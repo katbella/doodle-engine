@@ -1,16 +1,16 @@
 ---
 title: CLI Commands
-description: Reference for doodle dev, doodle build, and create-doodle-engine-game.
+description: Reference for doodle create, doodle dev, and doodle build.
 ---
 
-The `@doodle-engine/cli` package provides three commands.
+The `@doodle-engine/cli` package provides three commands: `doodle create`, `doodle dev`, and `doodle build`.
 
-## create-doodle-engine-game
+## doodle create
 
 Scaffold a new game project.
 
 ```bash
-npx create-doodle-engine-game <project-name>
+npx @doodle-engine/cli create <project-name>
 ```
 
 ### Prompts

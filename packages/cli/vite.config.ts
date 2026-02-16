@@ -6,7 +6,6 @@ export default defineConfig({
     lib: {
       entry: {
         cli: resolve(__dirname, 'src/cli.ts'),
-        create: resolve(__dirname, 'src/create.ts'),
       },
       formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,

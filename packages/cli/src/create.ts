@@ -1,5 +1,5 @@
 /**
- * create-doodle-engine-game
+ * doodle create
  *
  * Scaffolds a new Doodle Engine game project
  */
@@ -17,19 +17,7 @@ const folder = '📁'
 const check = '✅'
 const rocket = '🚀'
 
-async function create() {
-  const args = process.argv.slice(2)
-
-  if (args.length === 0) {
-    console.log('')
-    console.log(crayon.red(`  ${dog} Woof! You forgot the project name!`))
-    console.log('')
-    console.log(crayon.yellow('  Usage: npx create-doodle-engine-game <project-name>'))
-    console.log('')
-    process.exit(1)
-  }
-
-  const projectName = args[0]
+export async function create(projectName: string) {
   const projectPath = join(process.cwd(), projectName)
 
   console.log('')
@@ -874,7 +862,3 @@ dist
 `)
 }
 
-create().catch((error) => {
-  console.error(crayon.red(`\n  ${dog} Ruh roh! Something went wrong:`), error)
-  process.exit(1)
-})

@@ -8,6 +8,7 @@ import { Command } from 'commander'
 import { crayon } from 'crayon.js'
 import { dev } from './commands/dev.js'
 import { build } from './commands/build.js'
+import { create } from './create.js'
 
 const program = new Command()
 
@@ -15,6 +16,13 @@ program
   .name('doodle')
   .description(crayon.magenta('🐾 Doodle Engine') + crayon.dim(' — Narrative RPG development tools'))
   .version('0.0.1')
+
+program
+  .command('create <project-name>')
+  .description('Scaffold a new Doodle Engine game project')
+  .action(async (projectName: string) => {
+    await create(projectName)
+  })
 
 program
   .command('dev')

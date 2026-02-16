@@ -37,7 +37,7 @@ Doodle Engine doesn't ship with every possible game mechanic out of the box, but
 ## Quick Start
 
 ```bash
-npx create-doodle-engine-game my-game
+npx @doodle-engine/cli create my-game
 cd my-game
 npm install       # or: yarn install / pnpm install
 npm run dev        # or: yarn dev / pnpm dev
@@ -51,7 +51,7 @@ Open `http://localhost:3000` to play your game.
 |---------|-------------|
 | `@doodle-engine/core` | Pure TypeScript engine: parsing, state, conditions, effects, snapshots |
 | `@doodle-engine/react` | React 19 components: GameShell, GameRenderer, individual components, hooks |
-| `@doodle-engine/cli` | Dev tools: `doodle dev`, `doodle build`, project scaffolding |
+| `@doodle-engine/cli` | Dev tools: `doodle create`, `doodle dev`, `doodle build` |
 
 ## Documentation
 

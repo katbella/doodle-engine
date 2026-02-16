@@ -8,7 +8,7 @@ description: How to create a new Doodle Engine game project.
 Scaffold a new game project with the CLI:
 
 ```bash
-npx create-doodle-engine-game my-game
+npx @doodle-engine/cli create my-game
 ```
 
 The scaffolder will prompt you:
