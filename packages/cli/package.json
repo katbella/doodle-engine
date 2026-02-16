@@ -4,7 +4,6 @@
   "type": "module",
   "description": "CLI tools for Doodle Engine game development",
   "bin": {
-    "create-doodle-engine-game": "./dist/create.js",
     "doodle": "./dist/cli.js"
   },
   "files": [
