@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.5
+
+### Patch Changes
+
+- 632bffe: move scaffolding to doodle create subcommand, fix workspace protocol in published packages
+- Updated dependencies [632bffe]
+  - @doodle-engine/core@0.0.5
+
 ## 0.0.4
 
 ### Patch Changes
