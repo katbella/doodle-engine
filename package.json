@@ -13,7 +13,7 @@
     "docs:build": "yarn --cwd docs build",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "yarn build && yarn workspaces foreach -A --no-private npm publish --access public --tolerate-republish"
+    "release": "yarn build && yarn workspaces foreach -A --no-private exec node -e \"const fs=require('fs');const p=fs.readFileSync('package.json','utf8');if(p.includes('workspace:')){console.error('workspace: protocol found in package.json for '+process.cwd());process.exit(1)}\" && yarn workspaces foreach -A --no-private exec yarn npm publish --access public --tolerate-republish"
   },
   "engines": {
     "node": ">=24.0.0"
