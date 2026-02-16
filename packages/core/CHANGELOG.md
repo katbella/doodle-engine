@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.6
+
+### Patch Changes
+
+- 579a2e2: update build script to only build once
+
 ## 0.0.5
 
 ### Patch Changes
