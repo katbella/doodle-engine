@@ -111,4 +111,4 @@ Create a `content/` directory with at minimum:
 - `content/locations/`: location YAML files
 - `content/locales/en.yaml`: English strings
 
-See [Project Structure](../getting-started/project-structure/) for the full layout.
+See [Project Structure](/getting-started/project-structure/) for the full layout.
