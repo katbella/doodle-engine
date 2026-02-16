@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.5
+
+### Patch Changes
+
+- 632bffe: move scaffolding to doodle create subcommand, fix workspace protocol in published packages
+
 ## 0.0.4
 
 ### Patch Changes
