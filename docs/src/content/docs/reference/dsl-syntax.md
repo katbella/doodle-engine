@@ -172,7 +172,7 @@ IF blocks are evaluated in order. The first one whose condition passes fires its
 
 ## Effect Lines
 
-Effects modify game state. See [Effects Reference](../reference/effects/) for the full list.
+Effects modify game state. See [Effects Reference](/reference/effects/) for the full list.
 
 ```
 SET flag metBartender

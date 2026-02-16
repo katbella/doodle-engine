@@ -97,4 +97,4 @@ Your application code. The scaffolder creates a minimal setup:
 - **App.tsx**: fetches content, initializes the engine, renders `GameProvider` + `GameRenderer`
 - **index.css**: default styles (fully customizable)
 
-For custom renderers, replace `GameRenderer` with your own components using the `useGame` hook. See [Custom Renderer](../guides/custom-renderer/).
+For custom renderers, replace `GameRenderer` with your own components using the `useGame` hook. See [Custom Renderer](/guides/custom-renderer/).
