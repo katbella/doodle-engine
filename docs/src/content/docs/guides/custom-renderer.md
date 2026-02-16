@@ -163,4 +163,4 @@ const newSnapshot = engine.selectChoice('choice_1')
 renderMyUI(newSnapshot)
 ```
 
-See [Engine API Reference](/reference/engine-api/) for all available methods.
+See [Engine API Reference](../reference/engine-api/) for all available methods.

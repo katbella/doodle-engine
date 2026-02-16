@@ -203,4 +203,4 @@ bartender.greeting: "Welcome! What can I do for you?"
 |-----|-------|
 | Any string | Translated text |
 
-Referenced with `@key` syntax in other content files. See [Localization](/guides/localization/).
+Referenced with `@key` syntax in other content files. See [Localization](../guides/localization/).
