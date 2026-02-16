@@ -1,0 +1,7 @@
+---
+"@doodle-engine/cli": patch
+"@doodle-engine/core": patch
+"@doodle-engine/react": patch
+---
+
+Fix Github release tagging
