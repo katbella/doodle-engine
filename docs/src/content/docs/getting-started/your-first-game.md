@@ -162,11 +162,11 @@ export function App() {
 }
 ```
 
-`GameShell` handles the full game lifecycle. You just provide content and configuration. See [Game Shell](/guides/game-shell/) for customization options.
+`GameShell` handles the full game lifecycle. You just provide content and configuration. See [Game Shell](/doodle-engine/guides/game-shell/) for customization options.
 
 ## Next Steps
 
-- [Game Shell](/guides/game-shell/): splash screen, title, pause menu, settings
-- [Writing Dialogues](/guides/writing-dialogues/): branching conversations, conditions, effects
-- [Creating Quests](/guides/creating-quests/): multi-stage quest tracking
-- [Adding Locations](/guides/adding-locations/): maps and travel
+- [Game Shell](/doodle-engine/guides/game-shell/): splash screen, title, pause menu, settings
+- [Writing Dialogues](/doodle-engine/guides/writing-dialogues/): branching conversations, conditions, effects
+- [Creating Quests](/doodle-engine/guides/creating-quests/): multi-stage quest tracking
+- [Adding Locations](/doodle-engine/guides/adding-locations/): maps and travel

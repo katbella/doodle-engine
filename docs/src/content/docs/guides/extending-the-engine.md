@@ -128,7 +128,7 @@ function MyCustomUI() {
 </GameProvider>
 ```
 
-See [React Components Reference](/reference/react-components/) for all available components and props.
+See [React Components Reference](/doodle-engine/reference/react-components/) for all available components and props.
 
 ## Custom Game Shell
 
@@ -160,7 +160,7 @@ function MyGameApp() {
 }
 ```
 
-See [Game Shell](/guides/game-shell/) for how the built-in `GameShell` works, as a reference for building your own.
+See [Game Shell](/doodle-engine/guides/game-shell/) for how the built-in `GameShell` works, as a reference for building your own.
 
 ## Adding Custom Conditions
 
