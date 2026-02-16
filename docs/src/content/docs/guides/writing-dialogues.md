@@ -181,4 +181,4 @@ NODE farewell
   END dialogue
 ```
 
-See [DSL Syntax Reference](/reference/dsl-syntax/) for the complete keyword list.
+See [DSL Syntax Reference](/doodle-engine/reference/dsl-syntax/) for the complete keyword list.

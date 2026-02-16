@@ -108,7 +108,7 @@ GameShell automatically plays fullscreen video cutscenes when a dialogue uses th
 <GameShell videoBasePath="/assets/video" />
 ```
 
-See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding videos to your game.
+See [Video & Cutscenes](/doodle-engine/guides/video-cutscenes/) for full details on adding videos to your game.
 
 ## Save/Load
 
@@ -155,4 +155,4 @@ import {
 } from '@doodle-engine/react'
 ```
 
-See [Custom Renderer](/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/reference/react-components/) for individual component props.
+See [Custom Renderer](/doodle-engine/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/doodle-engine/reference/react-components/) for individual component props.
