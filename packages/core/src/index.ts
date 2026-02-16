@@ -1,0 +1,142 @@
+/**
+ * @doodle-engine/core
+ *
+ * Pure TypeScript narrative RPG engine.
+ * Framework-agnostic - manages game state, evaluates conditions, processes effects, builds snapshots.
+ */
+
+export const VERSION = '0.0.1'
+
+// Content Entities
+export type {
+  Location,
+  Character,
+  Item,
+  Map,
+  MapLocation,
+  Dialogue,
+  DialogueNode,
+  Choice,
+  Quest,
+  QuestStage,
+  JournalEntry,
+  GameConfig,
+} from './types/entities'
+
+// Conditions
+export type {
+  Condition,
+  HasFlagCondition,
+  NotFlagCondition,
+  HasItemCondition,
+  VariableEqualsCondition,
+  VariableGreaterThanCondition,
+  VariableLessThanCondition,
+  AtLocationCondition,
+  QuestAtStageCondition,
+  CharacterAtCondition,
+  CharacterInPartyCondition,
+  RelationshipAboveCondition,
+  RelationshipBelowCondition,
+  TimeIsCondition,
+  ItemAtCondition,
+} from './types/conditions'
+
+// Effects
+export type {
+  Effect,
+  SetFlagEffect,
+  ClearFlagEffect,
+  SetVariableEffect,
+  AddVariableEffect,
+  AddItemEffect,
+  RemoveItemEffect,
+  MoveItemEffect,
+  GoToLocationEffect,
+  AdvanceTimeEffect,
+  SetQuestStageEffect,
+  AddJournalEntryEffect,
+  StartDialogueEffect,
+  EndDialogueEffect,
+  SetCharacterLocationEffect,
+  AddToPartyEffect,
+  RemoveFromPartyEffect,
+  SetRelationshipEffect,
+  AddRelationshipEffect,
+  SetCharacterStatEffect,
+  AddCharacterStatEffect,
+  SetMapEnabledEffect,
+  PlayMusicEffect,
+  PlaySoundEffect,
+  NotifyEffect,
+  PlayVideoEffect,
+} from './types/effects'
+
+// Game State
+export type {
+  GameState,
+  CharacterState,
+  DialogueState,
+  PlayerNote,
+  Time,
+} from './types/state'
+
+// Snapshot
+export type {
+  Snapshot,
+  SnapshotLocation,
+  SnapshotCharacter,
+  SnapshotItem,
+  SnapshotChoice,
+  SnapshotDialogue,
+  SnapshotQuest,
+  SnapshotJournalEntry,
+  SnapshotMapLocation,
+  SnapshotMap,
+} from './types/snapshot'
+
+// Save Data
+export type {
+  SaveData,
+} from './types/save'
+
+// Content Registry
+export type {
+  ContentRegistry,
+  LocaleData,
+} from './types/registry'
+
+// Condition Evaluators
+export {
+  evaluateCondition,
+  evaluateConditions,
+} from './conditions'
+
+// Effect Processors
+export {
+  applyEffect,
+  applyEffects,
+} from './effects'
+
+// Localization
+export {
+  resolveText,
+  createResolver,
+} from './localization'
+
+// Snapshot Builder
+export {
+  buildSnapshot,
+} from './snapshot'
+
+// Engine
+export {
+  Engine,
+} from './engine'
+
+// Parser
+export {
+  parseDialogue,
+  parseCondition,
+  parseEffect,
+} from './parser'

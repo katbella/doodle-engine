@@ -1,0 +1,68 @@
+---
+title: Doodle Engine
+description: A narrative RPG engine for text-based story-driven games.
+template: splash
+hero:
+  tagline: A narrative RPG engine for text-based story-driven games.
+  actions:
+    - text: Get Started
+      link: /getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/katbella/doodle-engine
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## What is Doodle Engine?
+
+Inspired by the Infinity Engine, Doodle Engine is for creators who want a story-first approach to games that can be extended. Write branching dialogue, quests, and world content in YAML and a simple DSL (domain-specific language). No code required for authoring. Plug in the included React renderer or build your own UI with the framework-agnostic core.
+
+### Who is it for?
+
+- **Game authors** who want to write stories without coding
+- **Interactive fiction writers** who need more game systems than Twine provides
+- **Web developers** who want to build narrative games with familiar tools (TypeScript, React, Vite)
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Framework-Agnostic Core" icon="puzzle">
+    Pure TypeScript engine with no UI dependencies. Build renderers for React, Vue, Svelte, or vanilla JS.
+  </Card>
+  <Card title="React Renderer Included" icon="rocket">
+    Batteries-included React components with GameShell (splash, title, pause, settings) or build your own custom UI.
+  </Card>
+  <Card title="Dialogue DSL" icon="pencil">
+    Write branching conversations in `.dlg` files with conditions, effects, and localization support.
+  </Card>
+  <Card title="YAML Content" icon="document">
+    Define locations, characters, items, quests, maps, and journal entries in simple YAML files.
+  </Card>
+  <Card title="Built-in Localization" icon="translate">
+    Multi-language support with `@key` references resolved at runtime. Add languages by adding locale files.
+  </Card>
+  <Card title="Quest & Journal System" icon="list-format">
+    Multi-stage quests with journal tracking. Authors define stages in YAML, effects advance them in dialogue.
+  </Card>
+  <Card title="Character Relationships" icon="heart">
+    Relationship values, party management, character stats, and location tracking, all managed by the engine.
+  </Card>
+  <Card title="Save & Load" icon="forward-slash">
+    Serialize and restore full game state. Works with localStorage, IndexedDB, cloud backends, or any storage.
+  </Card>
+  <Card title="Audio System" icon="star">
+    Background music with crossfade, one-shot sound effects, voice lines, and UI sounds.
+  </Card>
+  <Card title="Video Cutscenes" icon="right-caret">
+    Fullscreen video playback triggered from dialogue with skip support.
+  </Card>
+  <Card title="Hot Reload" icon="setting">
+    Vite dev server watches content files. Edit a dialogue, see the change instantly.
+  </Card>
+  <Card title="Fully Extensible" icon="open-book">
+    Use the core with any framework. Customize components. Add custom save backends. Build your own game shell.
+  </Card>
+</CardGrid>
