@@ -468,7 +468,6 @@ __metadata:
     vitest: "npm:^2.0.0"
     yaml: "npm:^2.4.0"
   bin:
-    create-doodle-engine-game: ./dist/create.js
     doodle: ./dist/cli.js
   languageName: unknown
   linkType: soft
