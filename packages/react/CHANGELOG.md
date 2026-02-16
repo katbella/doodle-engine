@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.4
+
+### Patch Changes
+
+- 204abef: update release script because yarn 4 has some publishing issues
+- Updated dependencies [204abef]
+  - @doodle-engine/core@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes
