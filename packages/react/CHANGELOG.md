@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.14
+
+### Patch Changes
+
+- 85dd03e: update dice roll template
+- Updated dependencies [85dd03e]
+  - @doodle-engine/core@0.0.14
+
 ## 0.0.13
 
 ### Patch Changes
