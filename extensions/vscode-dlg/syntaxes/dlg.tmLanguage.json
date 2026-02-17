@@ -1,0 +1,246 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Doodle DLG",
+  "scopeName": "source.dlg",
+  "patterns": [
+    {
+      "include": "#nodeLine"
+    },
+    {
+      "include": "#choiceLine"
+    },
+    {
+      "include": "#ifLine"
+    },
+    {
+      "include": "#requireLine"
+    },
+    {
+      "include": "#gotoLine"
+    },
+    {
+      "include": "#speakerLine"
+    },
+    {
+      "include": "#blockKeywords"
+    },
+    {
+      "include": "#lineKeywords"
+    },
+    {
+      "include": "#conditionTypes"
+    },
+    {
+      "include": "#effectObjects"
+    },
+    {
+      "include": "#booleans"
+    },
+    {
+      "include": "#localization"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#number"
+    },
+    {
+      "include": "#comment"
+    }
+  ],
+  "repository": {
+    "nodeLine": {
+      "patterns": [
+        {
+          "name": "meta.node.header.dlg",
+          "match": "^(\\s*)(NODE)(\\s+)([A-Za-z_][A-Za-z0-9_.-]*)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.dlg"
+            },
+            "4": {
+              "name": "entity.name.label.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "choiceLine": {
+      "patterns": [
+        {
+          "name": "meta.choice.header.dlg",
+          "match": "^(\\s*)(CHOICE)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.conditional.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "ifLine": {
+      "patterns": [
+        {
+          "name": "meta.if.header.dlg",
+          "match": "^(\\s*)(IF)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.conditional.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "requireLine": {
+      "patterns": [
+        {
+          "name": "meta.require.header.dlg",
+          "match": "^(\\s*)(REQUIRE)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.conditional.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "gotoLine": {
+      "patterns": [
+        {
+          "name": "meta.goto.header.dlg",
+          "match": "^(\\s*)(GOTO)(\\s+)(location)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.flow.dlg"
+            },
+            "4": {
+              "name": "storage.type.dlg"
+            }
+          }
+        },
+        {
+          "name": "meta.goto.header.dlg",
+          "match": "^(\\s*)(GOTO)(\\s+)([A-Za-z_][A-Za-z0-9_.-]*)\\b",
+          "captures": {
+            "2": {
+              "name": "keyword.control.flow.dlg"
+            },
+            "4": {
+              "name": "entity.name.label.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "speakerLine": {
+      "patterns": [
+        {
+          "name": "meta.speaker-line.dlg",
+          "match": "^(\\s*)([A-Z][A-Z0-9_]*)(\\s*:)",
+          "captures": {
+            "2": {
+              "name": "entity.name.type.class.dlg"
+            },
+            "3": {
+              "name": "punctuation.separator.key-value.dlg"
+            }
+          }
+        }
+      ]
+    },
+    "blockKeywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.dlg",
+          "match": "^(\\s*)(NODE|CHOICE|IF|END)\\b"
+        }
+      ]
+    },
+    "lineKeywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.flow.dlg",
+          "match": "^(\\s*)(GOTO|TRIGGER|REQUIRE)\\b"
+        },
+        {
+          "name": "support.function.builtin.dlg",
+          "match": "^(\\s*)(VOICE|PORTRAIT|MUSIC|SOUND|VIDEO|NOTIFY)\\b"
+        },
+        {
+          "name": "keyword.operator.word.dlg",
+          "match": "^(\\s*)(SET|CLEAR|ADD|REMOVE|MOVE|ADVANCE|START)\\b"
+        }
+      ]
+    },
+    "conditionTypes": {
+      "patterns": [
+        {
+          "name": "entity.name.function.dlg",
+          "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|relationshipAbove|relationshipBelow|timeIs|itemAt)\\b"
+        }
+      ]
+    },
+    "effectObjects": {
+      "patterns": [
+        {
+          "name": "variable.parameter.dlg",
+          "match": "\\b(flag|variable|questStage|characterLocation|relationship|characterStat|mapEnabled|item|journalEntry|toParty|fromParty|location|dialogue|time)\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.dlg",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "localization": {
+      "patterns": [
+        {
+          "name": "constant.other.symbol.dlg",
+          "match": "@[A-Za-z0-9._-]+"
+        }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.dlg",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.dlg"
+        }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.dlg"
+        }
+      },
+      "patterns": [
+        {
+          "name": "constant.character.escape.dlg",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.dlg",
+          "match": "\\b-?\\d+\\b"
+        }
+      ]
+    },
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.dlg",
+          "match": "#.*$"
+        }
+      ]
+    }
+  }
+}
