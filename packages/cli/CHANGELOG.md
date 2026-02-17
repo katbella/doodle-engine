@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.11
+
+### Patch Changes
+
+- 8716abd: update templates for interlude
+- Updated dependencies [8716abd]
+  - @doodle-engine/core@0.0.11
+  - @doodle-engine/react@0.0.11
+
 ## 0.0.10
 
 ### Patch Changes
