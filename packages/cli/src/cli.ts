@@ -8,6 +8,7 @@ import { Command } from 'commander'
 import { crayon } from 'crayon.js'
 import { dev } from './commands/dev.js'
 import { build } from './commands/build.js'
+import { validate } from './commands/validate.js'
 import { create } from './create.js'
 
 const program = new Command()
@@ -36,6 +37,13 @@ program
   .description('Build game for production')
   .action(async () => {
     await build()
+  })
+
+program
+  .command('validate')
+  .description('Validate game content')
+  .action(async () => {
+    await validate()
   })
 
 program.parse()
