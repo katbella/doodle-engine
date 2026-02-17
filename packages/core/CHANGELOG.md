@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.11
+
+### Patch Changes
+
+- 8716abd: update templates for interlude
+
 ## 0.0.10
 
 ### Patch Changes
