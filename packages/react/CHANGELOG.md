@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.18
+
+### Patch Changes
+
+- eabd6f3: update placeholders
+- Updated dependencies [eabd6f3]
+  - @doodle-engine/core@0.0.18
+
 ## 0.0.17
 
 ### Patch Changes
