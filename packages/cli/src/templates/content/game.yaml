@@ -1,0 +1,11 @@
+# Game Configuration
+startLocation: tavern
+startTime:
+  day: 1
+  hour: 8
+startFlags: {}
+startVariables:
+  gold: 100
+  reputation: 0
+  _drinksBought: 0
+startInventory: []

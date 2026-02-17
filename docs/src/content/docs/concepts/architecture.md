@@ -34,6 +34,7 @@ interface ContentRegistry {
   dialogues: Record<string, Dialogue>
   quests: Record<string, Quest>
   journalEntries: Record<string, JournalEntry>
+  interludes: Record<string, Interlude>
   locales: Record<string, LocaleData>
 }
 ```
@@ -58,6 +59,8 @@ interface GameState {
   mapEnabled: boolean
   notifications: string[]
   pendingSounds: string[]
+  pendingVideo: string | null
+  pendingInterlude: string | null
   currentLocale: string
 }
 ```
@@ -83,6 +86,8 @@ interface Snapshot {
   ambient: string
   notifications: string[]
   pendingSounds: string[]
+  pendingVideo: string | null
+  pendingInterlude: SnapshotInterlude | null
 }
 ```
 
@@ -92,8 +97,10 @@ Some state is transient. It appears in exactly one snapshot and is then cleared:
 
 - **notifications**: messages from `NOTIFY` effects
 - **pendingSounds**: sounds from `SOUND` effects
+- **pendingVideo**: file from `VIDEO` effects — show once, then null
+- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger — show once, then null
 
-After the engine builds a snapshot, it clears these arrays. This means the renderer doesn't need timers or cleanup logic; just render what's in the snapshot.
+After the engine builds a snapshot, it clears these fields. The renderer just renders what's in the snapshot — no timers or cleanup needed.
 
 ## Condition Evaluation
 
@@ -111,8 +118,9 @@ Effects run in order when:
 
 1. A dialogue node is reached (node effects)
 2. A choice is selected (choice effects)
+3. An interlude triggers (interlude `effects` field — typically `setFlag` to prevent repeats)
 
-Effects mutate state: setting flags, adding items, changing quest stages, moving characters, etc. The engine builds a new snapshot after all effects have been applied.
+Effects mutate state: setting flags, adding items, changing quest stages, moving characters, queuing interludes, rolling dice into variables, etc. The engine builds a new snapshot after all effects have been applied.
 
 ## Package Separation
 

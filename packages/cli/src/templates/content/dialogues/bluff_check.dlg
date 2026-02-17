@@ -1,0 +1,43 @@
+# Skill check example — demonstrates dice rolling and variable interpolation.
+#
+# ROLL <variable> <min> <max>  — rolls a random integer and stores it in a variable.
+# {varName}                    — in dialogue text, replaced with the variable's value.
+# roll <min> <max> <threshold> — condition: rolls and returns true if result >= threshold.
+#
+# This dialogue is NOT auto-triggered — start it from another node with:
+#   START dialogue bluff_check
+
+NODE start
+  # Roll a d20 and store it as "bluffRoll" before the player sees the result
+  ROLL bluffRoll 1 20
+  NARRATOR: @bluff.setup
+
+  CHOICE @bluff.choice.attempt
+    GOTO resolve
+  END
+
+  CHOICE @bluff.choice.back_down
+    NARRATOR: @bluff.backed_down
+    END dialogue
+  END
+
+NODE resolve
+  # Show the roll result using {bluffRoll} interpolation in the locale string
+  NARRATOR: @bluff.rolled
+
+  # Branch on whether the stored variable passes a threshold (15+)
+  IF variableGreaterThan bluffRoll 14
+    GOTO success
+  END
+
+  GOTO failure
+
+NODE success
+  NARRATOR: @bluff.success
+  ADD relationship bartender 2
+  SET flag bluffedMarcus
+  END dialogue
+
+NODE failure
+  NARRATOR: @bluff.failure
+  END dialogue

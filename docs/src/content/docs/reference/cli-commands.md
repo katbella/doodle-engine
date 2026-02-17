@@ -24,7 +24,9 @@ npx @doodle-engine/cli create <project-name>
   content/
     characters/bartender.yaml, merchant.yaml
     dialogues/tavern_intro.dlg, market_intro.dlg,
-              bartender_greeting.dlg, merchant_intro.dlg
+              bartender_greeting.dlg, merchant_intro.dlg,
+              bluff_check.dlg
+    interludes/chapter_one.yaml
     items/old_coin.yaml
     journal/tavern_discovery.yaml, odd_jobs_accepted.yaml,
             market_square.yaml
@@ -83,6 +85,7 @@ doodle dev
 |-----------|-----------|-----------------|
 | `characters/` | `.yaml` | Parsed as Character entity |
 | `dialogues/` | `.dlg` | Parsed with `parseDialogue()` |
+| `interludes/` | `.yaml` | Parsed as Interlude entity |
 | `items/` | `.yaml` | Parsed as Item entity |
 | `journal/` | `.yaml` | Parsed as JournalEntry entity |
 | `locales/` | `.yaml` | Loaded as flat key-value dict, keyed by filename |
@@ -103,6 +106,7 @@ doodle dev
     "dialogues": { ... },
     "quests": { ... },
     "journalEntries": { ... },
+    "interludes": { ... },
     "locales": { ... }
   },
   "config": {
@@ -239,10 +243,12 @@ doodle validate
   - `playMusic`/`playSound` have `file` argument
   - `playVideo` has `file` argument
   - `notify` has `message` argument
+  - `showInterlude` has `interludeId` argument
+  - `roll` has `variable`, `min`, and `max` arguments
 - **Character dialogue references**
   - Characters' `dialogue` field points to existing dialogue IDs
 - **Localization keys**
-  - All `@key` references in locations, characters, items, quests, journal entries, and dialogues exist in at least one locale file
+  - All `@key` references in locations, characters, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
 
 ### Exit codes
 
