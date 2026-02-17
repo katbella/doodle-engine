@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.16
+
+### Patch Changes
+
+- 3562b28: dialogue bugs
+- Updated dependencies [3562b28]
+  - @doodle-engine/core@0.0.16
+  - @doodle-engine/react@0.0.16
+
 ## 0.0.15
 
 ### Patch Changes
