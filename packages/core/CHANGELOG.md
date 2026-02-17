@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.14
+
+### Patch Changes
+
+- 85dd03e: update dice roll template
+
 ## 0.0.13
 
 ### Patch Changes
