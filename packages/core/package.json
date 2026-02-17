@@ -1,6 +1,6 @@
 {
   "name": "@doodle-engine/core",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "main": "./dist/core.cjs",
   "module": "./dist/core.js",
