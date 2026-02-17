@@ -39,7 +39,7 @@ text: |
 | `voice` | No | Narration audio file |
 | `sounds` | No | Array of ambient sound filenames |
 | `scroll` | No | Whether text auto-scrolls upward (default: `true`) |
-| `scrollSpeed` | No | Auto-scroll speed in pixels per second (default: `30`) |
+| `scrollSpeed` | No | Auto-scroll speed in elisas per second (default: `30`) |
 | `triggerLocation` | No | Location ID where this auto-triggers on enter |
 | `triggerConditions` | No | Conditions that must pass for auto-trigger |
 | `effects` | No | Effects applied when the interlude triggers (typically `setFlag` to prevent repeats) |

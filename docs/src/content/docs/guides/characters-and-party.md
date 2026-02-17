@@ -121,10 +121,10 @@ Characters have an extensible `stats` object for custom data:
 
 ```
 # Set a stat
-SET characterStat jaheira level 5
+SET characterStat elisa level 5
 
 # Add to a numeric stat
-ADD characterStat jaheira health -10
+ADD characterStat elisa health -10
 ```
 
 Stats appear in the snapshot's `SnapshotCharacter.stats` and can be displayed in a custom renderer.

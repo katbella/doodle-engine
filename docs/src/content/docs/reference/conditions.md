@@ -128,7 +128,7 @@ REQUIRE characterAt merchant market
 Check if a character is in the player's party.
 
 ```
-REQUIRE characterInParty jaheira
+REQUIRE characterInParty elisa
 ```
 
 | Parameter | Type | Description |

@@ -392,7 +392,7 @@ function applySetCharacterLocation(
 /**
  * Add a character to the player's party.
  *
- * Example: ADD toParty jaheira
+ * Example: ADD toParty elisa
  */
 function applyAddToParty(characterId: string, state: GameState): GameState {
   const characterState = state.characterState[characterId]
@@ -415,7 +415,7 @@ function applyAddToParty(characterId: string, state: GameState): GameState {
 /**
  * Remove a character from the player's party.
  *
- * Example: REMOVE fromParty jaheira
+ * Example: REMOVE fromParty elisa
  */
 function applyRemoveFromParty(characterId: string, state: GameState): GameState {
   const characterState = state.characterState[characterId]
@@ -492,7 +492,7 @@ function applyAddRelationship(
 /**
  * Set a stat value on a character.
  *
- * Example: SET characterStat jaheira level 5
+ * Example: SET characterStat elisa level 5
  */
 function applySetCharacterStat(
   characterId: string,
@@ -524,7 +524,7 @@ function applySetCharacterStat(
  * Add to (or subtract from) a character stat.
  * Only works if the current stat value is a number.
  *
- * Example: ADD characterStat jaheira health -10
+ * Example: ADD characterStat elisa health -10
  */
 function applyAddCharacterStat(
   characterId: string,

@@ -154,7 +154,7 @@ export interface SetCharacterLocationEffect {
 
 /**
  * Add a character to the player's party.
- * Example: ADD toParty jaheira
+ * Example: ADD toParty elisa
  */
 export interface AddToPartyEffect {
   type: 'addToParty'
@@ -164,7 +164,7 @@ export interface AddToPartyEffect {
 
 /**
  * Remove a character from the player's party.
- * Example: REMOVE fromParty jaheira
+ * Example: REMOVE fromParty elisa
  */
 export interface RemoveFromPartyEffect {
   type: 'removeFromParty'
@@ -198,7 +198,7 @@ export interface AddRelationshipEffect {
 
 /**
  * Set a stat value on a character.
- * Example: SET characterStat jaheira level 5
+ * Example: SET characterStat elisa level 5
  */
 export interface SetCharacterStatEffect {
   type: 'setCharacterStat'
@@ -212,7 +212,7 @@ export interface SetCharacterStatEffect {
 
 /**
  * Add to (or subtract from) a character stat.
- * Example: ADD characterStat jaheira health -10
+ * Example: ADD characterStat elisa health -10
  */
 export interface AddCharacterStatEffect {
   type: 'addCharacterStat'

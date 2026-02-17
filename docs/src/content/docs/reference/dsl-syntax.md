@@ -312,12 +312,12 @@ MOVE item sword armory
 SET questStage odd_jobs started
 ADD journalEntry tavern_discovery
 SET characterLocation merchant tavern
-ADD toParty jaheira
-REMOVE fromParty jaheira
+ADD toParty elisa
+REMOVE fromParty elisa
 SET relationship bartender 5
 ADD relationship bartender 1
-SET characterStat jaheira level 5
-ADD characterStat jaheira health -10
+SET characterStat elisa level 5
+ADD characterStat elisa health -10
 SET mapEnabled false
 ADVANCE time 2
 START dialogue merchant_intro
