@@ -106,7 +106,7 @@ export interface CharacterAtCondition {
 
 /**
  * Check if a character is in the player's party.
- * Example: characterInParty jaheira
+ * Example: characterInParty elisa
  */
 export interface CharacterInPartyCondition {
   type: 'characterInParty'

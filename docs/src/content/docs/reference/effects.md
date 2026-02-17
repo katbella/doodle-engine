@@ -171,7 +171,7 @@ SET characterLocation merchant tavern
 Add a character to the player's party.
 
 ```
-ADD toParty jaheira
+ADD toParty elisa
 ```
 
 ### REMOVE fromParty
@@ -179,7 +179,7 @@ ADD toParty jaheira
 Remove a character from the player's party.
 
 ```
-REMOVE fromParty jaheira
+REMOVE fromParty elisa
 ```
 
 ### SET relationship
@@ -204,7 +204,7 @@ ADD relationship bartender -2
 Set a stat value on a character.
 
 ```
-SET characterStat jaheira level 5
+SET characterStat elisa level 5
 ```
 
 ### ADD characterStat
@@ -212,7 +212,7 @@ SET characterStat jaheira level 5
 Add to (or subtract from) a character's stat.
 
 ```
-ADD characterStat jaheira health -10
+ADD characterStat elisa health -10
 ```
 
 ## Map

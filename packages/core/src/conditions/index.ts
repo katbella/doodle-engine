@@ -211,7 +211,7 @@ function evaluateCharacterAt(
  * Check if a character is in the player's party.
  * Returns false if the character doesn't exist in characterState.
  *
- * Example: characterInParty jaheira
+ * Example: characterInParty elisa
  */
 function evaluateCharacterInParty(characterId: string, state: GameState): boolean {
   const characterState = state.characterState[characterId]

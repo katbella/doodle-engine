@@ -84,10 +84,10 @@ describe('parseCondition', () => {
   })
 
   it('should parse characterInParty', () => {
-    const condition = parseCondition('characterInParty jaheira')
+    const condition = parseCondition('characterInParty elisa')
     expect(condition).toEqual({
       type: 'characterInParty',
-      characterId: 'jaheira',
+      characterId: 'elisa',
     })
   })
 
@@ -218,13 +218,13 @@ describe('parseEffect', () => {
   })
 
   it('should parse ADD toParty', () => {
-    const effect = parseEffect('ADD toParty jaheira')
-    expect(effect).toEqual({ type: 'addToParty', characterId: 'jaheira' })
+    const effect = parseEffect('ADD toParty elisa')
+    expect(effect).toEqual({ type: 'addToParty', characterId: 'elisa' })
   })
 
   it('should parse REMOVE fromParty', () => {
-    const effect = parseEffect('REMOVE fromParty jaheira')
-    expect(effect).toEqual({ type: 'removeFromParty', characterId: 'jaheira' })
+    const effect = parseEffect('REMOVE fromParty elisa')
+    expect(effect).toEqual({ type: 'removeFromParty', characterId: 'elisa' })
   })
 
   it('should parse SET relationship', () => {
@@ -246,20 +246,20 @@ describe('parseEffect', () => {
   })
 
   it('should parse SET characterStat', () => {
-    const effect = parseEffect('SET characterStat jaheira level 5')
+    const effect = parseEffect('SET characterStat elisa level 5')
     expect(effect).toEqual({
       type: 'setCharacterStat',
-      characterId: 'jaheira',
+      characterId: 'elisa',
       stat: 'level',
       value: 5,
     })
   })
 
   it('should parse ADD characterStat', () => {
-    const effect = parseEffect('ADD characterStat jaheira health -10')
+    const effect = parseEffect('ADD characterStat elisa health -10')
     expect(effect).toEqual({
       type: 'addCharacterStat',
-      characterId: 'jaheira',
+      characterId: 'elisa',
       stat: 'health',
       value: -10,
     })

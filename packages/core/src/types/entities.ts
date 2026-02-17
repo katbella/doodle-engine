@@ -207,7 +207,7 @@ export interface Interlude {
   sounds?: string[]
   /** Whether text auto-scrolls upward (default: true) */
   scroll?: boolean
-  /** Auto-scroll speed in pixels per second (default: 30) */
+  /** Auto-scroll speed in elisas per second (default: 30) */
   scrollSpeed?: number
   /** The narrative text shown (supports @localization keys) */
   text: string
