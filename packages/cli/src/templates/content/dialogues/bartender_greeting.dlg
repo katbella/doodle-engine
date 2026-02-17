@@ -75,6 +75,11 @@ NODE order_drink
     GOTO after_drink
   END
 
+  # Try to bluff a free drink — launches the skill check dialogue (demonstrates: START dialogue)
+  CHOICE @bartender.choice.try_bluff
+    START dialogue bluff_check
+  END
+
   # Always available as an out
   CHOICE @bartender.choice.too_rich
     GOTO start
