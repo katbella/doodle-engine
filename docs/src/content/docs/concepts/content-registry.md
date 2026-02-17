@@ -16,6 +16,7 @@ interface ContentRegistry {
   dialogues: Record<string, Dialogue>
   quests: Record<string, Quest>
   journalEntries: Record<string, JournalEntry>
+  interludes: Record<string, Interlude>
   locales: Record<string, LocaleData>
 }
 ```
@@ -43,6 +44,7 @@ The dev server (`doodle dev`) builds the registry automatically:
 | `content/dialogues/*.dlg` | `registry.dialogues` | DSL parser, keyed by filename |
 | `content/quests/*.yaml` | `registry.quests` | YAML parse, keyed by `id` |
 | `content/journal/*.yaml` | `registry.journalEntries` | YAML parse, keyed by `id` |
+| `content/interludes/*.yaml` | `registry.interludes` | YAML parse, keyed by `id` |
 | `content/locales/*.yaml` | `registry.locales` | YAML parse, keyed by filename |
 
 ### Special Cases
@@ -65,8 +67,8 @@ The engine uses the registry to:
 
 - Look up location data when building snapshots
 - Find character dialogues when `talkTo` is called
-- Resolve localization keys at snapshot time
-- Check triggered dialogue conditions on location change
+- Resolve localization keys and interpolate `{varName}` placeholders at snapshot time
+- Check triggered dialogue and interlude conditions on location change
 - Determine travel distances from map data
 
 ## Client-Side Loading
@@ -89,6 +91,8 @@ Entities reference each other by ID:
 - Item `location` field → Location ID, `"inventory"`, or Character ID
 - Map `locations[].id` → Location ID
 - Dialogue `triggerLocation` → Location ID
+- Interlude `triggerLocation` → Location ID
+- `INTERLUDE <id>` effect → Interlude ID
 - GameConfig `startLocation` → Location ID
 - GameConfig `startInventory` → Item IDs
 

@@ -1,0 +1,142 @@
+# This dialogue is triggered by clicking the bartender character.
+# SPEAKER: lines set who's talking — matched to character ID (case-insensitive).
+# Nodes can have multiple CHOICE blocks; REQUIRE hides a choice if the condition fails.
+
+NODE start
+  BARTENDER: @bartender.greeting
+
+  # Always available — ask for rumors (demonstrates: flag, relationship, journalEntry)
+  CHOICE @bartender.choice.whats_news
+    SET flag metBartender
+    ADD relationship bartender 1
+    GOTO rumors
+  END
+
+  # Always available — buy a drink (demonstrates: variable change, flag)
+  CHOICE @bartender.choice.order_drink
+    GOTO order_drink
+  END
+
+  # Only before accepting the quest (demonstrates: notFlag condition)
+  CHOICE @bartender.choice.looking_for_work
+    REQUIRE notFlag acceptedOddJobs
+    GOTO work_intro
+  END
+
+  # Only while quest is active at "started" stage (demonstrates: questAtStage condition)
+  CHOICE @bartender.choice.about_that_job
+    REQUIRE questAtStage odd_jobs started
+    GOTO work_followup
+  END
+
+  # Only after quest is complete (demonstrates: questAtStage condition)
+  CHOICE @bartender.choice.thanks_for_work
+    REQUIRE questAtStage odd_jobs complete
+    GOTO work_done
+  END
+
+  CHOICE @bartender.choice.nevermind
+    GOTO farewell
+  END
+
+NODE rumors
+  BARTENDER: @bartender.rumors
+  ADD journalEntry tavern_discovery
+  ADD item old_coin
+  NOTIFY @notification.journal_updated
+
+  CHOICE @bartender.choice.tell_me_more
+    GOTO rumors_detail
+  END
+
+  CHOICE @bartender.choice.back_to_chat
+    GOTO start
+  END
+
+NODE rumors_detail
+  BARTENDER: @bartender.rumors_detail
+
+  CHOICE @bartender.choice.interesting
+    GOTO start
+  END
+
+NODE order_drink
+  BARTENDER: @bartender.order_drink
+
+  # Only if player can afford it (demonstrates: variableGreaterThan condition)
+  CHOICE @bartender.choice.sure_pay
+    REQUIRE variableGreaterThan gold 4
+    ADD variable gold -5
+    ADD variable _drinksBought 1
+    ADD variable reputation 1
+    SET flag hadDrink
+    ADD relationship bartender 1
+    NOTIFY @notification.bought_drink
+    GOTO after_drink
+  END
+
+  # Always available as an out
+  CHOICE @bartender.choice.too_rich
+    GOTO start
+  END
+
+NODE after_drink
+  BARTENDER: @bartender.after_drink
+
+  CHOICE @bartender.choice.back_to_chat
+    GOTO start
+  END
+
+NODE work_intro
+  BARTENDER: @bartender.work_intro
+
+  CHOICE @bartender.choice.accept_work
+    SET flag acceptedOddJobs
+    SET questStage odd_jobs started
+    ADD journalEntry odd_jobs_accepted
+    ADD relationship bartender 2
+    ADD variable reputation 5
+    NOTIFY @notification.quest_started
+    GOTO work_accepted
+  END
+
+  CHOICE @bartender.choice.not_interested
+    GOTO start
+  END
+
+NODE work_accepted
+  BARTENDER: @bartender.work_accepted
+
+  CHOICE @bartender.choice.on_my_way
+    GOTO farewell
+  END
+
+  CHOICE @bartender.choice.more_details
+    GOTO work_details
+  END
+
+NODE work_details
+  BARTENDER: @bartender.work_details
+
+  CHOICE @bartender.choice.got_it
+    GOTO farewell
+  END
+
+NODE work_followup
+  BARTENDER: @bartender.work_followup
+
+  CHOICE @bartender.choice.on_my_way
+    GOTO farewell
+  END
+
+NODE work_done
+  BARTENDER: @bartender.work_done
+  ADD relationship bartender 3
+
+  CHOICE @bartender.choice.anytime
+    GOTO start
+  END
+
+NODE farewell
+  BARTENDER: @bartender.farewell
+  END dialogue
