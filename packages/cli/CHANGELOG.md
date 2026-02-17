@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.9
+
+### Patch Changes
+
+- 90cd5a7: Update validator and dev tools, added loading screen
+- Updated dependencies [90cd5a7]
+  - @doodle-engine/react@0.0.9
+  - @doodle-engine/core@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes
