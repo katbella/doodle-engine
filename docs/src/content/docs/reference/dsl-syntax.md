@@ -151,7 +151,7 @@ Choices are shown to the player as clickable options. They can have:
 - **Effects**: run when the choice is selected
 - **GOTO**: where to go next (required)
 
-## Conditional Blocks
+## Conditional Blocks (IF)
 
 ```
 IF condition
@@ -168,7 +168,74 @@ IF hasFlag metBartender
 END
 ```
 
-IF blocks are evaluated in order. The first one whose condition passes fires its GOTO/effects.
+**How IF blocks work:**
+
+1. IF blocks are evaluated **in order** (top to bottom) after the node's effects run
+2. The **first** condition that passes determines where to go next
+3. If no IF conditions pass, the node falls through to its regular `GOTO` (if present)
+4. IF blocks are **invisible to the player**: they create author-controlled branching
+5. Multiple IF blocks can exist in a node, but only the first passing one executes
+
+**Example:**
+
+```
+NODE check_reputation
+  BARTENDER: @bartender.sizing_you_up
+
+  IF variableGreaterThan reputation 50
+    GOTO trusted_path
+  END
+
+  IF variableGreaterThan reputation 20
+    GOTO neutral_path
+  END
+
+  GOTO suspicious_path
+```
+
+If reputation is 60, goes to `trusted_path`. If reputation is 30, goes to `neutral_path`. If reputation is 10, goes to `suspicious_path`.
+
+### IF vs CHOICE REQUIRE
+
+**IF blocks** (author-controlled branching):
+- Invisible to the player
+- First passing condition wins
+- Used for conditional story flow based on game state
+
+**CHOICE REQUIRE** (player-facing filtering):
+- All passing choices are shown to the player
+- Player selects which one to take
+- Used for gating options behind requirements (e.g., "needs 50 gold")
+
+```
+# IF: player never sees the branching
+NODE greeting
+  BARTENDER: @bartender.hello
+
+  IF hasFlag metBefore
+    GOTO returning_customer
+  END
+
+  GOTO new_customer
+
+# CHOICE REQUIRE: player sees all available options
+NODE offer
+  BARTENDER: @bartender.what_can_i_get_you
+
+  CHOICE @buy_ale
+    REQUIRE variableGreaterThan gold 4
+    GOTO buy_ale
+  END
+
+  CHOICE @buy_wine
+    REQUIRE variableGreaterThan gold 10
+    GOTO buy_wine
+  END
+
+  CHOICE @just_browsing
+    GOTO leave
+  END
+```
 
 ## Effect Lines
 

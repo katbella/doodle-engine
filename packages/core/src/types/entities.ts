@@ -128,7 +128,9 @@ export interface DialogueNode {
   choices: Choice[]
   /** Effects that run when this node is reached */
   effects?: Effect[]
-  /** Default next node if no choices (auto-advance) */
+  /** Conditional branching (IF blocks) - evaluated in order, first passing wins */
+  conditionalNext?: Array<{ condition: Condition; next: string }>
+  /** Default next node if no choices and no conditionalNext passes */
   next?: string
 }
 
