@@ -39,8 +39,8 @@ export function buildSnapshot(state: GameState, registry: ContentRegistry): Snap
   // Get locale data for current language
   const localeData = registry.locales[state.currentLocale] ?? {}
 
-  // Helper to resolve localization keys
-  const resolve = (text: string) => resolveText(text, localeData)
+  // Helper to resolve localization keys and {varName} interpolation
+  const resolve = (text: string) => resolveText(text, localeData, state.variables)
 
   // Build location snapshot
   const location = buildLocationSnapshot(state.currentLocation, registry, resolve)

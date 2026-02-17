@@ -345,6 +345,29 @@ describe('Condition Evaluators', () => {
     })
   })
 
+  describe('roll', () => {
+    it('should return true when roll meets threshold', () => {
+      // With min=max=20 and threshold=20, always passes
+      const condition: Condition = { type: 'roll', min: 20, max: 20, threshold: 20 }
+      const state = createTestState()
+      expect(evaluateCondition(condition, state)).toBe(true)
+    })
+
+    it('should return false when roll is below threshold', () => {
+      // With min=max=1 and threshold=20, always fails
+      const condition: Condition = { type: 'roll', min: 1, max: 1, threshold: 20 }
+      const state = createTestState()
+      expect(evaluateCondition(condition, state)).toBe(false)
+    })
+
+    it('should return a boolean result', () => {
+      const condition: Condition = { type: 'roll', min: 1, max: 20, threshold: 10 }
+      const state = createTestState()
+      const result = evaluateCondition(condition, state)
+      expect(typeof result).toBe('boolean')
+    })
+  })
+
   describe('evaluateConditions (multiple)', () => {
     it('should return true when all conditions pass', () => {
       const conditions: Condition[] = [

@@ -280,6 +280,7 @@ MUSIC tension_theme.ogg
 SOUND door_slam.ogg
 VIDEO intro_cinematic.mp4
 INTERLUDE chapter_one
+ROLL bluffRoll 1 20
 NOTIFY @notification.quest_started
 ```
 

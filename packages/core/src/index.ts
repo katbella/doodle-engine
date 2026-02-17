@@ -41,6 +41,7 @@ export type {
   RelationshipBelowCondition,
   TimeIsCondition,
   ItemAtCondition,
+  RollCondition,
 } from './types/conditions'
 
 // Effects
@@ -72,6 +73,7 @@ export type {
   NotifyEffect,
   PlayVideoEffect,
   ShowInterludeEffect,
+  RollEffect,
 } from './types/effects'
 
 // Game State

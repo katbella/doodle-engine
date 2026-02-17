@@ -25,34 +25,49 @@ import type { LocaleData } from '../types/registry'
  * resolveText("@missing.key", localeData)           // "@missing.key" (fallback)
  * ```
  */
-export function resolveText(text: string, localeData: LocaleData): string {
-  // If doesn't start with @, it's inline text - return as-is
-  if (!text.startsWith('@')) {
-    return text
+export function resolveText(
+  text: string,
+  localeData: LocaleData,
+  variables?: Record<string, number | string>
+): string {
+  // Resolve @localization key first
+  let resolved: string
+  if (text.startsWith('@')) {
+    const key = text.slice(1)
+    resolved = localeData[key] ?? text
+  } else {
+    resolved = text
   }
 
-  // Remove @ prefix and look up in locale data
-  const key = text.slice(1)
-  const resolved = localeData[key]
+  // Substitute {varName} placeholders with variable values
+  if (variables && resolved.includes('{')) {
+    resolved = resolved.replace(/\{(\w+)\}/g, (_, name) => {
+      const val = variables[name]
+      return val !== undefined ? String(val) : `{${name}}`
+    })
+  }
 
-  // Return resolved text, or the original @key as fallback if not found
-  return resolved ?? text
+  return resolved
 }
 
 /**
- * Create a localization resolver function bound to a specific locale.
+ * Create a localization resolver function bound to a specific locale and variables.
  * Useful for passing to functions that need to resolve multiple strings.
  *
  * @param localeData - Locale dictionary for the current language
- * @returns Function that resolves text using the provided locale data
+ * @param variables - Optional game variables for {varName} substitution
+ * @returns Function that resolves text using the provided locale data and variables
  *
  * @example
  * ```ts
- * const resolve = createResolver(localeData)
+ * const resolve = createResolver(localeData, variables)
  * const name = resolve("@character.bartender.name")
- * const bio = resolve("@character.bartender.bio")
+ * const roll = resolve("You rolled a {bluffRoll}.")
  * ```
  */
-export function createResolver(localeData: LocaleData): (text: string) => string {
-  return (text: string) => resolveText(text, localeData)
+export function createResolver(
+  localeData: LocaleData,
+  variables?: Record<string, number | string>
+): (text: string) => string {
+  return (text: string) => resolveText(text, localeData, variables)
 }

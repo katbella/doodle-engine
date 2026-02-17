@@ -467,10 +467,14 @@ text: |
   It might as well be you.
 
 # Auto-trigger when the player enters the tavern for the first time.
-# The seenChapterOne flag is set in content/dialogues/tavern_intro.dlg.
+# triggerConditions prevents re-triggering. effects runs when the interlude fires
+# — setFlag here marks it seen so it won't show again on return visits.
 triggerLocation: tavern
 triggerConditions:
   - type: notFlag
+    flag: seenChapterOne
+effects:
+  - type: setFlag
     flag: seenChapterOne
 `)
 
@@ -492,8 +496,6 @@ NODE start
 
   # Effects run immediately when this node is reached, before choices are shown.
   SET flag seenTavernIntro
-  # Mark the chapter interlude as seen so it doesn't replay on return visits.
-  SET flag seenChapterOne
 
   # CHOICE text can use a @key or "inline text".
   # A choice with END dialogue is a terminal choice — no GOTO needed.
@@ -772,6 +774,53 @@ NODE farewell
   END dialogue
 `)
 
+  // --- content/dialogues/bluff_check.dlg ---
+  // Demonstrates dice rolling: ROLL effect, {varName} interpolation, and roll condition
+  await writeFile(join(projectPath, 'content/dialogues/bluff_check.dlg'), `# Skill check example — demonstrates dice rolling and variable interpolation.
+#
+# ROLL <variable> <min> <max>  — rolls a random integer and stores it in a variable.
+# {varName}                    — in dialogue text, replaced with the variable's value.
+# roll <min> <max> <threshold> — condition: rolls and returns true if result >= threshold.
+#
+# This dialogue is NOT auto-triggered — start it from another node with:
+#   START dialogue bluff_check
+
+NODE start
+  # Roll a d20 and store it as "bluffRoll" before the player sees the result
+  ROLL bluffRoll 1 20
+  NARRATOR: @bluff.setup
+
+  CHOICE @bluff.choice.attempt
+    GOTO resolve
+  END
+
+  CHOICE @bluff.choice.back_down
+    NARRATOR: @bluff.backed_down
+    END dialogue
+  END
+
+NODE resolve
+  # Show the roll result using {bluffRoll} interpolation in the locale string
+  NARRATOR: @bluff.rolled
+
+  # Branch on whether the stored variable passes a threshold (15+)
+  IF variableGreaterThan bluffRoll 14
+    GOTO success
+  END
+
+  GOTO failure
+
+NODE success
+  NARRATOR: @bluff.success
+  ADD relationship bartender 2
+  SET flag bluffedMarcus
+  END dialogue
+
+NODE failure
+  NARRATOR: @bluff.failure
+  END dialogue
+`)
+
   // --- content/locales/en.yaml ---
   await writeFile(join(projectPath, 'content/locales/en.yaml'), `# ===================
 # Narrator Intros
@@ -901,18 +950,30 @@ notification.quest_updated: "Quest Updated: Odd Jobs"
 notification.quest_complete: "Quest Complete: Odd Jobs (+50 gold, +10 reputation)"
 notification.bought_drink: "Bought a drink (-5 gold)"
 notification.bought_map: "Bought a map (-20 gold)"
+
+# ===================
+# Skill Check (bluff_check.dlg)
+# ===================
+bluff.setup: "Marcus eyes you across the bar. You consider spinning him a tale to get a discount on that drink..."
+bluff.choice.attempt: "Try to bluff him."
+bluff.choice.back_down: "Actually, never mind."
+bluff.backed_down: "Some fights aren't worth picking."
+bluff.rolled: "You spin the tale with {bluffRoll} on your roll — and Marcus listens carefully."
+bluff.success: "The story lands perfectly. Marcus laughs and slides a free drink across the bar. \"That's a good one,\" he admits."
+bluff.failure: "Marcus raises an eyebrow. \"Nice try,\" he says, entirely unconvinced. \"That'll be five gold.\""
 `)
 
   console.log(crayon.green(`  ${check} Starter content created`))
   console.log('')
   console.log(crayon.dim('  Content includes:'))
-  console.log(crayon.dim('    2 locations (tavern, market)'))
+  console.log(crayon.dim('    2 locations  (tavern, market)'))
   console.log(crayon.dim('    2 characters (bartender, merchant)'))
-  console.log(crayon.dim('    1 item (old coin)'))
-  console.log(crayon.dim('    1 map (town)'))
-  console.log(crayon.dim('    1 quest with 3 stages'))
+  console.log(crayon.dim('    1 item       (old coin)'))
+  console.log(crayon.dim('    1 map        (town with 2 locations)'))
+  console.log(crayon.dim('    1 quest      (odd jobs, 3 stages)'))
   console.log(crayon.dim('    3 journal entries'))
-  console.log(crayon.dim('    4 dialogues (2 narrator intros, 2 NPC conversations)'))
+  console.log(crayon.dim('    1 interlude  (chapter one, auto-triggers at tavern)'))
+  console.log(crayon.dim('    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'))
   console.log(crayon.dim('    English locale with all strings'))
 
   // --- .gitignore ---

@@ -162,6 +162,8 @@ export function parseCondition(conditionStr: string): Condition {
       return { type: 'timeIs', startHour: Number(parts[1]), endHour: Number(parts[2]) }
     case 'itemAt':
       return { type: 'itemAt', itemId: parts[1], locationId: parts[2] }
+    case 'roll':
+      return { type: 'roll', min: Number(parts[1]), max: Number(parts[2]), threshold: Number(parts[3]) }
     default:
       throw new Error(`Unknown condition type: ${type}`)
   }
@@ -192,6 +194,10 @@ export function parseEffect(effectStr: string): Effect {
   }
   if (trimmed.startsWith('INTERLUDE ')) {
     return { type: 'showInterlude', interludeId: trimmed.substring(10).trim() }
+  }
+  if (trimmed.startsWith('ROLL ')) {
+    const parts = trimmed.split(/\s+/)
+    return { type: 'roll', variable: parts[1], min: Number(parts[2]), max: Number(parts[3]) }
   }
 
   const parts = trimmed.split(/\s+/)

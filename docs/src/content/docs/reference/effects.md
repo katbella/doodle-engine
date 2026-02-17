@@ -246,6 +246,44 @@ INTERLUDE chapter_one
 
 The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared after the player dismisses it. See the [Interludes guide](/doodle-engine/guides/interludes/) for the full YAML schema.
 
+## Dice Rolling
+
+### ROLL
+
+Roll a random integer between `min` and `max` (inclusive) and store the result in a variable.
+
+```
+ROLL bluffRoll 1 20
+```
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `variable` | `string` | Variable name to store the result in |
+| `min` | `number` | Minimum value (inclusive) |
+| `max` | `number` | Maximum value (inclusive) |
+
+The stored variable can then be displayed in dialogue using `{varName}` interpolation, or tested with `variableGreaterThan` / `variableLessThan` conditions.
+
+```
+# Roll once, then branch and display the result
+ROLL bluffRoll 1 20
+NARRATOR: You rolled a {bluffRoll}.
+
+IF variableGreaterThan bluffRoll 14
+  GOTO success
+END
+
+GOTO failure
+```
+
+For a one-shot hidden check where you don't need the value, use the `roll` condition instead:
+
+```
+REQUIRE roll 1 20 15
+```
+
+See the [Dice & Randomness guide](/doodle-engine/guides/dice-and-randomness/) for patterns and examples.
+
 ## Notifications
 
 ### NOTIFY

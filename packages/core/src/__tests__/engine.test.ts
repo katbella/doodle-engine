@@ -759,6 +759,56 @@ describe('Engine', () => {
       expect(snapshot.pendingInterlude).toBeNull()
     })
 
+    it('should apply interlude effects when triggered', () => {
+      // Interlude with effects — the canonical pattern for "mark as seen"
+      const registryWithEffects = {
+        ...createTestRegistry(),
+        interludes: {
+          chapter_one: {
+            id: 'chapter_one',
+            background: 'chapter_one.jpg',
+            text: 'Chapter One',
+            triggerLocation: 'market',
+            triggerConditions: [{ type: 'notFlag' as const, flag: 'seenChapterOne' }],
+            effects: [{ type: 'setFlag' as const, flag: 'seenChapterOne' }],
+          },
+        },
+      }
+      const customEngine = new Engine(registryWithEffects, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      // First visit: interlude fires
+      const firstVisit = customEngine.travelTo('market')
+      expect(firstVisit.pendingInterlude?.id).toBe('chapter_one')
+
+      // Effects applied seenChapterOne flag — second visit should NOT retrigger
+      customEngine.travelTo('tavern')
+      const secondVisit = customEngine.travelTo('market')
+      expect(secondVisit.pendingInterlude).toBeNull()
+    })
+
+    it('should trigger interlude on newGame when starting at the trigger location', () => {
+      const registryWithStartTrigger = {
+        ...createTestRegistry(),
+        interludes: {
+          intro: {
+            id: 'intro',
+            background: 'intro.jpg',
+            text: 'Welcome',
+            triggerLocation: 'tavern',
+            triggerConditions: [{ type: 'notFlag' as const, flag: 'seenIntro' }],
+            effects: [{ type: 'setFlag' as const, flag: 'seenIntro' }],
+          },
+        },
+      }
+      const customEngine = new Engine(registryWithStartTrigger, {} as any)
+      const snapshot = customEngine.newGame(createTestConfig())
+
+      expect(snapshot.pendingInterlude).not.toBeNull()
+      expect(snapshot.pendingInterlude?.id).toBe('intro')
+    })
+
     it('should trigger interlude via showInterlude effect', () => {
       const registryWithEffect = {
         ...createTestRegistry(),

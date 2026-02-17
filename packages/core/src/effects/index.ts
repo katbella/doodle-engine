@@ -109,6 +109,9 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
     case 'showInterlude':
       return applyShowInterlude(effect.interludeId, state)
 
+    case 'roll':
+      return applyRoll(effect.variable, effect.min, effect.max, state)
+
     default:
       // TypeScript exhaustiveness check - this should never be reached
       const _exhaustive: never = effect
@@ -615,5 +618,21 @@ function applyShowInterlude(interludeId: string, state: GameState): GameState {
   return {
     ...state,
     pendingInterlude: interludeId,
+  }
+}
+
+/**
+ * Roll a random integer between min and max (inclusive) and store in a variable.
+ *
+ * Example: ROLL bluffRoll 1 20
+ */
+function applyRoll(variable: string, min: number, max: number, state: GameState): GameState {
+  const result = Math.floor(Math.random() * (max - min + 1)) + min
+  return {
+    ...state,
+    variables: {
+      ...state.variables,
+      [variable]: result,
+    },
   }
 }

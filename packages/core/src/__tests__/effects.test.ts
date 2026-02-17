@@ -457,6 +457,47 @@ describe('Effect Processors', () => {
     })
   })
 
+  describe('roll', () => {
+    it('should store a value within the specified range', () => {
+      const effect: Effect = { type: 'roll', variable: 'bluffRoll', min: 1, max: 20 }
+      const state = createTestState()
+      const newState = applyEffect(effect, state)
+
+      const result = newState.variables['bluffRoll']
+      expect(typeof result).toBe('number')
+      expect(result as number).toBeGreaterThanOrEqual(1)
+      expect(result as number).toBeLessThanOrEqual(20)
+    })
+
+    it('should store exactly the value when min equals max', () => {
+      const effect: Effect = { type: 'roll', variable: 'fixedRoll', min: 15, max: 15 }
+      const state = createTestState()
+      const newState = applyEffect(effect, state)
+
+      expect(newState.variables['fixedRoll']).toBe(15)
+    })
+
+    it('should overwrite an existing variable', () => {
+      const effect: Effect = { type: 'roll', variable: 'gold', min: 5, max: 5 }
+      const state = createTestState() // gold is 100
+      const newState = applyEffect(effect, state)
+
+      expect(newState.variables['gold']).toBe(5)
+    })
+
+    it('should produce different results across multiple rolls', () => {
+      const effect: Effect = { type: 'roll', variable: 'r', min: 1, max: 100 }
+      const state = createTestState()
+      const results = new Set<number>()
+      for (let i = 0; i < 20; i++) {
+        const newState = applyEffect(effect, state)
+        results.add(newState.variables['r'] as number)
+      }
+      // With 100 possible values and 20 rolls, very likely to get at least 2 distinct values
+      expect(results.size).toBeGreaterThan(1)
+    })
+  })
+
   describe('showInterlude', () => {
     it('should set pendingInterlude to the interlude ID', () => {
       const effect: Effect = { type: 'showInterlude', interludeId: 'chapter_one' }

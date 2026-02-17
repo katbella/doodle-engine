@@ -42,6 +42,7 @@ text: |
 | `scrollSpeed` | No | Auto-scroll speed in pixels per second (default: `30`) |
 | `triggerLocation` | No | Location ID where this auto-triggers on enter |
 | `triggerConditions` | No | Conditions that must pass for auto-trigger |
+| `effects` | No | Effects applied when the interlude triggers (typically `setFlag` to prevent repeats) |
 
 ## Showing an Interlude
 
@@ -59,7 +60,7 @@ NODE find_letter
 
 ### Auto-trigger on Location Enter
 
-Set `triggerLocation` (and optional `triggerConditions`) in the YAML:
+Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effects` field runs immediately when the interlude triggers — use it to set a "seen" flag so the interlude doesn't repeat on return visits:
 
 ```yaml
 id: chapter_two
@@ -76,15 +77,14 @@ triggerConditions:
     flag: leftTavern
   - type: notFlag
     flag: seenChapterTwo
+effects:
+  - type: setFlag
+    flag: seenChapterTwo
 ```
 
-Add a flag in the dialogue or elsewhere to prevent the interlude from showing again:
+The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns — the interlude won't show again.
 
-```
-NODE enter_forest
-  SET flag seenChapterTwo
-  ...
-```
+**Important:** do NOT set the "seen" flag in a dialogue node that fires before the interlude check. The engine evaluates `triggerConditions` first, then applies `effects`. Setting the flag in a dialogue would mark the interlude as seen before the check runs, causing it to never trigger.
 
 ## Player Controls
 

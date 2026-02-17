@@ -285,6 +285,20 @@ export interface ShowInterludeEffect {
 }
 
 /**
+ * Roll a random integer and store it in a variable.
+ * Example: ROLL bluffRoll 1 20
+ */
+export interface RollEffect {
+  type: 'roll'
+  /** Variable to store the result in */
+  variable: string
+  /** Minimum value (inclusive) */
+  min: number
+  /** Maximum value (inclusive) */
+  max: number
+}
+
+/**
  * Union of all effect types.
  * This discriminated union allows authors to extend with custom effects.
  */
@@ -315,3 +329,4 @@ export type Effect =
   | NotifyEffect
   | PlayVideoEffect
   | ShowInterludeEffect
+  | RollEffect

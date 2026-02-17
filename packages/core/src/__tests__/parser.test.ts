@@ -316,10 +316,37 @@ describe('parseEffect', () => {
     expect(effect).toEqual({ type: 'playVideo', file: 'intro.mp4' })
   })
 
+  it('should parse INTERLUDE with interlude ID', () => {
+    const effect = parseEffect('INTERLUDE chapter_one')
+    expect(effect).toEqual({ type: 'showInterlude', interludeId: 'chapter_one' })
+  })
+
+  it('should parse ROLL effect', () => {
+    const effect = parseEffect('ROLL bluffRoll 1 20')
+    expect(effect).toEqual({
+      type: 'roll',
+      variable: 'bluffRoll',
+      min: 1,
+      max: 20,
+    })
+  })
+
   it('should throw on unknown effect', () => {
     expect(() => parseEffect('UNKNOWN effect foo')).toThrow(
       'Unknown effect keyword: UNKNOWN'
     )
+  })
+})
+
+describe('parseCondition - roll', () => {
+  it('should parse roll condition', () => {
+    const condition = parseCondition('roll 1 20 15')
+    expect(condition).toEqual({
+      type: 'roll',
+      min: 1,
+      max: 20,
+      threshold: 15,
+    })
   })
 })
 

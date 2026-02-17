@@ -215,6 +215,8 @@ export interface Interlude {
   triggerLocation?: string
   /** Conditions that must pass for auto-trigger (optional) */
   triggerConditions?: Condition[]
+  /** Effects applied to game state when the interlude triggers (e.g. setFlag to prevent repeat) */
+  effects?: Effect[]
 }
 
 /**
