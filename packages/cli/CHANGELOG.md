@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.7
+
+### Patch Changes
+
+- b7ac02f: Fix Github release tagging
+- Updated dependencies [b7ac02f]
+  - @doodle-engine/core@0.0.7
+  - @doodle-engine/react@0.0.7
+
 ## 0.0.6
 
 ### Patch Changes

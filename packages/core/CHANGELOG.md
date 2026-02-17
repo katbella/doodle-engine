@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.7
+
+### Patch Changes
+
+- b7ac02f: Fix Github release tagging
+
 ## 0.0.6
 
 ### Patch Changes
