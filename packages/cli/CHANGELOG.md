@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.13
+
+### Patch Changes
+
+- f21b68e: Updated docs and templates
+- Updated dependencies [f21b68e]
+  - @doodle-engine/core@0.0.13
+  - @doodle-engine/react@0.0.13
+
 ## 0.0.12
 
 ### Patch Changes
