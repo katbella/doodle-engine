@@ -48,6 +48,16 @@ export interface GameShellProps {
   videoBasePath?: string
   /** CSS class */
   className?: string
+  /**
+   * Enable the browser console debugging API (window.doodle).
+   * When true, you can type doodle.setFlag(), doodle.teleport(), etc.
+   * in the browser DevTools console while testing your game.
+   *
+   * Pass import.meta.env.DEV to automatically enable in development
+   * and disable in production builds:
+   *   <GameShell devTools={import.meta.env.DEV} ...>
+   */
+  devTools?: boolean
 }
 
 export function GameShell({
@@ -63,6 +73,7 @@ export function GameShell({
   availableLocales,
   videoBasePath = '/video',
   className = '',
+  devTools = false,
 }: GameShellProps) {
   const [screen, setScreen] = useState<Screen>(splashDuration > 0 ? 'splash' : 'title')
   const [showPauseMenu, setShowPauseMenu] = useState(false)
@@ -238,7 +249,7 @@ export function GameShell({
 
   return (
     <div className={`game-shell ${className}`}>
-      <GameProvider engine={gameState.engine} initialSnapshot={gameState.snapshot}>
+      <GameProvider engine={gameState.engine} initialSnapshot={gameState.snapshot} devTools={devTools}>
         <GameShellPlaying
           audioOptions={audioOptions}
           uiSoundControls={uiSoundsConfig !== false ? uiSoundControls : undefined}

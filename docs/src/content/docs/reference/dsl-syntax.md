@@ -142,14 +142,28 @@ CHOICE @choice_text
   REQUIRE condition        # Optional, multiple allowed
   effect1                  # Optional effects
   effect2
-  GOTO target_node         # Required destination
+  GOTO target_node         # Destination (see below)
 END
 ```
 
 Choices are shown to the player as clickable options. They can have:
 - **Conditions**: choice is hidden if any condition fails
 - **Effects**: run when the choice is selected
-- **GOTO**: where to go next (required)
+- **GOTO**: required unless the choice terminates the dialogue
+
+A choice terminates the dialogue (no GOTO needed) when it contains `END dialogue` or `GOTO location`:
+
+```
+# Terminal choice: ends the dialogue
+CHOICE "Look around."
+  END dialogue
+END
+
+# Terminal choice: ends dialogue and travels to location
+CHOICE "Head to the market."
+  GOTO location market
+END
+```
 
 ## Conditional Blocks (IF)
 
@@ -268,23 +282,31 @@ VIDEO intro_cinematic.mp4
 NOTIFY @notification.quest_started
 ```
 
-## Localization Syntax
+## Text Syntax
 
-Text values support `@key` references:
+Text in dialogues can be written in two ways:
+
+**Inline text** (quoted): Write the text directly in the `.dlg` file. No locale file needed.
+
+```
+BARTENDER: "Hello there, traveller!"
+CHOICE "What's the news?"
+  GOTO news
+END
+```
+
+**Localization keys** (prefixed with `@`): Reference a key defined in a locale file. Required for multi-language support.
 
 ```
 BARTENDER: @bartender.greeting
-CHOICE @bartender.choice.hello
-NOTIFY @notification.quest_started
+CHOICE @bartender.choice.ask_news
+  GOTO news
+END
 ```
 
-The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is shown (useful for spotting missing translations).
+The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is displayed (useful for spotting missing translations).
 
-Quoted strings are used as literal text:
-
-```
-BARTENDER: "Hello there!"
-```
+For quick prototyping or small single-language games, inline text is sufficient and simpler. Add localization keys later when you're ready to support multiple languages.
 
 ## Comments
 

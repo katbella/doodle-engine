@@ -43,12 +43,38 @@ function MyCustomGame() {
 }
 ```
 
-Wrap it with `GameProvider`:
+Wrap it with `GameProvider`. While content is loading, render a loading screen:
 
 ```tsx
-<GameProvider engine={engine} initialSnapshot={snapshot}>
-  <MyCustomGame />
-</GameProvider>
+import { GameProvider, LoadingScreen } from '@doodle-engine/react'
+
+function App() {
+  const [game, setGame] = useState<{ engine: Engine; snapshot: Snapshot } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/content')
+      .then((r) => r.json())
+      .then(({ registry, config }) => {
+        const engine = new Engine(registry, {} as GameState)
+        const snapshot = engine.newGame(config)
+        setGame({ engine, snapshot })
+      })
+  }, [])
+
+  if (!game) return <LoadingScreen />
+
+  return (
+    <GameProvider engine={game.engine} initialSnapshot={game.snapshot} devTools={import.meta.env.DEV}>
+      <MyCustomGame />
+    </GameProvider>
+  )
+}
+```
+
+Pass a custom `message` or `className` to style the loading state:
+
+```tsx
+<LoadingScreen message="Preparing your adventure..." className="my-loader" />
 ```
 
 ## Available Actions
@@ -71,6 +97,7 @@ You can use the pre-built components with your own layout:
 
 ```tsx
 import {
+  LoadingScreen,
   DialogueBox,
   ChoiceList,
   LocationView,
@@ -144,6 +171,27 @@ snapshot.ambient          // Current ambient sound
 snapshot.notifications    // Transient notifications (shown once)
 snapshot.pendingSounds    // Sound effects to play (cleared after snapshot)
 ```
+
+## Dev Tools Console API
+
+When `devTools={import.meta.env.DEV}` is set on `GameProvider` or `GameShell`, a `window.doodle` object is available in your browser's DevTools console while developing. Type `doodle.inspect()` to see all available commands:
+
+```
+doodle.setFlag("flagName")              // Set a flag
+doodle.clearFlag("flagName")            // Clear a flag
+doodle.setVariable("gold", 100)         // Set a variable
+doodle.getVariable("gold")              // Read a variable
+doodle.teleport("locationId")           // Jump to a location
+doodle.triggerDialogue("dialogueId")    // Start a dialogue
+doodle.setQuestStage("questId", "stage")
+doodle.addItem("itemId")
+doodle.removeItem("itemId")
+doodle.inspect()                        // Print current state summary
+doodle.inspectState()                   // Return raw game state object
+doodle.inspectRegistry()                // Return content registry object
+```
+
+`window.doodle` is only available after a game has started (after clicking New Game or Continue), because `GameProvider` must be mounted first.
 
 ## Building Without React
 

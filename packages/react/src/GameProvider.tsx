@@ -5,7 +5,7 @@
  * Provides action methods that update the snapshot when called.
  */
 
-import React, { createContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { createContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { Engine, enableDevTools } from '@doodle-engine/core'
 import type { Snapshot, SaveData } from '@doodle-engine/core'
 
@@ -33,26 +33,33 @@ export interface GameProviderProps {
   initialSnapshot: Snapshot
   /** Children components */
   children: ReactNode
+  /**
+   * Enable the browser console debugging API (window.doodle).
+   * When true, you can type doodle.setFlag(), doodle.teleport(), etc.
+   * in the browser DevTools console while testing your game.
+   *
+   * Pass import.meta.env.DEV to automatically enable in development
+   * and disable in production builds:
+   *   <GameProvider devTools={import.meta.env.DEV} ...>
+   */
+  devTools?: boolean
 }
 
 /**
  * Provider component that wraps the game UI
  * Manages engine state and provides actions to child components
  */
-export function GameProvider({ engine, initialSnapshot, children }: GameProviderProps) {
+export function GameProvider({ engine, initialSnapshot, children, devTools = false }: GameProviderProps) {
   const [snapshot, setSnapshot] = useState<Snapshot>(initialSnapshot)
 
-  // Enable dev tools in development mode
   useEffect(() => {
-    if (import.meta.env.DEV) {
+    if (devTools) {
       enableDevTools(engine, () => setSnapshot(engine.getSnapshot()))
-
-      // Cleanup on unmount
       return () => {
         delete window.doodle
       }
     }
-  }, [engine])
+  }, [engine, devTools])
 
   // Action: Select a dialogue choice
   const selectChoice = useCallback(

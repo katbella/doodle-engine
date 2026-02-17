@@ -76,7 +76,7 @@ This is useful for:
 
 - **Start node exists**: The `startNode` specified in a dialogue must be a valid node ID
 - **No duplicate node IDs**: Each node ID must be unique within its dialogue
-- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalNext` targets must point to existing nodes
+- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalNext` targets must point to existing nodes. Exception: choices that contain `END dialogue` or `GOTO location` don't need a `GOTO` target — they terminate the dialogue.
 
 Example error:
 
@@ -93,9 +93,15 @@ All conditions must have their required arguments:
 | Condition | Required Arguments |
 |-----------|-------------------|
 | `hasFlag`, `notFlag` | `flag` |
-| `hasItem`, `notItem` | `item` |
-| `questAtStage` | `quest`, `stage` |
+| `hasItem`, `notItem` | `itemId` |
+| `questAtStage` | `questId`, `stageId` |
+| `atLocation` | `locationId` |
+| `characterAt` | `characterId`, `locationId` |
+| `characterInParty` | `characterId` |
+| `relationshipAbove`, `relationshipBelow` | `characterId`, `value` |
 | `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value` |
+| `itemAt` | `itemId`, `locationId` |
+| `timeIs` | at least one of `hour` or `day` |
 
 Example error:
 
@@ -112,21 +118,23 @@ All effects must have their required arguments:
 |--------|-------------------|
 | `setFlag`, `clearFlag` | `flag` |
 | `setVariable`, `addVariable` | `variable`, `value` |
-| `addItem`, `removeItem` | `item` |
-| `moveItem` | `item`, `location` |
-| `setQuestStage` | `quest`, `stage` |
-| `addJournalEntry` | `entry` |
-| `setCharacterLocation` | `character`, `location` |
-| `addToParty`, `removeFromParty` | `character` |
-| `setRelationship`, `addRelationship` | `character`, `value` |
-| `setCharacterStat`, `addCharacterStat` | `character`, `stat`, `value` |
+| `addItem`, `removeItem` | `itemId` |
+| `moveItem` | `itemId`, `locationId` |
+| `setQuestStage` | `questId`, `stageId` |
+| `addJournalEntry` | `entryId` |
+| `setCharacterLocation` | `characterId`, `locationId` |
+| `addToParty`, `removeFromParty` | `characterId` |
+| `setRelationship`, `addRelationship` | `characterId`, `value` |
+| `setCharacterStat`, `addCharacterStat` | `characterId`, `stat`, `value` |
 | `setMapEnabled` | `enabled` |
 | `advanceTime` | `hours` |
-| `goToLocation` | `location` |
-| `startDialogue` | `dialogue` |
-| `playMusic`, `playSound` | `file` |
+| `goToLocation` | `locationId` |
+| `startDialogue` | `dialogueId` |
+| `playMusic` | `track` |
+| `playSound` | `sound` |
 | `playVideo` | `file` |
 | `notify` | `message` |
+| `endDialogue` | *(none)* |
 
 Example error:
 

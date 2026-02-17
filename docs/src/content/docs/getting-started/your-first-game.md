@@ -30,14 +30,14 @@ Create `content/locations/tavern.yaml`:
 
 ```yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: "The Salty Dog"
+description: "A cozy tavern with worn wooden tables and the smell of hearth smoke."
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: ""
 ```
 
-The `@` prefix means the value is a localization key. The actual text lives in your locale file.
+Text can be written inline like this, or as localization keys (`@location.tavern.name`) that resolve from a locale file. Inline text is simpler for getting started. See [Localization](/doodle-engine/guides/localization/) when you're ready to support multiple languages.
 
 ## Adding a Character
 
@@ -45,8 +45,8 @@ Create `content/characters/bartender.yaml`:
 
 ```yaml
 id: bartender
-name: "@character.bartender.name"
-biography: "@character.bartender.bio"
+name: "Greta"
+biography: "The no-nonsense owner of the Salty Dog."
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -61,24 +61,24 @@ Create `content/dialogues/bartender_greeting.dlg`:
 
 ```
 NODE start
-  BARTENDER: @bartender.greeting
+  BARTENDER: "Welcome to the Salty Dog! What can I do for you?"
 
-  CHOICE @bartender.choice.whats_news
+  CHOICE "Any news around town?"
     SET flag metBartender
     ADD relationship bartender 1
     GOTO rumors
   END
 
-  CHOICE @bartender.choice.nevermind
+  CHOICE "Nothing, just looking around."
     GOTO farewell
   END
 
 NODE rumors
-  BARTENDER: @bartender.rumors
+  BARTENDER: "Word is there's a merchant in the market square looking for help with deliveries."
   GOTO farewell
 
 NODE farewell
-  BARTENDER: @bartender.farewell
+  BARTENDER: "Come back anytime!"
   END dialogue
 ```
 
@@ -89,25 +89,7 @@ Key concepts:
 - Effects like `SET flag` and `ADD relationship` modify game state
 - `END dialogue` closes the conversation
 
-## Adding Locale Strings
-
-Create `content/locales/en.yaml`:
-
-```yaml
-location.tavern.name: "The Rusty Tankard"
-location.tavern.description: "A cozy tavern with worn wooden tables and the smell of hearth smoke."
-
-character.bartender.name: "Greta"
-character.bartender.bio: "The no-nonsense owner of the Rusty Tankard."
-
-bartender.greeting: "Welcome to the Rusty Tankard! What can I do for you?"
-bartender.choice.whats_news: "Any news around town?"
-bartender.choice.nevermind: "Nothing, just looking around."
-bartender.rumors: "Word is there's a merchant in the market square looking for help with deliveries."
-bartender.farewell: "Come back anytime!"
-```
-
-All `@key` references in YAML and `.dlg` files resolve against this locale data at runtime.
+Text is written inline with quotes here. When you're ready to support multiple languages, move text to a locale file and use `@key` references. See [Localization](/doodle-engine/guides/localization/).
 
 ## Running Your Game
 
@@ -130,7 +112,7 @@ The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides 
 ```tsx
 import { useEffect, useState } from 'react'
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core'
-import { GameShell } from '@doodle-engine/react'
+import { GameShell, LoadingScreen } from '@doodle-engine/react'
 
 export function App() {
   const [content, setContent] = useState<{
@@ -147,7 +129,7 @@ export function App() {
       }))
   }, [])
 
-  if (!content) return <div>Loading...</div>
+  if (!content) return <LoadingScreen />
 
   return (
     <GameShell
