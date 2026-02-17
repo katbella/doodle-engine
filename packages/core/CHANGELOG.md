@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.12
+
+### Patch Changes
+
+- a509381: Add dice roller
+
 ## 0.0.11
 
 ### Patch Changes
