@@ -5,11 +5,12 @@ description: How a Doodle Engine game project is organized.
 
 A scaffolded game project has this structure:
 
-```
+```text
 my-game/
   content/
     characters/       # Character YAML files
     dialogues/        # Dialogue .dlg files
+    interludes/       # Interlude YAML files
     items/            # Item YAML files
     journal/          # Journal entry YAML files
     locales/          # Locale YAML files (en.yaml, es.yaml, etc.)
@@ -39,6 +40,7 @@ All game content lives in `content/`. The engine loads files by directory:
 |-----------|-----------|--------|
 | `characters/` | `.yaml` | Character definitions |
 | `dialogues/` | `.dlg` | Dialogue scripts (DSL) |
+| `interludes/` | `.yaml` | Interlude definitions |
 | `items/` | `.yaml` | Item definitions |
 | `journal/` | `.yaml` | Journal entries |
 | `locales/` | `.yaml` | Translation strings |
@@ -83,7 +85,7 @@ name: "@location.tavern.name"
 
 Static files referenced by content:
 
-- **images/**: location banners (`banner` field), character portraits (`portrait`), item icons/images
+- **images/**: location banners (`banner` field), character portraits (`portrait`), item icons/images, interlude images
 - **audio/**: music tracks (`music` field), ambient sounds (`ambient`), sound effects, voice lines
 - **maps/**: map background images (`image` field in map YAML)
 

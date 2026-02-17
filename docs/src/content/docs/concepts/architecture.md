@@ -3,19 +3,19 @@ title: Architecture
 description: Understanding the state → action → snapshot data flow.
 ---
 
-Doodle Engine follows a one-way data flow pattern: **actions go in, snapshots come out**.
+Doodle Engine follows a one-way data flow pattern: **player actions go in, a new state is produced, and a snapshot comes out**.
 
 ## Overview
 
-```
-Player Action → Engine → State Mutation → Snapshot → Renderer
-     ↑                                                    |
-     └────────────────────────────────────────────────────┘
+```text
+Player Action → Engine → New State → Snapshot → Renderer
+      ↑                                             |
+      └─────────────────────────────────────────────┘
 ```
 
 1. The **player** performs an action (talk to character, select choice, travel)
 2. The **engine** processes the action, evaluating conditions and applying effects
-3. **State** is mutated immutably (new state object)
+3. A **new state** is produced (the previous state is not modified)
 4. A **snapshot** is built: a renderer-ready view of the current state
 5. The **renderer** displays the snapshot and waits for the next action
 
@@ -25,7 +25,7 @@ Player Action → Engine → State Mutation → Snapshot → Renderer
 
 Game content is defined in YAML and `.dlg` files. It never changes at runtime. Content is loaded into a `ContentRegistry`:
 
-```typescript
+```ts
 interface ContentRegistry {
   locations: Record<string, Location>
   characters: Record<string, Character>
@@ -43,7 +43,7 @@ interface ContentRegistry {
 
 Game state tracks everything that changes during play:
 
-```typescript
+```ts
 interface GameState {
   currentLocation: string
   currentTime: { day: number; hour: number }
@@ -67,18 +67,18 @@ interface GameState {
 
 ### Snapshot (Derived)
 
-The snapshot is computed from state + registry. It enriches IDs with full entity data, resolves localization keys, and evaluates conditions to determine what's visible:
+The snapshot is computed from the current state and the content registry. It enriches IDs with full entity data, resolves localization keys, and evaluates conditions to determine what is visible:
 
-```typescript
+```ts
 interface Snapshot {
-  location: SnapshotLocation      // Full location data
-  charactersHere: SnapshotCharacter[]  // NPCs at current location
-  party: SnapshotCharacter[]      // Party members
-  dialogue: SnapshotDialogue | null    // Current dialogue or null
-  choices: SnapshotChoice[]       // Available choices (condition-filtered)
-  inventory: SnapshotItem[]       // Items with full data
-  quests: SnapshotQuest[]         // Active quests
-  journal: SnapshotJournalEntry[] // Unlocked entries
+  location: SnapshotLocation
+  charactersHere: SnapshotCharacter[]
+  party: SnapshotCharacter[]
+  dialogue: SnapshotDialogue | null
+  choices: SnapshotChoice[]
+  inventory: SnapshotItem[]
+  quests: SnapshotQuest[]
+  journal: SnapshotJournalEntry[]
   variables: Record<string, number | string>
   time: { day: number; hour: number }
   map: SnapshotMap | null
@@ -95,39 +95,39 @@ interface Snapshot {
 
 Some state is transient. It appears in exactly one snapshot and is then cleared:
 
-- **notifications**: messages from `NOTIFY` effects
-- **pendingSounds**: sounds from `SOUND` effects
-- **pendingVideo**: file from `VIDEO` effects — show once, then null
-- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger — show once, then null
+- **notifications**: messages from `NOTIFY` effects  
+- **pendingSounds**: sounds from `SOUND` effects  
+- **pendingVideo**: file from `VIDEO` effects (show once, then null)  
+- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger (show once, then null)  
 
-After the engine builds a snapshot, it clears these fields. The renderer just renders what's in the snapshot — no timers or cleanup needed.
+After a snapshot is produced, the engine clears these fields in the next state. The renderer simply renders what is in the snapshot; no timers or cleanup are required.
 
 ## Condition Evaluation
 
 Conditions are evaluated at snapshot build time to determine:
 
-- Which dialogue choices are visible (choices with failing `REQUIRE` are hidden)
-- Which triggered dialogues should fire
-- Which `IF` branches to take
+- Which dialogue choices are visible (choices with failing `REQUIRE` are hidden)  
+- Which triggered dialogues activate  
+- Which `IF` branches to take  
 
-This means the snapshot only contains valid, visible options. The renderer never needs to evaluate conditions.
+This means the snapshot only contains valid, visible options. The renderer never evaluates conditions.
 
 ## Effect Processing
 
 Effects run in order when:
 
-1. A dialogue node is reached (node effects)
-2. A choice is selected (choice effects)
-3. An interlude triggers (interlude `effects` field — typically `setFlag` to prevent repeats)
+1. A dialogue node is reached (node effects)  
+2. A choice is selected (choice effects)  
+3. An interlude triggers (interlude `effects` field, typically `setFlag` to prevent repeats)  
 
-Effects mutate state: setting flags, adding items, changing quest stages, moving characters, queuing interludes, rolling dice into variables, etc. The engine builds a new snapshot after all effects have been applied.
+Effects produce a new state: setting flags, adding items, changing quest stages, moving characters, queuing interludes, rolling dice into variables, and similar operations. The engine builds a new snapshot after all effects have been applied.
 
 ## Package Separation
 
-```
+```text
 @doodle-engine/core    Engine, types, conditions, effects, parser, snapshot builder
 @doodle-engine/react   React components, hooks, context provider
 @doodle-engine/cli     Dev server, project scaffolder, production build
 ```
 
-The core package has **no UI dependencies**. It can be used with any framework or runtime. The React package is one possible renderer. The CLI package provides development tooling.
+The core package has no UI or framework dependencies. It can be used with any framework or runtime. The React package is one possible renderer. The CLI package provides development tooling.

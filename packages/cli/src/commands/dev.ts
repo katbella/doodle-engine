@@ -57,6 +57,12 @@ export async function dev() {
         persistent: true,
       })
 
+      // Suppress add events during the initial directory scan.
+      // chokidar fires 'add' for every existing file on startup — we don't
+      // want those to spam the console or trigger repeated validation.
+      let ready = false
+      watcher.on('ready', () => { ready = true })
+
       // Debounce validation + reload so multiple rapid events from one save
       // don't print duplicate error blocks.
       let reloadTimer: ReturnType<typeof setTimeout> | null = null
@@ -75,6 +81,7 @@ export async function dev() {
       })
 
       watcher.on('add', (path) => {
+        if (!ready) return
         scheduleReload(crayon.green(`  ${plus} Content added: ${path}`))
       })
     },
