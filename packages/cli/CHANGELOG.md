@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.15
+
+### Patch Changes
+
+- c143488: update validator
+- Updated dependencies [c143488]
+  - @doodle-engine/core@0.0.15
+  - @doodle-engine/react@0.0.15
+
 ## 0.0.14
 
 ### Patch Changes
