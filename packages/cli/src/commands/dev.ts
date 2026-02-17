@@ -49,7 +49,10 @@ export async function dev() {
       })
 
       // Watch content files and trigger HMR
-      const watcher = watch(join(contentDir, '**/*'), {
+      // Pass the directory directly — chokidar watches recursively by default.
+      // Passing a glob with join() produces backslash paths on Windows that
+      // chokidar's glob matcher doesn't handle correctly.
+      const watcher = watch(contentDir, {
         ignored: /(^|[\/\\])\../,
         persistent: true,
       })

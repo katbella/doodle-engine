@@ -186,7 +186,7 @@ createRoot(document.getElementById('root')!).render(
   if (useDefaultRenderer) {
     appTsx = `import { useEffect, useState } from 'react'
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core'
-import { GameShell } from '@doodle-engine/react'
+import { GameShell, LoadingScreen } from '@doodle-engine/react'
 
 export function App() {
   const [content, setContent] = useState<{ registry: ContentRegistry; config: GameConfig } | null>(null)
@@ -198,7 +198,7 @@ export function App() {
   }, [])
 
   if (!content) {
-    return <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>Loading game...</div>
+    return <LoadingScreen />
   }
 
   return (
@@ -209,6 +209,7 @@ export function App() {
       subtitle="A text-based adventure"
       splashDuration={2000}
       availableLocales={[{ code: 'en', label: 'English' }]}
+      devTools={import.meta.env.DEV}
     />
   )
 }
@@ -217,7 +218,7 @@ export function App() {
     appTsx = `import { useEffect, useState } from 'react'
 import { Engine } from '@doodle-engine/core'
 import type { GameState, Snapshot } from '@doodle-engine/core'
-import { GameProvider, useGame } from '@doodle-engine/react'
+import { GameProvider, LoadingScreen, useGame } from '@doodle-engine/react'
 
 export function App() {
   const [game, setGame] = useState<{ engine: Engine; snapshot: Snapshot } | null>(null)
@@ -233,11 +234,11 @@ export function App() {
   }, [])
 
   if (!game) {
-    return <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>Loading game...</div>
+    return <LoadingScreen />
   }
 
   return (
-    <GameProvider engine={game.engine} initialSnapshot={game.snapshot}>
+    <GameProvider engine={game.engine} initialSnapshot={game.snapshot} devTools={import.meta.env.DEV}>
       <GameUI />
     </GameProvider>
   )
@@ -440,13 +441,25 @@ category: places
 
   // --- content/dialogues/tavern_intro.dlg ---
   // Triggered narrator intro on first visit to tavern
-  await writeFile(join(projectPath, 'content/dialogues/tavern_intro.dlg'), `TRIGGER tavern
+  await writeFile(join(projectPath, 'content/dialogues/tavern_intro.dlg'), `# This dialogue triggers automatically when the player enters the tavern.
+# TRIGGER <locationId> fires on arrival. REQUIRE conditions guard the trigger.
+# Use notFlag to make it a one-time intro.
+
+TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
+# Each NODE is a conversation point. The first NODE is always the start.
 NODE start
+  # NARRATOR: has no speaker — used for scene-setting text.
+  # @narrator.tavern_intro is a localization key defined in content/locales/en.yaml.
+  # You can also write text inline: NARRATOR: "The tavern is warm and smells of ale."
   NARRATOR: @narrator.tavern_intro
+
+  # Effects run immediately when this node is reached, before choices are shown.
   SET flag seenTavernIntro
 
+  # CHOICE text can use a @key or "inline text".
+  # A choice with END dialogue is a terminal choice — no GOTO needed.
   CHOICE @narrator.choice.look_around
     END dialogue
   END
@@ -454,12 +467,16 @@ NODE start
 
   // --- content/dialogues/market_intro.dlg ---
   // Triggered narrator intro on first visit to market
-  await writeFile(join(projectPath, 'content/dialogues/market_intro.dlg'), `TRIGGER market
+  await writeFile(join(projectPath, 'content/dialogues/market_intro.dlg'), `# One-time narrator intro for the market. Same pattern as tavern_intro.dlg.
+
+TRIGGER market
 REQUIRE notFlag seenMarketIntro
 
 NODE start
   NARRATOR: @narrator.market_intro
   SET flag seenMarketIntro
+
+  # ADD journalEntry unlocks a journal entry for the player.
   ADD journalEntry market_square
 
   CHOICE @narrator.choice.look_around
@@ -468,7 +485,11 @@ NODE start
 `)
 
   // --- content/dialogues/bartender_greeting.dlg ---
-  await writeFile(join(projectPath, 'content/dialogues/bartender_greeting.dlg'), `NODE start
+  await writeFile(join(projectPath, 'content/dialogues/bartender_greeting.dlg'), `# This dialogue is triggered by clicking the bartender character.
+# SPEAKER: lines set who's talking — matched to character ID (case-insensitive).
+# Nodes can have multiple CHOICE blocks; REQUIRE hides a choice if the condition fails.
+
+NODE start
   BARTENDER: @bartender.greeting
 
   # Always available — ask for rumors (demonstrates: flag, relationship, journalEntry)
@@ -609,7 +630,10 @@ NODE farewell
 `)
 
   // --- content/dialogues/merchant_intro.dlg ---
-  await writeFile(join(projectPath, 'content/dialogues/merchant_intro.dlg'), `NODE start
+  await writeFile(join(projectPath, 'content/dialogues/merchant_intro.dlg'), `# Merchant dialogue. Same speaker-line and CHOICE syntax as bartender_greeting.dlg.
+# The quest choices here demonstrate multi-stage quest gating with questAtStage.
+
+NODE start
   MERCHANT: @merchant.greeting
 
   CHOICE @merchant.choice.browse_wares

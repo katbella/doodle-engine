@@ -132,7 +132,10 @@ function validateDialogueNode(
 
   // Validate choice targets
   for (const choice of node.choices) {
-    if (!validNodeIds.has(choice.next)) {
+    const endsDialogue = choice.effects?.some(
+      (e: any) => e.type === 'endDialogue' || e.type === 'goToLocation'
+    )
+    if (!endsDialogue && !validNodeIds.has(choice.next)) {
       errors.push({
         file,
         message: `Node "${node.id}" choice "${choice.id}" GOTO "${choice.next}" points to non-existent node`,
@@ -172,6 +175,53 @@ function validateDialogueNode(
   return errors
 }
 
+// Required field mappings for conditions
+const CONDITION_FIELDS: Record<string, string[]> = {
+  hasFlag: ['flag'],
+  notFlag: ['flag'],
+  hasItem: ['itemId'],
+  notItem: ['itemId'],
+  variableEquals: ['variable', 'value'],
+  variableGreaterThan: ['variable', 'value'],
+  variableLessThan: ['variable', 'value'],
+  questAtStage: ['questId', 'stageId'],
+  atLocation: ['locationId'],
+  characterAt: ['characterId', 'locationId'],
+  characterInParty: ['characterId'],
+  relationshipAbove: ['characterId', 'value'],
+  relationshipBelow: ['characterId', 'value'],
+  itemAt: ['itemId', 'locationId'],
+}
+
+// Required field mappings for effects
+const EFFECT_FIELDS: Record<string, string[]> = {
+  setFlag: ['flag'],
+  clearFlag: ['flag'],
+  setVariable: ['variable', 'value'],
+  addVariable: ['variable', 'value'],
+  addItem: ['itemId'],
+  removeItem: ['itemId'],
+  moveItem: ['itemId', 'locationId'],
+  goToLocation: ['locationId'],
+  advanceTime: ['hours'],
+  setQuestStage: ['questId', 'stageId'],
+  addJournalEntry: ['entryId'],
+  startDialogue: ['dialogueId'],
+  endDialogue: [],
+  setCharacterLocation: ['characterId', 'locationId'],
+  addToParty: ['characterId'],
+  removeFromParty: ['characterId'],
+  setRelationship: ['characterId', 'value'],
+  addRelationship: ['characterId', 'value'],
+  setCharacterStat: ['characterId', 'stat', 'value'],
+  addCharacterStat: ['characterId', 'stat', 'value'],
+  setMapEnabled: ['enabled'],
+  playMusic: ['track'],
+  playSound: ['sound'],
+  notify: ['message'],
+  playVideo: ['file'],
+}
+
 /**
  * Validate a condition has required arguments.
  */
@@ -186,56 +236,31 @@ function validateCondition(condition: any, nodeId: string, file: string): Valida
     return errors
   }
 
-  // Check type-specific required fields
-  switch (condition.type) {
-    case 'hasFlag':
-    case 'notFlag':
-      if (!condition.flag) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "${condition.type}" missing required "flag" argument`,
-        })
-      }
-      break
-    case 'hasItem':
-    case 'notItem':
-      if (!condition.item) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "${condition.type}" missing required "item" argument`,
-        })
-      }
-      break
-    case 'questAtStage':
-      if (!condition.quest) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "questAtStage" missing required "quest" argument`,
-        })
-      }
-      if (!condition.stage) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "questAtStage" missing required "stage" argument`,
-        })
-      }
-      break
-    case 'variableEquals':
-    case 'variableGreaterThan':
-    case 'variableLessThan':
-      if (!condition.variable) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "${condition.type}" missing required "variable" argument`,
-        })
-      }
-      if (condition.value === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" condition "${condition.type}" missing required "value" argument`,
-        })
-      }
-      break
+  // Special case: timeIs requires at least one of hour or day
+  if (condition.type === 'timeIs') {
+    if (condition.hour === undefined && condition.day === undefined) {
+      errors.push({
+        file,
+        message: `Node "${nodeId}" condition "timeIs" must have at least one of "hour" or "day" argument`,
+      })
+    }
+    return errors
+  }
+
+  // Check required fields for this condition type
+  const requiredFields = CONDITION_FIELDS[condition.type]
+  if (!requiredFields) {
+    // Unknown condition type - skip validation (allows extensibility)
+    return errors
+  }
+
+  for (const field of requiredFields) {
+    if (condition[field] === undefined || condition[field] === null || condition[field] === '') {
+      errors.push({
+        file,
+        message: `Node "${nodeId}" condition "${condition.type}" missing required "${field}" argument`,
+      })
+    }
   }
 
   return errors
@@ -255,193 +280,20 @@ function validateEffect(effect: any, nodeId: string, file: string): ValidationEr
     return errors
   }
 
-  // Check type-specific required fields
-  switch (effect.type) {
-    case 'setFlag':
-    case 'clearFlag':
-      if (!effect.flag) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "flag" argument`,
-        })
-      }
-      break
-    case 'setVariable':
-    case 'addVariable':
-      if (!effect.variable) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "variable" argument`,
-        })
-      }
-      if (effect.value === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "value" argument`,
-        })
-      }
-      break
-    case 'addItem':
-    case 'removeItem':
-      if (!effect.item) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "item" argument`,
-        })
-      }
-      break
-    case 'moveItem':
-      if (!effect.item) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "moveItem" missing required "item" argument`,
-        })
-      }
-      if (!effect.location) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "moveItem" missing required "location" argument`,
-        })
-      }
-      break
-    case 'setQuestStage':
-      if (!effect.quest) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "setQuestStage" missing required "quest" argument`,
-        })
-      }
-      if (!effect.stage) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "setQuestStage" missing required "stage" argument`,
-        })
-      }
-      break
-    case 'addJournalEntry':
-      if (!effect.entry) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "addJournalEntry" missing required "entry" argument`,
-        })
-      }
-      break
-    case 'setCharacterLocation':
-      if (!effect.character) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "setCharacterLocation" missing required "character" argument`,
-        })
-      }
-      if (!effect.location) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "setCharacterLocation" missing required "location" argument`,
-        })
-      }
-      break
-    case 'addToParty':
-    case 'removeFromParty':
-      if (!effect.character) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "character" argument`,
-        })
-      }
-      break
-    case 'setRelationship':
-    case 'addRelationship':
-      if (!effect.character) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "character" argument`,
-        })
-      }
-      if (effect.value === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "value" argument`,
-        })
-      }
-      break
-    case 'setCharacterStat':
-    case 'addCharacterStat':
-      if (!effect.character) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "character" argument`,
-        })
-      }
-      if (!effect.stat) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "stat" argument`,
-        })
-      }
-      if (effect.value === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "value" argument`,
-        })
-      }
-      break
-    case 'setMapEnabled':
-      if (effect.enabled === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "setMapEnabled" missing required "enabled" argument`,
-        })
-      }
-      break
-    case 'advanceTime':
-      if (effect.hours === undefined) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "advanceTime" missing required "hours" argument`,
-        })
-      }
-      break
-    case 'goToLocation':
-      if (!effect.location) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "goToLocation" missing required "location" argument`,
-        })
-      }
-      break
-    case 'startDialogue':
-      if (!effect.dialogue) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "startDialogue" missing required "dialogue" argument`,
-        })
-      }
-      break
-    case 'playMusic':
-    case 'playSound':
-      if (!effect.file) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "${effect.type}" missing required "file" argument`,
-        })
-      }
-      break
-    case 'playVideo':
-      if (!effect.file) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "playVideo" missing required "file" argument`,
-        })
-      }
-      break
-    case 'notify':
-      if (!effect.message) {
-        errors.push({
-          file,
-          message: `Node "${nodeId}" effect "notify" missing required "message" argument`,
-        })
-      }
-      break
+  // Check required fields for this effect type
+  const requiredFields = EFFECT_FIELDS[effect.type]
+  if (!requiredFields) {
+    // Unknown effect type - skip validation (allows extensibility)
+    return errors
+  }
+
+  for (const field of requiredFields) {
+    if (effect[field] === undefined || effect[field] === null || effect[field] === '') {
+      errors.push({
+        file,
+        message: `Node "${nodeId}" effect "${effect.type}" missing required "${field}" argument`,
+      })
+    }
   }
 
   return errors

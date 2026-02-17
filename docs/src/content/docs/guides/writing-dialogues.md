@@ -5,6 +5,35 @@ description: How to write branching dialogue scripts with the .dlg DSL.
 
 Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. You don't need to know any programming language; the DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow. Place dialogue files in `content/dialogues/`.
 
+## Quick Start (No Localization Needed)
+
+You can write all your dialogue text inline using quoted strings. No locale files required — just write your text directly:
+
+```
+NODE start
+  BARTENDER: "Well, well. A new face. What brings you to the Salty Dog?"
+
+  CHOICE "Any news around town?"
+    SET flag heardRumors
+    ADD relationship bartender 1
+    GOTO rumors
+  END
+
+  CHOICE "Nothing. Just passing through."
+    GOTO farewell
+  END
+
+NODE rumors
+  BARTENDER: "Word is the merchant at the market square is looking for help. Pays well, too."
+  GOTO farewell
+
+NODE farewell
+  BARTENDER: "Safe travels."
+  END dialogue
+```
+
+This is the simplest way to get started. You can add localization keys later when you need multi-language support. See [Localization](/doodle-engine/guides/localization/) for details.
+
 ## Basic Structure
 
 A dialogue is a graph of **nodes**. Each node has a speaker, text, and optional choices:

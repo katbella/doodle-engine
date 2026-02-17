@@ -19,11 +19,12 @@ import { GameProvider } from '@doodle-engine/react'
 
 ### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `engine` | `Engine` | Engine instance (already initialized) |
-| `initialSnapshot` | `Snapshot` | Initial snapshot (from `newGame` or `loadGame`) |
-| `children` | `ReactNode` | Child components |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `engine` | `Engine` | required | Engine instance (already initialized) |
+| `initialSnapshot` | `Snapshot` | required | Initial snapshot (from `newGame` or `loadGame`) |
+| `children` | `ReactNode` | required | Child components |
+| `devTools` | `boolean` | `false` | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
 ### Context Value
 
@@ -287,6 +288,25 @@ import { VideoPlayer } from '@doodle-engine/react'
 | `onComplete` | `() => void` | required | Called when video ends or is skipped |
 | `className` | `string` | `''` | CSS class |
 
+## LoadingScreen
+
+Simple loading state displayed while game content is fetching. Used in the scaffolded `App.tsx` as the default loading UI.
+
+```tsx
+import { LoadingScreen } from '@doodle-engine/react'
+
+<LoadingScreen message="Loading..." className="my-loader" />
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `message` | `string` | `'Loading...'` | Message to display |
+| `className` | `string` | `''` | CSS class for custom styling |
+
+Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, and `.loading-screen-message` in your CSS. Or pass a `className` and override everything.
+
 ## SplashScreen
 
 Brief logo/loading screen that auto-advances after a duration.
@@ -413,6 +433,7 @@ import { GameShell } from '@doodle-engine/react'
   subtitle="A text-based adventure"
   splashDuration={2000}
   availableLocales={[{ code: 'en', label: 'English' }]}
+  devTools={import.meta.env.DEV}
 />
 ```
 
@@ -432,6 +453,7 @@ import { GameShell } from '@doodle-engine/react'
 | `availableLocales` | `{ code: string; label: string }[]` | — | Language options for settings |
 | `videoBasePath` | `string` | `'/video'` | Base path for video files |
 | `className` | `string` | `''` | CSS class |
+| `devTools` | `boolean` | `false` | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
 ### Features
 

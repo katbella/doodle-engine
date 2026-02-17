@@ -6,7 +6,7 @@
 
 import { build as viteBuild } from 'vite'
 import react from '@vitejs/plugin-react'
-import { readFile, readdir } from 'fs/promises'
+import { readFile, readdir, mkdir, writeFile } from 'fs/promises'
 import { join, extname, relative } from 'path'
 import { parse as parseYaml } from 'yaml'
 import { parseDialogue } from '@doodle-engine/core'
@@ -21,10 +21,11 @@ export async function build() {
   console.log(crayon.bold.magenta('🐕 Building Doodle Engine game...'))
   console.log('')
 
-  // Run validation first
+  // Run validation and load content
   console.log(crayon.dim('Validating content...'))
+  let loadedContent: any
   try {
-    const { registry, fileMap } = await loadContent(contentDir)
+    const { registry, fileMap, config } = await loadContent(contentDir)
     const errors = validateContent(registry, fileMap)
 
     printValidationErrors(errors)
@@ -34,6 +35,8 @@ export async function build() {
       console.log('')
       process.exit(1)
     }
+
+    loadedContent = { registry, config }
   } catch (error) {
     console.error(crayon.red('Error loading content:'), error)
     process.exit(1)
@@ -51,6 +54,11 @@ export async function build() {
         emptyOutDir: true,
       },
     })
+
+    // Write content JSON to dist so vite preview can serve it at /api/content
+    const apiDir = join(cwd, 'dist', 'api')
+    await mkdir(apiDir, { recursive: true })
+    await writeFile(join(apiDir, 'content'), JSON.stringify(loadedContent))
 
     console.log('')
     console.log(crayon.green('✅ Build complete! Output in dist/'))
@@ -150,5 +158,15 @@ async function loadContent(contentDir: string) {
     // Dialogues directory might not exist
   }
 
-  return { registry, fileMap }
+  // Load game config
+  let config: any = null
+  try {
+    const configPath = join(contentDir, 'game.yaml')
+    const configContent = await readFile(configPath, 'utf-8')
+    config = parseYaml(configContent)
+  } catch {
+    config = { id: 'game', startLocation: '', startTime: { day: 1, hour: 8 }, startFlags: {}, startVariables: {}, startInventory: [] }
+  }
+
+  return { registry, fileMap, config }
 }
