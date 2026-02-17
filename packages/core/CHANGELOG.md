@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.15
+
+### Patch Changes
+
+- c143488: update validator
+
 ## 0.0.14
 
 ### Patch Changes
