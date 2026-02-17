@@ -120,10 +120,32 @@ Journal entries are only added once. Adding the same entry again has no effect.
 
 ### START dialogue
 
-Start a different dialogue.
+Replace the current dialogue with a different one, starting from its first node.
 
 ```
 START dialogue merchant_intro
+```
+
+The current dialogue ends and the new one starts from scratch. There is no return path — once the new dialogue ends, the player is back at the idle state, not back in the original conversation.
+
+**Use `START dialogue` when** the sub-dialogue is self-contained and doesn't need to flow back into the caller (a cutscene, a one-off encounter, a modal quiz).
+
+**Use inline `GOTO` instead when** you need the player to return to earlier choices after the sub-flow. Add the sub-flow nodes directly to the same `.dlg` file and route them back:
+
+```
+# inline: bluff nodes live in bartender_greeting.dlg and GOTO start when done
+CHOICE "Try to bluff a free drink."
+  GOTO bluff_attempt
+END
+```
+
+vs.
+
+```
+# START dialogue: the bluff is a standalone file, conversation ends when it's done
+CHOICE "Tell me about yourself."
+  START dialogue npc_backstory
+END
 ```
 
 ### END dialogue

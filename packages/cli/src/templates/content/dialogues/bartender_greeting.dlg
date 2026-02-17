@@ -75,13 +75,48 @@ NODE order_drink
     GOTO after_drink
   END
 
-  # Try to bluff a free drink — launches the skill check dialogue (demonstrates: START dialogue)
+  # Try to bluff a free drink — rolls dice inline (demonstrates: ROLL + GOTO within one dialogue)
   CHOICE @bartender.choice.try_bluff
-    START dialogue bluff_check
+    GOTO bluff_attempt
   END
 
   # Always available as an out
   CHOICE @bartender.choice.too_rich
+    GOTO start
+  END
+
+NODE bluff_attempt
+  # Roll happens immediately on entering this node — auto-advances to success or failure
+  ROLL bluffRoll 1 20
+  IF variableGreaterThan bluffRoll 14
+    GOTO bluff_success
+  END
+  GOTO bluff_failure
+
+NODE bluff_success
+  BARTENDER: @bluff.success.bartender
+  ADD relationship bartender 2
+  SET flag bluffedMarcus
+
+  CHOICE @bluff.choice.cheers
+    GOTO start
+  END
+
+NODE bluff_failure
+  BARTENDER: @bluff.failure.bartender
+
+  CHOICE @bluff.choice.fine_pay
+    REQUIRE variableGreaterThan gold 4
+    ADD variable gold -5
+    ADD variable _drinksBought 1
+    ADD variable reputation 1
+    SET flag hadDrink
+    ADD relationship bartender 1
+    NOTIFY @notification.bought_drink
+    GOTO start
+  END
+
+  CHOICE @bluff.choice.walk_away
     GOTO start
   END
 

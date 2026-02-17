@@ -106,6 +106,12 @@ function createTestRegistry(): ContentRegistry {
                 effects: [{ type: 'setFlag', flag: 'greetedBartender' }],
                 next: 'response',
               },
+              {
+                id: 'choice_bluff',
+                text: 'Try to bluff',
+                effects: [{ type: 'startDialogue', dialogueId: 'bluff_check' }],
+                next: '',
+              },
             ],
           },
           {
@@ -114,6 +120,38 @@ function createTestRegistry(): ContentRegistry {
             text: 'Nice to meet you',
             choices: [],
             effects: [{ type: 'endDialogue' }],
+          },
+        ],
+      },
+      bluff_check: {
+        id: 'bluff_check',
+        startNode: 'start',
+        nodes: [
+          {
+            id: 'start',
+            speaker: null,
+            text: 'You try to bluff.',
+            choices: [
+              {
+                id: 'attempt',
+                text: 'Attempt',
+                effects: [],
+                next: 'success',
+              },
+            ],
+          },
+          {
+            id: 'success',
+            speaker: 'bartender',
+            text: 'Well played!',
+            choices: [
+              {
+                id: 'thanks',
+                text: 'Thanks!',
+                effects: [{ type: 'endDialogue' }],
+                next: '',
+              },
+            ],
           },
         ],
       },
@@ -280,7 +318,7 @@ describe('Engine', () => {
       expect(snapshot.dialogue).not.toBeNull()
       expect(snapshot.dialogue?.speaker).toBe('bartender')
       expect(snapshot.dialogue?.text).toBe('Welcome!')
-      expect(snapshot.choices).toHaveLength(1)
+      expect(snapshot.choices).toHaveLength(2)
     })
 
     it('should do nothing if character has no dialogue', () => {
@@ -319,6 +357,30 @@ describe('Engine', () => {
 
       // The response node has endDialogue effect
       const snapshot = engine.getSnapshot()
+      expect(snapshot.dialogue).toBeNull()
+    })
+
+    it('should switch to new dialogue when startDialogue effect fires', () => {
+      const config = createTestConfig()
+      engine.newGame(config)
+      engine.talkTo('bartender')
+
+      // choice_bluff has a startDialogue effect pointing to bluff_check
+      const snapshot = engine.selectChoice('choice_bluff')
+
+      // Should be in bluff_check's start node, not still in bartender_greeting
+      expect(snapshot.dialogue).not.toBeNull()
+      expect(snapshot.dialogue?.text).toBe('You try to bluff.')
+    })
+
+    it('should complete flow through startDialogue to endDialogue', () => {
+      const config = createTestConfig()
+      engine.newGame(config)
+      engine.talkTo('bartender')
+      engine.selectChoice('choice_bluff')         // → bluff_check start node
+      engine.selectChoice('attempt')              // → bluff_check success node
+      const snapshot = engine.selectChoice('thanks') // endDialogue
+
       expect(snapshot.dialogue).toBeNull()
     })
   })
