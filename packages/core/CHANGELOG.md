@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.13
+
+### Patch Changes
+
+- f21b68e: Updated docs and templates
+
 ## 0.0.12
 
 ### Patch Changes
