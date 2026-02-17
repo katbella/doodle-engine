@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.12
+
+### Patch Changes
+
+- a509381: Add dice roller
+- Updated dependencies [a509381]
+  - @doodle-engine/core@0.0.12
+  - @doodle-engine/react@0.0.12
+
 ## 0.0.11
 
 ### Patch Changes
