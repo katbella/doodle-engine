@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.17
+
+### Patch Changes
+
+- 07107df: fix bluff checks
+- Updated dependencies [07107df]
+  - @doodle-engine/core@0.0.17
+  - @doodle-engine/react@0.0.17
+
 ## 0.0.16
 
 ### Patch Changes
