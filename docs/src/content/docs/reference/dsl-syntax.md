@@ -284,29 +284,32 @@ NOTIFY @notification.quest_started
 
 ## Text Syntax
 
-Text in dialogues can be written in two ways:
+Dialogue text can be written in three forms:
 
-**Inline text** (quoted): Write the text directly in the `.dlg` file. No locale file needed.
+**Plain text**: Just write the words. Works for most lines.
 
 ```
-BARTENDER: "Hello there, traveller!"
-CHOICE "What's the news?"
-  GOTO news
-END
+BARTENDER: Hello there, traveller!
+CHOICE What's the news?
 ```
 
-**Localization keys** (prefixed with `@`): Reference a key defined in a locale file. Required for multi-language support.
+**Quoted text**: Wrap in double quotes when the text contains `:`, `#`, or starts with `@`. Quotes are stripped before display.
+
+```
+BARTENDER: "Hello, friend! What'll it be?"
+CHOICE "Anything starting with @ is safe in quotes"
+```
+
+**Localization keys** (prefixed with `@`): Reference a key from a locale file. Required for multi-language support.
 
 ```
 BARTENDER: @bartender.greeting
 CHOICE @bartender.choice.ask_news
-  GOTO news
-END
 ```
 
-The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is displayed (useful for spotting missing translations).
+The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is displayed.
 
-For quick prototyping or small single-language games, inline text is sufficient and simpler. Add localization keys later when you're ready to support multiple languages.
+For single-language games, plain or quoted text is simpler. Add `@keys` later when you need multiple languages.
 
 ## Comments
 
@@ -318,7 +321,7 @@ NODE start
   BARTENDER: @bartender.greeting  # Inline comments work too
 ```
 
-If `#` appears inside a quoted string, it's preserved as text content.
+A `#` inside a quoted string is preserved as text. In plain text, `#` starts a comment and everything after it is ignored — use quotes if you need a literal `#` in dialogue.
 
 ## Complete Example
 

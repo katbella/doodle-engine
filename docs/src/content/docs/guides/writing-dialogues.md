@@ -7,32 +7,42 @@ Dialogues are written in `.dlg` files using a simple DSL (domain-specific langua
 
 ## Quick Start (No Localization Needed)
 
-You can write all your dialogue text inline using quoted strings. No locale files required — just write your text directly:
+You can write dialogue text directly — no locale files required. There are three forms:
+
+```
+BARTENDER: Hello there             # plain text, fine for simple lines
+BARTENDER: "Hello, friend!"        # quotes when text has special characters or starts with @
+BARTENDER: @bartender.greeting     # localization key for multi-language support
+```
+
+Use plain text for most things. Add quotes when your text contains `:`, `#`, or starts with `@`. Use `@keys` only when you need multiple languages.
+
+Here's a complete example using plain and quoted text:
 
 ```
 NODE start
-  BARTENDER: "Well, well. A new face. What brings you to the Salty Dog?"
+  BARTENDER: Well, well. A new face. What brings you to the Salty Dog?
 
-  CHOICE "Any news around town?"
+  CHOICE Any news around town?
     SET flag heardRumors
     ADD relationship bartender 1
     GOTO rumors
   END
 
-  CHOICE "Nothing. Just passing through."
+  CHOICE Nothing. Just passing through.
     GOTO farewell
   END
 
 NODE rumors
-  BARTENDER: "Word is the merchant at the market square is looking for help. Pays well, too."
+  BARTENDER: Word is the merchant at the market square is looking for help. Pays well, too.
   GOTO farewell
 
 NODE farewell
-  BARTENDER: "Safe travels."
+  BARTENDER: Safe travels.
   END dialogue
 ```
 
-This is the simplest way to get started. You can add localization keys later when you need multi-language support. See [Localization](/doodle-engine/guides/localization/) for details.
+See [Localization](/doodle-engine/guides/localization/) when you're ready to support multiple languages.
 
 ## Basic Structure
 
