@@ -220,6 +220,7 @@ const EFFECT_FIELDS: Record<string, string[]> = {
   playSound: ['sound'],
   notify: ['message'],
   playVideo: ['file'],
+  showInterlude: ['interludeId'],
 }
 
 /**
@@ -400,6 +401,13 @@ function validateLocalizationKeys(
           checkKey(choice.text, dialogue.id, 'dialogue')
         }
       }
+    }
+  }
+
+  // Check interludes
+  for (const interlude of Object.values(registry.interludes)) {
+    if (isLocalizationKey(interlude.text)) {
+      checkKey(interlude.text, interlude.id, 'interlude')
     }
   }
 

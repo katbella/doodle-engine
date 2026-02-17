@@ -99,6 +99,9 @@ export interface GameState {
   /** Video to play (cleared after snapshot is built) */
   pendingVideo: string | null
 
+  /** Interlude ID to show (cleared after snapshot is built) */
+  pendingInterlude: string | null
+
   /** Active language code (e.g., "en", "es") */
   currentLocale: string
 }

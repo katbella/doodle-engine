@@ -21,6 +21,7 @@ export interface GameContextValue {
     setLocale: (locale: string) => void
     saveGame: () => SaveData
     loadGame: (saveData: SaveData) => void
+    dismissInterlude: () => void
   }
 }
 
@@ -138,6 +139,11 @@ export function GameProvider({ engine, initialSnapshot, children, devTools = fal
     [engine]
   )
 
+  // Action: Dismiss the current interlude
+  const dismissInterlude = useCallback(() => {
+    setSnapshot(engine.getSnapshot())
+  }, [engine])
+
   const contextValue: GameContextValue = {
     snapshot,
     actions: {
@@ -150,6 +156,7 @@ export function GameProvider({ engine, initialSnapshot, children, devTools = fal
       setLocale,
       saveGame,
       loadGame,
+      dismissInterlude,
     },
   }
 

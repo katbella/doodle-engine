@@ -72,6 +72,7 @@ async function createProjectStructure(
     'content/dialogues',
     'content/quests',
     'content/journal',
+    'content/interludes',
     'content/locales',
     'content/maps',
     'assets/images/banners',
@@ -437,6 +438,39 @@ category: quests
 title: "@journal.market_square.title"
 text: "@journal.market_square.text"
 category: places
+`)
+
+  // --- content/interludes ---
+  await writeFile(join(projectPath, 'content/interludes/chapter_one.yaml'), `id: chapter_one
+# Background image shown fullscreen during the interlude.
+# Put your image in assets/images/ and reference it here.
+background: /assets/images/banners/tavern_banner.jpg
+
+# Optional: decorative border/frame image overlaid on the background.
+# banner: /assets/images/ui/chapter_frame.png
+
+# Optional: music to play during this interlude.
+# music: /assets/audio/music/chapter_theme.ogg
+
+# The narrative text. Use @localization.key for multi-language support,
+# or write plain text directly.
+text: |
+  Chapter One: A New Beginning
+
+  The road behind you stretches long and empty.
+  Ahead, the lights of town flicker through the evening mist.
+
+  You have heard the rumours. Strange things happening.
+  People going missing. Shadows that move wrong.
+
+  Someone has to look into it.
+
+  It might as well be you.
+
+# triggerLocation: tavern
+# triggerConditions:
+#   - type: notFlag
+#     flag: seenChapterOne
 `)
 
   // --- content/dialogues/tavern_intro.dlg ---

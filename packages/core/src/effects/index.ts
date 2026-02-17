@@ -106,6 +106,9 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
     case 'playVideo':
       return applyPlayVideo(effect.file, state)
 
+    case 'showInterlude':
+      return applyShowInterlude(effect.interludeId, state)
+
     default:
       // TypeScript exhaustiveness check - this should never be reached
       const _exhaustive: never = effect
@@ -599,5 +602,18 @@ function applyPlayVideo(file: string, state: GameState): GameState {
   return {
     ...state,
     pendingVideo: file,
+  }
+}
+
+/**
+ * Queue a narrative interlude to show.
+ * The interlude is shown once and then cleared from the state.
+ *
+ * Example: INTERLUDE chapter_one
+ */
+function applyShowInterlude(interludeId: string, state: GameState): GameState {
+  return {
+    ...state,
+    pendingInterlude: interludeId,
   }
 }

@@ -86,11 +86,13 @@ export class Engine {
       notifications: [],
       pendingSounds: [],
       pendingVideo: null,
+      pendingInterlude: null,
       currentLocale: 'en', // Default locale
     }
 
-    // Check for triggered dialogues at starting location
+    // Check for triggered dialogues and interludes at starting location
     this.checkTriggeredDialogues()
+    this.checkTriggeredInterludes()
 
     // Build and return initial snapshot
     return this.buildSnapshotAndClearTransients()
@@ -352,8 +354,9 @@ export class Engine {
       },
     }
 
-    // Check for triggered dialogues at new location
+    // Check for triggered dialogues and interludes at new location
     this.checkTriggeredDialogues()
+    this.checkTriggeredInterludes()
 
     return this.buildSnapshotAndClearTransients()
   }
@@ -444,6 +447,7 @@ export class Engine {
       notifications: [],
       pendingSounds: [],
       pendingVideo: null,
+      pendingInterlude: null,
     }
 
     return snapshot
@@ -535,6 +539,37 @@ export class Engine {
       }
 
       // Only trigger one dialogue at a time
+      break
+    }
+  }
+
+  /**
+   * Check for interludes that should auto-trigger at the current location.
+   *
+   * If an interlude matches the current location and all its conditions pass,
+   * queue that interlude to show.
+   *
+   * This is called after location changes (newGame, travelTo).
+   */
+  private checkTriggeredInterludes(): void {
+    for (const interlude of Object.values(this.registry.interludes)) {
+      if (interlude.triggerLocation !== this.state.currentLocation) {
+        continue
+      }
+
+      if (
+        interlude.triggerConditions &&
+        !evaluateConditions(interlude.triggerConditions, this.state)
+      ) {
+        continue
+      }
+
+      this.state = {
+        ...this.state,
+        pendingInterlude: interlude.id,
+      }
+
+      // Only trigger one interlude at a time
       break
     }
   }

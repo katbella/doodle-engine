@@ -84,6 +84,7 @@ async function loadContent(contentDir: string) {
     dialogues: {},
     quests: {},
     journalEntries: {},
+    interludes: {},
     locales: {},
   }
 
@@ -97,6 +98,7 @@ async function loadContent(contentDir: string) {
     { dir: 'maps', key: 'maps' },
     { dir: 'quests', key: 'quests' },
     { dir: 'journal', key: 'journalEntries' },
+    { dir: 'interludes', key: 'interludes' },
   ]
 
   for (const { dir, key } of entityTypes) {

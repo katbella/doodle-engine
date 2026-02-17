@@ -20,6 +20,7 @@ export type {
   Quest,
   QuestStage,
   JournalEntry,
+  Interlude,
   GameConfig,
 } from './types/entities'
 
@@ -70,6 +71,7 @@ export type {
   PlaySoundEffect,
   NotifyEffect,
   PlayVideoEffect,
+  ShowInterludeEffect,
 } from './types/effects'
 
 // Game State
@@ -93,6 +95,7 @@ export type {
   SnapshotJournalEntry,
   SnapshotMapLocation,
   SnapshotMap,
+  SnapshotInterlude,
 } from './types/snapshot'
 
 // Save Data

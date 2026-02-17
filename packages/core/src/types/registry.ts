@@ -14,6 +14,7 @@ import type {
   Dialogue,
   Quest,
   JournalEntry,
+  Interlude,
 } from './entities'
 
 /**
@@ -56,6 +57,9 @@ export interface ContentRegistry {
 
   /** All journal entries indexed by ID */
   journalEntries: Record<string, JournalEntry>
+
+  /** All interludes indexed by ID */
+  interludes: Record<string, Interlude>
 
   /** All locales indexed by language code (e.g., "en", "es") */
   locales: Record<string, LocaleData>
