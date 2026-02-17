@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.8
+
+### Patch Changes
+
+- 599ce7c: Dev tooling and DSL validation
+
 ## 0.0.7
 
 ### Patch Changes
