@@ -423,4 +423,297 @@ describe('Engine', () => {
       expect(snapshot2.time).toEqual(snapshot1.time)
     })
   })
+
+  describe('conditionalNext (IF blocks)', () => {
+    it('should evaluate conditionalNext and use first passing condition', () => {
+      const registry: ContentRegistry = {
+        ...createTestRegistry(),
+        dialogues: {
+          test_dialogue: {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+              {
+                id: 'start',
+                speaker: 'bartender',
+                text: 'Start node',
+                choices: [],
+                effects: [{ type: 'setFlag', flag: 'test_flag' }],
+                conditionalNext: [
+                  { condition: { type: 'hasFlag', flag: 'wrong_flag' }, next: 'wrong' },
+                  { condition: { type: 'hasFlag', flag: 'test_flag' }, next: 'correct' },
+                ],
+                next: 'fallthrough',
+              },
+              {
+                id: 'correct',
+                speaker: 'bartender',
+                text: 'Correct node',
+                choices: [],
+              },
+              {
+                id: 'wrong',
+                speaker: 'bartender',
+                text: 'Wrong node',
+                choices: [],
+              },
+              {
+                id: 'fallthrough',
+                speaker: 'bartender',
+                text: 'Fallthrough node',
+                choices: [],
+              },
+            ],
+          },
+        },
+        characters: {
+          bartender: {
+            id: 'bartender',
+            name: 'Marcus',
+            biography: 'A bartender',
+            portrait: 'bartender.png',
+            location: 'tavern',
+            dialogue: 'test_dialogue',
+            stats: {},
+          },
+        },
+      }
+
+      const customEngine = new Engine(registry, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      const snapshot = customEngine.talkTo('bartender')
+
+      // Should land on 'correct' node (second conditionalNext, first passing)
+      expect(snapshot.dialogue?.text).toBe('Correct node')
+    })
+
+    it('should fall through to node.next when no conditionalNext passes', () => {
+      const registry: ContentRegistry = {
+        ...createTestRegistry(),
+        dialogues: {
+          test_dialogue: {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+              {
+                id: 'start',
+                speaker: 'bartender',
+                text: 'Start node',
+                choices: [],
+                conditionalNext: [
+                  { condition: { type: 'hasFlag', flag: 'nonexistent' }, next: 'wrong' },
+                ],
+                next: 'fallthrough',
+              },
+              {
+                id: 'fallthrough',
+                speaker: 'bartender',
+                text: 'Fallthrough node',
+                choices: [],
+              },
+              {
+                id: 'wrong',
+                speaker: 'bartender',
+                text: 'Wrong node',
+                choices: [],
+              },
+            ],
+          },
+        },
+        characters: {
+          bartender: {
+            id: 'bartender',
+            name: 'Marcus',
+            biography: 'A bartender',
+            portrait: 'bartender.png',
+            location: 'tavern',
+            dialogue: 'test_dialogue',
+            stats: {},
+          },
+        },
+      }
+
+      const customEngine = new Engine(registry, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      const snapshot = customEngine.talkTo('bartender')
+
+      // Should fall through to node.next
+      expect(snapshot.dialogue?.text).toBe('Fallthrough node')
+    })
+
+    it('should end dialogue when no conditionalNext passes and no node.next', () => {
+      const registry: ContentRegistry = {
+        ...createTestRegistry(),
+        dialogues: {
+          test_dialogue: {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+              {
+                id: 'start',
+                speaker: 'bartender',
+                text: 'Start node',
+                choices: [],
+                conditionalNext: [
+                  { condition: { type: 'hasFlag', flag: 'nonexistent' }, next: 'wrong' },
+                ],
+                // No node.next - should end dialogue
+              },
+              {
+                id: 'wrong',
+                speaker: 'bartender',
+                text: 'Wrong node',
+                choices: [],
+              },
+            ],
+          },
+        },
+        characters: {
+          bartender: {
+            id: 'bartender',
+            name: 'Marcus',
+            biography: 'A bartender',
+            portrait: 'bartender.png',
+            location: 'tavern',
+            dialogue: 'test_dialogue',
+            stats: {},
+          },
+        },
+      }
+
+      const customEngine = new Engine(registry, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      const snapshot = customEngine.talkTo('bartender')
+
+      // Should end dialogue
+      expect(snapshot.dialogue).toBeNull()
+    })
+
+    it('should apply effects before evaluating conditionalNext', () => {
+      const registry: ContentRegistry = {
+        ...createTestRegistry(),
+        dialogues: {
+          test_dialogue: {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+              {
+                id: 'start',
+                speaker: 'bartender',
+                text: 'Start node',
+                choices: [],
+                // Effect sets flag that conditionalNext checks
+                effects: [{ type: 'setFlag', flag: 'unlocked' }],
+                conditionalNext: [
+                  { condition: { type: 'hasFlag', flag: 'unlocked' }, next: 'unlocked_path' },
+                ],
+                next: 'locked_path',
+              },
+              {
+                id: 'unlocked_path',
+                speaker: 'bartender',
+                text: 'Unlocked path',
+                choices: [],
+              },
+              {
+                id: 'locked_path',
+                speaker: 'bartender',
+                text: 'Locked path',
+                choices: [],
+              },
+            ],
+          },
+        },
+        characters: {
+          bartender: {
+            id: 'bartender',
+            name: 'Marcus',
+            biography: 'A bartender',
+            portrait: 'bartender.png',
+            location: 'tavern',
+            dialogue: 'test_dialogue',
+            stats: {},
+          },
+        },
+      }
+
+      const customEngine = new Engine(registry, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      const snapshot = customEngine.talkTo('bartender')
+
+      // Effects should run before branching, so flag is set and condition passes
+      expect(snapshot.dialogue?.text).toBe('Unlocked path')
+    })
+
+    it('should not evaluate conditionalNext on nodes with choices', () => {
+      const registry: ContentRegistry = {
+        ...createTestRegistry(),
+        dialogues: {
+          test_dialogue: {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+              {
+                id: 'start',
+                speaker: 'bartender',
+                text: 'Start node with choices',
+                choices: [
+                  {
+                    id: 'choice1',
+                    text: 'Option 1',
+                    next: 'end',
+                  },
+                ],
+                // Has conditionalNext but also has choices, so should stay at this node
+                conditionalNext: [
+                  { condition: { type: 'hasFlag', flag: 'any' }, next: 'should_not_go_here' },
+                ],
+              },
+              {
+                id: 'end',
+                speaker: 'bartender',
+                text: 'End node',
+                choices: [],
+              },
+              {
+                id: 'should_not_go_here',
+                speaker: 'bartender',
+                text: 'Should not reach',
+                choices: [],
+              },
+            ],
+          },
+        },
+        characters: {
+          bartender: {
+            id: 'bartender',
+            name: 'Marcus',
+            biography: 'A bartender',
+            portrait: 'bartender.png',
+            location: 'tavern',
+            dialogue: 'test_dialogue',
+            stats: {},
+          },
+        },
+      }
+
+      const customEngine = new Engine(registry, {} as any)
+      const config = createTestConfig()
+      customEngine.newGame(config)
+
+      const snapshot = customEngine.talkTo('bartender')
+
+      // Should stay at start node because it has choices
+      expect(snapshot.dialogue?.text).toBe('Start node with choices')
+      expect(snapshot.choices).toHaveLength(1)
+    })
+  })
 })

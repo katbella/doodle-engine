@@ -12,7 +12,7 @@
 
 import type { ContentRegistry } from '../types/registry'
 import type { GameState, CharacterState } from '../types/state'
-import type { GameConfig } from '../types/entities'
+import type { GameConfig, DialogueNode } from '../types/entities'
 import type { Snapshot } from '../types/snapshot'
 import type { SaveData } from '../types/save'
 import { buildSnapshot } from '../snapshot'
@@ -161,26 +161,48 @@ export class Engine {
       this.state = applyEffects(choice.effects, this.state)
     }
 
-    // Move to next node
+    // Move to next node specified by choice
     const nextNode = dialogue.nodes.find(n => n.id === choice.next)
-    if (nextNode) {
-      this.state = {
-        ...this.state,
-        dialogueState: {
-          dialogueId: dialogue.id,
-          nodeId: nextNode.id,
-        },
-      }
-
-      // Apply node effects
-      if (nextNode.effects) {
-        this.state = applyEffects(nextNode.effects, this.state)
-      }
-    } else {
+    if (!nextNode) {
       // No next node - end dialogue
       this.state = {
         ...this.state,
         dialogueState: null,
+      }
+      return this.buildSnapshotAndClearTransients()
+    }
+
+    // Set dialogue state to this node
+    this.state = {
+      ...this.state,
+      dialogueState: {
+        dialogueId: dialogue.id,
+        nodeId: nextNode.id,
+      },
+    }
+
+    // Apply node effects first (before evaluating conditionalNext)
+    if (nextNode.effects) {
+      this.state = applyEffects(nextNode.effects, this.state)
+    }
+
+    // If node has no choices, auto-advance using conditionalNext or next
+    if (nextNode.choices.length === 0) {
+      const resolvedNext = this.resolveNextNode(nextNode)
+      if (resolvedNext) {
+        this.state = {
+          ...this.state,
+          dialogueState: {
+            dialogueId: dialogue.id,
+            nodeId: resolvedNext,
+          },
+        }
+      } else {
+        // No next - end dialogue
+        this.state = {
+          ...this.state,
+          dialogueState: null,
+        }
       }
     }
 
@@ -224,6 +246,26 @@ export class Engine {
     // Apply start node effects
     if (startNode.effects) {
       this.state = applyEffects(startNode.effects, this.state)
+    }
+
+    // If start node has no choices, auto-advance using conditionalNext or next
+    if (startNode.choices.length === 0) {
+      const resolvedNext = this.resolveNextNode(startNode)
+      if (resolvedNext) {
+        this.state = {
+          ...this.state,
+          dialogueState: {
+            dialogueId: dialogue.id,
+            nodeId: resolvedNext,
+          },
+        }
+      } else {
+        // No next - end dialogue
+        this.state = {
+          ...this.state,
+          dialogueState: null,
+        }
+      }
     }
 
     return this.buildSnapshotAndClearTransients()
@@ -408,6 +450,31 @@ export class Engine {
   }
 
   /**
+   * Resolve the next node ID from a dialogue node.
+   *
+   * Evaluates conditionalNext (IF blocks) in order, returning the first passing condition's next node.
+   * Falls through to node.next if no conditionalNext passes.
+   * Returns null if neither exists (end dialogue).
+   *
+   * @param node - The dialogue node to resolve next from
+   * @returns Next node ID, or null to end dialogue
+   */
+  private resolveNextNode(node: DialogueNode): string | null {
+    // Check conditionalNext (IF blocks) in order
+    if (node.conditionalNext && node.conditionalNext.length > 0) {
+      for (const conditionalBranch of node.conditionalNext) {
+        if (evaluateConditions([conditionalBranch.condition], this.state)) {
+          // First passing condition wins
+          return conditionalBranch.next
+        }
+      }
+    }
+
+    // Fall through to default next, or null if none
+    return node.next ?? null
+  }
+
+  /**
    * Check for dialogues that should auto-trigger at the current location.
    *
    * If a dialogue matches the current location and all its conditions pass,
@@ -445,6 +512,26 @@ export class Engine {
       // Apply start node effects
       if (startNode.effects) {
         this.state = applyEffects(startNode.effects, this.state)
+      }
+
+      // If start node has no choices, auto-advance using conditionalNext or next
+      if (startNode.choices.length === 0) {
+        const resolvedNext = this.resolveNextNode(startNode)
+        if (resolvedNext) {
+          this.state = {
+            ...this.state,
+            dialogueState: {
+              dialogueId: dialogue.id,
+              nodeId: resolvedNext,
+            },
+          }
+        } else {
+          // No next - end dialogue
+          this.state = {
+            ...this.state,
+            dialogueState: null,
+          }
+        }
       }
 
       // Only trigger one dialogue at a time

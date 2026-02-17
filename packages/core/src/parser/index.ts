@@ -551,9 +551,9 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
     next,
   }
 
-  // Store conditional next if any (extension to base type for IF blocks)
+  // Store conditional next if any (IF blocks)
   if (conditionalNext.length > 0) {
-    ;(node as any).conditionalNext = conditionalNext
+    node.conditionalNext = conditionalNext
   }
 
   return { node, nextIndex: i }
