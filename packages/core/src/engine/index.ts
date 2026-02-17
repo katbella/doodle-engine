@@ -163,6 +163,11 @@ export class Engine {
       this.state = applyEffects(choice.effects, this.state)
     }
 
+    // If a startDialogue effect fired, nodeId will be '' — initialize the new dialogue
+    if (this.state.dialogueState?.nodeId === '') {
+      return this.initDialogue(this.state.dialogueState.dialogueId)
+    }
+
     // Move to next node specified by choice
     const nextNode = dialogue.nodes.find(n => n.id === choice.next)
     if (!nextNode) {
@@ -224,8 +229,15 @@ export class Engine {
     if (!character || !character.dialogue) {
       return this.buildSnapshotAndClearTransients()
     }
+    return this.initDialogue(character.dialogue)
+  }
 
-    const dialogue = this.registry.dialogues[character.dialogue]
+  /**
+   * Initialize a dialogue from its start node.
+   * Used by talkTo and when a startDialogue effect fires mid-conversation.
+   */
+  private initDialogue(dialogueId: string): Snapshot {
+    const dialogue = this.registry.dialogues[dialogueId]
     if (!dialogue) {
       return this.buildSnapshotAndClearTransients()
     }

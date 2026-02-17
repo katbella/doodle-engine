@@ -3,11 +3,13 @@ title: Content Registry
 description: How game content is loaded and organized.
 ---
 
-The `ContentRegistry` is a read-only data structure that holds all game content. It's built at load time from the `content/` directory and never changes during gameplay.
+The `ContentRegistry` is a read-only data structure that holds all game content. It is built at load time from the `content/` directory and is never modified by the engine or renderer during gameplay.
+
+The registry provides a single indexed source of truth for all static game data, allowing the engine to resolve IDs quickly and build snapshots without scanning files.
 
 ## Structure
 
-```typescript
+```ts
 interface ContentRegistry {
   locations: Record<string, Location>
   characters: Record<string, Character>
@@ -27,11 +29,11 @@ Every entity is indexed by its `id` field. For example, a location with `id: tav
 
 The dev server (`doodle dev`) builds the registry automatically:
 
-1. Scans `content/` subdirectories
-2. Parses `.yaml` files as entities based on their directory
-3. Parses `.dlg` files with the dialogue parser
-4. Loads locale files as flat key-value dictionaries
-5. Serves the complete registry via `/api/content`
+1. Scans `content/` subdirectories  
+2. Parses `.yaml` files as entities based on their directory  
+3. Parses `.dlg` files with the dialogue parser  
+4. Loads locale files as flat key-value dictionaries  
+5. Serves the complete registry via `/api/content`  
 
 ### Loading by Directory
 
@@ -55,27 +57,27 @@ The dev server (`doodle dev`) builds the registry automatically:
 
 **game.yaml** is loaded separately as a `GameConfig`, not part of the registry.
 
-## Using the Registry
+## How the Engine Uses the Registry
 
 The registry is passed to the `Engine` constructor:
 
-```typescript
+```ts
 const engine = new Engine(registry, initialState)
 ```
 
 The engine uses the registry to:
 
-- Look up location data when building snapshots
-- Find character dialogues when `talkTo` is called
-- Resolve localization keys and interpolate `{varName}` placeholders at snapshot time
-- Check triggered dialogue and interlude conditions on location change
-- Determine travel distances from map data
+- Look up location data when building snapshots  
+- Find character dialogues when `talkTo` is called  
+- Resolve localization keys and interpolate `{varName}` placeholders at snapshot time  
+- Check triggered dialogue and interlude conditions on location change  
+- Determine travel distances from map data  
 
 ## Client-Side Loading
 
 In the browser, the registry is fetched from the dev server:
 
-```typescript
+```ts
 const response = await fetch('/api/content')
 const { registry, config } = await response.json()
 
@@ -86,14 +88,14 @@ const engine = new Engine(registry, createInitialState(config))
 
 Entities reference each other by ID:
 
-- Character `dialogue` field → Dialogue ID
-- Character `location` field → Location ID
-- Item `location` field → Location ID, `"inventory"`, or Character ID
-- Map `locations[].id` → Location ID
-- Dialogue `triggerLocation` → Location ID
-- Interlude `triggerLocation` → Location ID
-- `INTERLUDE <id>` effect → Interlude ID
-- GameConfig `startLocation` → Location ID
-- GameConfig `startInventory` → Item IDs
+- Character `dialogue` field → Dialogue ID  
+- Character `location` field → Location ID  
+- Item `location` field → Location ID, `"inventory"`, or Character ID  
+- Map `locations[].id` → Location ID  
+- Dialogue `triggerLocation` → Location ID  
+- Interlude `triggerLocation` → Location ID  
+- `INTERLUDE <id>` effect → Interlude ID  
+- GameConfig `startLocation` → Location ID  
+- GameConfig `startInventory` → Item IDs  
 
-These references are validated at runtime when the engine tries to look them up. Missing references are handled gracefully (the action is a no-op).
+These references are resolved at runtime when the engine looks them up. Missing references are handled gracefully (the action becomes a no-op).

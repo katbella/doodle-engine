@@ -9,10 +9,10 @@ Doodle Engine games can include images, audio, and video. Assets are served as s
 
 The scaffolded project includes these asset directories:
 
-```
+```text
 assets/
   images/
-    banners/       # Location banner images
+    banners/       # Location banner images and interlude banners
     portraits/     # Character portrait images
     items/         # Item icon and detail images
     maps/          # Map background images
@@ -21,8 +21,10 @@ assets/
     sfx/           # Sound effects
     voice/         # Voice lines
     ui/            # UI sounds (clicks, menu sounds)
-  video/           # Cutscene video files
+  video/           # Cutscene or interlude video files
 ```
+
+Asset paths referenced in content are resolved relative to the configured asset base path (by default, the `assets/` directory).
 
 ## Supported Formats
 
@@ -86,8 +88,8 @@ icon: old_coin_icon.png
 image: old_coin.png
 ```
 
-- `icon`: small image shown in inventory grid
-- `image`: larger image shown in the inspection modal
+- `icon`: small image shown in inventory grids and lists  
+- `image`: larger image shown in inspection or detail views  
 
 ### Map Images
 
@@ -112,29 +114,20 @@ VOICE bartender_greeting.ogg
 VIDEO intro_cinematic.mp4
 ```
 
-## Image Optimization Tips
+Interludes may also reference images or video depending on configuration.
 
-- **Banners**: 1200x400px or similar wide aspect ratio, JPG at 80% quality
-- **Portraits**: 200x200px to 400x400px, PNG for transparency or JPG for photos
-- **Item icons**: 64x64px to 128x128px, PNG with transparency
-- **Item detail images**: 400x400px, PNG or JPG
-- **Map images**: Size to fit your map layout, JPG for photos or PNG for illustrated maps
-- Use WebP where possible for 25-35% smaller files than PNG/JPG
+## Compression Tips
 
-## Audio Compression Tips
-
-- **Music**: OGG at 128-192 kbps (good quality, reasonable size)
-- **Sound effects**: OGG at 96-128 kbps (short files, quality matters less)
-- **Voice lines**: OGG at 96-128 kbps (speech compresses well)
-- **UI sounds**: OGG at 64-96 kbps (very short clips)
-- Keep music tracks under 5 MB each when possible
-- Trim silence from the beginning and end of all audio files
+- Use compressed formats to keep downloads reasonable
+- Trim silence from the beginning and end of audio files
+- Avoid unnecessarily large images or long uncompressed video
+- Prefer modern formats (WebP, OGG, WebM) when compatibility allows
 
 ## Bundled vs External Assets
 
 For most games, bundle all assets with your build. They're copied to `dist/` and served alongside the game. This is the simplest approach and works with any hosting.
 
-For games with large media libraries (many music tracks, extensive voice acting, video cutscenes), consider hosting media externally on a CDN:
+For games with large media libraries (many music tracks, extensive voice acting, or video cutscenes), consider hosting media externally on a CDN:
 
 ```tsx
 <GameShell
@@ -145,10 +138,10 @@ For games with large media libraries (many music tracks, extensive voice acting,
 
 ## Loading Behavior
 
-Assets are loaded by the browser as needed. There's no built-in preloading or streaming system. The browser handles caching automatically.
+Assets are loaded by the browser as needed. There's no built-in preloading or streaming system.
 
-- **Images**: Loaded when the component renders (location change, inventory open, etc.)
-- **Audio**: Loaded when playback is triggered (location music, sound effects, voice)
-- **Video**: Loaded when the `VideoPlayer` component mounts (streamed by the browser)
+- **Images** load when components render (location change, inventory open, etc.)
+- **Audio** loads when playback is triggered
+- **Video** loads when the player component mounts
 
-For a smoother experience, keep file sizes reasonable and consider using compressed formats.
+The browser handles caching automatically.
