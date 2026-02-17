@@ -27,7 +27,9 @@ Inspired by the Infinity Engine (the engine powering games like Baldur's Gate 1 
 - **UI sounds**: click, menu open/close sounds for renderer chrome
 - **Game shell**: splash screen, title screen, pause menu, settings panel
 - **Hot reload**: Vite dev server watches content files and reloads instantly
-- **CLI tools**: scaffold new projects, dev server, production builds
+- **Content validation**: automatic validation of dialogue structure, conditions, effects, and localization keys with detailed error messages
+- **Dev tools**: browser console API for debugging game state, teleporting, triggering dialogues, and inspecting content (dev mode only)
+- **CLI tools**: scaffold new projects, dev server, production builds, content validation
 - **Extensible by design**: build custom renderers with any framework, compose built-in conditions and effects to create mechanics like dice rolls, text-based combat, or shops
 
 ## Extensibility
@@ -49,9 +51,9 @@ Open `http://localhost:3000` to play your game.
 
 | Package | Description |
 |---------|-------------|
-| `@doodle-engine/core` | Pure TypeScript engine: parsing, state, conditions, effects, snapshots |
+| `@doodle-engine/core` | Pure TypeScript engine: parsing, state, conditions, effects, snapshots, dev tools API |
 | `@doodle-engine/react` | React 19 components: GameShell, GameRenderer, individual components, hooks |
-| `@doodle-engine/cli` | Dev tools: `doodle create`, `doodle dev`, `doodle build` |
+| `@doodle-engine/cli` | CLI tools: `doodle create`, `doodle dev`, `doodle build`, `doodle validate` |
 
 ## Documentation
 
@@ -68,6 +70,9 @@ yarn dev
 - [Installation](docs/src/content/docs/getting-started/installation.md)
 - [Your First Game](docs/src/content/docs/getting-started/your-first-game.md)
 - [Writing Dialogues](docs/src/content/docs/guides/writing-dialogues.md)
+- [Content Validation](docs/src/content/docs/guides/content-validation.md)
+- [Debugging with Dev Tools](docs/src/content/docs/guides/debugging-with-devtools.md)
+- [CLI Commands](docs/src/content/docs/reference/cli-commands.md)
 - [DSL Syntax Reference](docs/src/content/docs/reference/dsl-syntax.md)
 - [Effects Reference](docs/src/content/docs/reference/effects.md)
 - [React Components](docs/src/content/docs/reference/react-components.md)

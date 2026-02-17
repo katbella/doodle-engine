@@ -1,11 +1,9 @@
 /**
- * Build command
+ * Validate command
  *
- * Builds the game into a static site
+ * Validates all content in the content directory and reports errors.
  */
 
-import { build as viteBuild } from 'vite'
-import react from '@vitejs/plugin-react'
 import { readFile, readdir } from 'fs/promises'
 import { join, extname, relative } from 'path'
 import { parse as parseYaml } from 'yaml'
@@ -13,16 +11,14 @@ import { parseDialogue } from '@doodle-engine/core'
 import { crayon } from 'crayon.js'
 import { validateContent, printValidationErrors } from '../validate.js'
 
-export async function build() {
+export async function validate() {
   const cwd = process.cwd()
   const contentDir = join(cwd, 'content')
 
   console.log('')
-  console.log(crayon.bold.magenta('🐕 Building Doodle Engine game...'))
+  console.log(crayon.bold.magenta('🐾 Validating Doodle Engine content...'))
   console.log('')
 
-  // Run validation first
-  console.log(crayon.dim('Validating content...'))
   try {
     const { registry, fileMap } = await loadContent(contentDir)
     const errors = validateContent(registry, fileMap)
@@ -30,36 +26,10 @@ export async function build() {
     printValidationErrors(errors)
 
     if (errors.length > 0) {
-      console.log(crayon.red('Build failed due to validation errors.'))
-      console.log('')
       process.exit(1)
     }
   } catch (error) {
     console.error(crayon.red('Error loading content:'), error)
-    process.exit(1)
-  }
-
-  console.log('')
-
-  // Proceed with build
-  try {
-    await viteBuild({
-      root: cwd,
-      plugins: [react()],
-      build: {
-        outDir: 'dist',
-        emptyOutDir: true,
-      },
-    })
-
-    console.log('')
-    console.log(crayon.green('✅ Build complete! Output in dist/'))
-    console.log('')
-    console.log('To preview the build:')
-    console.log(crayon.dim('  yarn preview'))
-    console.log('')
-  } catch (error) {
-    console.error(crayon.red('Build failed:'), error)
     process.exit(1)
   }
 }

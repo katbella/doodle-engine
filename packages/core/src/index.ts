@@ -140,3 +140,12 @@ export {
   parseCondition,
   parseEffect,
 } from './parser'
+
+// Dev Tools (framework-agnostic debugging API)
+export type {
+  DevTools,
+} from './devtools'
+
+export {
+  enableDevTools,
+} from './devtools'

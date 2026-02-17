@@ -5,8 +5,8 @@
  * Provides action methods that update the snapshot when called.
  */
 
-import React, { createContext, useState, useCallback, type ReactNode } from 'react'
-import { Engine } from '@doodle-engine/core'
+import React, { createContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { Engine, enableDevTools } from '@doodle-engine/core'
 import type { Snapshot, SaveData } from '@doodle-engine/core'
 
 export interface GameContextValue {
@@ -41,6 +41,18 @@ export interface GameProviderProps {
  */
 export function GameProvider({ engine, initialSnapshot, children }: GameProviderProps) {
   const [snapshot, setSnapshot] = useState<Snapshot>(initialSnapshot)
+
+  // Enable dev tools in development mode
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      enableDevTools(engine, () => setSnapshot(engine.getSnapshot()))
+
+      // Cleanup on unmount
+      return () => {
+        delete window.doodle
+      }
+    }
+  }, [engine])
 
   // Action: Select a dialogue choice
   const selectChoice = useCallback(
