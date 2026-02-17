@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.8
+
+### Patch Changes
+
+- 599ce7c: Dev tooling and DSL validation
+- Updated dependencies [599ce7c]
+  - @doodle-engine/core@0.0.8
+  - @doodle-engine/react@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes
