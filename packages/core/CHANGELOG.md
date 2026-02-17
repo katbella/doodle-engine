@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.17
+
+### Patch Changes
+
+- 07107df: fix bluff checks
+
 ## 0.0.16
 
 ### Patch Changes
