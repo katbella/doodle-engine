@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.10
+
+### Patch Changes
+
+- ecfe7ba: Added Interludes
+
 ## 0.0.9
 
 ### Patch Changes

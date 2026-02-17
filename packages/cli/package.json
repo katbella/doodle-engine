@@ -1,6 +1,6 @@
 {
   "name": "@doodle-engine/cli",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "description": "CLI tools for Doodle Engine game development",
   "bin": {
