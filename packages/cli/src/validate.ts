@@ -133,9 +133,9 @@ function validateDialogueNode(
   // Validate choice targets
   for (const choice of node.choices) {
     const endsDialogue = choice.effects?.some(
-      (e: any) => e.type === 'endDialogue' || e.type === 'goToLocation'
+      (e: any) => e.type === 'endDialogue' || e.type === 'goToLocation' || e.type === 'startDialogue'
     )
-    if (!endsDialogue && !validNodeIds.has(choice.next)) {
+    if (!endsDialogue && choice.next && !validNodeIds.has(choice.next)) {
       errors.push({
         file,
         message: `Node "${node.id}" choice "${choice.id}" GOTO "${choice.next}" points to non-existent node`,
