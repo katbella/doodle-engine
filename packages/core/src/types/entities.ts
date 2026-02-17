@@ -189,6 +189,35 @@ export interface JournalEntry {
 }
 
 /**
+ * A narrative interlude — a full-screen text scene shown between gameplay moments.
+ * Like the chapter cards in Baldur's Gate: background image, scrolling text, music.
+ */
+export interface Interlude {
+  /** Unique identifier for this interlude */
+  id: string
+  /** Background image filename */
+  background: string
+  /** Optional decorative banner/frame image overlaid on the background */
+  banner?: string
+  /** Optional music track to play during the interlude */
+  music?: string
+  /** Optional narration audio file */
+  voice?: string
+  /** Optional ambient sounds to play */
+  sounds?: string[]
+  /** Whether text auto-scrolls upward (default: true) */
+  scroll?: boolean
+  /** Auto-scroll speed in pixels per second (default: 30) */
+  scrollSpeed?: number
+  /** The narrative text shown (supports @localization keys) */
+  text: string
+  /** Location ID where this auto-triggers on enter (optional) */
+  triggerLocation?: string
+  /** Conditions that must pass for auto-trigger (optional) */
+  triggerConditions?: Condition[]
+}
+
+/**
  * Game configuration that defines starting conditions.
  */
 export interface GameConfig {

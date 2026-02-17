@@ -109,6 +109,7 @@ export function GameShell({
       notifications: [],
       pendingSounds: [],
       pendingVideo: null,
+      pendingInterlude: null,
       currentLocale: 'en',
     }
     return new Engine(registry, state)

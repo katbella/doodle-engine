@@ -149,6 +149,30 @@ export interface SnapshotMap {
 }
 
 /**
+ * Interlude information in a snapshot (localized).
+ */
+export interface SnapshotInterlude {
+  /** Interlude ID */
+  id: string
+  /** Background image filename */
+  background: string
+  /** Optional decorative banner/frame image */
+  banner?: string
+  /** Optional music track filename */
+  music?: string
+  /** Optional narration audio filename */
+  voice?: string
+  /** Optional ambient sound filenames */
+  sounds?: string[]
+  /** Whether text auto-scrolls (resolved default: true) */
+  scroll: boolean
+  /** Auto-scroll speed in px/s (resolved default: 30) */
+  scrollSpeed: number
+  /** Localized narrative text */
+  text: string
+}
+
+/**
  * A snapshot represents everything the renderer needs to display the current moment.
  * All localization has been resolved, all conditions have been evaluated.
  * The renderer never sees raw game state, content registry, or localization keys.
@@ -204,4 +228,7 @@ export interface Snapshot {
 
   /** Video to play fullscreen (from playVideo effect) */
   pendingVideo: string | null
+
+  /** Interlude to show fullscreen (from showInterlude effect or trigger) */
+  pendingInterlude: SnapshotInterlude | null
 }

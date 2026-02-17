@@ -56,6 +56,9 @@ export type { SaveLoadPanelProps } from './components/SaveLoadPanel'
 export { VideoPlayer } from './components/VideoPlayer'
 export type { VideoPlayerProps } from './components/VideoPlayer'
 
+export { Interlude } from './components/Interlude'
+export type { InterludeProps } from './components/Interlude'
+
 export { LoadingScreen } from './components/LoadingScreen'
 export type { LoadingScreenProps } from './components/LoadingScreen'
 

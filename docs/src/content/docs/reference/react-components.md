@@ -41,6 +41,7 @@ interface GameContextValue {
     setLocale: (locale: string) => void
     saveGame: () => SaveData
     loadGame: (saveData: SaveData) => void
+    dismissInterlude: () => void
   }
 }
 ```
@@ -264,6 +265,28 @@ import { SaveLoadPanel } from '@doodle-engine/react'
 - Save button serializes to localStorage
 - Load button disabled when no save exists
 - Shows temporary "Saved!" / "Loaded!" / "No save found" feedback
+
+## Interlude
+
+Full-screen narrative text scene (chapter card, dream sequence, etc.). Displays a background image with auto-scrolling text. Handled automatically by `GameRenderer` and `GameShell` — use this only when building a custom renderer.
+
+```tsx
+import { Interlude } from '@doodle-engine/react'
+
+<Interlude
+  interlude={snapshot.pendingInterlude}
+  onDismiss={actions.dismissInterlude}
+/>
+```
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `interlude` | `SnapshotInterlude` | Interlude data from the snapshot |
+| `onDismiss` | `() => void` | Called when the player skips or finishes reading |
+
+The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll.
 
 ## VideoPlayer
 

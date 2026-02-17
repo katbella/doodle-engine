@@ -279,6 +279,7 @@ END dialogue
 MUSIC tension_theme.ogg
 SOUND door_slam.ogg
 VIDEO intro_cinematic.mp4
+INTERLUDE chapter_one
 NOTIFY @notification.quest_started
 ```
 

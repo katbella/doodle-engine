@@ -42,6 +42,7 @@ function createTestState(): GameState {
     notifications: [],
     pendingSounds: [],
     pendingVideo: null,
+    pendingInterlude: null,
     currentLocale: 'en',
   }
 }
@@ -453,6 +454,25 @@ describe('Effect Processors', () => {
       const newState = applyEffect(effect, state)
 
       expect(newState.pendingVideo).toBe('outro.mp4')
+    })
+  })
+
+  describe('showInterlude', () => {
+    it('should set pendingInterlude to the interlude ID', () => {
+      const effect: Effect = { type: 'showInterlude', interludeId: 'chapter_one' }
+      const state = createTestState()
+      const newState = applyEffect(effect, state)
+
+      expect(newState.pendingInterlude).toBe('chapter_one')
+      expect(newState).not.toBe(state)
+    })
+
+    it('should replace existing pendingInterlude', () => {
+      const effect: Effect = { type: 'showInterlude', interludeId: 'chapter_two' }
+      const state = { ...createTestState(), pendingInterlude: 'chapter_one' }
+      const newState = applyEffect(effect, state)
+
+      expect(newState.pendingInterlude).toBe('chapter_two')
     })
   })
 

@@ -13,6 +13,7 @@ import { Journal } from './components/Journal'
 import { MapView } from './components/MapView'
 import { NotificationArea } from './components/NotificationArea'
 import { SaveLoadPanel } from './components/SaveLoadPanel'
+import { Interlude } from './components/Interlude'
 
 export interface GameRendererProps {
   className?: string
@@ -28,6 +29,13 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
 
   return (
     <div className={`game-renderer ${className}`}>
+      {snapshot.pendingInterlude && (
+        <Interlude
+          interlude={snapshot.pendingInterlude}
+          onDismiss={actions.dismissInterlude}
+        />
+      )}
+
       <NotificationArea notifications={snapshot.notifications} />
 
       <div className="game-main">

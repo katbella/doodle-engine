@@ -1,6 +1,6 @@
 ---
 title: Effects
-description: All 24 effect types with examples.
+description: All 25 effect types with examples.
 ---
 
 Effects are mutations to game state. They run in order when a dialogue node is reached or a choice is selected.
@@ -233,6 +233,18 @@ VIDEO intro_cinematic.mp4
 ```
 
 The video appears as `pendingVideo` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared. The `VideoPlayer` component (or `GameShell`) handles playback and skip.
+
+## Interludes
+
+### INTERLUDE
+
+Show a narrative interlude — a full-screen text scene with scrolling text and a background image, like chapter cards in Baldur's Gate.
+
+```
+INTERLUDE chapter_one
+```
+
+The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared after the player dismisses it. See the [Interludes guide](/doodle-engine/guides/interludes/) for the full YAML schema.
 
 ## Notifications
 

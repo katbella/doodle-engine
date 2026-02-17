@@ -275,6 +275,16 @@ export interface PlayVideoEffect {
 }
 
 /**
+ * Show a narrative interlude (full-screen text scene).
+ * Example: INTERLUDE chapter_one
+ */
+export interface ShowInterludeEffect {
+  type: 'showInterlude'
+  /** Interlude ID to display */
+  interludeId: string
+}
+
+/**
  * Union of all effect types.
  * This discriminated union allows authors to extend with custom effects.
  */
@@ -304,3 +314,4 @@ export type Effect =
   | PlaySoundEffect
   | NotifyEffect
   | PlayVideoEffect
+  | ShowInterludeEffect

@@ -190,6 +190,9 @@ export function parseEffect(effectStr: string): Effect {
   if (trimmed.startsWith('VIDEO ')) {
     return { type: 'playVideo', file: trimmed.substring(6).trim() }
   }
+  if (trimmed.startsWith('INTERLUDE ')) {
+    return { type: 'showInterlude', interludeId: trimmed.substring(10).trim() }
+  }
 
   const parts = trimmed.split(/\s+/)
   const keyword = parts[0]

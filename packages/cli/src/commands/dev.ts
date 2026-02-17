@@ -113,6 +113,7 @@ async function loadAllContent(contentDir: string) {
     dialogues: {},
     quests: {},
     journalEntries: {},
+    interludes: {},
     locales: {},
   }
 
@@ -126,6 +127,7 @@ async function loadAllContent(contentDir: string) {
     { dir: 'maps', key: 'maps' },
     { dir: 'quests', key: 'quests' },
     { dir: 'journal', key: 'journalEntries' },
+    { dir: 'interludes', key: 'interludes' },
   ]
 
   for (const { dir, key } of entityTypes) {
@@ -234,6 +236,7 @@ async function loadContentWithFileMap(contentDir: string) {
     dialogues: {},
     quests: {},
     journalEntries: {},
+    interludes: {},
     locales: {},
   }
 
@@ -247,6 +250,7 @@ async function loadContentWithFileMap(contentDir: string) {
     { dir: 'maps', key: 'maps' },
     { dir: 'quests', key: 'quests' },
     { dir: 'journal', key: 'journalEntries' },
+    { dir: 'interludes', key: 'interludes' },
   ]
 
   for (const { dir, key } of entityTypes) {

@@ -23,6 +23,7 @@ import type {
   SnapshotJournalEntry,
   SnapshotMap,
   SnapshotMapLocation,
+  SnapshotInterlude,
 } from '../types/snapshot'
 import { resolveText } from '../localization'
 import { evaluateConditions } from '../conditions'
@@ -82,6 +83,25 @@ export function buildSnapshot(state: GameState, registry: ContentRegistry): Snap
   // Copy pending video
   const pendingVideo = state.pendingVideo
 
+  // Resolve pending interlude
+  let pendingInterlude: SnapshotInterlude | null = null
+  if (state.pendingInterlude) {
+    const interlude = registry.interludes[state.pendingInterlude]
+    if (interlude) {
+      pendingInterlude = {
+        id: interlude.id,
+        background: interlude.background,
+        banner: interlude.banner,
+        music: interlude.music,
+        voice: interlude.voice,
+        sounds: interlude.sounds,
+        scroll: interlude.scroll ?? true,
+        scrollSpeed: interlude.scrollSpeed ?? 30,
+        text: resolve(interlude.text),
+      }
+    }
+  }
+
   return {
     location,
     charactersHere,
@@ -100,6 +120,7 @@ export function buildSnapshot(state: GameState, registry: ContentRegistry): Snap
     notifications,
     pendingSounds,
     pendingVideo,
+    pendingInterlude,
   }
 }
 
