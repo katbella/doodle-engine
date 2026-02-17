@@ -181,6 +181,8 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
       console.log('  doodle.removeItem(itemId)')
       console.log('  doodle.inspectState()')
       console.log('  doodle.inspectRegistry()')
+      console.log('')
+      console.log('📚 Docs: https://katbella.com/doodle-engine/')
     },
 
     inspectState() {
@@ -194,5 +196,5 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
     },
   }
 
-  console.log('🐾 Doodle Engine dev tools enabled! Type `doodle.inspect()` to see available commands.')
+  console.log('🐾 Doodle Engine dev tools enabled! Type `doodle.inspect()` to see available commands.\n📚 You can also check out the docs: https://katbella.com/doodle-engine/')
 }
