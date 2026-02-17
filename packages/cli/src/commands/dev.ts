@@ -57,28 +57,25 @@ export async function dev() {
         persistent: true,
       })
 
-      watcher.on('change', async (path) => {
-        console.log(crayon.yellow(`  ${pencil} Content changed: ${path}`))
+      // Debounce validation + reload so multiple rapid events from one save
+      // don't print duplicate error blocks.
+      let reloadTimer: ReturnType<typeof setTimeout> | null = null
+      const scheduleReload = (label: string) => {
+        if (reloadTimer) clearTimeout(reloadTimer)
+        reloadTimer = setTimeout(async () => {
+          reloadTimer = null
+          console.log(label)
+          await runValidation(contentDir)
+          server.ws.send({ type: 'full-reload', path: '*' })
+        }, 50)
+      }
 
-        // Run validation
-        await runValidation(contentDir)
-
-        server.ws.send({
-          type: 'full-reload',
-          path: '*',
-        })
+      watcher.on('change', (path) => {
+        scheduleReload(crayon.yellow(`  ${pencil} Content changed: ${path}`))
       })
 
-      watcher.on('add', async (path) => {
-        console.log(crayon.green(`  ${plus} Content added: ${path}`))
-
-        // Run validation
-        await runValidation(contentDir)
-
-        server.ws.send({
-          type: 'full-reload',
-          path: '*',
-        })
+      watcher.on('add', (path) => {
+        scheduleReload(crayon.green(`  ${plus} Content added: ${path}`))
       })
     },
   }
