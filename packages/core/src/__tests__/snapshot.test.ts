@@ -189,6 +189,7 @@ function createTestState(): GameState {
     notifications: ['@notification.test'],
     pendingSounds: [],
     pendingVideo: null,
+    pendingInterlude: null,
     currentLocale: 'en',
   }
 }
@@ -387,6 +388,84 @@ describe('Snapshot Builder', () => {
 
       expect(snapshot.dialogue).toBeNull()
       expect(snapshot.choices).toHaveLength(0)
+    })
+  })
+
+  describe('variable interpolation', () => {
+    it('should substitute {varName} placeholders in dialogue text', () => {
+      const state = {
+        ...createTestState(),
+        variables: { bluffRoll: 17 },
+        dialogueState: { dialogueId: 'bartender_greeting', nodeId: 'intro' },
+      }
+      const registry = {
+        ...createTestRegistry(),
+        locales: {
+          en: {
+            ...createTestRegistry().locales.en,
+            'bartender.greeting': 'You rolled a {bluffRoll}!',
+          },
+        },
+      }
+      const snapshot = buildSnapshot(state, registry)
+
+      expect(snapshot.dialogue?.text).toBe('You rolled a 17!')
+    })
+
+    it('should substitute {varName} in plain text dialogue', () => {
+      const state = {
+        ...createTestState(),
+        variables: { gold: 50 },
+        dialogueState: { dialogueId: 'bartender_greeting', nodeId: 'intro' },
+      }
+      const registry = {
+        ...createTestRegistry(),
+        dialogues: {
+          bartender_greeting: {
+            id: 'bartender_greeting',
+            startNode: 'intro',
+            nodes: [
+              {
+                id: 'intro',
+                speaker: 'bartender',
+                text: 'You have {gold} gold.',
+                choices: [],
+              },
+            ],
+          },
+        },
+      }
+      const snapshot = buildSnapshot(state, registry)
+
+      expect(snapshot.dialogue?.text).toBe('You have 50 gold.')
+    })
+
+    it('should leave unknown {varName} unchanged', () => {
+      const state = {
+        ...createTestState(),
+        variables: {},
+        dialogueState: { dialogueId: 'bartender_greeting', nodeId: 'intro' },
+      }
+      const registry = {
+        ...createTestRegistry(),
+        dialogues: {
+          bartender_greeting: {
+            id: 'bartender_greeting',
+            startNode: 'intro',
+            nodes: [
+              {
+                id: 'intro',
+                speaker: 'bartender',
+                text: 'You have {gold} gold.',
+                choices: [],
+              },
+            ],
+          },
+        },
+      }
+      const snapshot = buildSnapshot(state, registry)
+
+      expect(snapshot.dialogue?.text).toBe('You have {gold} gold.')
     })
   })
 

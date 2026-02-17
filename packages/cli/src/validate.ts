@@ -191,6 +191,7 @@ const CONDITION_FIELDS: Record<string, string[]> = {
   relationshipAbove: ['characterId', 'value'],
   relationshipBelow: ['characterId', 'value'],
   itemAt: ['itemId', 'locationId'],
+  roll: ['min', 'max', 'threshold'],
 }
 
 // Required field mappings for effects
@@ -221,6 +222,7 @@ const EFFECT_FIELDS: Record<string, string[]> = {
   notify: ['message'],
   playVideo: ['file'],
   showInterlude: ['interludeId'],
+  roll: ['variable', 'min', 'max'],
 }
 
 /**

@@ -185,6 +185,7 @@ text: |
 | `scrollSpeed` | `number` | No | Auto-scroll speed in px/s (default: `30`) |
 | `triggerLocation` | `string` | No | Location ID where this auto-triggers on enter |
 | `triggerConditions` | `Condition[]` | No | Conditions that must pass for auto-trigger |
+| `effects` | `Effect[]` | No | Effects applied when the interlude triggers (e.g. set a "seen" flag) |
 
 Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling to `triggerLocation` if all `triggerConditions` pass. See the [Interludes guide](/doodle-engine/guides/interludes/).
 

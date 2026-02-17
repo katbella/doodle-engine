@@ -70,6 +70,9 @@ export function evaluateCondition(condition: Condition, state: GameState): boole
     case 'itemAt':
       return evaluateItemAt(condition.itemId, condition.locationId, state)
 
+    case 'roll':
+      return evaluateRoll(condition.min, condition.max, condition.threshold)
+
     default:
       // TypeScript exhaustiveness check - this should never be reached
       const _exhaustive: never = condition
@@ -276,4 +279,15 @@ function evaluateTimeIs(startHour: number, endHour: number, state: GameState): b
  */
 function evaluateItemAt(itemId: string, locationId: string, state: GameState): boolean {
   return state.itemLocations[itemId] === locationId
+}
+
+/**
+ * Roll a random integer between min and max (inclusive) and check against threshold.
+ * Returns true if the roll result is >= threshold.
+ *
+ * Example: roll 1 20 15
+ */
+function evaluateRoll(min: number, max: number, threshold: number): boolean {
+  const result = Math.floor(Math.random() * (max - min + 1)) + min
+  return result >= threshold
 }

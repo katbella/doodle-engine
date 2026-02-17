@@ -569,6 +569,11 @@ export class Engine {
         pendingInterlude: interlude.id,
       }
 
+      // Apply interlude effects (e.g. setFlag to prevent re-triggering on next visit)
+      if (interlude.effects) {
+        this.state = applyEffects(interlude.effects, this.state)
+      }
+
       // Only trigger one interlude at a time
       break
     }

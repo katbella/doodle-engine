@@ -187,6 +187,27 @@ REQUIRE itemAt sword armory
 | `itemId` | `string` | Item ID |
 | `locationId` | `string` | Location ID |
 
+## roll
+
+Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. The roll is not stored anywhere — use the `ROLL` effect if you need the value.
+
+```
+REQUIRE roll 1 20 15
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `min` | `number` | Minimum roll value (inclusive) |
+| `max` | `number` | Maximum roll value (inclusive) |
+| `threshold` | `number` | Minimum result needed to pass |
+
+**Use `ROLL` effect first when you need to:**
+- Show the player what they rolled (variable interpolation with `{varName}`)
+- Branch on the result in multiple places
+- Reference the roll elsewhere in the scene
+
+For a one-shot hidden check with no displayed result, the `roll` condition is simpler. See the [Dice & Randomness guide](/doodle-engine/guides/dice-and-randomness/).
+
 ## Using Conditions in Dialogue
 
 ### On choices (shown only when condition passes):

@@ -163,6 +163,22 @@ export interface ItemAtCondition {
 }
 
 /**
+ * Roll a random integer and check if it meets a threshold.
+ * Example: roll 1 20 15  (roll 1-20, pass if >= 15)
+ *
+ * Used for silent pass/fail checks without storing the result.
+ */
+export interface RollCondition {
+  type: 'roll'
+  /** Minimum value (inclusive) */
+  min: number
+  /** Maximum value (inclusive) */
+  max: number
+  /** Minimum result needed to pass (inclusive) */
+  threshold: number
+}
+
+/**
  * Union of all condition types.
  * This discriminated union allows authors to extend with custom conditions.
  */
@@ -181,3 +197,4 @@ export type Condition =
   | RelationshipBelowCondition
   | TimeIsCondition
   | ItemAtCondition
+  | RollCondition
