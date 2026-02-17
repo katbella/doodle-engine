@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.16
+
+### Patch Changes
+
+- 3562b28: dialogue bugs
+
 ## 0.0.15
 
 ### Patch Changes
