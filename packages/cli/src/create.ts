@@ -443,7 +443,7 @@ category: places
   // --- content/interludes ---
   await writeFile(join(projectPath, 'content/interludes/chapter_one.yaml'), `id: chapter_one
 # Background image shown fullscreen during the interlude.
-# Put your image in assets/images/ and reference it here.
+# Replace with your own image in assets/images/.
 background: /assets/images/banners/tavern_banner.jpg
 
 # Optional: decorative border/frame image overlaid on the background.
@@ -452,8 +452,7 @@ background: /assets/images/banners/tavern_banner.jpg
 # Optional: music to play during this interlude.
 # music: /assets/audio/music/chapter_theme.ogg
 
-# The narrative text. Use @localization.key for multi-language support,
-# or write plain text directly.
+# The narrative text. Supports @localization.key or plain text.
 text: |
   Chapter One: A New Beginning
 
@@ -467,10 +466,12 @@ text: |
 
   It might as well be you.
 
-# triggerLocation: tavern
-# triggerConditions:
-#   - type: notFlag
-#     flag: seenChapterOne
+# Auto-trigger when the player enters the tavern for the first time.
+# The seenChapterOne flag is set in content/dialogues/tavern_intro.dlg.
+triggerLocation: tavern
+triggerConditions:
+  - type: notFlag
+    flag: seenChapterOne
 `)
 
   // --- content/dialogues/tavern_intro.dlg ---
@@ -491,6 +492,8 @@ NODE start
 
   # Effects run immediately when this node is reached, before choices are shown.
   SET flag seenTavernIntro
+  # Mark the chapter interlude as seen so it doesn't replay on return visits.
+  SET flag seenChapterOne
 
   # CHOICE text can use a @key or "inline text".
   # A choice with END dialogue is a terminal choice — no GOTO needed.
