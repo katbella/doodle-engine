@@ -209,6 +209,52 @@ NODE check_reputation
 
 If reputation is 60, goes to `trusted_path`. If reputation is 30, goes to `neutral_path`. If reputation is 10, goes to `suspicious_path`.
 
+## Auto-Advancing Nodes
+
+A node that has **no `CHOICE` blocks** is never shown to the player as a prompt. The engine processes it silently and advances automatically:
+
+1. Node effects run (speaker lines are set as the current dialogue text, effects apply)
+2. IF blocks evaluate in order — first passing condition redirects to its target
+3. If no IF passes, the top-level `GOTO` fires
+4. If there is no GOTO and no IF passes, the dialogue ends
+
+This is the basis for **silent processing nodes** — nodes that apply effects or branch on state without giving the player any visible choice:
+
+```
+# Roll the dice and branch — player never sees this node as a prompt
+NODE skill_check
+  ROLL result 1 20
+  IF variableGreaterThan result 14
+    GOTO success
+  END
+  GOTO failure
+
+NODE success
+  BARTENDER: "Impressive. This one's on the house."
+
+  CHOICE "Cheers!"
+    GOTO start
+  END
+
+NODE failure
+  BARTENDER: "Nope. Five gold."
+
+  CHOICE "Fine."
+    ADD variable gold -5
+    GOTO start
+  END
+```
+
+A node can also auto-advance unconditionally with a bare `GOTO`:
+
+```
+NODE after_drink
+  BARTENDER: @bartender.after_drink
+  GOTO start
+```
+
+The player sees the bartender's line, then the engine advances to `start` immediately (no click required).
+
 ### IF vs CHOICE REQUIRE
 
 **IF blocks** (author-controlled branching):
