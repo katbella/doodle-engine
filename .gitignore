@@ -3,6 +3,7 @@ dist
 *.log
 .DS_Store
 docs/.astro/
+docs/.yarn/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
