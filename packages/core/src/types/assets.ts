@@ -18,9 +18,9 @@ export interface AssetEntry {
 export interface AssetManifest {
     /** Version for cache invalidation */
     version: string;
-    /** Shell assets (tier 1) — load first */
+    /** Shell assets (tier 1), loaded first */
     shell: AssetEntry[];
-    /** Game assets (tier 2) — load with progress */
+    /** Game assets (tier 2), loaded with progress */
     game: AssetEntry[];
     /** Total size in bytes */
     totalSize: number;

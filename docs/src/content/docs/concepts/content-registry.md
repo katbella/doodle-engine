@@ -27,7 +27,7 @@ Every entity is indexed by its `id` field. For example, a location with `id: tav
 
 ## How Content is Loaded
 
-The dev server (`doodle dev`) builds the registry automatically:
+The dev server (`npm run dev`) builds the registry automatically:
 
 1. Scans `content/` subdirectories
 2. Parses `.yaml` files as entities based on their directory

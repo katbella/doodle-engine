@@ -23,8 +23,8 @@ export function getAssetType(path: string): 'image' | 'audio' | 'video' {
 
 /**
  * Extract all asset paths from a content registry and game config.
- * Shell assets come first (tier 1); game assets are tier 2.
- * Paths are deduplicated — shell assets are never duplicated in game.
+ * Shell assets come first (tier 1). Game assets are tier 2.
+ * Paths are deduplicated. Shell assets are never duplicated in game.
  */
 export function extractAssetPaths(
     registry: ContentRegistry,

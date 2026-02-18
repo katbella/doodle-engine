@@ -189,7 +189,7 @@ export interface JournalEntry {
 }
 
 /**
- * A narrative interlude — a full-screen text scene shown between gameplay moments.
+ * A narrative interlude: a full-screen text scene shown between gameplay moments.
  * Like the chapter cards in Baldur's Gate: background image, scrolling text, music.
  */
 export interface Interlude {
@@ -220,8 +220,8 @@ export interface Interlude {
 }
 
 /**
- * Shell screen configuration — controls splash, loading, title, and UI sounds.
- * All fields are optional; screens render gracefully with zero assets.
+ * Shell screen configuration. Controls splash, loading, title, and UI sounds.
+ * All fields are optional. Screens render gracefully with zero assets.
  */
 export interface ShellConfig {
     splash?: {

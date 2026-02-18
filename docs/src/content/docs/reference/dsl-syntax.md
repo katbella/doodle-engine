@@ -215,14 +215,14 @@ If reputation is 60, goes to `trusted_path`. If reputation is 30, goes to `neutr
 A node that has **no `CHOICE` blocks** is never shown to the player as a prompt. The engine processes it silently and advances automatically:
 
 1. Node effects run (speaker lines are set as the current dialogue text, effects apply)
-2. IF blocks evaluate in order — first passing condition redirects to its target
+2. IF blocks evaluate in order. The first passing condition redirects to its target.
 3. If no IF passes, the top-level `GOTO` fires
 4. If there is no GOTO and no IF passes, the dialogue ends
 
-This is the basis for **silent processing nodes** — nodes that apply effects or branch on state without giving the player any visible choice:
+This is the basis for **silent processing nodes**: nodes that apply effects or branch on state without giving the player any visible choice:
 
 ```
-# Roll the dice and branch — player never sees this node as a prompt
+# Roll the dice and branch. The player never sees this node as a prompt.
 NODE skill_check
   ROLL result 1 20
   IF variableGreaterThan result 14
@@ -372,7 +372,7 @@ NODE start
   BARTENDER: @bartender.greeting  # Inline comments work too
 ```
 
-A `#` inside a quoted string is preserved as text. In plain text, `#` starts a comment and everything after it is ignored — use quotes if you need a literal `#` in dialogue.
+A `#` inside a quoted string is preserved as text. In plain text, `#` starts a comment and everything after it is ignored. Use quotes if you need a literal `#` in dialogue.
 
 ## Complete Example
 

@@ -1,8 +1,8 @@
-# Standalone skill-check demo — demonstrates dice syntax in isolation.
+# Standalone skill-check demo. Demonstrates dice syntax in isolation.
 #
-# ROLL <variable> <min> <max>  — rolls a random integer and stores it in a variable.
-# {varName}                    — in dialogue text, replaced with the variable's value.
-# roll <min> <max> <threshold> — condition: rolls and returns true if result >= threshold.
+# ROLL <variable> <min> <max>  : rolls a random integer and stores it in a variable.
+# {varName}                    : in dialogue text, replaced with the variable's value.
+# roll <min> <max> <threshold> : condition. Rolls and returns true if result >= threshold.
 #
 # The actual bluff check in this scaffold is inlined into bartender_greeting.dlg
 # so it can flow back into the bartender conversation (GOTO after_drink, GOTO start).
@@ -50,7 +50,7 @@ NODE failure
   NARRATOR: @bluff.failure.narration
   BARTENDER: @bluff.failure.bartender
 
-  # Still have to pay — or just walk away
+  # Still have to pay, or just walk away
   CHOICE @bluff.choice.fine_pay
     REQUIRE variableGreaterThan gold 4
     ADD variable gold -5

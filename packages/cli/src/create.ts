@@ -33,7 +33,7 @@ function resolveOutputPath(key: string): string | null {
     // Strip the './templates/' prefix
     const rel = key.replace('./templates/', '');
 
-    // App variant files are picked separately — skip in main loop
+    // App variant files are picked separately; skip in main loop
     if (rel === 'src/App.default.tsx' || rel === 'src/App.custom.tsx')
         return null;
 
@@ -130,7 +130,7 @@ async function createProjectStructure(
     console.log(crayon.green(`  ${check} Directories created`));
     console.log('');
 
-    // --- package.json (generated — needs projectName) ---
+    // --- package.json (generated, needs projectName) ---
     const packageJson = {
         name: projectName,
         version: '0.1.0',
@@ -138,6 +138,7 @@ async function createProjectStructure(
         scripts: {
             dev: 'doodle dev',
             build: 'doodle build',
+            validate: 'doodle validate',
             preview: 'vite preview',
         },
         dependencies: {

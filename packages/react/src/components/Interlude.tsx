@@ -2,7 +2,7 @@
  * Interlude - Full-screen narrative text scene
  *
  * Displays a background image with scrolling text, like chapter cards
- * in Baldur's Gate. The player can skip at any time.
+ * in Infinity Engine games such as Baldur's Gate. The player can skip at any time.
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';

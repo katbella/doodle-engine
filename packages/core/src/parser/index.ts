@@ -52,18 +52,18 @@ function tokenize(input: string): Token[] {
                     const quoteStart = original.indexOf(quoteMatch[0]);
                     const quoteEnd = quoteStart + quoteMatch[0].length;
                     if (hashIndex < quoteStart) {
-                        // # is before the quote — it's a comment
+                        // # is before the quote, so it's a comment
                         withoutComment = original.substring(0, hashIndex);
                     } else if (
                         hashIndex >= quoteStart &&
                         hashIndex < quoteEnd
                     ) {
-                        // # is inside quotes — preserve it, strip any # after the quote
+                        // # is inside quotes. Preserve it and strip any # after the quote.
                         withoutComment =
                             original.substring(0, quoteEnd) +
                             original.substring(quoteEnd).split('#')[0];
                     } else {
-                        // # is after the quote — strip from there
+                        // # is after the quote, so strip from there
                         withoutComment = original.substring(0, hashIndex);
                     }
                 } else {

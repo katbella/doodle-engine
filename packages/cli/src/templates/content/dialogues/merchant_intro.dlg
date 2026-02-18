@@ -31,7 +31,7 @@ NODE start
 NODE browse
   MERCHANT: @merchant.browse
 
-  # Conditional purchase — need enough gold (demonstrates: variableGreaterThan)
+  # Conditional purchase: need enough gold (demonstrates: variableGreaterThan)
   CHOICE @merchant.choice.buy_map
     REQUIRE variableGreaterThan gold 19
     ADD variable gold -20

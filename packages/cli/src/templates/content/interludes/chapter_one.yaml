@@ -25,7 +25,7 @@ text: |
 
 # Auto-trigger when the player enters the tavern for the first time.
 # triggerConditions prevents re-triggering. effects runs when the interlude fires
-# — setFlag here marks it seen so it won't show again on return visits.
+# setFlag here marks it seen so it won't show again on return visits.
 triggerLocation: tavern
 triggerConditions:
   - type: notFlag

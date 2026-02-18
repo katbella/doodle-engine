@@ -126,7 +126,7 @@ Replace the current dialogue with a different one, starting from its first node.
 START dialogue merchant_intro
 ```
 
-The current dialogue ends and the new one starts from scratch. There is no return path — once the new dialogue ends, the player is back at the idle state, not back in the original conversation.
+The current dialogue ends and the new one starts from scratch. There is no return path. Once the new dialogue ends, the player is back at the idle state, not back in the original conversation.
 
 **Use `START dialogue` when** the sub-dialogue is self-contained and doesn't need to flow back into the caller (a cutscene, a one-off encounter, a modal quiz).
 
@@ -260,7 +260,7 @@ The video appears as `pendingVideo` in the snapshot. It's transient: it appears 
 
 ### INTERLUDE
 
-Show a narrative interlude — a full-screen text scene with scrolling text and a background image, like chapter cards in Baldur's Gate.
+Show a narrative interlude: a full-screen text scene with scrolling text and a background image, like chapter cards in Infinity Engine games such as Baldur's Gate.
 
 ```
 INTERLUDE chapter_one

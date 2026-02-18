@@ -2,7 +2,7 @@
 
 # Shell screen configuration
 # Uncomment and provide your own assets to customize the game shell.
-# The game will work without these — screens will use styled gradients and skip sounds.
+# The game will work without these. Screens will use styled gradients and skip sounds.
 #
 # shell:
 #   splash:

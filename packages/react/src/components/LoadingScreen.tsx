@@ -7,7 +7,7 @@ import type { AssetLoadingState } from '@doodle-engine/core';
 export interface LoadingScreenProps {
     /** Asset loading state (from AssetProvider) */
     state: AssetLoadingState;
-    /** Background image (from shell config) — shown behind the progress UI */
+    /** Background image (from shell config), shown behind the progress UI */
     background?: string;
     /** Custom progress bar renderer */
     renderProgress?: (progress: number, phase: string) => React.ReactNode;

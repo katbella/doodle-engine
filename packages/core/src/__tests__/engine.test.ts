@@ -876,7 +876,7 @@ describe('Engine', () => {
         });
 
         it('should apply interlude effects when triggered', () => {
-            // Interlude with effects — the canonical pattern for "mark as seen"
+            // Interlude with effects: the canonical pattern for "mark as seen"
             const registryWithEffects = {
                 ...createTestRegistry(),
                 interludes: {
@@ -908,7 +908,7 @@ describe('Engine', () => {
             const firstVisit = customEngine.travelTo('market');
             expect(firstVisit.pendingInterlude?.id).toBe('chapter_one');
 
-            // Effects applied seenChapterOne flag — second visit should NOT retrigger
+            // Effects applied seenChapterOne flag. Second visit should NOT retrigger.
             customEngine.travelTo('tavern');
             const secondVisit = customEngine.travelTo('market');
             expect(secondVisit.pendingInterlude).toBeNull();
@@ -976,7 +976,7 @@ describe('Engine', () => {
 
             const snapshot = customEngine.talkTo('bartender');
             // bartender triggers bartender_greeting, not interlude_trigger
-            // Test via applyEffect instead — covered in effects.test.ts
+            // Test via applyEffect instead, covered in effects.test.ts
             // Just verify the field exists on the snapshot
             expect('pendingInterlude' in snapshot).toBe(true);
         });
