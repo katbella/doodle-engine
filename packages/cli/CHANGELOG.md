@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.24
+
+### Patch Changes
+
+- 21af7c9: docs link update
+- Updated dependencies [21af7c9]
+    - @doodle-engine/core@0.0.24
+    - @doodle-engine/react@0.0.24
+
 ## 0.0.23
 
 ### Patch Changes
