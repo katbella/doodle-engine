@@ -220,9 +220,48 @@ export interface Interlude {
 }
 
 /**
+ * Shell screen configuration — controls splash, loading, title, and UI sounds.
+ * All fields are optional; screens render gracefully with zero assets.
+ */
+export interface ShellConfig {
+  splash?: {
+    /** Studio or game logo image path */
+    logo?: string
+    /** Background image path */
+    background?: string
+    /** Brief sound effect played during splash */
+    sound?: string
+    /** Display duration in ms (default: 2000) */
+    duration?: number
+  }
+  loading?: {
+    /** Background image path */
+    background?: string
+    /** Music to play during loading (optional) */
+    music?: string
+  }
+  title?: {
+    /** Game logo image path */
+    logo?: string
+    /** Background image path */
+    background?: string
+    /** Music to play on the title screen */
+    music?: string
+  }
+  uiSounds?: {
+    click?: string
+    hover?: string
+    menuOpen?: string
+    menuClose?: string
+  }
+}
+
+/**
  * Game configuration that defines starting conditions.
  */
 export interface GameConfig {
+  /** Shell screen configuration */
+  shell?: ShellConfig
   /** Starting location ID */
   startLocation: string
   /** Starting time */

@@ -94,7 +94,7 @@ Text is written inline with quotes here. When you're ready to support multiple l
 ## Running Your Game
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 The dev server:
@@ -111,33 +111,38 @@ The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides 
 
 ```tsx
 import { useEffect, useState } from 'react'
-import type { ContentRegistry, GameConfig } from '@doodle-engine/core'
-import { GameShell, LoadingScreen } from '@doodle-engine/react'
+import type { ContentRegistry, GameConfig, AssetManifest } from '@doodle-engine/core'
+import { GameShell } from '@doodle-engine/react'
 
 export function App() {
   const [content, setContent] = useState<{
     registry: ContentRegistry
     config: GameConfig
+    manifest: AssetManifest
   } | null>(null)
 
   useEffect(() => {
-    fetch('/api/content')
-      .then(res => res.json())
-      .then(data => setContent({
-        registry: data.registry,
-        config: data.config,
-      }))
+    Promise.all([
+      fetch('/api/content').then((res) => res.json()),
+      fetch('/api/manifest').then((res) => res.json()),
+    ]).then(([contentData, manifestData]) => {
+      setContent({
+        registry: contentData.registry,
+        config: contentData.config,
+        manifest: manifestData,
+      })
+    })
   }, [])
 
-  if (!content) return <LoadingScreen />
+  if (!content) return <div className="app-bootstrap"><div className="spinner" /></div>
 
   return (
     <GameShell
       registry={content.registry}
       config={content.config}
+      manifest={content.manifest}
       title="My Game"
       subtitle="A text-based adventure"
-      splashDuration={2000}
       availableLocales={[{ code: 'en', label: 'English' }]}
     />
   )

@@ -43,10 +43,10 @@ function MyCustomGame() {
 }
 ```
 
-Wrap it with `GameProvider`. While content is loading, render a loading screen:
+Wrap it with `GameProvider`. While content is loading, render a placeholder:
 
 ```tsx
-import { GameProvider, LoadingScreen } from '@doodle-engine/react'
+import { GameProvider } from '@doodle-engine/react'
 
 function App() {
   const [game, setGame] = useState<{ engine: Engine; snapshot: Snapshot } | null>(null)
@@ -61,7 +61,7 @@ function App() {
       })
   }, [])
 
-  if (!game) return <LoadingScreen />
+  if (!game) return <div className="app-bootstrap"><div className="spinner" /></div>
 
   return (
     <GameProvider engine={game.engine} initialSnapshot={game.snapshot} devTools={import.meta.env.DEV}>
@@ -69,12 +69,6 @@ function App() {
     </GameProvider>
   )
 }
-```
-
-Pass a custom `message` or `className` to style the loading state:
-
-```tsx
-<LoadingScreen message="Preparing your adventure..." className="my-loader" />
 ```
 
 ## Available Actions
