@@ -13,13 +13,15 @@ import { GameShell } from '@doodle-engine/react'
 <GameShell
   registry={registry}
   config={config}
+  manifest={manifest}
   title="My Game"
   subtitle="A text-based adventure"
 />
 ```
 
 This gives you:
-- A 2-second splash screen with your title
+- An asset loading screen before any game content renders
+- A splash screen (if `shell.splash` is configured in `game.yaml`)
 - A title screen with New Game, Continue (if save exists), and Settings
 - Full gameplay with `GameRenderer`
 - Escape key opens pause menu (Resume, Save, Load, Settings, Quit to Title)
@@ -28,24 +30,23 @@ This gives you:
 
 ## Splash Screen
 
-The splash screen shows briefly before the title screen. Configure with:
+The splash screen is configured in `content/game.yaml`:
 
-```tsx
-<GameShell
-  logoSrc="/images/logo.png"
-  title="My Game"
-  splashDuration={3000}  // 3 seconds
-/>
+```yaml
+shell:
+  splash:
+    logo: /assets/images/studio-logo.png
+    background: /assets/images/splash-bg.jpg
+    sound: /assets/audio/splash.ogg
+    duration: 2000
 ```
 
-Set `splashDuration={0}` to skip the splash and go directly to the title screen.
-
-Players can click to skip the splash at any time.
+If `shell.splash` is not defined, the splash screen is skipped and the game goes directly to the title screen. Players can click to skip the splash at any time.
 
 ## Title Screen
 
 The title screen shows:
-- Your logo (if `logoSrc` is provided)
+- The logo image (if `shell.title.logo` is configured in `game.yaml`)
 - Game title and subtitle
 - **New Game** button
 - **Continue** button (only if a save exists in localStorage)

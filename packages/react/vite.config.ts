@@ -1,3 +1,4 @@
+import { copyFileSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -13,5 +14,14 @@ export default defineConfig({
       external: ['react', 'react-dom', '@doodle-engine/core'],
     },
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'copy-css',
+      closeBundle() {
+        mkdirSync('dist', { recursive: true })
+        copyFileSync('src/styles/shell.css', 'dist/shell.css')
+      },
+    },
+  ],
 })

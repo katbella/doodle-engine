@@ -16,6 +16,7 @@ import { parse as parseYaml } from 'yaml'
 import { parseDialogue } from '@doodle-engine/core'
 import { crayon } from 'crayon.js'
 import { validateContent, printValidationErrors } from '../validate.js'
+import { generateAssetManifest } from '../manifest.js'
 
 const paw = '🐾'
 const sparkle = '✨'
@@ -45,6 +46,26 @@ export async function dev() {
           console.error(crayon.red(`  Error loading content:`), error)
           res.statusCode = 500
           res.end(JSON.stringify({ error: 'Failed to load content' }))
+        }
+      })
+
+      // API endpoint to load asset manifest (generated on-the-fly from content)
+      server.middlewares.use('/api/manifest', async (_req, res) => {
+        try {
+          const { registry, config } = await loadAllContent(contentDir)
+          const manifest = await generateAssetManifest(
+            join(cwd, 'assets'),
+            cwd,
+            registry as any,
+            config as any,
+            'dev'
+          )
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify(manifest))
+        } catch (error) {
+          console.error(crayon.red(`  Error generating manifest:`), error)
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: 'Failed to generate manifest' }))
         }
       })
 
