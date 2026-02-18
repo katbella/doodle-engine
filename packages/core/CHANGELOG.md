@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.24
+
+### Patch Changes
+
+- 21af7c9: docs link update
+
 ## 0.0.23
 
 ### Patch Changes
