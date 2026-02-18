@@ -42,7 +42,7 @@ NODE farewell
   END dialogue
 ```
 
-See [Localization](/doodle-engine/guides/localization/) when you're ready to support multiple languages.
+See [Localization](/guides/localization/) when you're ready to support multiple languages.
 
 ## Basic Structure
 
@@ -221,4 +221,4 @@ NODE farewell
   END dialogue
 ```
 
-See [DSL Syntax Reference](/doodle-engine/reference/dsl-syntax/) for the complete keyword list.
+See [DSL Syntax Reference](/reference/dsl-syntax/) for the complete keyword list.

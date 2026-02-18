@@ -11,18 +11,18 @@ Create flat key-value YAML files in `content/locales/`:
 
 ```yaml
 # content/locales/en.yaml
-location.tavern.name: "The Rusty Tankard"
-location.tavern.description: "A cozy tavern with worn wooden tables."
-character.bartender.name: "Greta"
-bartender.greeting: "Welcome! What can I do for you?"
+location.tavern.name: 'The Rusty Tankard'
+location.tavern.description: 'A cozy tavern with worn wooden tables.'
+character.bartender.name: 'Greta'
+bartender.greeting: 'Welcome! What can I do for you?'
 ```
 
 ```yaml
 # content/locales/es.yaml
-location.tavern.name: "La Jarra Oxidada"
-location.tavern.description: "Una taberna acogedora con mesas de madera gastadas."
-character.bartender.name: "Greta"
-bartender.greeting: "¡Bienvenido! ¿Qué puedo hacer por ti?"
+location.tavern.name: 'La Jarra Oxidada'
+location.tavern.description: 'Una taberna acogedora con mesas de madera gastadas.'
+character.bartender.name: 'Greta'
+bartender.greeting: '¡Bienvenido! ¿Qué puedo hacer por ti?'
 ```
 
 Locale files are loaded by filename: `en.yaml` becomes locale `"en"`, `es.yaml` becomes `"es"`.
@@ -34,8 +34,8 @@ Reference locale strings with the `@` prefix in YAML content:
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: '@location.tavern.name'
+description: '@location.tavern.description'
 ```
 
 And in `.dlg` dialogue files:
@@ -60,9 +60,9 @@ At snapshot build time, the engine resolves all `@key` references:
 The resolution function:
 
 ```typescript
-import { resolveText } from "@doodle-engine/core";
+import { resolveText } from '@doodle-engine/core';
 
-const text = resolveText("@bartender.greeting", localeData);
+const text = resolveText('@bartender.greeting', localeData);
 // → "Welcome! What can I do for you?"
 ```
 
@@ -72,7 +72,7 @@ Use the `setLocale` action:
 
 ```tsx
 const { actions } = useGame();
-actions.setLocale("es");
+actions.setLocale('es');
 ```
 
 Or from a dialogue effect. This isn't built into the DSL, but can be done programmatically via the engine.
@@ -119,5 +119,5 @@ NOTIFY @notification.quest_started
 ```
 
 ```yaml
-notification.quest_started: "New Quest: Odd Jobs"
+notification.quest_started: 'New Quest: Odd Jobs'
 ```

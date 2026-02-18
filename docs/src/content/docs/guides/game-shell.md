@@ -8,14 +8,14 @@ description: Using GameShell for splash screens, title menus, pause, settings, a
 ## Basic Usage
 
 ```tsx
-import { GameShell } from "@doodle-engine/react";
+import { GameShell } from '@doodle-engine/react';
 
 <GameShell
-  registry={registry}
-  config={config}
-  manifest={manifest}
-  title="My Game"
-  subtitle="A text-based adventure"
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    title="My Game"
+    subtitle="A text-based adventure"
 />;
 ```
 
@@ -35,11 +35,11 @@ The splash screen is configured in `content/game.yaml`:
 
 ```yaml
 shell:
-  splash:
-    logo: /assets/images/studio-logo.png
-    background: /assets/images/splash-bg.jpg
-    sound: /assets/audio/splash.ogg
-    duration: 2000
+    splash:
+        logo: /assets/images/studio-logo.png
+        background: /assets/images/splash-bg.jpg
+        sound: /assets/audio/splash.ogg
+        duration: 2000
 ```
 
 If `shell.splash` is not defined, the splash screen is skipped and the game goes directly to the title screen. Players can click to skip the splash at any time.
@@ -73,13 +73,13 @@ The settings panel provides:
 
 ```tsx
 <GameShell
-  registry={registry}
-  config={config}
-  availableLocales={[
-    { code: "en", label: "English" },
-    { code: "es", label: "Español" },
-    { code: "fr", label: "Français" },
-  ]}
+    registry={registry}
+    config={config}
+    availableLocales={[
+        { code: 'en', label: 'English' },
+        { code: 'es', label: 'Español' },
+        { code: 'fr', label: 'Français' },
+    ]}
 />
 ```
 
@@ -113,7 +113,7 @@ GameShell automatically plays fullscreen video cutscenes when a dialogue uses th
 <GameShell videoBasePath="/assets/video" />
 ```
 
-See [Video & Cutscenes](/doodle-engine/guides/video-cutscenes/) for full details on adding videos to your game.
+See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding videos to your game.
 
 ## Save/Load
 
@@ -131,13 +131,13 @@ Pass audio options to configure the game audio manager:
 
 ```tsx
 <GameShell
-  audioOptions={{
-    audioBasePath: "/audio",
-    masterVolume: 1.0,
-    musicVolume: 0.7,
-    soundVolume: 0.8,
-    voiceVolume: 1.0,
-  }}
+    audioOptions={{
+        audioBasePath: '/audio',
+        masterVolume: 1.0,
+        musicVolume: 0.7,
+        soundVolume: 0.8,
+        voiceVolume: 1.0,
+    }}
 />
 ```
 
@@ -147,17 +147,17 @@ If you need more control, you can use the individual components directly instead
 
 ```tsx
 import {
-  GameProvider,
-  GameRenderer,
-  SplashScreen,
-  TitleScreen,
-  PauseMenu,
-  SettingsPanel,
-  VideoPlayer,
-  useGame,
-  useAudioManager,
-  useUISounds,
-} from "@doodle-engine/react";
+    GameProvider,
+    GameRenderer,
+    SplashScreen,
+    TitleScreen,
+    PauseMenu,
+    SettingsPanel,
+    VideoPlayer,
+    useGame,
+    useAudioManager,
+    useUISounds,
+} from '@doodle-engine/react';
 ```
 
-See [Custom Renderer](/doodle-engine/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/doodle-engine/reference/react-components/) for individual component props.
+See [Custom Renderer](/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/reference/react-components/) for individual component props.

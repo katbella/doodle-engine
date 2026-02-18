@@ -13,12 +13,12 @@ Every game starts with `content/game.yaml`:
 id: game
 startLocation: tavern
 startTime:
-  day: 1
-  hour: 8
+    day: 1
+    hour: 8
 startFlags: {}
 startVariables:
-  gold: 100
-  reputation: 0
+    gold: 100
+    reputation: 0
 startInventory: []
 ```
 
@@ -30,14 +30,14 @@ Create `content/locations/tavern.yaml`:
 
 ```yaml
 id: tavern
-name: "The Salty Dog"
-description: "A cozy tavern with worn wooden tables and the smell of hearth smoke."
+name: 'The Salty Dog'
+description: 'A cozy tavern with worn wooden tables and the smell of hearth smoke.'
 banner: tavern.png
 music: tavern_ambience.ogg
-ambient: ""
+ambient: ''
 ```
 
-Text can be written inline like this, or as localization keys (`@location.tavern.name`) that resolve from a locale file. Inline text is simpler for getting started. See [Localization](/doodle-engine/guides/localization/) when you're ready to support multiple languages.
+Text can be written inline like this, or as localization keys (`@location.tavern.name`) that resolve from a locale file. Inline text is simpler for getting started. See [Localization](/guides/localization/) when you're ready to support multiple languages.
 
 ## Adding a Character
 
@@ -45,8 +45,8 @@ Create `content/characters/bartender.yaml`:
 
 ```yaml
 id: bartender
-name: "Greta"
-biography: "The no-nonsense owner of the Salty Dog."
+name: 'Greta'
+biography: 'The no-nonsense owner of the Salty Dog.'
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -90,7 +90,7 @@ Key concepts:
 - Effects like `SET flag` and `ADD relationship` modify game state
 - `END dialogue` closes the conversation
 
-Text is written inline with quotes here. When you're ready to support multiple languages, move text to a locale file and use `@key` references. See [Localization](/doodle-engine/guides/localization/).
+Text is written inline with quotes here. When you're ready to support multiple languages, move text to a locale file and use `@key` references. See [Localization](/guides/localization/).
 
 ## Running Your Game
 
@@ -112,59 +112,59 @@ Open `http://localhost:3000` to see your tavern, talk to the bartender, and expl
 The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides splash screen, title screen, pause menu, settings, and video support out of the box:
 
 ```tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import type {
-  ContentRegistry,
-  GameConfig,
-  AssetManifest,
-} from "@doodle-engine/core";
-import { GameShell } from "@doodle-engine/react";
+    ContentRegistry,
+    GameConfig,
+    AssetManifest,
+} from '@doodle-engine/core';
+import { GameShell } from '@doodle-engine/react';
 
 export function App() {
-  const [content, setContent] = useState<{
-    registry: ContentRegistry;
-    config: GameConfig;
-    manifest: AssetManifest;
-  } | null>(null);
+    const [content, setContent] = useState<{
+        registry: ContentRegistry;
+        config: GameConfig;
+        manifest: AssetManifest;
+    } | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/content").then((res) => res.json()),
-      fetch("/api/manifest").then((res) => res.json()),
-    ]).then(([contentData, manifestData]) => {
-      setContent({
-        registry: contentData.registry,
-        config: contentData.config,
-        manifest: manifestData,
-      });
-    });
-  }, []);
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/content').then((res) => res.json()),
+            fetch('/api/manifest').then((res) => res.json()),
+        ]).then(([contentData, manifestData]) => {
+            setContent({
+                registry: contentData.registry,
+                config: contentData.config,
+                manifest: manifestData,
+            });
+        });
+    }, []);
 
-  if (!content)
+    if (!content)
+        return (
+            <div className="app-bootstrap">
+                <div className="spinner" />
+            </div>
+        );
+
     return (
-      <div className="app-bootstrap">
-        <div className="spinner" />
-      </div>
+        <GameShell
+            registry={content.registry}
+            config={content.config}
+            manifest={content.manifest}
+            title="My Game"
+            subtitle="A text-based adventure"
+            availableLocales={[{ code: 'en', label: 'English' }]}
+        />
     );
-
-  return (
-    <GameShell
-      registry={content.registry}
-      config={content.config}
-      manifest={content.manifest}
-      title="My Game"
-      subtitle="A text-based adventure"
-      availableLocales={[{ code: "en", label: "English" }]}
-    />
-  );
 }
 ```
 
-`GameShell` handles the full game lifecycle. You just provide content and configuration. See [Game Shell](/doodle-engine/guides/game-shell/) for customization options.
+`GameShell` handles the full game lifecycle. You just provide content and configuration. See [Game Shell](/guides/game-shell/) for customization options.
 
 ## Next Steps
 
-- [Game Shell](/doodle-engine/guides/game-shell/): splash screen, title, pause menu, settings
-- [Writing Dialogues](/doodle-engine/guides/writing-dialogues/): branching conversations, conditions, effects
-- [Creating Quests](/doodle-engine/guides/creating-quests/): multi-stage quest tracking
-- [Adding Locations](/doodle-engine/guides/adding-locations/): maps and travel
+- [Game Shell](/guides/game-shell/): splash screen, title, pause menu, settings
+- [Writing Dialogues](/guides/writing-dialogues/): branching conversations, conditions, effects
+- [Creating Quests](/guides/creating-quests/): multi-stage quest tracking
+- [Adding Locations](/guides/adding-locations/): maps and travel

@@ -32,8 +32,8 @@ For small games, bundle everything in `dist/`. For games with large media files,
 
 ```tsx
 <GameShell
-  audioOptions={{ audioBasePath: "https://cdn.example.com/audio" }}
-  videoBasePath="https://cdn.example.com/video"
+    audioOptions={{ audioBasePath: 'https://cdn.example.com/audio' }}
+    videoBasePath="https://cdn.example.com/video"
 />
 ```
 

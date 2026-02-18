@@ -7,21 +7,21 @@
  * - Cleans up old caches on activate
  */
 
-import type { AssetManifest } from "@doodle-engine/core";
+import type { AssetManifest } from '@doodle-engine/core';
 
 /**
  * Generate service worker source code for a given asset manifest.
  */
 export function generateServiceWorker(manifest: AssetManifest): string {
-  const cacheName = `doodle-engine-assets-${manifest.version}`;
-  const allPaths = [
-    ...manifest.shell.map((e) => e.path),
-    ...manifest.game.map((e) => e.path),
-  ];
+    const cacheName = `doodle-engine-assets-${manifest.version}`;
+    const allPaths = [
+        ...manifest.shell.map((e) => e.path),
+        ...manifest.game.map((e) => e.path),
+    ];
 
-  const precacheList = JSON.stringify(allPaths, null, 2);
+    const precacheList = JSON.stringify(allPaths, null, 2);
 
-  return `/**
+    return `/**
  * Doodle Engine Service Worker
  * Generated at build time — do not edit manually.
  * Cache version: ${manifest.version}

@@ -302,7 +302,7 @@ NODE offer
 
 ## Effect Lines
 
-Effects modify game state. See [Effects Reference](/doodle-engine/reference/effects/) for the full list.
+Effects modify game state. See [Effects Reference](/reference/effects/) for the full list.
 
 ```
 SET flag metBartender

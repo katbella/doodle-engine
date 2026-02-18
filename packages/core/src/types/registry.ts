@@ -7,15 +7,15 @@
  */
 
 import type {
-  Location,
-  Character,
-  Item,
-  Map,
-  Dialogue,
-  Quest,
-  JournalEntry,
-  Interlude,
-} from "./entities";
+    Location,
+    Character,
+    Item,
+    Map,
+    Dialogue,
+    Quest,
+    JournalEntry,
+    Interlude,
+} from './entities';
 
 /**
  * Localization dictionary mapping keys to translated strings.
@@ -29,7 +29,7 @@ import type {
  * ```
  */
 export interface LocaleData {
-  [key: string]: string;
+    [key: string]: string;
 }
 
 /**
@@ -37,30 +37,30 @@ export interface LocaleData {
  * All lookups are by ID using Record<id, entity> for O(1) access.
  */
 export interface ContentRegistry {
-  /** All locations indexed by ID */
-  locations: Record<string, Location>;
+    /** All locations indexed by ID */
+    locations: Record<string, Location>;
 
-  /** All characters indexed by ID */
-  characters: Record<string, Character>;
+    /** All characters indexed by ID */
+    characters: Record<string, Character>;
 
-  /** All items indexed by ID */
-  items: Record<string, Item>;
+    /** All items indexed by ID */
+    items: Record<string, Item>;
 
-  /** All maps indexed by ID */
-  maps: Record<string, Map>;
+    /** All maps indexed by ID */
+    maps: Record<string, Map>;
 
-  /** All dialogues indexed by ID */
-  dialogues: Record<string, Dialogue>;
+    /** All dialogues indexed by ID */
+    dialogues: Record<string, Dialogue>;
 
-  /** All quests indexed by ID */
-  quests: Record<string, Quest>;
+    /** All quests indexed by ID */
+    quests: Record<string, Quest>;
 
-  /** All journal entries indexed by ID */
-  journalEntries: Record<string, JournalEntry>;
+    /** All journal entries indexed by ID */
+    journalEntries: Record<string, JournalEntry>;
 
-  /** All interludes indexed by ID */
-  interludes: Record<string, Interlude>;
+    /** All interludes indexed by ID */
+    interludes: Record<string, Interlude>;
 
-  /** All locales indexed by language code (e.g., "en", "es") */
-  locales: Record<string, LocaleData>;
+    /** All locales indexed by language code (e.g., "en", "es") */
+    locales: Record<string, LocaleData>;
 }

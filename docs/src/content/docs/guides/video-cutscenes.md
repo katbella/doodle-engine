@@ -39,30 +39,30 @@ The default `videoBasePath` is `'/video'`.
 For custom renderers, use the `VideoPlayer` component directly:
 
 ```tsx
-import { VideoPlayer } from "@doodle-engine/react";
+import { VideoPlayer } from '@doodle-engine/react';
 
 function MyGame() {
-  const { snapshot } = useGame();
-  const [video, setVideo] = useState<string | null>(null);
+    const { snapshot } = useGame();
+    const [video, setVideo] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (snapshot.pendingVideo) {
-      setVideo(snapshot.pendingVideo);
-    }
-  }, [snapshot.pendingVideo]);
+    useEffect(() => {
+        if (snapshot.pendingVideo) {
+            setVideo(snapshot.pendingVideo);
+        }
+    }, [snapshot.pendingVideo]);
 
-  return (
-    <>
-      {video && (
-        <VideoPlayer
-          src={video}
-          basePath="/video"
-          onComplete={() => setVideo(null)}
-        />
-      )}
-      {/* rest of your UI */}
-    </>
-  );
+    return (
+        <>
+            {video && (
+                <VideoPlayer
+                    src={video}
+                    basePath="/video"
+                    onComplete={() => setVideo(null)}
+                />
+            )}
+            {/* rest of your UI */}
+        </>
+    );
 }
 ```
 

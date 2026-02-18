@@ -6,25 +6,25 @@
  */
 
 export interface NotificationAreaProps {
-  notifications: string[];
-  className?: string;
+    notifications: string[];
+    className?: string;
 }
 
 export function NotificationArea({
-  notifications,
-  className = "",
+    notifications,
+    className = '',
 }: NotificationAreaProps) {
-  if (notifications.length === 0) {
-    return null;
-  }
+    if (notifications.length === 0) {
+        return null;
+    }
 
-  return (
-    <div className={`notification-area ${className}`}>
-      {notifications.map((text, index) => (
-        <div key={index} className="notification">
-          {text}
+    return (
+        <div className={`notification-area ${className}`}>
+            {notifications.map((text, index) => (
+                <div key={index} className="notification">
+                    {text}
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 }

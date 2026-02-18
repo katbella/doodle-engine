@@ -74,9 +74,9 @@ NODE failure
 With locale strings:
 
 ```yaml
-bluff.setup: "You consider spinning Marcus a tale to get a free drink..."
-bluff.rolled: "You spin the tale — a {bluffRoll} on your roll."
-bluff.success: "The story lands perfectly. Marcus slides over a free drink."
+bluff.setup: 'You consider spinning Marcus a tale to get a free drink...'
+bluff.rolled: 'You spin the tale — a {bluffRoll} on your roll.'
+bluff.success: 'The story lands perfectly. Marcus slides over a free drink.'
 bluff.failure: 'Marcus raises an eyebrow. "Nice try."'
 ```
 

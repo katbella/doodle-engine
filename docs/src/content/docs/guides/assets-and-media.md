@@ -57,8 +57,8 @@ Asset paths referenced in content are resolved relative to the configured asset 
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: '@location.tavern.name'
+description: '@location.tavern.description'
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
@@ -71,7 +71,7 @@ Banner images are referenced by filename. The renderer loads them using the conf
 ```yaml
 # content/characters/bartender.yaml
 id: bartender
-name: "@character.bartender.name"
+name: '@character.bartender.name'
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -82,8 +82,8 @@ dialogue: bartender_greeting
 ```yaml
 # content/items/old_coin.yaml
 id: old_coin
-name: "@item.old_coin.name"
-description: "@item.old_coin.description"
+name: '@item.old_coin.name'
+description: '@item.old_coin.description'
 icon: old_coin_icon.png
 image: old_coin.png
 ```
@@ -96,7 +96,7 @@ image: old_coin.png
 ```yaml
 # content/maps/town.yaml
 id: town
-name: "@map.town.name"
+name: '@map.town.name'
 image: town_map.png
 ```
 

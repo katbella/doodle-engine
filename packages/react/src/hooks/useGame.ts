@@ -4,8 +4,8 @@
  * Must be used within a GameProvider
  */
 
-import { useContext } from "react";
-import { GameContext, type GameContextValue } from "../GameProvider";
+import { useContext } from 'react';
+import { GameContext, type GameContextValue } from '../GameProvider';
 
 /**
  * Hook to access the current snapshot and game actions
@@ -13,11 +13,11 @@ import { GameContext, type GameContextValue } from "../GameProvider";
  * @throws Error if used outside GameProvider
  */
 export function useGame(): GameContextValue {
-  const context = useContext(GameContext);
+    const context = useContext(GameContext);
 
-  if (!context) {
-    throw new Error("useGame must be used within a GameProvider");
-  }
+    if (!context) {
+        throw new Error('useGame must be used within a GameProvider');
+    }
 
-  return context;
+    return context;
 }

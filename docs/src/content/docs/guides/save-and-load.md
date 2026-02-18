@@ -9,9 +9,9 @@ Doodle Engine supports saving and loading the complete game state.
 
 ```typescript
 interface SaveData {
-  version: string; // Save format version
-  timestamp: string; // ISO 8601 timestamp
-  state: GameState; // Complete game state
+    version: string; // Save format version
+    timestamp: string; // ISO 8601 timestamp
+    state: GameState; // Complete game state
 }
 ```
 
@@ -38,10 +38,10 @@ const snapshot = engine.loadGame(saveData);
 The `GameRenderer` includes a `SaveLoadPanel` component that saves to `localStorage`:
 
 ```tsx
-import { GameProvider, GameRenderer } from "@doodle-engine/react";
+import { GameProvider, GameRenderer } from '@doodle-engine/react';
 
 <GameProvider engine={engine} initialSnapshot={snapshot}>
-  <GameRenderer />
+    <GameRenderer />
 </GameProvider>;
 ```
 
@@ -50,15 +50,15 @@ The panel provides Save and Load buttons with feedback messages. The Load button
 ## Using SaveLoadPanel Standalone
 
 ```tsx
-import { SaveLoadPanel } from "@doodle-engine/react";
+import { SaveLoadPanel } from '@doodle-engine/react';
 
 <SaveLoadPanel
-  onSave={() => engine.saveGame()}
-  onLoad={(saveData) => {
-    const snapshot = engine.loadGame(saveData);
-    // update your state with the new snapshot
-  }}
-  storageKey="my-game-save"
+    onSave={() => engine.saveGame()}
+    onLoad={(saveData) => {
+        const snapshot = engine.loadGame(saveData);
+        // update your state with the new snapshot
+    }}
+    storageKey="my-game-save"
 />;
 ```
 
@@ -78,13 +78,13 @@ For custom storage (server-side, IndexedDB, etc.), use the engine API directly:
 ```typescript
 // Save to server
 const saveData = engine.saveGame();
-await fetch("/api/save", {
-  method: "POST",
-  body: JSON.stringify(saveData),
+await fetch('/api/save', {
+    method: 'POST',
+    body: JSON.stringify(saveData),
 });
 
 // Load from server
-const response = await fetch("/api/save");
+const response = await fetch('/api/save');
 const saveData = await response.json();
 const snapshot = engine.loadGame(saveData);
 ```

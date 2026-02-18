@@ -14,17 +14,17 @@ Create a YAML file in `content/interludes/`:
 id: chapter_one
 background: /assets/images/banners/dusk_road.jpg
 text: |
-  Chapter One: A New Beginning
+    Chapter One: A New Beginning
 
-  The road behind you stretches long and empty.
-  Ahead, the lights of town flicker through the evening mist.
+    The road behind you stretches long and empty.
+    Ahead, the lights of town flicker through the evening mist.
 
-  You have heard the rumours. Strange things happening.
-  People going missing. Shadows that move wrong.
+    You have heard the rumours. Strange things happening.
+    People going missing. Shadows that move wrong.
 
-  Someone has to look into it.
+    Someone has to look into it.
 
-  It might as well be you.
+    It might as well be you.
 ```
 
 ### All Fields
@@ -66,20 +66,20 @@ Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effe
 id: chapter_two
 background: /assets/images/banners/forest.jpg
 text: |
-  Chapter Two: Into the Woods
+    Chapter Two: Into the Woods
 
-  The forest is older than the town.
-  Older than the people who named it.
+    The forest is older than the town.
+    Older than the people who named it.
 
 triggerLocation: dark_forest
 triggerConditions:
-  - type: hasFlag
-    flag: leftTavern
-  - type: notFlag
-    flag: seenChapterTwo
+    - type: hasFlag
+      flag: leftTavern
+    - type: notFlag
+      flag: seenChapterTwo
 effects:
-  - type: setFlag
-    flag: seenChapterTwo
+    - type: setFlag
+      flag: seenChapterTwo
 ```
 
 The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns — the interlude won't show again.
@@ -104,17 +104,17 @@ Use a localization key for multi-language support:
 ```yaml
 id: chapter_one
 background: /assets/images/banners/dusk_road.jpg
-text: "@chapter.one.intro"
+text: '@chapter.one.intro'
 ```
 
 Then in `content/locales/en.yaml`:
 
 ```yaml
 chapter.one.intro: |
-  Chapter One: A New Beginning
+    Chapter One: A New Beginning
 
-  The road behind you stretches long and empty.
-  ...
+    The road behind you stretches long and empty.
+    ...
 ```
 
 ## Custom Renderer
@@ -122,21 +122,21 @@ chapter.one.intro: |
 If you're building a custom renderer (not using `GameShell`), render the interlude yourself:
 
 ```tsx
-import { Interlude } from "@doodle-engine/react";
+import { Interlude } from '@doodle-engine/react';
 
 function MyRenderer() {
-  const { snapshot, actions } = useGame();
+    const { snapshot, actions } = useGame();
 
-  if (snapshot.pendingInterlude) {
-    return (
-      <Interlude
-        interlude={snapshot.pendingInterlude}
-        onDismiss={actions.dismissInterlude}
-      />
-    );
-  }
+    if (snapshot.pendingInterlude) {
+        return (
+            <Interlude
+                interlude={snapshot.pendingInterlude}
+                onDismiss={actions.dismissInterlude}
+            />
+        );
+    }
 
-  return <div>...</div>;
+    return <div>...</div>;
 }
 ```
 

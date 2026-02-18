@@ -151,7 +151,7 @@ Characters' `dialogue` field must reference existing dialogue IDs:
 ```yaml
 # content/characters/bartender.yaml
 id: bartender
-name: "Old Pete"
+name: 'Old Pete'
 dialogue: bartender_greeting # Must exist in content/dialogues/
 ```
 
@@ -170,8 +170,8 @@ All `@key` references must exist in at least one locale file:
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: "@location.tavern.name" # Must exist in locales/*.yaml
-description: "@location.tavern.desc" # Must exist in locales/*.yaml
+name: '@location.tavern.name' # Must exist in locales/*.yaml
+description: '@location.tavern.desc' # Must exist in locales/*.yaml
 ```
 
 Example error:
@@ -257,7 +257,7 @@ Character "merchant" references non-existent dialogue "merchant_chat"
 ```yaml
 # content/characters/merchant.yaml
 id: merchant
-name: "Merchant"
+name: 'Merchant'
 dialogue: merchant_intro # Fix: changed from merchant_chat
 ```
 
@@ -275,8 +275,8 @@ Localization key "@location.tavern.name" not found in any locale file
 
 ```yaml
 # content/locales/en.yaml
-location.tavern.name: "The Rusty Tankard"
-location.tavern.desc: "A cozy tavern with warm firelight."
+location.tavern.name: 'The Rusty Tankard'
+location.tavern.desc: 'A cozy tavern with warm firelight.'
 ```
 
 ## Validation in CI/CD
@@ -290,15 +290,15 @@ name: Validate Content
 on: [push, pull_request]
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm install
-      - run: npx doodle validate
+    validate:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - run: npm install
+            - run: npx doodle validate
 ```
 
 `npx doodle validate` exits with code 1 if errors are found, which fails the CI build.
