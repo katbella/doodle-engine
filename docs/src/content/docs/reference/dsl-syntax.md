@@ -147,6 +147,7 @@ END
 ```
 
 Choices are shown to the player as clickable options. They can have:
+
 - **Conditions**: choice is hidden if any condition fails
 - **Effects**: run when the choice is selected
 - **GOTO**: required unless the choice terminates the dialogue
@@ -258,11 +259,13 @@ The player sees the bartender's line, then the engine advances to `start` immedi
 ### IF vs CHOICE REQUIRE
 
 **IF blocks** (author-controlled branching):
+
 - Invisible to the player
 - First passing condition wins
 - Used for conditional story flow based on game state
 
 **CHOICE REQUIRE** (player-facing filtering):
+
 - All passing choices are shown to the player
 - Player selects which one to take
 - Used for gating options behind requirements (e.g., "needs 50 gold")

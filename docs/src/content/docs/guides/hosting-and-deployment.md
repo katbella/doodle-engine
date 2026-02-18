@@ -12,6 +12,7 @@ npm run build        # or: yarn build / pnpm build
 ```
 
 This produces a `dist/` directory containing:
+
 - `index.html`: entry point
 - `assets/`: bundled JavaScript and CSS
 - Any static files from your project root (images, audio, video)
@@ -19,6 +20,7 @@ This produces a `dist/` directory containing:
 ## Static Hosting
 
 The build output is fully static — upload the `dist/` folder to any static host. Most hosts need:
+
 - **Build command**: `npm run build`
 - **Publish directory**: `dist`
 
@@ -30,7 +32,7 @@ For small games, bundle everything in `dist/`. For games with large media files,
 
 ```tsx
 <GameShell
-  audioOptions={{ audioBasePath: 'https://cdn.example.com/audio' }}
+  audioOptions={{ audioBasePath: "https://cdn.example.com/audio" }}
   videoBasePath="https://cdn.example.com/video"
 />
 ```
@@ -40,11 +42,13 @@ For small games, bundle everything in `dist/`. For games with large media files,
 Doodle Engine games can be packaged as desktop applications using standard web-to-desktop wrappers. No special engine configuration is needed.
 
 **[Electron](https://www.electronjs.org/)** — wraps your game in a Chromium window:
+
 1. Build with `npm run build`
 2. Create an Electron main process that loads `dist/index.html`
 3. Package with `electron-builder` or `electron-forge`
 
 **[Tauri](https://tauri.app/)** — lighter alternative using the system webview:
+
 1. Build with `npm run build`
 2. Point Tauri's `devPath` at your `dist/` directory
 3. Build with `tauri build`

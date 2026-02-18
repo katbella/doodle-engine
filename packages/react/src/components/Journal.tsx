@@ -2,16 +2,16 @@
  * Journal - Displays unlocked journal entries and quests
  */
 
-import React from 'react'
-import type { SnapshotQuest, SnapshotJournalEntry } from '@doodle-engine/core'
+import React from "react";
+import type { SnapshotQuest, SnapshotJournalEntry } from "@doodle-engine/core";
 
 export interface JournalProps {
-  quests: SnapshotQuest[]
-  entries: SnapshotJournalEntry[]
-  className?: string
+  quests: SnapshotQuest[];
+  entries: SnapshotJournalEntry[];
+  className?: string;
 }
 
-export function Journal({ quests, entries, className = '' }: JournalProps) {
+export function Journal({ quests, entries, className = "" }: JournalProps) {
   return (
     <div className={`journal ${className}`}>
       <h2>Journal</h2>
@@ -33,7 +33,10 @@ export function Journal({ quests, entries, className = '' }: JournalProps) {
         <div className="journal-entries">
           <h3>Entries</h3>
           {entries.map((entry) => (
-            <div key={entry.id} className={`journal-entry journal-category-${entry.category}`}>
+            <div
+              key={entry.id}
+              className={`journal-entry journal-category-${entry.category}`}
+            >
               <div className="entry-title">{entry.title}</div>
               <div className="entry-text">{entry.text}</div>
             </div>
@@ -45,5 +48,5 @@ export function Journal({ quests, entries, className = '' }: JournalProps) {
         <p className="journal-empty">No entries yet</p>
       )}
     </div>
-  )
+  );
 }

@@ -17,15 +17,15 @@ dialogue: bartender_greeting
 stats: {}
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique identifier, used in dialogue speaker lines and effects |
-| `name` | Display name (supports `@key` localization) |
-| `biography` | Character background text |
-| `portrait` | Portrait image |
-| `location` | Starting location ID |
-| `dialogue` | Dialogue ID when the player talks to them |
-| `stats` | Extensible stats object (e.g., `{ level: 5, class: "warrior" }`) |
+| Field       | Description                                                      |
+| ----------- | ---------------------------------------------------------------- |
+| `id`        | Unique identifier, used in dialogue speaker lines and effects    |
+| `name`      | Display name (supports `@key` localization)                      |
+| `biography` | Character background text                                        |
+| `portrait`  | Portrait image                                                   |
+| `location`  | Starting location ID                                             |
+| `dialogue`  | Dialogue ID when the player talks to them                        |
+| `stats`     | Extensible stats object (e.g., `{ level: 5, class: "warrior" }`) |
 
 ## Characters at Location vs Party
 
@@ -42,8 +42,8 @@ When a player clicks a character in `charactersHere`, the engine calls `talkTo(c
 
 ```tsx
 // In a custom renderer
-const { actions } = useGame()
-actions.talkTo('bartender')
+const { actions } = useGame();
+actions.talkTo("bartender");
 ```
 
 ## Relationships

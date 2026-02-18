@@ -18,14 +18,14 @@ music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `name` | `string` | Display name (supports `@key`) |
-| `description` | `string` | Text shown at this location |
-| `banner` | `string` | Banner image filename |
-| `music` | `string` | Background music track |
-| `ambient` | `string` | Ambient sound loop |
+| Field         | Type     | Description                    |
+| ------------- | -------- | ------------------------------ |
+| `id`          | `string` | Unique identifier              |
+| `name`        | `string` | Display name (supports `@key`) |
+| `description` | `string` | Text shown at this location    |
+| `banner`      | `string` | Banner image filename          |
+| `music`       | `string` | Background music track         |
+| `ambient`     | `string` | Ambient sound loop             |
 
 ## Character
 
@@ -41,15 +41,15 @@ dialogue: bartender_greeting
 stats: {}
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `name` | `string` | Display name (supports `@key`) |
-| `biography` | `string` | Character background text |
-| `portrait` | `string` | Portrait image filename |
-| `location` | `string` | Starting location ID |
-| `dialogue` | `string` | Dialogue ID for conversations |
-| `stats` | `Record<string, unknown>` | Extensible stats object |
+| Field       | Type                      | Description                    |
+| ----------- | ------------------------- | ------------------------------ |
+| `id`        | `string`                  | Unique identifier              |
+| `name`      | `string`                  | Display name (supports `@key`) |
+| `biography` | `string`                  | Character background text      |
+| `portrait`  | `string`                  | Portrait image filename        |
+| `location`  | `string`                  | Starting location ID           |
+| `dialogue`  | `string`                  | Dialogue ID for conversations  |
+| `stats`     | `Record<string, unknown>` | Extensible stats object        |
 
 ## Item
 
@@ -65,15 +65,15 @@ location: inventory
 stats: {}
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `name` | `string` | Display name (supports `@key`) |
-| `description` | `string` | Full description |
-| `icon` | `string` | Small icon for inventory grid |
-| `image` | `string` | Large image for detail view |
-| `location` | `string` | Starting location: location ID, `"inventory"`, or character ID |
-| `stats` | `Record<string, unknown>` | Extensible stats object |
+| Field         | Type                      | Description                                                    |
+| ------------- | ------------------------- | -------------------------------------------------------------- |
+| `id`          | `string`                  | Unique identifier                                              |
+| `name`        | `string`                  | Display name (supports `@key`)                                 |
+| `description` | `string`                  | Full description                                               |
+| `icon`        | `string`                  | Small icon for inventory grid                                  |
+| `image`       | `string`                  | Large image for detail view                                    |
+| `location`    | `string`                  | Starting location: location ID, `"inventory"`, or character ID |
+| `stats`       | `Record<string, unknown>` | Extensible stats object                                        |
 
 ## Map
 
@@ -93,21 +93,21 @@ locations:
     y: 200
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `name` | `string` | Display name (supports `@key`) |
-| `image` | `string` | Map background image |
-| `scale` | `number` | Distance-to-travel-time multiplier |
-| `locations` | `MapLocation[]` | Location markers |
+| Field       | Type            | Description                        |
+| ----------- | --------------- | ---------------------------------- |
+| `id`        | `string`        | Unique identifier                  |
+| `name`      | `string`        | Display name (supports `@key`)     |
+| `image`     | `string`        | Map background image               |
+| `scale`     | `number`        | Distance-to-travel-time multiplier |
+| `locations` | `MapLocation[]` | Location markers                   |
 
 ### MapLocation
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Location ID (must match a location entity) |
-| `x` | `number` | X coordinate on the map image |
-| `y` | `number` | Y coordinate on the map image |
+| Field | Type     | Description                                |
+| ----- | -------- | ------------------------------------------ |
+| `id`  | `string` | Location ID (must match a location entity) |
+| `x`   | `number` | X coordinate on the map image              |
+| `y`   | `number` | Y coordinate on the map image              |
 
 ## Quest
 
@@ -126,19 +126,19 @@ stages:
     description: "@quest.odd_jobs.stage.complete"
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `name` | `string` | Display name (supports `@key`) |
-| `description` | `string` | Quest description |
-| `stages` | `QuestStage[]` | Ordered list of quest stages |
+| Field         | Type           | Description                    |
+| ------------- | -------------- | ------------------------------ |
+| `id`          | `string`       | Unique identifier              |
+| `name`        | `string`       | Display name (supports `@key`) |
+| `description` | `string`       | Quest description              |
+| `stages`      | `QuestStage[]` | Ordered list of quest stages   |
 
 ### QuestStage
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Stage identifier (used with `SET questStage`) |
-| `description` | `string` | Text shown in journal for this stage |
+| Field         | Type     | Description                                   |
+| ------------- | -------- | --------------------------------------------- |
+| `id`          | `string` | Stage identifier (used with `SET questStage`) |
+| `description` | `string` | Text shown in journal for this stage          |
 
 ## JournalEntry
 
@@ -151,11 +151,11 @@ text: "@journal.tavern_discovery.text"
 category: places
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique identifier |
-| `title` | `string` | Display title (supports `@key`) |
-| `text` | `string` | Entry content |
+| Field      | Type     | Description                                                               |
+| ---------- | -------- | ------------------------------------------------------------------------- |
+| `id`       | `string` | Unique identifier                                                         |
+| `title`    | `string` | Display title (supports `@key`)                                           |
+| `text`     | `string` | Entry content                                                             |
 | `category` | `string` | Category for grouping (e.g., `"lore"`, `"people"`, `"places"`, `"quest"`) |
 
 ## Interlude
@@ -172,20 +172,20 @@ text: |
   Ahead, the lights of town flicker through the evening mist.
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `string` | Yes | Unique identifier |
-| `background` | `string` | Yes | Background image path |
-| `text` | `string` | Yes | Narrative text (supports `@key`) |
-| `banner` | `string` | No | Optional decorative frame/border image |
-| `music` | `string` | No | Music track to play |
-| `voice` | `string` | No | Narration audio file |
-| `sounds` | `string[]` | No | Ambient sounds to play |
-| `scroll` | `boolean` | No | Auto-scroll text (default: `true`) |
-| `scrollSpeed` | `number` | No | Auto-scroll speed in px/s (default: `30`) |
-| `triggerLocation` | `string` | No | Location ID where this auto-triggers on enter |
-| `triggerConditions` | `Condition[]` | No | Conditions that must pass for auto-trigger |
-| `effects` | `Effect[]` | No | Effects applied when the interlude triggers (e.g. set a "seen" flag) |
+| Field               | Type          | Required | Description                                                          |
+| ------------------- | ------------- | -------- | -------------------------------------------------------------------- |
+| `id`                | `string`      | Yes      | Unique identifier                                                    |
+| `background`        | `string`      | Yes      | Background image path                                                |
+| `text`              | `string`      | Yes      | Narrative text (supports `@key`)                                     |
+| `banner`            | `string`      | No       | Optional decorative frame/border image                               |
+| `music`             | `string`      | No       | Music track to play                                                  |
+| `voice`             | `string`      | No       | Narration audio file                                                 |
+| `sounds`            | `string[]`    | No       | Ambient sounds to play                                               |
+| `scroll`            | `boolean`     | No       | Auto-scroll text (default: `true`)                                   |
+| `scrollSpeed`       | `number`      | No       | Auto-scroll speed in px/s (default: `30`)                            |
+| `triggerLocation`   | `string`      | No       | Location ID where this auto-triggers on enter                        |
+| `triggerConditions` | `Condition[]` | No       | Conditions that must pass for auto-trigger                           |
+| `effects`           | `Effect[]`    | No       | Effects applied when the interlude triggers (e.g. set a "seen" flag) |
 
 Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling to `triggerLocation` if all `triggerConditions` pass. See the [Interludes guide](/doodle-engine/guides/interludes/).
 
@@ -207,14 +207,14 @@ startVariables:
 startInventory: []
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Must be `"game"` |
-| `startLocation` | `string` | Starting location ID |
-| `startTime` | `{ day: number, hour: number }` | Starting time |
-| `startFlags` | `Record<string, boolean>` | Initial flags |
-| `startVariables` | `Record<string, number \| string>` | Initial variables |
-| `startInventory` | `string[]` | Item IDs the player starts with |
+| Field            | Type                               | Description                     |
+| ---------------- | ---------------------------------- | ------------------------------- |
+| `id`             | `string`                           | Must be `"game"`                |
+| `startLocation`  | `string`                           | Starting location ID            |
+| `startTime`      | `{ day: number, hour: number }`    | Starting time                   |
+| `startFlags`     | `Record<string, boolean>`          | Initial flags                   |
+| `startVariables` | `Record<string, number \| string>` | Initial variables               |
+| `startInventory` | `string[]`                         | Item IDs the player starts with |
 
 ## Locale
 
@@ -230,8 +230,8 @@ character.bartender.name: "Greta"
 bartender.greeting: "Welcome! What can I do for you?"
 ```
 
-| Key | Value |
-|-----|-------|
+| Key        | Value           |
+| ---------- | --------------- |
 | Any string | Translated text |
 
 Referenced with `@key` syntax in other content files. See [Localization](/doodle-engine/guides/localization/).

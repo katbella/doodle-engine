@@ -8,7 +8,7 @@ description: Using GameShell for splash screens, title menus, pause, settings, a
 ## Basic Usage
 
 ```tsx
-import { GameShell } from '@doodle-engine/react'
+import { GameShell } from "@doodle-engine/react";
 
 <GameShell
   registry={registry}
@@ -16,10 +16,11 @@ import { GameShell } from '@doodle-engine/react'
   manifest={manifest}
   title="My Game"
   subtitle="A text-based adventure"
-/>
+/>;
 ```
 
 This gives you:
+
 - An asset loading screen before any game content renders
 - A splash screen (if `shell.splash` is configured in `game.yaml`)
 - A title screen with New Game, Continue (if save exists), and Settings
@@ -46,6 +47,7 @@ If `shell.splash` is not defined, the splash screen is skipped and the game goes
 ## Title Screen
 
 The title screen shows:
+
 - The logo image (if `shell.title.logo` is configured in `game.yaml`)
 - Game title and subtitle
 - **New Game** button
@@ -55,6 +57,7 @@ The title screen shows:
 ## Pause Menu
 
 During gameplay, click the **Menu** button or press **Escape** to open the pause menu with:
+
 - **Resume**: close the menu
 - **Save**: save to localStorage
 - **Load**: load from localStorage
@@ -64,6 +67,7 @@ During gameplay, click the **Menu** button or press **Escape** to open the pause
 ## Settings Panel
 
 The settings panel provides:
+
 - Volume sliders (Master, Music, Sound Effects, Voice, UI)
 - Language selection (if `availableLocales` is provided)
 
@@ -72,9 +76,9 @@ The settings panel provides:
   registry={registry}
   config={config}
   availableLocales={[
-    { code: 'en', label: 'English' },
-    { code: 'es', label: 'Español' },
-    { code: 'fr', label: 'Français' },
+    { code: "en", label: "English" },
+    { code: "es", label: "Español" },
+    { code: "fr", label: "Français" },
   ]}
 />
 ```
@@ -128,7 +132,7 @@ Pass audio options to configure the game audio manager:
 ```tsx
 <GameShell
   audioOptions={{
-    audioBasePath: '/audio',
+    audioBasePath: "/audio",
     masterVolume: 1.0,
     musicVolume: 0.7,
     soundVolume: 0.8,
@@ -153,7 +157,7 @@ import {
   useGame,
   useAudioManager,
   useUISounds,
-} from '@doodle-engine/react'
+} from "@doodle-engine/react";
 ```
 
 See [Custom Renderer](/doodle-engine/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/doodle-engine/reference/react-components/) for individual component props.

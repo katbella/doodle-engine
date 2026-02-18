@@ -66,6 +66,7 @@ npx doodle validate
 ```
 
 This is useful for:
+
 - Quick content checks before committing
 - CI/CD pipelines (validation returns exit code 1 on errors)
 - Manual testing of specific changes
@@ -90,18 +91,18 @@ content/dialogues/bartender_greeting.dlg
 
 All conditions must have their required arguments:
 
-| Condition | Required Arguments |
-|-----------|-------------------|
-| `hasFlag`, `notFlag` | `flag` |
-| `hasItem`, `notItem` | `itemId` |
-| `questAtStage` | `questId`, `stageId` |
-| `atLocation` | `locationId` |
-| `characterAt` | `characterId`, `locationId` |
-| `characterInParty` | `characterId` |
-| `relationshipAbove`, `relationshipBelow` | `characterId`, `value` |
-| `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value` |
-| `itemAt` | `itemId`, `locationId` |
-| `timeIs` | at least one of `hour` or `day` |
+| Condition                                                   | Required Arguments              |
+| ----------------------------------------------------------- | ------------------------------- |
+| `hasFlag`, `notFlag`                                        | `flag`                          |
+| `hasItem`, `notItem`                                        | `itemId`                        |
+| `questAtStage`                                              | `questId`, `stageId`            |
+| `atLocation`                                                | `locationId`                    |
+| `characterAt`                                               | `characterId`, `locationId`     |
+| `characterInParty`                                          | `characterId`                   |
+| `relationshipAbove`, `relationshipBelow`                    | `characterId`, `value`          |
+| `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value`             |
+| `itemAt`                                                    | `itemId`, `locationId`          |
+| `timeIs`                                                    | at least one of `hour` or `day` |
 
 Example error:
 
@@ -114,27 +115,27 @@ content/dialogues/bartender_greeting.dlg
 
 All effects must have their required arguments:
 
-| Effect | Required Arguments |
-|--------|-------------------|
-| `setFlag`, `clearFlag` | `flag` |
-| `setVariable`, `addVariable` | `variable`, `value` |
-| `addItem`, `removeItem` | `itemId` |
-| `moveItem` | `itemId`, `locationId` |
-| `setQuestStage` | `questId`, `stageId` |
-| `addJournalEntry` | `entryId` |
-| `setCharacterLocation` | `characterId`, `locationId` |
-| `addToParty`, `removeFromParty` | `characterId` |
-| `setRelationship`, `addRelationship` | `characterId`, `value` |
+| Effect                                 | Required Arguments             |
+| -------------------------------------- | ------------------------------ |
+| `setFlag`, `clearFlag`                 | `flag`                         |
+| `setVariable`, `addVariable`           | `variable`, `value`            |
+| `addItem`, `removeItem`                | `itemId`                       |
+| `moveItem`                             | `itemId`, `locationId`         |
+| `setQuestStage`                        | `questId`, `stageId`           |
+| `addJournalEntry`                      | `entryId`                      |
+| `setCharacterLocation`                 | `characterId`, `locationId`    |
+| `addToParty`, `removeFromParty`        | `characterId`                  |
+| `setRelationship`, `addRelationship`   | `characterId`, `value`         |
 | `setCharacterStat`, `addCharacterStat` | `characterId`, `stat`, `value` |
-| `setMapEnabled` | `enabled` |
-| `advanceTime` | `hours` |
-| `goToLocation` | `locationId` |
-| `startDialogue` | `dialogueId` |
-| `playMusic` | `track` |
-| `playSound` | `sound` |
-| `playVideo` | `file` |
-| `notify` | `message` |
-| `endDialogue` | *(none)* |
+| `setMapEnabled`                        | `enabled`                      |
+| `advanceTime`                          | `hours`                        |
+| `goToLocation`                         | `locationId`                   |
+| `startDialogue`                        | `dialogueId`                   |
+| `playMusic`                            | `track`                        |
+| `playSound`                            | `sound`                        |
+| `playVideo`                            | `file`                         |
+| `notify`                               | `message`                      |
+| `endDialogue`                          | _(none)_                       |
 
 Example error:
 
@@ -151,7 +152,7 @@ Characters' `dialogue` field must reference existing dialogue IDs:
 # content/characters/bartender.yaml
 id: bartender
 name: "Old Pete"
-dialogue: bartender_greeting  # Must exist in content/dialogues/
+dialogue: bartender_greeting # Must exist in content/dialogues/
 ```
 
 Example error:
@@ -169,8 +170,8 @@ All `@key` references must exist in at least one locale file:
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: "@location.tavern.name"        # Must exist in locales/*.yaml
-description: "@location.tavern.desc"  # Must exist in locales/*.yaml
+name: "@location.tavern.name" # Must exist in locales/*.yaml
+description: "@location.tavern.desc" # Must exist in locales/*.yaml
 ```
 
 Example error:
@@ -186,6 +187,7 @@ content/locations/tavern.yaml
 ### GOTO Target Not Found
 
 **Error:**
+
 ```
 Node "greet" GOTO "continue" points to non-existent node
 ```
@@ -206,6 +208,7 @@ NODE continue  # Add this node
 ### Duplicate Node IDs
 
 **Error:**
+
 ```
 Duplicate node ID "greet"
 ```
@@ -225,6 +228,7 @@ NODE greet_again  # Changed from "greet"
 ### Missing Required Argument
 
 **Error:**
+
 ```
 Node "greet" condition "hasFlag" missing required "flag" argument
 ```
@@ -241,6 +245,7 @@ REQUIRE hasFlag("quest_started")  # Add the flag name in quotes
 ### Character References Non-Existent Dialogue
 
 **Error:**
+
 ```
 Character "merchant" references non-existent dialogue "merchant_chat"
 ```
@@ -253,12 +258,13 @@ Character "merchant" references non-existent dialogue "merchant_chat"
 # content/characters/merchant.yaml
 id: merchant
 name: "Merchant"
-dialogue: merchant_intro  # Fix: changed from merchant_chat
+dialogue: merchant_intro # Fix: changed from merchant_chat
 ```
 
 ### Localization Key Not Found
 
 **Error:**
+
 ```
 Localization key "@location.tavern.name" not found in any locale file
 ```
@@ -314,11 +320,13 @@ jobs:
 Validation catches **structural errors** but not **logic errors**:
 
 ✅ **Catches:**
+
 - Missing nodes
 - Missing required arguments
 - Non-existent references
 
 ❌ **Doesn't catch:**
+
 - Dialogue that doesn't make narrative sense
 - Incorrectly set flags (e.g., setting `quest_completed` too early)
 - Logic that creates softlocks or dead ends

@@ -3,7 +3,7 @@
  * Save files contain game state plus metadata.
  */
 
-import type { GameState } from './state'
+import type { GameState } from "./state";
 
 /**
  * Save file data structure.
@@ -11,11 +11,11 @@ import type { GameState } from './state'
  */
 export interface SaveData {
   /** Save file format version (for migration handling) */
-  version: string
+  version: string;
 
   /** ISO 8601 timestamp of when this save was created */
-  timestamp: string
+  timestamp: string;
 
   /** The complete game state */
-  state: GameState
+  state: GameState;
 }

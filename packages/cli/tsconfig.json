@@ -11,8 +11,5 @@
   },
   "include": ["src"],
   "exclude": ["src/templates"],
-  "references": [
-    { "path": "../core" },
-    { "path": "../react" }
-  ]
+  "references": [{ "path": "../core" }, { "path": "../react" }]
 }

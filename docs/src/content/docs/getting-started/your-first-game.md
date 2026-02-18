@@ -83,6 +83,7 @@ NODE farewell
 ```
 
 Key concepts:
+
 - `NODE` defines a conversation point
 - `BARTENDER:` sets the speaker (matches character ID, case-insensitive)
 - `CHOICE` blocks define what the player can say
@@ -98,6 +99,7 @@ npm run dev
 ```
 
 The dev server:
+
 1. Loads all content from `content/`
 2. Parses `.dlg` files into dialogue entities
 3. Serves content via `/api/content`
@@ -110,31 +112,40 @@ Open `http://localhost:3000` to see your tavern, talk to the bartender, and expl
 The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides splash screen, title screen, pause menu, settings, and video support out of the box:
 
 ```tsx
-import { useEffect, useState } from 'react'
-import type { ContentRegistry, GameConfig, AssetManifest } from '@doodle-engine/core'
-import { GameShell } from '@doodle-engine/react'
+import { useEffect, useState } from "react";
+import type {
+  ContentRegistry,
+  GameConfig,
+  AssetManifest,
+} from "@doodle-engine/core";
+import { GameShell } from "@doodle-engine/react";
 
 export function App() {
   const [content, setContent] = useState<{
-    registry: ContentRegistry
-    config: GameConfig
-    manifest: AssetManifest
-  } | null>(null)
+    registry: ContentRegistry;
+    config: GameConfig;
+    manifest: AssetManifest;
+  } | null>(null);
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/content').then((res) => res.json()),
-      fetch('/api/manifest').then((res) => res.json()),
+      fetch("/api/content").then((res) => res.json()),
+      fetch("/api/manifest").then((res) => res.json()),
     ]).then(([contentData, manifestData]) => {
       setContent({
         registry: contentData.registry,
         config: contentData.config,
         manifest: manifestData,
-      })
-    })
-  }, [])
+      });
+    });
+  }, []);
 
-  if (!content) return <div className="app-bootstrap"><div className="spinner" /></div>
+  if (!content)
+    return (
+      <div className="app-bootstrap">
+        <div className="spinner" />
+      </div>
+    );
 
   return (
     <GameShell
@@ -143,9 +154,9 @@ export function App() {
       manifest={content.manifest}
       title="My Game"
       subtitle="A text-based adventure"
-      availableLocales={[{ code: 'en', label: 'English' }]}
+      availableLocales={[{ code: "en", label: "English" }]}
     />
-  )
+  );
 }
 ```
 

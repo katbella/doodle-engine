@@ -2,22 +2,22 @@
  * CharacterList - Displays characters at current location
  */
 
-import React from 'react'
-import type { SnapshotCharacter } from '@doodle-engine/core'
+import React from "react";
+import type { SnapshotCharacter } from "@doodle-engine/core";
 
 export interface CharacterListProps {
-  characters: SnapshotCharacter[]
-  onTalkTo: (characterId: string) => void
-  className?: string
+  characters: SnapshotCharacter[];
+  onTalkTo: (characterId: string) => void;
+  className?: string;
 }
 
 export function CharacterList({
   characters,
   onTalkTo,
-  className = '',
+  className = "",
 }: CharacterListProps) {
   if (characters.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -42,5 +42,5 @@ export function CharacterList({
         ))}
       </div>
     </div>
-  )
+  );
 }

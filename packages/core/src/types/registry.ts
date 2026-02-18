@@ -15,7 +15,7 @@ import type {
   Quest,
   JournalEntry,
   Interlude,
-} from './entities'
+} from "./entities";
 
 /**
  * Localization dictionary mapping keys to translated strings.
@@ -29,7 +29,7 @@ import type {
  * ```
  */
 export interface LocaleData {
-  [key: string]: string
+  [key: string]: string;
 }
 
 /**
@@ -38,29 +38,29 @@ export interface LocaleData {
  */
 export interface ContentRegistry {
   /** All locations indexed by ID */
-  locations: Record<string, Location>
+  locations: Record<string, Location>;
 
   /** All characters indexed by ID */
-  characters: Record<string, Character>
+  characters: Record<string, Character>;
 
   /** All items indexed by ID */
-  items: Record<string, Item>
+  items: Record<string, Item>;
 
   /** All maps indexed by ID */
-  maps: Record<string, Map>
+  maps: Record<string, Map>;
 
   /** All dialogues indexed by ID */
-  dialogues: Record<string, Dialogue>
+  dialogues: Record<string, Dialogue>;
 
   /** All quests indexed by ID */
-  quests: Record<string, Quest>
+  quests: Record<string, Quest>;
 
   /** All journal entries indexed by ID */
-  journalEntries: Record<string, JournalEntry>
+  journalEntries: Record<string, JournalEntry>;
 
   /** All interludes indexed by ID */
-  interludes: Record<string, Interlude>
+  interludes: Record<string, Interlude>;
 
   /** All locales indexed by language code (e.g., "en", "es") */
-  locales: Record<string, LocaleData>
+  locales: Record<string, LocaleData>;
 }

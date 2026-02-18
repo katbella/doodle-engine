@@ -54,19 +54,19 @@ MUSIC tension_theme.ogg
 The `useAudioManager` hook manages all audio playback automatically based on the snapshot:
 
 ```tsx
-import { useAudioManager } from '@doodle-engine/react'
+import { useAudioManager } from "@doodle-engine/react";
 
 function MyGame() {
-  const { snapshot } = useGame()
+  const { snapshot } = useGame();
 
   const audioControls = useAudioManager(snapshot, {
-    audioBasePath: '/audio',
+    audioBasePath: "/audio",
     masterVolume: 1.0,
     musicVolume: 0.7,
     soundVolume: 0.8,
     voiceVolume: 1.0,
     crossfadeDuration: 1000,
-  })
+  });
 
   // audioControls provides volume setters and stopAll
 }
@@ -74,24 +74,24 @@ function MyGame() {
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `audioBasePath` | `string` | `'/audio'` | Base path for audio files |
-| `masterVolume` | `number` | `1.0` | Master volume (0-1) |
-| `musicVolume` | `number` | `0.7` | Music channel volume (0-1) |
-| `soundVolume` | `number` | `0.8` | Sound effects volume (0-1) |
-| `voiceVolume` | `number` | `1.0` | Voice channel volume (0-1) |
-| `crossfadeDuration` | `number` | `1000` | Crossfade time in ms |
+| Option              | Type     | Default    | Description                |
+| ------------------- | -------- | ---------- | -------------------------- |
+| `audioBasePath`     | `string` | `'/audio'` | Base path for audio files  |
+| `masterVolume`      | `number` | `1.0`      | Master volume (0-1)        |
+| `musicVolume`       | `number` | `0.7`      | Music channel volume (0-1) |
+| `soundVolume`       | `number` | `0.8`      | Sound effects volume (0-1) |
+| `voiceVolume`       | `number` | `1.0`      | Voice channel volume (0-1) |
+| `crossfadeDuration` | `number` | `1000`     | Crossfade time in ms       |
 
 ### Controls
 
 ```typescript
 interface AudioManagerControls {
-  setMasterVolume: (volume: number) => void
-  setMusicVolume: (volume: number) => void
-  setSoundVolume: (volume: number) => void
-  setVoiceVolume: (volume: number) => void
-  stopAll: () => void
+  setMasterVolume: (volume: number) => void;
+  setMusicVolume: (volume: number) => void;
+  setSoundVolume: (volume: number) => void;
+  setVoiceVolume: (volume: number) => void;
+  stopAll: () => void;
 }
 ```
 
@@ -147,11 +147,7 @@ const uiSounds = useUISounds({
 If you're using `GameShell`, UI sounds are built in. Configure them via the `uiSounds` prop:
 
 ```tsx
-<GameShell
-  registry={registry}
-  config={config}
-  uiSounds={{ volume: 0.5 }}
-/>
+<GameShell registry={registry} config={config} uiSounds={{ volume: 0.5 }} />
 ```
 
 ### UI Sound File Organization
@@ -172,4 +168,3 @@ assets/
     voice/
       bartender_greeting.ogg
 ```
-
