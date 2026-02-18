@@ -1,18 +1,18 @@
 # This dialogue is triggered by clicking the bartender character.
-# SPEAKER: lines set who's talking — matched to character ID (case-insensitive).
+# SPEAKER: lines set who's talking, matched to character ID (case-insensitive).
 # Nodes can have multiple CHOICE blocks; REQUIRE hides a choice if the condition fails.
 
 NODE start
   BARTENDER: @bartender.greeting
 
-  # Always available — ask for rumors (demonstrates: flag, relationship, journalEntry)
+  # Always available: ask for rumors (demonstrates: flag, relationship, journalEntry)
   CHOICE @bartender.choice.whats_news
     SET flag metBartender
     ADD relationship bartender 1
     GOTO rumors
   END
 
-  # Always available — buy a drink (demonstrates: variable change, flag)
+  # Always available: buy a drink (demonstrates: variable change, flag)
   CHOICE @bartender.choice.order_drink
     GOTO order_drink
   END
@@ -75,7 +75,7 @@ NODE order_drink
     GOTO after_drink
   END
 
-  # Try to bluff a free drink — rolls dice inline (demonstrates: ROLL + GOTO within one dialogue)
+  # Try to bluff a free drink. Rolls dice inline (demonstrates: ROLL + GOTO within one dialogue)
   CHOICE @bartender.choice.try_bluff
     GOTO bluff_attempt
   END
@@ -86,7 +86,7 @@ NODE order_drink
   END
 
 NODE bluff_attempt
-  # Roll happens immediately on entering this node — auto-advances to success or failure
+  # Roll happens immediately on entering this node. Auto-advances to success or failure.
   ROLL bluffRoll 1 20
   IF variableGreaterThan bluffRoll 14
     GOTO bluff_success

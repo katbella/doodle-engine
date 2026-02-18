@@ -57,12 +57,12 @@ content/characters/merchant.yaml
 Build failed due to validation errors.
 ```
 
-### Manual Validation (`npx doodle validate`)
+### Manual Validation (`npm run validate`)
 
 You can run validation manually without starting the dev server or building:
 
 ```bash
-npx doodle validate
+npm run validate
 ```
 
 This is useful for:
@@ -298,16 +298,16 @@ jobs:
               with:
                   node-version: 24
             - run: npm install
-            - run: npx doodle validate
+            - run: npm run validate
 ```
 
-`npx doodle validate` exits with code 1 if errors are found, which fails the CI build.
+`npm run validate` exits with code 1 if errors are found, which fails the CI build.
 
 ## Best Practices
 
 1. **Fix errors as they appear**: Don't let validation errors accumulate. Fix them immediately when they appear in `npm run dev`.
 
-2. **Run validation before committing**: Add `npx doodle validate` to your pre-commit hook or run it manually before pushing changes.
+2. **Run validation before committing**: Run `npm run validate` before pushing changes to catch errors early.
 
 3. **Use descriptive IDs**: Clear node IDs, quest IDs, and dialogue IDs make validation errors easier to understand.
 

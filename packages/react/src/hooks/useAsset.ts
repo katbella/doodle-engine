@@ -1,6 +1,6 @@
 /**
- * useAsset — hook to get a single asset with loading state.
- * usePrefetch — hook to prefetch assets for upcoming screens.
+ * useAsset: hook to get a single asset with loading state.
+ * usePrefetch: hook to prefetch assets for upcoming screens.
  */
 
 import { useEffect } from 'react';
@@ -19,7 +19,7 @@ export interface UseAssetResult {
 
 /**
  * Hook to get a single asset's loading state.
- * Returns a usable URL immediately — the asset may still be loading.
+ * Returns a usable URL immediately. The asset may still be loading.
  */
 export function useAsset(path: string | undefined): UseAssetResult {
     const { state, getAssetUrl, isReady } = useAssetContext();

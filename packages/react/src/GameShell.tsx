@@ -37,7 +37,7 @@ type Screen = 'splash' | 'title' | 'playing';
 export interface GameShellProps {
     /** Content registry (from /api/content) */
     registry: ContentRegistry;
-    /** Game config (from /api/content) — includes shell config */
+    /** Game config (from /api/content), includes shell config */
     config: GameConfig;
     /** Asset manifest (from /api/manifest) */
     manifest: AssetManifest;

@@ -10,12 +10,12 @@
 
 :root {
     /* Colors */
-    --doodle-bg-primary: #0f0f23;
-    --doodle-bg-secondary: #1a1a2e;
+    --doodle-bg-primary: #121212;
+    --doodle-bg-secondary: #1e1e1e;
     --doodle-text-primary: #ffffff;
-    --doodle-text-secondary: #a0a0b0;
-    --doodle-accent: #6366f1;
-    --doodle-accent-hover: #818cf8;
+    --doodle-text-secondary: #a0a0a0;
+    --doodle-accent: #ffffff;
+    --doodle-accent-hover: #cccccc;
 
     /* Typography */
     --doodle-font-family: system-ui, -apple-system, sans-serif;
@@ -123,7 +123,7 @@
 
 .loading-screen-asset {
     font-size: 0.75rem;
-    color: rgba(160, 160, 176, 0.6);
+    color: color-mix(in srgb, var(--doodle-text-secondary) 60%, transparent);
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -131,7 +131,7 @@
     max-width: 100%;
 }
 
-/* Legacy support — used by old <LoadingScreen message> usage */
+/* Legacy support: used by old <LoadingScreen message> usage */
 .loading-screen-message {
     font-size: var(--doodle-font-size-base);
     color: var(--doodle-text-secondary);
@@ -177,7 +177,7 @@
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Legacy class — kept for backward compat */
+/* Legacy class, kept for backward compat */
 .splash-loading {
     font-size: var(--doodle-font-size-sm);
     color: var(--doodle-text-secondary);
@@ -253,13 +253,13 @@
 
 .title-button:hover,
 .title-button:focus-visible {
-    background: rgba(99, 102, 241, 0.2);
+    background: color-mix(in srgb, var(--doodle-accent) 20%, transparent);
     border-color: var(--doodle-accent);
     outline: none;
 }
 
 .title-button:active {
-    background: rgba(99, 102, 241, 0.35);
+    background: color-mix(in srgb, var(--doodle-accent) 35%, transparent);
 }
 
 /* ── Shared animations ───────────────────────────────────────────── */

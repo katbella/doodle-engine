@@ -1,5 +1,5 @@
 /**
- * AssetProvider — context and loading orchestration for the asset system.
+ * AssetProvider: context and loading orchestration for the asset system.
  *
  * Manages the two-tier loading flow:
  *   loading-shell → loading-game → complete
@@ -27,7 +27,7 @@ import { createAssetLoader } from '@doodle-engine/core';
 export interface AssetContextValue {
     /** Current loading state */
     state: AssetLoadingState;
-    /** Get URL for an asset (returns the path; assets are cached by the loader) */
+    /** Get URL for an asset (returns the path, cached by the loader) */
     getAssetUrl: (path: string) => string;
     /** Check if a specific asset is ready */
     isReady: (path: string) => boolean;
@@ -55,7 +55,7 @@ export interface AssetProviderProps {
     loader?: AssetLoader;
     /** Called when loading state changes */
     onStateChange?: (state: AssetLoadingState) => void;
-    /** Render prop for loading screen — receives state for progress display */
+    /** Render prop for loading screen, receives state for progress display */
     renderLoading?: (state: AssetLoadingState) => ReactNode;
 }
 

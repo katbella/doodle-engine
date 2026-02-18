@@ -2,7 +2,7 @@
  * SplashScreen - Brief studio/logo screen before the title.
  *
  * Reads assets from shell config when available.
- * All assets are optional — renders gracefully with none.
+ * All assets are optional. Renders gracefully with none.
  */
 
 import { useEffect, useRef } from 'react';
@@ -38,7 +38,7 @@ export function SplashScreen({
             audio.volume = 0.8;
             audioRef.current = audio;
             audio.play().catch(() => {
-                // Autoplay may be blocked — fail silently
+                // Autoplay may be blocked. Fail silently.
             });
         }
         return () => {

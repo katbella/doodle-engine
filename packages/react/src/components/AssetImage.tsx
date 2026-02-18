@@ -1,5 +1,5 @@
 /**
- * AssetImage — image component that handles asset loading gracefully.
+ * AssetImage: image component that handles asset loading gracefully.
  *
  * Shows a placeholder while the asset is loading, then fades in.
  * Falls back to a transparent placeholder if no placeholder is given.

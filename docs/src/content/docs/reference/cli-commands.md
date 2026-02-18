@@ -5,6 +5,13 @@ description: Reference for doodle create, doodle dev, doodle build, and doodle v
 
 The `@doodle-engine/cli` package provides four commands: `doodle create`, `doodle dev`, `doodle build`, and `doodle validate`.
 
+In a scaffolded project, these are wired up as npm scripts:
+
+- `npm run dev` runs `doodle dev`
+- `npm run build` runs `doodle build`
+- `npm run validate` runs `doodle validate`
+- `npm run preview` runs `vite preview`
+
 ## doodle create
 
 Scaffold a new game project.
@@ -65,7 +72,7 @@ npm run dev
 Start the development server with content hot-reload.
 
 ```bash
-doodle dev
+npm run dev
 ```
 
 ### What it does
@@ -184,7 +191,7 @@ doodle.inspectRegistry(); // Return content registry object
 Build the game for production.
 
 ```bash
-doodle build
+npm run build
 ```
 
 ### What it does
@@ -215,7 +222,7 @@ npx vite preview
 Validate all game content without building or running the dev server.
 
 ```bash
-doodle validate
+npm run validate
 ```
 
 ### What it validates
@@ -289,5 +296,5 @@ content/characters/merchant.yaml
 ### When to use
 
 - **Before committing**: Validate content changes before pushing to version control
-- **CI/CD pipelines**: Add `doodle validate` to your CI workflow to catch content errors early
+- **CI/CD pipelines**: Add `npm run validate` to your CI workflow to catch content errors early
 - **Manual testing**: Run validation without starting the full dev server
