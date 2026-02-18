@@ -1,14 +1,15 @@
 /**
- * TitleScreen - Main menu with New Game, Continue, Settings
+ * TitleScreen - Main menu with New Game, Continue, Settings.
+ *
+ * Reads logo and background from shell config when available.
+ * All shell assets are optional — renders gracefully with none.
  */
 
+import type { ShellConfig } from '@doodle-engine/core'
+
 export interface TitleScreenProps {
-  /** Game title */
-  title?: string
-  /** Subtitle text */
-  subtitle?: string
-  /** Logo image source */
-  logoSrc?: string
+  /** Shell title config (from game.yaml) */
+  shell?: ShellConfig['title']
   /** Whether a save exists to continue from */
   hasSaveData: boolean
   /** Start a new game */
@@ -17,23 +18,33 @@ export interface TitleScreenProps {
   onContinue: () => void
   /** Open settings */
   onSettings: () => void
+  /** Game title text (shown when no logo) */
+  title?: string
+  /** Subtitle text */
+  subtitle?: string
   /** CSS class */
   className?: string
 }
 
 export function TitleScreen({
-  title = 'Doodle Engine',
-  subtitle,
-  logoSrc,
+  shell,
   hasSaveData,
   onNewGame,
   onContinue,
   onSettings,
+  title = 'Doodle Engine',
+  subtitle,
   className = '',
 }: TitleScreenProps) {
+  const displayLogo = shell?.logo
+
+  const bgStyle = shell?.background
+    ? { backgroundImage: `url(${shell.background})` }
+    : undefined
+
   return (
-    <div className={`title-screen ${className}`}>
-      {logoSrc && <img src={logoSrc} alt={title} className="title-logo" />}
+    <div className={`title-screen ${className}`} style={bgStyle}>
+      {displayLogo && <img src={displayLogo} alt={title} className="title-logo" />}
       <h1 className="title-heading">{title}</h1>
       {subtitle && <p className="title-subtitle">{subtitle}</p>}
       <div className="title-menu">

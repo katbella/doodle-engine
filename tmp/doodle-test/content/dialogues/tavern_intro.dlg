@@ -1,0 +1,22 @@
+# This dialogue triggers automatically when the player enters the tavern.
+# TRIGGER <locationId> fires on arrival. REQUIRE conditions guard the trigger.
+# Use notFlag to make it a one-time intro.
+
+TRIGGER tavern
+REQUIRE notFlag seenTavernIntro
+
+# Each NODE is a conversation point. The first NODE is always the start.
+NODE start
+  # NARRATOR: has no speaker — used for scene-setting text.
+  # @narrator.tavern_intro is a localization key defined in content/locales/en.yaml.
+  # You can also write text inline: NARRATOR: "The tavern is warm and smells of ale."
+  NARRATOR: @narrator.tavern_intro
+
+  # Effects run immediately when this node is reached, before choices are shown.
+  SET flag seenTavernIntro
+
+  # CHOICE text can use a @key or "inline text".
+  # A choice with END dialogue is a terminal choice — no GOTO needed.
+  CHOICE @narrator.choice.look_around
+    END dialogue
+  END

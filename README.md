@@ -36,13 +36,14 @@ The focus is on letting writers iterate quickly.
 
 The engine is written in TypeScript and built around a predictable state model.
 
-- Framework-agnostic core with no UI dependencies  
-- One-way data flow where actions produce snapshots and renderers display them  
-- React renderer with components for dialogue, choices, inventory, journal, map, and characters, plus a complete game shell  
-- Audio support for music, sound effects, and voice lines  
-- Video cutscene playback  
-- Dev tools exposed on `window.doodle` for testing and debugging  
-- CLI for project scaffolding, development, builds, and validation  
+- Framework-agnostic core with no UI dependencies
+- One-way data flow where actions produce snapshots and renderers display them
+- React renderer with components for dialogue, choices, inventory, journal, map, and characters, plus a complete game shell
+- Asset preloading so images and audio are ready before they appear
+- Audio support for music, sound effects, and voice lines
+- Video cutscene playback
+- Dev tools exposed on `window.doodle` for testing and debugging
+- CLI for project scaffolding, development, builds, and validation
 
 The architecture is meant to stay understandable as projects grow.
 

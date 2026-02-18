@@ -21,8 +21,31 @@ export type {
   QuestStage,
   JournalEntry,
   Interlude,
+  ShellConfig,
   GameConfig,
 } from './types/entities'
+
+// Asset Types
+export type {
+  AssetEntry,
+  AssetManifest,
+  AssetLoadingState,
+} from './types/assets'
+
+// Asset Manifest Utilities
+export {
+  getAssetType,
+  extractAssetPaths,
+} from './assets/manifest'
+
+// Asset Loader
+export type {
+  AssetLoader,
+} from './assets/loader'
+
+export {
+  createAssetLoader,
+} from './assets/loader'
 
 // Conditions
 export type {

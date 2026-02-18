@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Engine } from '@doodle-engine/core'
 import type { GameState, Snapshot } from '@doodle-engine/core'
-import { GameProvider, LoadingScreen, useGame } from '@doodle-engine/react'
+import { GameProvider, useGame } from '@doodle-engine/react'
 
 export function App() {
   const [game, setGame] = useState<{ engine: Engine; snapshot: Snapshot } | null>(null)
@@ -17,7 +17,7 @@ export function App() {
   }, [])
 
   if (!game) {
-    return <LoadingScreen />
+    return <div className="app-bootstrap"><div className="spinner" /></div>
   }
 
   return (
