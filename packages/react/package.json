@@ -1,6 +1,6 @@
 {
   "name": "@doodle-engine/react",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "type": "module",
   "main": "./dist/react.cjs",
   "module": "./dist/react.js",
