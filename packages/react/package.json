@@ -10,7 +10,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/react.js",
       "require": "./dist/react.cjs"
-    }
+    },
+    "./style.css": "./dist/shell.css"
   },
   "files": [
     "dist"
