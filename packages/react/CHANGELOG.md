@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.20
+
+### Patch Changes
+
+- 96d5194: fix missing css
+- Updated dependencies [96d5194]
+  - @doodle-engine/core@0.0.20
+
 ## 0.0.19
 
 ### Patch Changes
