@@ -30,25 +30,25 @@ Asset paths referenced in content are resolved relative to the configured asset 
 
 ### Images
 
-| Format | Use Case |
-|--------|----------|
-| PNG | Portraits, icons, UI elements (supports transparency) |
-| JPG | Banners, backgrounds, photos |
-| WebP | Modern alternative to PNG/JPG (smaller files, wide support) |
+| Format | Use Case                                                    |
+| ------ | ----------------------------------------------------------- |
+| PNG    | Portraits, icons, UI elements (supports transparency)       |
+| JPG    | Banners, backgrounds, photos                                |
+| WebP   | Modern alternative to PNG/JPG (smaller files, wide support) |
 
 ### Audio
 
-| Format | Use Case |
-|--------|----------|
-| OGG | Recommended for all audio (good compression, wide support) |
-| MP3 | Alternative for music and voice (universal support) |
+| Format | Use Case                                                   |
+| ------ | ---------------------------------------------------------- |
+| OGG    | Recommended for all audio (good compression, wide support) |
+| MP3    | Alternative for music and voice (universal support)        |
 
 ### Video
 
-| Format | Use Case |
-|--------|----------|
+| Format      | Use Case                                                   |
+| ----------- | ---------------------------------------------------------- |
 | MP4 (H.264) | Recommended for video playback (universal browser support) |
-| WebM (VP9) | Alternative with better compression (most modern browsers) |
+| WebM (VP9)  | Alternative with better compression (most modern browsers) |
 
 ## Referencing Assets in Content
 
@@ -88,8 +88,8 @@ icon: old_coin_icon.png
 image: old_coin.png
 ```
 
-- `icon`: small image shown in inventory grids and lists  
-- `image`: larger image shown in inspection or detail views  
+- `icon`: small image shown in inventory grids and lists
+- `image`: larger image shown in inspection or detail views
 
 ### Map Images
 

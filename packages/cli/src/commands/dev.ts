@@ -7,67 +7,67 @@
  * - Serves the game with hot reload
  */
 
-import { createServer, type ViteDevServer, type Plugin } from 'vite'
-import react from '@vitejs/plugin-react'
-import { watch } from 'chokidar'
-import { readFile, readdir } from 'fs/promises'
-import { join, extname, relative } from 'path'
-import { parse as parseYaml } from 'yaml'
-import { parseDialogue } from '@doodle-engine/core'
-import { crayon } from 'crayon.js'
-import { validateContent, printValidationErrors } from '../validate.js'
-import { generateAssetManifest } from '../manifest.js'
+import { createServer, type ViteDevServer, type Plugin } from "vite";
+import react from "@vitejs/plugin-react";
+import { watch } from "chokidar";
+import { readFile, readdir } from "fs/promises";
+import { join, extname, relative } from "path";
+import { parse as parseYaml } from "yaml";
+import { parseDialogue } from "@doodle-engine/core";
+import { crayon } from "crayon.js";
+import { validateContent, printValidationErrors } from "../validate.js";
+import { generateAssetManifest } from "../manifest.js";
 
-const paw = '🐾'
-const sparkle = '✨'
-const pencil = '✏️'
-const plus = '➕'
+const paw = "🐾";
+const sparkle = "✨";
+const pencil = "✏️";
+const plus = "➕";
 
 export async function dev() {
-  const cwd = process.cwd()
-  const contentDir = join(cwd, 'content')
+  const cwd = process.cwd();
+  const contentDir = join(cwd, "content");
 
-  console.log('')
-  console.log(crayon.bold.magenta(`  ${paw} Doodle Engine Dev Server ${paw}`))
-  console.log('')
+  console.log("");
+  console.log(crayon.bold.magenta(`  ${paw} Doodle Engine Dev Server ${paw}`));
+  console.log("");
 
   // Create content loader plugin
   const contentPlugin: Plugin = {
-    name: 'doodle-content-loader',
+    name: "doodle-content-loader",
 
     configureServer(server: ViteDevServer) {
       // API endpoint to load all content
-      server.middlewares.use('/api/content', async (_req, res) => {
+      server.middlewares.use("/api/content", async (_req, res) => {
         try {
-          const content = await loadAllContent(contentDir)
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(content))
+          const content = await loadAllContent(contentDir);
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(content));
         } catch (error) {
-          console.error(crayon.red(`  Error loading content:`), error)
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: 'Failed to load content' }))
+          console.error(crayon.red(`  Error loading content:`), error);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: "Failed to load content" }));
         }
-      })
+      });
 
       // API endpoint to load asset manifest (generated on-the-fly from content)
-      server.middlewares.use('/api/manifest', async (_req, res) => {
+      server.middlewares.use("/api/manifest", async (_req, res) => {
         try {
-          const { registry, config } = await loadAllContent(contentDir)
+          const { registry, config } = await loadAllContent(contentDir);
           const manifest = await generateAssetManifest(
-            join(cwd, 'assets'),
+            join(cwd, "assets"),
             cwd,
             registry as any,
             config as any,
-            'dev'
-          )
-          res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify(manifest))
+            "dev",
+          );
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(manifest));
         } catch (error) {
-          console.error(crayon.red(`  Error generating manifest:`), error)
-          res.statusCode = 500
-          res.end(JSON.stringify({ error: 'Failed to generate manifest' }))
+          console.error(crayon.red(`  Error generating manifest:`), error);
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: "Failed to generate manifest" }));
         }
-      })
+      });
 
       // Watch content files and trigger HMR
       // Pass the directory directly — chokidar watches recursively by default.
@@ -76,37 +76,39 @@ export async function dev() {
       const watcher = watch(contentDir, {
         ignored: /(^|[\/\\])\../,
         persistent: true,
-      })
+      });
 
       // Suppress add events during the initial directory scan.
       // chokidar fires 'add' for every existing file on startup — we don't
       // want those to spam the console or trigger repeated validation.
-      let ready = false
-      watcher.on('ready', () => { ready = true })
+      let ready = false;
+      watcher.on("ready", () => {
+        ready = true;
+      });
 
       // Debounce validation + reload so multiple rapid events from one save
       // don't print duplicate error blocks.
-      let reloadTimer: ReturnType<typeof setTimeout> | null = null
+      let reloadTimer: ReturnType<typeof setTimeout> | null = null;
       const scheduleReload = (label: string) => {
-        if (reloadTimer) clearTimeout(reloadTimer)
+        if (reloadTimer) clearTimeout(reloadTimer);
         reloadTimer = setTimeout(async () => {
-          reloadTimer = null
-          console.log(label)
-          await runValidation(contentDir)
-          server.ws.send({ type: 'full-reload', path: '*' })
-        }, 50)
-      }
+          reloadTimer = null;
+          console.log(label);
+          await runValidation(contentDir);
+          server.ws.send({ type: "full-reload", path: "*" });
+        }, 50);
+      };
 
-      watcher.on('change', (path) => {
-        scheduleReload(crayon.yellow(`  ${pencil} Content changed: ${path}`))
-      })
+      watcher.on("change", (path) => {
+        scheduleReload(crayon.yellow(`  ${pencil} Content changed: ${path}`));
+      });
 
-      watcher.on('add', (path) => {
-        if (!ready) return
-        scheduleReload(crayon.green(`  ${plus} Content added: ${path}`))
-      })
+      watcher.on("add", (path) => {
+        if (!ready) return;
+        scheduleReload(crayon.green(`  ${plus} Content added: ${path}`));
+      });
     },
-  }
+  };
 
   // Create Vite server
   const server = await createServer({
@@ -116,14 +118,14 @@ export async function dev() {
       port: 3000,
       open: true,
     },
-  })
+  });
 
-  await server.listen()
+  await server.listen();
 
-  server.printUrls()
-  console.log('')
-  console.log(crayon.dim(`  ${sparkle} Watching content files for changes...`))
-  console.log('')
+  server.printUrls();
+  console.log("");
+  console.log(crayon.dim(`  ${sparkle} Watching content files for changes...`));
+  console.log("");
 }
 
 /**
@@ -140,34 +142,34 @@ async function loadAllContent(contentDir: string) {
     journalEntries: {},
     interludes: {},
     locales: {},
-  }
+  };
 
-  let config: any = null
+  let config: any = null;
 
   // Load each entity type (YAML files with id field)
   const entityTypes = [
-    { dir: 'locations', key: 'locations' },
-    { dir: 'characters', key: 'characters' },
-    { dir: 'items', key: 'items' },
-    { dir: 'maps', key: 'maps' },
-    { dir: 'quests', key: 'quests' },
-    { dir: 'journal', key: 'journalEntries' },
-    { dir: 'interludes', key: 'interludes' },
-  ]
+    { dir: "locations", key: "locations" },
+    { dir: "characters", key: "characters" },
+    { dir: "items", key: "items" },
+    { dir: "maps", key: "maps" },
+    { dir: "quests", key: "quests" },
+    { dir: "journal", key: "journalEntries" },
+    { dir: "interludes", key: "interludes" },
+  ];
 
   for (const { dir, key } of entityTypes) {
-    const dirPath = join(contentDir, dir)
+    const dirPath = join(contentDir, dir);
     try {
-      const files = await readdir(dirPath)
+      const files = await readdir(dirPath);
 
       for (const file of files) {
-        if (extname(file) === '.yaml' || extname(file) === '.yml') {
-          const filePath = join(dirPath, file)
-          const content = await readFile(filePath, 'utf-8')
-          const data = parseYaml(content)
+        if (extname(file) === ".yaml" || extname(file) === ".yml") {
+          const filePath = join(dirPath, file);
+          const content = await readFile(filePath, "utf-8");
+          const data = parseYaml(content);
 
           if (data && data.id) {
-            registry[key][data.id] = data
+            registry[key][data.id] = data;
           }
         }
       }
@@ -178,16 +180,16 @@ async function loadAllContent(contentDir: string) {
 
   // Load locale files (flat key-value YAML, keyed by filename)
   try {
-    const localesDir = join(contentDir, 'locales')
-    const files = await readdir(localesDir)
+    const localesDir = join(contentDir, "locales");
+    const files = await readdir(localesDir);
 
     for (const file of files) {
-      if (extname(file) === '.yaml' || extname(file) === '.yml') {
-        const filePath = join(localesDir, file)
-        const content = await readFile(filePath, 'utf-8')
-        const data = parseYaml(content)
-        const localeId = file.replace(/\.(yaml|yml)$/, '')
-        registry.locales[localeId] = data ?? {}
+      if (extname(file) === ".yaml" || extname(file) === ".yml") {
+        const filePath = join(localesDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const data = parseYaml(content);
+        const localeId = file.replace(/\.(yaml|yml)$/, "");
+        registry.locales[localeId] = data ?? {};
       }
     }
   } catch {
@@ -196,16 +198,16 @@ async function loadAllContent(contentDir: string) {
 
   // Load dialogues (.dlg files)
   try {
-    const dialoguesDir = join(contentDir, 'dialogues')
-    const files = await readdir(dialoguesDir)
+    const dialoguesDir = join(contentDir, "dialogues");
+    const files = await readdir(dialoguesDir);
 
     for (const file of files) {
-      if (extname(file) === '.dlg') {
-        const filePath = join(dialoguesDir, file)
-        const content = await readFile(filePath, 'utf-8')
-        const dialogueId = file.replace('.dlg', '')
-        const dialogue = parseDialogue(content, dialogueId)
-        registry.dialogues[dialogue.id] = dialogue
+      if (extname(file) === ".dlg") {
+        const filePath = join(dialoguesDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const dialogueId = file.replace(".dlg", "");
+        const dialogue = parseDialogue(content, dialogueId);
+        registry.dialogues[dialogue.id] = dialogue;
       }
     }
   } catch {
@@ -214,21 +216,21 @@ async function loadAllContent(contentDir: string) {
 
   // Load game config
   try {
-    const configPath = join(contentDir, 'game.yaml')
-    const configContent = await readFile(configPath, 'utf-8')
-    config = parseYaml(configContent)
+    const configPath = join(contentDir, "game.yaml");
+    const configContent = await readFile(configPath, "utf-8");
+    config = parseYaml(configContent);
   } catch {
-    console.warn(crayon.yellow('  No game.yaml found, using defaults'))
+    console.warn(crayon.yellow("  No game.yaml found, using defaults"));
     config = {
-      startLocation: 'tavern',
+      startLocation: "tavern",
       startTime: { day: 1, hour: 8 },
       startFlags: {},
       startVariables: {},
       startInventory: [],
-    }
+    };
   }
 
-  return { registry, config }
+  return { registry, config };
 }
 
 /**
@@ -236,16 +238,16 @@ async function loadAllContent(contentDir: string) {
  */
 async function runValidation(contentDir: string) {
   try {
-    const { registry, fileMap } = await loadContentWithFileMap(contentDir)
-    const errors = validateContent(registry, fileMap)
+    const { registry, fileMap } = await loadContentWithFileMap(contentDir);
+    const errors = validateContent(registry, fileMap);
 
     if (errors.length > 0) {
-      console.log('') // Add spacing
-      printValidationErrors(errors)
-      console.log('') // Add spacing
+      console.log(""); // Add spacing
+      printValidationErrors(errors);
+      console.log(""); // Add spacing
     }
   } catch (error) {
-    console.error(crayon.red('  Error running validation:'), error)
+    console.error(crayon.red("  Error running validation:"), error);
   }
 }
 
@@ -263,35 +265,35 @@ async function loadContentWithFileMap(contentDir: string) {
     journalEntries: {},
     interludes: {},
     locales: {},
-  }
+  };
 
-  const fileMap = new Map<string, string>()
+  const fileMap = new Map<string, string>();
 
   // Load each entity type (YAML files with id field)
   const entityTypes = [
-    { dir: 'locations', key: 'locations' },
-    { dir: 'characters', key: 'characters' },
-    { dir: 'items', key: 'items' },
-    { dir: 'maps', key: 'maps' },
-    { dir: 'quests', key: 'quests' },
-    { dir: 'journal', key: 'journalEntries' },
-    { dir: 'interludes', key: 'interludes' },
-  ]
+    { dir: "locations", key: "locations" },
+    { dir: "characters", key: "characters" },
+    { dir: "items", key: "items" },
+    { dir: "maps", key: "maps" },
+    { dir: "quests", key: "quests" },
+    { dir: "journal", key: "journalEntries" },
+    { dir: "interludes", key: "interludes" },
+  ];
 
   for (const { dir, key } of entityTypes) {
-    const dirPath = join(contentDir, dir)
+    const dirPath = join(contentDir, dir);
     try {
-      const files = await readdir(dirPath)
+      const files = await readdir(dirPath);
 
       for (const file of files) {
-        if (extname(file) === '.yaml' || extname(file) === '.yml') {
-          const filePath = join(dirPath, file)
-          const content = await readFile(filePath, 'utf-8')
-          const data = parseYaml(content)
+        if (extname(file) === ".yaml" || extname(file) === ".yml") {
+          const filePath = join(dirPath, file);
+          const content = await readFile(filePath, "utf-8");
+          const data = parseYaml(content);
 
           if (data && data.id) {
-            registry[key][data.id] = data
-            fileMap.set(data.id, relative(process.cwd(), filePath))
+            registry[key][data.id] = data;
+            fileMap.set(data.id, relative(process.cwd(), filePath));
           }
         }
       }
@@ -302,16 +304,16 @@ async function loadContentWithFileMap(contentDir: string) {
 
   // Load locale files
   try {
-    const localesDir = join(contentDir, 'locales')
-    const files = await readdir(localesDir)
+    const localesDir = join(contentDir, "locales");
+    const files = await readdir(localesDir);
 
     for (const file of files) {
-      if (extname(file) === '.yaml' || extname(file) === '.yml') {
-        const filePath = join(localesDir, file)
-        const content = await readFile(filePath, 'utf-8')
-        const data = parseYaml(content)
-        const localeId = file.replace(/\.(yaml|yml)$/, '')
-        registry.locales[localeId] = data ?? {}
+      if (extname(file) === ".yaml" || extname(file) === ".yml") {
+        const filePath = join(localesDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const data = parseYaml(content);
+        const localeId = file.replace(/\.(yaml|yml)$/, "");
+        registry.locales[localeId] = data ?? {};
       }
     }
   } catch {
@@ -320,22 +322,22 @@ async function loadContentWithFileMap(contentDir: string) {
 
   // Load dialogues
   try {
-    const dialoguesDir = join(contentDir, 'dialogues')
-    const files = await readdir(dialoguesDir)
+    const dialoguesDir = join(contentDir, "dialogues");
+    const files = await readdir(dialoguesDir);
 
     for (const file of files) {
-      if (extname(file) === '.dlg') {
-        const filePath = join(dialoguesDir, file)
-        const content = await readFile(filePath, 'utf-8')
-        const dialogueId = file.replace('.dlg', '')
-        const dialogue = parseDialogue(content, dialogueId)
-        registry.dialogues[dialogue.id] = dialogue
-        fileMap.set(dialogue.id, relative(process.cwd(), filePath))
+      if (extname(file) === ".dlg") {
+        const filePath = join(dialoguesDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const dialogueId = file.replace(".dlg", "");
+        const dialogue = parseDialogue(content, dialogueId);
+        registry.dialogues[dialogue.id] = dialogue;
+        fileMap.set(dialogue.id, relative(process.cwd(), filePath));
       }
     }
   } catch {
     // Dialogues directory might not exist
   }
 
-  return { registry, fileMap }
+  return { registry, fileMap };
 }

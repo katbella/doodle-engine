@@ -2,15 +2,15 @@
  * DialogueBox - Displays current dialogue node
  */
 
-import React from 'react'
-import type { SnapshotDialogue } from '@doodle-engine/core'
+import React from "react";
+import type { SnapshotDialogue } from "@doodle-engine/core";
 
 export interface DialogueBoxProps {
-  dialogue: SnapshotDialogue
-  className?: string
+  dialogue: SnapshotDialogue;
+  className?: string;
 }
 
-export function DialogueBox({ dialogue, className = '' }: DialogueBoxProps) {
+export function DialogueBox({ dialogue, className = "" }: DialogueBoxProps) {
   return (
     <div className={`dialogue-box ${className}`}>
       {dialogue.portrait && (
@@ -24,5 +24,5 @@ export function DialogueBox({ dialogue, className = '' }: DialogueBoxProps) {
         <div className="dialogue-text">{dialogue.text}</div>
       </div>
     </div>
-  )
+  );
 }

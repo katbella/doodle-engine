@@ -9,9 +9,9 @@
  * Example: SET flag metBartender
  */
 export interface SetFlagEffect {
-  type: 'setFlag'
+  type: "setFlag";
   /** Flag key to set */
-  flag: string
+  flag: string;
 }
 
 /**
@@ -19,9 +19,9 @@ export interface SetFlagEffect {
  * Example: CLEAR flag doorLocked
  */
 export interface ClearFlagEffect {
-  type: 'clearFlag'
+  type: "clearFlag";
   /** Flag key to clear */
-  flag: string
+  flag: string;
 }
 
 /**
@@ -29,11 +29,11 @@ export interface ClearFlagEffect {
  * Example: SET variable gold 100
  */
 export interface SetVariableEffect {
-  type: 'setVariable'
+  type: "setVariable";
   /** Variable key to set */
-  variable: string
+  variable: string;
   /** Value to set */
-  value: number | string
+  value: number | string;
 }
 
 /**
@@ -41,11 +41,11 @@ export interface SetVariableEffect {
  * Example: ADD variable gold -50
  */
 export interface AddVariableEffect {
-  type: 'addVariable'
+  type: "addVariable";
   /** Variable key to modify */
-  variable: string
+  variable: string;
   /** Amount to add (can be negative) */
-  value: number
+  value: number;
 }
 
 /**
@@ -53,9 +53,9 @@ export interface AddVariableEffect {
  * Example: ADD item rusty_key
  */
 export interface AddItemEffect {
-  type: 'addItem'
+  type: "addItem";
   /** Item ID to add */
-  itemId: string
+  itemId: string;
 }
 
 /**
@@ -63,9 +63,9 @@ export interface AddItemEffect {
  * Example: REMOVE item rusty_key
  */
 export interface RemoveItemEffect {
-  type: 'removeItem'
+  type: "removeItem";
   /** Item ID to remove */
-  itemId: string
+  itemId: string;
 }
 
 /**
@@ -73,11 +73,11 @@ export interface RemoveItemEffect {
  * Example: MOVE item rusty_key cellar
  */
 export interface MoveItemEffect {
-  type: 'moveItem'
+  type: "moveItem";
   /** Item ID to move */
-  itemId: string
+  itemId: string;
   /** Destination location ID */
-  locationId: string
+  locationId: string;
 }
 
 /**
@@ -85,9 +85,9 @@ export interface MoveItemEffect {
  * Example: GOTO location tavern
  */
 export interface GoToLocationEffect {
-  type: 'goToLocation'
+  type: "goToLocation";
   /** Destination location ID */
-  locationId: string
+  locationId: string;
 }
 
 /**
@@ -95,9 +95,9 @@ export interface GoToLocationEffect {
  * Example: ADVANCE time 2
  */
 export interface AdvanceTimeEffect {
-  type: 'advanceTime'
+  type: "advanceTime";
   /** Hours to advance */
-  hours: number
+  hours: number;
 }
 
 /**
@@ -105,11 +105,11 @@ export interface AdvanceTimeEffect {
  * Example: SET questStage odd_jobs started
  */
 export interface SetQuestStageEffect {
-  type: 'setQuestStage'
+  type: "setQuestStage";
   /** Quest ID */
-  questId: string
+  questId: string;
   /** Stage ID to set */
-  stageId: string
+  stageId: string;
 }
 
 /**
@@ -117,9 +117,9 @@ export interface SetQuestStageEffect {
  * Example: ADD journalEntry tavern_discovery
  */
 export interface AddJournalEntryEffect {
-  type: 'addJournalEntry'
+  type: "addJournalEntry";
   /** Journal entry ID to unlock */
-  entryId: string
+  entryId: string;
 }
 
 /**
@@ -127,9 +127,9 @@ export interface AddJournalEntryEffect {
  * Example: START dialogue merchant_intro
  */
 export interface StartDialogueEffect {
-  type: 'startDialogue'
+  type: "startDialogue";
   /** Dialogue ID to start */
-  dialogueId: string
+  dialogueId: string;
 }
 
 /**
@@ -137,7 +137,7 @@ export interface StartDialogueEffect {
  * Example: END dialogue
  */
 export interface EndDialogueEffect {
-  type: 'endDialogue'
+  type: "endDialogue";
 }
 
 /**
@@ -145,11 +145,11 @@ export interface EndDialogueEffect {
  * Example: SET characterLocation merchant tavern
  */
 export interface SetCharacterLocationEffect {
-  type: 'setCharacterLocation'
+  type: "setCharacterLocation";
   /** Character ID */
-  characterId: string
+  characterId: string;
   /** Destination location ID */
-  locationId: string
+  locationId: string;
 }
 
 /**
@@ -157,9 +157,9 @@ export interface SetCharacterLocationEffect {
  * Example: ADD toParty elisa
  */
 export interface AddToPartyEffect {
-  type: 'addToParty'
+  type: "addToParty";
   /** Character ID to add */
-  characterId: string
+  characterId: string;
 }
 
 /**
@@ -167,9 +167,9 @@ export interface AddToPartyEffect {
  * Example: REMOVE fromParty elisa
  */
 export interface RemoveFromPartyEffect {
-  type: 'removeFromParty'
+  type: "removeFromParty";
   /** Character ID to remove */
-  characterId: string
+  characterId: string;
 }
 
 /**
@@ -177,11 +177,11 @@ export interface RemoveFromPartyEffect {
  * Example: SET relationship bartender 5
  */
 export interface SetRelationshipEffect {
-  type: 'setRelationship'
+  type: "setRelationship";
   /** Character ID */
-  characterId: string
+  characterId: string;
   /** Relationship value to set */
-  value: number
+  value: number;
 }
 
 /**
@@ -189,11 +189,11 @@ export interface SetRelationshipEffect {
  * Example: ADD relationship bartender 1
  */
 export interface AddRelationshipEffect {
-  type: 'addRelationship'
+  type: "addRelationship";
   /** Character ID */
-  characterId: string
+  characterId: string;
   /** Amount to add (can be negative) */
-  value: number
+  value: number;
 }
 
 /**
@@ -201,13 +201,13 @@ export interface AddRelationshipEffect {
  * Example: SET characterStat elisa level 5
  */
 export interface SetCharacterStatEffect {
-  type: 'setCharacterStat'
+  type: "setCharacterStat";
   /** Character ID */
-  characterId: string
+  characterId: string;
   /** Stat key to set */
-  stat: string
+  stat: string;
   /** Value to set */
-  value: unknown
+  value: unknown;
 }
 
 /**
@@ -215,13 +215,13 @@ export interface SetCharacterStatEffect {
  * Example: ADD characterStat elisa health -10
  */
 export interface AddCharacterStatEffect {
-  type: 'addCharacterStat'
+  type: "addCharacterStat";
   /** Character ID */
-  characterId: string
+  characterId: string;
   /** Stat key to modify */
-  stat: string
+  stat: string;
   /** Amount to add (can be negative) */
-  value: number
+  value: number;
 }
 
 /**
@@ -229,9 +229,9 @@ export interface AddCharacterStatEffect {
  * Example: SET mapEnabled false
  */
 export interface SetMapEnabledEffect {
-  type: 'setMapEnabled'
+  type: "setMapEnabled";
   /** Whether map should be enabled */
-  enabled: boolean
+  enabled: boolean;
 }
 
 /**
@@ -239,9 +239,9 @@ export interface SetMapEnabledEffect {
  * Example: MUSIC tension_theme.ogg
  */
 export interface PlayMusicEffect {
-  type: 'playMusic'
+  type: "playMusic";
   /** Music track filename */
-  track: string
+  track: string;
 }
 
 /**
@@ -249,9 +249,9 @@ export interface PlayMusicEffect {
  * Example: SOUND door_slam.ogg
  */
 export interface PlaySoundEffect {
-  type: 'playSound'
+  type: "playSound";
   /** Sound effect filename */
-  sound: string
+  sound: string;
 }
 
 /**
@@ -259,9 +259,9 @@ export interface PlaySoundEffect {
  * Example: NOTIFY @quest.odd_jobs.started
  */
 export interface NotifyEffect {
-  type: 'notify'
+  type: "notify";
   /** Notification message (supports @localization keys) */
-  message: string
+  message: string;
 }
 
 /**
@@ -269,9 +269,9 @@ export interface NotifyEffect {
  * Example: VIDEO intro.mp4
  */
 export interface PlayVideoEffect {
-  type: 'playVideo'
+  type: "playVideo";
   /** Video filename */
-  file: string
+  file: string;
 }
 
 /**
@@ -279,9 +279,9 @@ export interface PlayVideoEffect {
  * Example: INTERLUDE chapter_one
  */
 export interface ShowInterludeEffect {
-  type: 'showInterlude'
+  type: "showInterlude";
   /** Interlude ID to display */
-  interludeId: string
+  interludeId: string;
 }
 
 /**
@@ -289,13 +289,13 @@ export interface ShowInterludeEffect {
  * Example: ROLL bluffRoll 1 20
  */
 export interface RollEffect {
-  type: 'roll'
+  type: "roll";
   /** Variable to store the result in */
-  variable: string
+  variable: string;
   /** Minimum value (inclusive) */
-  min: number
+  min: number;
   /** Maximum value (inclusive) */
-  max: number
+  max: number;
 }
 
 /**
@@ -329,4 +329,4 @@ export type Effect =
   | NotifyEffect
   | PlayVideoEffect
   | ShowInterludeEffect
-  | RollEffect
+  | RollEffect;

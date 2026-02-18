@@ -2,18 +2,22 @@
  * ChoiceList - Displays available dialogue choices
  */
 
-import React from 'react'
-import type { SnapshotChoice } from '@doodle-engine/core'
+import React from "react";
+import type { SnapshotChoice } from "@doodle-engine/core";
 
 export interface ChoiceListProps {
-  choices: SnapshotChoice[]
-  onSelectChoice: (choiceId: string) => void
-  className?: string
+  choices: SnapshotChoice[];
+  onSelectChoice: (choiceId: string) => void;
+  className?: string;
 }
 
-export function ChoiceList({ choices, onSelectChoice, className = '' }: ChoiceListProps) {
+export function ChoiceList({
+  choices,
+  onSelectChoice,
+  className = "",
+}: ChoiceListProps) {
   if (choices.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -28,5 +32,5 @@ export function ChoiceList({ choices, onSelectChoice, className = '' }: ChoiceLi
         </button>
       ))}
     </div>
-  )
+  );
 }

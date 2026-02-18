@@ -3,25 +3,25 @@
  * These represent static content defined by authors in YAML and DSL files.
  */
 
-import type { Condition } from './conditions'
-import type { Effect } from './effects'
+import type { Condition } from "./conditions";
+import type { Effect } from "./effects";
 
 /**
  * A location in the game world where the player can be.
  */
 export interface Location {
   /** Unique identifier for this location */
-  id: string
+  id: string;
   /** Display name (supports @localization keys) */
-  name: string
+  name: string;
   /** Text shown when player is at this location */
-  description: string
+  description: string;
   /** Image shown when player is at this location */
-  banner: string
+  banner: string;
   /** Background music track */
-  music: string
+  music: string;
   /** Ambient sound loop */
-  ambient: string
+  ambient: string;
 }
 
 /**
@@ -29,19 +29,19 @@ export interface Location {
  */
 export interface Character {
   /** Unique identifier for this character */
-  id: string
+  id: string;
   /** Display name (supports @localization keys) */
-  name: string
+  name: string;
   /** Character background text */
-  biography: string
+  biography: string;
   /** Character portrait image */
-  portrait: string
+  portrait: string;
   /** Starting location ID */
-  location: string
+  location: string;
   /** Dialogue ID when player talks to this character */
-  dialogue: string
+  dialogue: string;
   /** Extensible stats object - engine stores but doesn't interpret */
-  stats: Record<string, unknown>
+  stats: Record<string, unknown>;
 }
 
 /**
@@ -49,19 +49,19 @@ export interface Character {
  */
 export interface Item {
   /** Unique identifier for this item */
-  id: string
+  id: string;
   /** Display name (supports @localization keys) */
-  name: string
+  name: string;
   /** Item description text */
-  description: string
+  description: string;
   /** Small image for inventory display */
-  icon: string
+  icon: string;
   /** Large image for detailed view */
-  image: string
+  image: string;
   /** Starting location (location ID, "inventory", or character ID) */
-  location: string
+  location: string;
   /** Extensible stats object - engine stores but doesn't interpret */
-  stats: Record<string, unknown>
+  stats: Record<string, unknown>;
 }
 
 /**
@@ -69,11 +69,11 @@ export interface Item {
  */
 export interface MapLocation {
   /** Location ID */
-  id: string
+  id: string;
   /** X coordinate on map image */
-  x: number
+  x: number;
   /** Y coordinate on map image */
-  y: number
+  y: number;
 }
 
 /**
@@ -81,15 +81,15 @@ export interface MapLocation {
  */
 export interface Map {
   /** Unique identifier for this map */
-  id: string
+  id: string;
   /** Display name (supports @localization keys) */
-  name: string
+  name: string;
   /** Map background image */
-  image: string
+  image: string;
   /** Units to travel time conversion factor */
-  scale: number
+  scale: number;
   /** Locations shown on this map with their coordinates */
-  locations: MapLocation[]
+  locations: MapLocation[];
 }
 
 /**
@@ -97,15 +97,15 @@ export interface Map {
  */
 export interface Dialogue {
   /** Unique identifier for this dialogue */
-  id: string
+  id: string;
   /** Location ID where this auto-triggers on enter (optional) */
-  triggerLocation?: string
+  triggerLocation?: string;
   /** Conditions that must pass for auto-trigger (optional) */
-  conditions?: Condition[]
+  conditions?: Condition[];
   /** ID of the node that begins the conversation */
-  startNode: string
+  startNode: string;
   /** All dialogue nodes in this conversation */
-  nodes: DialogueNode[]
+  nodes: DialogueNode[];
 }
 
 /**
@@ -113,25 +113,25 @@ export interface Dialogue {
  */
 export interface DialogueNode {
   /** Unique identifier for this node */
-  id: string
+  id: string;
   /** Character ID speaking, or null for narration */
-  speaker: string | null
+  speaker: string | null;
   /** What's said (supports @localization keys) */
-  text: string
+  text: string;
   /** Optional audio file for this line */
-  voice?: string
+  voice?: string;
   /** Optional portrait override (expression variant) */
-  portrait?: string
+  portrait?: string;
   /** Conditions that must be true to show this node */
-  conditions?: Condition[]
+  conditions?: Condition[];
   /** Player choices (if empty, auto-advance to next) */
-  choices: Choice[]
+  choices: Choice[];
   /** Effects that run when this node is reached */
-  effects?: Effect[]
+  effects?: Effect[];
   /** Conditional branching (IF blocks) - evaluated in order, first passing wins */
-  conditionalNext?: Array<{ condition: Condition; next: string }>
+  conditionalNext?: Array<{ condition: Condition; next: string }>;
   /** Default next node if no choices and no conditionalNext passes */
-  next?: string
+  next?: string;
 }
 
 /**
@@ -139,15 +139,15 @@ export interface DialogueNode {
  */
 export interface Choice {
   /** Unique identifier for this choice */
-  id: string
+  id: string;
   /** What the player sees (supports @localization keys) */
-  text: string
+  text: string;
   /** Conditions that must be true to show this choice */
-  conditions?: Condition[]
+  conditions?: Condition[];
   /** Effects that run when this choice is selected */
-  effects?: Effect[]
+  effects?: Effect[];
   /** Which node to go to when picked */
-  next: string
+  next: string;
 }
 
 /**
@@ -155,13 +155,13 @@ export interface Choice {
  */
 export interface Quest {
   /** Unique identifier for this quest */
-  id: string
+  id: string;
   /** Display name (supports @localization keys) */
-  name: string
+  name: string;
   /** Quest description text */
-  description: string
+  description: string;
   /** Quest stages (including started, complete, failed, etc.) */
-  stages: QuestStage[]
+  stages: QuestStage[];
 }
 
 /**
@@ -169,9 +169,9 @@ export interface Quest {
  */
 export interface QuestStage {
   /** Unique identifier for this stage */
-  id: string
+  id: string;
   /** Text shown in journal for this stage */
-  description: string
+  description: string;
 }
 
 /**
@@ -179,13 +179,13 @@ export interface QuestStage {
  */
 export interface JournalEntry {
   /** Unique identifier for this entry */
-  id: string
+  id: string;
   /** Display title (supports @localization keys) */
-  title: string
+  title: string;
   /** Entry content text */
-  text: string
+  text: string;
   /** Category for grouping (e.g., "lore", "people", "places") */
-  category: string
+  category: string;
 }
 
 /**
@@ -194,29 +194,29 @@ export interface JournalEntry {
  */
 export interface Interlude {
   /** Unique identifier for this interlude */
-  id: string
+  id: string;
   /** Background image filename */
-  background: string
+  background: string;
   /** Optional decorative banner/frame image overlaid on the background */
-  banner?: string
+  banner?: string;
   /** Optional music track to play during the interlude */
-  music?: string
+  music?: string;
   /** Optional narration audio file */
-  voice?: string
+  voice?: string;
   /** Optional ambient sounds to play */
-  sounds?: string[]
+  sounds?: string[];
   /** Whether text auto-scrolls upward (default: true) */
-  scroll?: boolean
+  scroll?: boolean;
   /** Auto-scroll speed in elisas per second (default: 30) */
-  scrollSpeed?: number
+  scrollSpeed?: number;
   /** The narrative text shown (supports @localization keys) */
-  text: string
+  text: string;
   /** Location ID where this auto-triggers on enter (optional) */
-  triggerLocation?: string
+  triggerLocation?: string;
   /** Conditions that must pass for auto-trigger (optional) */
-  triggerConditions?: Condition[]
+  triggerConditions?: Condition[];
   /** Effects applied to game state when the interlude triggers (e.g. setFlag to prevent repeat) */
-  effects?: Effect[]
+  effects?: Effect[];
 }
 
 /**
@@ -226,34 +226,34 @@ export interface Interlude {
 export interface ShellConfig {
   splash?: {
     /** Studio or game logo image path */
-    logo?: string
+    logo?: string;
     /** Background image path */
-    background?: string
+    background?: string;
     /** Brief sound effect played during splash */
-    sound?: string
+    sound?: string;
     /** Display duration in ms (default: 2000) */
-    duration?: number
-  }
+    duration?: number;
+  };
   loading?: {
     /** Background image path */
-    background?: string
+    background?: string;
     /** Music to play during loading (optional) */
-    music?: string
-  }
+    music?: string;
+  };
   title?: {
     /** Game logo image path */
-    logo?: string
+    logo?: string;
     /** Background image path */
-    background?: string
+    background?: string;
     /** Music to play on the title screen */
-    music?: string
-  }
+    music?: string;
+  };
   uiSounds?: {
-    click?: string
-    hover?: string
-    menuOpen?: string
-    menuClose?: string
-  }
+    click?: string;
+    hover?: string;
+    menuOpen?: string;
+    menuClose?: string;
+  };
 }
 
 /**
@@ -261,20 +261,20 @@ export interface ShellConfig {
  */
 export interface GameConfig {
   /** Shell screen configuration */
-  shell?: ShellConfig
+  shell?: ShellConfig;
   /** Starting location ID */
-  startLocation: string
+  startLocation: string;
   /** Starting time */
   startTime: {
     /** Starting day */
-    day: number
+    day: number;
     /** Starting hour (0-23) */
-    hour: number
-  }
+    hour: number;
+  };
   /** Starting flags */
-  startFlags: Record<string, boolean>
+  startFlags: Record<string, boolean>;
   /** Starting variables */
-  startVariables: Record<string, number | string>
+  startVariables: Record<string, number | string>;
   /** Starting inventory (array of item IDs) */
-  startInventory: string[]
+  startInventory: string[];
 }

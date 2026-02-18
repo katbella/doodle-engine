@@ -11,10 +11,10 @@ The `Engine` class is the heart of Doodle Engine. It holds the content registry 
 new Engine(registry: ContentRegistry, state: GameState)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter  | Type              | Description                                               |
+| ---------- | ----------------- | --------------------------------------------------------- |
 | `registry` | `ContentRegistry` | All game content (locations, characters, dialogues, etc.) |
-| `state` | `GameState` | Initial game state |
+| `state`    | `GameState`       | Initial game state                                        |
 
 ## Methods
 
@@ -27,8 +27,8 @@ newGame(config: GameConfig): Snapshot
 Start a new game. Initializes state from config, sets up character and item locations from the registry, and checks for triggered dialogues at the starting location.
 
 ```typescript
-const engine = new Engine(registry, state)
-const snapshot = engine.newGame(config)
+const engine = new Engine(registry, state);
+const snapshot = engine.newGame(config);
 ```
 
 ### loadGame
@@ -40,7 +40,7 @@ loadGame(saveData: SaveData): Snapshot
 Restore game state from save data and return a snapshot.
 
 ```typescript
-const snapshot = engine.loadGame(saveData)
+const snapshot = engine.loadGame(saveData);
 ```
 
 ### saveGame
@@ -52,17 +52,17 @@ saveGame(): SaveData
 Capture the current game state as serializable save data.
 
 ```typescript
-const saveData = engine.saveGame()
-localStorage.setItem('save', JSON.stringify(saveData))
+const saveData = engine.saveGame();
+localStorage.setItem("save", JSON.stringify(saveData));
 ```
 
 Returns:
 
 ```typescript
 interface SaveData {
-  version: string    // "1.0"
-  timestamp: string  // ISO 8601
-  state: GameState   // Complete state
+  version: string; // "1.0"
+  timestamp: string; // ISO 8601
+  state: GameState; // Complete state
 }
 ```
 
@@ -77,7 +77,7 @@ Process a player's dialogue choice. Applies the choice's effects, advances to th
 If no next node exists, the dialogue ends. If not currently in dialogue, returns the current snapshot unchanged.
 
 ```typescript
-const snapshot = engine.selectChoice('choice_buy_drink')
+const snapshot = engine.selectChoice("choice_buy_drink");
 ```
 
 ### talkTo
@@ -89,7 +89,7 @@ talkTo(characterId: string): Snapshot
 Start a conversation with a character. Looks up the character's `dialogue` field, finds the start node, and begins the dialogue.
 
 ```typescript
-const snapshot = engine.talkTo('bartender')
+const snapshot = engine.talkTo("bartender");
 ```
 
 ### takeItem
@@ -101,7 +101,7 @@ takeItem(itemId: string): Snapshot
 Pick up an item at the current location. Only works if the item's location matches the player's current location. Moves the item to `"inventory"`.
 
 ```typescript
-const snapshot = engine.takeItem('rusty_key')
+const snapshot = engine.takeItem("rusty_key");
 ```
 
 ### travelTo
@@ -115,7 +115,7 @@ Travel to a location on the map. Calculates travel time based on distance and ma
 Does nothing if the map is disabled (`mapEnabled: false`).
 
 ```typescript
-const snapshot = engine.travelTo('market')
+const snapshot = engine.travelTo("market");
 ```
 
 ### writeNote
@@ -127,7 +127,7 @@ writeNote(title: string, text: string): Snapshot
 Add a player note to the journal. Notes have auto-generated IDs based on timestamp.
 
 ```typescript
-const snapshot = engine.writeNote('Clue', 'The bartender mentioned a coin...')
+const snapshot = engine.writeNote("Clue", "The bartender mentioned a coin...");
 ```
 
 ### deleteNote
@@ -139,7 +139,7 @@ deleteNote(noteId: string): Snapshot
 Remove a player note from the journal.
 
 ```typescript
-const snapshot = engine.deleteNote('note_1234567890')
+const snapshot = engine.deleteNote("note_1234567890");
 ```
 
 ### setLocale
@@ -151,7 +151,7 @@ setLocale(locale: string): Snapshot
 Change the active language. The next snapshot will have all `@key` references resolved against the new locale.
 
 ```typescript
-const snapshot = engine.setLocale('es')
+const snapshot = engine.setLocale("es");
 ```
 
 ### getSnapshot
@@ -163,7 +163,7 @@ getSnapshot(): Snapshot
 Get the current snapshot without making any changes. Useful for initial rendering.
 
 ```typescript
-const snapshot = engine.getSnapshot()
+const snapshot = engine.getSnapshot();
 ```
 
 ## Data Flow

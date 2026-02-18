@@ -2,24 +2,24 @@
  * SettingsPanel - Volume controls and language selection
  */
 
-import type { AudioManagerControls } from '../hooks/useAudioManager'
-import type { UISoundControls } from '../hooks/useUISounds'
+import type { AudioManagerControls } from "../hooks/useAudioManager";
+import type { UISoundControls } from "../hooks/useUISounds";
 
 export interface SettingsPanelProps {
   /** Audio manager controls for volume */
-  audioControls: AudioManagerControls
+  audioControls: AudioManagerControls;
   /** UI sound controls */
-  uiSoundControls?: UISoundControls
+  uiSoundControls?: UISoundControls;
   /** Available languages */
-  availableLocales?: { code: string; label: string }[]
+  availableLocales?: { code: string; label: string }[];
   /** Current language code */
-  currentLocale?: string
+  currentLocale?: string;
   /** Language change handler */
-  onLocaleChange?: (locale: string) => void
+  onLocaleChange?: (locale: string) => void;
   /** Go back / close settings */
-  onBack: () => void
+  onBack: () => void;
   /** CSS class */
-  className?: string
+  className?: string;
 }
 
 export function SettingsPanel({
@@ -29,7 +29,7 @@ export function SettingsPanel({
   currentLocale,
   onLocaleChange,
   onBack,
-  className = '',
+  className = "",
 }: SettingsPanelProps) {
   return (
     <div className={`settings-panel ${className}`}>
@@ -83,9 +83,11 @@ export function SettingsPanel({
         </div>
       )}
 
-      <button className="settings-back-button" onClick={onBack}>Back</button>
+      <button className="settings-back-button" onClick={onBack}>
+        Back
+      </button>
     </div>
-  )
+  );
 }
 
 function VolumeSlider({
@@ -93,9 +95,9 @@ function VolumeSlider({
   value,
   onChange,
 }: {
-  label: string
-  value: number
-  onChange: (value: number) => void
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
 }) {
   return (
     <div className="volume-slider">
@@ -110,5 +112,5 @@ function VolumeSlider({
         className="volume-input"
       />
     </div>
-  )
+  );
 }

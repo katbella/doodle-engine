@@ -92,6 +92,7 @@ END
 ## Quest Display
 
 Active quests appear in the Journal component. Each quest shows:
+
 - Quest name and description
 - Current stage description
 

@@ -10,39 +10,39 @@ All components are exported from `@doodle-engine/react`.
 Context provider that wraps the game UI. Holds the engine instance and manages state updates.
 
 ```tsx
-import { GameProvider } from '@doodle-engine/react'
+import { GameProvider } from "@doodle-engine/react";
 
 <GameProvider engine={engine} initialSnapshot={snapshot}>
   {children}
-</GameProvider>
+</GameProvider>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `engine` | `Engine` | required | Engine instance (already initialized) |
-| `initialSnapshot` | `Snapshot` | required | Initial snapshot (from `newGame` or `loadGame`) |
-| `children` | `ReactNode` | required | Child components |
-| `devTools` | `boolean` | `false` | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
+| Prop              | Type        | Default  | Description                                                     |
+| ----------------- | ----------- | -------- | --------------------------------------------------------------- |
+| `engine`          | `Engine`    | required | Engine instance (already initialized)                           |
+| `initialSnapshot` | `Snapshot`  | required | Initial snapshot (from `newGame` or `loadGame`)                 |
+| `children`        | `ReactNode` | required | Child components                                                |
+| `devTools`        | `boolean`   | `false`  | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
 ### Context Value
 
 ```typescript
 interface GameContextValue {
-  snapshot: Snapshot
+  snapshot: Snapshot;
   actions: {
-    selectChoice: (choiceId: string) => void
-    talkTo: (characterId: string) => void
-    takeItem: (itemId: string) => void
-    travelTo: (locationId: string) => void
-    writeNote: (title: string, text: string) => void
-    deleteNote: (noteId: string) => void
-    setLocale: (locale: string) => void
-    saveGame: () => SaveData
-    loadGame: (saveData: SaveData) => void
-    dismissInterlude: () => void
-  }
+    selectChoice: (choiceId: string) => void;
+    talkTo: (characterId: string) => void;
+    takeItem: (itemId: string) => void;
+    travelTo: (locationId: string) => void;
+    writeNote: (title: string, text: string) => void;
+    deleteNote: (noteId: string) => void;
+    setLocale: (locale: string) => void;
+    saveGame: () => SaveData;
+    loadGame: (saveData: SaveData) => void;
+    dismissInterlude: () => void;
+  };
 }
 ```
 
@@ -53,18 +53,18 @@ Access via `useGame()` hook.
 Batteries-included full-screen renderer. Provides a complete game UI with all components pre-wired.
 
 ```tsx
-import { GameRenderer } from '@doodle-engine/react'
+import { GameRenderer } from "@doodle-engine/react";
 
 <GameProvider engine={engine} initialSnapshot={snapshot}>
   <GameRenderer className="my-game" />
-</GameProvider>
+</GameProvider>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `className` | `string` | `''` | CSS class |
+| Prop        | Type     | Default | Description |
+| ----------- | -------- | ------- | ----------- |
+| `className` | `string` | `''`    | CSS class   |
 
 ### Layout
 
@@ -82,111 +82,108 @@ import { GameRenderer } from '@doodle-engine/react'
 Displays the current dialogue node with speaker name, portrait, and text.
 
 ```tsx
-import { DialogueBox } from '@doodle-engine/react'
+import { DialogueBox } from "@doodle-engine/react";
 
-<DialogueBox dialogue={snapshot.dialogue} />
+<DialogueBox dialogue={snapshot.dialogue} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `dialogue` | `SnapshotDialogue` | required | Current dialogue data |
-| `className` | `string` | `''` | CSS class |
+| Prop        | Type               | Default  | Description           |
+| ----------- | ------------------ | -------- | --------------------- |
+| `dialogue`  | `SnapshotDialogue` | required | Current dialogue data |
+| `className` | `string`           | `''`     | CSS class             |
 
 ## ChoiceList
 
 Displays available dialogue choices as clickable buttons.
 
 ```tsx
-import { ChoiceList } from '@doodle-engine/react'
+import { ChoiceList } from "@doodle-engine/react";
 
-<ChoiceList
-  choices={snapshot.choices}
-  onSelectChoice={actions.selectChoice}
-/>
+<ChoiceList choices={snapshot.choices} onSelectChoice={actions.selectChoice} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `choices` | `SnapshotChoice[]` | required | Available choices |
+| Prop             | Type                         | Default  | Description              |
+| ---------------- | ---------------------------- | -------- | ------------------------ |
+| `choices`        | `SnapshotChoice[]`           | required | Available choices        |
 | `onSelectChoice` | `(choiceId: string) => void` | required | Choice selection handler |
-| `className` | `string` | `''` | CSS class |
+| `className`      | `string`                     | `''`     | CSS class                |
 
 ## LocationView
 
 Displays the current location with banner image, name, and description.
 
 ```tsx
-import { LocationView } from '@doodle-engine/react'
+import { LocationView } from "@doodle-engine/react";
 
-<LocationView location={snapshot.location} />
+<LocationView location={snapshot.location} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `location` | `SnapshotLocation` | required | Location data |
-| `className` | `string` | `''` | CSS class |
+| Prop        | Type               | Default  | Description   |
+| ----------- | ------------------ | -------- | ------------- |
+| `location`  | `SnapshotLocation` | required | Location data |
+| `className` | `string`           | `''`     | CSS class     |
 
 ## CharacterList
 
 Displays characters at the current location as clickable cards with portraits.
 
 ```tsx
-import { CharacterList } from '@doodle-engine/react'
+import { CharacterList } from "@doodle-engine/react";
 
 <CharacterList
   characters={snapshot.charactersHere}
   onTalkTo={actions.talkTo}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `characters` | `SnapshotCharacter[]` | required | Characters to display |
-| `onTalkTo` | `(characterId: string) => void` | required | Talk handler |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type                            | Default  | Description           |
+| ------------ | ------------------------------- | -------- | --------------------- |
+| `characters` | `SnapshotCharacter[]`           | required | Characters to display |
+| `onTalkTo`   | `(characterId: string) => void` | required | Talk handler          |
+| `className`  | `string`                        | `''`     | CSS class             |
 
 ## MapView
 
 Displays the map with clickable location markers.
 
 ```tsx
-import { MapView } from '@doodle-engine/react'
+import { MapView } from "@doodle-engine/react";
 
-<MapView map={snapshot.map} onTravelTo={actions.travelTo} />
+<MapView map={snapshot.map} onTravelTo={actions.travelTo} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `map` | `SnapshotMap \| null` | required | Map data (null hides component) |
-| `onTravelTo` | `(locationId: string) => void` | required | Travel handler |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type                           | Default  | Description                     |
+| ------------ | ------------------------------ | -------- | ------------------------------- |
+| `map`        | `SnapshotMap \| null`          | required | Map data (null hides component) |
+| `onTravelTo` | `(locationId: string) => void` | required | Travel handler                  |
+| `className`  | `string`                       | `''`     | CSS class                       |
 
 ## Inventory
 
 Displays the player's items in a grid with click-to-inspect modal.
 
 ```tsx
-import { Inventory } from '@doodle-engine/react'
+import { Inventory } from "@doodle-engine/react";
 
-<Inventory items={snapshot.inventory} />
+<Inventory items={snapshot.inventory} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `items` | `SnapshotItem[]` | required | Inventory items |
-| `className` | `string` | `''` | CSS class |
+| Prop        | Type             | Default  | Description     |
+| ----------- | ---------------- | -------- | --------------- |
+| `items`     | `SnapshotItem[]` | required | Inventory items |
+| `className` | `string`         | `''`     | CSS class       |
 
 ### Features
 
@@ -200,18 +197,18 @@ import { Inventory } from '@doodle-engine/react'
 Displays active quests and unlocked journal entries.
 
 ```tsx
-import { Journal } from '@doodle-engine/react'
+import { Journal } from "@doodle-engine/react";
 
-<Journal quests={snapshot.quests} entries={snapshot.journal} />
+<Journal quests={snapshot.quests} entries={snapshot.journal} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `quests` | `SnapshotQuest[]` | required | Active quests |
-| `entries` | `SnapshotJournalEntry[]` | required | Unlocked journal entries |
-| `className` | `string` | `''` | CSS class |
+| Prop        | Type                     | Default  | Description              |
+| ----------- | ------------------------ | -------- | ------------------------ |
+| `quests`    | `SnapshotQuest[]`        | required | Active quests            |
+| `entries`   | `SnapshotJournalEntry[]` | required | Unlocked journal entries |
+| `className` | `string`                 | `''`     | CSS class                |
 
 ### Layout
 
@@ -223,17 +220,17 @@ import { Journal } from '@doodle-engine/react'
 Displays transient notifications.
 
 ```tsx
-import { NotificationArea } from '@doodle-engine/react'
+import { NotificationArea } from "@doodle-engine/react";
 
-<NotificationArea notifications={snapshot.notifications} />
+<NotificationArea notifications={snapshot.notifications} />;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
+| Prop            | Type       | Default  | Description           |
+| --------------- | ---------- | -------- | --------------------- |
 | `notifications` | `string[]` | required | Notification messages |
-| `className` | `string` | `''` | CSS class |
+| `className`     | `string`   | `''`     | CSS class             |
 
 Notifications are transient. They appear in one snapshot and are automatically cleared by the engine.
 
@@ -242,23 +239,23 @@ Notifications are transient. They appear in one snapshot and are automatically c
 Save and load game state via localStorage.
 
 ```tsx
-import { SaveLoadPanel } from '@doodle-engine/react'
+import { SaveLoadPanel } from "@doodle-engine/react";
 
 <SaveLoadPanel
   onSave={actions.saveGame}
   onLoad={actions.loadGame}
   storageKey="my-game-save"
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onSave` | `() => SaveData` | required | Save handler |
-| `onLoad` | `(saveData: SaveData) => void` | required | Load handler |
-| `storageKey` | `string` | `'doodle-engine-save'` | localStorage key |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type                           | Default                | Description      |
+| ------------ | ------------------------------ | ---------------------- | ---------------- |
+| `onSave`     | `() => SaveData`               | required               | Save handler     |
+| `onLoad`     | `(saveData: SaveData) => void` | required               | Load handler     |
+| `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key |
+| `className`  | `string`                       | `''`                   | CSS class        |
 
 ### Features
 
@@ -271,20 +268,20 @@ import { SaveLoadPanel } from '@doodle-engine/react'
 Full-screen narrative text scene (chapter card, dream sequence, etc.). Displays a background image with auto-scrolling text. Handled automatically by `GameRenderer` and `GameShell` — use this only when building a custom renderer.
 
 ```tsx
-import { Interlude } from '@doodle-engine/react'
+import { Interlude } from "@doodle-engine/react";
 
 <Interlude
   interlude={snapshot.pendingInterlude}
   onDismiss={actions.dismissInterlude}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `interlude` | `SnapshotInterlude` | Interlude data from the snapshot |
-| `onDismiss` | `() => void` | Called when the player skips or finishes reading |
+| Prop        | Type                | Description                                      |
+| ----------- | ------------------- | ------------------------------------------------ |
+| `interlude` | `SnapshotInterlude` | Interlude data from the snapshot                 |
+| `onDismiss` | `() => void`        | Called when the player skips or finishes reading |
 
 The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll.
 
@@ -293,23 +290,23 @@ The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wh
 Fullscreen video/cutscene overlay with a visible Skip button. Also supports skip via keypress (Escape, Space, Enter).
 
 ```tsx
-import { VideoPlayer } from '@doodle-engine/react'
+import { VideoPlayer } from "@doodle-engine/react";
 
 <VideoPlayer
   src="intro_cinematic.mp4"
   basePath="/video"
-  onComplete={() => console.log('Video done')}
-/>
+  onComplete={() => console.log("Video done")}
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `src` | `string` | required | Video file name |
-| `basePath` | `string` | `'/video'` | Base path for video files |
-| `onComplete` | `() => void` | required | Called when video ends or is skipped |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type         | Default    | Description                          |
+| ------------ | ------------ | ---------- | ------------------------------------ |
+| `src`        | `string`     | required   | Video file name                      |
+| `basePath`   | `string`     | `'/video'` | Base path for video files            |
+| `onComplete` | `() => void` | required   | Called when video ends or is skipped |
+| `className`  | `string`     | `''`       | CSS class                            |
 
 ## LoadingScreen
 
@@ -328,12 +325,12 @@ import { LoadingScreen } from '@doodle-engine/react'
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `state` | `AssetLoadingState` | required | Loading state from `AssetProvider` |
-| `background` | `string` | — | Background image URL (from `shell.loading.background`) |
-| `renderProgress` | `(progress: number, phase: string) => ReactNode` | — | Custom progress bar renderer |
-| `className` | `string` | `''` | CSS class |
+| Prop             | Type                                             | Default  | Description                                            |
+| ---------------- | ------------------------------------------------ | -------- | ------------------------------------------------------ |
+| `state`          | `AssetLoadingState`                              | required | Loading state from `AssetProvider`                     |
+| `background`     | `string`                                         | —        | Background image URL (from `shell.loading.background`) |
+| `renderProgress` | `(progress: number, phase: string) => ReactNode` | —        | Custom progress bar renderer                           |
+| `className`      | `string`                                         | `''`     | CSS class                                              |
 
 Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, `.loading-screen-phase`, `.loading-screen-percent`, `.loading-screen-bar-track`, and `.loading-screen-bar-fill` in your CSS.
 
@@ -342,39 +339,39 @@ Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-sc
 Brief studio/logo screen that auto-advances. Assets and duration come from `config.shell.splash` in `game.yaml`.
 
 ```tsx
-import { SplashScreen } from '@doodle-engine/react'
+import { SplashScreen } from "@doodle-engine/react";
 
 <SplashScreen
   shell={config.shell?.splash}
-  onComplete={() => setScreen('title')}
-/>
+  onComplete={() => setScreen("title")}
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `shell` | `ShellConfig['splash']` | — | Splash config from `game.yaml` |
-| `onComplete` | `() => void` | required | Called when splash finishes |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type                    | Default  | Description                    |
+| ------------ | ----------------------- | -------- | ------------------------------ |
+| `shell`      | `ShellConfig['splash']` | —        | Splash config from `game.yaml` |
+| `onComplete` | `() => void`            | required | Called when splash finishes    |
+| `className`  | `string`                | `''`     | CSS class                      |
 
 Duration defaults to `2000ms` if not set in `shell.duration`. Click anywhere to skip.
 
 The `shell` config fields:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `logo` | `string` | Logo image path |
-| `background` | `string` | Background image path |
-| `sound` | `string` | Sound effect played on enter |
-| `duration` | `number` | Auto-advance time in ms (default `2000`) |
+| Field        | Type     | Description                              |
+| ------------ | -------- | ---------------------------------------- |
+| `logo`       | `string` | Logo image path                          |
+| `background` | `string` | Background image path                    |
+| `sound`      | `string` | Sound effect played on enter             |
+| `duration`   | `number` | Auto-advance time in ms (default `2000`) |
 
 ## TitleScreen
 
 Main menu with New Game, Continue, and Settings buttons.
 
 ```tsx
-import { TitleScreen } from '@doodle-engine/react'
+import { TitleScreen } from "@doodle-engine/react";
 
 <TitleScreen
   title="My Game"
@@ -383,28 +380,28 @@ import { TitleScreen } from '@doodle-engine/react'
   onNewGame={handleNewGame}
   onContinue={handleContinue}
   onSettings={handleSettings}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `shell` | `ShellConfig['title']` | — | Title config from `game.yaml` |
-| `title` | `string` | `'Doodle Engine'` | Game title text (shown when no logo) |
-| `subtitle` | `string` | — | Subtitle text |
-| `hasSaveData` | `boolean` | required | Whether Continue button is shown |
-| `onNewGame` | `() => void` | required | New Game handler |
-| `onContinue` | `() => void` | required | Continue handler |
-| `onSettings` | `() => void` | required | Settings handler |
-| `className` | `string` | `''` | CSS class |
+| Prop          | Type                   | Default           | Description                          |
+| ------------- | ---------------------- | ----------------- | ------------------------------------ |
+| `shell`       | `ShellConfig['title']` | —                 | Title config from `game.yaml`        |
+| `title`       | `string`               | `'Doodle Engine'` | Game title text (shown when no logo) |
+| `subtitle`    | `string`               | —                 | Subtitle text                        |
+| `hasSaveData` | `boolean`              | required          | Whether Continue button is shown     |
+| `onNewGame`   | `() => void`           | required          | New Game handler                     |
+| `onContinue`  | `() => void`           | required          | Continue handler                     |
+| `onSettings`  | `() => void`           | required          | Settings handler                     |
+| `className`   | `string`               | `''`              | CSS class                            |
 
 ## PauseMenu
 
 In-game overlay with Resume, Save, Load, Settings, and Quit to Title buttons.
 
 ```tsx
-import { PauseMenu } from '@doodle-engine/react'
+import { PauseMenu } from "@doodle-engine/react";
 
 <PauseMenu
   onResume={handleResume}
@@ -412,54 +409,54 @@ import { PauseMenu } from '@doodle-engine/react'
   onLoad={handleLoad}
   onSettings={handleSettings}
   onQuitToTitle={handleQuit}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onResume` | `() => void` | required | Resume gameplay |
-| `onSave` | `() => void` | required | Save game |
-| `onLoad` | `() => void` | required | Load saved game |
-| `onSettings` | `() => void` | required | Open settings |
+| Prop            | Type         | Default  | Description          |
+| --------------- | ------------ | -------- | -------------------- |
+| `onResume`      | `() => void` | required | Resume gameplay      |
+| `onSave`        | `() => void` | required | Save game            |
+| `onLoad`        | `() => void` | required | Load saved game      |
+| `onSettings`    | `() => void` | required | Open settings        |
 | `onQuitToTitle` | `() => void` | required | Quit to title screen |
-| `className` | `string` | `''` | CSS class |
+| `className`     | `string`     | `''`     | CSS class            |
 
 ## SettingsPanel
 
 Settings UI with volume sliders and language selection.
 
 ```tsx
-import { SettingsPanel } from '@doodle-engine/react'
+import { SettingsPanel } from "@doodle-engine/react";
 
 <SettingsPanel
   audioControls={audioControls}
   uiSoundControls={uiSoundControls}
-  availableLocales={[{ code: 'en', label: 'English' }]}
+  availableLocales={[{ code: "en", label: "English" }]}
   onLocaleChange={actions.setLocale}
   onBack={handleBack}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `audioControls` | `object` | required | Audio volume setters |
-| `uiSoundControls` | `UISoundControls` | — | UI sound controls |
-| `availableLocales` | `{ code: string; label: string }[]` | — | Language options |
-| `currentLocale` | `string` | — | Current language code |
-| `onLocaleChange` | `(locale: string) => void` | — | Language change handler |
-| `onBack` | `() => void` | required | Back/close handler |
-| `className` | `string` | `''` | CSS class |
+| Prop               | Type                                | Default  | Description             |
+| ------------------ | ----------------------------------- | -------- | ----------------------- |
+| `audioControls`    | `object`                            | required | Audio volume setters    |
+| `uiSoundControls`  | `UISoundControls`                   | —        | UI sound controls       |
+| `availableLocales` | `{ code: string; label: string }[]` | —        | Language options        |
+| `currentLocale`    | `string`                            | —        | Current language code   |
+| `onLocaleChange`   | `(locale: string) => void`          | —        | Language change handler |
+| `onBack`           | `() => void`                        | required | Back/close handler      |
+| `className`        | `string`                            | `''`     | CSS class               |
 
 ## GameShell
 
 Complete game wrapper that manages the full lifecycle: splash screen → title screen → gameplay, with pause menu, settings, and video playback built in.
 
 ```tsx
-import { GameShell } from '@doodle-engine/react'
+import { GameShell } from "@doodle-engine/react";
 
 <GameShell
   registry={registry}
@@ -467,29 +464,29 @@ import { GameShell } from '@doodle-engine/react'
   manifest={manifest}
   title="My Game"
   subtitle="A text-based adventure"
-  availableLocales={[{ code: 'en', label: 'English' }]}
+  availableLocales={[{ code: "en", label: "English" }]}
   devTools={import.meta.env.DEV}
-/>
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `registry` | `ContentRegistry` | required | Content registry from `/api/content` |
-| `config` | `GameConfig` | required | Game config from `/api/content` |
-| `manifest` | `AssetManifest` | required | Asset manifest from `/api/manifest` |
-| `assetLoader` | `AssetLoader` | — | Custom asset loader (for non-browser environments) |
-| `title` | `string` | `'Doodle Engine'` | Game title text |
-| `subtitle` | `string` | — | Subtitle text |
-| `uiSounds` | `UISoundConfig \| false` | — | UI sound config, or `false` to disable |
-| `audioOptions` | `AudioManagerOptions` | — | Game audio options |
-| `storageKey` | `string` | `'doodle-engine-save'` | localStorage key for saves |
-| `availableLocales` | `{ code: string; label: string }[]` | — | Language options for settings |
-| `videoBasePath` | `string` | `'/video'` | Base path for video files |
-| `className` | `string` | `''` | CSS class |
-| `renderLoading` | `(state: AssetLoadingState) => ReactNode` | — | Override the loading screen |
-| `devTools` | `boolean` | `false` | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
+| Prop               | Type                                      | Default                | Description                                                     |
+| ------------------ | ----------------------------------------- | ---------------------- | --------------------------------------------------------------- |
+| `registry`         | `ContentRegistry`                         | required               | Content registry from `/api/content`                            |
+| `config`           | `GameConfig`                              | required               | Game config from `/api/content`                                 |
+| `manifest`         | `AssetManifest`                           | required               | Asset manifest from `/api/manifest`                             |
+| `assetLoader`      | `AssetLoader`                             | —                      | Custom asset loader (for non-browser environments)              |
+| `title`            | `string`                                  | `'Doodle Engine'`      | Game title text                                                 |
+| `subtitle`         | `string`                                  | —                      | Subtitle text                                                   |
+| `uiSounds`         | `UISoundConfig \| false`                  | —                      | UI sound config, or `false` to disable                          |
+| `audioOptions`     | `AudioManagerOptions`                     | —                      | Game audio options                                              |
+| `storageKey`       | `string`                                  | `'doodle-engine-save'` | localStorage key for saves                                      |
+| `availableLocales` | `{ code: string; label: string }[]`       | —                      | Language options for settings                                   |
+| `videoBasePath`    | `string`                                  | `'/video'`             | Base path for video files                                       |
+| `className`        | `string`                                  | `''`                   | CSS class                                                       |
+| `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                      | Override the loading screen                                     |
+| `devTools`         | `boolean`                                 | `false`                | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
 Splash screen, loading background, title logo, and UI sounds are configured in `game.yaml` under `shell:`. See [Asset Loading](/doodle-engine/guides/asset-loading/) for the full shell config reference.
 

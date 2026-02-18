@@ -11,8 +11,8 @@
  * rather than mutating the existing one.
  */
 
-import type { Effect } from '../types/effects'
-import type { GameState } from '../types/state'
+import type { Effect } from "../types/effects";
+import type { GameState } from "../types/state";
 
 /**
  * Apply a single effect to the game state.
@@ -29,93 +29,107 @@ import type { GameState } from '../types/state'
  */
 export function applyEffect(effect: Effect, state: GameState): GameState {
   switch (effect.type) {
-    case 'setFlag':
-      return applySetFlag(effect.flag, state)
+    case "setFlag":
+      return applySetFlag(effect.flag, state);
 
-    case 'clearFlag':
-      return applyClearFlag(effect.flag, state)
+    case "clearFlag":
+      return applyClearFlag(effect.flag, state);
 
-    case 'setVariable':
-      return applySetVariable(effect.variable, effect.value, state)
+    case "setVariable":
+      return applySetVariable(effect.variable, effect.value, state);
 
-    case 'addVariable':
-      return applyAddVariable(effect.variable, effect.value, state)
+    case "addVariable":
+      return applyAddVariable(effect.variable, effect.value, state);
 
-    case 'addItem':
-      return applyAddItem(effect.itemId, state)
+    case "addItem":
+      return applyAddItem(effect.itemId, state);
 
-    case 'removeItem':
-      return applyRemoveItem(effect.itemId, state)
+    case "removeItem":
+      return applyRemoveItem(effect.itemId, state);
 
-    case 'moveItem':
-      return applyMoveItem(effect.itemId, effect.locationId, state)
+    case "moveItem":
+      return applyMoveItem(effect.itemId, effect.locationId, state);
 
-    case 'goToLocation':
-      return applyGoToLocation(effect.locationId, state)
+    case "goToLocation":
+      return applyGoToLocation(effect.locationId, state);
 
-    case 'advanceTime':
-      return applyAdvanceTime(effect.hours, state)
+    case "advanceTime":
+      return applyAdvanceTime(effect.hours, state);
 
-    case 'setQuestStage':
-      return applySetQuestStage(effect.questId, effect.stageId, state)
+    case "setQuestStage":
+      return applySetQuestStage(effect.questId, effect.stageId, state);
 
-    case 'addJournalEntry':
-      return applyAddJournalEntry(effect.entryId, state)
+    case "addJournalEntry":
+      return applyAddJournalEntry(effect.entryId, state);
 
-    case 'startDialogue':
-      return applyStartDialogue(effect.dialogueId, state)
+    case "startDialogue":
+      return applyStartDialogue(effect.dialogueId, state);
 
-    case 'endDialogue':
-      return applyEndDialogue(state)
+    case "endDialogue":
+      return applyEndDialogue(state);
 
-    case 'setCharacterLocation':
-      return applySetCharacterLocation(effect.characterId, effect.locationId, state)
+    case "setCharacterLocation":
+      return applySetCharacterLocation(
+        effect.characterId,
+        effect.locationId,
+        state,
+      );
 
-    case 'addToParty':
-      return applyAddToParty(effect.characterId, state)
+    case "addToParty":
+      return applyAddToParty(effect.characterId, state);
 
-    case 'removeFromParty':
-      return applyRemoveFromParty(effect.characterId, state)
+    case "removeFromParty":
+      return applyRemoveFromParty(effect.characterId, state);
 
-    case 'setRelationship':
-      return applySetRelationship(effect.characterId, effect.value, state)
+    case "setRelationship":
+      return applySetRelationship(effect.characterId, effect.value, state);
 
-    case 'addRelationship':
-      return applyAddRelationship(effect.characterId, effect.value, state)
+    case "addRelationship":
+      return applyAddRelationship(effect.characterId, effect.value, state);
 
-    case 'setCharacterStat':
-      return applySetCharacterStat(effect.characterId, effect.stat, effect.value, state)
+    case "setCharacterStat":
+      return applySetCharacterStat(
+        effect.characterId,
+        effect.stat,
+        effect.value,
+        state,
+      );
 
-    case 'addCharacterStat':
-      return applyAddCharacterStat(effect.characterId, effect.stat, effect.value, state)
+    case "addCharacterStat":
+      return applyAddCharacterStat(
+        effect.characterId,
+        effect.stat,
+        effect.value,
+        state,
+      );
 
-    case 'setMapEnabled':
-      return applySetMapEnabled(effect.enabled, state)
+    case "setMapEnabled":
+      return applySetMapEnabled(effect.enabled, state);
 
-    case 'playMusic':
+    case "playMusic":
       // Music is handled by snapshot builder (reads from location.music)
       // This effect is for one-off music changes (not implemented yet)
-      return state
+      return state;
 
-    case 'playSound':
-      return applyPlaySound(effect.sound, state)
+    case "playSound":
+      return applyPlaySound(effect.sound, state);
 
-    case 'notify':
-      return applyNotify(effect.message, state)
+    case "notify":
+      return applyNotify(effect.message, state);
 
-    case 'playVideo':
-      return applyPlayVideo(effect.file, state)
+    case "playVideo":
+      return applyPlayVideo(effect.file, state);
 
-    case 'showInterlude':
-      return applyShowInterlude(effect.interludeId, state)
+    case "showInterlude":
+      return applyShowInterlude(effect.interludeId, state);
 
-    case 'roll':
-      return applyRoll(effect.variable, effect.min, effect.max, state)
+    case "roll":
+      return applyRoll(effect.variable, effect.min, effect.max, state);
 
     default:
       // TypeScript exhaustiveness check - this should never be reached
-      const _exhaustive: never = effect
-      return state
+      const _exhaustive: never = effect;
+      return state;
   }
 }
 
@@ -129,7 +143,10 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
  * @returns New game state with all effects applied
  */
 export function applyEffects(effects: Effect[], state: GameState): GameState {
-  return effects.reduce((currentState, effect) => applyEffect(effect, currentState), state)
+  return effects.reduce(
+    (currentState, effect) => applyEffect(effect, currentState),
+    state,
+  );
 }
 
 // =============================================================================
@@ -148,7 +165,7 @@ function applySetFlag(flag: string, state: GameState): GameState {
       ...state.flags,
       [flag]: true,
     },
-  }
+  };
 }
 
 /**
@@ -163,7 +180,7 @@ function applyClearFlag(flag: string, state: GameState): GameState {
       ...state.flags,
       [flag]: false,
     },
-  }
+  };
 }
 
 /**
@@ -174,7 +191,7 @@ function applyClearFlag(flag: string, state: GameState): GameState {
 function applySetVariable(
   variable: string,
   value: number | string,
-  state: GameState
+  state: GameState,
 ): GameState {
   return {
     ...state,
@@ -182,7 +199,7 @@ function applySetVariable(
       ...state.variables,
       [variable]: value,
     },
-  }
+  };
 }
 
 /**
@@ -192,12 +209,16 @@ function applySetVariable(
  *
  * Example: ADD variable gold -50
  */
-function applyAddVariable(variable: string, value: number, state: GameState): GameState {
-  const currentValue = state.variables[variable]
+function applyAddVariable(
+  variable: string,
+  value: number,
+  state: GameState,
+): GameState {
+  const currentValue = state.variables[variable];
 
   // Only add if current value is a number or doesn't exist
   const newValue =
-    typeof currentValue === 'number' ? currentValue + value : value
+    typeof currentValue === "number" ? currentValue + value : value;
 
   return {
     ...state,
@@ -205,7 +226,7 @@ function applyAddVariable(variable: string, value: number, state: GameState): Ga
       ...state.variables,
       [variable]: newValue,
     },
-  }
+  };
 }
 
 /**
@@ -217,7 +238,7 @@ function applyAddVariable(variable: string, value: number, state: GameState): Ga
 function applyAddItem(itemId: string, state: GameState): GameState {
   // Don't add if already in inventory
   if (state.inventory.includes(itemId)) {
-    return state
+    return state;
   }
 
   return {
@@ -225,9 +246,9 @@ function applyAddItem(itemId: string, state: GameState): GameState {
     inventory: [...state.inventory, itemId],
     itemLocations: {
       ...state.itemLocations,
-      [itemId]: 'inventory',
+      [itemId]: "inventory",
     },
-  }
+  };
 }
 
 /**
@@ -239,10 +260,10 @@ function applyAddItem(itemId: string, state: GameState): GameState {
 function applyRemoveItem(itemId: string, state: GameState): GameState {
   return {
     ...state,
-    inventory: state.inventory.filter(id => id !== itemId),
+    inventory: state.inventory.filter((id) => id !== itemId),
     // Note: itemLocation is NOT updated here - the item stays at "inventory"
     // or wherever it was. Use moveItem to relocate it.
-  }
+  };
 }
 
 /**
@@ -251,15 +272,19 @@ function applyRemoveItem(itemId: string, state: GameState): GameState {
  *
  * Example: MOVE item rusty_key cellar
  */
-function applyMoveItem(itemId: string, locationId: string, state: GameState): GameState {
+function applyMoveItem(
+  itemId: string,
+  locationId: string,
+  state: GameState,
+): GameState {
   return {
     ...state,
-    inventory: state.inventory.filter(id => id !== itemId),
+    inventory: state.inventory.filter((id) => id !== itemId),
     itemLocations: {
       ...state.itemLocations,
       [itemId]: locationId,
     },
-  }
+  };
 }
 
 /**
@@ -273,7 +298,7 @@ function applyGoToLocation(locationId: string, state: GameState): GameState {
   return {
     ...state,
     currentLocation: locationId,
-  }
+  };
 }
 
 /**
@@ -283,9 +308,9 @@ function applyGoToLocation(locationId: string, state: GameState): GameState {
  * Example: ADVANCE time 2
  */
 function applyAdvanceTime(hours: number, state: GameState): GameState {
-  const newHour = state.currentTime.hour + hours
-  const daysToAdd = Math.floor(newHour / 24)
-  const finalHour = newHour % 24
+  const newHour = state.currentTime.hour + hours;
+  const daysToAdd = Math.floor(newHour / 24);
+  const finalHour = newHour % 24;
 
   return {
     ...state,
@@ -293,7 +318,7 @@ function applyAdvanceTime(hours: number, state: GameState): GameState {
       day: state.currentTime.day + daysToAdd,
       hour: finalHour,
     },
-  }
+  };
 }
 
 /**
@@ -304,7 +329,7 @@ function applyAdvanceTime(hours: number, state: GameState): GameState {
 function applySetQuestStage(
   questId: string,
   stageId: string,
-  state: GameState
+  state: GameState,
 ): GameState {
   return {
     ...state,
@@ -312,7 +337,7 @@ function applySetQuestStage(
       ...state.questProgress,
       [questId]: stageId,
     },
-  }
+  };
 }
 
 /**
@@ -324,13 +349,13 @@ function applySetQuestStage(
 function applyAddJournalEntry(entryId: string, state: GameState): GameState {
   // Don't add if already unlocked
   if (state.unlockedJournalEntries.includes(entryId)) {
-    return state
+    return state;
   }
 
   return {
     ...state,
     unlockedJournalEntries: [...state.unlockedJournalEntries, entryId],
-  }
+  };
 }
 
 /**
@@ -345,9 +370,9 @@ function applyStartDialogue(dialogueId: string, state: GameState): GameState {
     ...state,
     dialogueState: {
       dialogueId,
-      nodeId: '', // Will be set by engine when it looks up the dialogue
+      nodeId: "", // Will be set by engine when it looks up the dialogue
     },
-  }
+  };
 }
 
 /**
@@ -359,7 +384,7 @@ function applyEndDialogue(state: GameState): GameState {
   return {
     ...state,
     dialogueState: null,
-  }
+  };
 }
 
 /**
@@ -370,11 +395,11 @@ function applyEndDialogue(state: GameState): GameState {
 function applySetCharacterLocation(
   characterId: string,
   locationId: string,
-  state: GameState
+  state: GameState,
 ): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -386,7 +411,7 @@ function applySetCharacterLocation(
         location: locationId,
       },
     },
-  }
+  };
 }
 
 /**
@@ -395,9 +420,9 @@ function applySetCharacterLocation(
  * Example: ADD toParty elisa
  */
 function applyAddToParty(characterId: string, state: GameState): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -409,7 +434,7 @@ function applyAddToParty(characterId: string, state: GameState): GameState {
         inParty: true,
       },
     },
-  }
+  };
 }
 
 /**
@@ -417,10 +442,13 @@ function applyAddToParty(characterId: string, state: GameState): GameState {
  *
  * Example: REMOVE fromParty elisa
  */
-function applyRemoveFromParty(characterId: string, state: GameState): GameState {
-  const characterState = state.characterState[characterId]
+function applyRemoveFromParty(
+  characterId: string,
+  state: GameState,
+): GameState {
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -432,7 +460,7 @@ function applyRemoveFromParty(characterId: string, state: GameState): GameState 
         inParty: false,
       },
     },
-  }
+  };
 }
 
 /**
@@ -443,11 +471,11 @@ function applyRemoveFromParty(characterId: string, state: GameState): GameState 
 function applySetRelationship(
   characterId: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -459,7 +487,7 @@ function applySetRelationship(
         relationship: value,
       },
     },
-  }
+  };
 }
 
 /**
@@ -470,11 +498,11 @@ function applySetRelationship(
 function applyAddRelationship(
   characterId: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -486,7 +514,7 @@ function applyAddRelationship(
         relationship: characterState.relationship + value,
       },
     },
-  }
+  };
 }
 
 /**
@@ -498,11 +526,11 @@ function applySetCharacterStat(
   characterId: string,
   stat: string,
   value: unknown,
-  state: GameState
+  state: GameState,
 ): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
   return {
@@ -517,7 +545,7 @@ function applySetCharacterStat(
         },
       },
     },
-  }
+  };
 }
 
 /**
@@ -530,16 +558,16 @@ function applyAddCharacterStat(
   characterId: string,
   stat: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): GameState {
-  const characterState = state.characterState[characterId]
+  const characterState = state.characterState[characterId];
   if (!characterState) {
-    return state
+    return state;
   }
 
-  const currentValue = characterState.stats[stat]
+  const currentValue = characterState.stats[stat];
   const newValue =
-    typeof currentValue === 'number' ? currentValue + value : value
+    typeof currentValue === "number" ? currentValue + value : value;
 
   return {
     ...state,
@@ -553,7 +581,7 @@ function applyAddCharacterStat(
         },
       },
     },
-  }
+  };
 }
 
 /**
@@ -566,7 +594,7 @@ function applySetMapEnabled(enabled: boolean, state: GameState): GameState {
   return {
     ...state,
     mapEnabled: enabled,
-  }
+  };
 }
 
 /**
@@ -579,7 +607,7 @@ function applyNotify(message: string, state: GameState): GameState {
   return {
     ...state,
     notifications: [...state.notifications, message],
-  }
+  };
 }
 
 /**
@@ -592,7 +620,7 @@ function applyPlaySound(sound: string, state: GameState): GameState {
   return {
     ...state,
     pendingSounds: [...state.pendingSounds, sound],
-  }
+  };
 }
 
 /**
@@ -605,7 +633,7 @@ function applyPlayVideo(file: string, state: GameState): GameState {
   return {
     ...state,
     pendingVideo: file,
-  }
+  };
 }
 
 /**
@@ -618,7 +646,7 @@ function applyShowInterlude(interludeId: string, state: GameState): GameState {
   return {
     ...state,
     pendingInterlude: interludeId,
-  }
+  };
 }
 
 /**
@@ -626,13 +654,18 @@ function applyShowInterlude(interludeId: string, state: GameState): GameState {
  *
  * Example: ROLL bluffRoll 1 20
  */
-function applyRoll(variable: string, min: number, max: number, state: GameState): GameState {
-  const result = Math.floor(Math.random() * (max - min + 1)) + min
+function applyRoll(
+  variable: string,
+  min: number,
+  max: number,
+  state: GameState,
+): GameState {
+  const result = Math.floor(Math.random() * (max - min + 1)) + min;
   return {
     ...state,
     variables: {
       ...state.variables,
       [variable]: result,
     },
-  }
+  };
 }

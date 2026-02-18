@@ -29,11 +29,7 @@ The video plays fullscreen before the dialogue text is shown.
 If you're using `GameShell`, video playback is automatic. Configure the video file location:
 
 ```tsx
-<GameShell
-  registry={registry}
-  config={config}
-  videoBasePath="/assets/video"
-/>
+<GameShell registry={registry} config={config} videoBasePath="/assets/video" />
 ```
 
 The default `videoBasePath` is `'/video'`.
@@ -43,17 +39,17 @@ The default `videoBasePath` is `'/video'`.
 For custom renderers, use the `VideoPlayer` component directly:
 
 ```tsx
-import { VideoPlayer } from '@doodle-engine/react'
+import { VideoPlayer } from "@doodle-engine/react";
 
 function MyGame() {
-  const { snapshot } = useGame()
-  const [video, setVideo] = useState<string | null>(null)
+  const { snapshot } = useGame();
+  const [video, setVideo] = useState<string | null>(null);
 
   useEffect(() => {
     if (snapshot.pendingVideo) {
-      setVideo(snapshot.pendingVideo)
+      setVideo(snapshot.pendingVideo);
     }
-  }, [snapshot.pendingVideo])
+  }, [snapshot.pendingVideo]);
 
   return (
     <>
@@ -66,22 +62,23 @@ function MyGame() {
       )}
       {/* rest of your UI */}
     </>
-  )
+  );
 }
 ```
 
 ### VideoPlayer Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `src` | `string` | required | Video file name |
-| `basePath` | `string` | `'/video'` | Base path for video files |
-| `onComplete` | `() => void` | required | Called when video ends or is skipped |
-| `className` | `string` | `''` | CSS class |
+| Prop         | Type         | Default    | Description                          |
+| ------------ | ------------ | ---------- | ------------------------------------ |
+| `src`        | `string`     | required   | Video file name                      |
+| `basePath`   | `string`     | `'/video'` | Base path for video files            |
+| `onComplete` | `() => void` | required   | Called when video ends or is skipped |
+| `className`  | `string`     | `''`       | CSS class                            |
 
 ## Skipping Videos
 
 Players can skip a video using:
+
 - The **Skip** button displayed on the video overlay
 - **Escape**, **Space**, or **Enter** keys
 

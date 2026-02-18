@@ -2,26 +2,31 @@
  * LoadingScreen - Displayed while game assets are loading.
  */
 
-import type { AssetLoadingState } from '@doodle-engine/core'
+import type { AssetLoadingState } from "@doodle-engine/core";
 
 export interface LoadingScreenProps {
   /** Asset loading state (from AssetProvider) */
-  state: AssetLoadingState
+  state: AssetLoadingState;
   /** Background image (from shell config) — shown behind the progress UI */
-  background?: string
+  background?: string;
   /** Custom progress bar renderer */
-  renderProgress?: (progress: number, phase: string) => React.ReactNode
+  renderProgress?: (progress: number, phase: string) => React.ReactNode;
   /** CSS class */
-  className?: string
+  className?: string;
 }
 
-function phaseLabel(phase: AssetLoadingState['phase']): string {
+function phaseLabel(phase: AssetLoadingState["phase"]): string {
   switch (phase) {
-    case 'loading-shell': return 'Loading...'
-    case 'loading-game':  return 'Loading game assets...'
-    case 'complete':      return 'Ready!'
-    case 'error':         return 'Error loading assets'
-    default:              return 'Loading...'
+    case "loading-shell":
+      return "Loading...";
+    case "loading-game":
+      return "Loading game assets...";
+    case "complete":
+      return "Ready!";
+    case "error":
+      return "Error loading assets";
+    default:
+      return "Loading...";
   }
 }
 
@@ -29,14 +34,14 @@ export function LoadingScreen({
   state,
   background,
   renderProgress,
-  className = '',
+  className = "",
 }: LoadingScreenProps) {
   const bgStyle = background
     ? { backgroundImage: `url(${background})` }
-    : undefined
+    : undefined;
 
-  const percent = Math.round(state.overallProgress * 100)
-  const label = phaseLabel(state.phase)
+  const percent = Math.round(state.overallProgress * 100);
+  const label = phaseLabel(state.phase);
 
   return (
     <div className={`loading-screen ${className}`} style={bgStyle}>
@@ -62,17 +67,17 @@ export function LoadingScreen({
 
           {state.currentAsset && (
             <div className="loading-screen-asset" title={state.currentAsset}>
-              {state.currentAsset.split('/').pop()}
+              {state.currentAsset.split("/").pop()}
             </div>
           )}
         </div>
 
         {state.error && (
-          <p className="loading-screen-message" style={{ color: '#f87171' }}>
+          <p className="loading-screen-message" style={{ color: "#f87171" }}>
             {state.error}
           </p>
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -10,8 +10,8 @@
  * All evaluators are pure functions with no side effects.
  */
 
-import type { Condition } from '../types/conditions'
-import type { GameState } from '../types/state'
+import type { Condition } from "../types/conditions";
+import type { GameState } from "../types/state";
 
 /**
  * Evaluate a single condition against the current game state.
@@ -26,57 +26,80 @@ import type { GameState } from '../types/state'
  * const passes = evaluateCondition(condition, state) // true if flag is set
  * ```
  */
-export function evaluateCondition(condition: Condition, state: GameState): boolean {
+export function evaluateCondition(
+  condition: Condition,
+  state: GameState,
+): boolean {
   switch (condition.type) {
-    case 'hasFlag':
-      return evaluateHasFlag(condition.flag, state)
+    case "hasFlag":
+      return evaluateHasFlag(condition.flag, state);
 
-    case 'notFlag':
-      return evaluateNotFlag(condition.flag, state)
+    case "notFlag":
+      return evaluateNotFlag(condition.flag, state);
 
-    case 'hasItem':
-      return evaluateHasItem(condition.itemId, state)
+    case "hasItem":
+      return evaluateHasItem(condition.itemId, state);
 
-    case 'variableEquals':
-      return evaluateVariableEquals(condition.variable, condition.value, state)
+    case "variableEquals":
+      return evaluateVariableEquals(condition.variable, condition.value, state);
 
-    case 'variableGreaterThan':
-      return evaluateVariableGreaterThan(condition.variable, condition.value, state)
+    case "variableGreaterThan":
+      return evaluateVariableGreaterThan(
+        condition.variable,
+        condition.value,
+        state,
+      );
 
-    case 'variableLessThan':
-      return evaluateVariableLessThan(condition.variable, condition.value, state)
+    case "variableLessThan":
+      return evaluateVariableLessThan(
+        condition.variable,
+        condition.value,
+        state,
+      );
 
-    case 'atLocation':
-      return evaluateAtLocation(condition.locationId, state)
+    case "atLocation":
+      return evaluateAtLocation(condition.locationId, state);
 
-    case 'questAtStage':
-      return evaluateQuestAtStage(condition.questId, condition.stageId, state)
+    case "questAtStage":
+      return evaluateQuestAtStage(condition.questId, condition.stageId, state);
 
-    case 'characterAt':
-      return evaluateCharacterAt(condition.characterId, condition.locationId, state)
+    case "characterAt":
+      return evaluateCharacterAt(
+        condition.characterId,
+        condition.locationId,
+        state,
+      );
 
-    case 'characterInParty':
-      return evaluateCharacterInParty(condition.characterId, state)
+    case "characterInParty":
+      return evaluateCharacterInParty(condition.characterId, state);
 
-    case 'relationshipAbove':
-      return evaluateRelationshipAbove(condition.characterId, condition.value, state)
+    case "relationshipAbove":
+      return evaluateRelationshipAbove(
+        condition.characterId,
+        condition.value,
+        state,
+      );
 
-    case 'relationshipBelow':
-      return evaluateRelationshipBelow(condition.characterId, condition.value, state)
+    case "relationshipBelow":
+      return evaluateRelationshipBelow(
+        condition.characterId,
+        condition.value,
+        state,
+      );
 
-    case 'timeIs':
-      return evaluateTimeIs(condition.startHour, condition.endHour, state)
+    case "timeIs":
+      return evaluateTimeIs(condition.startHour, condition.endHour, state);
 
-    case 'itemAt':
-      return evaluateItemAt(condition.itemId, condition.locationId, state)
+    case "itemAt":
+      return evaluateItemAt(condition.itemId, condition.locationId, state);
 
-    case 'roll':
-      return evaluateRoll(condition.min, condition.max, condition.threshold)
+    case "roll":
+      return evaluateRoll(condition.min, condition.max, condition.threshold);
 
     default:
       // TypeScript exhaustiveness check - this should never be reached
-      const _exhaustive: never = condition
-      return false
+      const _exhaustive: never = condition;
+      return false;
   }
 }
 
@@ -88,8 +111,11 @@ export function evaluateCondition(condition: Condition, state: GameState): boole
  * @param state - Current game state
  * @returns true if all conditions pass, false otherwise
  */
-export function evaluateConditions(conditions: Condition[], state: GameState): boolean {
-  return conditions.every(condition => evaluateCondition(condition, state))
+export function evaluateConditions(
+  conditions: Condition[],
+  state: GameState,
+): boolean {
+  return conditions.every((condition) => evaluateCondition(condition, state));
 }
 
 // =============================================================================
@@ -103,7 +129,7 @@ export function evaluateConditions(conditions: Condition[], state: GameState): b
  * Example: hasFlag metBartender
  */
 function evaluateHasFlag(flag: string, state: GameState): boolean {
-  return state.flags[flag] === true
+  return state.flags[flag] === true;
 }
 
 /**
@@ -113,7 +139,7 @@ function evaluateHasFlag(flag: string, state: GameState): boolean {
  * Example: notFlag doorLocked
  */
 function evaluateNotFlag(flag: string, state: GameState): boolean {
-  return state.flags[flag] !== true
+  return state.flags[flag] !== true;
 }
 
 /**
@@ -122,7 +148,7 @@ function evaluateNotFlag(flag: string, state: GameState): boolean {
  * Example: hasItem rusty_key
  */
 function evaluateHasItem(itemId: string, state: GameState): boolean {
-  return state.inventory.includes(itemId)
+  return state.inventory.includes(itemId);
 }
 
 /**
@@ -134,9 +160,9 @@ function evaluateHasItem(itemId: string, state: GameState): boolean {
 function evaluateVariableEquals(
   variable: string,
   value: number | string,
-  state: GameState
+  state: GameState,
 ): boolean {
-  return state.variables[variable] === value
+  return state.variables[variable] === value;
 }
 
 /**
@@ -148,10 +174,10 @@ function evaluateVariableEquals(
 function evaluateVariableGreaterThan(
   variable: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): boolean {
-  const variableValue = state.variables[variable]
-  return typeof variableValue === 'number' && variableValue > value
+  const variableValue = state.variables[variable];
+  return typeof variableValue === "number" && variableValue > value;
 }
 
 /**
@@ -163,10 +189,10 @@ function evaluateVariableGreaterThan(
 function evaluateVariableLessThan(
   variable: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): boolean {
-  const variableValue = state.variables[variable]
-  return typeof variableValue === 'number' && variableValue < value
+  const variableValue = state.variables[variable];
+  return typeof variableValue === "number" && variableValue < value;
 }
 
 /**
@@ -175,7 +201,7 @@ function evaluateVariableLessThan(
  * Example: atLocation tavern
  */
 function evaluateAtLocation(locationId: string, state: GameState): boolean {
-  return state.currentLocation === locationId
+  return state.currentLocation === locationId;
 }
 
 /**
@@ -187,9 +213,9 @@ function evaluateAtLocation(locationId: string, state: GameState): boolean {
 function evaluateQuestAtStage(
   questId: string,
   stageId: string,
-  state: GameState
+  state: GameState,
 ): boolean {
-  return state.questProgress[questId] === stageId
+  return state.questProgress[questId] === stageId;
 }
 
 /**
@@ -201,10 +227,10 @@ function evaluateQuestAtStage(
 function evaluateCharacterAt(
   characterId: string,
   locationId: string,
-  state: GameState
+  state: GameState,
 ): boolean {
-  const characterState = state.characterState[characterId]
-  return characterState?.location === locationId
+  const characterState = state.characterState[characterId];
+  return characterState?.location === locationId;
 }
 
 /**
@@ -213,9 +239,12 @@ function evaluateCharacterAt(
  *
  * Example: characterInParty elisa
  */
-function evaluateCharacterInParty(characterId: string, state: GameState): boolean {
-  const characterState = state.characterState[characterId]
-  return characterState?.inParty === true
+function evaluateCharacterInParty(
+  characterId: string,
+  state: GameState,
+): boolean {
+  const characterState = state.characterState[characterId];
+  return characterState?.inParty === true;
 }
 
 /**
@@ -227,10 +256,10 @@ function evaluateCharacterInParty(characterId: string, state: GameState): boolea
 function evaluateRelationshipAbove(
   characterId: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): boolean {
-  const characterState = state.characterState[characterId]
-  return characterState !== undefined && characterState.relationship > value
+  const characterState = state.characterState[characterId];
+  return characterState !== undefined && characterState.relationship > value;
 }
 
 /**
@@ -242,10 +271,10 @@ function evaluateRelationshipAbove(
 function evaluateRelationshipBelow(
   characterId: string,
   value: number,
-  state: GameState
+  state: GameState,
 ): boolean {
-  const characterState = state.characterState[characterId]
-  return characterState !== undefined && characterState.relationship < value
+  const characterState = state.characterState[characterId];
+  return characterState !== undefined && characterState.relationship < value;
 }
 
 /**
@@ -259,16 +288,20 @@ function evaluateRelationshipBelow(
  * @param startHour - Start hour (0-23, inclusive)
  * @param endHour - End hour (0-23, exclusive)
  */
-function evaluateTimeIs(startHour: number, endHour: number, state: GameState): boolean {
-  const currentHour = state.currentTime.hour
+function evaluateTimeIs(
+  startHour: number,
+  endHour: number,
+  state: GameState,
+): boolean {
+  const currentHour = state.currentTime.hour;
 
   // Handle normal range (e.g., 9 to 17)
   if (startHour < endHour) {
-    return currentHour >= startHour && currentHour < endHour
+    return currentHour >= startHour && currentHour < endHour;
   }
 
   // Handle wrap-around range (e.g., 20 to 6)
-  return currentHour >= startHour || currentHour < endHour
+  return currentHour >= startHour || currentHour < endHour;
 }
 
 /**
@@ -277,8 +310,12 @@ function evaluateTimeIs(startHour: number, endHour: number, state: GameState): b
  *
  * Example: itemAt sword armory
  */
-function evaluateItemAt(itemId: string, locationId: string, state: GameState): boolean {
-  return state.itemLocations[itemId] === locationId
+function evaluateItemAt(
+  itemId: string,
+  locationId: string,
+  state: GameState,
+): boolean {
+  return state.itemLocations[itemId] === locationId;
 }
 
 /**
@@ -288,6 +325,6 @@ function evaluateItemAt(itemId: string, locationId: string, state: GameState): b
  * Example: roll 1 20 15
  */
 function evaluateRoll(min: number, max: number, threshold: number): boolean {
-  const result = Math.floor(Math.random() * (max - min + 1)) + min
-  return result >= threshold
+  const result = Math.floor(Math.random() * (max - min + 1)) + min;
+  return result >= threshold;
 }

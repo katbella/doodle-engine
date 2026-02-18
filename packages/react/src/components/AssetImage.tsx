@@ -5,21 +5,21 @@
  * Falls back to a transparent placeholder if no placeholder is given.
  */
 
-import { useState } from 'react'
-import type { ImgHTMLAttributes } from 'react'
-import { useAsset } from '../hooks/useAsset'
+import { useState } from "react";
+import type { ImgHTMLAttributes } from "react";
+import { useAsset } from "../hooks/useAsset";
 
 export interface AssetImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   /** Asset path */
-  src: string
+  src: string;
   /** Placeholder src to show while loading (default: transparent 1x1) */
-  placeholder?: string
+  placeholder?: string;
   /** Fade-in duration in ms (default: 200) */
-  fadeIn?: number
+  fadeIn?: number;
 }
 
 const TRANSPARENT =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 export function AssetImage({
   src,
@@ -28,8 +28,8 @@ export function AssetImage({
   style,
   ...rest
 }: AssetImageProps) {
-  const { url, isReady } = useAsset(src)
-  const [loaded, setLoaded] = useState(false)
+  const { url, isReady } = useAsset(src);
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <img
@@ -42,5 +42,5 @@ export function AssetImage({
         ...style,
       }}
     />
-  )
+  );
 }

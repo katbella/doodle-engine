@@ -18,14 +18,14 @@ music: tavern_ambience.ogg
 ambient: ""
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique identifier, used in dialogue effects and map references |
-| `name` | Display name (use `@key` for localization) |
-| `description` | Text shown when the player is at this location |
-| `banner` | Image displayed at the top of the location view |
-| `music` | Background music track (auto-plays, crossfades between locations) |
-| `ambient` | Ambient sound loop (plays alongside music) |
+| Field         | Description                                                       |
+| ------------- | ----------------------------------------------------------------- |
+| `id`          | Unique identifier, used in dialogue effects and map references    |
+| `name`        | Display name (use `@key` for localization)                        |
+| `description` | Text shown when the player is at this location                    |
+| `banner`      | Image displayed at the top of the location view                   |
+| `music`       | Background music track (auto-plays, crossfades between locations) |
+| `ambient`     | Ambient sound loop (plays alongside music)                        |
 
 ## Creating a Map
 
@@ -45,12 +45,12 @@ locations:
     y: 200
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique map identifier |
-| `name` | Display name |
-| `image` | Background image for the map |
-| `scale` | Travel time multiplier (higher = longer travel) |
+| Field       | Description                                                     |
+| ----------- | --------------------------------------------------------------- |
+| `id`        | Unique map identifier                                           |
+| `name`      | Display name                                                    |
+| `image`     | Background image for the map                                    |
+| `scale`     | Travel time multiplier (higher = longer travel)                 |
 | `locations` | Array of location markers with x/y coordinates on the map image |
 
 The `x` and `y` coordinates position clickable markers on the map image. Players click a marker to travel.
@@ -78,6 +78,7 @@ The `TRIGGER` keyword auto-starts this dialogue when the player enters the taver
 ## Travel Effects
 
 When a player travels to a location:
+
 1. `currentLocation` updates to the new location
 2. Time advances based on map `scale` and distance
 3. Any active dialogue ends
