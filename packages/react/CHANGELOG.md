@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.23
+
+### Patch Changes
+
+- ab7ff80: cli formatting and docs fixes
+- Updated dependencies [ab7ff80]
+    - @doodle-engine/core@0.0.23
+
 ## 0.0.22
 
 ### Patch Changes
