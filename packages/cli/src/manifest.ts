@@ -35,7 +35,7 @@ export async function generateAssetManifest(
     );
 
     async function getSize(assetPath: string): Promise<number | undefined> {
-        // Asset paths are like /assets/images/foo.png — strip the leading /
+        // Asset paths are like /assets/images/foo.png, so strip the leading /
         const fsPath = join(
             publicDir,
             assetPath.startsWith('/') ? assetPath.slice(1) : assetPath

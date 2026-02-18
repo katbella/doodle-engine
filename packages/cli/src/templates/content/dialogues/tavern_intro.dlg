@@ -7,7 +7,7 @@ REQUIRE notFlag seenTavernIntro
 
 # Each NODE is a conversation point. The first NODE is always the start.
 NODE start
-  # NARRATOR: has no speaker — used for scene-setting text.
+  # NARRATOR: has no speaker. Used for scene-setting text.
   # @narrator.tavern_intro is a localization key defined in content/locales/en.yaml.
   # You can also write text inline: NARRATOR: "The tavern is warm and smells of ale."
   NARRATOR: @narrator.tavern_intro
@@ -16,7 +16,7 @@ NODE start
   SET flag seenTavernIntro
 
   # CHOICE text can use a @key or "inline text".
-  # A choice with END dialogue is a terminal choice — no GOTO needed.
+  # A choice with END dialogue is a terminal choice. No GOTO needed.
   CHOICE @narrator.choice.look_around
     END dialogue
   END

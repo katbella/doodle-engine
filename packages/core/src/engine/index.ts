@@ -168,7 +168,7 @@ export class Engine {
             this.state = applyEffects(choice.effects, this.state);
         }
 
-        // If a startDialogue effect fired, nodeId will be '' — initialize the new dialogue
+        // If a startDialogue effect fired, nodeId will be ''. Initialize the new dialogue.
         if (this.state.dialogueState?.nodeId === '') {
             return this.initDialogue(this.state.dialogueState.dialogueId);
         }

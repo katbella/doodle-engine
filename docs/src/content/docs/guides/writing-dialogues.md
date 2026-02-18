@@ -7,7 +7,7 @@ Dialogues are written in `.dlg` files using a simple DSL (domain-specific langua
 
 ## Quick Start (No Localization Needed)
 
-You can write dialogue text directly — no locale files required. There are three forms:
+You can write dialogue text directly (no locale files required). There are three forms:
 
 ```
 BARTENDER: Hello there             # plain text, fine for simple lines

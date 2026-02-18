@@ -189,7 +189,7 @@ REQUIRE itemAt sword armory
 
 ## roll
 
-Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. The roll is not stored anywhere — use the `ROLL` effect if you need the value.
+Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. The roll is not stored anywhere. Use the `ROLL` effect if you need the value.
 
 ```
 REQUIRE roll 1 20 15

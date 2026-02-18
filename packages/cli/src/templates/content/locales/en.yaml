@@ -1,7 +1,7 @@
 # ===================
 # Narrator Intros
 # ===================
-narrator.tavern_intro: "You push open the heavy oak door and step inside. The warmth hits you first, then the smell — stale ale, wood smoke, and something frying in the kitchen. A few patrons hunch over their mugs. Behind the bar, a broad-shouldered man wipes down glasses, watching you with quiet interest."
+narrator.tavern_intro: "You push open the heavy oak door and step inside. The warmth hits you first, then the smell: stale ale, wood smoke, and something frying in the kitchen. A few patrons hunch over their mugs. Behind the bar, a broad-shouldered man wipes down glasses, watching you with quiet interest."
 narrator.market_intro: "The market square opens up before you, a riot of color and noise. Stalls line every side, draped in bright awnings. Merchants call out their prices, children dart between carts, and somewhere a street musician plays an out-of-tune fiddle."
 narrator.choice.look_around: "Look around."
 
@@ -47,7 +47,7 @@ quest.odd_jobs.stage.complete: "Job well done. Elena paid 50 gold for the troubl
 journal.tavern_discovery.title: "The Salty Dog"
 journal.tavern_discovery.text: "I found a tavern in the docks district called The Salty Dog. The bartender, Marcus, seems well-connected. Word is there's been strange folk around the docks at night."
 journal.odd_jobs_accepted.title: "Work at the Market"
-journal.odd_jobs_accepted.text: "Marcus pointed me toward a merchant in the market square — Elena. She's looking for someone reliable. Should head over and introduce myself."
+journal.odd_jobs_accepted.text: "Marcus pointed me toward a merchant in the market square: Elena. She's looking for someone reliable. Should head over and introduce myself."
 journal.market_square.title: "Market Square"
 journal.market_square.text: "The market square is the heart of this little town. Elena has been trading here for fifteen years. A good place to resupply."
 
@@ -78,15 +78,15 @@ bartender.choice.got_it: "Got it. I'll take care of it."
 bartender.choice.anytime: "Anytime."
 
 # Responses
-bartender.rumors: "Word is there's been strange folk poking around the docks at night. And the merchant in the market square has been looking for hired help. Oh — found this on the floor the other day. Strange markings. You can have it."
+bartender.rumors: "Word is there's been strange folk poking around the docks at night. And the merchant in the market square has been looking for hired help. Oh, found this on the floor the other day. Strange markings. You can have it."
 bartender.rumors_detail: "Some say they've seen lights out on the old pier after midnight. Probably smugglers, but who knows these days. Keep your wits about you."
-bartender.order_drink: "Five gold for the house special — strongest thing this side of the river. What do you say?"
+bartender.order_drink: "Five gold for the house special, strongest thing this side of the river. What do you say?"
 bartender.after_drink: "Glad you like it! Brewed it myself. Now then, anything else?"
-bartender.work_intro: "Well now, you look capable enough. There's a merchant over in the market square — Elena — she's been asking around for someone reliable. Tell her Marcus sent you."
+bartender.work_intro: "Well now, you look capable enough. There's a merchant over in the market square. Elena has been asking around for someone reliable. Tell her Marcus sent you."
 bartender.work_accepted: "Good on you. Elena's fair with pay. Head to the market square when you're ready."
-bartender.work_details: "Something about a shipment that needs escorting. Nothing too dangerous, she says — but then, that's what they always say."
+bartender.work_details: "Something about a shipment that needs escorting. Nothing too dangerous, she says, but then, that's what they always say."
 bartender.work_followup: "Still working on that job for Elena? She's over at the market square if you haven't found her yet. Don't keep her waiting too long."
-bartender.work_done: "I heard Elena's singing your praises. Good work out there — I knew you had it in you."
+bartender.work_done: "I heard Elena's singing your praises. Good work out there. I knew you had it in you."
 
 # ===================
 # Merchant Dialogue
@@ -110,12 +110,12 @@ merchant.choice.on_it: "Consider it done."
 merchant.choice.glad_to_help: "Glad I could help."
 
 # Responses
-merchant.browse: "Take a look! I've got a fine map of the area if you're new around here. Only twenty gold — a bargain for not getting lost."
+merchant.browse: "Take a look! I've got a fine map of the area if you're new around here. Only twenty gold, a bargain for not getting lost."
 merchant.sold_map: "Excellent choice! This'll keep you from wandering into the wrong part of town."
-merchant.too_pricey: "Ha! You'd pay twice that if you got lost in the docks at night. But no rush — I'll be here."
+merchant.too_pricey: "Ha! You'd pay twice that if you got lost in the docks at night. But no rush. I'll be here."
 merchant.odd_jobs: "Ah, Marcus sent you? Good man. I've got a shipment coming in and could use someone to keep an eye on things. Interested?"
-merchant.task_details: "Head down to the docks at sundown. You'll meet my contact there — a woman named Ria. Make sure the cargo gets here in one piece."
-merchant.quest_complete: "Everything arrived in perfect condition! You've earned this — fifty gold, as promised. If I need help again, you'll be the first I call."
+merchant.task_details: "Head down to the docks at sundown. You'll meet my contact there, a woman named Ria. Make sure the cargo gets here in one piece."
+merchant.quest_complete: "Everything arrived in perfect condition! You've earned this: fifty gold, as promised. If I need help again, you'll be the first I call."
 merchant.about_market: "Market Square is the heart of this little town. You can find just about anything here if you know where to look. I've been trading here for fifteen years."
 
 # ===================
@@ -135,7 +135,7 @@ bluff.setup: "Marcus eyes you across the bar. You consider spinning him a tale t
 bluff.choice.attempt: "Try to bluff him."
 bluff.choice.back_down: "Actually, never mind."
 bluff.backed_down: "Some fights aren't worth picking."
-bluff.rolled: "You spin the tale with {bluffRoll} on your roll — and Marcus listens carefully."
+bluff.rolled: "You spin the tale with {bluffRoll} on your roll, and Marcus listens carefully."
 bluff.success.narration: "The story lands perfectly. Marcus laughs and slides a free drink across the bar."
 bluff.success.bartender: "Sure, this one's on the house."
 bluff.failure.narration: "Marcus raises an eyebrow, entirely unconvinced."

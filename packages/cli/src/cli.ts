@@ -17,7 +17,7 @@ program
     .name('doodle')
     .description(
         crayon.magenta('🐾 Doodle Engine') +
-            crayon.dim(' — Narrative RPG development tools')
+            crayon.dim(': Narrative RPG development tools')
     )
     .version('0.0.1');
 

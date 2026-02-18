@@ -3,7 +3,7 @@ title: Your First Game
 description: Walk through building a simple game with Doodle Engine.
 ---
 
-This guide walks through the starter game created by `doodle create` to explain how everything fits together.
+This guide walks through the starter game created by the scaffolder to explain how everything fits together.
 
 ## Game Configuration
 

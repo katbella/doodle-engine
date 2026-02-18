@@ -7,7 +7,7 @@ Doodle Engine supports two randomness primitives: the `ROLL` effect and the `rol
 
 ## ROLL effect
 
-`ROLL <variable> <min> <max>` — rolls a random integer and stores it in a variable. Use this when you need to:
+`ROLL <variable> <min> <max>`: rolls a random integer and stores it in a variable. Use this when you need to:
 
 - Display the result to the player
 - Branch on the result in multiple places
@@ -18,11 +18,11 @@ ROLL bluffRoll 1 20
 NARRATOR: You rolled a {bluffRoll}!
 ```
 
-The `{bluffRoll}` placeholder is replaced with the variable's value when the snapshot is built. This works in any dialogue text — speaker lines, narrator lines, choice text, and notification messages.
+The `{bluffRoll}` placeholder is replaced with the variable's value when the snapshot is built. This works in any dialogue text: speaker lines, narrator lines, choice text, and notification messages.
 
 ## roll condition
 
-`roll <min> <max> <threshold>` — rolls a random integer and returns true if the result is >= threshold. No value is stored. Use this for hidden checks where the player doesn't need to see the outcome.
+`roll <min> <max> <threshold>`: rolls a random integer and returns true if the result is >= threshold. No value is stored. Use this for hidden checks where the player doesn't need to see the outcome.
 
 ```
 CHOICE @bluff
@@ -75,14 +75,14 @@ With locale strings:
 
 ```yaml
 bluff.setup: 'You consider spinning Marcus a tale to get a free drink...'
-bluff.rolled: 'You spin the tale — a {bluffRoll} on your roll.'
+bluff.rolled: 'You spin the tale, rolling a {bluffRoll}.'
 bluff.success: 'The story lands perfectly. Marcus slides over a free drink.'
 bluff.failure: 'Marcus raises an eyebrow. "Nice try."'
 ```
 
 ## Hidden check pattern
 
-For a check the player doesn't see — e.g., a random encounter, a lucky find — use the `roll` condition directly on a `REQUIRE`:
+For a check the player doesn't see (e.g., a random encounter, a lucky find), use the `roll` condition directly on a `REQUIRE`:
 
 ```
 NODE explore

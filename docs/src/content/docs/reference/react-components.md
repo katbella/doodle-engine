@@ -265,7 +265,7 @@ import { SaveLoadPanel } from '@doodle-engine/react';
 
 ## Interlude
 
-Full-screen narrative text scene (chapter card, dream sequence, etc.). Displays a background image with auto-scrolling text. Handled automatically by `GameRenderer` and `GameShell` — use this only when building a custom renderer.
+Full-screen narrative text scene (chapter card, dream sequence, etc.). Displays a background image with auto-scrolling text. Handled automatically by `GameRenderer` and `GameShell`. Use this only when building a custom renderer.
 
 ```tsx
 import { Interlude } from '@doodle-engine/react';

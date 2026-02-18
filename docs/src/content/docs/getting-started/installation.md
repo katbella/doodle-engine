@@ -47,7 +47,9 @@ You'll need:
 {
     "scripts": {
         "dev": "doodle dev",
-        "build": "doodle build"
+        "build": "doodle build",
+        "validate": "doodle validate",
+        "preview": "vite preview"
     },
     "dependencies": {
         "@doodle-engine/core": "latest",
