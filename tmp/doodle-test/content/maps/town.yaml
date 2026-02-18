@@ -1,0 +1,11 @@
+id: town
+name: "@map.town.name"
+image: ""
+scale: 1
+locations:
+  - id: tavern
+    x: 100
+    y: 200
+  - id: market
+    x: 300
+    y: 150

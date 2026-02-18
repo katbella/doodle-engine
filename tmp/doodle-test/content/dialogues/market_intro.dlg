@@ -1,0 +1,15 @@
+# One-time narrator intro for the market. Same pattern as tavern_intro.dlg.
+
+TRIGGER market
+REQUIRE notFlag seenMarketIntro
+
+NODE start
+  NARRATOR: @narrator.market_intro
+  SET flag seenMarketIntro
+
+  # ADD journalEntry unlocks a journal entry for the player.
+  ADD journalEntry market_square
+
+  CHOICE @narrator.choice.look_around
+    END dialogue
+  END

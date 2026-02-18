@@ -1,0 +1,274 @@
+/**
+ * Doodle Engine Shell Styles
+ *
+ * CSS for loading, splash, and title screens.
+ * Override these variables or individual classes to customize the look.
+ *
+ * Import in your app:
+ *   import '@doodle-engine/react/styles/shell.css'
+ */
+
+:root {
+  /* Colors */
+  --doodle-bg-primary: #0f0f23;
+  --doodle-bg-secondary: #1a1a2e;
+  --doodle-text-primary: #ffffff;
+  --doodle-text-secondary: #a0a0b0;
+  --doodle-accent: #6366f1;
+  --doodle-accent-hover: #818cf8;
+
+  /* Typography */
+  --doodle-font-family: system-ui, -apple-system, sans-serif;
+  --doodle-font-size-sm: 0.875rem;
+  --doodle-font-size-base: 1rem;
+  --doodle-font-size-lg: 1.25rem;
+  --doodle-font-size-xl: 2rem;
+  --doodle-font-size-2xl: 3rem;
+
+  /* Spacing */
+  --doodle-spacing-sm: 0.5rem;
+  --doodle-spacing-md: 1rem;
+  --doodle-spacing-lg: 2rem;
+  --doodle-spacing-xl: 4rem;
+
+  /* Transitions */
+  --doodle-transition-fast: 150ms ease;
+  --doodle-transition-normal: 300ms ease;
+  --doodle-transition-slow: 500ms ease;
+}
+
+/* ── Loading Screen ──────────────────────────────────────────────── */
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--doodle-bg-primary) 0%, var(--doodle-bg-secondary) 100%);
+  background-size: cover;
+  background-position: center;
+  color: var(--doodle-text-primary);
+  font-family: var(--doodle-font-family);
+  z-index: 9999;
+}
+
+.loading-screen-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--doodle-spacing-lg);
+  width: min(480px, 90vw);
+}
+
+.loading-screen-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--doodle-accent);
+  border-radius: 50%;
+  animation: doodle-spin 0.8s linear infinite;
+}
+
+@keyframes doodle-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-screen-progress-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--doodle-spacing-sm);
+}
+
+.loading-screen-bar-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-screen-bar-fill {
+  height: 100%;
+  background: var(--doodle-accent);
+  border-radius: 2px;
+  transition: width 150ms ease;
+}
+
+.loading-screen-phase {
+  font-size: var(--doodle-font-size-sm);
+  color: var(--doodle-text-secondary);
+  text-align: center;
+}
+
+.loading-screen-percent {
+  font-size: var(--doodle-font-size-sm);
+  color: var(--doodle-text-secondary);
+  text-align: right;
+}
+
+.loading-screen-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.loading-screen-asset {
+  font-size: 0.75rem;
+  color: rgba(160, 160, 176, 0.6);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Legacy support — used by old <LoadingScreen message> usage */
+.loading-screen-message {
+  font-size: var(--doodle-font-size-base);
+  color: var(--doodle-text-secondary);
+  text-align: center;
+}
+
+/* ── Splash Screen ───────────────────────────────────────────────── */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--doodle-bg-primary) 0%, var(--doodle-bg-secondary) 100%);
+  background-size: cover;
+  background-position: center;
+  color: var(--doodle-text-primary);
+  font-family: var(--doodle-font-family);
+  cursor: pointer;
+  animation: doodle-fade-in var(--doodle-transition-slow) ease;
+  z-index: 9998;
+}
+
+.splash-logo {
+  max-width: min(400px, 80vw);
+  max-height: 30vh;
+  object-fit: contain;
+  animation: doodle-fade-in var(--doodle-transition-slow) ease;
+}
+
+.splash-title {
+  font-size: var(--doodle-font-size-2xl);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin: 0;
+  animation: doodle-fade-in var(--doodle-transition-slow) ease;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Legacy class — kept for backward compat */
+.splash-loading {
+  font-size: var(--doodle-font-size-sm);
+  color: var(--doodle-text-secondary);
+  margin-top: var(--doodle-spacing-lg);
+  opacity: 0.6;
+}
+
+/* ── Title Screen ────────────────────────────────────────────────── */
+
+.title-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--doodle-bg-secondary) 0%, var(--doodle-bg-primary) 100%);
+  background-size: cover;
+  background-position: center;
+  color: var(--doodle-text-primary);
+  font-family: var(--doodle-font-family);
+  gap: var(--doodle-spacing-md);
+  z-index: 9997;
+}
+
+.title-logo {
+  max-width: min(600px, 80vw);
+  max-height: 25vh;
+  object-fit: contain;
+  margin-bottom: var(--doodle-spacing-md);
+}
+
+.title-heading {
+  font-size: var(--doodle-font-size-2xl);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.title-subtitle {
+  font-size: var(--doodle-font-size-lg);
+  color: var(--doodle-text-secondary);
+  margin: 0;
+}
+
+.title-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--doodle-spacing-sm);
+  margin-top: var(--doodle-spacing-lg);
+  width: min(280px, 80vw);
+}
+
+.title-button {
+  padding: 0.75rem var(--doodle-spacing-lg);
+  background: transparent;
+  color: var(--doodle-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-family: var(--doodle-font-family);
+  font-size: var(--doodle-font-size-base);
+  cursor: pointer;
+  transition: background var(--doodle-transition-fast), border-color var(--doodle-transition-fast);
+  text-align: center;
+}
+
+.title-button:hover,
+.title-button:focus-visible {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--doodle-accent);
+  outline: none;
+}
+
+.title-button:active {
+  background: rgba(99, 102, 241, 0.35);
+}
+
+/* ── Shared animations ───────────────────────────────────────────── */
+
+@keyframes doodle-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Bootstrap loader (before manifest fetch) ────────────────────── */
+
+.app-bootstrap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--doodle-bg-primary);
+}
+
+.app-bootstrap .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--doodle-accent);
+  border-radius: 50%;
+  animation: doodle-spin 0.8s linear infinite;
+}
