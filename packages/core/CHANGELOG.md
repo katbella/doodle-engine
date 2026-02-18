@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.20
+
+### Patch Changes
+
+- 96d5194: fix missing css
+
 ## 0.0.19
 
 ### Patch Changes
