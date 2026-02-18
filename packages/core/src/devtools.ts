@@ -192,7 +192,7 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
             console.log('  doodle.inspectState()');
             console.log('  doodle.inspectRegistry()');
             console.log('');
-            console.log('📚 Docs: https://katbella.com/doodle-engine/');
+            console.log('📚 Docs: https://doodleengine.dev/');
         },
 
         inspectState() {
@@ -207,6 +207,6 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
     };
 
     console.log(
-        '🐾 Doodle Engine dev tools enabled! Type `doodle.inspect()` to see available commands.\n📚 You can also check out the docs: https://katbella.com/doodle-engine/'
+        '🐾 Doodle Engine dev tools enabled! Type `doodle.inspect()` to see available commands.\n📚 You can also check out the docs: https://doodleengine.dev/'
     );
 }
