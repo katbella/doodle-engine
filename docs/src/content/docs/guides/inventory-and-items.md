@@ -19,15 +19,15 @@ location: inventory
 stats: {}
 ```
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique identifier |
-| `name` | Display name (supports `@key` localization) |
-| `description` | Full description shown on inspection |
-| `icon` | Small image for inventory grid |
-| `image` | Large image for detail/inspection view |
-| `location` | Starting location: a location ID, `"inventory"`, or a character ID |
-| `stats` | Extensible stats object |
+| Field         | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| `id`          | Unique identifier                                                  |
+| `name`        | Display name (supports `@key` localization)                        |
+| `description` | Full description shown on inspection                               |
+| `icon`        | Small image for inventory grid                                     |
+| `image`       | Large image for detail/inspection view                             |
+| `location`    | Starting location: a location ID, `"inventory"`, or a character ID |
+| `stats`       | Extensible stats object                                            |
 
 ## Adding Items via Dialogue
 
@@ -89,20 +89,20 @@ The default `GameRenderer` shows inventory in the sidebar with a grid of item ic
 In a custom renderer, use the `Inventory` component:
 
 ```tsx
-import { Inventory } from '@doodle-engine/react'
+import { Inventory } from "@doodle-engine/react";
 
-<Inventory items={snapshot.inventory} />
+<Inventory items={snapshot.inventory} />;
 ```
 
 Or build your own using `snapshot.inventory`, which contains `SnapshotItem` objects:
 
 ```typescript
 interface SnapshotItem {
-  id: string
-  name: string        // Localized
-  description: string // Localized
-  icon: string
-  image: string
-  stats: Record<string, unknown>
+  id: string;
+  name: string; // Localized
+  description: string; // Localized
+  icon: string;
+  image: string;
+  stats: Record<string, unknown>;
 }
 ```

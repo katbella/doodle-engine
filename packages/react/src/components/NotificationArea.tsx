@@ -6,16 +6,16 @@
  */
 
 export interface NotificationAreaProps {
-  notifications: string[]
-  className?: string
+  notifications: string[];
+  className?: string;
 }
 
 export function NotificationArea({
   notifications,
-  className = '',
+  className = "",
 }: NotificationAreaProps) {
   if (notifications.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -26,5 +26,5 @@ export function NotificationArea({
         </div>
       ))}
     </div>
-  )
+  );
 }

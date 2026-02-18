@@ -5,43 +5,43 @@
 /** A single asset entry in the manifest */
 export interface AssetEntry {
   /** Asset path relative to public root */
-  path: string
+  path: string;
   /** Asset type for loading strategy */
-  type: 'image' | 'audio' | 'video'
+  type: "image" | "audio" | "video";
   /** File size in bytes (for progress calculation) */
-  size?: number
+  size?: number;
   /** Which tier this asset belongs to */
-  tier: 0 | 1 | 2
+  tier: 0 | 1 | 2;
 }
 
 /** Complete asset manifest generated at build time */
 export interface AssetManifest {
   /** Version for cache invalidation */
-  version: string
+  version: string;
   /** Shell assets (tier 1) — load first */
-  shell: AssetEntry[]
+  shell: AssetEntry[];
   /** Game assets (tier 2) — load with progress */
-  game: AssetEntry[]
+  game: AssetEntry[];
   /** Total size in bytes */
-  totalSize: number
+  totalSize: number;
   /** Shell size in bytes */
-  shellSize: number
+  shellSize: number;
 }
 
 /** Current loading state */
 export interface AssetLoadingState {
   /** Current phase */
-  phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error'
+  phase: "idle" | "loading-shell" | "loading-game" | "complete" | "error";
   /** Bytes loaded so far */
-  bytesLoaded: number
+  bytesLoaded: number;
   /** Total bytes to load in current phase */
-  bytesTotal: number
+  bytesTotal: number;
   /** Progress 0-1 for current phase */
-  progress: number
+  progress: number;
   /** Overall progress 0-1 across all phases */
-  overallProgress: number
+  overallProgress: number;
   /** Currently loading asset path (for display) */
-  currentAsset: string | null
+  currentAsset: string | null;
   /** Error message if phase is 'error' */
-  error: string | null
+  error: string | null;
 }

@@ -29,20 +29,20 @@ text: |
 
 ### All Fields
 
-| Field | Required | Description |
-|---|---|---|
-| `id` | Yes | Unique identifier |
-| `background` | Yes | Background image path |
-| `text` | Yes | The narrative text (plain text or `@localization.key`) |
-| `banner` | No | Optional decorative frame/border image overlaid on the background |
-| `music` | No | Music track to play during the interlude |
-| `voice` | No | Narration audio file |
-| `sounds` | No | Array of ambient sound filenames |
-| `scroll` | No | Whether text auto-scrolls upward (default: `true`) |
-| `scrollSpeed` | No | Auto-scroll speed in elisas per second (default: `30`) |
-| `triggerLocation` | No | Location ID where this auto-triggers on enter |
-| `triggerConditions` | No | Conditions that must pass for auto-trigger |
-| `effects` | No | Effects applied when the interlude triggers (typically `setFlag` to prevent repeats) |
+| Field               | Required | Description                                                                          |
+| ------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `id`                | Yes      | Unique identifier                                                                    |
+| `background`        | Yes      | Background image path                                                                |
+| `text`              | Yes      | The narrative text (plain text or `@localization.key`)                               |
+| `banner`            | No       | Optional decorative frame/border image overlaid on the background                    |
+| `music`             | No       | Music track to play during the interlude                                             |
+| `voice`             | No       | Narration audio file                                                                 |
+| `sounds`            | No       | Array of ambient sound filenames                                                     |
+| `scroll`            | No       | Whether text auto-scrolls upward (default: `true`)                                   |
+| `scrollSpeed`       | No       | Auto-scroll speed in elisas per second (default: `30`)                               |
+| `triggerLocation`   | No       | Location ID where this auto-triggers on enter                                        |
+| `triggerConditions` | No       | Conditions that must pass for auto-trigger                                           |
+| `effects`           | No       | Effects applied when the interlude triggers (typically `setFlag` to prevent repeats) |
 
 ## Showing an Interlude
 
@@ -88,13 +88,13 @@ The effects run at trigger time (before the player even sees the interlude), so 
 
 ## Player Controls
 
-| Action | Effect |
-|---|---|
-| **Click anywhere** | Skip (dismiss) |
-| **Skip >> button** | Dismiss |
-| **Space or Enter** | Dismiss |
-| **Escape** | Dismiss |
-| **Mouse wheel** | Manual scroll (pauses auto-scroll) |
+| Action               | Effect                             |
+| -------------------- | ---------------------------------- |
+| **Click anywhere**   | Skip (dismiss)                     |
+| **Skip >> button**   | Dismiss                            |
+| **Space or Enter**   | Dismiss                            |
+| **Escape**           | Dismiss                            |
+| **Mouse wheel**      | Manual scroll (pauses auto-scroll) |
 | **↑ / ↓ arrow keys** | Manual scroll (pauses auto-scroll) |
 
 ## Localized Text
@@ -122,10 +122,10 @@ chapter.one.intro: |
 If you're building a custom renderer (not using `GameShell`), render the interlude yourself:
 
 ```tsx
-import { Interlude } from '@doodle-engine/react'
+import { Interlude } from "@doodle-engine/react";
 
 function MyRenderer() {
-  const { snapshot, actions } = useGame()
+  const { snapshot, actions } = useGame();
 
   if (snapshot.pendingInterlude) {
     return (
@@ -133,10 +133,10 @@ function MyRenderer() {
         interlude={snapshot.pendingInterlude}
         onDismiss={actions.dismissInterlude}
       />
-    )
+    );
   }
 
-  return <div>...</div>
+  return <div>...</div>;
 }
 ```
 

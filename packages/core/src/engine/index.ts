@@ -10,14 +10,14 @@
  * One-way data flow: actions in, snapshots out.
  */
 
-import type { ContentRegistry } from '../types/registry'
-import type { GameState, CharacterState } from '../types/state'
-import type { GameConfig, DialogueNode } from '../types/entities'
-import type { Snapshot } from '../types/snapshot'
-import type { SaveData } from '../types/save'
-import { buildSnapshot } from '../snapshot'
-import { applyEffects } from '../effects'
-import { evaluateConditions } from '../conditions'
+import type { ContentRegistry } from "../types/registry";
+import type { GameState, CharacterState } from "../types/state";
+import type { GameConfig, DialogueNode } from "../types/entities";
+import type { Snapshot } from "../types/snapshot";
+import type { SaveData } from "../types/save";
+import { buildSnapshot } from "../snapshot";
+import { applyEffects } from "../effects";
+import { evaluateConditions } from "../conditions";
 
 /**
  * The Doodle Engine.
@@ -25,8 +25,8 @@ import { evaluateConditions } from '../conditions'
  * Manages game state, processes actions, and produces snapshots.
  */
 export class Engine {
-  private registry: ContentRegistry
-  private state: GameState
+  private registry: ContentRegistry;
+  private state: GameState;
 
   /**
    * Create a new engine instance.
@@ -35,8 +35,8 @@ export class Engine {
    * @param state - Initial game state
    */
   constructor(registry: ContentRegistry, state: GameState) {
-    this.registry = registry
-    this.state = state
+    this.registry = registry;
+    this.state = state;
   }
 
   // ===========================================================================
@@ -53,20 +53,20 @@ export class Engine {
    */
   newGame(config: GameConfig): Snapshot {
     // Initialize character state from registry
-    const characterState: Record<string, CharacterState> = {}
+    const characterState: Record<string, CharacterState> = {};
     for (const [id, character] of Object.entries(this.registry.characters)) {
       characterState[id] = {
         location: character.location,
         inParty: false,
         relationship: 0,
         stats: { ...character.stats }, // Clone stats
-      }
+      };
     }
 
     // Initialize item locations from registry
-    const itemLocations: Record<string, string> = {}
+    const itemLocations: Record<string, string> = {};
     for (const [id, item] of Object.entries(this.registry.items)) {
-      itemLocations[id] = item.location
+      itemLocations[id] = item.location;
     }
 
     // Create initial game state
@@ -87,15 +87,15 @@ export class Engine {
       pendingSounds: [],
       pendingVideo: null,
       pendingInterlude: null,
-      currentLocale: 'en', // Default locale
-    }
+      currentLocale: "en", // Default locale
+    };
 
     // Check for triggered dialogues and interludes at starting location
-    this.checkTriggeredDialogues()
-    this.checkTriggeredInterludes()
+    this.checkTriggeredDialogues();
+    this.checkTriggeredInterludes();
 
     // Build and return initial snapshot
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -109,9 +109,9 @@ export class Engine {
   loadGame(saveData: SaveData): Snapshot {
     // In a real implementation, you'd handle version migration here
     // For now, just restore the state directly
-    this.state = { ...saveData.state }
+    this.state = { ...saveData.state };
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -123,10 +123,10 @@ export class Engine {
    */
   saveGame(): SaveData {
     return {
-      version: '1.0',
+      version: "1.0",
       timestamp: new Date().toISOString(),
       state: { ...this.state },
-    }
+    };
   }
 
   /**
@@ -140,43 +140,46 @@ export class Engine {
   selectChoice(choiceId: string): Snapshot {
     if (!this.state.dialogueState) {
       // Not in dialogue - return current state
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
-    const dialogue = this.registry.dialogues[this.state.dialogueState.dialogueId]
+    const dialogue =
+      this.registry.dialogues[this.state.dialogueState.dialogueId];
     if (!dialogue) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
-    const currentNode = dialogue.nodes.find(n => n.id === this.state.dialogueState?.nodeId)
+    const currentNode = dialogue.nodes.find(
+      (n) => n.id === this.state.dialogueState?.nodeId,
+    );
     if (!currentNode) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
-    const choice = currentNode.choices.find(c => c.id === choiceId)
+    const choice = currentNode.choices.find((c) => c.id === choiceId);
     if (!choice) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Apply choice effects
     if (choice.effects) {
-      this.state = applyEffects(choice.effects, this.state)
+      this.state = applyEffects(choice.effects, this.state);
     }
 
     // If a startDialogue effect fired, nodeId will be '' — initialize the new dialogue
-    if (this.state.dialogueState?.nodeId === '') {
-      return this.initDialogue(this.state.dialogueState.dialogueId)
+    if (this.state.dialogueState?.nodeId === "") {
+      return this.initDialogue(this.state.dialogueState.dialogueId);
     }
 
     // Move to next node specified by choice
-    const nextNode = dialogue.nodes.find(n => n.id === choice.next)
+    const nextNode = dialogue.nodes.find((n) => n.id === choice.next);
     if (!nextNode) {
       // No next node - end dialogue
       this.state = {
         ...this.state,
         dialogueState: null,
-      }
-      return this.buildSnapshotAndClearTransients()
+      };
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Set dialogue state to this node
@@ -186,16 +189,16 @@ export class Engine {
         dialogueId: dialogue.id,
         nodeId: nextNode.id,
       },
-    }
+    };
 
     // Apply node effects first (before evaluating conditionalNext)
     if (nextNode.effects) {
-      this.state = applyEffects(nextNode.effects, this.state)
+      this.state = applyEffects(nextNode.effects, this.state);
     }
 
     // If node has no choices, auto-advance using conditionalNext or next
     if (nextNode.choices.length === 0) {
-      const resolvedNext = this.resolveNextNode(nextNode)
+      const resolvedNext = this.resolveNextNode(nextNode);
       if (resolvedNext) {
         this.state = {
           ...this.state,
@@ -203,17 +206,17 @@ export class Engine {
             dialogueId: dialogue.id,
             nodeId: resolvedNext,
           },
-        }
+        };
       } else {
         // No next - end dialogue
         this.state = {
           ...this.state,
           dialogueState: null,
-        }
+        };
       }
     }
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -225,11 +228,11 @@ export class Engine {
    * @returns New snapshot with dialogue started
    */
   talkTo(characterId: string): Snapshot {
-    const character = this.registry.characters[characterId]
+    const character = this.registry.characters[characterId];
     if (!character || !character.dialogue) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
-    return this.initDialogue(character.dialogue)
+    return this.initDialogue(character.dialogue);
   }
 
   /**
@@ -237,15 +240,15 @@ export class Engine {
    * Used by talkTo and when a startDialogue effect fires mid-conversation.
    */
   private initDialogue(dialogueId: string): Snapshot {
-    const dialogue = this.registry.dialogues[dialogueId]
+    const dialogue = this.registry.dialogues[dialogueId];
     if (!dialogue) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Find the start node
-    const startNode = dialogue.nodes.find(n => n.id === dialogue.startNode)
+    const startNode = dialogue.nodes.find((n) => n.id === dialogue.startNode);
     if (!startNode) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Start dialogue
@@ -255,16 +258,16 @@ export class Engine {
         dialogueId: dialogue.id,
         nodeId: startNode.id,
       },
-    }
+    };
 
     // Apply start node effects
     if (startNode.effects) {
-      this.state = applyEffects(startNode.effects, this.state)
+      this.state = applyEffects(startNode.effects, this.state);
     }
 
     // If start node has no choices, auto-advance using conditionalNext or next
     if (startNode.choices.length === 0) {
-      const resolvedNext = this.resolveNextNode(startNode)
+      const resolvedNext = this.resolveNextNode(startNode);
       if (resolvedNext) {
         this.state = {
           ...this.state,
@@ -272,17 +275,17 @@ export class Engine {
             dialogueId: dialogue.id,
             nodeId: resolvedNext,
           },
-        }
+        };
       } else {
         // No next - end dialogue
         this.state = {
           ...this.state,
           dialogueState: null,
-        }
+        };
       }
     }
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -296,7 +299,7 @@ export class Engine {
   takeItem(itemId: string): Snapshot {
     // Check if item is at current location
     if (this.state.itemLocations[itemId] !== this.state.currentLocation) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Add to inventory
@@ -305,11 +308,11 @@ export class Engine {
       inventory: [...this.state.inventory, itemId],
       itemLocations: {
         ...this.state.itemLocations,
-        [itemId]: 'inventory',
+        [itemId]: "inventory",
       },
-    }
+    };
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -322,39 +325,42 @@ export class Engine {
    */
   travelTo(locationId: string): Snapshot {
     if (!this.state.mapEnabled) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Find the map that contains both current and destination locations
     // For simplicity, we'll just use the first map
-    const mapIds = Object.keys(this.registry.maps)
+    const mapIds = Object.keys(this.registry.maps);
     if (mapIds.length === 0) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
-    const map = this.registry.maps[mapIds[0]]
+    const map = this.registry.maps[mapIds[0]];
     if (!map) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Find locations on the map
-    const currentLoc = map.locations.find(l => l.id === this.state.currentLocation)
-    const destLoc = map.locations.find(l => l.id === locationId)
+    const currentLoc = map.locations.find(
+      (l) => l.id === this.state.currentLocation,
+    );
+    const destLoc = map.locations.find((l) => l.id === locationId);
 
     if (!currentLoc || !destLoc) {
-      return this.buildSnapshotAndClearTransients()
+      return this.buildSnapshotAndClearTransients();
     }
 
     // Calculate travel time: distance × scale
     const distance = Math.sqrt(
-      Math.pow(destLoc.x - currentLoc.x, 2) + Math.pow(destLoc.y - currentLoc.y, 2)
-    )
-    const travelTime = Math.round(distance * map.scale)
+      Math.pow(destLoc.x - currentLoc.x, 2) +
+        Math.pow(destLoc.y - currentLoc.y, 2),
+    );
+    const travelTime = Math.round(distance * map.scale);
 
     // Update location and time
-    const newHour = this.state.currentTime.hour + travelTime
-    const daysToAdd = Math.floor(newHour / 24)
-    const finalHour = newHour % 24
+    const newHour = this.state.currentTime.hour + travelTime;
+    const daysToAdd = Math.floor(newHour / 24);
+    const finalHour = newHour % 24;
 
     this.state = {
       ...this.state,
@@ -364,13 +370,13 @@ export class Engine {
         day: this.state.currentTime.day + daysToAdd,
         hour: finalHour,
       },
-    }
+    };
 
     // Check for triggered dialogues and interludes at new location
-    this.checkTriggeredDialogues()
-    this.checkTriggeredInterludes()
+    this.checkTriggeredDialogues();
+    this.checkTriggeredInterludes();
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -387,14 +393,14 @@ export class Engine {
       id: `note_${Date.now()}`,
       title,
       text,
-    }
+    };
 
     this.state = {
       ...this.state,
       playerNotes: [...this.state.playerNotes, note],
-    }
+    };
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -408,10 +414,10 @@ export class Engine {
   deleteNote(noteId: string): Snapshot {
     this.state = {
       ...this.state,
-      playerNotes: this.state.playerNotes.filter(n => n.id !== noteId),
-    }
+      playerNotes: this.state.playerNotes.filter((n) => n.id !== noteId),
+    };
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -426,9 +432,9 @@ export class Engine {
     this.state = {
       ...this.state,
       currentLocale: locale,
-    }
+    };
 
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   /**
@@ -439,7 +445,7 @@ export class Engine {
    * @returns Current snapshot
    */
   getSnapshot(): Snapshot {
-    return this.buildSnapshotAndClearTransients()
+    return this.buildSnapshotAndClearTransients();
   }
 
   // ===========================================================================
@@ -451,7 +457,7 @@ export class Engine {
    * Transient state is data that should only appear in one snapshot.
    */
   private buildSnapshotAndClearTransients(): Snapshot {
-    const snapshot = buildSnapshot(this.state, this.registry)
+    const snapshot = buildSnapshot(this.state, this.registry);
 
     // Clear transient fields after building snapshot
     this.state = {
@@ -460,9 +466,9 @@ export class Engine {
       pendingSounds: [],
       pendingVideo: null,
       pendingInterlude: null,
-    }
+    };
 
-    return snapshot
+    return snapshot;
   }
 
   /**
@@ -481,13 +487,13 @@ export class Engine {
       for (const conditionalBranch of node.conditionalNext) {
         if (evaluateConditions([conditionalBranch.condition], this.state)) {
           // First passing condition wins
-          return conditionalBranch.next
+          return conditionalBranch.next;
         }
       }
     }
 
     // Fall through to default next, or null if none
-    return node.next ?? null
+    return node.next ?? null;
   }
 
   /**
@@ -502,18 +508,21 @@ export class Engine {
     for (const dialogue of Object.values(this.registry.dialogues)) {
       // Check if dialogue triggers at current location
       if (dialogue.triggerLocation !== this.state.currentLocation) {
-        continue
+        continue;
       }
 
       // Check if conditions pass
-      if (dialogue.conditions && !evaluateConditions(dialogue.conditions, this.state)) {
-        continue
+      if (
+        dialogue.conditions &&
+        !evaluateConditions(dialogue.conditions, this.state)
+      ) {
+        continue;
       }
 
       // Find start node
-      const startNode = dialogue.nodes.find(n => n.id === dialogue.startNode)
+      const startNode = dialogue.nodes.find((n) => n.id === dialogue.startNode);
       if (!startNode) {
-        continue
+        continue;
       }
 
       // Start this dialogue
@@ -523,16 +532,16 @@ export class Engine {
           dialogueId: dialogue.id,
           nodeId: startNode.id,
         },
-      }
+      };
 
       // Apply start node effects
       if (startNode.effects) {
-        this.state = applyEffects(startNode.effects, this.state)
+        this.state = applyEffects(startNode.effects, this.state);
       }
 
       // If start node has no choices, auto-advance using conditionalNext or next
       if (startNode.choices.length === 0) {
-        const resolvedNext = this.resolveNextNode(startNode)
+        const resolvedNext = this.resolveNextNode(startNode);
         if (resolvedNext) {
           this.state = {
             ...this.state,
@@ -540,18 +549,18 @@ export class Engine {
               dialogueId: dialogue.id,
               nodeId: resolvedNext,
             },
-          }
+          };
         } else {
           // No next - end dialogue
           this.state = {
             ...this.state,
             dialogueState: null,
-          }
+          };
         }
       }
 
       // Only trigger one dialogue at a time
-      break
+      break;
     }
   }
 
@@ -566,28 +575,28 @@ export class Engine {
   private checkTriggeredInterludes(): void {
     for (const interlude of Object.values(this.registry.interludes)) {
       if (interlude.triggerLocation !== this.state.currentLocation) {
-        continue
+        continue;
       }
 
       if (
         interlude.triggerConditions &&
         !evaluateConditions(interlude.triggerConditions, this.state)
       ) {
-        continue
+        continue;
       }
 
       this.state = {
         ...this.state,
         pendingInterlude: interlude.id,
-      }
+      };
 
       // Apply interlude effects (e.g. setFlag to prevent re-triggering on next visit)
       if (interlude.effects) {
-        this.state = applyEffects(interlude.effects, this.state)
+        this.state = applyEffects(interlude.effects, this.state);
       }
 
       // Only trigger one interlude at a time
-      break
+      break;
     }
   }
 }

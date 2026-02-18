@@ -21,10 +21,10 @@ Variables starting with `_` are **hidden from the default renderer**. They still
 ```yaml
 # content/game.yaml
 startVariables:
-  gold: 100           # Shown to player
-  reputation: 0       # Shown to player
-  _drinksBought: 0    # Hidden, internal tracking
-  _timesVisited: 0    # Hidden, internal tracking
+  gold: 100 # Shown to player
+  reputation: 0 # Shown to player
+  _drinksBought: 0 # Hidden, internal tracking
+  _timesVisited: 0 # Hidden, internal tracking
 ```
 
 ### In Dialogue Effects
@@ -48,8 +48,9 @@ REQUIRE variableGreaterThan _drinksBought 3
 The `GameRenderer` filters variables before displaying:
 
 ```typescript
-const visibleVariables = Object.entries(snapshot.variables)
-  .filter(([key]) => !key.startsWith('_'))
+const visibleVariables = Object.entries(snapshot.variables).filter(
+  ([key]) => !key.startsWith("_"),
+);
 ```
 
 This is a renderer-level convention, not an engine-level one. The core engine treats all variables the same. If you build a custom renderer, you can choose to show or hide any variables you want.

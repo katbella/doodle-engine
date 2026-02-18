@@ -2,30 +2,31 @@
  * GameRenderer - Main component that renders the complete game UI
  */
 
-import { useGame } from './hooks/useGame'
-import { useAudioManager } from './hooks/useAudioManager'
-import { DialogueBox } from './components/DialogueBox'
-import { ChoiceList } from './components/ChoiceList'
-import { LocationView } from './components/LocationView'
-import { CharacterList } from './components/CharacterList'
-import { Inventory } from './components/Inventory'
-import { Journal } from './components/Journal'
-import { MapView } from './components/MapView'
-import { NotificationArea } from './components/NotificationArea'
-import { SaveLoadPanel } from './components/SaveLoadPanel'
-import { Interlude } from './components/Interlude'
+import { useGame } from "./hooks/useGame";
+import { useAudioManager } from "./hooks/useAudioManager";
+import { DialogueBox } from "./components/DialogueBox";
+import { ChoiceList } from "./components/ChoiceList";
+import { LocationView } from "./components/LocationView";
+import { CharacterList } from "./components/CharacterList";
+import { Inventory } from "./components/Inventory";
+import { Journal } from "./components/Journal";
+import { MapView } from "./components/MapView";
+import { NotificationArea } from "./components/NotificationArea";
+import { SaveLoadPanel } from "./components/SaveLoadPanel";
+import { Interlude } from "./components/Interlude";
 
 export interface GameRendererProps {
-  className?: string
+  className?: string;
 }
 
-export function GameRenderer({ className = '' }: GameRendererProps) {
-  const { snapshot, actions } = useGame()
-  useAudioManager(snapshot)
+export function GameRenderer({ className = "" }: GameRendererProps) {
+  const { snapshot, actions } = useGame();
+  useAudioManager(snapshot);
 
   // Filter out underscore-prefixed variables (internal tracking)
-  const visibleVariables = Object.entries(snapshot.variables)
-    .filter(([key]) => !key.startsWith('_'))
+  const visibleVariables = Object.entries(snapshot.variables).filter(
+    ([key]) => !key.startsWith("_"),
+  );
 
   return (
     <div className={`game-renderer ${className}`}>
@@ -44,7 +45,10 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
         {snapshot.dialogue && (
           <div className="dialogue-container">
             <DialogueBox dialogue={snapshot.dialogue} />
-            <ChoiceList choices={snapshot.choices} onSelectChoice={actions.selectChoice} />
+            <ChoiceList
+              choices={snapshot.choices}
+              onSelectChoice={actions.selectChoice}
+            />
           </div>
         )}
 
@@ -86,8 +90,10 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
         )}
         <Inventory items={snapshot.inventory} />
         <Journal quests={snapshot.quests} entries={snapshot.journal} />
-        {snapshot.map && <MapView map={snapshot.map} onTravelTo={actions.travelTo} />}
+        {snapshot.map && (
+          <MapView map={snapshot.map} onTravelTo={actions.travelTo} />
+        )}
       </div>
     </div>
-  )
+  );
 }

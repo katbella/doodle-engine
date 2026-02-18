@@ -1,4 +1,3 @@
-
 <h1 align="center">Doodle Engine</h1>
 
 <p align="center">A dialogue-driven engine for RPGs and narrative adventure games.</p>
@@ -19,14 +18,14 @@ The engine manages dialogue, quests, inventory, characters, relationships, locat
 
 Games are written in plain text and YAML. No programming is required to build story content.
 
-- Dialogue written in a readable script format with speakers, choices, branching, conditions, and effects  
-- World data in YAML: locations, characters, items, quests, and journal entries  
-- Conditions based on flags, variables, items, quest stages, relationships, and time of day  
-- Dice rolls for skill checks and random outcomes  
-- Narrative interludes for chapter screens, dream sequences, and story moments  
-- Localization using translation keys and locale files  
-- Hot reload while writing  
-- Validation that catches missing references and structural errors before you play  
+- Dialogue written in a readable script format with speakers, choices, branching, conditions, and effects
+- World data in YAML: locations, characters, items, quests, and journal entries
+- Conditions based on flags, variables, items, quest stages, relationships, and time of day
+- Dice rolls for skill checks and random outcomes
+- Narrative interludes for chapter screens, dream sequences, and story moments
+- Localization using translation keys and locale files
+- Hot reload while writing
+- Validation that catches missing references and structural errors before you play
 
 The focus is on letting writers iterate quickly.
 
@@ -70,11 +69,11 @@ npm run dev
 
 ## Packages
 
-| Package | Description |
-|--------|--------|
-| `@doodle-engine/core` | Engine state, parsing, conditions, and effects |
-| `@doodle-engine/react` | React components and hooks |
-| `@doodle-engine/cli` | Dev server, scaffolding, builds |
+| Package                | Description                                    |
+| ---------------------- | ---------------------------------------------- |
+| `@doodle-engine/core`  | Engine state, parsing, conditions, and effects |
+| `@doodle-engine/react` | React components and hooks                     |
+| `@doodle-engine/cli`   | Dev server, scaffolding, builds                |
 
 ---
 

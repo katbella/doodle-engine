@@ -36,17 +36,17 @@ my-game/
 
 All game content lives in `content/`. The engine loads files by directory:
 
-| Directory | File Type | Entity |
-|-----------|-----------|--------|
-| `characters/` | `.yaml` | Character definitions |
-| `dialogues/` | `.dlg` | Dialogue scripts (DSL) |
-| `interludes/` | `.yaml` | Interlude definitions |
-| `items/` | `.yaml` | Item definitions |
-| `journal/` | `.yaml` | Journal entries |
-| `locales/` | `.yaml` | Translation strings |
-| `locations/` | `.yaml` | Location definitions |
-| `maps/` | `.yaml` | Map definitions |
-| `quests/` | `.yaml` | Quest definitions |
+| Directory     | File Type | Entity                 |
+| ------------- | --------- | ---------------------- |
+| `characters/` | `.yaml`   | Character definitions  |
+| `dialogues/`  | `.dlg`    | Dialogue scripts (DSL) |
+| `interludes/` | `.yaml`   | Interlude definitions  |
+| `items/`      | `.yaml`   | Item definitions       |
+| `journal/`    | `.yaml`   | Journal entries        |
+| `locales/`    | `.yaml`   | Translation strings    |
+| `locations/`  | `.yaml`   | Location definitions   |
+| `maps/`       | `.yaml`   | Map definitions        |
+| `quests/`     | `.yaml`   | Quest definitions      |
 
 ### game.yaml
 
@@ -54,14 +54,14 @@ The root configuration file. Required fields:
 
 ```yaml
 id: game
-startLocation: tavern       # Where the player begins
+startLocation: tavern # Where the player begins
 startTime:
   day: 1
   hour: 8
-startFlags: {}               # Initial boolean flags
-startVariables:              # Initial numeric/string variables
+startFlags: {} # Initial boolean flags
+startVariables: # Initial numeric/string variables
   gold: 100
-startInventory: []           # Item IDs the player starts with
+startInventory: [] # Item IDs the player starts with
 ```
 
 ### Locale Files
