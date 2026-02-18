@@ -3,25 +3,27 @@ title: Asset Loading
 description: How the asset loading system works, and how to configure shell assets.
 ---
 
-Doodle Engine loads all game assets before they're needed. Dialogue portraits are ready before a conversation starts, music is loaded before entering a location, and cutscenes play without buffering delays. No pop-in, no audio gaps, no flicker when moving between scenes.
+Doodle Engine uses an asset loading system to prepare media before it is needed by the renderer. Portraits, banners, music, and other assets are requested ahead of scene transitions so they are available when the UI renders or playback begins.
+
+This page is primarily useful for developers building custom renderers or modifying loading behavior. Content authors usually do not need to interact with the asset loader directly.
 
 ## How It Works
 
-Assets are organized into **tiers** based on when they need to be available:
+Assets are organized into tiers based on when they need to be available during startup and gameplay:
 
 | Tier | When loaded | What it contains |
 |------|-------------|-----------------|
 | **Tier 0** | Bundled in JS | CSS spinner, inline SVG |
 | **Tier 1 (shell)** | Before any screen renders | Splash/title/loading backgrounds, logos, UI sounds |
-| **Tier 2 (game)** | During the loading screen | All gameplay assets — portraits, banners, music, etc. |
+| **Tier 2 (game)** | During the loading screen | All gameplay assets referenced by the manifest, including portraits, banners, music, and other media |
 
 ### The Loading Flow
 
 ```
 1. LOADING  → download shell assets (tier 1), then game assets (tier 2) with progress
-2. SPLASH   → studio logo (already cached)
-3. TITLE    → title screen with music (already cached)
-4. PLAYING  → game (all assets already cached)
+2. SPLASH   → studio logo (already loaded)
+3. TITLE    → title screen with music (already loaded)
+4. PLAYING  → game (game assets ready)
 ```
 
 The loading screen uses CSS-only defaults (gradient background, animated spinner) so it renders immediately with zero external assets. It upgrades its appearance once shell assets arrive.
@@ -53,7 +55,7 @@ shell:
     menuClose: /assets/audio/sfx/menu-close.ogg
 ```
 
-All fields are optional. Screens render gracefully with no assets — styled gradients replace missing backgrounds, title text replaces missing logos, and missing sounds are skipped silently.
+All fields are optional. Screens render with built-in defaults when assets are not provided. Backgrounds fall back to styled gradients, logos fall back to text, and missing sounds are ignored.
 
 ## Customizing the Loading Screen
 
@@ -80,8 +82,8 @@ The `state` object includes:
   phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error'
   bytesLoaded: number
   bytesTotal: number
-  progress: number        // 0-1 for current phase
-  overallProgress: number // 0-1 across all phases
+  progress: number
+  overallProgress: number
   currentAsset: string | null
   error: string | null
 }
@@ -113,24 +115,22 @@ function LocationBanner({ src }: { src: string }) {
 
 ## Prefetching
 
-Prefetch assets for upcoming screens to ensure instant transitions:
+Prefetch assets for upcoming screens to ensure smooth transitions:
 
 ```tsx
 import { usePrefetch } from '@doodle-engine/react'
 
 function TavernScene({ registry }) {
-  // Prefetch the market assets while the player is at the tavern
   usePrefetch([
     registry.locations.market.banner,
     registry.locations.market.music,
   ])
-  // ...
 }
 ```
 
 ## Service Worker
 
-In production, `npm run build` generates a service worker (`dist/sw.js`) that precaches all manifest assets. Assets are cached on the first visit and load instantly on return visits.
+In production, `npm run build` generates a service worker (`dist/sw.js`) that precaches all manifest assets. Assets are cached on the first visit and typically load from cache on subsequent visits.
 
 The service worker:
 - Precaches all assets during install
@@ -145,10 +145,8 @@ Service workers are only registered in production. Development uses the same loa
 For desktop wrappers or file:// contexts where assets are already local, provide a custom loader:
 
 ```ts
-import { createAssetLoader } from '@doodle-engine/core'
 import type { AssetLoader } from '@doodle-engine/core'
 
-// Assets are available locally — no fetching needed
 const localLoader: AssetLoader = {
   isAvailable: async () => true,
   load: async () => {},
