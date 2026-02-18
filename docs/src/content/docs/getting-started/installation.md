@@ -51,7 +51,9 @@ You'll need:
   },
   "dependencies": {
     "@doodle-engine/core": "latest",
-    "@doodle-engine/react": "latest"
+    "@doodle-engine/react": "latest",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@doodle-engine/cli": "latest",
@@ -65,38 +67,50 @@ You'll need:
 Create `src/main.tsx`:
 
 ```tsx
-import { createRoot } from 'react-dom/client'
-import App from './App'
-import './index.css'
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(<App />)
+createRoot(document.getElementById("root")!).render(<App />);
 ```
 
 Create `src/App.tsx` using `GameShell`:
 
 ```tsx
-import { useEffect, useState } from 'react'
-import type { ContentRegistry, GameConfig, AssetManifest } from '@doodle-engine/core'
-import { GameShell } from '@doodle-engine/react'
+import { useEffect, useState } from "react";
+import type {
+  ContentRegistry,
+  GameConfig,
+  AssetManifest,
+} from "@doodle-engine/core";
+import { GameShell } from "@doodle-engine/react";
 
 export default function App() {
   const [content, setContent] = useState<{
-    registry: ContentRegistry
-    config: GameConfig
-  } | null>(null)
-  const [manifest, setManifest] = useState<AssetManifest | null>(null)
+    registry: ContentRegistry;
+    config: GameConfig;
+  } | null>(null);
+  const [manifest, setManifest] = useState<AssetManifest | null>(null);
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/content').then((res) => res.json()),
-      fetch('/api/manifest').then((res) => res.json()),
+      fetch("/api/content").then((res) => res.json()),
+      fetch("/api/manifest").then((res) => res.json()),
     ]).then(([contentData, manifestData]) => {
-      setContent({ registry: contentData.registry, config: contentData.config })
-      setManifest(manifestData)
-    })
-  }, [])
+      setContent({
+        registry: contentData.registry,
+        config: contentData.config,
+      });
+      setManifest(manifestData);
+    });
+  }, []);
 
-  if (!content || !manifest) return <div className="app-bootstrap"><div className="spinner" /></div>
+  if (!content || !manifest)
+    return (
+      <div className="app-bootstrap">
+        <div className="spinner" />
+      </div>
+    );
 
   return (
     <GameShell
@@ -105,7 +119,7 @@ export default function App() {
       manifest={manifest}
       title="My Game"
     />
-  )
+  );
 }
 ```
 

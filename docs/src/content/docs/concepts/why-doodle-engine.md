@@ -9,9 +9,9 @@ Doodle Engine is built for story-driven games where dialogue and world state mat
 
 Game authors write content in YAML and a simple dialogue DSL. Developers extend the engine and build renderers in TypeScript. Writers work in text files. Programmers work in code. Both can move forward without blocking each other.
 
-The engine supports visual presentation elements such as image banners, video, and narrative interludes with scrolling text, allowing games to mix prose with structured scenes and transitions.
+The engine supports visual presentation elements such as image banners, video triggered by dialogue effects, and narrative interludes with scrolling text. This allows games to mix prose with structured scenes and transitions.
 
-Games built with Doodle Engine can be shipped as standalone titles. Projects commonly run in the browser during development and are packaged for desktop using Electron, Tauri, or similar tools.
+Games built with Doodle Engine can be shipped as standalone titles. Projects typically run in the browser during development and can be packaged for desktop using Electron, Tauri, or similar tools.
 
 The goal is to make narrative games easier to build without locking projects into a specific ruleset, genre, or visual style.
 
@@ -19,7 +19,7 @@ The goal is to make narrative games easier to build without locking projects int
 
 ### vs Twine
 
-[Twine](https://twinery.org/) is excellent for hypertext fiction: stories told through linked passages. Doodle Engine is aimed at games with persistent state and world structure, such as locations, inventory, and quests.
+[Twine](https://twinery.org/) is designed for hypertext fiction: stories told through linked passages. Doodle Engine is aimed at games with persistent state and world structure, such as locations, inventory, and quests.
 
 | | Twine | Doodle Engine |
 |---|---|---|
@@ -30,7 +30,7 @@ The goal is to make narrative games easier to build without locking projects int
 
 ### vs Ink
 
-[Ink](https://www.inklestudios.com/ink/) is a strong language for branching dialogue and narrative flow. It assumes you will provide the surrounding game systems yourself.
+[Ink](https://www.inklestudios.com/ink/) is a language for branching dialogue and narrative flow. It assumes you will provide the surrounding game systems yourself.
 
 Doodle Engine includes those systems so dialogue, inventory, quests, and world state are part of the same model.
 
@@ -45,7 +45,7 @@ Doodle Engine includes those systems so dialogue, inventory, quests, and world s
 
 [Ren'Py](https://www.renpy.org/) is a visual novel engine with a Python-based scripting language and a renderer designed around sprites, backgrounds, and scene composition.
 
-Doodle Engine focuses on text-driven games and leaves presentation entirely to the renderer.
+Doodle Engine focuses on text-driven games and leaves presentation to the renderer.
 
 | | Ren'Py | Doodle Engine |
 |---|---|---|
@@ -81,4 +81,4 @@ Doodle Engine is not a good fit when:
 - **Interactive fiction authors** who need inventory, quests, and world state  
 - **Web developers** who want to build narrative games with familiar tools  
 - **Game jam teams** that need scaffolding and fast iteration  
-- **Educators** teaching narrative design or game development
+- **Educators** teaching narrative design or game development  
