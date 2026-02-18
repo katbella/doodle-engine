@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.22
+
+### Patch Changes
+
+- edffc3b: fix routing
+- Updated dependencies [edffc3b]
+    - @doodle-engine/react@0.0.22
+    - @doodle-engine/core@0.0.22
+
 ## 0.0.21
 
 ### Patch Changes
