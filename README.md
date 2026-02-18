@@ -8,7 +8,7 @@
 
 Doodle Engine is an engine for building text-driven RPGs and adventure games. It focuses on dialogue, narrative flow, and world state rather than movement, combat, or pathfinding.
 
-It is inspired by how the Infinity Engine handled dialogue and scripting, but it is not tied to any specific ruleset or genre. The goal is to give writers and programmers a flexible foundation for story-heavy games.
+It is inspired by how the Infinity Engine (the engine powering Baldur's Gate I and II, Icewind Dale, and Planescape: Torment) handled dialogue and scripting, but it is not tied to any specific ruleset or genre. The goal is to give writers and programmers a flexible foundation for story-heavy games.
 
 The engine manages dialogue, quests, inventory, characters, relationships, locations, journal entries, save/load, audio, video cutscenes, and localization.
 

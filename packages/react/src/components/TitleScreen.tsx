@@ -2,7 +2,7 @@
  * TitleScreen - Main menu with New Game, Continue, Settings.
  *
  * Reads logo and background from shell config when available.
- * All shell assets are optional — renders gracefully with none.
+ * All shell assets are optional. Renders gracefully with none.
  */
 
 import type { ShellConfig } from '@doodle-engine/core';

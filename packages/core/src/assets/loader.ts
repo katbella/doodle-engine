@@ -40,7 +40,7 @@ export interface AssetLoader {
  * Uses the Cache API when available (browser production).
  * Falls back to plain fetch (warms browser cache) when Cache API is unavailable.
  *
- * @param version - Cache version string; changing this busts the cache
+ * @param version - Cache version string. Changing this busts the cache.
  */
 export function createAssetLoader(version: string = '1'): AssetLoader {
     const cacheName = `${CACHE_NAME_PREFIX}${version}`;
@@ -76,7 +76,7 @@ export function createAssetLoader(version: string = '1'): AssetLoader {
             }
             await cache.put(path, response);
         } else {
-            // No Cache API — just fetch to warm up the browser's HTTP cache
+            // No Cache API. Just fetch to warm up the browser's HTTP cache.
             const response = await fetch(path);
             if (!response.ok) {
                 throw new Error(

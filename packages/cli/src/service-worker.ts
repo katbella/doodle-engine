@@ -23,7 +23,7 @@ export function generateServiceWorker(manifest: AssetManifest): string {
 
     return `/**
  * Doodle Engine Service Worker
- * Generated at build time — do not edit manually.
+ * Generated at build time. Do not edit manually.
  * Cache version: ${manifest.version}
  */
 
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API and non-asset requests — serve from network
+  // Skip API and non-asset requests. Serve from network.
   if (url.pathname.startsWith('/api/')) {
     return;
   }

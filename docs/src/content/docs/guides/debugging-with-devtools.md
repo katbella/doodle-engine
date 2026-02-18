@@ -117,7 +117,7 @@ if (import.meta.env.DEV) {
 1. Start your dev server:
 
     ```bash
-    doodle dev
+    npm run dev
     ```
 
 2. Open your game in the browser (usually `http://localhost:3000`)
@@ -301,8 +301,8 @@ console.log(state.inventory);
 ## Limitations
 
 - Dev tools access **internal engine state** using private fields. This is intentional for debugging but means breaking changes to the engine internals won't be considered breaking changes to the dev tools API.
-- Dev tools only work in **development mode** (`doodle dev`). They are not available in production builds.
-- State changes made via dev tools **bypass all game logic**. For example, `doodle.addItem()` doesn't trigger effects or run conditions—it directly mutates the state.
+- Dev tools only work in **development mode** (`npm run dev`). They are not available in production builds.
+- State changes made via dev tools **bypass all game logic**. For example, `doodle.addItem()` doesn't trigger effects or run conditions. It directly mutates the state.
 
 ## Production Safety
 

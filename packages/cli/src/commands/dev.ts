@@ -83,7 +83,7 @@ export async function dev() {
             });
 
             // Watch content files and trigger HMR
-            // Pass the directory directly — chokidar watches recursively by default.
+            // Pass the directory directly. Chokidar watches recursively by default.
             // Passing a glob with join() produces backslash paths on Windows that
             // chokidar's glob matcher doesn't handle correctly.
             const watcher = watch(contentDir, {
@@ -92,7 +92,7 @@ export async function dev() {
             });
 
             // Suppress add events during the initial directory scan.
-            // chokidar fires 'add' for every existing file on startup — we don't
+            // chokidar fires 'add' for every existing file on startup, and we don't
             // want those to spam the console or trigger repeated validation.
             let ready = false;
             watcher.on('ready', () => {

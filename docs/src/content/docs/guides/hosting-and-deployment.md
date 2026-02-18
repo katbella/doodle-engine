@@ -19,7 +19,7 @@ This produces a `dist/` directory containing:
 
 ## Static Hosting
 
-The build output is fully static — upload the `dist/` folder to any static host. Most hosts need:
+The build output is fully static. Upload the `dist/` folder to any static host. Most hosts need:
 
 - **Build command**: `npm run build`
 - **Publish directory**: `dist`
@@ -41,13 +41,13 @@ For small games, bundle everything in `dist/`. For games with large media files,
 
 Doodle Engine games can be packaged as desktop applications using standard web-to-desktop wrappers. No special engine configuration is needed.
 
-**[Electron](https://www.electronjs.org/)** — wraps your game in a Chromium window:
+**[Electron](https://www.electronjs.org/)**: wraps your game in a Chromium window:
 
 1. Build with `npm run build`
 2. Create an Electron main process that loads `dist/index.html`
 3. Package with `electron-builder` or `electron-forge`
 
-**[Tauri](https://tauri.app/)** — lighter alternative using the system webview:
+**[Tauri](https://tauri.app/)**: lighter alternative using the system webview:
 
 1. Build with `npm run build`
 2. Point Tauri's `devPath` at your `dist/` directory

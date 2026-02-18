@@ -3,7 +3,7 @@ title: Narrative Interludes
 description: Full-screen text scenes for chapter transitions and dream sequences.
 ---
 
-Interludes are full-screen text scenes — chapter cards, dream sequences, journal entries read aloud — like the parchment screens between chapters in Baldur's Gate. They show a background image with scrolling narrative text. The player can read at their own pace and skip when ready.
+Interludes are full-screen text scenes (chapter cards, dream sequences, journal entries read aloud), like the parchment screens between chapters in Infinity Engine Games like Baldur's Gate. They show a background image with scrolling narrative text. The player can read at their own pace and skip when ready.
 
 ## Creating an Interlude
 
@@ -60,7 +60,7 @@ NODE find_letter
 
 ### Auto-trigger on Location Enter
 
-Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effects` field runs immediately when the interlude triggers — use it to set a "seen" flag so the interlude doesn't repeat on return visits:
+Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effects` field runs immediately when the interlude triggers. Use it to set a "seen" flag so the interlude doesn't repeat on return visits:
 
 ```yaml
 id: chapter_two
@@ -82,7 +82,7 @@ effects:
       flag: seenChapterTwo
 ```
 
-The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns — the interlude won't show again.
+The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns. The interlude won't show again.
 
 **Important:** do NOT set the "seen" flag in a dialogue node that fires before the interlude check. The engine evaluates `triggerConditions` first, then applies `effects`. Setting the flag in a dialogue would mark the interlude as seen before the check runs, causing it to never trigger.
 
