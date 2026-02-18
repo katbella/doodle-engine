@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.22
+
+### Patch Changes
+
+- edffc3b: fix routing
+
 ## 0.0.21
 
 ### Patch Changes
