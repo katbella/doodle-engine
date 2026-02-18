@@ -79,7 +79,7 @@ npm run dev
 
 ## Documentation
 
-https://katbella.github.io/doodle-engine/
+https://doodleengine.dev/
 
 ---
 
