@@ -27,15 +27,15 @@ Game content is defined in YAML and `.dlg` files. It never changes at runtime. C
 
 ```ts
 interface ContentRegistry {
-  locations: Record<string, Location>
-  characters: Record<string, Character>
-  items: Record<string, Item>
-  maps: Record<string, Map>
-  dialogues: Record<string, Dialogue>
-  quests: Record<string, Quest>
-  journalEntries: Record<string, JournalEntry>
-  interludes: Record<string, Interlude>
-  locales: Record<string, LocaleData>
+  locations: Record<string, Location>;
+  characters: Record<string, Character>;
+  items: Record<string, Item>;
+  maps: Record<string, Map>;
+  dialogues: Record<string, Dialogue>;
+  quests: Record<string, Quest>;
+  journalEntries: Record<string, JournalEntry>;
+  interludes: Record<string, Interlude>;
+  locales: Record<string, LocaleData>;
 }
 ```
 
@@ -45,23 +45,23 @@ Game state tracks everything that changes during play:
 
 ```ts
 interface GameState {
-  currentLocation: string
-  currentTime: { day: number; hour: number }
-  flags: Record<string, boolean>
-  variables: Record<string, number | string>
-  inventory: string[]
-  questProgress: Record<string, string>
-  unlockedJournalEntries: string[]
-  playerNotes: PlayerNote[]
-  dialogueState: DialogueState | null
-  characterState: Record<string, CharacterState>
-  itemLocations: Record<string, string>
-  mapEnabled: boolean
-  notifications: string[]
-  pendingSounds: string[]
-  pendingVideo: string | null
-  pendingInterlude: string | null
-  currentLocale: string
+  currentLocation: string;
+  currentTime: { day: number; hour: number };
+  flags: Record<string, boolean>;
+  variables: Record<string, number | string>;
+  inventory: string[];
+  questProgress: Record<string, string>;
+  unlockedJournalEntries: string[];
+  playerNotes: PlayerNote[];
+  dialogueState: DialogueState | null;
+  characterState: Record<string, CharacterState>;
+  itemLocations: Record<string, string>;
+  mapEnabled: boolean;
+  notifications: string[];
+  pendingSounds: string[];
+  pendingVideo: string | null;
+  pendingInterlude: string | null;
+  currentLocale: string;
 }
 ```
 
@@ -71,23 +71,23 @@ The snapshot is computed from the current state and the content registry. It enr
 
 ```ts
 interface Snapshot {
-  location: SnapshotLocation
-  charactersHere: SnapshotCharacter[]
-  party: SnapshotCharacter[]
-  dialogue: SnapshotDialogue | null
-  choices: SnapshotChoice[]
-  inventory: SnapshotItem[]
-  quests: SnapshotQuest[]
-  journal: SnapshotJournalEntry[]
-  variables: Record<string, number | string>
-  time: { day: number; hour: number }
-  map: SnapshotMap | null
-  music: string
-  ambient: string
-  notifications: string[]
-  pendingSounds: string[]
-  pendingVideo: string | null
-  pendingInterlude: SnapshotInterlude | null
+  location: SnapshotLocation;
+  charactersHere: SnapshotCharacter[];
+  party: SnapshotCharacter[];
+  dialogue: SnapshotDialogue | null;
+  choices: SnapshotChoice[];
+  inventory: SnapshotItem[];
+  quests: SnapshotQuest[];
+  journal: SnapshotJournalEntry[];
+  variables: Record<string, number | string>;
+  time: { day: number; hour: number };
+  map: SnapshotMap | null;
+  music: string;
+  ambient: string;
+  notifications: string[];
+  pendingSounds: string[];
+  pendingVideo: string | null;
+  pendingInterlude: SnapshotInterlude | null;
 }
 ```
 
@@ -95,10 +95,10 @@ interface Snapshot {
 
 Some state is transient. It appears in exactly one snapshot and is then cleared:
 
-- **notifications**: messages from `NOTIFY` effects  
-- **pendingSounds**: sounds from `SOUND` effects  
-- **pendingVideo**: file from `VIDEO` effects (show once, then null)  
-- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger (show once, then null)  
+- **notifications**: messages from `NOTIFY` effects
+- **pendingSounds**: sounds from `SOUND` effects
+- **pendingVideo**: file from `VIDEO` effects (show once, then null)
+- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger (show once, then null)
 
 After a snapshot is produced, the engine clears these fields in the next state. The renderer simply renders what is in the snapshot; no timers or cleanup are required.
 
@@ -106,9 +106,9 @@ After a snapshot is produced, the engine clears these fields in the next state. 
 
 Conditions are evaluated at snapshot build time to determine:
 
-- Which dialogue choices are visible (choices with failing `REQUIRE` are hidden)  
-- Which triggered dialogues activate  
-- Which `IF` branches to take  
+- Which dialogue choices are visible (choices with failing `REQUIRE` are hidden)
+- Which triggered dialogues activate
+- Which `IF` branches to take
 
 This means the snapshot only contains valid, visible options. The renderer never evaluates conditions.
 
@@ -116,9 +116,9 @@ This means the snapshot only contains valid, visible options. The renderer never
 
 Effects run in order when:
 
-1. A dialogue node is reached (node effects)  
-2. A choice is selected (choice effects)  
-3. An interlude triggers (interlude `effects` field, typically `setFlag` to prevent repeats)  
+1. A dialogue node is reached (node effects)
+2. A choice is selected (choice effects)
+3. An interlude triggers (interlude `effects` field, typically `setFlag` to prevent repeats)
 
 Effects produce a new state: setting flags, adding items, changing quest stages, moving characters, queuing interludes, rolling dice into variables, and similar operations. The engine builds a new snapshot after all effects have been applied.
 

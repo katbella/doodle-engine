@@ -70,6 +70,7 @@ NODE farewell
 ```
 
 ### Key rules:
+
 - The first `NODE` is the start node
 - `SPEAKER:` lines set who's talking (matched to character ID, case-insensitive)
 - `NARRATOR:` lines have no speaker and are used for descriptions

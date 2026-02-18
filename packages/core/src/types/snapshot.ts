@@ -4,20 +4,20 @@
  * The renderer displays snapshots but never sees raw game state.
  */
 
-import type { Time } from './state'
+import type { Time } from "./state";
 
 /**
  * Location information in a snapshot (localized).
  */
 export interface SnapshotLocation {
   /** Location ID */
-  id: string
+  id: string;
   /** Localized display name */
-  name: string
+  name: string;
   /** Localized description text */
-  description: string
+  description: string;
   /** Banner image filename */
-  banner: string
+  banner: string;
 }
 
 /**
@@ -25,21 +25,21 @@ export interface SnapshotLocation {
  */
 export interface SnapshotCharacter {
   /** Character ID */
-  id: string
+  id: string;
   /** Localized display name */
-  name: string
+  name: string;
   /** Localized biography text */
-  biography: string
+  biography: string;
   /** Portrait image filename */
-  portrait: string
+  portrait: string;
   /** Current location ID */
-  location: string
+  location: string;
   /** Whether this character is in the party */
-  inParty: boolean
+  inParty: boolean;
   /** Relationship value with the player */
-  relationship: number
+  relationship: number;
   /** Character stats */
-  stats: Record<string, unknown>
+  stats: Record<string, unknown>;
 }
 
 /**
@@ -47,17 +47,17 @@ export interface SnapshotCharacter {
  */
 export interface SnapshotItem {
   /** Item ID */
-  id: string
+  id: string;
   /** Localized display name */
-  name: string
+  name: string;
   /** Localized description text */
-  description: string
+  description: string;
   /** Icon image filename */
-  icon: string
+  icon: string;
   /** Large image filename */
-  image: string
+  image: string;
   /** Item stats */
-  stats: Record<string, unknown>
+  stats: Record<string, unknown>;
 }
 
 /**
@@ -65,9 +65,9 @@ export interface SnapshotItem {
  */
 export interface SnapshotChoice {
   /** Choice ID */
-  id: string
+  id: string;
   /** Localized choice text */
-  text: string
+  text: string;
 }
 
 /**
@@ -75,15 +75,15 @@ export interface SnapshotChoice {
  */
 export interface SnapshotDialogue {
   /** Character ID speaking, or null for narration */
-  speaker: string | null
+  speaker: string | null;
   /** Localized speaker name (or "Narrator") */
-  speakerName: string
+  speakerName: string;
   /** Localized dialogue text */
-  text: string
+  text: string;
   /** Portrait image filename (if speaker is a character) */
-  portrait?: string
+  portrait?: string;
   /** Voice audio filename (optional) */
-  voice?: string
+  voice?: string;
 }
 
 /**
@@ -91,15 +91,15 @@ export interface SnapshotDialogue {
  */
 export interface SnapshotQuest {
   /** Quest ID */
-  id: string
+  id: string;
   /** Localized quest name */
-  name: string
+  name: string;
   /** Localized quest description */
-  description: string
+  description: string;
   /** Current stage ID */
-  currentStage: string
+  currentStage: string;
   /** Localized current stage description */
-  currentStageDescription: string
+  currentStageDescription: string;
 }
 
 /**
@@ -107,13 +107,13 @@ export interface SnapshotQuest {
  */
 export interface SnapshotJournalEntry {
   /** Entry ID */
-  id: string
+  id: string;
   /** Localized entry title */
-  title: string
+  title: string;
   /** Localized entry text */
-  text: string
+  text: string;
   /** Entry category */
-  category: string
+  category: string;
 }
 
 /**
@@ -121,15 +121,15 @@ export interface SnapshotJournalEntry {
  */
 export interface SnapshotMapLocation {
   /** Location ID */
-  id: string
+  id: string;
   /** Localized location name */
-  name: string
+  name: string;
   /** X coordinate on map */
-  x: number
+  x: number;
   /** Y coordinate on map */
-  y: number
+  y: number;
   /** Whether this is the player's current location */
-  isCurrent: boolean
+  isCurrent: boolean;
 }
 
 /**
@@ -137,15 +137,15 @@ export interface SnapshotMapLocation {
  */
 export interface SnapshotMap {
   /** Map ID */
-  id: string
+  id: string;
   /** Localized map name */
-  name: string
+  name: string;
   /** Map image filename */
-  image: string
+  image: string;
   /** Map scale for travel time calculation */
-  scale: number
+  scale: number;
   /** Locations on this map */
-  locations: SnapshotMapLocation[]
+  locations: SnapshotMapLocation[];
 }
 
 /**
@@ -153,23 +153,23 @@ export interface SnapshotMap {
  */
 export interface SnapshotInterlude {
   /** Interlude ID */
-  id: string
+  id: string;
   /** Background image filename */
-  background: string
+  background: string;
   /** Optional decorative banner/frame image */
-  banner?: string
+  banner?: string;
   /** Optional music track filename */
-  music?: string
+  music?: string;
   /** Optional narration audio filename */
-  voice?: string
+  voice?: string;
   /** Optional ambient sound filenames */
-  sounds?: string[]
+  sounds?: string[];
   /** Whether text auto-scrolls (resolved default: true) */
-  scroll: boolean
+  scroll: boolean;
   /** Auto-scroll speed in px/s (resolved default: 30) */
-  scrollSpeed: number
+  scrollSpeed: number;
   /** Localized narrative text */
-  text: string
+  text: string;
 }
 
 /**
@@ -179,56 +179,56 @@ export interface SnapshotInterlude {
  */
 export interface Snapshot {
   /** Current location information */
-  location: SnapshotLocation
+  location: SnapshotLocation;
 
   /** Characters at the current location */
-  charactersHere: SnapshotCharacter[]
+  charactersHere: SnapshotCharacter[];
 
   /** Items at the current location (not in inventory) */
-  itemsHere: SnapshotItem[]
+  itemsHere: SnapshotItem[];
 
   /** Available dialogue choices (only if in dialogue) */
-  choices: SnapshotChoice[]
+  choices: SnapshotChoice[];
 
   /** Current dialogue node (null if not in dialogue) */
-  dialogue: SnapshotDialogue | null
+  dialogue: SnapshotDialogue | null;
 
   /** Characters in the player's party */
-  party: SnapshotCharacter[]
+  party: SnapshotCharacter[];
 
   /** Items in the player's inventory */
-  inventory: SnapshotItem[]
+  inventory: SnapshotItem[];
 
   /** Active quests with current stages */
-  quests: SnapshotQuest[]
+  quests: SnapshotQuest[];
 
   /** Unlocked journal entries */
-  journal: SnapshotJournalEntry[]
+  journal: SnapshotJournalEntry[];
 
   /** Game variables (gold, counters, etc.) */
-  variables: Record<string, number | string>
+  variables: Record<string, number | string>;
 
   /** Current in-game time */
-  time: Time
+  time: Time;
 
   /** Map data (null if map is disabled) */
-  map: SnapshotMap | null
+  map: SnapshotMap | null;
 
   /** Current music track filename */
-  music: string
+  music: string;
 
   /** Current ambient sound filename */
-  ambient: string
+  ambient: string;
 
   /** Notifications to display (cleared after shown) */
-  notifications: string[]
+  notifications: string[];
 
   /** Sound effects to play (from recent playSound effects) */
-  pendingSounds: string[]
+  pendingSounds: string[];
 
   /** Video to play fullscreen (from playVideo effect) */
-  pendingVideo: string | null
+  pendingVideo: string | null;
 
   /** Interlude to show fullscreen (from showInterlude effect or trigger) */
-  pendingInterlude: SnapshotInterlude | null
+  pendingInterlude: SnapshotInterlude | null;
 }

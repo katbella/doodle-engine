@@ -60,9 +60,9 @@ At snapshot build time, the engine resolves all `@key` references:
 The resolution function:
 
 ```typescript
-import { resolveText } from '@doodle-engine/core'
+import { resolveText } from "@doodle-engine/core";
 
-const text = resolveText('@bartender.greeting', localeData)
+const text = resolveText("@bartender.greeting", localeData);
 // → "Welcome! What can I do for you?"
 ```
 
@@ -71,8 +71,8 @@ const text = resolveText('@bartender.greeting', localeData)
 Use the `setLocale` action:
 
 ```tsx
-const { actions } = useGame()
-actions.setLocale('es')
+const { actions } = useGame();
+actions.setLocale("es");
 ```
 
 Or from a dialogue effect. This isn't built into the DSL, but can be done programmatically via the engine.

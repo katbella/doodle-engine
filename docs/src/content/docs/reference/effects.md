@@ -278,11 +278,11 @@ Roll a random integer between `min` and `max` (inclusive) and store the result i
 ROLL bluffRoll 1 20
 ```
 
-| Argument | Type | Description |
-|----------|------|-------------|
+| Argument   | Type     | Description                          |
+| ---------- | -------- | ------------------------------------ |
 | `variable` | `string` | Variable name to store the result in |
-| `min` | `number` | Minimum value (inclusive) |
-| `max` | `number` | Maximum value (inclusive) |
+| `min`      | `number` | Minimum value (inclusive)            |
+| `max`      | `number` | Maximum value (inclusive)            |
 
 The stored variable can then be displayed in dialogue using `{varName}` interpolation, or tested with `variableGreaterThan` / `variableLessThan` conditions.
 
@@ -322,13 +322,13 @@ Notifications are transient. They appear in one snapshot and are automatically c
 ## TypeScript API
 
 ```typescript
-import { applyEffect, applyEffects } from '@doodle-engine/core'
+import { applyEffect, applyEffects } from "@doodle-engine/core";
 
 // Single effect
-const newState = applyEffect(effect, gameState)
+const newState = applyEffect(effect, gameState);
 
 // Multiple effects (applied sequentially)
-const newState = applyEffects(effects, gameState)
+const newState = applyEffects(effects, gameState);
 ```
 
 ## Effect Order

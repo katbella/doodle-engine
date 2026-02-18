@@ -3,18 +3,18 @@
  * usePrefetch — hook to prefetch assets for upcoming screens.
  */
 
-import { useEffect } from 'react'
-import { useAssetContext } from '../AssetProvider'
+import { useEffect } from "react";
+import { useAssetContext } from "../AssetProvider";
 
 export interface UseAssetResult {
   /** URL to use in src / backgroundImage (returns the path directly) */
-  url: string
+  url: string;
   /** Whether the asset is fully loaded and cached */
-  isReady: boolean
+  isReady: boolean;
   /** Whether the asset is actively loading */
-  isLoading: boolean
+  isLoading: boolean;
   /** Error if loading failed */
-  error: string | null
+  error: string | null;
 }
 
 /**
@@ -22,22 +22,23 @@ export interface UseAssetResult {
  * Returns a usable URL immediately — the asset may still be loading.
  */
 export function useAsset(path: string | undefined): UseAssetResult {
-  const { state, getAssetUrl, isReady } = useAssetContext()
+  const { state, getAssetUrl, isReady } = useAssetContext();
 
   if (!path) {
-    return { url: '', isReady: false, isLoading: false, error: null }
+    return { url: "", isReady: false, isLoading: false, error: null };
   }
 
-  const ready = isReady(path)
+  const ready = isReady(path);
   const loading =
-    !ready && (state.phase === 'loading-shell' || state.phase === 'loading-game')
+    !ready &&
+    (state.phase === "loading-shell" || state.phase === "loading-game");
 
   return {
     url: ready ? getAssetUrl(path) : path,
     isReady: ready,
     isLoading: loading,
-    error: state.phase === 'error' ? state.error : null,
-  }
+    error: state.phase === "error" ? state.error : null,
+  };
 }
 
 /**
@@ -45,11 +46,11 @@ export function useAsset(path: string | undefined): UseAssetResult {
  * Useful for prefetching the next location's assets when the player arrives somewhere.
  */
 export function usePrefetch(paths: string[]): void {
-  const { prefetch } = useAssetContext()
+  const { prefetch } = useAssetContext();
 
   useEffect(() => {
     if (paths.length > 0) {
-      prefetch(paths)
+      prefetch(paths);
     }
-  }, [paths, prefetch])
+  }, [paths, prefetch]);
 }

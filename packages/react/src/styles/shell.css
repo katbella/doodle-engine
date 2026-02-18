@@ -46,7 +46,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--doodle-bg-primary) 0%, var(--doodle-bg-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--doodle-bg-primary) 0%,
+    var(--doodle-bg-secondary) 100%
+  );
   background-size: cover;
   background-position: center;
   color: var(--doodle-text-primary);
@@ -72,7 +76,9 @@
 }
 
 @keyframes doodle-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-screen-progress-wrap {
@@ -141,7 +147,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--doodle-bg-primary) 0%, var(--doodle-bg-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--doodle-bg-primary) 0%,
+    var(--doodle-bg-secondary) 100%
+  );
   background-size: cover;
   background-position: center;
   color: var(--doodle-text-primary);
@@ -184,7 +194,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, var(--doodle-bg-secondary) 0%, var(--doodle-bg-primary) 100%);
+  background: linear-gradient(
+    160deg,
+    var(--doodle-bg-secondary) 0%,
+    var(--doodle-bg-primary) 100%
+  );
   background-size: cover;
   background-position: center;
   color: var(--doodle-text-primary);
@@ -231,7 +245,9 @@
   font-family: var(--doodle-font-family);
   font-size: var(--doodle-font-size-base);
   cursor: pointer;
-  transition: background var(--doodle-transition-fast), border-color var(--doodle-transition-fast);
+  transition:
+    background var(--doodle-transition-fast),
+    border-color var(--doodle-transition-fast);
   text-align: center;
 }
 
@@ -249,8 +265,12 @@
 /* ── Shared animations ───────────────────────────────────────────── */
 
 @keyframes doodle-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ── Bootstrap loader (before manifest fetch) ────────────────────── */

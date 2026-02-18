@@ -77,7 +77,7 @@ With locale strings:
 bluff.setup: "You consider spinning Marcus a tale to get a free drink..."
 bluff.rolled: "You spin the tale — a {bluffRoll} on your roll."
 bluff.success: "The story lands perfectly. Marcus slides over a free drink."
-bluff.failure: "Marcus raises an eyebrow. \"Nice try.\""
+bluff.failure: 'Marcus raises an eyebrow. "Nice try."'
 ```
 
 ## Hidden check pattern
@@ -99,13 +99,13 @@ NODE explore
 
 ## Threshold reference
 
-| Dice | Threshold | Approximate chance |
-|------|-----------|-------------------|
-| `1 20 15` | 15+ on a d20 | 30% |
-| `1 20 11` | 11+ on a d20 | 50% |
-| `1 20 6` | 6+ on a d20 | 75% |
-| `1 4 4` | 4 on a d4 | 25% |
-| `1 2 2` | 2 on a coin flip | 50% |
+| Dice      | Threshold        | Approximate chance |
+| --------- | ---------------- | ------------------ |
+| `1 20 15` | 15+ on a d20     | 30%                |
+| `1 20 11` | 11+ on a d20     | 50%                |
+| `1 20 6`  | 6+ on a d20      | 75%                |
+| `1 4 4`   | 4 on a d4        | 25%                |
+| `1 2 2`   | 2 on a coin flip | 50%                |
 
 ## Variable interpolation
 

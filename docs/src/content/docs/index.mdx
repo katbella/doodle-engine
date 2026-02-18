@@ -1,4 +1,3 @@
-
 ---
 title: Doodle Engine
 description: A dialogue-driven engine for RPGs and narrative adventure games.
@@ -15,7 +14,7 @@ hero:
       icon: external
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid } from "@astrojs/starlight/components";
 
 ## About
 
@@ -29,22 +28,27 @@ The design is inspired by classic dialogue scripting approaches used in games bu
 
 <CardGrid>
   <Card title="Dialogue System" icon="pencil">
-    Branching conversations with speakers, choices, conditions, and effects in a readable script format.
+    Branching conversations with speakers, choices, conditions, and effects in a
+    readable script format.
   </Card>
   <Card title="World Content" icon="document">
-    Define locations, characters, items, quests, journal entries, and maps in YAML.
+    Define locations, characters, items, quests, journal entries, and maps in
+    YAML.
   </Card>
   <Card title="Conditions and Dice" icon="list-format">
-    Control flow using flags, variables, items, quest stages, relationships, time of day, and rolls.
+    Control flow using flags, variables, items, quest stages, relationships,
+    time of day, and rolls.
   </Card>
   <Card title="Localization" icon="translate">
     Use translation keys and add languages by creating locale files.
   </Card>
   <Card title="Narrative Interludes" icon="open-book">
-    Full-screen text sequences for chapter introductions, dreams, flashbacks, and story moments.
+    Full-screen text sequences for chapter introductions, dreams, flashbacks,
+    and story moments.
   </Card>
   <Card title="Validation" icon="approve-check">
-    Catch broken references, missing nodes, and invalid conditions before running the game.
+    Catch broken references, missing nodes, and invalid conditions before
+    running the game.
   </Card>
 </CardGrid>
 
@@ -59,22 +63,27 @@ The design is inspired by classic dialogue scripting approaches used in games bu
     A TypeScript engine with no UI dependencies. Use any framework or renderer.
   </Card>
   <Card title="Predictable State Flow" icon="right-arrow">
-    Actions produce snapshots. Renderers display snapshots. State moves in one direction.
+    Actions produce snapshots. Renderers display snapshots. State moves in one
+    direction.
   </Card>
   <Card title="React Renderer" icon="rocket">
-    Components for dialogue, choices, inventory, journal, map, and characters, plus a full game shell.
+    Components for dialogue, choices, inventory, journal, map, and characters,
+    plus a full game shell.
   </Card>
   <Card title="Audio and Video" icon="star">
     Music playback, sound effects, voice lines, UI sounds, and video cutscenes.
   </Card>
   <Card title="Asset Preloading" icon="download">
-    Images and audio load before render. No portrait pop-in during dialogue, no delayed sound effects, no flicker when entering a new location.
+    Images and audio load before render. No portrait pop-in during dialogue, no
+    delayed sound effects, no flicker when entering a new location.
   </Card>
   <Card title="Dev Tools" icon="setting">
-    Console tools for inspecting state, setting flags, teleporting, and triggering dialogues.
+    Console tools for inspecting state, setting flags, teleporting, and
+    triggering dialogues.
   </Card>
   <Card title="CLI" icon="seti:shell">
-    Project scaffolding, dev server with hot reload, production builds, and content validation.
+    Project scaffolding, dev server with hot reload, production builds, and
+    content validation.
   </Card>
 </CardGrid>
 

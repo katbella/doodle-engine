@@ -11,11 +11,11 @@ This page is primarily useful for developers building custom renderers or modify
 
 Assets are organized into tiers based on when they need to be available during startup and gameplay:
 
-| Tier | When loaded | What it contains |
-|------|-------------|-----------------|
-| **Tier 0** | Bundled in JS | CSS spinner, inline SVG |
-| **Tier 1 (shell)** | Before any screen renders | Splash/title/loading backgrounds, logos, UI sounds |
-| **Tier 2 (game)** | During the loading screen | All gameplay assets referenced by the manifest, including portraits, banners, music, and other media |
+| Tier               | When loaded               | What it contains                                                                                     |
+| ------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Tier 0**         | Bundled in JS             | CSS spinner, inline SVG                                                                              |
+| **Tier 1 (shell)** | Before any screen renders | Splash/title/loading backgrounds, logos, UI sounds                                                   |
+| **Tier 2 (game)**  | During the loading screen | All gameplay assets referenced by the manifest, including portraits, banners, music, and other media |
 
 ### The Loading Flow
 
@@ -79,13 +79,13 @@ The `state` object includes:
 
 ```ts
 {
-  phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error'
-  bytesLoaded: number
-  bytesTotal: number
-  progress: number
-  overallProgress: number
-  currentAsset: string | null
-  error: string | null
+  phase: "idle" | "loading-shell" | "loading-game" | "complete" | "error";
+  bytesLoaded: number;
+  bytesTotal: number;
+  progress: number;
+  overallProgress: number;
+  currentAsset: string | null;
+  error: string | null;
 }
 ```
 
@@ -94,7 +94,7 @@ The `state` object includes:
 When building a custom renderer (not using `GameShell`), wrap your app in `AssetProvider`:
 
 ```tsx
-import { AssetProvider, useAsset } from '@doodle-engine/react'
+import { AssetProvider, useAsset } from "@doodle-engine/react";
 
 function App() {
   return (
@@ -104,12 +104,12 @@ function App() {
     >
       <MyGame />
     </AssetProvider>
-  )
+  );
 }
 
 function LocationBanner({ src }: { src: string }) {
-  const { url, isReady } = useAsset(src)
-  return <img src={url} style={{ opacity: isReady ? 1 : 0 }} />
+  const { url, isReady } = useAsset(src);
+  return <img src={url} style={{ opacity: isReady ? 1 : 0 }} />;
 }
 ```
 
@@ -118,13 +118,13 @@ function LocationBanner({ src }: { src: string }) {
 Prefetch assets for upcoming screens to ensure smooth transitions:
 
 ```tsx
-import { usePrefetch } from '@doodle-engine/react'
+import { usePrefetch } from "@doodle-engine/react";
 
 function TavernScene({ registry }) {
   usePrefetch([
     registry.locations.market.banner,
     registry.locations.market.music,
-  ])
+  ]);
 }
 ```
 
@@ -133,6 +133,7 @@ function TavernScene({ registry }) {
 In production, `npm run build` generates a service worker (`dist/sw.js`) that precaches all manifest assets. Assets are cached on the first visit and typically load from cache on subsequent visits.
 
 The service worker:
+
 - Precaches all assets during install
 - Serves assets from cache (cache-first strategy)
 - Cleans old caches when a new build is deployed

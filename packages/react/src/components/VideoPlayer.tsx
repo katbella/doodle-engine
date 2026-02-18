@@ -5,37 +5,37 @@
  * Calls onComplete when the video ends or is skipped.
  */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 export interface VideoPlayerProps {
   /** Video file path */
-  src: string
+  src: string;
   /** Base path for video files */
-  basePath?: string
+  basePath?: string;
   /** Called when video ends or is skipped */
-  onComplete: () => void
+  onComplete: () => void;
   /** CSS class */
-  className?: string
+  className?: string;
 }
 
 export function VideoPlayer({
   src,
-  basePath = '/video',
+  basePath = "/video",
   onComplete,
-  className = '',
+  className = "",
 }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault()
-        onComplete()
+      if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        onComplete();
       }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onComplete])
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onComplete]);
 
   return (
     <div className={`video-player-overlay ${className}`}>
@@ -46,12 +46,9 @@ export function VideoPlayer({
         onEnded={onComplete}
         className="video-player-video"
       />
-      <button
-        className="video-player-skip-button"
-        onClick={onComplete}
-      >
+      <button className="video-player-skip-button" onClick={onComplete}>
         Skip
       </button>
     </div>
-  )
+  );
 }

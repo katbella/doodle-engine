@@ -82,18 +82,18 @@ doodle dev
 
 ### Content loading
 
-| Directory | File Type | How it's loaded |
-|-----------|-----------|-----------------|
-| `characters/` | `.yaml` | Parsed as Character entity |
-| `dialogues/` | `.dlg` | Parsed with `parseDialogue()` |
-| `interludes/` | `.yaml` | Parsed as Interlude entity |
-| `items/` | `.yaml` | Parsed as Item entity |
-| `journal/` | `.yaml` | Parsed as JournalEntry entity |
-| `locales/` | `.yaml` | Loaded as flat key-value dict, keyed by filename |
-| `locations/` | `.yaml` | Parsed as Location entity |
-| `maps/` | `.yaml` | Parsed as Map entity |
-| `quests/` | `.yaml` | Parsed as Quest entity |
-| `game.yaml` | `.yaml` | Parsed as GameConfig |
+| Directory     | File Type | How it's loaded                                  |
+| ------------- | --------- | ------------------------------------------------ |
+| `characters/` | `.yaml`   | Parsed as Character entity                       |
+| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                    |
+| `interludes/` | `.yaml`   | Parsed as Interlude entity                       |
+| `items/`      | `.yaml`   | Parsed as Item entity                            |
+| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                    |
+| `locales/`    | `.yaml`   | Loaded as flat key-value dict, keyed by filename |
+| `locations/`  | `.yaml`   | Parsed as Location entity                        |
+| `maps/`       | `.yaml`   | Parsed as Map entity                             |
+| `quests/`     | `.yaml`   | Parsed as Quest entity                           |
+| `game.yaml`   | `.yaml`   | Parsed as GameConfig                             |
 
 ### /api/content response
 
@@ -149,30 +149,30 @@ In development mode, a `window.doodle` object is exposed in the browser console 
 
 ```js
 // Flag manipulation
-doodle.setFlag('quest_started')
-doodle.clearFlag('quest_started')
+doodle.setFlag("quest_started");
+doodle.clearFlag("quest_started");
 
 // Variable manipulation
-doodle.setVariable('gold', 100)
-doodle.getVariable('gold')
+doodle.setVariable("gold", 100);
+doodle.getVariable("gold");
 
 // Location control
-doodle.teleport('tavern')
+doodle.teleport("tavern");
 
 // Dialogue control
-doodle.triggerDialogue('bartender_greeting')
+doodle.triggerDialogue("bartender_greeting");
 
 // Quest control
-doodle.setQuestStage('odd_jobs', 'in_progress')
+doodle.setQuestStage("odd_jobs", "in_progress");
 
 // Inventory control
-doodle.addItem('old_coin')
-doodle.removeItem('old_coin')
+doodle.addItem("old_coin");
+doodle.removeItem("old_coin");
 
 // Inspection
-doodle.inspect()           // Show current state and available commands
-doodle.inspectState()      // Return full game state object
-doodle.inspectRegistry()   // Return content registry object
+doodle.inspect(); // Show current state and available commands
+doodle.inspectState(); // Return full game state object
+doodle.inspectRegistry(); // Return content registry object
 ```
 
 **Dev tools are automatically removed from production builds** via Vite's tree-shaking.
