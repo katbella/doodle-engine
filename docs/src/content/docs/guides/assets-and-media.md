@@ -138,10 +138,11 @@ For games with large media libraries (many music tracks, extensive voice acting,
 
 ## Loading Behavior
 
-Assets are loaded by the browser as needed. There's no built-in preloading or streaming system.
+Doodle Engine preloads assets before they're needed. Portraits are ready before a conversation starts, music loads before entering a location, and cutscenes play without buffering delays.
 
-- **Images** load when components render (location change, inventory open, etc.)
-- **Audio** loads when playback is triggered
-- **Video** loads when the player component mounts
+Assets are divided into two loading tiers:
 
-The browser handles caching automatically.
+- **Shell assets** (logo, title screen, UI sounds) load before any screen renders
+- **Game assets** (portraits, banners, music, items) load during the loading screen, tracked by phase
+
+See [Asset Loading](./asset-loading.md) for how to configure what loads when.
