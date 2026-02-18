@@ -34,25 +34,25 @@ Add a `shell:` section to your `content/game.yaml`:
 
 ```yaml
 shell:
-  splash:
-    logo: /assets/images/studio-logo.png
-    background: /assets/images/splash-bg.jpg
-    sound: /assets/audio/sfx/splash-sting.ogg
-    duration: 2000
+    splash:
+        logo: /assets/images/studio-logo.png
+        background: /assets/images/splash-bg.jpg
+        sound: /assets/audio/sfx/splash-sting.ogg
+        duration: 2000
 
-  loading:
-    background: /assets/images/loading-bg.jpg
+    loading:
+        background: /assets/images/loading-bg.jpg
 
-  title:
-    logo: /assets/images/game-logo.png
-    background: /assets/images/title-bg.jpg
-    music: /assets/audio/music/title-theme.ogg
+    title:
+        logo: /assets/images/game-logo.png
+        background: /assets/images/title-bg.jpg
+        music: /assets/audio/music/title-theme.ogg
 
-  uiSounds:
-    click: /assets/audio/sfx/ui-click.ogg
-    hover: /assets/audio/sfx/ui-hover.ogg
-    menuOpen: /assets/audio/sfx/menu-open.ogg
-    menuClose: /assets/audio/sfx/menu-close.ogg
+    uiSounds:
+        click: /assets/audio/sfx/ui-click.ogg
+        hover: /assets/audio/sfx/ui-hover.ogg
+        menuOpen: /assets/audio/sfx/menu-open.ogg
+        menuClose: /assets/audio/sfx/menu-close.ogg
 ```
 
 All fields are optional. Screens render with built-in defaults when assets are not provided. Backgrounds fall back to styled gradients, logos fall back to text, and missing sounds are ignored.
@@ -63,15 +63,15 @@ Pass a `renderLoading` prop to `GameShell` for complete control:
 
 ```tsx
 <GameShell
-  manifest={manifest}
-  config={config}
-  registry={registry}
-  renderLoading={(state) => (
-    <div className="my-loader">
-      <p>{Math.round(state.overallProgress * 100)}%</p>
-      <progress value={state.overallProgress} max={1} />
-    </div>
-  )}
+    manifest={manifest}
+    config={config}
+    registry={registry}
+    renderLoading={(state) => (
+        <div className="my-loader">
+            <p>{Math.round(state.overallProgress * 100)}%</p>
+            <progress value={state.overallProgress} max={1} />
+        </div>
+    )}
 />
 ```
 
@@ -79,13 +79,13 @@ The `state` object includes:
 
 ```ts
 {
-  phase: "idle" | "loading-shell" | "loading-game" | "complete" | "error";
-  bytesLoaded: number;
-  bytesTotal: number;
-  progress: number;
-  overallProgress: number;
-  currentAsset: string | null;
-  error: string | null;
+    phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error';
+    bytesLoaded: number;
+    bytesTotal: number;
+    progress: number;
+    overallProgress: number;
+    currentAsset: string | null;
+    error: string | null;
 }
 ```
 
@@ -94,22 +94,22 @@ The `state` object includes:
 When building a custom renderer (not using `GameShell`), wrap your app in `AssetProvider`:
 
 ```tsx
-import { AssetProvider, useAsset } from "@doodle-engine/react";
+import { AssetProvider, useAsset } from '@doodle-engine/react';
 
 function App() {
-  return (
-    <AssetProvider
-      manifest={manifest}
-      renderLoading={(state) => <LoadingScreen state={state} />}
-    >
-      <MyGame />
-    </AssetProvider>
-  );
+    return (
+        <AssetProvider
+            manifest={manifest}
+            renderLoading={(state) => <LoadingScreen state={state} />}
+        >
+            <MyGame />
+        </AssetProvider>
+    );
 }
 
 function LocationBanner({ src }: { src: string }) {
-  const { url, isReady } = useAsset(src);
-  return <img src={url} style={{ opacity: isReady ? 1 : 0 }} />;
+    const { url, isReady } = useAsset(src);
+    return <img src={url} style={{ opacity: isReady ? 1 : 0 }} />;
 }
 ```
 
@@ -118,13 +118,13 @@ function LocationBanner({ src }: { src: string }) {
 Prefetch assets for upcoming screens to ensure smooth transitions:
 
 ```tsx
-import { usePrefetch } from "@doodle-engine/react";
+import { usePrefetch } from '@doodle-engine/react';
 
 function TavernScene({ registry }) {
-  usePrefetch([
-    registry.locations.market.banner,
-    registry.locations.market.music,
-  ]);
+    usePrefetch([
+        registry.locations.market.banner,
+        registry.locations.market.music,
+    ]);
 }
 ```
 

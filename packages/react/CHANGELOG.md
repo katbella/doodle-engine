@@ -6,7 +6,7 @@
 
 - beffac5: prettier
 - Updated dependencies [beffac5]
-  - @doodle-engine/core@0.0.21
+    - @doodle-engine/core@0.0.21
 
 ## 0.0.20
 
@@ -14,7 +14,7 @@
 
 - 96d5194: fix missing css
 - Updated dependencies [96d5194]
-  - @doodle-engine/core@0.0.20
+    - @doodle-engine/core@0.0.20
 
 ## 0.0.19
 
@@ -22,7 +22,7 @@
 
 - 07090d1: feature: asset loader
 - Updated dependencies [07090d1]
-  - @doodle-engine/core@0.0.19
+    - @doodle-engine/core@0.0.19
 
 ## 0.0.18
 
@@ -30,7 +30,7 @@
 
 - eabd6f3: update placeholders
 - Updated dependencies [eabd6f3]
-  - @doodle-engine/core@0.0.18
+    - @doodle-engine/core@0.0.18
 
 ## 0.0.17
 
@@ -38,7 +38,7 @@
 
 - 07107df: fix bluff checks
 - Updated dependencies [07107df]
-  - @doodle-engine/core@0.0.17
+    - @doodle-engine/core@0.0.17
 
 ## 0.0.16
 
@@ -46,7 +46,7 @@
 
 - 3562b28: dialogue bugs
 - Updated dependencies [3562b28]
-  - @doodle-engine/core@0.0.16
+    - @doodle-engine/core@0.0.16
 
 ## 0.0.15
 
@@ -54,7 +54,7 @@
 
 - c143488: update validator
 - Updated dependencies [c143488]
-  - @doodle-engine/core@0.0.15
+    - @doodle-engine/core@0.0.15
 
 ## 0.0.14
 
@@ -62,7 +62,7 @@
 
 - 85dd03e: update dice roll template
 - Updated dependencies [85dd03e]
-  - @doodle-engine/core@0.0.14
+    - @doodle-engine/core@0.0.14
 
 ## 0.0.13
 
@@ -70,7 +70,7 @@
 
 - f21b68e: Updated docs and templates
 - Updated dependencies [f21b68e]
-  - @doodle-engine/core@0.0.13
+    - @doodle-engine/core@0.0.13
 
 ## 0.0.12
 
@@ -78,7 +78,7 @@
 
 - a509381: Add dice roller
 - Updated dependencies [a509381]
-  - @doodle-engine/core@0.0.12
+    - @doodle-engine/core@0.0.12
 
 ## 0.0.11
 
@@ -86,7 +86,7 @@
 
 - 8716abd: update templates for interlude
 - Updated dependencies [8716abd]
-  - @doodle-engine/core@0.0.11
+    - @doodle-engine/core@0.0.11
 
 ## 0.0.10
 
@@ -94,7 +94,7 @@
 
 - ecfe7ba: Added Interludes
 - Updated dependencies [ecfe7ba]
-  - @doodle-engine/core@0.0.10
+    - @doodle-engine/core@0.0.10
 
 ## 0.0.9
 
@@ -102,7 +102,7 @@
 
 - 90cd5a7: Update validator and dev tools, added loading screen
 - Updated dependencies [90cd5a7]
-  - @doodle-engine/core@0.0.9
+    - @doodle-engine/core@0.0.9
 
 ## 0.0.8
 
@@ -110,7 +110,7 @@
 
 - 599ce7c: Dev tooling and DSL validation
 - Updated dependencies [599ce7c]
-  - @doodle-engine/core@0.0.8
+    - @doodle-engine/core@0.0.8
 
 ## 0.0.7
 
@@ -118,7 +118,7 @@
 
 - b7ac02f: Fix Github release tagging
 - Updated dependencies [b7ac02f]
-  - @doodle-engine/core@0.0.7
+    - @doodle-engine/core@0.0.7
 
 ## 0.0.6
 
@@ -126,7 +126,7 @@
 
 - 579a2e2: update build script to only build once
 - Updated dependencies [579a2e2]
-  - @doodle-engine/core@0.0.6
+    - @doodle-engine/core@0.0.6
 
 ## 0.0.5
 
@@ -134,7 +134,7 @@
 
 - 632bffe: move scaffolding to doodle create subcommand, fix workspace protocol in published packages
 - Updated dependencies [632bffe]
-  - @doodle-engine/core@0.0.5
+    - @doodle-engine/core@0.0.5
 
 ## 0.0.4
 
@@ -142,7 +142,7 @@
 
 - 204abef: update release script because yarn 4 has some publishing issues
 - Updated dependencies [204abef]
-  - @doodle-engine/core@0.0.4
+    - @doodle-engine/core@0.0.4
 
 ## 0.0.3
 
@@ -152,7 +152,7 @@
 - 14ff820: move project scaffolding to doodle create subcommand
 - Updated dependencies [9aba18f]
 - Updated dependencies [14ff820]
-  - @doodle-engine/core@0.0.3
+    - @doodle-engine/core@0.0.3
 
 ## 0.0.2
 
@@ -160,4 +160,4 @@
 
 - 09a12e4: Initial publish
 - Updated dependencies [09a12e4]
-  - @doodle-engine/core@0.0.2
+    - @doodle-engine/core@0.0.2

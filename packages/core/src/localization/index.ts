@@ -5,7 +5,7 @@
  * Authors use @keys in content files, and the engine resolves them when building snapshots.
  */
 
-import type { LocaleData } from "../types/registry";
+import type { LocaleData } from '../types/registry';
 
 /**
  * Resolve a localization key to a translated string.
@@ -26,28 +26,28 @@ import type { LocaleData } from "../types/registry";
  * ```
  */
 export function resolveText(
-  text: string,
-  localeData: LocaleData,
-  variables?: Record<string, number | string>,
+    text: string,
+    localeData: LocaleData,
+    variables?: Record<string, number | string>
 ): string {
-  // Resolve @localization key first
-  let resolved: string;
-  if (text.startsWith("@")) {
-    const key = text.slice(1);
-    resolved = localeData[key] ?? text;
-  } else {
-    resolved = text;
-  }
+    // Resolve @localization key first
+    let resolved: string;
+    if (text.startsWith('@')) {
+        const key = text.slice(1);
+        resolved = localeData[key] ?? text;
+    } else {
+        resolved = text;
+    }
 
-  // Substitute {varName} placeholders with variable values
-  if (variables && resolved.includes("{")) {
-    resolved = resolved.replace(/\{(\w+)\}/g, (_, name) => {
-      const val = variables[name];
-      return val !== undefined ? String(val) : `{${name}}`;
-    });
-  }
+    // Substitute {varName} placeholders with variable values
+    if (variables && resolved.includes('{')) {
+        resolved = resolved.replace(/\{(\w+)\}/g, (_, name) => {
+            const val = variables[name];
+            return val !== undefined ? String(val) : `{${name}}`;
+        });
+    }
 
-  return resolved;
+    return resolved;
 }
 
 /**
@@ -66,8 +66,8 @@ export function resolveText(
  * ```
  */
 export function createResolver(
-  localeData: LocaleData,
-  variables?: Record<string, number | string>,
+    localeData: LocaleData,
+    variables?: Record<string, number | string>
 ): (text: string) => string {
-  return (text: string) => resolveText(text, localeData, variables);
+    return (text: string) => resolveText(text, localeData, variables);
 }

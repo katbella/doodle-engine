@@ -9,9 +9,9 @@
  * Example: hasFlag metBartender
  */
 export interface HasFlagCondition {
-  type: "hasFlag";
-  /** Flag key to check */
-  flag: string;
+    type: 'hasFlag';
+    /** Flag key to check */
+    flag: string;
 }
 
 /**
@@ -19,9 +19,9 @@ export interface HasFlagCondition {
  * Example: notFlag doorLocked
  */
 export interface NotFlagCondition {
-  type: "notFlag";
-  /** Flag key to check */
-  flag: string;
+    type: 'notFlag';
+    /** Flag key to check */
+    flag: string;
 }
 
 /**
@@ -29,9 +29,9 @@ export interface NotFlagCondition {
  * Example: hasItem rusty_key
  */
 export interface HasItemCondition {
-  type: "hasItem";
-  /** Item ID to check for */
-  itemId: string;
+    type: 'hasItem';
+    /** Item ID to check for */
+    itemId: string;
 }
 
 /**
@@ -39,11 +39,11 @@ export interface HasItemCondition {
  * Example: variableEquals gold 100
  */
 export interface VariableEqualsCondition {
-  type: "variableEquals";
-  /** Variable key to check */
-  variable: string;
-  /** Value to compare against */
-  value: number | string;
+    type: 'variableEquals';
+    /** Variable key to check */
+    variable: string;
+    /** Value to compare against */
+    value: number | string;
 }
 
 /**
@@ -51,11 +51,11 @@ export interface VariableEqualsCondition {
  * Example: variableGreaterThan gold 10
  */
 export interface VariableGreaterThanCondition {
-  type: "variableGreaterThan";
-  /** Variable key to check */
-  variable: string;
-  /** Value to compare against */
-  value: number;
+    type: 'variableGreaterThan';
+    /** Variable key to check */
+    variable: string;
+    /** Value to compare against */
+    value: number;
 }
 
 /**
@@ -63,11 +63,11 @@ export interface VariableGreaterThanCondition {
  * Example: variableLessThan reputation 0
  */
 export interface VariableLessThanCondition {
-  type: "variableLessThan";
-  /** Variable key to check */
-  variable: string;
-  /** Value to compare against */
-  value: number;
+    type: 'variableLessThan';
+    /** Variable key to check */
+    variable: string;
+    /** Value to compare against */
+    value: number;
 }
 
 /**
@@ -75,9 +75,9 @@ export interface VariableLessThanCondition {
  * Example: atLocation tavern
  */
 export interface AtLocationCondition {
-  type: "atLocation";
-  /** Location ID to check */
-  locationId: string;
+    type: 'atLocation';
+    /** Location ID to check */
+    locationId: string;
 }
 
 /**
@@ -85,11 +85,11 @@ export interface AtLocationCondition {
  * Example: questAtStage odd_jobs started
  */
 export interface QuestAtStageCondition {
-  type: "questAtStage";
-  /** Quest ID to check */
-  questId: string;
-  /** Stage ID to check for */
-  stageId: string;
+    type: 'questAtStage';
+    /** Quest ID to check */
+    questId: string;
+    /** Stage ID to check for */
+    stageId: string;
 }
 
 /**
@@ -97,11 +97,11 @@ export interface QuestAtStageCondition {
  * Example: characterAt merchant market
  */
 export interface CharacterAtCondition {
-  type: "characterAt";
-  /** Character ID to check */
-  characterId: string;
-  /** Location ID to check */
-  locationId: string;
+    type: 'characterAt';
+    /** Character ID to check */
+    characterId: string;
+    /** Location ID to check */
+    locationId: string;
 }
 
 /**
@@ -109,9 +109,9 @@ export interface CharacterAtCondition {
  * Example: characterInParty elisa
  */
 export interface CharacterInPartyCondition {
-  type: "characterInParty";
-  /** Character ID to check */
-  characterId: string;
+    type: 'characterInParty';
+    /** Character ID to check */
+    characterId: string;
 }
 
 /**
@@ -119,11 +119,11 @@ export interface CharacterInPartyCondition {
  * Example: relationshipAbove bartender 5
  */
 export interface RelationshipAboveCondition {
-  type: "relationshipAbove";
-  /** Character ID to check */
-  characterId: string;
-  /** Minimum relationship value (exclusive) */
-  value: number;
+    type: 'relationshipAbove';
+    /** Character ID to check */
+    characterId: string;
+    /** Minimum relationship value (exclusive) */
+    value: number;
 }
 
 /**
@@ -131,11 +131,11 @@ export interface RelationshipAboveCondition {
  * Example: relationshipBelow bartender 0
  */
 export interface RelationshipBelowCondition {
-  type: "relationshipBelow";
-  /** Character ID to check */
-  characterId: string;
-  /** Maximum relationship value (exclusive) */
-  value: number;
+    type: 'relationshipBelow';
+    /** Character ID to check */
+    characterId: string;
+    /** Maximum relationship value (exclusive) */
+    value: number;
 }
 
 /**
@@ -143,11 +143,11 @@ export interface RelationshipBelowCondition {
  * Example: timeIs 20 6 (8 PM to 6 AM)
  */
 export interface TimeIsCondition {
-  type: "timeIs";
-  /** Start hour (0-23, inclusive) */
-  startHour: number;
-  /** End hour (0-23, exclusive) */
-  endHour: number;
+    type: 'timeIs';
+    /** Start hour (0-23, inclusive) */
+    startHour: number;
+    /** End hour (0-23, exclusive) */
+    endHour: number;
 }
 
 /**
@@ -155,11 +155,11 @@ export interface TimeIsCondition {
  * Example: itemAt sword armory
  */
 export interface ItemAtCondition {
-  type: "itemAt";
-  /** Item ID to check */
-  itemId: string;
-  /** Location ID to check */
-  locationId: string;
+    type: 'itemAt';
+    /** Item ID to check */
+    itemId: string;
+    /** Location ID to check */
+    locationId: string;
 }
 
 /**
@@ -169,13 +169,13 @@ export interface ItemAtCondition {
  * Used for silent pass/fail checks without storing the result.
  */
 export interface RollCondition {
-  type: "roll";
-  /** Minimum value (inclusive) */
-  min: number;
-  /** Maximum value (inclusive) */
-  max: number;
-  /** Minimum result needed to pass (inclusive) */
-  threshold: number;
+    type: 'roll';
+    /** Minimum value (inclusive) */
+    min: number;
+    /** Maximum value (inclusive) */
+    max: number;
+    /** Minimum result needed to pass (inclusive) */
+    threshold: number;
 }
 
 /**
@@ -183,18 +183,18 @@ export interface RollCondition {
  * This discriminated union allows authors to extend with custom conditions.
  */
 export type Condition =
-  | HasFlagCondition
-  | NotFlagCondition
-  | HasItemCondition
-  | VariableEqualsCondition
-  | VariableGreaterThanCondition
-  | VariableLessThanCondition
-  | AtLocationCondition
-  | QuestAtStageCondition
-  | CharacterAtCondition
-  | CharacterInPartyCondition
-  | RelationshipAboveCondition
-  | RelationshipBelowCondition
-  | TimeIsCondition
-  | ItemAtCondition
-  | RollCondition;
+    | HasFlagCondition
+    | NotFlagCondition
+    | HasItemCondition
+    | VariableEqualsCondition
+    | VariableGreaterThanCondition
+    | VariableLessThanCondition
+    | AtLocationCondition
+    | QuestAtStageCondition
+    | CharacterAtCondition
+    | CharacterInPartyCondition
+    | RelationshipAboveCondition
+    | RelationshipBelowCondition
+    | TimeIsCondition
+    | ItemAtCondition
+    | RollCondition;

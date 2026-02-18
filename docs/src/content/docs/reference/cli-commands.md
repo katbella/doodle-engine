@@ -149,25 +149,25 @@ In development mode, a `window.doodle` object is exposed in the browser console 
 
 ```js
 // Flag manipulation
-doodle.setFlag("quest_started");
-doodle.clearFlag("quest_started");
+doodle.setFlag('quest_started');
+doodle.clearFlag('quest_started');
 
 // Variable manipulation
-doodle.setVariable("gold", 100);
-doodle.getVariable("gold");
+doodle.setVariable('gold', 100);
+doodle.getVariable('gold');
 
 // Location control
-doodle.teleport("tavern");
+doodle.teleport('tavern');
 
 // Dialogue control
-doodle.triggerDialogue("bartender_greeting");
+doodle.triggerDialogue('bartender_greeting');
 
 // Quest control
-doodle.setQuestStage("odd_jobs", "in_progress");
+doodle.setQuestStage('odd_jobs', 'in_progress');
 
 // Inventory control
-doodle.addItem("old_coin");
-doodle.removeItem("old_coin");
+doodle.addItem('old_coin');
+doodle.removeItem('old_coin');
 
 // Inspection
 doodle.inspect(); // Show current state and available commands
@@ -221,38 +221,38 @@ doodle validate
 ### What it validates
 
 - **Dialogue structure**
-  - `startNode` exists in dialogue
-  - No duplicate node IDs within a dialogue
-  - All GOTO targets (from `node.next`, `choice.next`, `conditionalNext`) point to existing nodes
+    - `startNode` exists in dialogue
+    - No duplicate node IDs within a dialogue
+    - All GOTO targets (from `node.next`, `choice.next`, `conditionalNext`) point to existing nodes
 - **Conditions**
-  - `hasFlag`/`notFlag` have `flag` argument
-  - `hasItem`/`notItem` have `item` argument
-  - `questAtStage` has `quest` and `stage` arguments
-  - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
+    - `hasFlag`/`notFlag` have `flag` argument
+    - `hasItem`/`notItem` have `item` argument
+    - `questAtStage` has `quest` and `stage` arguments
+    - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
 - **Effects**
-  - `setFlag`/`clearFlag` have `flag` argument
-  - `setVariable`/`addVariable` have `variable` and `value` arguments
-  - `addItem`/`removeItem` have `item` argument
-  - `moveItem` has `item` and `location` arguments
-  - `setQuestStage` has `quest` and `stage` arguments
-  - `addJournalEntry` has `entry` argument
-  - `setCharacterLocation` has `character` and `location` arguments
-  - `addToParty`/`removeFromParty` have `character` argument
-  - `setRelationship`/`addRelationship` have `character` and `value` arguments
-  - `setCharacterStat`/`addCharacterStat` have `character`, `stat`, and `value` arguments
-  - `setMapEnabled` has `enabled` argument
-  - `advanceTime` has `hours` argument
-  - `goToLocation` has `location` argument
-  - `startDialogue` has `dialogue` argument
-  - `playMusic`/`playSound` have `file` argument
-  - `playVideo` has `file` argument
-  - `notify` has `message` argument
-  - `showInterlude` has `interludeId` argument
-  - `roll` has `variable`, `min`, and `max` arguments
+    - `setFlag`/`clearFlag` have `flag` argument
+    - `setVariable`/`addVariable` have `variable` and `value` arguments
+    - `addItem`/`removeItem` have `item` argument
+    - `moveItem` has `item` and `location` arguments
+    - `setQuestStage` has `quest` and `stage` arguments
+    - `addJournalEntry` has `entry` argument
+    - `setCharacterLocation` has `character` and `location` arguments
+    - `addToParty`/`removeFromParty` have `character` argument
+    - `setRelationship`/`addRelationship` have `character` and `value` arguments
+    - `setCharacterStat`/`addCharacterStat` have `character`, `stat`, and `value` arguments
+    - `setMapEnabled` has `enabled` argument
+    - `advanceTime` has `hours` argument
+    - `goToLocation` has `location` argument
+    - `startDialogue` has `dialogue` argument
+    - `playMusic`/`playSound` have `file` argument
+    - `playVideo` has `file` argument
+    - `notify` has `message` argument
+    - `showInterlude` has `interludeId` argument
+    - `roll` has `variable`, `min`, and `max` arguments
 - **Character dialogue references**
-  - Characters' `dialogue` field points to existing dialogue IDs
+    - Characters' `dialogue` field points to existing dialogue IDs
 - **Localization keys**
-  - All `@key` references in locations, characters, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
+    - All `@key` references in locations, characters, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
 
 ### Exit codes
 

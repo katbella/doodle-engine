@@ -45,20 +45,20 @@ You'll need:
 
 ```json
 {
-  "scripts": {
-    "dev": "doodle dev",
-    "build": "doodle build"
-  },
-  "dependencies": {
-    "@doodle-engine/core": "latest",
-    "@doodle-engine/react": "latest",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@doodle-engine/cli": "latest",
-    "vite": "^6.0.0"
-  }
+    "scripts": {
+        "dev": "doodle dev",
+        "build": "doodle build"
+    },
+    "dependencies": {
+        "@doodle-engine/core": "latest",
+        "@doodle-engine/react": "latest",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@doodle-engine/cli": "latest",
+        "vite": "^6.0.0"
+    }
 }
 ```
 
@@ -67,59 +67,59 @@ You'll need:
 Create `src/main.tsx`:
 
 ```tsx
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css";
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById('root')!).render(<App />);
 ```
 
 Create `src/App.tsx` using `GameShell`:
 
 ```tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import type {
-  ContentRegistry,
-  GameConfig,
-  AssetManifest,
-} from "@doodle-engine/core";
-import { GameShell } from "@doodle-engine/react";
+    ContentRegistry,
+    GameConfig,
+    AssetManifest,
+} from '@doodle-engine/core';
+import { GameShell } from '@doodle-engine/react';
 
 export default function App() {
-  const [content, setContent] = useState<{
-    registry: ContentRegistry;
-    config: GameConfig;
-  } | null>(null);
-  const [manifest, setManifest] = useState<AssetManifest | null>(null);
+    const [content, setContent] = useState<{
+        registry: ContentRegistry;
+        config: GameConfig;
+    } | null>(null);
+    const [manifest, setManifest] = useState<AssetManifest | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/content").then((res) => res.json()),
-      fetch("/api/manifest").then((res) => res.json()),
-    ]).then(([contentData, manifestData]) => {
-      setContent({
-        registry: contentData.registry,
-        config: contentData.config,
-      });
-      setManifest(manifestData);
-    });
-  }, []);
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/content').then((res) => res.json()),
+            fetch('/api/manifest').then((res) => res.json()),
+        ]).then(([contentData, manifestData]) => {
+            setContent({
+                registry: contentData.registry,
+                config: contentData.config,
+            });
+            setManifest(manifestData);
+        });
+    }, []);
 
-  if (!content || !manifest)
+    if (!content || !manifest)
+        return (
+            <div className="app-bootstrap">
+                <div className="spinner" />
+            </div>
+        );
+
     return (
-      <div className="app-bootstrap">
-        <div className="spinner" />
-      </div>
+        <GameShell
+            registry={content.registry}
+            config={content.config}
+            manifest={manifest}
+            title="My Game"
+        />
     );
-
-  return (
-    <GameShell
-      registry={content.registry}
-      config={content.config}
-      manifest={manifest}
-      title="My Game"
-    />
-  );
 }
 ```
 
@@ -135,4 +135,4 @@ Create a `content/` directory with at minimum:
 - `content/locations/`: location YAML files
 - `content/locales/en.yaml`: English strings
 
-See [Project Structure](/doodle-engine/getting-started/project-structure/) for the full layout.
+See [Project Structure](/getting-started/project-structure/) for the full layout.

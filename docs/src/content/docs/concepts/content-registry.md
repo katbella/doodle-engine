@@ -11,15 +11,15 @@ The registry provides a single indexed source of truth for all static game data,
 
 ```ts
 interface ContentRegistry {
-  locations: Record<string, Location>;
-  characters: Record<string, Character>;
-  items: Record<string, Item>;
-  maps: Record<string, Map>;
-  dialogues: Record<string, Dialogue>;
-  quests: Record<string, Quest>;
-  journalEntries: Record<string, JournalEntry>;
-  interludes: Record<string, Interlude>;
-  locales: Record<string, LocaleData>;
+    locations: Record<string, Location>;
+    characters: Record<string, Character>;
+    items: Record<string, Item>;
+    maps: Record<string, Map>;
+    dialogues: Record<string, Dialogue>;
+    quests: Record<string, Quest>;
+    journalEntries: Record<string, JournalEntry>;
+    interludes: Record<string, Interlude>;
+    locales: Record<string, LocaleData>;
 }
 ```
 
@@ -78,7 +78,7 @@ The engine uses the registry to:
 In the browser, the registry is fetched from the dev server:
 
 ```ts
-const response = await fetch("/api/content");
+const response = await fetch('/api/content');
 const { registry, config } = await response.json();
 
 const engine = new Engine(registry, createInitialState(config));

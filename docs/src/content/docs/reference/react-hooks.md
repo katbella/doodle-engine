@@ -8,19 +8,19 @@ description: Reference for useGame and useAudioManager hooks.
 Access the game context (snapshot and actions) from any component inside a `GameProvider`.
 
 ```tsx
-import { useGame } from "@doodle-engine/react";
+import { useGame } from '@doodle-engine/react';
 
 function MyComponent() {
-  const { snapshot, actions } = useGame();
+    const { snapshot, actions } = useGame();
 
-  return (
-    <div>
-      <h1>{snapshot.location.name}</h1>
-      <button onClick={() => actions.talkTo("bartender")}>
-        Talk to {snapshot.charactersHere[0]?.name}
-      </button>
-    </div>
-  );
+    return (
+        <div>
+            <h1>{snapshot.location.name}</h1>
+            <button onClick={() => actions.talkTo('bartender')}>
+                Talk to {snapshot.charactersHere[0]?.name}
+            </button>
+        </div>
+    );
 }
 ```
 
@@ -28,18 +28,18 @@ function MyComponent() {
 
 ```typescript
 interface GameContextValue {
-  snapshot: Snapshot;
-  actions: {
-    selectChoice: (choiceId: string) => void;
-    talkTo: (characterId: string) => void;
-    takeItem: (itemId: string) => void;
-    travelTo: (locationId: string) => void;
-    writeNote: (title: string, text: string) => void;
-    deleteNote: (noteId: string) => void;
-    setLocale: (locale: string) => void;
-    saveGame: () => SaveData;
-    loadGame: (saveData: SaveData) => void;
-  };
+    snapshot: Snapshot;
+    actions: {
+        selectChoice: (choiceId: string) => void;
+        talkTo: (characterId: string) => void;
+        takeItem: (itemId: string) => void;
+        travelTo: (locationId: string) => void;
+        writeNote: (title: string, text: string) => void;
+        deleteNote: (noteId: string) => void;
+        setLocale: (locale: string) => void;
+        saveGame: () => SaveData;
+        loadGame: (saveData: SaveData) => void;
+    };
 }
 ```
 
@@ -70,26 +70,28 @@ Each action calls the corresponding engine method and updates the snapshot:
 Manages audio playback automatically based on snapshot changes.
 
 ```tsx
-import { useAudioManager } from "@doodle-engine/react";
+import { useAudioManager } from '@doodle-engine/react';
 
 function MyGame() {
-  const { snapshot } = useGame();
+    const { snapshot } = useGame();
 
-  const controls = useAudioManager(snapshot, {
-    audioBasePath: "/audio",
-    masterVolume: 1.0,
-    musicVolume: 0.7,
-    soundVolume: 0.8,
-    voiceVolume: 1.0,
-    crossfadeDuration: 1000,
-  });
+    const controls = useAudioManager(snapshot, {
+        audioBasePath: '/audio',
+        masterVolume: 1.0,
+        musicVolume: 0.7,
+        soundVolume: 0.8,
+        voiceVolume: 1.0,
+        crossfadeDuration: 1000,
+    });
 
-  return (
-    <div>
-      <button onClick={() => controls.setMasterVolume(0.5)}>Half Volume</button>
-      <button onClick={controls.stopAll}>Mute</button>
-    </div>
-  );
+    return (
+        <div>
+            <button onClick={() => controls.setMasterVolume(0.5)}>
+                Half Volume
+            </button>
+            <button onClick={controls.stopAll}>Mute</button>
+        </div>
+    );
 }
 ```
 
@@ -115,11 +117,11 @@ function MyGame() {
 
 ```typescript
 interface AudioManagerControls {
-  setMasterVolume: (volume: number) => void;
-  setMusicVolume: (volume: number) => void;
-  setSoundVolume: (volume: number) => void;
-  setVoiceVolume: (volume: number) => void;
-  stopAll: () => void;
+    setMasterVolume: (volume: number) => void;
+    setMusicVolume: (volume: number) => void;
+    setSoundVolume: (volume: number) => void;
+    setVoiceVolume: (volume: number) => void;
+    stopAll: () => void;
 }
 ```
 
@@ -147,29 +149,29 @@ The hook manages three channels:
 Standalone hook for UI chrome sounds (clicks, menu open/close). This is separate from `useAudioManager` because it handles renderer UI sounds, not game content audio.
 
 ```tsx
-import { useUISounds } from "@doodle-engine/react";
+import { useUISounds } from '@doodle-engine/react';
 
 function MyUI() {
-  const uiSounds = useUISounds({
-    basePath: "/audio/ui",
-    volume: 0.5,
-    sounds: {
-      click: "click.ogg",
-      menuOpen: "menu_open.ogg",
-      menuClose: "menu_close.ogg",
-    },
-  });
+    const uiSounds = useUISounds({
+        basePath: '/audio/ui',
+        volume: 0.5,
+        sounds: {
+            click: 'click.ogg',
+            menuOpen: 'menu_open.ogg',
+            menuClose: 'menu_close.ogg',
+        },
+    });
 
-  return (
-    <button
-      onClick={() => {
-        uiSounds.playClick();
-        doSomething();
-      }}
-    >
-      Click Me
-    </button>
-  );
+    return (
+        <button
+            onClick={() => {
+                uiSounds.playClick();
+                doSomething();
+            }}
+        >
+            Click Me
+        </button>
+    );
 }
 ```
 
@@ -189,14 +191,14 @@ function MyUI() {
 
 ```typescript
 interface UISoundControls {
-  playClick: () => void;
-  playMenuOpen: () => void;
-  playMenuClose: () => void;
-  playSound: (key: string) => void;
-  setEnabled: (enabled: boolean) => void;
-  setVolume: (volume: number) => void;
-  enabled: boolean;
-  volume: number;
+    playClick: () => void;
+    playMenuOpen: () => void;
+    playMenuClose: () => void;
+    playSound: (key: string) => void;
+    setEnabled: (enabled: boolean) => void;
+    setVolume: (volume: number) => void;
+    enabled: boolean;
+    volume: number;
 }
 ```
 
@@ -206,13 +208,13 @@ interface UISoundControls {
 
 ```tsx
 <GameShell
-  registry={registry}
-  config={config}
-  uiSounds={{
-    basePath: "/audio/ui",
-    volume: 0.5,
-    sounds: { click: "click.ogg" },
-  }}
+    registry={registry}
+    config={config}
+    uiSounds={{
+        basePath: '/audio/ui',
+        volume: 0.5,
+        sounds: { click: 'click.ogg' },
+    }}
 />
 ```
 
