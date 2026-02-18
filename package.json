@@ -1,25 +1,25 @@
 {
-  "name": "doodle-engine",
-  "private": true,
-  "packageManager": "yarn@4.6.0",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "yarn workspaces foreach -At run build",
-    "dev": "yarn workspaces foreach -Ap run dev",
-    "test": "yarn workspaces foreach -A run test",
-    "docs:dev": "yarn --cwd docs dev",
-    "docs:build": "yarn --cwd docs build",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "node scripts/publish.mjs"
-  },
-  "engines": {
-    "node": ">=24.0.0"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.29.8",
-    "prettier": "3.8.1"
-  }
+    "name": "doodle-engine",
+    "private": true,
+    "packageManager": "yarn@4.6.0",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "yarn workspaces foreach -At run build",
+        "dev": "yarn workspaces foreach -Ap run dev",
+        "test": "yarn workspaces foreach -A run test",
+        "docs:dev": "yarn --cwd docs dev",
+        "docs:build": "yarn --cwd docs build",
+        "changeset": "changeset",
+        "version": "changeset version",
+        "release": "node scripts/publish.mjs"
+    },
+    "engines": {
+        "node": ">=24.0.0"
+    },
+    "devDependencies": {
+        "@changesets/cli": "^2.29.8",
+        "prettier": "3.8.1"
+    }
 }

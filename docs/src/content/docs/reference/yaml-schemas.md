@@ -11,8 +11,8 @@ All content entities are defined in YAML files placed in the appropriate `conten
 
 ```yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: '@location.tavern.name'
+description: '@location.tavern.description'
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
@@ -33,8 +33,8 @@ ambient: fire_crackling.ogg
 
 ```yaml
 id: bartender
-name: "@character.bartender.name"
-biography: "@character.bartender.bio"
+name: '@character.bartender.name'
+biography: '@character.bartender.bio'
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -57,8 +57,8 @@ stats: {}
 
 ```yaml
 id: old_coin
-name: "@item.old_coin.name"
-description: "@item.old_coin.description"
+name: '@item.old_coin.name'
+description: '@item.old_coin.description'
 icon: old_coin_icon.png
 image: old_coin.png
 location: inventory
@@ -81,16 +81,16 @@ stats: {}
 
 ```yaml
 id: town
-name: "@map.town.name"
+name: '@map.town.name'
 image: town_map.png
 scale: 1
 locations:
-  - id: tavern
-    x: 200
-    y: 350
-  - id: market
-    x: 500
-    y: 200
+    - id: tavern
+      x: 200
+      y: 350
+    - id: market
+      x: 500
+      y: 200
 ```
 
 | Field       | Type            | Description                        |
@@ -115,15 +115,15 @@ locations:
 
 ```yaml
 id: odd_jobs
-name: "@quest.odd_jobs.name"
-description: "@quest.odd_jobs.description"
+name: '@quest.odd_jobs.name'
+description: '@quest.odd_jobs.description'
 stages:
-  - id: started
-    description: "@quest.odd_jobs.stage.started"
-  - id: talked_to_merchant
-    description: "@quest.odd_jobs.stage.talked_to_merchant"
-  - id: complete
-    description: "@quest.odd_jobs.stage.complete"
+    - id: started
+      description: '@quest.odd_jobs.stage.started'
+    - id: talked_to_merchant
+      description: '@quest.odd_jobs.stage.talked_to_merchant'
+    - id: complete
+      description: '@quest.odd_jobs.stage.complete'
 ```
 
 | Field         | Type           | Description                    |
@@ -146,8 +146,8 @@ stages:
 
 ```yaml
 id: tavern_discovery
-title: "@journal.tavern_discovery.title"
-text: "@journal.tavern_discovery.text"
+title: '@journal.tavern_discovery.title'
+text: '@journal.tavern_discovery.text'
 category: places
 ```
 
@@ -166,10 +166,10 @@ category: places
 id: chapter_one
 background: /assets/images/banners/dusk_road.jpg
 text: |
-  Chapter One: A New Beginning
+    Chapter One: A New Beginning
 
-  The road behind you stretches long and empty.
-  Ahead, the lights of town flicker through the evening mist.
+    The road behind you stretches long and empty.
+    Ahead, the lights of town flicker through the evening mist.
 ```
 
 | Field               | Type          | Required | Description                                                          |
@@ -187,7 +187,7 @@ text: |
 | `triggerConditions` | `Condition[]` | No       | Conditions that must pass for auto-trigger                           |
 | `effects`           | `Effect[]`    | No       | Effects applied when the interlude triggers (e.g. set a "seen" flag) |
 
-Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling to `triggerLocation` if all `triggerConditions` pass. See the [Interludes guide](/doodle-engine/guides/interludes/).
+Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling to `triggerLocation` if all `triggerConditions` pass. See the [Interludes guide](/guides/interludes/).
 
 ## GameConfig
 
@@ -197,13 +197,13 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 id: game
 startLocation: tavern
 startTime:
-  day: 1
-  hour: 8
+    day: 1
+    hour: 8
 startFlags: {}
 startVariables:
-  gold: 100
-  reputation: 0
-  _drinksBought: 0
+    gold: 100
+    reputation: 0
+    _drinksBought: 0
 startInventory: []
 ```
 
@@ -224,14 +224,14 @@ Locale files are flat key-value dictionaries (not entities). They're loaded by f
 
 ```yaml
 # content/locales/en.yaml
-location.tavern.name: "The Rusty Tankard"
-location.tavern.description: "A cozy tavern with worn wooden tables."
-character.bartender.name: "Greta"
-bartender.greeting: "Welcome! What can I do for you?"
+location.tavern.name: 'The Rusty Tankard'
+location.tavern.description: 'A cozy tavern with worn wooden tables.'
+character.bartender.name: 'Greta'
+bartender.greeting: 'Welcome! What can I do for you?'
 ```
 
 | Key        | Value           |
 | ---------- | --------------- |
 | Any string | Translated text |
 
-Referenced with `@key` syntax in other content files. See [Localization](/doodle-engine/guides/localization/).
+Referenced with `@key` syntax in other content files. See [Localization](/guides/localization/).

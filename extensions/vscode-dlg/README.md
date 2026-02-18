@@ -18,7 +18,7 @@ If you want this available in your regular editor window:
 
 1. Close VS Code.
 2. Copy the `vscode-dlg` folder to:
-   - Windows: `%USERPROFILE%\.vscode\extensions\doodle-dlg-syntax-0.0.1`
-   - macOS: `~/.vscode/extensions/doodle-dlg-syntax-0.0.1`
-   - Linux: `~/.vscode/extensions/doodle-dlg-syntax-0.0.1`
+    - Windows: `%USERPROFILE%\.vscode\extensions\doodle-dlg-syntax-0.0.1`
+    - macOS: `~/.vscode/extensions/doodle-dlg-syntax-0.0.1`
+    - Linux: `~/.vscode/extensions/doodle-dlg-syntax-0.0.1`
 3. Reopen VS Code and open any `.dlg` file.

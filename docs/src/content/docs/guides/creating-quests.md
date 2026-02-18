@@ -11,15 +11,15 @@ Create `content/quests/odd_jobs.yaml`:
 
 ```yaml
 id: odd_jobs
-name: "@quest.odd_jobs.name"
-description: "@quest.odd_jobs.description"
+name: '@quest.odd_jobs.name'
+description: '@quest.odd_jobs.description'
 stages:
-  - id: started
-    description: "@quest.odd_jobs.stage.started"
-  - id: talked_to_merchant
-    description: "@quest.odd_jobs.stage.talked_to_merchant"
-  - id: complete
-    description: "@quest.odd_jobs.stage.complete"
+    - id: started
+      description: '@quest.odd_jobs.stage.started'
+    - id: talked_to_merchant
+      description: '@quest.odd_jobs.stage.talked_to_merchant'
+    - id: complete
+      description: '@quest.odd_jobs.stage.complete'
 ```
 
 Each stage has an `id` and a `description` shown in the player's journal.
@@ -101,11 +101,11 @@ Quests are considered "active" when they have any stage set in `questProgress`. 
 ## Locale Strings
 
 ```yaml
-quest.odd_jobs.name: "Odd Jobs"
-quest.odd_jobs.description: "Help the local merchants with various tasks."
-quest.odd_jobs.stage.started: "The merchant mentioned needing help with deliveries."
+quest.odd_jobs.name: 'Odd Jobs'
+quest.odd_jobs.description: 'Help the local merchants with various tasks.'
+quest.odd_jobs.stage.started: 'The merchant mentioned needing help with deliveries.'
 quest.odd_jobs.stage.talked_to_merchant: "Agreed to handle the merchant's deliveries."
-quest.odd_jobs.stage.complete: "All deliveries completed successfully."
-notification.quest_started: "New Quest: Odd Jobs"
-notification.quest_complete: "Quest Complete: Odd Jobs (+50 gold, +10 reputation)"
+quest.odd_jobs.stage.complete: 'All deliveries completed successfully.'
+notification.quest_started: 'New Quest: Odd Jobs'
+notification.quest_complete: 'Quest Complete: Odd Jobs (+50 gold, +10 reputation)'
 ```

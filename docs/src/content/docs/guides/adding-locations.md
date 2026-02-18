@@ -11,11 +11,11 @@ Create `content/locations/tavern.yaml`:
 
 ```yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: '@location.tavern.name'
+description: '@location.tavern.description'
 banner: tavern.png
 music: tavern_ambience.ogg
-ambient: ""
+ambient: ''
 ```
 
 | Field         | Description                                                       |
@@ -33,16 +33,16 @@ Maps connect locations and let players travel between them. Create `content/maps
 
 ```yaml
 id: town
-name: "@map.town.name"
+name: '@map.town.name'
 image: town_map.png
 scale: 1
 locations:
-  - id: tavern
-    x: 200
-    y: 350
-  - id: market
-    x: 500
-    y: 200
+    - id: tavern
+      x: 200
+      y: 350
+    - id: market
+      x: 500
+      y: 200
 ```
 
 | Field       | Description                                                     |

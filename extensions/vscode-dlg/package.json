@@ -1,36 +1,36 @@
 {
-  "name": "doodle-dlg-syntax",
-  "displayName": "Doodle DLG Syntax",
-  "description": "Syntax highlighting for Doodle Engine .dlg dialogue files.",
-  "version": "0.0.1",
-  "publisher": "doodle-engine",
-  "license": "MIT",
-  "engines": {
-    "vscode": "^1.85.0"
-  },
-  "categories": [
-    "Programming Languages"
-  ],
-  "contributes": {
-    "languages": [
-      {
-        "id": "dlg",
-        "aliases": [
-          "DLG",
-          "doodle-dlg"
-        ],
-        "extensions": [
-          ".dlg"
-        ],
-        "configuration": "./language-configuration.json"
-      }
+    "name": "doodle-dlg-syntax",
+    "displayName": "Doodle DLG Syntax",
+    "description": "Syntax highlighting for Doodle Engine .dlg dialogue files.",
+    "version": "0.0.1",
+    "publisher": "doodle-engine",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Programming Languages"
     ],
-    "grammars": [
-      {
-        "language": "dlg",
-        "scopeName": "source.dlg",
-        "path": "./syntaxes/dlg.tmLanguage.json"
-      }
-    ]
-  }
+    "contributes": {
+        "languages": [
+            {
+                "id": "dlg",
+                "aliases": [
+                    "DLG",
+                    "doodle-dlg"
+                ],
+                "extensions": [
+                    ".dlg"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "dlg",
+                "scopeName": "source.dlg",
+                "path": "./syntaxes/dlg.tmLanguage.json"
+            }
+        ]
+    }
 }

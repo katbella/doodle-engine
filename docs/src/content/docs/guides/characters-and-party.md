@@ -9,8 +9,8 @@ Create `content/characters/bartender.yaml`:
 
 ```yaml
 id: bartender
-name: "@character.bartender.name"
-biography: "@character.bartender.bio"
+name: '@character.bartender.name'
+biography: '@character.bartender.bio'
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -43,7 +43,7 @@ When a player clicks a character in `charactersHere`, the engine calls `talkTo(c
 ```tsx
 // In a custom renderer
 const { actions } = useGame();
-actions.talkTo("bartender");
+actions.talkTo('bartender');
 ```
 
 ## Relationships

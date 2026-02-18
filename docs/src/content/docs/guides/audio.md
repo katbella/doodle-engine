@@ -14,8 +14,8 @@ Each location has `music` and `ambient` fields:
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: "@location.tavern.name"
-description: "@location.tavern.description"
+name: '@location.tavern.name'
+description: '@location.tavern.description'
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
@@ -54,21 +54,21 @@ MUSIC tension_theme.ogg
 The `useAudioManager` hook manages all audio playback automatically based on the snapshot:
 
 ```tsx
-import { useAudioManager } from "@doodle-engine/react";
+import { useAudioManager } from '@doodle-engine/react';
 
 function MyGame() {
-  const { snapshot } = useGame();
+    const { snapshot } = useGame();
 
-  const audioControls = useAudioManager(snapshot, {
-    audioBasePath: "/audio",
-    masterVolume: 1.0,
-    musicVolume: 0.7,
-    soundVolume: 0.8,
-    voiceVolume: 1.0,
-    crossfadeDuration: 1000,
-  });
+    const audioControls = useAudioManager(snapshot, {
+        audioBasePath: '/audio',
+        masterVolume: 1.0,
+        musicVolume: 0.7,
+        soundVolume: 0.8,
+        voiceVolume: 1.0,
+        crossfadeDuration: 1000,
+    });
 
-  // audioControls provides volume setters and stopAll
+    // audioControls provides volume setters and stopAll
 }
 ```
 
@@ -87,11 +87,11 @@ function MyGame() {
 
 ```typescript
 interface AudioManagerControls {
-  setMasterVolume: (volume: number) => void;
-  setMusicVolume: (volume: number) => void;
-  setSoundVolume: (volume: number) => void;
-  setVoiceVolume: (volume: number) => void;
-  stopAll: () => void;
+    setMasterVolume: (volume: number) => void;
+    setMusicVolume: (volume: number) => void;
+    setSoundVolume: (volume: number) => void;
+    setVoiceVolume: (volume: number) => void;
+    stopAll: () => void;
 }
 ```
 
