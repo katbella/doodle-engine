@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.19
+
+### Patch Changes
+
+- 07090d1: feature: asset loader
+- Updated dependencies [07090d1]
+  - @doodle-engine/react@0.0.19
+  - @doodle-engine/core@0.0.19
+
 ## 0.0.18
 
 ### Patch Changes
