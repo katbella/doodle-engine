@@ -266,7 +266,7 @@ Show a narrative interlude — a full-screen text scene with scrolling text and 
 INTERLUDE chapter_one
 ```
 
-The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared after the player dismisses it. See the [Interludes guide](/doodle-engine/guides/interludes/) for the full YAML schema.
+The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared after the player dismisses it. See the [Interludes guide](/guides/interludes/) for the full YAML schema.
 
 ## Dice Rolling
 
@@ -304,7 +304,7 @@ For a one-shot hidden check where you don't need the value, use the `roll` condi
 REQUIRE roll 1 20 15
 ```
 
-See the [Dice & Randomness guide](/doodle-engine/guides/dice-and-randomness/) for patterns and examples.
+See the [Dice & Randomness guide](/guides/dice-and-randomness/) for patterns and examples.
 
 ## Notifications
 
@@ -322,7 +322,7 @@ Notifications are transient. They appear in one snapshot and are automatically c
 ## TypeScript API
 
 ```typescript
-import { applyEffect, applyEffects } from "@doodle-engine/core";
+import { applyEffect, applyEffects } from '@doodle-engine/core';
 
 // Single effect
 const newState = applyEffect(effect, gameState);

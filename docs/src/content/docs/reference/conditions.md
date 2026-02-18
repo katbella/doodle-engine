@@ -207,7 +207,7 @@ REQUIRE roll 1 20 15
 - Branch on the result in multiple places
 - Reference the roll elsewhere in the scene
 
-For a one-shot hidden check with no displayed result, the `roll` condition is simpler. See the [Dice & Randomness guide](/doodle-engine/guides/dice-and-randomness/).
+For a one-shot hidden check with no displayed result, the `roll` condition is simpler. See the [Dice & Randomness guide](/guides/dice-and-randomness/).
 
 ## Using Conditions in Dialogue
 
@@ -249,7 +249,7 @@ END
 ## TypeScript API
 
 ```typescript
-import { evaluateCondition, evaluateConditions } from "@doodle-engine/core";
+import { evaluateCondition, evaluateConditions } from '@doodle-engine/core';
 
 // Single condition
 const passes = evaluateCondition(condition, gameState);

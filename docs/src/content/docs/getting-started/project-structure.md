@@ -56,11 +56,11 @@ The root configuration file. Required fields:
 id: game
 startLocation: tavern # Where the player begins
 startTime:
-  day: 1
-  hour: 8
+    day: 1
+    hour: 8
 startFlags: {} # Initial boolean flags
 startVariables: # Initial numeric/string variables
-  gold: 100
+    gold: 100
 startInventory: [] # Item IDs the player starts with
 ```
 
@@ -70,15 +70,15 @@ Locale files are flat key-value YAML dictionaries. They're loaded by filename: `
 
 ```yaml
 # content/locales/en.yaml
-location.tavern.name: "The Rusty Tankard"
-character.bartender.name: "Greta"
+location.tavern.name: 'The Rusty Tankard'
+character.bartender.name: 'Greta'
 ```
 
 Referenced anywhere with `@key` syntax:
 
 ```yaml
 # content/locations/tavern.yaml
-name: "@location.tavern.name"
+name: '@location.tavern.name'
 ```
 
 ## Assets Directory
@@ -99,4 +99,4 @@ Your application code. The scaffolder creates a minimal setup:
 - **App.tsx**: fetches content, initializes the engine, renders `GameProvider` + `GameRenderer`
 - **index.css**: default styles (fully customizable)
 
-For custom renderers, replace `GameRenderer` with your own components using the `useGame` hook. See [Custom Renderer](/doodle-engine/guides/custom-renderer/).
+For custom renderers, replace `GameRenderer` with your own components using the `useGame` hook. See [Custom Renderer](/guides/custom-renderer/).

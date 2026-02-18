@@ -11,8 +11,8 @@ Create `content/items/old_coin.yaml`:
 
 ```yaml
 id: old_coin
-name: "@item.old_coin.name"
-description: "@item.old_coin.description"
+name: '@item.old_coin.name'
+description: '@item.old_coin.description'
 icon: old_coin_icon.png
 image: old_coin.png
 location: inventory
@@ -89,7 +89,7 @@ The default `GameRenderer` shows inventory in the sidebar with a grid of item ic
 In a custom renderer, use the `Inventory` component:
 
 ```tsx
-import { Inventory } from "@doodle-engine/react";
+import { Inventory } from '@doodle-engine/react';
 
 <Inventory items={snapshot.inventory} />;
 ```
@@ -98,11 +98,11 @@ Or build your own using `snapshot.inventory`, which contains `SnapshotItem` obje
 
 ```typescript
 interface SnapshotItem {
-  id: string;
-  name: string; // Localized
-  description: string; // Localized
-  icon: string;
-  image: string;
-  stats: Record<string, unknown>;
+    id: string;
+    name: string; // Localized
+    description: string; // Localized
+    icon: string;
+    image: string;
+    stats: Record<string, unknown>;
 }
 ```

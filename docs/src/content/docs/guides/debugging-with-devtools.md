@@ -17,29 +17,29 @@ The React renderer automatically enables dev tools in development mode:
 
 ```tsx
 // Already integrated in GameProvider - no extra setup needed!
-import { GameProvider } from "@doodle-engine/react";
+import { GameProvider } from '@doodle-engine/react';
 ```
 
 If you're building a custom React renderer:
 
 ```tsx
-import { useEffect } from "react";
-import { Engine, enableDevTools } from "@doodle-engine/core";
+import { useEffect } from 'react';
+import { Engine, enableDevTools } from '@doodle-engine/core';
 
 function MyRenderer({ engine }) {
-  const [snapshot, setSnapshot] = useState(engine.getSnapshot());
+    const [snapshot, setSnapshot] = useState(engine.getSnapshot());
 
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      enableDevTools(engine, () => setSnapshot(engine.getSnapshot()));
+    useEffect(() => {
+        if (import.meta.env.DEV) {
+            enableDevTools(engine, () => setSnapshot(engine.getSnapshot()));
 
-      return () => {
-        delete window.doodle;
-      };
-    }
-  }, [engine]);
+            return () => {
+                delete window.doodle;
+            };
+        }
+    }, [engine]);
 
-  // ... rest of renderer
+    // ... rest of renderer
 }
 ```
 
@@ -47,24 +47,24 @@ function MyRenderer({ engine }) {
 
 ```vue
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
-import { enableDevTools } from "@doodle-engine/core";
+import { onMounted, onUnmounted, ref } from 'vue';
+import { enableDevTools } from '@doodle-engine/core';
 
-const props = defineProps(["engine"]);
+const props = defineProps(['engine']);
 const snapshot = ref(props.engine.getSnapshot());
 
 onMounted(() => {
-  if (import.meta.env.DEV) {
-    enableDevTools(props.engine, () => {
-      snapshot.value = props.engine.getSnapshot();
-    });
-  }
+    if (import.meta.env.DEV) {
+        enableDevTools(props.engine, () => {
+            snapshot.value = props.engine.getSnapshot();
+        });
+    }
 });
 
 onUnmounted(() => {
-  if (import.meta.env.DEV) {
-    delete window.doodle;
-  }
+    if (import.meta.env.DEV) {
+        delete window.doodle;
+    }
 });
 </script>
 ```
@@ -99,16 +99,16 @@ onUnmounted(() => {
 ### Vanilla JavaScript
 
 ```js
-import { enableDevTools } from "@doodle-engine/core";
+import { enableDevTools } from '@doodle-engine/core';
 
 let engine = new Engine(registry, initialState);
 let snapshot = engine.getSnapshot();
 
 if (import.meta.env.DEV) {
-  enableDevTools(engine, () => {
-    snapshot = engine.getSnapshot();
-    render(snapshot); // Your render function
-  });
+    enableDevTools(engine, () => {
+        snapshot = engine.getSnapshot();
+        render(snapshot); // Your render function
+    });
 }
 ```
 
@@ -116,9 +116,9 @@ if (import.meta.env.DEV) {
 
 1. Start your dev server:
 
-   ```bash
-   doodle dev
-   ```
+    ```bash
+    doodle dev
+    ```
 
 2. Open your game in the browser (usually `http://localhost:3000`)
 
@@ -134,11 +134,11 @@ Flags are boolean game state values used in conditions and branching.
 
 ```js
 // Set a flag
-doodle.setFlag("quest_started");
-doodle.setFlag("met_merchant");
+doodle.setFlag('quest_started');
+doodle.setFlag('met_merchant');
 
 // Clear a flag
-doodle.clearFlag("quest_started");
+doodle.clearFlag('quest_started');
 ```
 
 **Use case**: Test dialogue branches that depend on flags without playing through the entire game.
@@ -149,11 +149,11 @@ Variables store numeric or string values (gold, counters, player name, etc.).
 
 ```js
 // Set a variable
-doodle.setVariable("gold", 500);
-doodle.setVariable("player_name", "Alice");
+doodle.setVariable('gold', 500);
+doodle.setVariable('player_name', 'Alice');
 
 // Get a variable's current value
-doodle.getVariable("gold");
+doodle.getVariable('gold');
 // → 500
 ```
 
@@ -164,9 +164,9 @@ doodle.getVariable("gold");
 Instantly teleport to any location without using the map.
 
 ```js
-doodle.teleport("tavern");
-doodle.teleport("market");
-doodle.teleport("dungeon_entrance");
+doodle.teleport('tavern');
+doodle.teleport('market');
+doodle.teleport('dungeon_entrance');
 ```
 
 **Use case**: Quickly navigate to specific locations to test content without traversing the map.
@@ -176,8 +176,8 @@ doodle.teleport("dungeon_entrance");
 Trigger any dialogue directly, bypassing normal game flow.
 
 ```js
-doodle.triggerDialogue("bartender_greeting");
-doodle.triggerDialogue("merchant_intro");
+doodle.triggerDialogue('bartender_greeting');
+doodle.triggerDialogue('merchant_intro');
 ```
 
 **Use case**: Test specific dialogue trees without playing through prerequisites.
@@ -187,9 +187,9 @@ doodle.triggerDialogue("merchant_intro");
 Set quest stages directly to test quest progression.
 
 ```js
-doodle.setQuestStage("odd_jobs", "in_progress");
-doodle.setQuestStage("odd_jobs", "completed");
-doodle.setQuestStage("main_quest", "chapter_2");
+doodle.setQuestStage('odd_jobs', 'in_progress');
+doodle.setQuestStage('odd_jobs', 'completed');
+doodle.setQuestStage('main_quest', 'chapter_2');
 ```
 
 **Use case**: Test quest UI, journal entries, and quest-dependent content.
@@ -200,11 +200,11 @@ Add or remove items from inventory without picking them up.
 
 ```js
 // Add an item
-doodle.addItem("old_coin");
-doodle.addItem("rusty_sword");
+doodle.addItem('old_coin');
+doodle.addItem('rusty_sword');
 
 // Remove an item
-doodle.removeItem("old_coin");
+doodle.removeItem('old_coin');
 ```
 
 **Use case**: Test inventory UI, item-dependent dialogue, or mechanics that require specific items.
@@ -238,10 +238,10 @@ You want to test a dialogue option that only appears if the player has completed
 
 ```js
 // Set up the prerequisite quest state
-doodle.setQuestStage("odd_jobs", "completed");
+doodle.setQuestStage('odd_jobs', 'completed');
 
 // Trigger the dialogue
-doodle.triggerDialogue("bartender_greeting");
+doodle.triggerDialogue('bartender_greeting');
 
 // The quest-dependent choice should now appear
 ```
@@ -252,13 +252,13 @@ You're building a shop system with conditions based on gold:
 
 ```js
 // Give yourself gold
-doodle.setVariable("gold", 1000);
+doodle.setVariable('gold', 1000);
 
 // Verify the variable is set
-doodle.getVariable("gold");
+doodle.getVariable('gold');
 
 // Trigger the shop dialogue
-doodle.triggerDialogue("merchant_shop");
+doodle.triggerDialogue('merchant_shop');
 
 // Try buying items and check if gold decreases correctly
 ```
@@ -269,13 +269,13 @@ A character has different dialogue if you're carrying a specific item:
 
 ```js
 // Add the item
-doodle.addItem("magic_amulet");
+doodle.addItem('magic_amulet');
 
 // Teleport to the character's location
-doodle.teleport("wizards_tower");
+doodle.teleport('wizards_tower');
 
 // Talk to the character
-doodle.triggerDialogue("wizard_greeting");
+doodle.triggerDialogue('wizard_greeting');
 
 // Special dialogue should appear
 ```

@@ -10,77 +10,83 @@ The default `GameRenderer` provides a complete UI out of the box, but you can bu
 The `useGame` hook provides the current snapshot and all action methods:
 
 ```tsx
-import { useGame } from "@doodle-engine/react";
+import { useGame } from '@doodle-engine/react';
 
 function MyCustomGame() {
-  const { snapshot, actions } = useGame();
+    const { snapshot, actions } = useGame();
 
-  return (
-    <div>
-      <h1>{snapshot.location.name}</h1>
-      <p>{snapshot.location.description}</p>
-
-      {snapshot.dialogue && (
+    return (
         <div>
-          <strong>{snapshot.dialogue.speakerName}:</strong>
-          <p>{snapshot.dialogue.text}</p>
+            <h1>{snapshot.location.name}</h1>
+            <p>{snapshot.location.description}</p>
+
+            {snapshot.dialogue && (
+                <div>
+                    <strong>{snapshot.dialogue.speakerName}:</strong>
+                    <p>{snapshot.dialogue.text}</p>
+                </div>
+            )}
+
+            {snapshot.choices.map((choice) => (
+                <button
+                    key={choice.id}
+                    onClick={() => actions.selectChoice(choice.id)}
+                >
+                    {choice.text}
+                </button>
+            ))}
+
+            {!snapshot.dialogue &&
+                snapshot.charactersHere.map((char) => (
+                    <button
+                        key={char.id}
+                        onClick={() => actions.talkTo(char.id)}
+                    >
+                        Talk to {char.name}
+                    </button>
+                ))}
         </div>
-      )}
-
-      {snapshot.choices.map((choice) => (
-        <button key={choice.id} onClick={() => actions.selectChoice(choice.id)}>
-          {choice.text}
-        </button>
-      ))}
-
-      {!snapshot.dialogue &&
-        snapshot.charactersHere.map((char) => (
-          <button key={char.id} onClick={() => actions.talkTo(char.id)}>
-            Talk to {char.name}
-          </button>
-        ))}
-    </div>
-  );
+    );
 }
 ```
 
 Wrap it with `GameProvider`. While content is loading, render a placeholder:
 
 ```tsx
-import { GameProvider } from "@doodle-engine/react";
+import { GameProvider } from '@doodle-engine/react';
 
 function App() {
-  const [game, setGame] = useState<{
-    engine: Engine;
-    snapshot: Snapshot;
-  } | null>(null);
+    const [game, setGame] = useState<{
+        engine: Engine;
+        snapshot: Snapshot;
+    } | null>(null);
 
-  useEffect(() => {
-    fetch("/api/content")
-      .then((r) => r.json())
-      .then(({ registry, config }) => {
-        const engine = new Engine(registry, {} as GameState);
-        const snapshot = engine.newGame(config);
-        setGame({ engine, snapshot });
-      });
-  }, []);
+    useEffect(() => {
+        fetch('/api/content')
+            .then((r) => r.json())
+            .then(({ registry, config }) => {
+                const engine = new Engine(registry, {} as GameState);
+                const snapshot = engine.newGame(config);
+                setGame({ engine, snapshot });
+            });
+    }, []);
 
-  if (!game)
+    if (!game)
+        return (
+            <div className="app-bootstrap">
+                <div className="spinner" />
+            </div>
+        );
+
     return (
-      <div className="app-bootstrap">
-        <div className="spinner" />
-      </div>
+        <GameProvider
+            engine={game.engine}
+            initialSnapshot={game.snapshot}
+            devTools={import.meta.env.DEV}
+        >
+            <MyCustomGame />
+        </GameProvider>
     );
-
-  return (
-    <GameProvider
-      engine={game.engine}
-      initialSnapshot={game.snapshot}
-      devTools={import.meta.env.DEV}
-    >
-      <MyCustomGame />
-    </GameProvider>
-  );
 }
 ```
 
@@ -104,50 +110,53 @@ You can use the pre-built components with your own layout:
 
 ```tsx
 import {
-  LoadingScreen,
-  DialogueBox,
-  ChoiceList,
-  LocationView,
-  CharacterList,
-  MapView,
-  Inventory,
-  Journal,
-  NotificationArea,
-  SaveLoadPanel,
-} from "@doodle-engine/react";
+    LoadingScreen,
+    DialogueBox,
+    ChoiceList,
+    LocationView,
+    CharacterList,
+    MapView,
+    Inventory,
+    Journal,
+    NotificationArea,
+    SaveLoadPanel,
+} from '@doodle-engine/react';
 
 function MyLayout() {
-  const { snapshot, actions } = useGame();
+    const { snapshot, actions } = useGame();
 
-  return (
-    <div className="my-layout">
-      <LocationView location={snapshot.location} />
+    return (
+        <div className="my-layout">
+            <LocationView location={snapshot.location} />
 
-      {snapshot.dialogue && <DialogueBox dialogue={snapshot.dialogue} />}
+            {snapshot.dialogue && <DialogueBox dialogue={snapshot.dialogue} />}
 
-      <ChoiceList
-        choices={snapshot.choices}
-        onSelectChoice={actions.selectChoice}
-      />
+            <ChoiceList
+                choices={snapshot.choices}
+                onSelectChoice={actions.selectChoice}
+            />
 
-      <CharacterList
-        characters={snapshot.charactersHere}
-        onTalkTo={actions.talkTo}
-      />
+            <CharacterList
+                characters={snapshot.charactersHere}
+                onTalkTo={actions.talkTo}
+            />
 
-      <Inventory items={snapshot.inventory} />
+            <Inventory items={snapshot.inventory} />
 
-      <Journal quests={snapshot.quests} entries={snapshot.journal} />
+            <Journal quests={snapshot.quests} entries={snapshot.journal} />
 
-      {snapshot.map && (
-        <MapView map={snapshot.map} onTravelTo={actions.travelTo} />
-      )}
+            {snapshot.map && (
+                <MapView map={snapshot.map} onTravelTo={actions.travelTo} />
+            )}
 
-      <NotificationArea notifications={snapshot.notifications} />
+            <NotificationArea notifications={snapshot.notifications} />
 
-      <SaveLoadPanel onSave={actions.saveGame} onLoad={actions.loadGame} />
-    </div>
-  );
+            <SaveLoadPanel
+                onSave={actions.saveGame}
+                onLoad={actions.loadGame}
+            />
+        </div>
+    );
 }
 ```
 
@@ -199,7 +208,7 @@ doodle.inspectRegistry()                // Return content registry object
 The core engine is framework-agnostic. Use it with any UI:
 
 ```typescript
-import { Engine } from "@doodle-engine/core";
+import { Engine } from '@doodle-engine/core';
 
 const engine = new Engine(registry, state);
 const snapshot = engine.newGame(config);
@@ -208,8 +217,8 @@ const snapshot = engine.newGame(config);
 renderMyUI(snapshot);
 
 // On user action
-const newSnapshot = engine.selectChoice("choice_1");
+const newSnapshot = engine.selectChoice('choice_1');
 renderMyUI(newSnapshot);
 ```
 
-See [Engine API Reference](/doodle-engine/reference/engine-api/) for all available methods.
+See [Engine API Reference](/reference/engine-api/) for all available methods.
