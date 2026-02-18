@@ -1,0 +1,7 @@
+id: old_coin
+name: "@item.old_coin.name"
+description: "@item.old_coin.description"
+icon: ""
+image: ""
+location: tavern
+stats: {}

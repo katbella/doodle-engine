@@ -1,0 +1,35 @@
+id: chapter_one
+# Background image shown fullscreen during the interlude.
+# Replace with your own image in assets/images/.
+background: /assets/images/banners/tavern_banner.jpg
+
+# Optional: decorative border/frame image overlaid on the background.
+# banner: /assets/images/ui/chapter_frame.png
+
+# Optional: music to play during this interlude.
+# music: /assets/audio/music/chapter_theme.ogg
+
+# The narrative text. Supports @localization.key or plain text.
+text: |
+  Chapter One: A New Beginning
+
+  The road behind you stretches long and empty.
+  Ahead, the lights of town flicker through the evening mist.
+
+  You have heard the rumours. Strange things happening.
+  People going missing. Shadows that move wrong.
+
+  Someone has to look into it.
+
+  It might as well be you.
+
+# Auto-trigger when the player enters the tavern for the first time.
+# triggerConditions prevents re-triggering. effects runs when the interlude fires
+# — setFlag here marks it seen so it won't show again on return visits.
+triggerLocation: tavern
+triggerConditions:
+  - type: notFlag
+    flag: seenChapterOne
+effects:
+  - type: setFlag
+    flag: seenChapterOne

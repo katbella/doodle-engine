@@ -313,35 +313,16 @@ import { VideoPlayer } from '@doodle-engine/react'
 
 ## LoadingScreen
 
-Simple loading state displayed while game content is fetching. Used in the scaffolded `App.tsx` as the default loading UI.
+Progress screen displayed while game assets load. Used as the default `renderLoading` UI inside `GameShell` and `AssetProvider`.
 
 ```tsx
 import { LoadingScreen } from '@doodle-engine/react'
 
-<LoadingScreen message="Loading..." className="my-loader" />
-```
-
-### Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `message` | `string` | `'Loading...'` | Message to display |
-| `className` | `string` | `''` | CSS class for custom styling |
-
-Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, and `.loading-screen-message` in your CSS. Or pass a `className` and override everything.
-
-## SplashScreen
-
-Brief logo/loading screen that auto-advances after a duration.
-
-```tsx
-import { SplashScreen } from '@doodle-engine/react'
-
-<SplashScreen
-  logoSrc="/images/logo.png"
-  title="My Game"
-  onComplete={() => setScreen('title')}
-  duration={2000}
+<GameShell
+  renderLoading={(state) => (
+    <LoadingScreen state={state} background="/assets/images/loading-bg.jpg" />
+  )}
+  ...
 />
 ```
 
@@ -349,13 +330,44 @@ import { SplashScreen } from '@doodle-engine/react'
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `logoSrc` | `string` | — | Logo image source |
-| `title` | `string` | — | Game title text |
-| `onComplete` | `() => void` | required | Called when splash finishes |
-| `duration` | `number` | `2000` | Auto-advance time in ms |
+| `state` | `AssetLoadingState` | required | Loading state from `AssetProvider` |
+| `background` | `string` | — | Background image URL (from `shell.loading.background`) |
+| `renderProgress` | `(progress: number, phase: string) => ReactNode` | — | Custom progress bar renderer |
 | `className` | `string` | `''` | CSS class |
 
-Click anywhere to skip the splash screen.
+Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, `.loading-screen-phase`, `.loading-screen-percent`, `.loading-screen-bar-track`, and `.loading-screen-bar-fill` in your CSS.
+
+## SplashScreen
+
+Brief studio/logo screen that auto-advances. Assets and duration come from `config.shell.splash` in `game.yaml`.
+
+```tsx
+import { SplashScreen } from '@doodle-engine/react'
+
+<SplashScreen
+  shell={config.shell?.splash}
+  onComplete={() => setScreen('title')}
+/>
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `shell` | `ShellConfig['splash']` | — | Splash config from `game.yaml` |
+| `onComplete` | `() => void` | required | Called when splash finishes |
+| `className` | `string` | `''` | CSS class |
+
+Duration defaults to `2000ms` if not set in `shell.duration`. Click anywhere to skip.
+
+The `shell` config fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `logo` | `string` | Logo image path |
+| `background` | `string` | Background image path |
+| `sound` | `string` | Sound effect played on enter |
+| `duration` | `number` | Auto-advance time in ms (default `2000`) |
 
 ## TitleScreen
 
@@ -378,9 +390,9 @@ import { TitleScreen } from '@doodle-engine/react'
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `title` | `string` | `'Doodle Engine'` | Game title |
+| `shell` | `ShellConfig['title']` | — | Title config from `game.yaml` |
+| `title` | `string` | `'Doodle Engine'` | Game title text (shown when no logo) |
 | `subtitle` | `string` | — | Subtitle text |
-| `logoSrc` | `string` | — | Logo image source |
 | `hasSaveData` | `boolean` | required | Whether Continue button is shown |
 | `onNewGame` | `() => void` | required | New Game handler |
 | `onContinue` | `() => void` | required | Continue handler |
@@ -452,9 +464,9 @@ import { GameShell } from '@doodle-engine/react'
 <GameShell
   registry={registry}
   config={config}
+  manifest={manifest}
   title="My Game"
   subtitle="A text-based adventure"
-  splashDuration={2000}
   availableLocales={[{ code: 'en', label: 'English' }]}
   devTools={import.meta.env.DEV}
 />
@@ -466,21 +478,25 @@ import { GameShell } from '@doodle-engine/react'
 |------|------|---------|-------------|
 | `registry` | `ContentRegistry` | required | Content registry from `/api/content` |
 | `config` | `GameConfig` | required | Game config from `/api/content` |
-| `title` | `string` | `'Doodle Engine'` | Game title |
+| `manifest` | `AssetManifest` | required | Asset manifest from `/api/manifest` |
+| `assetLoader` | `AssetLoader` | — | Custom asset loader (for non-browser environments) |
+| `title` | `string` | `'Doodle Engine'` | Game title text |
 | `subtitle` | `string` | — | Subtitle text |
-| `logoSrc` | `string` | — | Logo/splash image |
-| `splashDuration` | `number` | `2000` | Splash screen duration (0 to skip) |
 | `uiSounds` | `UISoundConfig \| false` | — | UI sound config, or `false` to disable |
 | `audioOptions` | `AudioManagerOptions` | — | Game audio options |
 | `storageKey` | `string` | `'doodle-engine-save'` | localStorage key for saves |
 | `availableLocales` | `{ code: string; label: string }[]` | — | Language options for settings |
 | `videoBasePath` | `string` | `'/video'` | Base path for video files |
 | `className` | `string` | `''` | CSS class |
+| `renderLoading` | `(state: AssetLoadingState) => ReactNode` | — | Override the loading screen |
 | `devTools` | `boolean` | `false` | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
+
+Splash screen, loading background, title logo, and UI sounds are configured in `game.yaml` under `shell:`. See [Asset Loading](/doodle-engine/guides/asset-loading/) for the full shell config reference.
 
 ### Features
 
-- Splash screen with logo and auto-advance
+- Asset loading with progress screen before any game content renders
+- Splash screen (shown when `config.shell.splash` is configured)
 - Title screen with New Game, Continue (if save exists), Settings
 - In-game pause menu (Menu button or Escape key)
 - Settings panel with volume sliders and language select

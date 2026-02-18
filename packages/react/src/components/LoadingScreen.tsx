@@ -1,23 +1,77 @@
 /**
- * LoadingScreen - Displayed while game content is loading
- *
- * Simple default loading state. Replace with your own component or
- * style it with CSS using the className prop.
+ * LoadingScreen - Displayed while game assets are loading.
  */
 
+import type { AssetLoadingState } from '@doodle-engine/core'
+
 export interface LoadingScreenProps {
-  /** Optional message to display */
-  message?: string
-  /** CSS class for custom styling */
+  /** Asset loading state (from AssetProvider) */
+  state: AssetLoadingState
+  /** Background image (from shell config) — shown behind the progress UI */
+  background?: string
+  /** Custom progress bar renderer */
+  renderProgress?: (progress: number, phase: string) => React.ReactNode
+  /** CSS class */
   className?: string
 }
 
-export function LoadingScreen({ message = 'Loading...', className = '' }: LoadingScreenProps) {
+function phaseLabel(phase: AssetLoadingState['phase']): string {
+  switch (phase) {
+    case 'loading-shell': return 'Loading...'
+    case 'loading-game':  return 'Loading game assets...'
+    case 'complete':      return 'Ready!'
+    case 'error':         return 'Error loading assets'
+    default:              return 'Loading...'
+  }
+}
+
+export function LoadingScreen({
+  state,
+  background,
+  renderProgress,
+  className = '',
+}: LoadingScreenProps) {
+  const bgStyle = background
+    ? { backgroundImage: `url(${background})` }
+    : undefined
+
+  const percent = Math.round(state.overallProgress * 100)
+  const label = phaseLabel(state.phase)
+
   return (
-    <div className={`loading-screen ${className}`}>
+    <div className={`loading-screen ${className}`} style={bgStyle}>
       <div className="loading-screen-content">
         <div className="loading-screen-spinner" />
-        <p className="loading-screen-message">{message}</p>
+
+        <div className="loading-screen-progress-wrap">
+          <div className="loading-screen-row">
+            <span className="loading-screen-phase">{label}</span>
+            <span className="loading-screen-percent">{percent}%</span>
+          </div>
+
+          {renderProgress ? (
+            renderProgress(state.overallProgress, state.phase)
+          ) : (
+            <div className="loading-screen-bar-track">
+              <div
+                className="loading-screen-bar-fill"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          )}
+
+          {state.currentAsset && (
+            <div className="loading-screen-asset" title={state.currentAsset}>
+              {state.currentAsset.split('/').pop()}
+            </div>
+          )}
+        </div>
+
+        {state.error && (
+          <p className="loading-screen-message" style={{ color: '#f87171' }}>
+            {state.error}
+          </p>
+        )}
       </div>
     </div>
   )
