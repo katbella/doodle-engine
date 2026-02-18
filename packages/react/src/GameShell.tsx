@@ -1,22 +1,25 @@
 /**
  * GameShell - Complete game wrapper with splash, title, menus
  *
- * Manages the game lifecycle: splash → title → playing
+ * Manages the game lifecycle: loading → splash → title → playing
  * Includes pause menu, settings, and video playback.
- * Wraps GameProvider + GameRenderer with full shell chrome.
+ * Wraps AssetProvider + GameProvider + GameRenderer with full shell chrome.
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { Engine } from '@doodle-engine/core'
-import type { ContentRegistry, GameConfig, GameState, Snapshot, SaveData } from '@doodle-engine/core'
+import type { ContentRegistry, GameConfig, GameState, Snapshot, SaveData, AssetManifest, AssetLoadingState } from '@doodle-engine/core'
+import type { AssetLoader } from '@doodle-engine/core'
 import { GameProvider } from './GameProvider'
 import { GameRenderer } from './GameRenderer'
+import { AssetProvider } from './AssetProvider'
 import { useAudioManager } from './hooks/useAudioManager'
 import { useUISounds } from './hooks/useUISounds'
 import type { UISoundConfig, UISoundControls } from './hooks/useUISounds'
 import type { AudioManagerOptions } from './hooks/useAudioManager'
 import { SplashScreen } from './components/SplashScreen'
 import { TitleScreen } from './components/TitleScreen'
+import { LoadingScreen } from './components/LoadingScreen'
 import { PauseMenu } from './components/PauseMenu'
 import { SettingsPanel } from './components/SettingsPanel'
 import { VideoPlayer } from './components/VideoPlayer'
@@ -26,16 +29,16 @@ type Screen = 'splash' | 'title' | 'playing'
 export interface GameShellProps {
   /** Content registry (from /api/content) */
   registry: ContentRegistry
-  /** Game config (from /api/content) */
+  /** Game config (from /api/content) — includes shell config */
   config: GameConfig
+  /** Asset manifest (from /api/manifest) */
+  manifest: AssetManifest
+  /** Custom asset loader (for non-browser environments) */
+  assetLoader?: AssetLoader
   /** Game title for title screen */
   title?: string
   /** Subtitle text */
   subtitle?: string
-  /** Logo image source */
-  logoSrc?: string
-  /** Splash screen duration in ms (0 to skip) */
-  splashDuration?: number
   /** UI sound configuration, or false to disable */
   uiSounds?: UISoundConfig | false
   /** Audio manager options */
@@ -48,14 +51,11 @@ export interface GameShellProps {
   videoBasePath?: string
   /** CSS class */
   className?: string
+  /** Override the loading screen entirely */
+  renderLoading?: (state: AssetLoadingState) => React.ReactNode
   /**
    * Enable the browser console debugging API (window.doodle).
-   * When true, you can type doodle.setFlag(), doodle.teleport(), etc.
-   * in the browser DevTools console while testing your game.
-   *
-   * Pass import.meta.env.DEV to automatically enable in development
-   * and disable in production builds:
-   *   <GameShell devTools={import.meta.env.DEV} ...>
+   * Pass import.meta.env.DEV to automatically enable in development.
    */
   devTools?: boolean
 }
@@ -63,19 +63,83 @@ export interface GameShellProps {
 export function GameShell({
   registry,
   config,
+  manifest,
+  assetLoader,
   title = 'Doodle Engine',
   subtitle,
-  logoSrc,
-  splashDuration = 2000,
   uiSounds: uiSoundsConfig,
   audioOptions,
   storageKey = 'doodle-engine-save',
   availableLocales,
   videoBasePath = '/video',
   className = '',
+  renderLoading,
   devTools = false,
 }: GameShellProps) {
-  const [screen, setScreen] = useState<Screen>(splashDuration > 0 ? 'splash' : 'title')
+  const shell = config.shell
+
+  return (
+    <AssetProvider
+      manifest={manifest}
+      loader={assetLoader}
+      renderLoading={(state) => {
+        if (renderLoading) return renderLoading(state)
+        return (
+          <LoadingScreen
+            state={state}
+            background={shell?.loading?.background}
+          />
+        )
+      }}
+    >
+      <GameShellInner
+        registry={registry}
+        config={config}
+        title={title}
+        subtitle={subtitle}
+        uiSoundsConfig={uiSoundsConfig}
+        audioOptions={audioOptions}
+        storageKey={storageKey}
+        availableLocales={availableLocales}
+        videoBasePath={videoBasePath}
+        className={className}
+        devTools={devTools}
+      />
+    </AssetProvider>
+  )
+}
+
+// ── Inner component (rendered after shell assets are loaded) ──────────────────
+
+interface GameShellInnerProps {
+  registry: ContentRegistry
+  config: GameConfig
+  title: string
+  subtitle?: string
+  uiSoundsConfig?: UISoundConfig | false
+  audioOptions?: AudioManagerOptions
+  storageKey: string
+  availableLocales?: { code: string; label: string }[]
+  videoBasePath: string
+  className: string
+  devTools: boolean
+}
+
+function GameShellInner({
+  registry,
+  config,
+  title,
+  subtitle,
+  uiSoundsConfig,
+  audioOptions,
+  storageKey,
+  availableLocales,
+  videoBasePath,
+  className,
+  devTools,
+}: GameShellInnerProps) {
+  const shell = config.shell
+  const [screen, setScreen] = useState<Screen>(shell?.splash ? 'splash' : 'title')
   const [showPauseMenu, setShowPauseMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [settingsFrom, setSettingsFrom] = useState<'title' | 'pause'>('title')
@@ -210,10 +274,8 @@ export function GameShell({
     return (
       <div className={`game-shell ${className}`}>
         <SplashScreen
-          logoSrc={logoSrc}
-          title={title}
+          shell={shell?.splash}
           onComplete={() => setScreen('title')}
-          duration={splashDuration}
         />
       </div>
     )
@@ -232,9 +294,9 @@ export function GameShell({
           />
         ) : (
           <TitleScreen
+            shell={shell?.title}
             title={title}
             subtitle={subtitle}
-            logoSrc={logoSrc}
             hasSaveData={hasSaveData}
             onNewGame={handleNewGame}
             onContinue={handleContinue}

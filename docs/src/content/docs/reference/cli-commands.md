@@ -54,8 +54,8 @@ npx @doodle-engine/cli create <project-name>
 
 ```bash
 cd <project-name>
-yarn install
-yarn dev
+npm install
+npm run dev
 ```
 
 ---
@@ -74,10 +74,11 @@ doodle dev
 2. Loads all content from `content/` directory
 3. Parses `.yaml` files as entities and `.dlg` files as dialogues
 4. Serves content via the `/api/content` endpoint as JSON
-5. Watches `content/**/*` for changes using chokidar
-6. **Validates content on every file change** and prints errors to the terminal
-7. Triggers full page reload when content files change
-8. **Exposes `window.doodle` dev tools API** in the browser console (dev mode only)
+5. **Generates asset manifest on-the-fly** and serves it at `/api/manifest`
+6. Watches `content/**/*` for changes using chokidar
+7. **Validates content on every file change** and prints errors to the terminal
+8. Triggers full page reload when content files change
+9. **Exposes `window.doodle` dev tools API** in the browser console (dev mode only)
 
 ### Content loading
 
@@ -193,6 +194,9 @@ doodle build
 3. Outputs to `dist/` directory
 4. Bundles and optimizes all assets
 5. Strips dev tools from production bundle
+6. **Generates `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
+7. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
+8. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
 
 If validation errors are found, the build will exit with code 1 and display the errors. Fix all validation errors before deploying to production.
 

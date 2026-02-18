@@ -12,6 +12,8 @@ import { parse as parseYaml } from 'yaml'
 import { parseDialogue } from '@doodle-engine/core'
 import { crayon } from 'crayon.js'
 import { validateContent, printValidationErrors } from '../validate.js'
+import { generateAssetManifest } from '../manifest.js'
+import { generateServiceWorker } from '../service-worker.js'
 
 export async function build() {
   const cwd = process.cwd()
@@ -24,8 +26,13 @@ export async function build() {
   // Run validation and load content
   console.log(crayon.dim('Validating content...'))
   let loadedContent: any
+  let registry: any
+  let config: any
   try {
-    const { registry, fileMap, config } = await loadContent(contentDir)
+    const loaded = await loadContent(contentDir)
+    registry = loaded.registry
+    config = loaded.config
+    const { fileMap } = loaded
     const errors = validateContent(registry, fileMap)
 
     printValidationErrors(errors)
@@ -55,10 +62,32 @@ export async function build() {
       },
     })
 
+    const distDir = join(cwd, 'dist')
+    const publicDir = cwd // assets live at <cwd>/assets, served from root
+
+    // Generate asset manifest
+    console.log(crayon.dim('Generating asset manifest...'))
+    const manifest = await generateAssetManifest(
+      join(cwd, 'assets'),
+      publicDir,
+      registry,
+      config,
+      Date.now().toString()
+    )
+
     // Write content JSON to dist so vite preview can serve it at /api/content
-    const apiDir = join(cwd, 'dist', 'api')
+    const apiDir = join(distDir, 'api')
     await mkdir(apiDir, { recursive: true })
     await writeFile(join(apiDir, 'content'), JSON.stringify(loadedContent))
+
+    // Write asset manifest to dist/api/manifest and dist/asset-manifest.json
+    await writeFile(join(apiDir, 'manifest'), JSON.stringify(manifest))
+    await writeFile(join(distDir, 'asset-manifest.json'), JSON.stringify(manifest, null, 2))
+
+    // Generate and write service worker
+    console.log(crayon.dim('Generating service worker...'))
+    const swSource = generateServiceWorker(manifest)
+    await writeFile(join(distDir, 'sw.js'), swSource)
 
     console.log('')
     console.log(crayon.green('✅ Build complete! Output in dist/'))

@@ -7,12 +7,12 @@ Doodle Engine includes a comprehensive content validation system that catches er
 
 ## When Validation Runs
 
-### During Development (`doodle dev`)
+### During Development (`npm run dev`)
 
-When you run `doodle dev`, validation runs automatically whenever you change a content file:
+When you run `npm run dev`, validation runs automatically whenever you change a content file:
 
 ```bash
-doodle dev
+npm run dev
 ```
 
 If errors are found, they're printed to the terminal, but **the dev server keeps running**. You can continue working while fixing errors.
@@ -29,12 +29,12 @@ content/dialogues/bartender_greeting.dlg
   Add NODE continue or fix the GOTO target
 ```
 
-### Before Building (`doodle build`)
+### Before Building (`npm run build`)
 
-When you run `doodle build`, validation runs first. If errors are found, **the build fails** and no production bundle is created:
+When you run `npm run build`, validation runs first. If errors are found, **the build fails** and no production bundle is created:
 
 ```bash
-doodle build
+npm run build
 ```
 
 Example output:
@@ -57,12 +57,12 @@ content/characters/merchant.yaml
 Build failed due to validation errors.
 ```
 
-### Manual Validation (`doodle validate`)
+### Manual Validation (`npx doodle validate`)
 
 You can run validation manually without starting the dev server or building:
 
 ```bash
-doodle validate
+npx doodle validate
 ```
 
 This is useful for:
@@ -76,7 +76,7 @@ This is useful for:
 
 - **Start node exists**: The `startNode` specified in a dialogue must be a valid node ID
 - **No duplicate node IDs**: Each node ID must be unique within its dialogue
-- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalNext` targets must point to existing nodes. Exception: choices that contain `END dialogue` or `GOTO location` don't need a `GOTO` target — they terminate the dialogue.
+- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalNext` targets must point to existing nodes. Exception: choices that contain `END dialogue` or `GOTO location` don't need a `GOTO` target. They terminate the dialogue.
 
 Example error:
 
@@ -295,13 +295,13 @@ jobs:
       - run: npx doodle validate
 ```
 
-The `doodle validate` command exits with code 1 if errors are found, which fails the CI build.
+`npx doodle validate` exits with code 1 if errors are found, which fails the CI build.
 
 ## Best Practices
 
-1. **Fix errors as they appear**: Don't let validation errors accumulate. Fix them immediately when they appear in `doodle dev`.
+1. **Fix errors as they appear**: Don't let validation errors accumulate. Fix them immediately when they appear in `npm run dev`.
 
-2. **Run validation before committing**: Add `doodle validate` to your pre-commit hook or run it manually before pushing changes.
+2. **Run validation before committing**: Add `npx doodle validate` to your pre-commit hook or run it manually before pushing changes.
 
 3. **Use descriptive IDs**: Clear node IDs, quest IDs, and dialogue IDs make validation errors easier to understand.
 
