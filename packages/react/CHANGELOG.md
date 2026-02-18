@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.21
+
+### Patch Changes
+
+- beffac5: prettier
+- Updated dependencies [beffac5]
+  - @doodle-engine/core@0.0.21
+
 ## 0.0.20
 
 ### Patch Changes
