@@ -18,9 +18,13 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 ## About
 
-Doodle Engine is a dialogue-driven engine for RPGs and narrative adventure games. It focuses on story, choices, and world state rather than movement or combat systems.
+Doodle Engine is built for text-driven RPGs and narrative adventure games where dialogue and world state are the core mechanics.
 
-The design is inspired by classic dialogue scripting approaches used in games built on the Infinity Engine (the engine powering Baldur's Gate I and II, Icewind Dale, and Planescape: Torment), but the engine itself is system-agnostic and intended for a wide range of narrative games.
+It emphasizes story, choices, and systemic narrative flow rather than movement, combat, or pathfinding.
+
+The engine is written in TypeScript and designed to be ruleset-agnostic, giving writers and programmers a flexible foundation for story-heavy games.
+
+Its scripting model draws inspiration from Infinity Engine titles such as Baldur’s Gate I and II, Icewind Dale, and Planescape: Torment.
 
 ---
 
@@ -52,7 +56,7 @@ The design is inspired by classic dialogue scripting approaches used in games bu
     </Card>
 </CardGrid>
 
-[Start writing your first game →](/getting-started/your-first-game/)
+[Start writing your first game →](/getting-started/installation/)
 
 ---
 
@@ -60,8 +64,8 @@ The design is inspired by classic dialogue scripting approaches used in games bu
 
 <CardGrid>
     <Card title="Framework-Agnostic Core" icon="puzzle">
-        A TypeScript engine with no UI dependencies. Use any framework or
-        renderer.
+        Core engine written in TypeScript with no UI dependencies.
+        Integrate with any renderer or frontend framework.
     </Card>
     <Card title="Predictable State Flow" icon="right-arrow">
         Actions produce snapshots. Renderers display snapshots. State moves in
@@ -97,6 +101,6 @@ The design is inspired by classic dialogue scripting approaches used in games bu
 
 The engine core does not assume a UI or save backend. Renderers, shells, and persistence layers can be replaced or extended.
 
-Effects and conditions are building blocks. Combine them in dialogue to create mechanics such as reputation systems, skill checks, crafting, or shops without modifying the engine.
+Effects and conditions compose cleanly. Combine them in dialogue to implement mechanics such as reputation systems, skill checks, crafting, or shops without modifying the engine core.
 
 [Read the extending guide →](/guides/extending-the-engine/)

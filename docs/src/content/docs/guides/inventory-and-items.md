@@ -3,7 +3,7 @@ title: Inventory & Items
 description: How to define items and manage inventory through dialogue effects.
 ---
 
-Items are defined in YAML and added to the player's inventory through dialogue effects. Since this is a text-based game, items aren't picked up from the ground; they're given through story events.
+Items are defined in YAML and added to the player's inventory through dialogue effects. Since this is a text-based game, items aren't picked up from the ground. They're given through story events.
 
 ## Defining an Item
 

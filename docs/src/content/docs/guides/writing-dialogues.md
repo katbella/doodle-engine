@@ -3,7 +3,7 @@ title: Writing Dialogues
 description: How to write branching dialogue scripts with the .dlg DSL.
 ---
 
-Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. You don't need to know any programming language; the DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow. Place dialogue files in `content/dialogues/`.
+Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. You don't need to know any programming language. The DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow. Place dialogue files in `content/dialogues/`.
 
 ## Quick Start (No Localization Needed)
 
@@ -172,8 +172,12 @@ END
 
 ## Complete Example
 
+Triggered intro and character conversation live in separate files. The triggered file auto-plays when the player enters the location. The character file plays when the player clicks the character.
+
+`content/dialogues/tavern_intro.dlg`:
+
 ```
-# Bartender greeting with multiple conversation paths
+# Plays automatically the first time the player enters the tavern
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
@@ -184,8 +188,13 @@ NODE start
   CHOICE @narrator.choice.look_around
     END dialogue
   END
+```
 
-NODE greeting
+`content/dialogues/bartender_greeting.dlg`:
+
+```
+# Plays when the player clicks the bartender character
+NODE start
   BARTENDER: @bartender.greeting
 
   CHOICE @bartender.choice.ask_rumors
@@ -210,11 +219,11 @@ NODE rumors
   BARTENDER: @bartender.rumors
   ADD item old_coin
   NOTIFY @notification.found_coin
-  GOTO greeting
+  GOTO start
 
 NODE after_drink
   BARTENDER: @bartender.after_drink
-  GOTO greeting
+  GOTO start
 
 NODE farewell
   BARTENDER: @bartender.farewell

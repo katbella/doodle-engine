@@ -5,6 +5,7 @@
 
 import type { ContentRegistry } from '../types/registry';
 import type { GameConfig } from '../types/entities';
+import { resolveAssetPath } from './paths';
 
 /**
  * Determine asset type from file extension.
@@ -69,36 +70,36 @@ export function extractAssetPaths(
 
     // Locations: banner, music, ambient
     for (const location of Object.values(registry.locations)) {
-        addGame(location.banner);
-        addGame(location.music);
-        addGame(location.ambient);
+        addGame(resolveAssetPath(location.banner, 'banner'));
+        addGame(resolveAssetPath(location.music, 'music'));
+        addGame(resolveAssetPath(location.ambient, 'ambient'));
     }
 
     // Characters: portrait
     for (const character of Object.values(registry.characters)) {
-        addGame(character.portrait);
+        addGame(resolveAssetPath(character.portrait, 'portrait'));
     }
 
     // Items: icon, image
     for (const item of Object.values(registry.items)) {
-        addGame(item.icon);
-        addGame(item.image);
+        addGame(resolveAssetPath(item.icon, 'item'));
+        addGame(resolveAssetPath(item.image, 'item'));
     }
 
     // Maps: image
     for (const map of Object.values(registry.maps)) {
-        addGame(map.image);
+        addGame(resolveAssetPath(map.image, 'map'));
     }
 
     // Interludes: background, banner, music, voice, sounds[]
     for (const interlude of Object.values(registry.interludes)) {
-        addGame(interlude.background);
-        addGame(interlude.banner);
-        addGame(interlude.music);
-        addGame(interlude.voice);
+        addGame(resolveAssetPath(interlude.background, 'banner'));
+        addGame(resolveAssetPath(interlude.banner, 'banner'));
+        addGame(resolveAssetPath(interlude.music, 'music'));
+        addGame(resolveAssetPath(interlude.voice, 'voice'));
         if (interlude.sounds) {
             for (const sound of interlude.sounds) {
-                addGame(sound);
+                addGame(resolveAssetPath(sound, 'sfx'));
             }
         }
     }
@@ -106,8 +107,8 @@ export function extractAssetPaths(
     // Dialogues: voice and portrait overrides in each node
     for (const dialogue of Object.values(registry.dialogues)) {
         for (const node of dialogue.nodes) {
-            addGame(node.voice);
-            addGame(node.portrait);
+            addGame(resolveAssetPath(node.voice, 'voice'));
+            addGame(resolveAssetPath(node.portrait, 'portrait'));
         }
     }
 
