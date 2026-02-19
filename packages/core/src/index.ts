@@ -35,6 +35,10 @@ export type {
 // Asset Manifest Utilities
 export { getAssetType, extractAssetPaths } from './assets/manifest';
 
+// Asset Path Resolution
+export { resolveAssetPath } from './assets/paths';
+export type { AssetCategory } from './assets/paths';
+
 // Asset Loader
 export type { AssetLoader } from './assets/loader';
 

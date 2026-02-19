@@ -75,6 +75,7 @@ The settings panel provides:
 <GameShell
     registry={registry}
     config={config}
+    manifest={manifest}
     availableLocales={[
         { code: 'en', label: 'English' },
         { code: 'es', label: 'Español' },
@@ -85,13 +86,13 @@ The settings panel provides:
 
 ## UI Sounds
 
-GameShell includes UI click sounds for menus. Configure or disable:
+`GameShell` plays sounds for menu interactions (clicks, open/close). Configure or disable them with the `uiSounds` prop:
 
 ```tsx
 // Custom UI sounds
 <GameShell
   uiSounds={{
-    basePath: '/audio/ui',
+    basePath: '/assets/audio/ui',
     volume: 0.5,
     sounds: {
       click: 'click.ogg',
@@ -104,6 +105,18 @@ GameShell includes UI click sounds for menus. Configure or disable:
 // Disable UI sounds
 <GameShell uiSounds={false} />
 ```
+
+To preload UI sounds before the title screen appears, list them in `content/game.yaml` under `shell.uiSounds`:
+
+```yaml
+shell:
+  uiSounds:
+    click: /assets/audio/ui/click.ogg
+    menuOpen: /assets/audio/ui/menu_open.ogg
+    menuClose: /assets/audio/ui/menu_close.ogg
+```
+
+`shell.uiSounds` in `game.yaml` controls **preloading**: it tells the asset loader which files to cache as tier 1 (shell) assets, so they are ready before the title screen renders. The `uiSounds` prop on `GameShell` controls **playback**: it tells the runtime where to find sound files when a button is clicked. The file paths in both must match.
 
 ## Video Cutscenes
 
@@ -132,7 +145,7 @@ Pass audio options to configure the game audio manager:
 ```tsx
 <GameShell
     audioOptions={{
-        audioBasePath: '/audio',
+        audioBasePath: '/assets/audio',
         masterVolume: 1.0,
         musicVolume: 0.7,
         soundVolume: 0.8,

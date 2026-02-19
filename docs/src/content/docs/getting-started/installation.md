@@ -3,6 +3,22 @@ title: Installation
 description: How to create a new Doodle Engine game project.
 ---
 
+## Requirements
+
+You'll need these installed before you start:
+
+- **Node.js 24+**: Get it at [nodejs.org](https://nodejs.org/).
+- **npm**: Comes with Node.js. yarn and pnpm also work.
+- **A code editor**: [VS Code](https://code.visualstudio.com/) works well.
+
+## How It Works
+
+Doodle Engine games run in a web browser. Running `npm run dev` starts a local server at `http://localhost:3000`. You cannot open `index.html` directly as a file. It needs to be served.
+
+When you build for release (`npm run build`), you get a `dist/` folder with static files. Upload it to any static host: itch.io, GitHub Pages, Netlify, or your own server. No server-side software is required.
+
+For desktop distribution, you can wrap the build in [Electron](https://www.electronjs.org/) or [Tauri](https://tauri.app/). This is optional.
+
 ## Quick Start
 
 Scaffold a new game project with the CLI:

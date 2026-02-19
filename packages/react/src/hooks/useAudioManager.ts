@@ -13,7 +13,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { Snapshot } from '@doodle-engine/core';
 
 export interface AudioManagerOptions {
-    /** Base URL for audio assets */
+    /**
+     * @deprecated Audio paths are resolved by the engine at snapshot time.
+     * This option is no longer used.
+     */
     audioBasePath?: string;
     /** Master volume (0-1) */
     masterVolume?: number;
@@ -49,7 +52,6 @@ export function useAudioManager(
     options: AudioManagerOptions = {}
 ): AudioManagerControls {
     const {
-        audioBasePath = '/audio',
         masterVolume: initialMaster = 1.0,
         musicVolume: initialMusic = 0.7,
         soundVolume: initialSound = 0.8,
@@ -104,21 +106,14 @@ export function useAudioManager(
                 // Fade out and stop
                 fadeOut(musicAudio, crossfadeDuration);
             } else {
-                // Crossfade to new track
-                const trackPath = `${audioBasePath}/music/${newTrack}`;
-                crossfadeMusic(musicAudio, trackPath, crossfadeDuration);
+                // Crossfade to new track (path is already resolved by snapshot builder)
+                crossfadeMusic(musicAudio, newTrack, crossfadeDuration);
             }
         }
 
         // Update volume
         musicAudio.volume = masterVolume * musicVolume;
-    }, [
-        snapshot.music,
-        masterVolume,
-        musicVolume,
-        audioBasePath,
-        crossfadeDuration,
-    ]);
+    }, [snapshot.music, masterVolume, musicVolume, crossfadeDuration]);
 
     // Play voice when dialogue.voice changes
     useEffect(() => {
@@ -130,26 +125,28 @@ export function useAudioManager(
         if (voiceFile) {
             voiceAudio.pause();
             voiceAudio.currentTime = 0;
-            voiceAudio.src = `${audioBasePath}/voice/${voiceFile}`;
+            // Path is already resolved by snapshot builder
+            voiceAudio.src = voiceFile;
             voiceAudio.volume = masterVolume * voiceVolume;
             voiceAudio.play().catch((error) => {
                 console.warn('Voice playback failed:', error);
             });
         }
-    }, [snapshot.dialogue?.voice, masterVolume, voiceVolume, audioBasePath]);
+    }, [snapshot.dialogue?.voice, masterVolume, voiceVolume]);
 
     // Play sound effects from pendingSounds
     useEffect(() => {
         if (snapshot.pendingSounds.length === 0) return;
 
         snapshot.pendingSounds.forEach((soundFile) => {
-            const soundAudio = new Audio(`${audioBasePath}/sfx/${soundFile}`);
+            // Path is already resolved by snapshot builder
+            const soundAudio = new Audio(soundFile);
             soundAudio.volume = masterVolume * soundVolume;
             soundAudio.play().catch((error) => {
                 console.warn('Sound playback failed:', error);
             });
         });
-    }, [snapshot.pendingSounds, masterVolume, soundVolume, audioBasePath]);
+    }, [snapshot.pendingSounds, masterVolume, soundVolume]);
 
     // Helper: Crossfade to new music track
     const crossfadeMusic = (

@@ -24,8 +24,6 @@ assets/
   video/           # Video files used by VIDEO effects
 ```
 
-Asset paths referenced in content are resolved relative to the configured asset base path (by default, the `assets/` directory).
-
 ## Supported Formats
 
 ### Images
@@ -52,6 +50,45 @@ Asset paths referenced in content are resolved relative to the configured asset 
 
 ## Referencing Assets in Content
 
+Write bare filenames in YAML and DSL files. The engine resolves them to full paths based on the field type.
+
+```yaml
+# content/locations/tavern.yaml
+banner: tavern.png          # → /assets/images/banners/tavern.png
+music: tavern_ambience.ogg  # → /assets/audio/music/tavern_ambience.ogg
+```
+
+Resolution happens at snapshot build time. Components receive full paths and use them directly.
+
+### Convention Table
+
+| Field                                        | Resolves to                              |
+| -------------------------------------------- | ---------------------------------------- |
+| `location.banner`                            | `/assets/images/banners/{filename}`      |
+| `location.music`                             | `/assets/audio/music/{filename}`         |
+| `location.ambient`                           | `/assets/audio/sfx/{filename}`           |
+| `character.portrait`                         | `/assets/images/portraits/{filename}`    |
+| `item.icon`, `item.image`                    | `/assets/images/items/{filename}`        |
+| `map.image`                                  | `/assets/images/maps/{filename}`         |
+| `interlude.background`, `interlude.banner`   | `/assets/images/banners/{filename}`      |
+| `interlude.music`                            | `/assets/audio/music/{filename}`         |
+| `interlude.voice`                            | `/assets/audio/voice/{filename}`         |
+| `interlude.sounds[]`                         | `/assets/audio/sfx/{filename}`           |
+| DSL `MUSIC`                                  | `/assets/audio/music/{filename}`         |
+| DSL `SOUND`                                  | `/assets/audio/sfx/{filename}`           |
+| DSL `VOICE`                                  | `/assets/audio/voice/{filename}`         |
+| DSL `VIDEO`                                  | `/assets/video/{filename}`               |
+
+### Escape Hatch
+
+If you need to reference a file outside the convention, use a path starting with `/` or `assets/`:
+
+```yaml
+banner: /assets/images/special/custom_layout.png
+```
+
+These paths are used as-is without modification.
+
 ### Location Banners
 
 ```yaml
@@ -63,8 +100,6 @@ banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
 ```
-
-Banner images are referenced by filename. The renderer loads them using the configured asset paths.
 
 ### Character Portraits
 
@@ -134,4 +169,4 @@ Assets are divided into two loading tiers:
 - **Shell assets** (logo, title screen, UI sounds) load before any screen renders
 - **Game assets** (portraits, banners, music, items) load during the loading screen and are tracked by phase
 
-See [Asset Loading](./asset-loading.md) for details on loading phases and configuration.
+See [Asset Loading](/guides/asset-loading/) for details on loading phases and configuration.

@@ -23,9 +23,9 @@ ambient: fire_crackling.ogg
 | `id`          | `string` | Unique identifier              |
 | `name`        | `string` | Display name (supports `@key`) |
 | `description` | `string` | Text shown at this location    |
-| `banner`      | `string` | Banner image filename          |
-| `music`       | `string` | Background music track         |
-| `ambient`     | `string` | Ambient sound loop             |
+| `banner`      | `string` | Banner image filename                      |
+| `music`       | `string` | Background music filename      |
+| `ambient`     | `string` | Ambient sound filename         |
 
 ## Character
 
@@ -46,7 +46,7 @@ stats: {}
 | `id`        | `string`                  | Unique identifier              |
 | `name`      | `string`                  | Display name (supports `@key`) |
 | `biography` | `string`                  | Character background text      |
-| `portrait`  | `string`                  | Portrait image filename        |
+| `portrait`  | `string`                  | Portrait image filename                      |
 | `location`  | `string`                  | Starting location ID           |
 | `dialogue`  | `string`                  | Dialogue ID for conversations  |
 | `stats`     | `Record<string, unknown>` | Extensible stats object        |
@@ -70,8 +70,8 @@ stats: {}
 | `id`          | `string`                  | Unique identifier                                              |
 | `name`        | `string`                  | Display name (supports `@key`)                                 |
 | `description` | `string`                  | Full description                                               |
-| `icon`        | `string`                  | Small icon for inventory grid                                  |
-| `image`       | `string`                  | Large image for detail view                                    |
+| `icon`        | `string`                  | Small icon filename                                            |
+| `image`       | `string`                  | Large image filename                                           |
 | `location`    | `string`                  | Starting location: location ID, `"inventory"`, or character ID |
 | `stats`       | `Record<string, unknown>` | Extensible stats object                                        |
 
@@ -97,7 +97,7 @@ locations:
 | ----------- | --------------- | ---------------------------------- |
 | `id`        | `string`        | Unique identifier                  |
 | `name`      | `string`        | Display name (supports `@key`)     |
-| `image`     | `string`        | Map background image               |
+| `image`     | `string`        | Map background image filename                      |
 | `scale`     | `number`        | Distance-to-travel-time multiplier |
 | `locations` | `MapLocation[]` | Location markers                   |
 
@@ -164,7 +164,7 @@ category: places
 
 ```yaml
 id: chapter_one
-background: /assets/images/banners/dusk_road.jpg
+background: dusk_road.jpg
 text: |
     Chapter One: A New Beginning
 
@@ -175,7 +175,7 @@ text: |
 | Field               | Type          | Required | Description                                                          |
 | ------------------- | ------------- | -------- | -------------------------------------------------------------------- |
 | `id`                | `string`      | Yes      | Unique identifier                                                    |
-| `background`        | `string`      | Yes      | Background image path                                                |
+| `background`        | `string`      | Yes      | Background image filename                                            |
 | `text`              | `string`      | Yes      | Narrative text (supports `@key`)                                     |
 | `banner`            | `string`      | No       | Optional decorative frame/border image                               |
 | `music`             | `string`      | No       | Music track to play                                                  |
