@@ -107,6 +107,8 @@ The dev server:
 
 Open `http://localhost:3000` to see your tavern, talk to the bartender, and explore your game.
 
+The game must be served. Opening `index.html` directly as a file will not work.
+
 ## The App Component
 
 The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides splash screen, title screen, pause menu, settings, and video support out of the box:
@@ -124,8 +126,8 @@ export function App() {
     const [content, setContent] = useState<{
         registry: ContentRegistry;
         config: GameConfig;
-        manifest: AssetManifest;
     } | null>(null);
+    const [manifest, setManifest] = useState<AssetManifest | null>(null);
 
     useEffect(() => {
         Promise.all([
@@ -135,12 +137,12 @@ export function App() {
             setContent({
                 registry: contentData.registry,
                 config: contentData.config,
-                manifest: manifestData,
             });
+            setManifest(manifestData);
         });
     }, []);
 
-    if (!content)
+    if (!content || !manifest)
         return (
             <div className="app-bootstrap">
                 <div className="spinner" />
@@ -151,10 +153,11 @@ export function App() {
         <GameShell
             registry={content.registry}
             config={content.config}
-            manifest={content.manifest}
+            manifest={manifest}
             title="My Game"
             subtitle="A text-based adventure"
             availableLocales={[{ code: 'en', label: 'English' }]}
+            devTools={import.meta.env.DEV}
         />
     );
 }

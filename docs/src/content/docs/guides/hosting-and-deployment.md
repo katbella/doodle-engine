@@ -14,8 +14,20 @@ npm run build        # or: yarn build / pnpm build
 This produces a `dist/` directory containing:
 
 - `index.html`: entry point
-- `assets/`: bundled JavaScript and CSS
-- Any static files from your project root (images, audio, video)
+- `assets/`: bundled JavaScript and CSS (Vite output)
+- `api/content`: game content data
+- `api/manifest`: asset manifest
+- `asset-manifest.json`: human-readable asset manifest
+- `sw.js`: service worker for offline play
+
+Game assets (images, audio, video) from the `assets/` folder in your project root are **not** automatically included in `dist/`. Copy the `assets/` folder into `dist/` before deploying:
+
+```bash
+npm run build
+cp -r assets dist/assets
+```
+
+When you upload to a static host, upload the full `dist/` folder including the copied `assets/` subdirectory.
 
 ## Static Hosting
 
@@ -25,17 +37,6 @@ The build output is fully static. Upload the `dist/` folder to any static host. 
 - **Publish directory**: `dist`
 
 For **itch.io**: zip the contents of `dist/` and upload as an HTML5 game project.
-
-## Asset Hosting
-
-For small games, bundle everything in `dist/`. For games with large media files, host audio and video on a CDN and configure the base paths:
-
-```tsx
-<GameShell
-    audioOptions={{ audioBasePath: 'https://cdn.example.com/audio' }}
-    videoBasePath="https://cdn.example.com/video"
-/>
-```
 
 ## Desktop Packaging
 

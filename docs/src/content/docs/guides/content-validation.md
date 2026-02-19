@@ -3,7 +3,7 @@ title: Content Validation
 description: Validate your game content and fix errors before deployment.
 ---
 
-Doodle Engine includes a comprehensive content validation system that catches errors in your YAML files and dialogue DSL before you deploy your game. Validation runs automatically during development and is required before production builds.
+Doodle Engine validates your content automatically. It catches errors in your YAML files and dialogue DSL before you deploy. Validation runs during development and is required before production builds.
 
 ## When Validation Runs
 
@@ -238,8 +238,10 @@ Node "greet" condition "hasFlag" missing required "flag" argument
 **Fix:** Add the missing argument:
 
 ```
-REQUIRE hasFlag("quest_started")  # Add the flag name in quotes
-  CHOICE "Ask about the quest" -> ask_quest
+CHOICE "Ask about the quest"
+  REQUIRE hasFlag quest_started
+  GOTO ask_quest
+END
 ```
 
 ### Character References Non-Existent Dialogue
