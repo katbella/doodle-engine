@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.27
+
+### Patch Changes
+
+- d0420be: validation fixes
+- Updated dependencies [d0420be]
+    - @doodle-engine/core@0.0.27
+
 ## 0.0.26
 
 ### Patch Changes
