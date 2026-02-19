@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.27
+
+### Patch Changes
+
+- d0420be: validation fixes
+
 ## 0.0.26
 
 ### Patch Changes
