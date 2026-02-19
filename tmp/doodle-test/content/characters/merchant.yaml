@@ -1,7 +1,0 @@
-id: merchant
-name: "@character.merchant.name"
-biography: "@character.merchant.bio"
-portrait: ""
-location: market
-dialogue: merchant_intro
-stats: {}

@@ -1,7 +1,0 @@
-id: bartender
-name: "@character.bartender.name"
-biography: "@character.bartender.bio"
-portrait: ""
-location: tavern
-dialogue: bartender_greeting
-stats: {}
