@@ -1,6 +1,6 @@
 ---
 title: Why Doodle Engine
-description: How Doodle Engine compares to other narrative tools and when to use it.
+description: When to use Doodle Engine and what problems it solves.
 ---
 
 ## Philosophy
@@ -11,7 +11,7 @@ Game authors write content in YAML and a simple dialogue DSL. Developers extend 
 
 The engine supports visual presentation elements such as image banners, video triggered by dialogue effects, and narrative interludes with scrolling text. This allows games to mix prose with structured scenes and transitions.
 
-Games built with Doodle Engine can be shipped as standalone titles. Projects typically run in the browser during development and can be packaged for desktop using Electron, Tauri, or similar tools.
+Games built with Doodle Engine can be shipped as standalone titles. Projects typically run in the browser during development and can be packaged for web, desktop, or mobile. Desktop and mobile deployment can be accomplished using standard web wrapping tools.
 
 The goal is to make narrative games easier to build without locking projects into a specific ruleset, genre, or visual style.
 
@@ -21,39 +21,17 @@ The goal is to make narrative games easier to build without locking projects int
 
 [Twine](https://twinery.org/) is designed for hypertext fiction: stories told through linked passages. Doodle Engine is aimed at games with persistent state and world structure, such as locations, inventory, and quests.
 
-|                  | Twine                  | Doodle Engine                                     |
-| ---------------- | ---------------------- | ------------------------------------------------- |
-| Content format   | HTML passages          | YAML + dialogue DSL                               |
-| State management | Macros and variables   | Structured game state with conditions and effects |
-| Output           | Self-contained HTML    | Browser and desktop builds                        |
-| Best for         | Branching text stories | Story-driven RPGs with world state                |
-
 ### vs Ink
 
 [Ink](https://www.inklestudios.com/ink/) is a language for branching dialogue and narrative flow. It assumes you will provide the surrounding game systems yourself.
 
 Doodle Engine includes those systems so dialogue, inventory, quests, and world state are part of the same model.
 
-|                | Ink                                     | Doodle Engine                               |
-| -------------- | --------------------------------------- | ------------------------------------------- |
-| Content format | Ink scripting language                  | YAML + dialogue DSL                         |
-| Game systems   | Provided by your engine                 | Built-in (inventory, quests, maps, journal) |
-| Renderer       | Bring your own                          | Included (React) or custom                  |
-| Best for       | Dialogue inside an existing game engine | Complete story-driven RPGs                  |
-
 ### vs Ren'Py
 
 [Ren'Py](https://www.renpy.org/) is a visual novel engine with a Python-based scripting language and a renderer designed around sprites, backgrounds, and scene composition.
 
 Doodle Engine focuses on text-driven games and leaves presentation to the renderer.
-
-|              | Ren'Py                    | Doodle Engine                                           |
-| ------------ | ------------------------- | ------------------------------------------------------- |
-| Language     | Python + Ren'Py script    | TypeScript + YAML + DSL                                 |
-| Platform     | Desktop                   | Browser and desktop (Electron, Tauri)                   |
-| Visual style | Visual novel presentation | Text-driven with optional images, video, and interludes |
-| Game systems | Visual novel focused      | RPG-oriented (quests, inventory, maps, party)           |
-| Best for     | Visual novels             | Text-based RPGs and adventure games                     |
 
 ## When to Use Doodle Engine
 
@@ -62,7 +40,7 @@ Doodle Engine is a good fit when:
 - You are building a **text-based RPG** with dialogue, quests, and inventory
 - You want to **separate content from code** so writers and programmers can work independently
 - You want to build a **complete narrative game** that can ship on Steam or itch.io
-- You want a development workflow that runs in the browser but packages to desktop
+- You want a development workflow that runs in the browser but packages to web, desktop, or mobile
 - You want to present story moments using **images, video, or narrative interludes** alongside dialogue
 - You want to **control the UI** with CSS or build your own renderer
 - You need **localization** built in from the start
