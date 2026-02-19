@@ -15,9 +15,9 @@ You'll need these installed before you start:
 
 Doodle Engine games run in a web browser. Running `npm run dev` starts a local server at `http://localhost:3000`. You cannot open `index.html` directly as a file. It needs to be served.
 
-When you build for release (`npm run build`), you get a `dist/` folder with static files. Upload it to any static host: itch.io, GitHub Pages, Netlify, or your own server. No server-side software is required.
+When you build for release (`npm run build`), you get a `dist/` folder with static files. Upload it to any static host: itch.io, GitHub Pages, or your own server. No server-side software is required.
 
-For desktop distribution, you can wrap the build in [Electron](https://www.electronjs.org/) or [Tauri](https://tauri.app/). This is optional.
+For desktop or mobile distribution, you can wrap the build using standard web wrapping tools.
 
 ## Quick Start
 

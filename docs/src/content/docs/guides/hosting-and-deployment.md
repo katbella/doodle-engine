@@ -53,3 +53,16 @@ Doodle Engine games can be packaged as desktop applications using standard web-t
 1. Build with `npm run build`
 2. Point Tauri's `devPath` at your `dist/` directory
 3. Build with `tauri build`
+
+## Mobile Packaging
+
+The build output is a standard web application, so it can also be wrapped for mobile distribution using web-to-native tools. The general approach is the same: build with `npm run build`, then configure the wrapper to load your `dist/` directory as its web content.
+
+Most tools in this space (such as Capacitor or Cordova-based solutions) follow a similar pattern:
+
+1. Build your game with `npm run build`
+2. Copy your `assets/` folder into `dist/` as described above
+3. Configure the mobile wrapper to use `dist/` as its web root
+4. Build and sign for iOS or Android through the wrapper's toolchain
+
+Check the documentation for whichever tool you choose, as setup steps and platform requirements vary.
