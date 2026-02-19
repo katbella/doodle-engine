@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.25
+
+### Patch Changes
+
+- 3d6777c: update docs, fix asset routing
+- Updated dependencies [3d6777c]
+    - @doodle-engine/react@0.0.25
+    - @doodle-engine/core@0.0.25
+
 ## 0.0.24
 
 ### Patch Changes
