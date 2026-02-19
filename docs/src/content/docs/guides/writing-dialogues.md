@@ -3,7 +3,7 @@ title: Writing Dialogues
 description: How to write branching dialogue scripts with the .dlg DSL.
 ---
 
-Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. You don't need to know any programming language. The DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow. Place dialogue files in `content/dialogues/`.
+Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. The DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow, so no prior knowledge of programming is required. Place dialogue files in `content/dialogues/`.
 
 ## Quick Start (No Localization Needed)
 
