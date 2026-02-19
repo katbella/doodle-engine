@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.25
+
+### Patch Changes
+
+- 3d6777c: update docs, fix asset routing
+
 ## 0.0.24
 
 ### Patch Changes
