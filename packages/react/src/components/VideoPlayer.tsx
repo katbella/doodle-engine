@@ -8,9 +8,12 @@
 import { useEffect, useRef } from 'react';
 
 export interface VideoPlayerProps {
-    /** Video file path */
+    /** Video file path (resolved by the engine) */
     src: string;
-    /** Base path for video files */
+    /**
+     * @deprecated Video paths are resolved by the engine at snapshot time.
+     * This option is no longer used.
+     */
     basePath?: string;
     /** Called when video ends or is skipped */
     onComplete: () => void;
@@ -20,7 +23,6 @@ export interface VideoPlayerProps {
 
 export function VideoPlayer({
     src,
-    basePath = '/video',
     onComplete,
     className = '',
 }: VideoPlayerProps) {
@@ -41,7 +43,7 @@ export function VideoPlayer({
         <div className={`video-player-overlay ${className}`}>
             <video
                 ref={videoRef}
-                src={`${basePath}/${src}`}
+                src={src}
                 autoPlay
                 onEnded={onComplete}
                 className="video-player-video"

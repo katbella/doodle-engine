@@ -60,7 +60,6 @@ function MyGame() {
     const { snapshot } = useGame();
 
     const audioControls = useAudioManager(snapshot, {
-        audioBasePath: '/audio',
         masterVolume: 1.0,
         musicVolume: 0.7,
         soundVolume: 0.8,
@@ -74,10 +73,9 @@ function MyGame() {
 
 ### Options
 
-| Option              | Type     | Default    | Description                |
-| ------------------- | -------- | ---------- | -------------------------- |
-| `audioBasePath`     | `string` | `'/audio'` | Base path for audio files  |
-| `masterVolume`      | `number` | `1.0`      | Master volume (0-1)        |
+| Option              | Type     | Default | Description                |
+| ------------------- | -------- | ------- | -------------------------- |
+| `masterVolume`      | `number` | `1.0`   | Master volume (0-1)        |
 | `musicVolume`       | `number` | `0.7`      | Music channel volume (0-1) |
 | `soundVolume`       | `number` | `0.8`      | Sound effects volume (0-1) |
 | `voiceVolume`       | `number` | `1.0`      | Voice channel volume (0-1) |
@@ -107,19 +105,22 @@ Sound effects and pending sounds are transient. They appear in one snapshot and 
 
 ## File Organization
 
-Place audio files in `assets/audio/`:
+Place audio files in the matching `assets/audio/` subdirectory:
 
 ```
 assets/
   audio/
-    tavern_ambience.ogg
-    market_bustle.ogg
-    tension_theme.ogg
-    door_slam.ogg
-    bartender_greeting.ogg
+    music/
+      tavern_ambience.ogg
+      market_bustle.ogg
+      tension_theme.ogg
+    sfx/
+      door_slam.ogg
+    voice/
+      bartender_greeting.ogg
 ```
 
-The `audioBasePath` option controls where the hook looks for files. With the default `'/audio'`, files should be served from `/audio/filename.ogg`.
+The engine resolves bare filenames to full paths at snapshot time. A `music` field set to `tavern_ambience.ogg` becomes `/assets/audio/music/tavern_ambience.ogg` in the snapshot. See [Assets & Media](/guides/assets-and-media/) for the full convention table.
 
 ## UI Sounds
 

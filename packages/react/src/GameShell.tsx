@@ -55,8 +55,6 @@ export interface GameShellProps {
     storageKey?: string;
     /** Available languages for settings */
     availableLocales?: { code: string; label: string }[];
-    /** Video base path */
-    videoBasePath?: string;
     /** CSS class */
     className?: string;
     /** Override the loading screen entirely */
@@ -79,7 +77,6 @@ export function GameShell({
     audioOptions,
     storageKey = 'doodle-engine-save',
     availableLocales,
-    videoBasePath = '/video',
     className = '',
     renderLoading,
     devTools = false,
@@ -109,7 +106,6 @@ export function GameShell({
                 audioOptions={audioOptions}
                 storageKey={storageKey}
                 availableLocales={availableLocales}
-                videoBasePath={videoBasePath}
                 className={className}
                 devTools={devTools}
             />
@@ -128,7 +124,6 @@ interface GameShellInnerProps {
     audioOptions?: AudioManagerOptions;
     storageKey: string;
     availableLocales?: { code: string; label: string }[];
-    videoBasePath: string;
     className: string;
     devTools: boolean;
 }
@@ -142,7 +137,6 @@ function GameShellInner({
     audioOptions,
     storageKey,
     availableLocales,
-    videoBasePath,
     className,
     devTools,
 }: GameShellInnerProps) {
@@ -344,7 +338,6 @@ function GameShellInner({
                     showPauseMenu={showPauseMenu}
                     showSettings={showSettings}
                     availableLocales={availableLocales}
-                    videoBasePath={videoBasePath}
                     pendingVideo={pendingVideo}
                     setPendingVideo={setPendingVideo}
                     onPause={() => {
@@ -377,7 +370,6 @@ interface GameShellPlayingProps {
     showPauseMenu: boolean;
     showSettings: boolean;
     availableLocales?: { code: string; label: string }[];
-    videoBasePath: string;
     pendingVideo: string | null;
     setPendingVideo: (video: string | null) => void;
     onPause: () => void;
@@ -395,7 +387,6 @@ function GameShellPlaying({
     showPauseMenu,
     showSettings,
     availableLocales,
-    videoBasePath,
     pendingVideo,
     setPendingVideo,
     onPause,
@@ -421,7 +412,6 @@ function GameShellPlaying({
             {pendingVideo && (
                 <VideoPlayer
                     src={pendingVideo}
-                    basePath={videoBasePath}
                     onComplete={() => setPendingVideo(null)}
                 />
             )}

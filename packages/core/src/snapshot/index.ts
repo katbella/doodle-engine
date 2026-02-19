@@ -27,6 +27,7 @@ import type {
 } from '../types/snapshot';
 import { resolveText } from '../localization';
 import { evaluateConditions } from '../conditions';
+import { resolveAssetPath } from '../assets/paths';
 
 /**
  * Build a complete snapshot from current game state.
@@ -89,17 +90,21 @@ export function buildSnapshot(
 
     // Get music and ambient from current location
     const locationData = registry.locations[state.currentLocation];
-    const music = locationData?.music ?? '';
-    const ambient = locationData?.ambient ?? '';
+    const music = resolveAssetPath(locationData?.music, 'music');
+    const ambient = resolveAssetPath(locationData?.ambient, 'ambient');
 
     // Resolve notification localization keys
     const notifications = state.notifications.map(resolve);
 
-    // Copy pending sounds (filenames, no localization needed)
-    const pendingSounds = [...state.pendingSounds];
+    // Resolve pending sounds to full paths
+    const pendingSounds = state.pendingSounds.map((s) =>
+        resolveAssetPath(s, 'sfx')
+    );
 
-    // Copy pending video
-    const pendingVideo = state.pendingVideo;
+    // Resolve pending video to full path
+    const pendingVideo = state.pendingVideo
+        ? resolveAssetPath(state.pendingVideo, 'video')
+        : null;
 
     // Resolve pending interlude
     let pendingInterlude: SnapshotInterlude | null = null;
@@ -108,11 +113,13 @@ export function buildSnapshot(
         if (interlude) {
             pendingInterlude = {
                 id: interlude.id,
-                background: interlude.background,
-                banner: interlude.banner,
-                music: interlude.music,
-                voice: interlude.voice,
-                sounds: interlude.sounds,
+                background: resolveAssetPath(interlude.background, 'banner'),
+                banner: resolveAssetPath(interlude.banner, 'banner'),
+                music: resolveAssetPath(interlude.music, 'music'),
+                voice: resolveAssetPath(interlude.voice, 'voice'),
+                sounds: interlude.sounds?.map((s) =>
+                    resolveAssetPath(s, 'sfx')
+                ),
                 scroll: interlude.scroll ?? true,
                 scrollSpeed: interlude.scrollSpeed ?? 30,
                 text: resolve(interlude.text),
@@ -170,7 +177,7 @@ function buildLocationSnapshot(
         id: location.id,
         name: resolve(location.name),
         description: resolve(location.description),
-        banner: location.banner,
+        banner: resolveAssetPath(location.banner, 'banner'),
     };
 }
 
@@ -195,7 +202,7 @@ function buildCharactersHereSnapshot(
                     id: character.id,
                     name: resolve(character.name),
                     biography: resolve(character.biography),
-                    portrait: character.portrait,
+                    portrait: resolveAssetPath(character.portrait, 'portrait'),
                     location: characterState.location,
                     inParty: characterState.inParty,
                     relationship: characterState.relationship,
@@ -228,8 +235,8 @@ function buildItemsHereSnapshot(
                     id: item.id,
                     name: resolve(item.name),
                     description: resolve(item.description),
-                    icon: item.icon,
-                    image: item.image,
+                    icon: resolveAssetPath(item.icon, 'item'),
+                    image: resolveAssetPath(item.image, 'item'),
                     stats: item.stats,
                 });
             }
@@ -274,9 +281,11 @@ function buildDialogueSnapshot(
         speaker: node.speaker,
         speakerName,
         text: resolve(node.text),
-        portrait:
+        portrait: resolveAssetPath(
             node.portrait ?? registry.characters[node.speaker ?? '']?.portrait,
-        voice: node.voice,
+            'portrait'
+        ),
+        voice: resolveAssetPath(node.voice, 'voice'),
     };
 
     // Build choices - only include those whose conditions pass
@@ -317,7 +326,7 @@ function buildPartySnapshot(
                     id: character.id,
                     name: resolve(character.name),
                     biography: resolve(character.biography),
-                    portrait: character.portrait,
+                    portrait: resolveAssetPath(character.portrait, 'portrait'),
                     location: characterState.location,
                     inParty: characterState.inParty,
                     relationship: characterState.relationship,
@@ -347,8 +356,8 @@ function buildInventorySnapshot(
                 id: item.id,
                 name: resolve(item.name),
                 description: resolve(item.description),
-                icon: item.icon,
-                image: item.image,
+                icon: resolveAssetPath(item.icon, 'item'),
+                image: resolveAssetPath(item.image, 'item'),
                 stats: item.stats,
             };
         })
@@ -439,7 +448,7 @@ function buildMapSnapshot(
     return {
         id: map.id,
         name: resolve(map.name),
-        image: map.image,
+        image: resolveAssetPath(map.image, 'map'),
         scale: map.scale,
         locations,
     };

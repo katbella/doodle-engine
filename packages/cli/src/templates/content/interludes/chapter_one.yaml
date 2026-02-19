@@ -1,7 +1,7 @@
 id: chapter_one
 # Background image shown fullscreen during the interlude.
 # Replace with your own image in assets/images/.
-background: /assets/images/banners/tavern_banner.jpg
+background: tavern_banner.jpg
 
 # Optional: decorative border/frame image overlaid on the background.
 # banner: /assets/images/ui/chapter_frame.png

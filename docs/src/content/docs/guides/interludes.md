@@ -3,7 +3,7 @@ title: Narrative Interludes
 description: Full-screen text scenes for chapter transitions and dream sequences.
 ---
 
-Interludes are full-screen text scenes (chapter cards, dream sequences, journal entries read aloud), like the parchment screens between chapters in Infinity Engine Games like Baldur's Gate. They show a background image with scrolling narrative text. The player can read at their own pace and skip when ready.
+Interludes are full-screen text scenes (chapter cards, dream sequences, journal entries read aloud), like the parchment screens between chapters in Infinity Engine games like Baldur's Gate. They show a background image with scrolling narrative text. The player can read at their own pace and skip when ready.
 
 ## Creating an Interlude
 
@@ -39,7 +39,7 @@ text: |
 | `voice`             | No       | Narration audio file                                                                 |
 | `sounds`            | No       | Array of ambient sound filenames                                                     |
 | `scroll`            | No       | Whether text auto-scrolls upward (default: `true`)                                   |
-| `scrollSpeed`       | No       | Auto-scroll speed in elisas per second (default: `30`)                               |
+| `scrollSpeed`       | No       | Auto-scroll speed in pixels per second (default: `30`)                               |
 | `triggerLocation`   | No       | Location ID where this auto-triggers on enter                                        |
 | `triggerConditions` | No       | Conditions that must pass for auto-trigger                                           |
 | `effects`           | No       | Effects applied when the interlude triggers (typically `setFlag` to prevent repeats) |
