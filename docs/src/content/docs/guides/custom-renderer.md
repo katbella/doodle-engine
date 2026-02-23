@@ -95,7 +95,6 @@ function App() {
 ```typescript
 actions.selectChoice(choiceId: string)   // Pick a dialogue choice
 actions.talkTo(characterId: string)      // Start conversation
-actions.takeItem(itemId: string)         // Pick up an item
 actions.travelTo(locationId: string)     // Travel via map
 actions.writeNote(title, text)           // Add a player note
 actions.deleteNote(noteId: string)       // Remove a player note

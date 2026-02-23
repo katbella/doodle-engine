@@ -86,6 +86,10 @@ export default defineConfig({
                             slug: 'guides/debugging-with-devtools',
                         },
                         {
+                            label: 'VS Code Extension',
+                            slug: 'guides/vscode-extension',
+                        },
+                        {
                             label: 'Hosting & Deployment',
                             slug: 'guides/hosting-and-deployment',
                         },
