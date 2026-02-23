@@ -92,18 +92,6 @@ Start a conversation with a character. Looks up the character's `dialogue` field
 const snapshot = engine.talkTo('bartender');
 ```
 
-### takeItem
-
-```typescript
-takeItem(itemId: string): Snapshot
-```
-
-Pick up an item at the current location. Only works if the item's location matches the player's current location. Moves the item to `"inventory"`.
-
-```typescript
-const snapshot = engine.takeItem('rusty_key');
-```
-
 ### travelTo
 
 ```typescript

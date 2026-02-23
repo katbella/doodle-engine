@@ -12,7 +12,7 @@ Create a YAML file in `content/interludes/`:
 ```yaml
 # content/interludes/chapter_one.yaml
 id: chapter_one
-background: /assets/images/banners/dusk_road.jpg
+background: dusk_road.jpg
 text: |
     Chapter One: A New Beginning
 
@@ -64,7 +64,7 @@ Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effe
 
 ```yaml
 id: chapter_two
-background: /assets/images/banners/forest.jpg
+background: forest.jpg
 text: |
     Chapter Two: Into the Woods
 
@@ -103,7 +103,7 @@ Use a localization key for multi-language support:
 
 ```yaml
 id: chapter_one
-background: /assets/images/banners/dusk_road.jpg
+background: dusk_road.jpg
 text: '@chapter.one.intro'
 ```
 
