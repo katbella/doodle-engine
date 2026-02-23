@@ -41,4 +41,4 @@ Your game is running at `http://localhost:3000`.
 
 - [Project Structure](/getting-started/project-structure/) - what the scaffolder created
 - [Your First Game](/getting-started/your-first-game/) - walkthrough of the starter content
-- [Custom Renderer](/guides/custom-renderer/) - using individual components or building your own UI
+- [Custom Renderer](/technical/custom-renderer/) - using individual components or building your own UI
