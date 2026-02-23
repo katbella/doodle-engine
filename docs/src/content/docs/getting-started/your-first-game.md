@@ -1,173 +1,111 @@
 ---
 title: Your First Game
-description: Walk through building a simple game with Doodle Engine.
+description: Explore the example game the scaffolder created for you.
 ---
 
-This guide walks through the starter game created by the scaffolder to explain how everything fits together.
+The scaffolder created a complete example game. Let's explore what you got.
 
-## Game Configuration
+## game.yaml
 
-Every game starts with `content/game.yaml`:
+Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory.
 
 ```yaml
-id: game
 startLocation: tavern
 startTime:
-    day: 1
-    hour: 8
+  day: 1
+  hour: 8
 startFlags: {}
 startVariables:
-    gold: 100
-    reputation: 0
+  gold: 100
+  reputation: 0
+  _drinksBought: 0
 startInventory: []
 ```
 
-This sets the player's starting location, time, variables, and inventory.
+See [YAML Schemas](/reference/yaml-schemas/) for every field this file supports.
 
-## Adding a Location
+## Locations
 
-Create `content/locations/tavern.yaml`:
+Open `content/locations/tavern.yaml`. Each location has an `id`, a name, a description, and optional fields for a banner image and music track.
 
 ```yaml
 id: tavern
-name: 'The Salty Dog'
-description: 'A cozy tavern with worn wooden tables and the smell of hearth smoke.'
-banner: tavern.png
-music: tavern_ambience.ogg
-ambient: ''
+name: "@location.tavern.name"
+description: "@location.tavern.description"
+banner: ""
+music: ""
 ```
 
-Text can be written inline like this, or as localization keys (`@location.tavern.name`) that resolve from a locale file. Inline text is simpler for getting started. See [Localization](/guides/localization/) when you're ready to support multiple languages.
+The `@key` values are locale references. They resolve to strings in `content/locales/en.yaml`. See [Adding Locations](/guides/adding-locations/) for the full schema and map setup.
 
-## Adding a Character
+## Characters
 
-Create `content/characters/bartender.yaml`:
+Open `content/characters/bartender.yaml`. Characters have a name, portrait, a location that places them on the map, and a `dialogue` field pointing to the dialogue file that plays when the player talks to them.
 
 ```yaml
 id: bartender
-name: 'Greta'
-biography: 'The no-nonsense owner of the Salty Dog.'
-portrait: bartender.png
+name: "@character.bartender.name"
+biography: "@character.bartender.bio"
+portrait: ""
 location: tavern
 dialogue: bartender_greeting
 stats: {}
 ```
 
-The `location` field places the character at the tavern. The `dialogue` field points to the dialogue file that plays when the player talks to them.
+See [Characters & Party](/guides/characters-and-party/) for party members, stats, and relationships.
 
-## Writing a Dialogue
+## Dialogues
 
-Create `content/dialogues/bartender_greeting.dlg`:
+Open `content/dialogues/bartender_greeting.dlg`. Dialogues are written in the Doodle DSL. Nodes are conversation points, choices branch the conversation, and effects like `SET flag` or `ADD variable` change game state.
 
 ```
 NODE start
-  BARTENDER: "Welcome to the Salty Dog! What can I do for you?"
+  BARTENDER: @bartender.greeting
 
-  CHOICE "Any news around town?"
+  CHOICE @bartender.choice.whats_news
     SET flag metBartender
     ADD relationship bartender 1
     GOTO rumors
   END
 
-  CHOICE "Nothing, just looking around."
+  CHOICE @bartender.choice.nevermind
     GOTO farewell
   END
 
-NODE rumors
-  BARTENDER: "Word is there's a merchant in the market square looking for help with deliveries."
-  GOTO farewell
-
 NODE farewell
-  BARTENDER: "Come back anytime!"
+  BARTENDER: @bartender.farewell
   END dialogue
 ```
 
-Key concepts:
+The bartender file is well-commented and shows conditions, dice rolls, and quest triggers. See [Writing Dialogues](/guides/writing-dialogues/) for the full DSL reference.
 
-- `NODE` defines a conversation point
-- `BARTENDER:` sets the speaker (matches character ID, case-insensitive)
-- `CHOICE` blocks define what the player can say
-- Effects like `SET flag` and `ADD relationship` modify game state
-- `END dialogue` closes the conversation
+## Quests
 
-Text is written inline with quotes here. When you're ready to support multiple languages, move text to a locale file and use `@key` references. See [Localization](/guides/localization/).
+Open `content/quests/odd_jobs.yaml`. Quests have a list of stages. Dialogues advance the stage with `SET questStage`, and conditions like `REQUIRE questAtStage` show or hide choices based on where the player is in the quest.
 
-## Running Your Game
-
-```bash
-npm run dev
+```yaml
+id: odd_jobs
+name: "@quest.odd_jobs.name"
+description: "@quest.odd_jobs.description"
+stages:
+  - id: started
+    description: "@quest.odd_jobs.stage.started"
+  - id: talked_to_merchant
+    description: "@quest.odd_jobs.stage.talked_to_merchant"
+  - id: complete
+    description: "@quest.odd_jobs.stage.complete"
 ```
 
-The dev server:
-
-1. Loads all content from `content/`
-2. Parses `.dlg` files into dialogue entities
-3. Serves content via `/api/content`
-4. Watches for file changes and hot-reloads
-
-Open `http://localhost:3000` to see your tavern, talk to the bartender, and explore your game.
-
-The game must be served. Opening `index.html` directly as a file will not work.
+See [Creating Quests](/guides/creating-quests/) for journal entries and multi-stage quest design.
 
 ## The App Component
 
-The scaffolded `src/App.tsx` uses `GameShell`, a complete wrapper that provides splash screen, title screen, pause menu, settings, and video support out of the box:
+Open `src/App.tsx`. It fetches the content registry and asset manifest from the dev server, then passes them to `GameShell`. `GameShell` handles everything: splash screen, title screen, loading, pause menu, settings, and the game itself.
 
-```tsx
-import { useEffect, useState } from 'react';
-import type {
-    ContentRegistry,
-    GameConfig,
-    AssetManifest,
-} from '@doodle-engine/core';
-import { GameShell } from '@doodle-engine/react';
+See [Game Shell](/guides/game-shell/) for configuration options, or [Custom Renderer](/technical/custom-renderer/) if you want to build your own UI instead.
 
-export function App() {
-    const [content, setContent] = useState<{
-        registry: ContentRegistry;
-        config: GameConfig;
-    } | null>(null);
-    const [manifest, setManifest] = useState<AssetManifest | null>(null);
+---
 
-    useEffect(() => {
-        Promise.all([
-            fetch('/api/content').then((res) => res.json()),
-            fetch('/api/manifest').then((res) => res.json()),
-        ]).then(([contentData, manifestData]) => {
-            setContent({
-                registry: contentData.registry,
-                config: contentData.config,
-            });
-            setManifest(manifestData);
-        });
-    }, []);
+The template files are heavily commented. The best way to learn is to play the game, read the files, change things, and see what happens.
 
-    if (!content || !manifest)
-        return (
-            <div className="app-bootstrap">
-                <div className="spinner" />
-            </div>
-        );
-
-    return (
-        <GameShell
-            registry={content.registry}
-            config={content.config}
-            manifest={manifest}
-            title="My Game"
-            subtitle="A text-based adventure"
-            availableLocales={[{ code: 'en', label: 'English' }]}
-            devTools={import.meta.env.DEV}
-        />
-    );
-}
-```
-
-`GameShell` handles the full game lifecycle. You just provide content and configuration. See [Game Shell](/guides/game-shell/) for customization options.
-
-## Next Steps
-
-- [Game Shell](/guides/game-shell/): splash screen, title, pause menu, settings
-- [Writing Dialogues](/guides/writing-dialogues/): branching conversations, conditions, effects
-- [Creating Quests](/guides/creating-quests/): multi-stage quest tracking
-- [Adding Locations](/guides/adding-locations/): maps and travel
+When you're ready to understand a specific feature, the guides explain each piece in detail.
