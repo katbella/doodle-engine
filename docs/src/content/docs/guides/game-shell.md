@@ -173,4 +173,4 @@ import {
 } from '@doodle-engine/react';
 ```
 
-See [Custom Renderer](/guides/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/reference/react-components/) for individual component props.
+See [Custom Renderer](/technical/custom-renderer/) for building a fully custom UI, or the [React Components Reference](/reference/react-components/) for individual component props.
