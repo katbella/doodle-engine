@@ -376,8 +376,12 @@ A `#` inside a quoted string is preserved as text. In plain text, `#` starts a c
 
 ## Complete Example
 
+Triggered intro and character conversation live in separate files.
+
+`content/dialogues/tavern_intro.dlg`:
+
 ```
-# Triggered narrator intro for the tavern
+# Plays automatically the first time the player enters the tavern
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
@@ -388,9 +392,13 @@ NODE start
   CHOICE @narrator.choice.look_around
     END dialogue
   END
+```
 
-# Main bartender conversation (started by clicking the character)
-NODE greeting
+`content/dialogues/bartender_greeting.dlg`:
+
+```
+# Plays when the player clicks the bartender character
+NODE start
   BARTENDER: @bartender.greeting
 
   CHOICE @bartender.choice.ask_rumors
@@ -423,18 +431,18 @@ NODE rumors
   NOTIFY @notification.found_coin
 
   CHOICE @bartender.choice.interesting
-    GOTO greeting
+    GOTO start
   END
 
 NODE after_drink
   BARTENDER: @bartender.after_drink
-  GOTO greeting
+  GOTO start
 
 NODE quest_update
   BARTENDER: @bartender.quest_info
   SET questStage odd_jobs talked_to_merchant
   NOTIFY @notification.quest_updated
-  GOTO greeting
+  GOTO start
 
 NODE farewell
   BARTENDER: @bartender.farewell
