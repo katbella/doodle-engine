@@ -165,11 +165,11 @@
                 },
                 {
                     "name": "support.function.builtin.dlg",
-                    "match": "^(\\s*)(VOICE|PORTRAIT|MUSIC|SOUND|VIDEO|NOTIFY)\\b"
+                    "match": "^(\\s*)(VOICE|PORTRAIT|MUSIC|SOUND|VIDEO|NOTIFY|INTERLUDE)\\b"
                 },
                 {
                     "name": "keyword.operator.word.dlg",
-                    "match": "^(\\s*)(SET|CLEAR|ADD|REMOVE|MOVE|ADVANCE|START)\\b"
+                    "match": "^(\\s*)(SET|CLEAR|ADD|REMOVE|MOVE|ADVANCE|START|ROLL)\\b"
                 }
             ]
         },
@@ -177,7 +177,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.dlg",
-                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|relationshipAbove|relationshipBelow|timeIs|itemAt)\\b"
+                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|relationshipAbove|relationshipBelow|timeIs|itemAt|roll)\\b"
                 }
             ]
         },

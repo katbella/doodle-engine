@@ -89,6 +89,20 @@ banner: /assets/images/special/custom_layout.png
 
 These paths are used as-is without modification.
 
+### Shell Config Paths
+
+Shell assets configured in `game.yaml` under `shell:` use full paths. They are not processed by the convention table above.
+
+```yaml
+shell:
+  splash:
+    logo: /assets/images/studio-logo.png
+    background: /assets/images/splash-bg.jpg
+    sound: /assets/audio/sfx/splash-sting.ogg
+```
+
+Content YAML files (locations, characters, items, and so on) use bare filenames that the engine resolves at snapshot time. Shell config paths are read directly by the asset loader before any game content is processed, so they must be complete.
+
 ### Location Banners
 
 ```yaml
