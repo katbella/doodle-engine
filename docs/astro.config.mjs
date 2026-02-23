@@ -29,6 +29,7 @@ export default defineConfig({
                     label: 'Guides',
                     items: [
                         { label: 'Writing Dialogues', slug: 'guides/writing-dialogues' },
+                        { label: 'VS Code Extension', slug: 'guides/vscode-extension' },
                         { label: 'Adding Locations', slug: 'guides/adding-locations' },
                         { label: 'Characters & Party', slug: 'guides/characters-and-party' },
                         { label: 'Creating Quests', slug: 'guides/creating-quests' },
