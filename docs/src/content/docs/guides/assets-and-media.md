@@ -183,4 +183,4 @@ Assets are divided into two loading tiers:
 - **Shell assets** (logo, title screen, UI sounds) load before any screen renders
 - **Game assets** (portraits, banners, music, items) load during the loading screen and are tracked by phase
 
-See [Asset Loading](/guides/asset-loading/) for details on loading phases and configuration.
+See [Asset Loading](/technical/asset-loading/) for details on loading phases and configuration.

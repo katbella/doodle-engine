@@ -488,7 +488,7 @@ import { GameShell } from '@doodle-engine/react';
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                      | Override the loading screen                                     |
 | `devTools`         | `boolean`                                 | `false`                | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
-Splash screen, loading background, title logo, and UI sounds are configured in `game.yaml` under `shell:`. See [Asset Loading](/guides/asset-loading/) for the full shell config reference.
+Splash screen, loading background, title logo, and UI sounds are configured in `game.yaml` under `shell:`. See [Asset Loading](/technical/asset-loading/) for the full shell config reference.
 
 ### Features
 
