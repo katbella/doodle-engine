@@ -1,7 +1,7 @@
 id: town
 name: "@map.town.name"
 image: ""
-scale: 1
+scale: 100
 locations:
   - id: tavern
     x: 100
