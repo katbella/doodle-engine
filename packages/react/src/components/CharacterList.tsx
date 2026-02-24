@@ -2,7 +2,6 @@
  * CharacterList - Displays characters at current location
  */
 
-import React from 'react';
 import type { SnapshotCharacter } from '@doodle-engine/core';
 
 export interface CharacterListProps {
@@ -30,12 +29,14 @@ export function CharacterList({
                         className="character-card"
                         onClick={() => onTalkTo(character.id)}
                     >
-                        {character.portrait && (
+                        {character.portrait ? (
                             <img
                                 src={character.portrait}
                                 alt={character.name}
                                 className="character-portrait"
                             />
+                        ) : (
+                            <div className="character-portrait-placeholder" />
                         )}
                         <div className="character-name">{character.name}</div>
                     </button>

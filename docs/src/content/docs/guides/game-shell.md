@@ -154,6 +154,25 @@ Pass audio options to configure the game audio manager:
 />
 ```
 
+## Styling
+
+When you run `doodle create`, the scaffolder asks whether to include starter styles:
+
+- **Starter styles** — a dark fantasy theme with warm gold accents, sized layout panels, bottom bar, and panels for inventory, journal, map, and save/load. Everything is defined with CSS custom properties so you can retheme by editing `:root` values in `src/index.css`.
+- **Minimal CSS** — just a body reset. The right choice if you want to write your own styles from scratch.
+
+You can switch at any time by replacing `src/index.css`. The components output semantic class names (`.game-renderer`, `.game-layout`, `.game-main`, `.game-sidebar`, `.game-bottom-bar`, `.dialogue-box`, `.choice-button`, etc.) so any CSS that targets those classes will work.
+
+To retheme the starter styles, override the custom properties:
+
+```css
+:root {
+    --doodle-accent: #b87333;         /* copper instead of gold */
+    --doodle-bg-primary: #0d1117;     /* darker background */
+    --doodle-text-primary: #f0e6d3;   /* warmer text */
+}
+```
+
 ## Using Individual Components Instead
 
 If you need more control, you can use the individual components directly instead of `GameShell`:
