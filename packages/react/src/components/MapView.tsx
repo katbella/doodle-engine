@@ -23,9 +23,7 @@ function calculateTravelTime(
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    // Rough baseline: 100px = 1 hour at scale 1
-    const hours = Math.max(1, Math.round((distance / 100) * scale));
-    return hours;
+    return Math.round(distance * scale);
 }
 
 function calculateArrivalTime(
