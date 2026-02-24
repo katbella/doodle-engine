@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.29
+
+### Patch Changes
+
+- 977a2cb: fix calculate travel time
+
 ## 0.0.28
 
 ### Patch Changes
