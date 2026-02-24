@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.30
+
+### Patch Changes
+
+- 37d7178: fix distance scaling
+
 ## 0.0.29
 
 ### Patch Changes
