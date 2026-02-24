@@ -82,7 +82,7 @@ function createTestRegistry(): ContentRegistry {
                 id: 'city',
                 name: 'City',
                 image: 'city.png',
-                scale: 0.1,
+                scale: 10,
                 locations: [
                     { id: 'tavern', x: 0, y: 0 },
                     { id: 'market', x: 100, y: 0 },
@@ -436,7 +436,7 @@ describe('Engine', () => {
             engine.newGame(config);
 
             // Distance from tavern (0,0) to market (100,0) = 100
-            // Scale is 0.1, so travel time = 100 * 0.1 = 10 hours
+            // Scale is 10 px/hr, so travel time = 100 / 10 = 10 hours
             const snapshot = engine.travelTo('market');
 
             expect(snapshot.time.hour).toBe(18); // 8 + 10

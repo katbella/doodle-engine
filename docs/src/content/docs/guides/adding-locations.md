@@ -35,7 +35,7 @@ Maps connect locations and let players travel between them. Create `content/maps
 id: town
 name: '@map.town.name'
 image: town_map.png
-scale: 1
+scale: 100
 locations:
     - id: tavern
       x: 200
@@ -50,10 +50,22 @@ locations:
 | `id`        | Unique map identifier                                           |
 | `name`      | Display name                                                    |
 | `image`     | Background image for the map                                    |
-| `scale`     | Travel time multiplier (higher = longer travel)                 |
+| `scale`     | Pixels per hour of travel (higher = faster travel)              |
 | `locations` | Array of location markers with x/y coordinates on the map image |
 
 The `x` and `y` coordinates position clickable markers on the map image. Players click a marker to travel.
+
+### Map Scale
+
+The `scale` field controls travel time. It represents **pixels per hour** of travel.
+
+To calculate your scale: divide your map's width in pixels by how many hours you want it to take to cross the entire map.
+
+**Example**: A 500px wide map where crossing takes 5 hours → `scale: 100`
+
+**Formula**: `travel time = distance in pixels / scale`
+
+Minimum travel time is always 1 hour, regardless of scale.
 
 ## Location Intro Dialogues
 
@@ -80,7 +92,7 @@ The `TRIGGER` keyword auto-starts this dialogue when the player enters the taver
 When a player travels to a location:
 
 1. `currentLocation` updates to the new location
-2. Time advances based on map `scale` and distance
+2. Time advances based on map `scale` and distance — formula: `travel time = distance in pixels / scale`
 3. Any active dialogue ends
 4. Triggered dialogues at the new location are checked
 

@@ -359,7 +359,7 @@ export class Engine {
             Math.pow(destLoc.x - currentLoc.x, 2) +
                 Math.pow(destLoc.y - currentLoc.y, 2)
         );
-        const travelTime = Math.round(distance * map.scale);
+        const travelTime = Math.max(1, Math.round(distance / map.scale));
 
         // Update location and time
         const newHour = this.state.currentTime.hour + travelTime;
