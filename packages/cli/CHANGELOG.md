@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.30
+
+### Patch Changes
+
+- 37d7178: fix distance scaling
+- Updated dependencies [37d7178]
+    - @doodle-engine/react@0.0.30
+    - @doodle-engine/core@0.0.30
+
 ## 0.0.29
 
 ### Patch Changes
