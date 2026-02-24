@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.28
+
+### Patch Changes
+
+- e8a7103: add starter css
+- Updated dependencies [e8a7103]
+    - @doodle-engine/react@0.0.28
+    - @doodle-engine/core@0.0.28
+
 ## 0.0.27
 
 ### Patch Changes
