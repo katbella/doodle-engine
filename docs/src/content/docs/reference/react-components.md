@@ -69,7 +69,8 @@ import { GameRenderer } from '@doodle-engine/react';
 ### Layout
 
 - **Main area**: Location view with banner, dialogue box, choices, or character list
-- **Sidebar**: Save/load, resources (visible variables), party, inventory, journal, map
+- **Sidebar** (right): Party portraits and resources (visible variables)
+- **Bottom bar**: Inventory, Journal, Map, and Save/Load. Each opens a panel overlay
 
 ### Features
 
@@ -150,6 +151,32 @@ import { CharacterList } from '@doodle-engine/react';
 | `onTalkTo`   | `(characterId: string) => void` | required | Talk handler          |
 | `className`  | `string`                        | `''`     | CSS class             |
 
+## GameTime
+
+Displays the current in-game time.
+
+```tsx
+import { GameTime } from '@doodle-engine/react';
+
+<GameTime time={snapshot.time} format="narrative" />;
+```
+
+### Props
+
+| Prop        | Type                                          | Default     | Description       |
+| ----------- | --------------------------------------------- | ----------- | ----------------- |
+| `time`      | `{ day: number; hour: number }`               | required    | Time from snapshot |
+| `format`    | `'numeric' \| 'narrative' \| 'short'`         | `'numeric'` | Display format    |
+| `className` | `string`                                      | `''`        | CSS class         |
+
+### Formats
+
+- **numeric**: "Day 3, 14:00"
+- **narrative**: "Day 3, Afternoon"
+- **short**: "D3 14:00"
+
+The narrative format uses these time-of-day labels: Dawn (5–7), Morning (8–11), Midday (12–13), Afternoon (14–16), Evening (17–19), Dusk (20–21), Night (22–4).
+
 ## MapView
 
 Displays the map with clickable location markers.
@@ -157,16 +184,25 @@ Displays the map with clickable location markers.
 ```tsx
 import { MapView } from '@doodle-engine/react';
 
-<MapView map={snapshot.map} onTravelTo={actions.travelTo} />;
+<MapView
+    map={snapshot.map}
+    currentLocation={snapshot.location.id}
+    onTravelTo={actions.travelTo}
+/>;
 ```
 
 ### Props
 
-| Prop         | Type                           | Default  | Description                     |
-| ------------ | ------------------------------ | -------- | ------------------------------- |
-| `map`        | `SnapshotMap \| null`          | required | Map data (null hides component) |
-| `onTravelTo` | `(locationId: string) => void` | required | Travel handler                  |
-| `className`  | `string`                       | `''`     | CSS class                       |
+| Prop              | Type                           | Default  | Description                                        |
+| ----------------- | ------------------------------ | -------- | -------------------------------------------------- |
+| `map`             | `SnapshotMap \| null`          | required | Map data (null hides component)                    |
+| `currentLocation` | `string`                       | —        | Current location ID for distance calculation       |
+| `currentTime`     | `{ day: number; hour: number}` | —        | Current time for arrival calculation               |
+| `onTravelTo`      | `(locationId: string) => void` | required | Travel handler                                     |
+| `confirmTravel`   | `boolean`                      | `true`   | Show confirmation dialog before travel             |
+| `className`       | `string`                       | `''`     | CSS class                                          |
+
+When `confirmTravel` is `true` and the player clicks a location, a dialog shows the destination name and estimated journey time before any travel occurs. If `currentTime` is provided, the dialog also shows the expected arrival time. If `currentLocation` is not provided, the dialog skips the time estimate and just asks for confirmation. Travel time display is approximate — the engine applies its own time advancement rules when `travelTo` is called.
 
 ## Inventory
 

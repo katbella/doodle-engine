@@ -2,7 +2,7 @@
  * ChoiceList - Displays available dialogue choices
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 import type { SnapshotChoice } from '@doodle-engine/core';
 
 export interface ChoiceListProps {
@@ -16,6 +16,18 @@ export function ChoiceList({
     onSelectChoice,
     className = '',
 }: ChoiceListProps) {
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            const num = parseInt(e.key, 10);
+            if (num >= 1 && num <= choices.length) {
+                onSelectChoice(choices[num - 1].id);
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [choices, onSelectChoice]);
+
     if (choices.length === 0) {
         return null;
     }

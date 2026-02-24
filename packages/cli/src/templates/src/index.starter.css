@@ -1,0 +1,206 @@
+/* ══════════════════════════════════════════════════════════════════ */
+/* Doodle Engine — Starter Styles                                    */
+/* Variables and component scaffolds. TODO: Fill this in!     */
+/* ══════════════════════════════════════════════════════════════════ */
+
+/* ── Variables ────────────────────────────────────────────────────── */
+
+:root {
+    /* Base colors */
+    --doodle-bg-primary: #1a1a1a;
+    --doodle-bg-secondary: #252525;
+    --doodle-bg-tertiary: #2f2f2f;
+
+    /* Accent */
+    --doodle-accent: #c9a227;
+    --doodle-accent-dim: #8a7020;
+    --doodle-accent-bright: #e6b830;
+
+    /* Text */
+    --doodle-text-primary: #e8e8e8;
+    --doodle-text-secondary: #a0a0a0;
+    --doodle-text-muted: #666666;
+
+    /* Borders */
+    --doodle-border-color: #3a3a3a;
+    --doodle-border-accent: var(--doodle-accent-dim);
+
+    /* Spacing */
+    --doodle-spacing-xs: 4px;
+    --doodle-spacing-sm: 8px;
+    --doodle-spacing-md: 16px;
+    --doodle-spacing-lg: 24px;
+    --doodle-spacing-xl: 32px;
+
+    /* Border radius */
+    --doodle-radius-sm: 2px;
+    --doodle-radius-md: 4px;
+    --doodle-radius-lg: 8px;
+
+    /* Shadows */
+    --doodle-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --doodle-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
+
+    /* Layout dimensions */
+    --doodle-bottom-bar-height: 64px;
+    --doodle-sidebar-width: 200px;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--doodle-bg-primary);
+    color: var(--doodle-text-primary);
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+
+.game-renderer { }
+.game-layout { }
+.game-main { }
+.game-sidebar { }
+.game-bottom-bar { }
+
+/* ── Location ─────────────────────────────────────────────────────── */
+
+.location-view { }
+.location-banner { }
+.location-banner-placeholder { }
+.location-content { }
+.location-name { }
+.location-description { }
+
+/* ── Dialogue ─────────────────────────────────────────────────────── */
+
+.dialogue-container { }
+.dialogue-box { }
+.dialogue-portrait { }
+.dialogue-portrait-placeholder { }
+.dialogue-content { }
+.dialogue-speaker { }
+.dialogue-text { }
+
+/* ── Choices ──────────────────────────────────────────────────────── */
+
+.choice-list { }
+.choice-button { }
+
+/* ── Characters ───────────────────────────────────────────────────── */
+
+.character-list { }
+.character-grid { }
+.character-card { }
+.character-portrait { }
+.character-portrait-placeholder { }
+.character-name { }
+
+/* ── Game Time ────────────────────────────────────────────────────── */
+
+.game-time { }
+.game-time-display { }
+
+/* ── Party ────────────────────────────────────────────────────────── */
+
+.party-panel { }
+.party-empty { }
+.party-portraits { }
+.party-member { }
+.party-portrait { }
+.party-portrait-placeholder { }
+.party-name { }
+
+/* ── Resources ────────────────────────────────────────────────────── */
+
+.resources-panel { }
+.resources-list { }
+.resource-entry { }
+.resource-name { }
+.resource-value { }
+
+/* ── Bottom Bar ───────────────────────────────────────────────────── */
+
+.bottom-bar-button { }
+.bottom-bar-icon { }
+.bottom-bar-label { }
+
+/* ── Panels / Overlays ────────────────────────────────────────────── */
+
+.panel-overlay { }
+.panel { }
+.panel-close { }
+
+/* ── Inventory ────────────────────────────────────────────────────── */
+
+.inventory { }
+.inventory-empty { }
+.inventory-grid { }
+.inventory-item { }
+.item-icon { }
+.item-icon-placeholder { }
+.item-name { }
+.item-modal-overlay { }
+.item-modal { }
+.item-modal-image { }
+.item-modal-name { }
+.item-modal-description { }
+.item-modal-close { }
+
+/* ── Journal ──────────────────────────────────────────────────────── */
+
+.journal { }
+.quest-entry { }
+.quest-name { }
+.quest-description { }
+.journal-entry { }
+
+/* ── Map ──────────────────────────────────────────────────────────── */
+
+.map-view { }
+.map-locations { }
+.map-location-button { }
+.travel-confirm-overlay { }
+.travel-confirm { }
+.travel-confirm-title { }
+.travel-confirm-time { }
+.travel-confirm-arrival { }
+.travel-confirm-buttons { }
+.travel-confirm-cancel { }
+.travel-confirm-go { }
+
+/* ── Save / Load ──────────────────────────────────────────────────── */
+
+.save-load-panel { }
+.save-button { }
+.load-button { }
+
+/* ── Settings ─────────────────────────────────────────────────────── */
+
+.settings-panel { }
+
+/* ── Notifications ────────────────────────────────────────────────── */
+
+.notification-area { }
+.notification { }
+
+/* ── Interlude ────────────────────────────────────────────────────── */
+
+.interlude-overlay { }
+.interlude { }
+.interlude-background { }
+.interlude-title { }
+.interlude-text { }
+.interlude-dismiss { }
+
+/* ── Loading Screen ───────────────────────────────────────────────── */
+
+.loading-screen { }
+.loading-progress { }
+.loading-message { }
