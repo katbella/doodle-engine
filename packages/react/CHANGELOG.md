@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.29
+
+### Patch Changes
+
+- 977a2cb: fix calculate travel time
+- Updated dependencies [977a2cb]
+    - @doodle-engine/core@0.0.29
+
 ## 0.0.28
 
 ### Patch Changes
