@@ -25,7 +25,7 @@ The scaffolder creates a complete, ready-to-run project with all source files, c
 npx @doodle-engine/cli create my-game
 ```
 
-It will ask one question: whether to use the batteries-included `GameShell` renderer or start with a custom setup.
+The scaffolder asks which renderer to use. If you choose GameShell, it also asks whether to include starter styles.
 
 Then install and run:
 

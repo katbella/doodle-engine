@@ -27,7 +27,7 @@ const TEMPLATES = import.meta.glob('./templates/**/*', {
 
 /**
  * Maps a template glob key to its output path relative to the project root.
- * Returns null for files that need special handling (App variants).
+ * Returns null for files that need special handling (App variants, CSS variants).
  */
 function resolveOutputPath(key: string): string | null {
     // Strip the './templates/' prefix
@@ -35,6 +35,10 @@ function resolveOutputPath(key: string): string | null {
 
     // App variant files are picked separately; skip in main loop
     if (rel === 'src/App.default.tsx' || rel === 'src/App.custom.tsx')
+        return null;
+
+    // CSS variant files are picked separately; skip in main loop
+    if (rel === 'src/index.minimal.css' || rel === 'src/index.starter.css')
         return null;
 
     // _root/ files go to the project root
@@ -51,7 +55,7 @@ export async function create(projectName: string) {
     const projectPath = join(process.cwd(), projectName);
 
     console.log('');
-    console.log(crayon.bold.magenta(`  ${paw} Doodle Engine ${paw}`));
+    console.log(crayon.bold.yellow(`  ${paw} Doodle Engine ${paw}`));
     console.log(crayon.dim('  Text-based RPG and Adventure Game Scaffolder'));
     console.log('');
     console.log(`  ${dog} Creating new game: ${crayon.bold.cyan(projectName)}`);
@@ -72,10 +76,45 @@ export async function create(projectName: string) {
         process.exit(0);
     }
 
+    // If using the default renderer, ask about starter styles
+    let useStarterStyles = false;
+    if (useDefaultRenderer) {
+        const { starterStyles } = await prompts({
+            type: 'select',
+            name: 'starterStyles',
+            message: 'Include starter styles?',
+            choices: [
+                {
+                    title: 'Yes — styled UI with dark theme and gold accents',
+                    value: true,
+                },
+                {
+                    title: 'No — minimal CSS, build your own',
+                    value: false,
+                },
+            ],
+            initial: 0,
+        });
+
+        if (starterStyles === undefined) {
+            console.log(
+                crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
+            );
+            process.exit(0);
+        }
+
+        useStarterStyles = starterStyles;
+    }
+
     console.log('');
 
     // Create project structure
-    await createProjectStructure(projectPath, projectName, useDefaultRenderer);
+    await createProjectStructure(
+        projectPath,
+        projectName,
+        useDefaultRenderer,
+        useStarterStyles
+    );
 
     console.log('');
     console.log(crayon.bold.green(`  ${check} Project created successfully!`));
@@ -100,7 +139,8 @@ export async function create(projectName: string) {
 async function createProjectStructure(
     projectPath: string,
     projectName: string,
-    useDefaultRenderer: boolean
+    useDefaultRenderer: boolean,
+    useStarterStyles: boolean
 ) {
     // Create directory structure
     const dirs = [
@@ -179,6 +219,13 @@ async function createProjectStructure(
         ? './templates/src/App.default.tsx'
         : './templates/src/App.custom.tsx';
     await writeFile(join(projectPath, 'src/App.tsx'), TEMPLATES[appKey]);
+
+    // --- src/index.css (pick variant based on styles choice) ---
+    const cssKey =
+        useDefaultRenderer && useStarterStyles
+            ? './templates/src/index.starter.css'
+            : './templates/src/index.minimal.css';
+    await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
 
     console.log(crayon.green(`  ${check} Source files created`));
     console.log('');

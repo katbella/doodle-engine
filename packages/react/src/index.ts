@@ -85,3 +85,6 @@ export type { PauseMenuProps } from './components/PauseMenu';
 
 export { SettingsPanel } from './components/SettingsPanel';
 export type { SettingsPanelProps } from './components/SettingsPanel';
+
+export { GameTime } from './components/GameTime';
+export type { GameTimeProps, TimeFormat } from './components/GameTime';
