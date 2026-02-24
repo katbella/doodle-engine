@@ -2,7 +2,6 @@
  * LocationView - Displays current location
  */
 
-import React from 'react';
 import type { SnapshotLocation } from '@doodle-engine/core';
 
 export interface LocationViewProps {
@@ -13,11 +12,15 @@ export interface LocationViewProps {
 export function LocationView({ location, className = '' }: LocationViewProps) {
     return (
         <div className={`location-view ${className}`}>
-            {location.banner && (
-                <div className="location-banner">
+            <div className="location-banner">
+                {location.banner ? (
                     <img src={location.banner} alt={location.name} />
-                </div>
-            )}
+                ) : (
+                    <div className="location-banner-placeholder">
+                        Location Banner
+                    </div>
+                )}
+            </div>
 
             <div className="location-content">
                 <h1 className="location-name">{location.name}</h1>

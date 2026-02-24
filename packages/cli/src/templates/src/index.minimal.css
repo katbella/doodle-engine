@@ -1,0 +1,60 @@
+body {
+    margin: 0;
+    font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Travel confirmation (minimal baseline) ───────────────────────── */
+
+.travel-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.travel-confirm {
+    padding: 24px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+}
+
+.travel-confirm-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.travel-confirm-cancel,
+.travel-confirm-go {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+/* ── Game time (minimal baseline) ────────────────────────────────── */
+
+.game-time {
+    padding: 8px;
+    text-align: center;
+}
+
+/* ── Theme overrides ──────────────────────────────────────────────── */
+/* Override these variables to customize the shell screens.           */
+/* Full variable list: node_modules/@doodle-engine/react/dist/shell.css */
+
+/*
+:root {
+  --doodle-bg-primary: #0f0f23;
+  --doodle-bg-secondary: #1a1a2e;
+  --doodle-accent: #c9a227;
+}
+*/
