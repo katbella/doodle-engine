@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.31
+
+### Patch Changes
+
+- 4e1975e: extension bundling
+
 ## 0.0.30
 
 ### Patch Changes
