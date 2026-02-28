@@ -134,6 +134,26 @@ export async function create(projectName: string) {
     console.log('');
     console.log(crayon.dim(`  ${rocket} Happy game making! ${paw}`));
     console.log('');
+    console.log(
+        crayon.dim(
+            `  ${sparkle} ${crayon.bold.dim('VS Code tip:')} A syntax highlighting extension for .dlg files is included.`
+        )
+    );
+    console.log(crayon.dim('  To install it in VS Code:'));
+    console.log(
+        crayon.dim(
+            '    1. Open the Command Palette (Ctrl+Shift+P / Cmd+Shift+P)'
+        )
+    );
+    console.log(
+        crayon.dim('    2. Run "Extensions: Install from VSIX..."')
+    );
+    console.log(
+        crayon.dim(
+            '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.0.0.vsix'
+        )
+    );
+    console.log('');
 }
 
 async function createProjectStructure(

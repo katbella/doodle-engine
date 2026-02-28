@@ -7,7 +7,8 @@
         "doodle": "./dist/cli.js"
     },
     "files": [
-        "dist"
+        "dist",
+        "extensions"
     ],
     "scripts": {
         "dev": "vite build --watch",
