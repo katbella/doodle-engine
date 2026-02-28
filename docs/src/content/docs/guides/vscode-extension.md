@@ -26,12 +26,15 @@ The extension also enables:
 - Line comment toggling with `Ctrl+/` (`Cmd+/` on macOS)
 - Auto-closing double quotes
 
-## Install
+## Installation
 
-Copy the `vscode-dlg` folder into your VS Code extensions directory, naming it `doodle-engine.doodle-dlg-syntax-0.0.1`:
+The extension is bundled with the `@doodle-engine/cli` npm package. After running `npm install` (or `yarn`/`pnpm`) in your project:
 
-- **Windows**: `%USERPROFILE%\.vscode\extensions\doodle-engine.doodle-dlg-syntax-0.0.1`
-- **macOS**: `~/.vscode/extensions/doodle-engine.doodle-dlg-syntax-0.0.1`
-- **Linux**: `~/.vscode/extensions/doodle-engine.doodle-dlg-syntax-0.0.1`
+1. Open VS Code
+2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+3. Run **Extensions: Install from VSIX...**
+4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.0.0.vsix` in your project
 
-Then restart VS Code (or run **Developer: Reload Window** from the command palette). The extension loads automatically for any file with the `.dlg` extension.
+Then reload VS Code. The extension loads automatically for any file with the `.dlg` extension.
+
+> The extension is not published to the VS Code Marketplace - the `.vsix` bundled in the npm package is the distribution method.
