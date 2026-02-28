@@ -56,7 +56,7 @@ See [Characters & Party](/guides/characters-and-party/) for party members, stats
 
 ## Dialogues
 
-Open `content/dialogues/bartender_greeting.dlg`. Dialogues are written in the Doodle DSL. Nodes are conversation points, choices branch the conversation, and effects like `SET flag` or `ADD variable` change game state.
+Open `content/dialogues/bartender_greeting.dlg`. For syntax highlighting in VS Code, install the bundled extension (see [VS Code Extension](/guides/vscode-extension/) for instructions). Dialogues are written in the Doodle DSL. Nodes are conversation points, choices branch the conversation, and effects like `SET flag` or `ADD variable` change game state.
 
 ```
 NODE start

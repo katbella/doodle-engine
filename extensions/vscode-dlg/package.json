@@ -2,7 +2,7 @@
     "name": "doodle-dlg-syntax",
     "displayName": "Doodle DLG Syntax",
     "description": "Syntax highlighting for Doodle Engine .dlg dialogue files.",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "publisher": "doodle-engine",
     "license": "MIT",
     "engines": {
