@@ -6,6 +6,8 @@ import { useState } from 'react';
 import type { SaveData } from '@doodle-engine/core';
 
 export interface SaveLoadPanelProps {
+    /** Resolved UI strings from snapshot.ui */
+    ui: Record<string, string>;
     onSave: () => SaveData;
     onLoad: (saveData: SaveData) => void;
     storageKey?: string;
@@ -13,6 +15,7 @@ export interface SaveLoadPanelProps {
 }
 
 export function SaveLoadPanel({
+    ui,
     onSave,
     onLoad,
     storageKey = 'doodle-engine-save',
@@ -45,14 +48,14 @@ export function SaveLoadPanel({
     return (
         <div className={`save-load-panel ${className}`}>
             <button className="save-button" onClick={handleSave}>
-                Save
+                {ui['ui.save']}
             </button>
             <button
                 className="load-button"
                 onClick={handleLoad}
                 disabled={!hasSave}
             >
-                Load
+                {ui['ui.load']}
             </button>
             {message && <span className="save-load-message">{message}</span>}
         </div>
