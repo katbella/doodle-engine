@@ -214,6 +214,30 @@ describe('Effect Processors', () => {
 
             expect(newState.currentLocation).toBe('market');
         });
+
+        it('should move party members to the new location', () => {
+            const effect: Effect = {
+                type: 'goToLocation',
+                locationId: 'market',
+            };
+            // pixel_the_dog is inParty: true
+            const state = createTestState();
+            const newState = applyEffect(effect, state);
+
+            expect(newState.characterState.pixel_the_dog.location).toBe('market');
+        });
+
+        it('should not move non-party characters', () => {
+            const effect: Effect = {
+                type: 'goToLocation',
+                locationId: 'market',
+            };
+            // bartender is inParty: false
+            const state = createTestState();
+            const newState = applyEffect(effect, state);
+
+            expect(newState.characterState.bartender.location).toBe('tavern');
+        });
     });
 
     describe('advanceTime', () => {
@@ -368,6 +392,18 @@ describe('Effect Processors', () => {
 
             expect(newState.characterState.bartender.inParty).toBe(true);
         });
+
+        it('should sync character location to currentLocation when joining party', () => {
+            const effect: Effect = {
+                type: 'addToParty',
+                characterId: 'pixel_the_dog',
+            };
+            // pixel_the_dog is at 'camp', player is at 'tavern'
+            const state = createTestState();
+            const newState = applyEffect(effect, state);
+
+            expect(newState.characterState.pixel_the_dog.location).toBe('tavern');
+        });
     });
 
     describe('removeFromParty', () => {
@@ -380,6 +416,19 @@ describe('Effect Processors', () => {
             const newState = applyEffect(effect, state);
 
             expect(newState.characterState.pixel_the_dog.inParty).toBe(false);
+        });
+
+        it('should not change character location when removed from party', () => {
+            const effect: Effect = {
+                type: 'removeFromParty',
+                characterId: 'pixel_the_dog',
+            };
+            // pixel_the_dog is at 'camp' (their current location in state)
+            const state = createTestState();
+            const newState = applyEffect(effect, state);
+
+            // Location stays wherever they were — the character remains in place
+            expect(newState.characterState.pixel_the_dog.location).toBe('camp');
         });
     });
 
