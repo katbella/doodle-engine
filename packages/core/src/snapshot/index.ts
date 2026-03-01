@@ -195,7 +195,7 @@ function buildCharactersHereSnapshot(
     for (const [characterId, characterState] of Object.entries(
         state.characterState
     )) {
-        if (characterState.location === state.currentLocation) {
+        if (characterState.location === state.currentLocation && !characterState.inParty) {
             const character = registry.characters[characterId];
             if (character) {
                 charactersHere.push({
