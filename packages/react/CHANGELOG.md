@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.32
+
+### Patch Changes
+
+- 61f5336: fix party travel
+- Updated dependencies [61f5336]
+    - @doodle-engine/core@0.0.32
+
 ## 0.0.31
 
 ### Patch Changes
