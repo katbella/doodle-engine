@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Engine } from '@doodle-engine/core';
+import { Engine, buildUIStrings } from '@doodle-engine/core';
 import type {
     ContentRegistry,
     GameConfig,
@@ -307,6 +307,7 @@ function GameShellInner({
                     />
                 ) : (
                     <TitleScreen
+                        ui={buildUIStrings(registry.locales['en'] ?? {})}
                         shell={shell?.title}
                         title={title}
                         subtitle={subtitle}
@@ -430,6 +431,7 @@ function GameShellPlaying({
 
             {showPauseMenu && (
                 <PauseMenu
+                    ui={snapshot.ui}
                     onResume={onResume}
                     onSave={onSave}
                     onLoad={onLoad}

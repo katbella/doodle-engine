@@ -110,6 +110,45 @@ notification.<event_name>
 narrator.<context>
 ```
 
+## UI Strings
+
+The renderer's interface labels — buttons, sidebar tabs, panel headers — are localized through the same locale files as all other text. Define `ui.*` keys in your locale YAML to override the English defaults.
+
+If you don't define a `ui.*` key, the English default is used automatically. You only need to add these keys for non-English locales or if you want to customize the wording.
+
+| Key | Default |
+|-----|---------|
+| `ui.continue` | Continue |
+| `ui.inventory` | Inventory |
+| `ui.journal` | Journal |
+| `ui.map` | Map |
+| `ui.save_load` | Save/Load |
+| `ui.settings` | Settings |
+| `ui.save` | Save |
+| `ui.load` | Load |
+| `ui.new_game` | New Game |
+| `ui.resume` | Resume |
+| `ui.no_companions` | No companions |
+| `ui.narrator` | Narrator |
+
+Example Spanish locale file:
+
+```yaml
+# content/locales/es.yaml
+ui.continue: Continuar
+ui.inventory: Inventario
+ui.journal: Diario
+ui.map: Mapa
+ui.save_load: Guardar/Cargar
+ui.settings: Configuración
+ui.save: Guardar
+ui.load: Cargar
+ui.new_game: Nuevo juego
+ui.resume: Continuar partida
+ui.no_companions: Sin compañeros
+ui.narrator: Narrador
+```
+
 ## Notification Strings
 
 Notification effects use `@key` too:

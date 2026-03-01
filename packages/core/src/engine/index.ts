@@ -198,24 +198,9 @@ export class Engine {
             this.state = applyEffects(nextNode.effects, this.state);
         }
 
-        // If node has no choices, auto-advance using conditionalNext or next
+        // Settle at this node: show text if any, auto-advance if silent
         if (nextNode.choices.length === 0) {
-            const resolvedNext = this.resolveNextNode(nextNode);
-            if (resolvedNext) {
-                this.state = {
-                    ...this.state,
-                    dialogueState: {
-                        dialogueId: dialogue.id,
-                        nodeId: resolvedNext,
-                    },
-                };
-            } else {
-                // No next - end dialogue
-                this.state = {
-                    ...this.state,
-                    dialogueState: null,
-                };
-            }
+            this.settleAtNode(dialogue.id, nextNode);
         }
 
         return this.buildSnapshotAndClearTransients();
@@ -269,24 +254,9 @@ export class Engine {
             this.state = applyEffects(startNode.effects, this.state);
         }
 
-        // If start node has no choices, auto-advance using conditionalNext or next
+        // Settle at this node: show text if any, auto-advance if silent
         if (startNode.choices.length === 0) {
-            const resolvedNext = this.resolveNextNode(startNode);
-            if (resolvedNext) {
-                this.state = {
-                    ...this.state,
-                    dialogueState: {
-                        dialogueId: dialogue.id,
-                        nodeId: resolvedNext,
-                    },
-                };
-            } else {
-                // No next - end dialogue
-                this.state = {
-                    ...this.state,
-                    dialogueState: null,
-                };
-            }
+            this.settleAtNode(dialogue.id, startNode);
         }
 
         return this.buildSnapshotAndClearTransients();
@@ -463,6 +433,67 @@ export class Engine {
         return this.buildSnapshotAndClearTransients();
     }
 
+    /**
+     * Player clicked to advance past a text-only dialogue node.
+     *
+     * Called when the current node has text but no choices. Advances to the
+     * next node (via conditionalNext or next). If no next exists, ends the
+     * dialogue.
+     *
+     * @returns New snapshot after advancing
+     */
+    continueDialogue(): Snapshot {
+        if (!this.state.dialogueState) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        const dialogue =
+            this.registry.dialogues[this.state.dialogueState.dialogueId];
+        const currentNode = dialogue?.nodes.find(
+            (n) => n.id === this.state.dialogueState!.nodeId
+        );
+
+        if (!dialogue || !currentNode) {
+            this.state = { ...this.state, dialogueState: null };
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        const resolvedNext = this.resolveNextNode(currentNode);
+        if (!resolvedNext) {
+            this.state = { ...this.state, dialogueState: null };
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        const nextNode = dialogue.nodes.find((n) => n.id === resolvedNext);
+        if (!nextNode) {
+            this.state = { ...this.state, dialogueState: null };
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        this.state = {
+            ...this.state,
+            dialogueState: { dialogueId: dialogue.id, nodeId: resolvedNext },
+        };
+
+        if (nextNode.effects) {
+            this.state = applyEffects(nextNode.effects, this.state);
+        }
+
+        // startDialogue effect: initialize the new dialogue
+        if (this.state.dialogueState?.nodeId === '') {
+            return this.initDialogue(this.state.dialogueState.dialogueId);
+        }
+
+        this.settleAtNode(dialogue.id, nextNode);
+
+        // settleAtNode may have triggered a startDialogue via the silent-advance loop
+        if (this.state.dialogueState?.nodeId === '') {
+            return this.initDialogue(this.state.dialogueState.dialogueId);
+        }
+
+        return this.buildSnapshotAndClearTransients();
+    }
+
     // ===========================================================================
     // Internal Helper Methods
     // ===========================================================================
@@ -484,6 +515,83 @@ export class Engine {
         };
 
         return snapshot;
+    }
+
+    /**
+     * Settle at a node after entering it and applying its effects.
+     *
+     * - Node has text → show it, wait for player to call continueDialogue()
+     * - Node has choices (no text) → stay so the player can choose
+     * - Silent (no text, no choices) → auto-advance through the chain until
+     *   we reach a node with text/choices or the end of the dialogue
+     *
+     * Handles the case where effects (e.g. endDialogue) may have already
+     * nulled dialogueState — restores it when the node has text to display.
+     */
+    private settleAtNode(dialogueId: string, node: DialogueNode): void {
+        // Node has text → show it, wait for player click
+        if (node.text) {
+            this.state = {
+                ...this.state,
+                dialogueState: { dialogueId, nodeId: node.id },
+            };
+            return;
+        }
+
+        // Node has choices (no text) → stay, show choices
+        if (node.choices.length > 0) {
+            return;
+        }
+
+        // Silent node: auto-advance through the chain
+        const dialogue = this.registry.dialogues[dialogueId];
+        if (!dialogue) {
+            this.state = { ...this.state, dialogueState: null };
+            return;
+        }
+
+        let currentNode = node;
+        while (true) {
+            const nextId = this.resolveNextNode(currentNode);
+            if (!nextId) {
+                this.state = { ...this.state, dialogueState: null };
+                return;
+            }
+
+            const nextNode = dialogue.nodes.find((n) => n.id === nextId);
+            if (!nextNode) {
+                this.state = { ...this.state, dialogueState: null };
+                return;
+            }
+
+            this.state = {
+                ...this.state,
+                dialogueState: { dialogueId, nodeId: nextId },
+            };
+
+            if (nextNode.effects) {
+                this.state = applyEffects(nextNode.effects, this.state);
+            }
+
+            // startDialogue effect redirects to a new dialogue — signal to caller
+            if (this.state.dialogueState?.nodeId === '') {
+                return;
+            }
+
+            // Text or choices → show this node and stop
+            if (nextNode.text || nextNode.choices.length > 0) {
+                if (nextNode.text) {
+                    // Restore in case effects (e.g. endDialogue) changed dialogueState
+                    this.state = {
+                        ...this.state,
+                        dialogueState: { dialogueId, nodeId: nextNode.id },
+                    };
+                }
+                return;
+            }
+
+            currentNode = nextNode;
+        }
     }
 
     /**
@@ -561,24 +669,9 @@ export class Engine {
                 this.state = applyEffects(startNode.effects, this.state);
             }
 
-            // If start node has no choices, auto-advance using conditionalNext or next
+            // Settle at this node: show text if any, auto-advance if silent
             if (startNode.choices.length === 0) {
-                const resolvedNext = this.resolveNextNode(startNode);
-                if (resolvedNext) {
-                    this.state = {
-                        ...this.state,
-                        dialogueState: {
-                            dialogueId: dialogue.id,
-                            nodeId: resolvedNext,
-                        },
-                    };
-                } else {
-                    // No next - end dialogue
-                    this.state = {
-                        ...this.state,
-                        dialogueState: null,
-                    };
-                }
+                this.settleAtNode(dialogue.id, startNode);
             }
 
             // Only trigger one dialogue at a time

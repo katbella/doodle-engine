@@ -210,16 +210,27 @@ NODE check_reputation
 
 If reputation is 60, goes to `trusted_path`. If reputation is 30, goes to `neutral_path`. If reputation is 10, goes to `suspicious_path`.
 
-## Auto-Advancing Nodes
+## Text Nodes and Silent Nodes
 
-A node that has **no `CHOICE` blocks** is never shown to the player as a prompt. The engine processes it silently and advances automatically:
+How the engine handles nodes with no `CHOICE` blocks depends on whether the node has text:
 
-1. Node effects run (speaker lines are set as the current dialogue text, effects apply)
-2. IF blocks evaluate in order. The first passing condition redirects to its target.
-3. If no IF passes, the top-level `GOTO` fires
-4. If there is no GOTO and no IF passes, the dialogue ends
+### Text-only nodes (text, no choices)
 
-This is the basis for **silent processing nodes**: nodes that apply effects or branch on state without giving the player any visible choice:
+The engine shows the text and **waits for the player to click Continue**. Only after the player clicks does the engine advance via `GOTO` or `IF` blocks.
+
+```
+NODE intro
+  BARTENDER: @bartender.welcome
+  GOTO main_menu
+```
+
+The player reads the bartender's welcome, clicks Continue, then the engine moves to `main_menu`.
+
+Text-only nodes are the natural way to present narration, character monologues, or story beats before branching.
+
+### Silent processing nodes (no text, no choices)
+
+A node with **no speaker line and no text** is a **silent processing node**. The engine processes it instantly — applying effects and evaluating `IF` blocks — then advances to the next node without waiting for the player.
 
 ```
 # Roll the dice and branch. The player never sees this node as a prompt.
@@ -246,15 +257,15 @@ NODE failure
   END
 ```
 
-A node can also auto-advance unconditionally with a bare `GOTO`:
+`skill_check` is silent — it runs `ROLL`, evaluates the `IF`, and jumps to `success` or `failure` without the player seeing any prompt.
 
-```
-NODE after_drink
-  BARTENDER: @bartender.after_drink
-  GOTO start
-```
+### Summary
 
-The player sees the bartender's line, then the engine advances to `start` immediately (no click required).
+| Node type | Has text? | Has choices? | Player sees |
+|-----------|-----------|--------------|-------------|
+| Text-only | Yes | No | Text + Continue button |
+| Choice node | Yes or no | Yes | Text + choice buttons |
+| Silent processing | No | No | Nothing — auto-advances |
 
 ### IF vs CHOICE REQUIRE
 
@@ -436,6 +447,7 @@ NODE rumors
 
 NODE after_drink
   BARTENDER: @bartender.after_drink
+  # Player sees text, clicks Continue, then engine advances to start
   GOTO start
 
 NODE quest_update

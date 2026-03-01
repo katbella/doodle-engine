@@ -29,6 +29,55 @@ import { resolveText } from '../localization';
 import { evaluateConditions } from '../conditions';
 import { resolveAssetPath } from '../assets/paths';
 
+// =============================================================================
+// UI String Defaults
+// =============================================================================
+
+const UI_KEYS = [
+    'ui.continue',
+    'ui.inventory',
+    'ui.journal',
+    'ui.map',
+    'ui.save_load',
+    'ui.settings',
+    'ui.save',
+    'ui.load',
+    'ui.new_game',
+    'ui.resume',
+    'ui.no_companions',
+    'ui.narrator',
+] as const;
+
+const UI_DEFAULTS: Record<string, string> = {
+    'ui.continue': 'Continue',
+    'ui.inventory': 'Inventory',
+    'ui.journal': 'Journal',
+    'ui.map': 'Map',
+    'ui.save_load': 'Save/Load',
+    'ui.settings': 'Settings',
+    'ui.save': 'Save',
+    'ui.load': 'Load',
+    'ui.new_game': 'New Game',
+    'ui.resume': 'Resume',
+    'ui.no_companions': 'No companions',
+    'ui.narrator': 'Narrator',
+};
+
+/**
+ * Build the resolved UI strings record from locale data.
+ * Falls back to English defaults for any missing keys.
+ *
+ * @param localeData - Flat locale key-value map for the current language
+ * @returns Record of all UI keys with resolved strings
+ */
+export function buildUIStrings(localeData: LocaleData): Record<string, string> {
+    const ui: Record<string, string> = {};
+    for (const key of UI_KEYS) {
+        ui[key] = localeData[key] ?? UI_DEFAULTS[key];
+    }
+    return ui;
+}
+
 /**
  * Build a complete snapshot from current game state.
  *
@@ -46,6 +95,9 @@ export function buildSnapshot(
     // Helper to resolve localization keys and {varName} interpolation
     const resolve = (text: string) =>
         resolveText(text, localeData, state.variables);
+
+    // Build resolved UI strings (with English fallbacks)
+    const ui = buildUIStrings(localeData);
 
     // Build location snapshot
     const location = buildLocationSnapshot(
@@ -68,7 +120,8 @@ export function buildSnapshot(
     const { dialogue, choices } = buildDialogueSnapshot(
         state,
         registry,
-        resolve
+        resolve,
+        ui['ui.narrator']
     );
 
     // Build party members
@@ -146,6 +199,7 @@ export function buildSnapshot(
         pendingSounds,
         pendingVideo,
         pendingInterlude,
+        ui,
     };
 }
 
@@ -253,7 +307,8 @@ function buildItemsHereSnapshot(
 function buildDialogueSnapshot(
     state: GameState,
     registry: ContentRegistry,
-    resolve: (text: string) => string
+    resolve: (text: string) => string,
+    narratorName: string
 ): { dialogue: SnapshotDialogue | null; choices: SnapshotChoice[] } {
     // Not in dialogue
     if (!state.dialogueState) {
@@ -275,7 +330,7 @@ function buildDialogueSnapshot(
     // Build dialogue snapshot
     const speakerName = node.speaker
         ? resolve(registry.characters[node.speaker]?.name ?? node.speaker)
-        : 'Narrator';
+        : narratorName;
 
     const dialogueSnapshot: SnapshotDialogue = {
         speaker: node.speaker,

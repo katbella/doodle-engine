@@ -3,6 +3,8 @@
  */
 
 export interface PauseMenuProps {
+    /** Resolved UI strings from snapshot.ui */
+    ui: Record<string, string>;
     /** Resume gameplay */
     onResume: () => void;
     /** Save the game */
@@ -18,6 +20,7 @@ export interface PauseMenuProps {
 }
 
 export function PauseMenu({
+    ui,
     onResume,
     onSave,
     onLoad,
@@ -31,16 +34,16 @@ export function PauseMenu({
                 <h2 className="pause-title">Paused</h2>
                 <div className="pause-buttons">
                     <button className="pause-button" onClick={onResume}>
-                        Resume
+                        {ui['ui.resume']}
                     </button>
                     <button className="pause-button" onClick={onSave}>
-                        Save
+                        {ui['ui.save']}
                     </button>
                     <button className="pause-button" onClick={onLoad}>
-                        Load
+                        {ui['ui.load']}
                     </button>
                     <button className="pause-button" onClick={onSettings}>
-                        Settings
+                        {ui['ui.settings']}
                     </button>
                     <button
                         className="pause-button pause-button-quit"

@@ -1,4 +1,20 @@
 # ===================
+# UI Strings (English defaults are built in — uncomment to customize)
+# ===================
+# ui.continue: "Continue"
+# ui.inventory: "Inventory"
+# ui.journal: "Journal"
+# ui.map: "Map"
+# ui.save_load: "Save/Load"
+# ui.settings: "Settings"
+# ui.save: "Save"
+# ui.load: "Load"
+# ui.new_game: "New Game"
+# ui.resume: "Resume"
+# ui.no_companions: "No companions"
+# ui.narrator: "Narrator"
+
+# ===================
 # Narrator Intros
 # ===================
 narrator.tavern_intro: "You push open the heavy oak door and step inside. The warmth hits you first, then the smell: stale ale, wood smoke, and something frying in the kitchen. A few patrons hunch over their mugs. Behind the bar, a broad-shouldered man wipes down glasses, watching you with quiet interest."

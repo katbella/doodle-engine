@@ -8,6 +8,8 @@
 import type { ShellConfig } from '@doodle-engine/core';
 
 export interface TitleScreenProps {
+    /** Resolved UI strings (from buildUIStrings or snapshot.ui) */
+    ui: Record<string, string>;
     /** Shell title config (from game.yaml) */
     shell?: ShellConfig['title'];
     /** Whether a save exists to continue from */
@@ -27,6 +29,7 @@ export interface TitleScreenProps {
 }
 
 export function TitleScreen({
+    ui,
     shell,
     hasSaveData,
     onNewGame,
@@ -51,15 +54,15 @@ export function TitleScreen({
             {subtitle && <p className="title-subtitle">{subtitle}</p>}
             <div className="title-menu">
                 <button className="title-button" onClick={onNewGame}>
-                    New Game
+                    {ui['ui.new_game']}
                 </button>
                 {hasSaveData && (
                     <button className="title-button" onClick={onContinue}>
-                        Continue
+                        {ui['ui.resume']}
                     </button>
                 )}
                 <button className="title-button" onClick={onSettings}>
-                    Settings
+                    {ui['ui.settings']}
                 </button>
             </div>
         </div>

@@ -35,6 +35,7 @@ NODE start
 
 NODE rumors
   BARTENDER: Word is the merchant at the market square is looking for help. Pays well, too.
+  # Player sees this text and clicks Continue, then engine goes to farewell
   GOTO farewell
 
 NODE farewell
@@ -77,6 +78,8 @@ NODE farewell
 - `GOTO` routes to another node
 - `END dialogue` closes the conversation
 - `END` (without `dialogue`) closes a CHOICE or IF block
+- A node with text but no choices shows a **Continue** button — the player must click to advance
+- A node with no text and no choices is a **silent processing node** that auto-advances instantly
 
 ## Choices with Effects
 

@@ -79,6 +79,8 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                             <ChoiceList
                                 choices={snapshot.choices}
                                 onSelectChoice={actions.selectChoice}
+                                onContinue={actions.continueDialogue}
+                                continueLabel={snapshot.ui['ui.continue']}
                             />
                         </div>
                     ) : (
@@ -95,7 +97,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     <div className="party-panel">
                         <h2>Party</h2>
                         {snapshot.party.length === 0 ? (
-                            <p className="party-empty">No companions</p>
+                            <p className="party-empty">{snapshot.ui['ui.no_companions']}</p>
                         ) : (
                             <div className="party-portraits">
                                 {snapshot.party.map((member) => (
@@ -143,7 +145,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
 
             <nav className="game-bottom-bar">
                 <BottomBarButton
-                    label="Inventory"
+                    label={snapshot.ui['ui.inventory']}
                     icon="inventory"
                     onClick={() =>
                         setActivePanel(
@@ -153,7 +155,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     active={activePanel === 'inventory'}
                 />
                 <BottomBarButton
-                    label="Journal"
+                    label={snapshot.ui['ui.journal']}
                     icon="journal"
                     onClick={() =>
                         setActivePanel(
@@ -164,7 +166,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                 />
                 {snapshot.map && (
                     <BottomBarButton
-                        label="Map"
+                        label={snapshot.ui['ui.map']}
                         icon="map"
                         onClick={() =>
                             setActivePanel(
@@ -175,7 +177,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     />
                 )}
                 <BottomBarButton
-                    label="Save/Load"
+                    label={snapshot.ui['ui.save_load']}
                     icon="save"
                     onClick={() =>
                         setActivePanel(
@@ -185,7 +187,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     active={activePanel === 'saveload'}
                 />
                 <BottomBarButton
-                    label="Settings"
+                    label={snapshot.ui['ui.settings']}
                     icon="settings"
                     onClick={() =>
                         setActivePanel(
@@ -274,6 +276,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <SaveLoadPanel
+                            ui={snapshot.ui}
                             onSave={actions.saveGame}
                             onLoad={actions.loadGame}
                         />
