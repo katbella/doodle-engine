@@ -555,4 +555,125 @@ describe('Snapshot Builder', () => {
             expect(snapshot.location.description).toBe('Inline text');
         });
     });
+
+    describe('ui strings', () => {
+        it('should include ui record with all keys', () => {
+            const state = createTestState();
+            const registry = createTestRegistry();
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.ui).toBeDefined();
+            expect(typeof snapshot.ui).toBe('object');
+        });
+
+        it('should use English defaults when locale has no ui.* keys', () => {
+            const state = createTestState();
+            const registry = createTestRegistry();
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.ui['ui.inventory']).toBe('Inventory');
+            expect(snapshot.ui['ui.journal']).toBe('Journal');
+            expect(snapshot.ui['ui.map']).toBe('Map');
+            expect(snapshot.ui['ui.save_load']).toBe('Save/Load');
+            expect(snapshot.ui['ui.settings']).toBe('Settings');
+            expect(snapshot.ui['ui.save']).toBe('Save');
+            expect(snapshot.ui['ui.load']).toBe('Load');
+            expect(snapshot.ui['ui.new_game']).toBe('New Game');
+            expect(snapshot.ui['ui.resume']).toBe('Resume');
+            expect(snapshot.ui['ui.no_companions']).toBe('No companions');
+            expect(snapshot.ui['ui.narrator']).toBe('Narrator');
+            expect(snapshot.ui['ui.continue']).toBe('Continue');
+        });
+
+        it('should override defaults with locale-defined ui.* keys', () => {
+            const state = createTestState();
+            const registry = {
+                ...createTestRegistry(),
+                locales: {
+                    en: {
+                        ...createTestRegistry().locales.en,
+                        'ui.inventory': 'Inventario',
+                        'ui.journal': 'Diario',
+                        'ui.narrator': 'Narrador',
+                    },
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.ui['ui.inventory']).toBe('Inventario');
+            expect(snapshot.ui['ui.journal']).toBe('Diario');
+            expect(snapshot.ui['ui.narrator']).toBe('Narrador');
+            // Non-overridden keys still use defaults
+            expect(snapshot.ui['ui.map']).toBe('Map');
+        });
+
+        it('should use narrator ui string as speakerName for narration nodes', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'narration_test',
+                    nodeId: 'narrate',
+                },
+            };
+            const registry = {
+                ...createTestRegistry(),
+                locales: {
+                    en: {
+                        ...createTestRegistry().locales.en,
+                        'ui.narrator': 'Storyteller',
+                    },
+                },
+                dialogues: {
+                    ...createTestRegistry().dialogues,
+                    narration_test: {
+                        id: 'narration_test',
+                        startNode: 'narrate',
+                        nodes: [
+                            {
+                                id: 'narrate',
+                                speaker: null,
+                                text: 'The wind howled.',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.dialogue?.speaker).toBeNull();
+            expect(snapshot.dialogue?.speakerName).toBe('Storyteller');
+        });
+
+        it('should use default narrator name when no ui.narrator locale key', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'narration_test',
+                    nodeId: 'narrate',
+                },
+            };
+            const registry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    ...createTestRegistry().dialogues,
+                    narration_test: {
+                        id: 'narration_test',
+                        startNode: 'narrate',
+                        nodes: [
+                            {
+                                id: 'narrate',
+                                speaker: null,
+                                text: 'The wind howled.',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.dialogue?.speakerName).toBe('Narrator');
+        });
+    });
 });

@@ -288,12 +288,18 @@ describe('Engine', () => {
             const config = createTestConfig();
             const snapshot = engine.newGame(config);
 
-            // tavern_enter should trigger, apply effects (setFlag), then endDialogue
-            // So dialogue is null but flag should be set
-            expect(snapshot.dialogue).toBeNull();
+            // tavern_enter triggers and shows its text (text-only node, waits for click)
+            expect(snapshot.dialogue?.text).toBe(
+                'You enter the tavern for the first time'
+            );
 
+            // Flag was set by the effect before settleAtNode showed the text
             const saveData = engine.saveGame();
             expect(saveData.state.flags.visitedTavern).toBe(true);
+
+            // Player clicks Continue — no next node so dialogue ends
+            const snapshot2 = engine.continueDialogue();
+            expect(snapshot2.dialogue).toBeNull();
         });
     });
 
@@ -336,6 +342,7 @@ describe('Engine', () => {
         it('should do nothing if character has no dialogue', () => {
             const config = createTestConfig();
             engine.newGame(config);
+            engine.continueDialogue(); // dismiss tavern_enter triggered dialogue
 
             // Remove dialogue from bartender
             registry.characters.bartender.dialogue = '';
@@ -357,18 +364,18 @@ describe('Engine', () => {
             const saveData = engine.saveGame();
             expect(saveData.state.flags.greetedBartender).toBe(true);
 
-            // Response node has no choices and endDialogue effect, so dialogue ends immediately
-            expect(snapshot.dialogue).toBeNull();
+            // Response node has text — shown, waiting for player to click Continue
+            expect(snapshot.dialogue?.text).toBe('Nice to meet you');
         });
 
         it('should end dialogue when reaching node with endDialogue effect', () => {
             const config = createTestConfig();
             engine.newGame(config);
             engine.talkTo('bartender');
-            engine.selectChoice('choice_hello');
+            engine.selectChoice('choice_hello'); // → 'Nice to meet you' shown
 
-            // The response node has endDialogue effect
-            const snapshot = engine.getSnapshot();
+            // Player clicks Continue — endDialogue already fired, no next → ends
+            const snapshot = engine.continueDialogue();
             expect(snapshot.dialogue).toBeNull();
         });
 
@@ -608,10 +615,14 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
+            // 'start' node has text — shown first
             const snapshot = customEngine.talkTo('bartender');
+            expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Should land on 'correct' node (second conditionalNext, first passing)
-            expect(snapshot.dialogue?.text).toBe('Correct node');
+            // Player continues — conditionalNext evaluates with test_flag set
+            // Should land on 'correct' (second conditionalNext, first passing)
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('Correct node');
         });
 
         it('should fall through to node.next when no conditionalNext passes', () => {
@@ -670,10 +681,13 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
+            // 'start' node has text — shown first
             const snapshot = customEngine.talkTo('bartender');
+            expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Should fall through to node.next
-            expect(snapshot.dialogue?.text).toBe('Fallthrough node');
+            // Player continues — no conditionalNext passes, falls through to node.next
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('Fallthrough node');
         });
 
         it('should end dialogue when no conditionalNext passes and no node.next', () => {
@@ -726,10 +740,13 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
+            // 'start' node has text — shown first
             const snapshot = customEngine.talkTo('bartender');
+            expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Should end dialogue
-            expect(snapshot.dialogue).toBeNull();
+            // Player continues — no conditionalNext passes, no node.next → ends
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue).toBeNull();
         });
 
         it('should apply effects before evaluating conditionalNext', () => {
@@ -792,10 +809,13 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
+            // 'start' node has text — shown first (effects including setFlag('unlocked') already ran)
             const snapshot = customEngine.talkTo('bartender');
+            expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Effects should run before branching, so flag is set and condition passes
-            expect(snapshot.dialogue?.text).toBe('Unlocked path');
+            // Player continues — conditionalNext evaluates with 'unlocked' flag set
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('Unlocked path');
         });
 
         it('should not evaluate conditionalNext on nodes with choices', () => {
@@ -865,6 +885,220 @@ describe('Engine', () => {
             // Should stay at start node because it has choices
             expect(snapshot.dialogue?.text).toBe('Start node with choices');
             expect(snapshot.choices).toHaveLength(1);
+        });
+    });
+
+    describe('continueDialogue', () => {
+        it('should do nothing when not in dialogue', () => {
+            engine.newGame(createTestConfig());
+
+            const snapshot = engine.continueDialogue();
+            expect(snapshot.dialogue).toBeNull();
+        });
+
+        it('should show text-only node and end dialogue when no next exists', () => {
+            const reg: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    text_only: {
+                        id: 'text_only',
+                        startNode: 'start',
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: 'bartender',
+                                text: 'Hello!',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'text_only',
+                        stats: {},
+                    },
+                },
+            };
+            const customEngine = new Engine(reg, {} as any);
+            customEngine.newGame(createTestConfig());
+
+            const snapshot1 = customEngine.talkTo('bartender');
+            expect(snapshot1.dialogue?.text).toBe('Hello!');
+            expect(snapshot1.choices).toHaveLength(0);
+
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue).toBeNull();
+        });
+
+        it('should advance to the next text node', () => {
+            const reg: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    multi_text: {
+                        id: 'multi_text',
+                        startNode: 'first',
+                        nodes: [
+                            {
+                                id: 'first',
+                                speaker: 'bartender',
+                                text: 'First line.',
+                                choices: [],
+                                next: 'second',
+                            },
+                            {
+                                id: 'second',
+                                speaker: 'bartender',
+                                text: 'Second line.',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'multi_text',
+                        stats: {},
+                    },
+                },
+            };
+            const customEngine = new Engine(reg, {} as any);
+            customEngine.newGame(createTestConfig());
+
+            const snapshot1 = customEngine.talkTo('bartender');
+            expect(snapshot1.dialogue?.text).toBe('First line.');
+
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('Second line.');
+
+            const snapshot3 = customEngine.continueDialogue();
+            expect(snapshot3.dialogue).toBeNull();
+        });
+
+        it('should skip silent nodes and land on the next text node', () => {
+            const reg: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    with_silent: {
+                        id: 'with_silent',
+                        startNode: 'setup',
+                        nodes: [
+                            {
+                                id: 'setup',
+                                speaker: 'bartender',
+                                text: 'Setup.',
+                                choices: [],
+                                next: 'silent',
+                            },
+                            {
+                                id: 'silent',
+                                speaker: null,
+                                text: '',
+                                choices: [],
+                                effects: [
+                                    { type: 'setFlag', flag: 'passed_through' },
+                                ],
+                                next: 'result',
+                            },
+                            {
+                                id: 'result',
+                                speaker: 'bartender',
+                                text: 'Done!',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'with_silent',
+                        stats: {},
+                    },
+                },
+            };
+            const customEngine = new Engine(reg, {} as any);
+            customEngine.newGame(createTestConfig());
+
+            const snapshot1 = customEngine.talkTo('bartender');
+            expect(snapshot1.dialogue?.text).toBe('Setup.');
+
+            // continueDialogue skips the silent node and lands on 'result'
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('Done!');
+
+            // Silent node's effects ran
+            const saveData = customEngine.saveGame();
+            expect(saveData.state.flags.passed_through).toBe(true);
+        });
+
+        it('should advance to choices when next node has choices', () => {
+            const reg: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    text_then_choices: {
+                        id: 'text_then_choices',
+                        startNode: 'intro',
+                        nodes: [
+                            {
+                                id: 'intro',
+                                speaker: 'bartender',
+                                text: 'Welcome!',
+                                choices: [],
+                                next: 'ask',
+                            },
+                            {
+                                id: 'ask',
+                                speaker: 'bartender',
+                                text: 'What will it be?',
+                                choices: [
+                                    {
+                                        id: 'ale',
+                                        text: 'Ale, please.',
+                                        effects: [],
+                                        next: '',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'text_then_choices',
+                        stats: {},
+                    },
+                },
+            };
+            const customEngine = new Engine(reg, {} as any);
+            customEngine.newGame(createTestConfig());
+
+            const snapshot1 = customEngine.talkTo('bartender');
+            expect(snapshot1.dialogue?.text).toBe('Welcome!');
+            expect(snapshot1.choices).toHaveLength(0);
+
+            const snapshot2 = customEngine.continueDialogue();
+            expect(snapshot2.dialogue?.text).toBe('What will it be?');
+            expect(snapshot2.choices).toHaveLength(1);
         });
     });
 

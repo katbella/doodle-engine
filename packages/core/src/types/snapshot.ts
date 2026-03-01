@@ -231,4 +231,7 @@ export interface Snapshot {
 
     /** Interlude to show fullscreen (from showInterlude effect or trigger) */
     pendingInterlude: SnapshotInterlude | null;
+
+    /** Resolved UI strings for the renderer. All @keys resolved. */
+    ui: Record<string, string>;
 }

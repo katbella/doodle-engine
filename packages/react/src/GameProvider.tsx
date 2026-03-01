@@ -19,6 +19,7 @@ export interface GameContextValue {
     snapshot: Snapshot;
     actions: {
         selectChoice: (choiceId: string) => void;
+        continueDialogue: () => void;
         talkTo: (characterId: string) => void;
         takeItem: (itemId: string) => void;
         travelTo: (locationId: string) => void;
@@ -81,6 +82,12 @@ export function GameProvider({
         },
         [engine]
     );
+
+    // Action: Continue past a text-only dialogue node
+    const continueDialogue = useCallback(() => {
+        const newSnapshot = engine.continueDialogue();
+        setSnapshot(newSnapshot);
+    }, [engine]);
 
     // Action: Talk to a character
     const talkTo = useCallback(
@@ -159,6 +166,7 @@ export function GameProvider({
         snapshot,
         actions: {
             selectChoice,
+            continueDialogue,
             talkTo,
             takeItem,
             travelTo,
