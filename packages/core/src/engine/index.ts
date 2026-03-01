@@ -366,6 +366,16 @@ export class Engine {
         const daysToAdd = Math.floor(newHour / 24);
         const finalHour = newHour % 24;
 
+        const updatedCharacterState = { ...this.state.characterState };
+        for (const [charId, charState] of Object.entries(updatedCharacterState)) {
+            if (charState.inParty) {
+                updatedCharacterState[charId] = {
+                    ...charState,
+                    location: locationId,
+                };
+            }
+        }
+
         this.state = {
             ...this.state,
             currentLocation: locationId,
@@ -374,6 +384,7 @@ export class Engine {
                 day: this.state.currentTime.day + daysToAdd,
                 hour: finalHour,
             },
+            characterState: updatedCharacterState,
         };
 
         // Check for triggered dialogues and interludes at new location
