@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.33
+
+### Patch Changes
+
+- 51fb9f1: auto continue
+
 ## 0.0.32
 
 ### Patch Changes
