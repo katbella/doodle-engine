@@ -53,7 +53,6 @@ All game content lives in `content/`. The engine loads files by directory:
 The root configuration file. Required fields:
 
 ```yaml
-id: game
 startLocation: tavern # Where the player begins
 startTime:
     day: 1

@@ -303,9 +303,20 @@ function applyMoveItem(
  * Example: GOTO location tavern
  */
 function applyGoToLocation(locationId: string, state: GameState): GameState {
+    const updatedCharacterState = { ...state.characterState };
+    for (const [charId, charState] of Object.entries(updatedCharacterState)) {
+        if (charState.inParty) {
+            updatedCharacterState[charId] = {
+                ...charState,
+                location: locationId,
+            };
+        }
+    }
+
     return {
         ...state,
         currentLocation: locationId,
+        characterState: updatedCharacterState,
     };
 }
 
@@ -440,6 +451,7 @@ function applyAddToParty(characterId: string, state: GameState): GameState {
             [characterId]: {
                 ...characterState,
                 inParty: true,
+                location: state.currentLocation,
             },
         },
     };

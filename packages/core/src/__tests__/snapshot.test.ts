@@ -264,6 +264,38 @@ describe('Snapshot Builder', () => {
             expect(snapshot.party[0].inParty).toBe(true);
         });
 
+        it('should not include party members in charactersHere even at the same location', () => {
+            // Move pixel_the_dog to tavern (same as player) but keep inParty: true
+            const state = {
+                ...createTestState(),
+                characterState: {
+                    bartender: {
+                        location: 'tavern',
+                        inParty: false,
+                        relationship: 5,
+                        stats: {},
+                    },
+                    pixel_the_dog: {
+                        location: 'tavern', // same location as player
+                        inParty: true,
+                        relationship: 10,
+                        stats: { level: 3 },
+                    },
+                },
+            };
+            const registry = createTestRegistry();
+            const snapshot = buildSnapshot(state, registry);
+
+            // bartender should appear in charactersHere
+            expect(snapshot.charactersHere).toHaveLength(1);
+            expect(snapshot.charactersHere[0].id).toBe('bartender');
+
+            // pixel should appear in party, not in charactersHere
+            expect(snapshot.party).toHaveLength(1);
+            expect(snapshot.party[0].id).toBe('pixel_the_dog');
+            expect(snapshot.charactersHere.find((c) => c.id === 'pixel_the_dog')).toBeUndefined();
+        });
+
         it('should include inventory items', () => {
             const state = createTestState();
             const registry = createTestRegistry();

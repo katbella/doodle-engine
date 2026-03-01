@@ -194,7 +194,6 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 **File:** `content/game.yaml`
 
 ```yaml
-id: game
 startLocation: tavern
 startTime:
     day: 1

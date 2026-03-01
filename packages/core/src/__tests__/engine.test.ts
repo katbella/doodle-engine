@@ -442,6 +442,33 @@ describe('Engine', () => {
             expect(snapshot.time.hour).toBe(18); // 8 + 10
         });
 
+        it('should move party members to the destination when traveling', () => {
+            const config = createTestConfig();
+            engine.newGame(config);
+
+            // Add bartender to party (they are at tavern, same as player)
+            const saveData = engine.saveGame();
+            saveData.state.characterState.bartender.inParty = true;
+            saveData.state.characterState.bartender.location = 'tavern';
+            engine.loadGame(saveData);
+
+            engine.travelTo('market');
+
+            const afterTravel = engine.saveGame();
+            expect(afterTravel.state.characterState.bartender.location).toBe('market');
+        });
+
+        it('should not move non-party characters when traveling', () => {
+            const config = createTestConfig();
+            engine.newGame(config);
+
+            // pixel_the_dog is at camp and not in party
+            engine.travelTo('market');
+
+            const afterTravel = engine.saveGame();
+            expect(afterTravel.state.characterState.pixel_the_dog.location).toBe('camp');
+        });
+
         it('should not allow travel when map is disabled', () => {
             const config = createTestConfig();
             engine.newGame(config);
