@@ -136,7 +136,7 @@ export { applyEffect, applyEffects } from './effects';
 export { resolveText, createResolver } from './localization';
 
 // Snapshot Builder
-export { buildSnapshot } from './snapshot';
+export { buildSnapshot, buildUIStrings } from './snapshot';
 
 // Engine
 export { Engine } from './engine';
