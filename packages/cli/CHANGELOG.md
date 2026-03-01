@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.33
+
+### Patch Changes
+
+- 51fb9f1: auto continue
+- Updated dependencies [51fb9f1]
+    - @doodle-engine/react@0.0.33
+    - @doodle-engine/core@0.0.33
+
 ## 0.0.32
 
 ### Patch Changes
