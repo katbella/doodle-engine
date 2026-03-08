@@ -230,7 +230,7 @@ Text-only nodes are the natural way to present narration, character monologues, 
 
 ### Silent processing nodes (no text, no choices)
 
-A node with **no speaker line and no text** is a **silent processing node**. The engine processes it instantly — applying effects and evaluating `IF` blocks — then advances to the next node without waiting for the player.
+A node with **no speaker line and no text** is a **silent processing node**. The engine processes it instantly, applying effects and evaluating `IF` blocks, then advances to the next node without waiting for the player.
 
 ```
 # Roll the dice and branch. The player never sees this node as a prompt.
@@ -257,7 +257,7 @@ NODE failure
   END
 ```
 
-`skill_check` is silent — it runs `ROLL`, evaluates the `IF`, and jumps to `success` or `failure` without the player seeing any prompt.
+`skill_check` is silent. It runs `ROLL`, evaluates the `IF`, and jumps to `success` or `failure` without the player seeing any prompt.
 
 ### Summary
 
@@ -265,7 +265,7 @@ NODE failure
 |-----------|-----------|--------------|-------------|
 | Text-only | Yes | No | Text + Continue button |
 | Choice node | Yes or no | Yes | Text + choice buttons |
-| Silent processing | No | No | Nothing — auto-advances |
+| Silent processing | No | No | Auto-advances instantly |
 
 ### IF vs CHOICE REQUIRE
 

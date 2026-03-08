@@ -6,8 +6,8 @@
  * Wraps AssetProvider + GameProvider + GameRenderer with full shell chrome.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Engine, buildUIStrings } from '@doodle-engine/core';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Engine, buildUIStrings, resolveAssetPath } from '@doodle-engine/core';
 import type {
     ContentRegistry,
     GameConfig,
@@ -23,6 +23,7 @@ import { GameRenderer } from './GameRenderer';
 import { AssetProvider } from './AssetProvider';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useUISounds } from './hooks/useUISounds';
+import { AudioSettingsProvider, useAudioSettings } from './AudioSettingsContext';
 import type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
 import type { AudioManagerOptions } from './hooks/useAudioManager';
 import { SplashScreen } from './components/SplashScreen';
@@ -84,32 +85,34 @@ export function GameShell({
     const shell = config.shell;
 
     return (
-        <AssetProvider
-            manifest={manifest}
-            loader={assetLoader}
-            renderLoading={(state) => {
-                if (renderLoading) return renderLoading(state);
-                return (
-                    <LoadingScreen
-                        state={state}
-                        background={shell?.loading?.background}
-                    />
-                );
-            }}
-        >
-            <GameShellInner
-                registry={registry}
-                config={config}
-                title={title}
-                subtitle={subtitle}
-                uiSoundsConfig={uiSoundsConfig}
-                audioOptions={audioOptions}
-                storageKey={storageKey}
-                availableLocales={availableLocales}
-                className={className}
-                devTools={devTools}
-            />
-        </AssetProvider>
+        <AudioSettingsProvider defaults={audioOptions}>
+            <AssetProvider
+                manifest={manifest}
+                loader={assetLoader}
+                renderLoading={(state) => {
+                    if (renderLoading) return renderLoading(state);
+                    return (
+                        <LoadingScreen
+                            state={state}
+                            background={shell?.loading?.background}
+                        />
+                    );
+                }}
+            >
+                <GameShellInner
+                    registry={registry}
+                    config={config}
+                    title={title}
+                    subtitle={subtitle}
+                    uiSoundsConfig={uiSoundsConfig}
+                    audioOptions={audioOptions}
+                    storageKey={storageKey}
+                    availableLocales={availableLocales}
+                    className={className}
+                    devTools={devTools}
+                />
+            </AssetProvider>
+        </AudioSettingsProvider>
     );
 }
 
@@ -178,6 +181,7 @@ function GameShellInner({
             mapEnabled: true,
             notifications: [],
             pendingSounds: [],
+            musicOverride: null,
             pendingVideo: null,
             pendingInterlude: null,
             currentLocale: 'en',
@@ -246,6 +250,39 @@ function GameShellInner({
         if (settingsFrom === 'pause') setShowPauseMenu(true);
     }, [settingsFrom, uiSoundControls]);
 
+    // Title screen music
+    const audioSettings = useAudioSettings();
+    const titleMusicRef = useRef<HTMLAudioElement | null>(null);
+    const titleMusicPath = resolveAssetPath(shell?.title?.music, 'music');
+
+    useEffect(() => {
+        if (screen !== 'title' || !titleMusicPath) return;
+        const audio = new Audio(titleMusicPath);
+        audio.loop = true;
+        audio.volume = audioSettings.masterVolume * audioSettings.musicVolume;
+        titleMusicRef.current = audio;
+        audio.play().catch(() => {});
+        return () => {
+            audio.pause();
+            audio.src = '';
+            titleMusicRef.current = null;
+        };
+    }, [screen, titleMusicPath]);
+
+    useEffect(() => {
+        if (titleMusicRef.current) {
+            titleMusicRef.current.volume = audioSettings.masterVolume * audioSettings.musicVolume;
+        }
+    }, [audioSettings.masterVolume, audioSettings.musicVolume]);
+
+    const titleAudioControls = {
+        setMasterVolume: audioSettings.setMasterVolume,
+        setMusicVolume: audioSettings.setMusicVolume,
+        setSoundVolume: audioSettings.setSoundVolume,
+        setVoiceVolume: audioSettings.setVoiceVolume,
+        stopAll: () => { titleMusicRef.current?.pause(); },
+    };
+
     // Escape key toggles pause menu
     useEffect(() => {
         if (screen !== 'playing') return;
@@ -269,14 +306,6 @@ function GameShellInner({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [screen, showPauseMenu, showSettings, closeSettings, uiSoundControls]);
 
-    // Stub audio controls for settings when not playing
-    const stubAudioControls = {
-        setMasterVolume: () => {},
-        setMusicVolume: () => {},
-        setSoundVolume: () => {},
-        setVoiceVolume: () => {},
-        stopAll: () => {},
-    };
 
     // Splash screen
     if (screen === 'splash') {
@@ -296,7 +325,7 @@ function GameShellInner({
             <div className={`game-shell ${className}`}>
                 {showSettings ? (
                     <SettingsPanel
-                        audioControls={stubAudioControls}
+                        audioControls={titleAudioControls}
                         uiSoundControls={
                             uiSoundsConfig !== false
                                 ? uiSoundControls
@@ -399,7 +428,26 @@ function GameShellPlaying({
     onCloseSettings,
 }: GameShellPlayingProps) {
     const { snapshot, actions } = useGame();
-    const audioControls = useAudioManager(snapshot, audioOptions);
+    const audioSettings = useAudioSettings();
+
+    // Use persisted volumes as initial values, write back when player changes them
+    const mergedAudioOptions: AudioManagerOptions = {
+        ...audioOptions,
+        masterVolume: audioSettings.masterVolume,
+        musicVolume: audioSettings.musicVolume,
+        soundVolume: audioSettings.soundVolume,
+        voiceVolume: audioSettings.voiceVolume,
+    };
+    const rawAudioControls = useAudioManager(snapshot, mergedAudioOptions);
+
+    // Wrap controls so volume changes persist to context/localStorage
+    const audioControls = {
+        ...rawAudioControls,
+        setMasterVolume: (v: number) => { rawAudioControls.setMasterVolume(v); audioSettings.setMasterVolume(v); },
+        setMusicVolume: (v: number) => { rawAudioControls.setMusicVolume(v); audioSettings.setMusicVolume(v); },
+        setSoundVolume: (v: number) => { rawAudioControls.setSoundVolume(v); audioSettings.setSoundVolume(v); },
+        setVoiceVolume: (v: number) => { rawAudioControls.setVoiceVolume(v); audioSettings.setVoiceVolume(v); },
+    };
 
     // Watch for pending video from snapshot
     useEffect(() => {

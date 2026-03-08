@@ -253,6 +253,7 @@ describe('Engine', () => {
             mapEnabled: true,
             notifications: [],
             pendingSounds: [],
+            musicOverride: null,
             pendingVideo: null,
             pendingInterlude: null,
             currentLocale: 'en',

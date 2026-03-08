@@ -78,7 +78,7 @@ NODE farewell
 - `GOTO` routes to another node
 - `END dialogue` closes the conversation
 - `END` (without `dialogue`) closes a CHOICE or IF block
-- A node with text but no choices shows a **Continue** button — the player must click to advance
+- A node with text but no choices shows a **Continue** button. The player must click to advance.
 - A node with no text and no choices is a **silent processing node** that auto-advances instantly
 
 ## Choices with Effects

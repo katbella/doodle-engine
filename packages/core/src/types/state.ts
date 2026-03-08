@@ -96,6 +96,9 @@ export interface GameState {
     /** Sound effects to play (cleared after snapshot is built) */
     pendingSounds: string[];
 
+    /** Music track override set by a playMusic effect (null = use location.music) */
+    musicOverride: string | null;
+
     /** Video to play (cleared after snapshot is built) */
     pendingVideo: string | null;
 

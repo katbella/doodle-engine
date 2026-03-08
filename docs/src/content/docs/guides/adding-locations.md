@@ -92,7 +92,7 @@ The `TRIGGER` keyword auto-starts this dialogue when the player enters the taver
 When a player travels to a location:
 
 1. `currentLocation` updates to the new location
-2. Time advances based on map `scale` and distance — formula: `travel time = distance in pixels / scale`
+2. Time advances based on map `scale` and distance. The formula is `travel time = distance in pixels / scale`.
 3. Any active dialogue ends
 4. Triggered dialogues at the new location are checked
 

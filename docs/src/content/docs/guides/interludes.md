@@ -86,6 +86,16 @@ The effects run at trigger time (before the player even sees the interlude), so 
 
 **Important:** do NOT set the "seen" flag in a dialogue node that fires before the interlude check. The engine evaluates `triggerConditions` first, then applies `effects`. Setting the flag in a dialogue would mark the interlude as seen before the check runs, causing it to never trigger.
 
+## Audio
+
+The `Interlude` component plays audio fields automatically when the interlude appears:
+
+- **`music`**: loops for the full duration and stops on dismiss
+- **`voice`**: plays once as narration and stops on dismiss if still playing
+- **`sounds`**: each entry loops as ambient audio and stops on dismiss
+
+Volumes follow the player's current settings. All audio stops when the player skips.
+
 ## Player Controls
 
 | Action               | Effect                             |

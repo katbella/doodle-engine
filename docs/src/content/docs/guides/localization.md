@@ -112,7 +112,7 @@ narrator.<context>
 
 ## UI Strings
 
-The renderer's interface labels — buttons, sidebar tabs, panel headers — are localized through the same locale files as all other text. Define `ui.*` keys in your locale YAML to override the English defaults.
+The renderer's interface labels (buttons, sidebar tabs, panel headers) are localized through the same locale files as all other text. Define `ui.*` keys in your locale YAML to override the English defaults.
 
 If you don't define a `ui.*` key, the English default is used automatically. You only need to add these keys for non-English locales or if you want to customize the wording.
 

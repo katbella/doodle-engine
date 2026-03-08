@@ -41,6 +41,7 @@ function createTestState(): GameState {
         mapEnabled: true,
         notifications: [],
         pendingSounds: [],
+        musicOverride: null,
         pendingVideo: null,
         pendingInterlude: null,
         currentLocale: 'en',
@@ -560,15 +561,26 @@ describe('Effect Processors', () => {
     });
 
     describe('playMusic', () => {
-        it('should not modify state (audio handled by renderer)', () => {
+        it('should set musicOverride to the given track', () => {
             const effect: Effect = {
                 type: 'playMusic',
-                track: 'tension_theme.ogg',
+                track: 'romance_theme.ogg',
             };
             const state = createTestState();
             const newState = applyEffect(effect, state);
 
-            expect(newState).toBe(state); // Same reference since no modification
+            expect(newState.musicOverride).toBe('romance_theme.ogg');
+        });
+
+        it('should clear musicOverride when track is empty', () => {
+            const effect: Effect = {
+                type: 'playMusic',
+                track: '',
+            };
+            const state = { ...createTestState(), musicOverride: 'romance_theme.ogg' };
+            const newState = applyEffect(effect, state);
+
+            expect(newState.musicOverride).toBeNull();
         });
     });
 

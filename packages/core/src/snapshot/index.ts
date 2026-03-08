@@ -141,9 +141,9 @@ export function buildSnapshot(
         ? buildMapSnapshot(state, registry, resolve)
         : null;
 
-    // Get music and ambient from current location
+    // Get music and ambient from current location, respecting any playMusic override
     const locationData = registry.locations[state.currentLocation];
-    const music = resolveAssetPath(locationData?.music, 'music');
+    const music = resolveAssetPath(state.musicOverride ?? locationData?.music, 'music');
     const ambient = resolveAssetPath(locationData?.ambient, 'ambient');
 
     // Resolve notification localization keys
@@ -473,16 +473,12 @@ function buildJournalSnapshot(
 
 /**
  * Build map snapshot with all locations.
- * This is a simplified version - in a real implementation, you might want to
- * determine which map to show based on the current location.
  */
 function buildMapSnapshot(
     state: GameState,
     registry: ContentRegistry,
     resolve: (text: string) => string
 ): SnapshotMap | null {
-    // For now, just return the first map in the registry
-    // In a real implementation, you'd determine which map to show based on context
     const mapIds = Object.keys(registry.maps);
     if (mapIds.length === 0) return null;
 

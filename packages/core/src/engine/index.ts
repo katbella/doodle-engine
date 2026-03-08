@@ -87,6 +87,7 @@ export class Engine {
             mapEnabled: true,
             notifications: [],
             pendingSounds: [],
+            musicOverride: null,
             pendingVideo: null,
             pendingInterlude: null,
             currentLocale: 'en', // Default locale
@@ -109,8 +110,6 @@ export class Engine {
      * @returns Snapshot of the loaded game
      */
     loadGame(saveData: SaveData): Snapshot {
-        // In a real implementation, you'd handle version migration here
-        // For now, just restore the state directly
         this.state = { ...saveData.state };
 
         return this.buildSnapshotAndClearTransients();
@@ -350,6 +349,7 @@ export class Engine {
             ...this.state,
             currentLocation: locationId,
             dialogueState: null,
+            musicOverride: null,
             currentTime: {
                 day: this.state.currentTime.day + daysToAdd,
                 hour: finalHour,

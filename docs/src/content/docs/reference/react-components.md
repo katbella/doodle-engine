@@ -202,7 +202,7 @@ import { MapView } from '@doodle-engine/react';
 | `confirmTravel`   | `boolean`                      | `true`   | Show confirmation dialog before travel             |
 | `className`       | `string`                       | `''`     | CSS class                                          |
 
-When `confirmTravel` is `true` and the player clicks a location, a dialog shows the destination name and estimated journey time before any travel occurs. If `currentTime` is provided, the dialog also shows the expected arrival time. If `currentLocation` is not provided, the dialog skips the time estimate and just asks for confirmation. Travel time display is approximate — the engine applies its own time advancement rules when `travelTo` is called.
+When `confirmTravel` is `true` and the player clicks a location, a dialog shows the destination name and estimated journey time before any travel occurs. If `currentTime` is provided, the dialog also shows the expected arrival time. If `currentLocation` is not provided, the dialog skips the time estimate and just asks for confirmation. Travel time display is approximate. The engine applies its own time advancement rules when `travelTo` is called.
 
 ## Inventory
 

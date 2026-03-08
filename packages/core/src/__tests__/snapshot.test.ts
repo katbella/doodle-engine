@@ -196,6 +196,7 @@ function createTestState(): GameState {
         mapEnabled: true,
         notifications: ['@notification.test'],
         pendingSounds: [],
+        musicOverride: null,
         pendingVideo: null,
         pendingInterlude: null,
         currentLocale: 'en',

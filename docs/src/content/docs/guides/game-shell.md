@@ -54,6 +54,17 @@ The title screen shows:
 - **Continue** button (only if a save exists in localStorage)
 - **Settings** button
 
+Configure title screen music in `content/game.yaml`:
+
+```yaml
+shell:
+    title:
+        logo: /assets/images/logo.png
+        music: main_theme.ogg
+```
+
+The music plays on loop while the title screen is visible and stops when the player starts or continues a game.
+
 ## Pause Menu
 
 During gameplay, click the **Menu** button or press **Escape** to open the pause menu with:
@@ -154,12 +165,14 @@ Pass audio options to configure the game audio manager:
 />
 ```
 
+These are the default values. Volume settings are saved to localStorage under `'doodle-engine-audio'` and survive page reloads. The player's last-used settings take precedence over the defaults.
+
 ## Styling
 
 When you run `doodle create`, the scaffolder asks whether to include starter styles:
 
-- **Starter styles** — a dark fantasy theme with warm gold accents, sized layout panels, bottom bar, and panels for inventory, journal, map, and save/load. Everything is defined with CSS custom properties so you can retheme by editing `:root` values in `src/index.css`.
-- **Minimal CSS** — just a body reset. The right choice if you want to write your own styles from scratch.
+- **Starter styles**: a dark fantasy theme with warm gold accents, sized layout panels, bottom bar, and panels for inventory, journal, map, and save/load. Everything is defined with CSS custom properties so you can retheme by editing `:root` values in `src/index.css`.
+- **Minimal CSS**: just a body reset. Use this if you want to write your own styles from scratch.
 
 You can switch at any time by replacing `src/index.css`. The components output semantic class names (`.game-renderer`, `.game-layout`, `.game-main`, `.game-sidebar`, `.game-bottom-bar`, `.dialogue-box`, `.choice-button`, etc.) so any CSS that targets those classes will work.
 

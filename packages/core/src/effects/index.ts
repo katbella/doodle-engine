@@ -115,9 +115,7 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
             return applySetMapEnabled(effect.enabled, state);
 
         case 'playMusic':
-            // Music is handled by snapshot builder (reads from location.music)
-            // This effect is for one-off music changes (not implemented yet)
-            return state;
+            return applyPlayMusic(effect.track, state);
 
         case 'playSound':
             return applyPlaySound(effect.sound, state);
@@ -627,6 +625,20 @@ function applyNotify(message: string, state: GameState): GameState {
     return {
         ...state,
         notifications: [...state.notifications, message],
+    };
+}
+
+/**
+ * Override the current music track.
+ * Persists until the player travels (reset to null) or another playMusic fires.
+ * An empty track clears the override, falling back to location.music.
+ *
+ * Example: MUSIC romance_theme.ogg
+ */
+function applyPlayMusic(track: string, state: GameState): GameState {
+    return {
+        ...state,
+        musicOverride: track || null,
     };
 }
 
