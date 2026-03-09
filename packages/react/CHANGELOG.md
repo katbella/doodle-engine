@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.34
+
+### Patch Changes
+
+- 9b77754: fix playMusic implementation and docs
+- Updated dependencies [9b77754]
+    - @doodle-engine/core@0.0.34
+
 ## 0.0.33
 
 ### Patch Changes
