@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.35
+
+### Patch Changes
+
+- 831b748: fix ambient sound implementation
+
 ## 0.0.34
 
 ### Patch Changes
