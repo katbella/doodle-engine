@@ -7,8 +7,8 @@
  * - Dialogue keywords: SPEAKER:, NARRATOR:, VOICE
  * - Choice blocks with conditions and effects
  * - Conditional blocks (IF/END)
- * - All 14 condition types
- * - All 24 effect types
+ * - All 15 condition types
+ * - All 27 effect types
  * - @localization keys and "inline text"
  */
 
@@ -200,6 +200,9 @@ export function parseEffect(effectStr: string): Effect {
     // Handle special cases that may have localization keys or quoted text
     if (trimmed.startsWith('NOTIFY ')) {
         return { type: 'notify', message: parseText(trimmed.substring(7)) };
+    }
+    if (trimmed === 'MUSIC') {
+        return { type: 'playMusic', track: '' };
     }
     if (trimmed.startsWith('MUSIC ')) {
         return { type: 'playMusic', track: trimmed.substring(6).trim() };

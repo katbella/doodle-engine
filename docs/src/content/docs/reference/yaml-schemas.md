@@ -208,7 +208,7 @@ startInventory: []
 
 | Field            | Type                               | Description                     |
 | ---------------- | ---------------------------------- | ------------------------------- |
-| `id`             | `string`                           | Must be `"game"`                |
+| `shell?`         | `ShellConfig`                      | Shell screen configuration      |
 | `startLocation`  | `string`                           | Starting location ID            |
 | `startTime`      | `{ day: number, hour: number }`    | Starting time                   |
 | `startFlags`     | `Record<string, boolean>`          | Initial flags                   |

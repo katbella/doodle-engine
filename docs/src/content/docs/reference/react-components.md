@@ -33,8 +33,8 @@ interface GameContextValue {
     snapshot: Snapshot;
     actions: {
         selectChoice: (choiceId: string) => void;
+        continueDialogue: () => void;
         talkTo: (characterId: string) => void;
-        takeItem: (itemId: string) => void;
         travelTo: (locationId: string) => void;
         writeNote: (title: string, text: string) => void;
         deleteNote: (noteId: string) => void;
@@ -70,13 +70,19 @@ import { GameRenderer } from '@doodle-engine/react';
 
 - **Main area**: Location view with banner, dialogue box, choices, or character list
 - **Sidebar** (right): Party portraits and resources (visible variables)
-- **Bottom bar**: Inventory, Journal, Map, and Save/Load. Each opens a panel overlay
+- **Bottom bar**: Inventory, Journal, Notes, Map, and Save/Load. Each opens a panel overlay
+
+### Requirements
+
+Requires `GameProvider` for snapshot and actions. If `AudioSettingsProvider` is present in the tree, a Settings button appears in the bottom bar with volume sliders. Without the provider, the settings button is hidden.
+
+When used inside `GameShell`, both providers are already set up. When used standalone, wrap in `AudioSettingsProvider` if you want the built-in settings panel.
 
 ### Features
 
 - Auto-filters underscore-prefixed variables from the Resources panel
-- Integrates `useAudioManager` for automatic audio playback
 - Shows notifications as transient overlays
+- Settings panel with volume controls (requires `AudioSettingsProvider`)
 
 ## DialogueBox
 
@@ -97,21 +103,30 @@ import { DialogueBox } from '@doodle-engine/react';
 
 ## ChoiceList
 
-Displays available dialogue choices as clickable buttons.
+Displays available dialogue choices as clickable buttons. When there are no choices, renders a Continue button instead.
 
 ```tsx
 import { ChoiceList } from '@doodle-engine/react';
 
-<ChoiceList choices={snapshot.choices} onSelectChoice={actions.selectChoice} />;
+<ChoiceList
+    choices={snapshot.choices}
+    onSelectChoice={actions.selectChoice}
+    onContinue={actions.continueDialogue}
+    continueLabel={snapshot.ui['ui.continue']}
+/>;
 ```
 
 ### Props
 
-| Prop             | Type                         | Default  | Description              |
-| ---------------- | ---------------------------- | -------- | ------------------------ |
-| `choices`        | `SnapshotChoice[]`           | required | Available choices        |
-| `onSelectChoice` | `(choiceId: string) => void` | required | Choice selection handler |
-| `className`      | `string`                     | `''`     | CSS class                |
+| Prop             | Type                         | Default      | Description                                 |
+| ---------------- | ---------------------------- | ------------ | ------------------------------------------- |
+| `choices`        | `SnapshotChoice[]`           | required     | Available choices                           |
+| `onSelectChoice` | `(choiceId: string) => void` | required     | Choice selection handler                    |
+| `onContinue`     | `() => void`                 | required     | Called when player clicks Continue          |
+| `continueLabel`  | `string`                     | `'Continue'` | Label for the Continue button               |
+| `className`      | `string`                     | `''`         | CSS class                                   |
+
+Number keys 1–9 select choices by position. Enter and Space trigger the Continue button when it is shown.
 
 ## LocationView
 
@@ -251,6 +266,31 @@ import { Journal } from '@doodle-engine/react';
 - Quests shown first with name, description, and current stage
 - Journal entries shown below, with category used as CSS class (`journal-category-{category}`)
 
+## PlayerNotes
+
+Displays player-written notes with a form to add new ones and a delete button per note.
+
+```tsx
+import { PlayerNotes } from '@doodle-engine/react';
+
+<PlayerNotes
+    notes={snapshot.playerNotes}
+    onWrite={actions.writeNote}
+    onDelete={actions.deleteNote}
+/>;
+```
+
+### Props
+
+| Prop        | Type                                     | Default  | Description              |
+| ----------- | ---------------------------------------- | -------- | ------------------------ |
+| `notes`     | `PlayerNote[]`                           | required | Player-written notes     |
+| `onWrite`   | `(title: string, text: string) => void`  | required | Add note handler         |
+| `onDelete`  | `(noteId: string) => void`               | required | Delete note handler      |
+| `className` | `string`                                 | `''`     | CSS class                |
+
+Notes are stored in game state and persisted through save/load.
+
 ## NotificationArea
 
 Displays transient notifications.
@@ -329,20 +369,44 @@ Fullscreen video/cutscene overlay with a visible Skip button. Also supports skip
 import { VideoPlayer } from '@doodle-engine/react';
 
 <VideoPlayer
-    src="intro_cinematic.mp4"
-    basePath="/video"
+    src={snapshot.pendingVideo}
     onComplete={() => console.log('Video done')}
 />;
 ```
 
 ### Props
 
-| Prop         | Type         | Default    | Description                          |
-| ------------ | ------------ | ---------- | ------------------------------------ |
-| `src`        | `string`     | required   | Video file name                      |
-| `basePath`   | `string`     | `'/video'` | Base path for video files            |
-| `onComplete` | `() => void` | required   | Called when video ends or is skipped |
-| `className`  | `string`     | `''`       | CSS class                            |
+| Prop         | Type         | Default  | Description                          |
+| ------------ | ------------ | -------- | ------------------------------------ |
+| `src`        | `string`     | required | Video file path (resolved by engine) |
+| `onComplete` | `() => void` | required | Called when video ends or is skipped |
+| `className`  | `string`     | `''`     | CSS class                            |
+
+## AssetImage
+
+Image component that integrates with the asset preloading system. Shows a placeholder while the asset loads from the preload cache, then fades in. For custom renderers that need smooth image display without flash.
+
+```tsx
+import { AssetImage } from '@doodle-engine/react';
+
+<AssetImage
+    src={snapshot.location.banner}
+    alt={snapshot.location.name}
+    className="location-banner"
+/>;
+```
+
+### Props
+
+Extends all standard `<img>` HTML attributes, plus:
+
+| Prop          | Type     | Default        | Description                              |
+| ------------- | -------- | -------------- | ---------------------------------------- |
+| `src`         | `string` | required       | Asset path from snapshot                 |
+| `placeholder` | `string` | transparent 1x1 | Shown while loading                     |
+| `fadeIn`      | `number` | `200`          | Fade-in duration in ms (0 to disable)    |
+
+Asset paths from the snapshot are already resolved. Pass them directly.
 
 ## LoadingScreen
 
@@ -464,12 +528,15 @@ import { PauseMenu } from '@doodle-engine/react';
 Settings UI with volume sliders and language selection.
 
 ```tsx
-import { SettingsPanel } from '@doodle-engine/react';
+import { SettingsPanel, useAudioSettings } from '@doodle-engine/react';
+
+const audioSettings = useAudioSettings();
 
 <SettingsPanel
-    audioControls={audioControls}
+    audio={audioSettings}
     uiSoundControls={uiSoundControls}
     availableLocales={[{ code: 'en', label: 'English' }]}
+    currentLocale={snapshot.currentLocale}
     onLocaleChange={actions.setLocale}
     onBack={handleBack}
 />;
@@ -477,15 +544,17 @@ import { SettingsPanel } from '@doodle-engine/react';
 
 ### Props
 
-| Prop               | Type                                | Default  | Description             |
-| ------------------ | ----------------------------------- | -------- | ----------------------- |
-| `audioControls`    | `object`                            | required | Audio volume setters    |
-| `uiSoundControls`  | `UISoundControls`                   | —        | UI sound controls       |
-| `availableLocales` | `{ code: string; label: string }[]` | —        | Language options        |
-| `currentLocale`    | `string`                            | —        | Current language code   |
-| `onLocaleChange`   | `(locale: string) => void`          | —        | Language change handler |
-| `onBack`           | `() => void`                        | required | Back/close handler      |
-| `className`        | `string`                            | `''`     | CSS class               |
+| Prop               | Type                                | Default  | Description                          |
+| ------------------ | ----------------------------------- | -------- | ------------------------------------ |
+| `audio`            | `SettingsPanelAudio`                | required | Volume values and setters            |
+| `uiSoundControls`  | `UISoundControls`                   | —        | UI sound controls                    |
+| `availableLocales` | `{ code: string; label: string }[]` | —        | Language options                     |
+| `currentLocale`    | `string`                            | —        | Current language code                |
+| `onLocaleChange`   | `(locale: string) => void`          | —        | Language change handler              |
+| `onBack`           | `() => void`                        | required | Back/close handler                   |
+| `className`        | `string`                            | `''`     | CSS class                            |
+
+`SettingsPanelAudio` has the same shape as `AudioSettings` from `AudioSettingsContext`, so you can pass `useAudioSettings()` directly as the `audio` prop.
 
 ## GameShell
 
@@ -516,10 +585,9 @@ import { GameShell } from '@doodle-engine/react';
 | `title`            | `string`                                  | `'Doodle Engine'`      | Game title text                                                 |
 | `subtitle`         | `string`                                  | —                      | Subtitle text                                                   |
 | `uiSounds`         | `UISoundConfig \| false`                  | —                      | UI sound config, or `false` to disable                          |
-| `audioOptions`     | `AudioManagerOptions`                     | —                      | Game audio options                                              |
+| `audioOptions`     | `AudioManagerOptions`                     | —                      | Crossfade duration and other audio config                       |
 | `storageKey`       | `string`                                  | `'doodle-engine-save'` | localStorage key for saves                                      |
 | `availableLocales` | `{ code: string; label: string }[]`       | —                      | Language options for settings                                   |
-| `videoBasePath`    | `string`                                  | `'/video'`             | Base path for video files                                       |
 | `className`        | `string`                                  | `''`                   | CSS class                                                       |
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                      | Override the loading screen                                     |
 | `devTools`         | `boolean`                                 | `false`                | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |

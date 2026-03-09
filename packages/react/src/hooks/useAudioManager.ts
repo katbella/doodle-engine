@@ -1,23 +1,21 @@
 /**
  * useAudioManager - Manages game audio channels
  *
- * Handles three audio channels:
+ * Handles four audio channels:
  * - Music: Background music (loops, crossfades between tracks)
+ * - Ambient: Location ambient sound (loops, swaps on location change)
  * - Sound: Sound effects (one-shots from pendingSounds array)
  * - Voice: Dialogue voice (one at a time, from dialogue.voice)
  *
- * Watches snapshot for audio cues and plays them automatically
+ * Watches snapshot for audio cues and plays them automatically.
+ * Volume values are reactive parameters. The caller owns volume state
+ * (typically via AudioSettingsContext); this hook just applies them.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Snapshot } from '@doodle-engine/core';
 
 export interface AudioManagerOptions {
-    /**
-     * @deprecated Audio paths are resolved by the engine at snapshot time.
-     * This option is no longer used.
-     */
-    audioBasePath?: string;
     /** Master volume (0-1) */
     masterVolume?: number;
     /** Music volume (0-1) */
@@ -31,44 +29,37 @@ export interface AudioManagerOptions {
 }
 
 export interface AudioManagerControls {
-    /** Set master volume */
-    setMasterVolume: (volume: number) => void;
-    /** Set music volume */
-    setMusicVolume: (volume: number) => void;
-    /** Set sound volume */
-    setSoundVolume: (volume: number) => void;
-    /** Set voice volume */
-    setVoiceVolume: (volume: number) => void;
     /** Stop all audio */
     stopAll: () => void;
 }
 
 /**
  * Audio manager hook
- * Watches snapshot for audio changes and manages playback
+ * Watches snapshot for audio changes and manages playback.
+ * Volumes are reactive: pass current values each render.
  */
 export function useAudioManager(
     snapshot: Snapshot,
     options: AudioManagerOptions = {}
 ): AudioManagerControls {
     const {
-        masterVolume: initialMaster = 1.0,
-        musicVolume: initialMusic = 0.7,
-        soundVolume: initialSound = 0.8,
-        voiceVolume: initialVoice = 1.0,
+        masterVolume = 1.0,
+        musicVolume = 0.7,
+        soundVolume = 0.8,
+        voiceVolume = 1.0,
         crossfadeDuration = 1000,
     } = options;
 
-    // Volume state
-    const [masterVolume, setMasterVolume] = useState(initialMaster);
-    const [musicVolume, setMusicVolume] = useState(initialMusic);
-    const [soundVolume, setSoundVolume] = useState(initialSound);
-    const [voiceVolume, setVoiceVolume] = useState(initialVoice);
+    // Ref for current volumes, used in callbacks/timers without stale closures
+    const volumesRef = useRef({ masterVolume, musicVolume, soundVolume, voiceVolume });
+    volumesRef.current = { masterVolume, musicVolume, soundVolume, voiceVolume };
 
     // Audio elements
     const musicAudioRef = useRef<HTMLAudioElement | null>(null);
+    const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
     const voiceAudioRef = useRef<HTMLAudioElement | null>(null);
     const currentMusicTrack = useRef<string | null>(null);
+    const currentAmbientTrack = useRef<string | null>(null);
     const fadeIntervalRef = useRef<number | null>(null);
 
     // Initialize audio elements
@@ -77,43 +68,76 @@ export function useAudioManager(
         musicAudio.loop = true;
         musicAudioRef.current = musicAudio;
 
+        const ambientAudio = new Audio();
+        ambientAudio.loop = true;
+        ambientAudioRef.current = ambientAudio;
+
         const voiceAudio = new Audio();
         voiceAudioRef.current = voiceAudio;
 
         return () => {
-            // Cleanup on unmount
             if (fadeIntervalRef.current) {
                 clearInterval(fadeIntervalRef.current);
             }
             musicAudio.pause();
+            ambientAudio.pause();
             voiceAudio.pause();
             musicAudio.src = '';
+            ambientAudio.src = '';
             voiceAudio.src = '';
         };
     }, []);
 
-    // Update music when snapshot.music changes
+    // Update volumes on all active audio elements when volumes change
+    useEffect(() => {
+        if (musicAudioRef.current?.src) {
+            musicAudioRef.current.volume = masterVolume * musicVolume;
+        }
+        if (ambientAudioRef.current?.src) {
+            ambientAudioRef.current.volume = masterVolume * soundVolume;
+        }
+        if (voiceAudioRef.current?.src) {
+            voiceAudioRef.current.volume = masterVolume * voiceVolume;
+        }
+    }, [masterVolume, musicVolume, soundVolume, voiceVolume]);
+
+    // Switch music track when snapshot.music changes
     useEffect(() => {
         const musicAudio = musicAudioRef.current;
         if (!musicAudio) return;
 
         const newTrack = snapshot.music;
+        if (newTrack === currentMusicTrack.current) return;
 
-        if (newTrack !== currentMusicTrack.current) {
-            currentMusicTrack.current = newTrack;
+        currentMusicTrack.current = newTrack;
 
-            if (!newTrack) {
-                // Fade out and stop
-                fadeOut(musicAudio, crossfadeDuration);
-            } else {
-                // Crossfade to new track (path is already resolved by snapshot builder)
-                crossfadeMusic(musicAudio, newTrack, crossfadeDuration);
-            }
+        if (!newTrack) {
+            fadeOut(musicAudio, crossfadeDuration);
+        } else {
+            crossfadeMusic(musicAudio, newTrack, crossfadeDuration);
         }
+    }, [snapshot.music, crossfadeDuration]);
 
-        // Update volume
-        musicAudio.volume = masterVolume * musicVolume;
-    }, [snapshot.music, masterVolume, musicVolume, crossfadeDuration]);
+    // Switch ambient track when snapshot.ambient changes
+    useEffect(() => {
+        const ambientAudio = ambientAudioRef.current;
+        if (!ambientAudio) return;
+
+        const newTrack = snapshot.ambient;
+        if (newTrack === currentAmbientTrack.current) return;
+
+        currentAmbientTrack.current = newTrack;
+
+        ambientAudio.pause();
+        if (newTrack) {
+            ambientAudio.src = newTrack;
+            const v = volumesRef.current;
+            ambientAudio.volume = v.masterVolume * v.soundVolume;
+            ambientAudio.play().catch(() => {});
+        } else {
+            ambientAudio.src = '';
+        }
+    }, [snapshot.ambient]);
 
     // Play voice when dialogue.voice changes
     useEffect(() => {
@@ -121,32 +145,31 @@ export function useAudioManager(
         if (!voiceAudio) return;
 
         const voiceFile = snapshot.dialogue?.voice;
-
         if (voiceFile) {
             voiceAudio.pause();
             voiceAudio.currentTime = 0;
-            // Path is already resolved by snapshot builder
             voiceAudio.src = voiceFile;
-            voiceAudio.volume = masterVolume * voiceVolume;
+            const v = volumesRef.current;
+            voiceAudio.volume = v.masterVolume * v.voiceVolume;
             voiceAudio.play().catch((error) => {
                 console.warn('Voice playback failed:', error);
             });
         }
-    }, [snapshot.dialogue?.voice, masterVolume, voiceVolume]);
+    }, [snapshot.dialogue?.voice]);
 
     // Play sound effects from pendingSounds
     useEffect(() => {
         if (snapshot.pendingSounds.length === 0) return;
 
+        const v = volumesRef.current;
         snapshot.pendingSounds.forEach((soundFile) => {
-            // Path is already resolved by snapshot builder
             const soundAudio = new Audio(soundFile);
-            soundAudio.volume = masterVolume * soundVolume;
+            soundAudio.volume = v.masterVolume * v.soundVolume;
             soundAudio.play().catch((error) => {
                 console.warn('Sound playback failed:', error);
             });
         });
-    }, [snapshot.pendingSounds, masterVolume, soundVolume]);
+    }, [snapshot.pendingSounds]);
 
     // Helper: Crossfade to new music track
     const crossfadeMusic = (
@@ -154,18 +177,16 @@ export function useAudioManager(
         newTrackPath: string,
         duration: number
     ) => {
-        // Fade out current track
         fadeOut(audio, duration / 2).then(() => {
-            // Load and play new track
             audio.src = newTrackPath;
             audio.load();
             audio.volume = 0;
 
+            const v = volumesRef.current;
             audio
                 .play()
                 .then(() => {
-                    // Fade in new track
-                    fadeIn(audio, duration / 2, masterVolume * musicVolume);
+                    fadeIn(audio, duration / 2, v.masterVolume * v.musicVolume);
                 })
                 .catch((error) => {
                     console.warn('Music playback failed:', error);
@@ -233,17 +254,15 @@ export function useAudioManager(
             musicAudioRef.current.pause();
             musicAudioRef.current.currentTime = 0;
         }
+        if (ambientAudioRef.current) {
+            ambientAudioRef.current.pause();
+            ambientAudioRef.current.currentTime = 0;
+        }
         if (voiceAudioRef.current) {
             voiceAudioRef.current.pause();
             voiceAudioRef.current.currentTime = 0;
         }
     };
 
-    return {
-        setMasterVolume,
-        setMusicVolume,
-        setSoundVolume,
-        setVoiceVolume,
-        stopAll,
-    };
+    return { stopAll };
 }

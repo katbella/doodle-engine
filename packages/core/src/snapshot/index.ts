@@ -46,6 +46,7 @@ const UI_KEYS = [
     'ui.resume',
     'ui.no_companions',
     'ui.narrator',
+    'ui.notes',
 ] as const;
 
 const UI_DEFAULTS: Record<string, string> = {
@@ -61,6 +62,7 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.resume': 'Resume',
     'ui.no_companions': 'No companions',
     'ui.narrator': 'Narrator',
+    'ui.notes': 'Notes',
 };
 
 /**
@@ -190,6 +192,7 @@ export function buildSnapshot(
         inventory,
         quests,
         journal,
+        playerNotes: [...state.playerNotes],
         variables: { ...state.variables },
         time: state.currentTime,
         map,
@@ -200,6 +203,7 @@ export function buildSnapshot(
         pendingVideo,
         pendingInterlude,
         ui,
+        currentLocale: state.currentLocale,
     };
 }
 

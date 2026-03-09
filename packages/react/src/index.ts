@@ -14,6 +14,10 @@ export type { GameContextValue, GameProviderProps } from './GameProvider';
 export { AssetProvider, AssetContext, useAssetContext } from './AssetProvider';
 export type { AssetContextValue, AssetProviderProps } from './AssetProvider';
 
+// Audio Settings (persistent volume state)
+export { AudioSettingsProvider, AudioSettingsContext, useAudioSettings } from './AudioSettingsContext';
+export type { AudioSettings } from './AudioSettingsContext';
+
 // Hooks
 export { useGame } from './hooks/useGame';
 export { useAudioManager } from './hooks/useAudioManager';
@@ -53,6 +57,9 @@ export type { InventoryProps } from './components/Inventory';
 export { Journal } from './components/Journal';
 export type { JournalProps } from './components/Journal';
 
+export { PlayerNotes } from './components/PlayerNotes';
+export type { PlayerNotesProps } from './components/PlayerNotes';
+
 export { MapView } from './components/MapView';
 export type { MapViewProps } from './components/MapView';
 
@@ -84,7 +91,7 @@ export { PauseMenu } from './components/PauseMenu';
 export type { PauseMenuProps } from './components/PauseMenu';
 
 export { SettingsPanel } from './components/SettingsPanel';
-export type { SettingsPanelProps } from './components/SettingsPanel';
+export type { SettingsPanelProps, SettingsPanelAudio } from './components/SettingsPanel';
 
 export { GameTime } from './components/GameTime';
 export type { GameTimeProps, TimeFormat } from './components/GameTime';

@@ -428,7 +428,7 @@ describe('Effect Processors', () => {
             const state = createTestState();
             const newState = applyEffect(effect, state);
 
-            // Location stays wherever they were — the character remains in place
+            // Location stays wherever they were; the character remains in place
             expect(newState.characterState.pixel_the_dog.location).toBe('camp');
         });
     });

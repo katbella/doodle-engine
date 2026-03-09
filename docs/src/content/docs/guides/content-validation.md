@@ -94,7 +94,7 @@ All conditions must have their required arguments:
 | Condition                                                   | Required Arguments              |
 | ----------------------------------------------------------- | ------------------------------- |
 | `hasFlag`, `notFlag`                                        | `flag`                          |
-| `hasItem`, `notItem`                                        | `itemId`                        |
+| `hasItem`                                                   | `itemId`                        |
 | `questAtStage`                                              | `questId`, `stageId`            |
 | `atLocation`                                                | `locationId`                    |
 | `characterAt`                                               | `characterId`, `locationId`     |

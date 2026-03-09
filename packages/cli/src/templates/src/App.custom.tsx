@@ -64,20 +64,34 @@ function GameUI() {
                 >
                     <strong>{snapshot.dialogue.speakerName}:</strong>
                     <p>{snapshot.dialogue.text}</p>
-                    {snapshot.choices.map((choice) => (
-                        <button
-                            key={choice.id}
-                            onClick={() => actions.selectChoice(choice.id)}
-                            style={{
-                                display: 'block',
-                                margin: '0.5rem 0',
-                                padding: '0.5rem 1rem',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            {choice.text}
-                        </button>
-                    ))}
+                    {snapshot.choices.length > 0
+                        ? snapshot.choices.map((choice) => (
+                              <button
+                                  key={choice.id}
+                                  onClick={() => actions.selectChoice(choice.id)}
+                                  style={{
+                                      display: 'block',
+                                      margin: '0.5rem 0',
+                                      padding: '0.5rem 1rem',
+                                      cursor: 'pointer',
+                                  }}
+                              >
+                                  {choice.text}
+                              </button>
+                          ))
+                        : (
+                              <button
+                                  onClick={actions.continueDialogue}
+                                  style={{
+                                      display: 'block',
+                                      margin: '0.5rem 0',
+                                      padding: '0.5rem 1rem',
+                                      cursor: 'pointer',
+                                  }}
+                              >
+                                  Continue
+                              </button>
+                          )}
                 </div>
             )}
 
@@ -100,6 +114,7 @@ function GameUI() {
                     ))}
                 </div>
             )}
+
         </div>
     );
 }

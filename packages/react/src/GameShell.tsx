@@ -50,7 +50,7 @@ export interface GameShellProps {
     subtitle?: string;
     /** UI sound configuration, or false to disable */
     uiSounds?: UISoundConfig | false;
-    /** Audio manager options */
+    /** Audio manager options (crossfade duration, etc.) */
     audioOptions?: AudioManagerOptions;
     /** localStorage key for saves */
     storageKey?: string;
@@ -116,7 +116,7 @@ export function GameShell({
     );
 }
 
-// ── Inner component (rendered after shell assets are loaded) ──────────────────
+// Inner component (rendered after shell assets are loaded)
 
 interface GameShellInnerProps {
     registry: ContentRegistry;
@@ -147,6 +147,7 @@ function GameShellInner({
     const [screen, setScreen] = useState<Screen>(
         shell?.splash ? 'splash' : 'title'
     );
+    const [selectedLocale, setSelectedLocale] = useState('en');
     const [showPauseMenu, setShowPauseMenu] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [settingsFrom, setSettingsFrom] = useState<'title' | 'pause'>(
@@ -184,10 +185,10 @@ function GameShellInner({
             musicOverride: null,
             pendingVideo: null,
             pendingInterlude: null,
-            currentLocale: 'en',
+            currentLocale: selectedLocale,
         };
         return new Engine(registry, state);
-    }, [registry, config]);
+    }, [registry, config, selectedLocale]);
 
     const handleNewGame = useCallback(() => {
         uiSoundControls.playClick();
@@ -275,14 +276,6 @@ function GameShellInner({
         }
     }, [audioSettings.masterVolume, audioSettings.musicVolume]);
 
-    const titleAudioControls = {
-        setMasterVolume: audioSettings.setMasterVolume,
-        setMusicVolume: audioSettings.setMusicVolume,
-        setSoundVolume: audioSettings.setSoundVolume,
-        setVoiceVolume: audioSettings.setVoiceVolume,
-        stopAll: () => { titleMusicRef.current?.pause(); },
-    };
-
     // Escape key toggles pause menu
     useEffect(() => {
         if (screen !== 'playing') return;
@@ -325,18 +318,20 @@ function GameShellInner({
             <div className={`game-shell ${className}`}>
                 {showSettings ? (
                     <SettingsPanel
-                        audioControls={titleAudioControls}
+                        audio={audioSettings}
                         uiSoundControls={
                             uiSoundsConfig !== false
                                 ? uiSoundControls
                                 : undefined
                         }
                         availableLocales={availableLocales}
+                        currentLocale={selectedLocale}
+                        onLocaleChange={setSelectedLocale}
                         onBack={closeSettings}
                     />
                 ) : (
                     <TitleScreen
-                        ui={buildUIStrings(registry.locales['en'] ?? {})}
+                        ui={buildUIStrings(registry.locales[selectedLocale] ?? registry.locales['en'] ?? {})}
                         shell={shell?.title}
                         title={title}
                         subtitle={subtitle}
@@ -390,7 +385,8 @@ function GameShellInner({
 }
 
 /**
- * Inner component that has access to GameContext via useGame
+ * Inner component that has access to GameContext via useGame.
+ * Manages in-game audio playback and shell overlays (pause, settings, video).
  */
 import { useGame } from './hooks/useGame';
 
@@ -430,24 +426,14 @@ function GameShellPlaying({
     const { snapshot, actions } = useGame();
     const audioSettings = useAudioSettings();
 
-    // Use persisted volumes as initial values, write back when player changes them
-    const mergedAudioOptions: AudioManagerOptions = {
+    // Audio playback: volumes come from AudioSettingsContext (single source of truth)
+    useAudioManager(snapshot, {
         ...audioOptions,
         masterVolume: audioSettings.masterVolume,
         musicVolume: audioSettings.musicVolume,
         soundVolume: audioSettings.soundVolume,
         voiceVolume: audioSettings.voiceVolume,
-    };
-    const rawAudioControls = useAudioManager(snapshot, mergedAudioOptions);
-
-    // Wrap controls so volume changes persist to context/localStorage
-    const audioControls = {
-        ...rawAudioControls,
-        setMasterVolume: (v: number) => { rawAudioControls.setMasterVolume(v); audioSettings.setMasterVolume(v); },
-        setMusicVolume: (v: number) => { rawAudioControls.setMusicVolume(v); audioSettings.setMusicVolume(v); },
-        setSoundVolume: (v: number) => { rawAudioControls.setSoundVolume(v); audioSettings.setSoundVolume(v); },
-        setVoiceVolume: (v: number) => { rawAudioControls.setVoiceVolume(v); audioSettings.setVoiceVolume(v); },
-    };
+    });
 
     // Watch for pending video from snapshot
     useEffect(() => {
@@ -490,10 +476,10 @@ function GameShellPlaying({
 
             {showSettings && (
                 <SettingsPanel
-                    audioControls={audioControls}
+                    audio={audioSettings}
                     uiSoundControls={uiSoundControls}
                     availableLocales={availableLocales}
-                    currentLocale={snapshot.time ? undefined : undefined}
+                    currentLocale={snapshot.currentLocale}
                     onLocaleChange={actions.setLocale}
                     onBack={onCloseSettings}
                 />

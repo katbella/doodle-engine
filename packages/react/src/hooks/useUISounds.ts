@@ -17,6 +17,7 @@ export interface UISoundConfig {
     /** Sound file mappings */
     sounds?: {
         click?: string;
+        hover?: string;
         menuOpen?: string;
         menuClose?: string;
     };
@@ -25,6 +26,8 @@ export interface UISoundConfig {
 export interface UISoundControls {
     /** Play the click sound */
     playClick: () => void;
+    /** Play the hover sound */
+    playHover: () => void;
     /** Play the menu open sound */
     playMenuOpen: () => void;
     /** Play the menu close sound */
@@ -43,6 +46,7 @@ export interface UISoundControls {
 
 const DEFAULT_SOUNDS = {
     click: 'click.ogg',
+    hover: 'hover.ogg',
     menuOpen: 'menu_open.ogg',
     menuClose: 'menu_close.ogg',
 };
@@ -80,6 +84,7 @@ export function useUISounds(config: UISoundConfig = {}): UISoundControls {
     );
 
     const playClick = useCallback(() => play(soundMap.current.click), [play]);
+    const playHover = useCallback(() => play(soundMap.current.hover), [play]);
     const playMenuOpen = useCallback(
         () => play(soundMap.current.menuOpen),
         [play]
@@ -91,6 +96,7 @@ export function useUISounds(config: UISoundConfig = {}): UISoundControls {
 
     return {
         playClick,
+        playHover,
         playMenuOpen,
         playMenuClose,
         playSound,

@@ -1,16 +1,24 @@
 /**
  * GameRenderer - Main component that renders the complete game UI
+ *
+ * Renders the game layout, dialogue, characters, and bottom-bar panels.
+ * Audio playback is NOT managed here. The wrapper (GameShell or custom)
+ * is responsible for calling useAudioManager.
+ *
+ * Settings panel requires AudioSettingsProvider to be present in the tree.
+ * If no provider is found, the settings button is hidden.
  */
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useGame } from './hooks/useGame';
-import { useAudioManager } from './hooks/useAudioManager';
+import { AudioSettingsContext } from './AudioSettingsContext';
 import { DialogueBox } from './components/DialogueBox';
 import { ChoiceList } from './components/ChoiceList';
 import { LocationView } from './components/LocationView';
 import { CharacterList } from './components/CharacterList';
 import { Inventory } from './components/Inventory';
 import { Journal } from './components/Journal';
+import { PlayerNotes } from './components/PlayerNotes';
 import { MapView } from './components/MapView';
 import { NotificationArea } from './components/NotificationArea';
 import { SaveLoadPanel } from './components/SaveLoadPanel';
@@ -22,7 +30,7 @@ export interface GameRendererProps {
     className?: string;
 }
 
-type ActivePanel = 'inventory' | 'journal' | 'map' | 'saveload' | 'settings' | null;
+type ActivePanel = 'inventory' | 'journal' | 'notes' | 'map' | 'saveload' | 'settings' | null;
 
 function BottomBarButton({
     label,
@@ -49,7 +57,7 @@ function BottomBarButton({
 
 export function GameRenderer({ className = '' }: GameRendererProps) {
     const { snapshot, actions } = useGame();
-    const audioControls = useAudioManager(snapshot);
+    const audioSettings = useContext(AudioSettingsContext);
 
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
 
@@ -164,6 +172,16 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     }
                     active={activePanel === 'journal'}
                 />
+                <BottomBarButton
+                    label={snapshot.ui['ui.notes']}
+                    icon="notes"
+                    onClick={() =>
+                        setActivePanel(
+                            activePanel === 'notes' ? null : 'notes'
+                        )
+                    }
+                    active={activePanel === 'notes'}
+                />
                 {snapshot.map && (
                     <BottomBarButton
                         label={snapshot.ui['ui.map']}
@@ -186,16 +204,18 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     }
                     active={activePanel === 'saveload'}
                 />
-                <BottomBarButton
-                    label={snapshot.ui['ui.settings']}
-                    icon="settings"
-                    onClick={() =>
-                        setActivePanel(
-                            activePanel === 'settings' ? null : 'settings'
-                        )
-                    }
-                    active={activePanel === 'settings'}
-                />
+                {audioSettings && (
+                    <BottomBarButton
+                        label={snapshot.ui['ui.settings']}
+                        icon="settings"
+                        onClick={() =>
+                            setActivePanel(
+                                activePanel === 'settings' ? null : 'settings'
+                            )
+                        }
+                        active={activePanel === 'settings'}
+                    />
+                )}
             </nav>
 
             {activePanel === 'inventory' && (
@@ -229,6 +249,29 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                         <Journal
                             quests={snapshot.quests}
                             entries={snapshot.journal}
+                        />
+                        <button
+                            className="panel-close"
+                            onClick={() => setActivePanel(null)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+            {activePanel === 'notes' && (
+                <div
+                    className="panel-overlay"
+                    onClick={() => setActivePanel(null)}
+                >
+                    <div
+                        className="panel"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <PlayerNotes
+                            notes={snapshot.playerNotes}
+                            onWrite={actions.writeNote}
+                            onDelete={actions.deleteNote}
                         />
                         <button
                             className="panel-close"
@@ -289,7 +332,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                     </div>
                 </div>
             )}
-            {activePanel === 'settings' && (
+            {activePanel === 'settings' && audioSettings && (
                 <div
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
@@ -299,8 +342,9 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <SettingsPanel
-                            audioControls={audioControls}
+                            audio={audioSettings}
                             onLocaleChange={actions.setLocale}
+                            currentLocale={snapshot.currentLocale}
                             onBack={() => setActivePanel(null)}
                         />
                     </div>

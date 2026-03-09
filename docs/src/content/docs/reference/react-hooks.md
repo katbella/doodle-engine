@@ -31,14 +31,15 @@ interface GameContextValue {
     snapshot: Snapshot;
     actions: {
         selectChoice: (choiceId: string) => void;
+        continueDialogue: () => void;
         talkTo: (characterId: string) => void;
-        takeItem: (itemId: string) => void;
         travelTo: (locationId: string) => void;
         writeNote: (title: string, text: string) => void;
         deleteNote: (noteId: string) => void;
         setLocale: (locale: string) => void;
         saveGame: () => SaveData;
         loadGame: (saveData: SaveData) => void;
+        dismissInterlude: () => void;
     };
 }
 ```
@@ -54,14 +55,15 @@ Each action calls the corresponding engine method and updates the snapshot:
 | Action                   | Description                                  |
 | ------------------------ | -------------------------------------------- |
 | `selectChoice(choiceId)` | Pick a dialogue choice                       |
+| `continueDialogue()`     | Advance past a text-only dialogue node       |
 | `talkTo(characterId)`    | Start conversation with a character          |
-| `takeItem(itemId)`       | Pick up an item at current location          |
 | `travelTo(locationId)`   | Travel to a map location                     |
 | `writeNote(title, text)` | Add a player note                            |
 | `deleteNote(noteId)`     | Remove a player note                         |
 | `setLocale(locale)`      | Change language                              |
 | `saveGame()`             | Returns `SaveData` (doesn't update snapshot) |
 | `loadGame(saveData)`     | Restores state and updates snapshot          |
+| `dismissInterlude()`     | Clears a pending interlude from the snapshot |
 
 ---
 
@@ -69,78 +71,81 @@ Each action calls the corresponding engine method and updates the snapshot:
 
 Manages audio playback automatically based on snapshot changes.
 
+Manages audio playback automatically based on snapshot changes. Volumes are reactive parameters: pass current values each render and the hook applies them to the audio elements.
+
+The caller owns volume state (typically via `AudioSettingsContext`). This hook does not store volumes internally.
+
 ```tsx
-import { useAudioManager } from '@doodle-engine/react';
+import { useAudioManager, useAudioSettings, AudioSettingsProvider } from '@doodle-engine/react';
 
 function MyGame() {
     const { snapshot } = useGame();
+    const audioSettings = useAudioSettings();
 
-    const controls = useAudioManager(snapshot, {
-        audioBasePath: '/audio',
-        masterVolume: 1.0,
-        musicVolume: 0.7,
-        soundVolume: 0.8,
-        voiceVolume: 1.0,
-        crossfadeDuration: 1000,
+    const { stopAll } = useAudioManager(snapshot, {
+        masterVolume: audioSettings.masterVolume,
+        musicVolume: audioSettings.musicVolume,
+        soundVolume: audioSettings.soundVolume,
+        voiceVolume: audioSettings.voiceVolume,
     });
 
-    return (
-        <div>
-            <button onClick={() => controls.setMasterVolume(0.5)}>
-                Half Volume
-            </button>
-            <button onClick={controls.stopAll}>Mute</button>
-        </div>
-    );
+    return <button onClick={stopAll}>Stop Audio</button>;
 }
+
+// Wrap in AudioSettingsProvider for persistent volume state
+<AudioSettingsProvider>
+    <GameProvider engine={engine} initialSnapshot={snapshot}>
+        <MyGame />
+    </GameProvider>
+</AudioSettingsProvider>
 ```
 
 ### Parameters
 
-| Parameter  | Type                  | Description            |
-| ---------- | --------------------- | ---------------------- |
-| `snapshot` | `Snapshot`            | Current game snapshot  |
-| `options`  | `AudioManagerOptions` | Optional configuration |
+| Parameter  | Type                  | Description                            |
+| ---------- | --------------------- | -------------------------------------- |
+| `snapshot` | `Snapshot`            | Current game snapshot                  |
+| `options`  | `AudioManagerOptions` | Volume levels and crossfade config     |
 
 ### Options
 
-| Option              | Type     | Default    | Description                    |
-| ------------------- | -------- | ---------- | ------------------------------ |
-| `audioBasePath`     | `string` | `'/audio'` | Base path for audio files      |
-| `masterVolume`      | `number` | `1.0`      | Master volume multiplier (0-1) |
-| `musicVolume`       | `number` | `0.7`      | Music channel volume (0-1)     |
-| `soundVolume`       | `number` | `0.8`      | Sound effects volume (0-1)     |
-| `voiceVolume`       | `number` | `1.0`      | Voice channel volume (0-1)     |
-| `crossfadeDuration` | `number` | `1000`     | Music crossfade duration in ms |
+Volume values are **reactive**: when they change, all active audio elements update immediately.
+
+| Option              | Type     | Default | Description                    |
+| ------------------- | -------- | ------- | ------------------------------ |
+| `masterVolume`      | `number` | `1.0`   | Master volume multiplier (0-1) |
+| `musicVolume`       | `number` | `0.7`   | Music channel volume (0-1)     |
+| `soundVolume`       | `number` | `0.8`   | Sound effects volume (0-1)     |
+| `voiceVolume`       | `number` | `1.0`   | Voice channel volume (0-1)     |
+| `crossfadeDuration` | `number` | `1000`  | Music crossfade duration in ms |
 
 ### Returns
 
 ```typescript
 interface AudioManagerControls {
-    setMasterVolume: (volume: number) => void;
-    setMusicVolume: (volume: number) => void;
-    setSoundVolume: (volume: number) => void;
-    setVoiceVolume: (volume: number) => void;
     stopAll: () => void;
 }
 ```
 
 ### Audio Channels
 
-The hook manages three channels:
+The hook manages four channels:
 
-| Channel   | Source                     | Behavior                                |
-| --------- | -------------------------- | --------------------------------------- |
-| **Music** | `snapshot.music`           | Loops, crossfades between tracks        |
-| **Voice** | `snapshot.dialogue?.voice` | Plays dialogue voice lines              |
-| **Sound** | `snapshot.pendingSounds`   | One-shot effects, cleared after playing |
+| Channel     | Source                     | Behavior                                |
+| ----------- | -------------------------- | --------------------------------------- |
+| **Music**   | `snapshot.music`           | Loops, crossfades between tracks        |
+| **Ambient** | `snapshot.ambient`         | Loops, swaps on location change         |
+| **Voice**   | `snapshot.dialogue?.voice` | Plays dialogue voice lines              |
+| **Sound**   | `snapshot.pendingSounds`   | One-shot effects, cleared after playing |
 
 ### Automatic Behavior
 
 - When `snapshot.music` changes, the current track crossfades to the new one
+- When `snapshot.ambient` changes, the ambient track swaps immediately
 - When `snapshot.dialogue?.voice` is present, the voice file plays
 - All entries in `snapshot.pendingSounds` are played as one-shot effects
 - Volume levels are applied as `channelVolume × masterVolume`
+- Audio paths are resolved by the engine before reaching this hook. Write bare filenames in YAML content.
 
 ---
 

@@ -21,7 +21,6 @@ export interface GameContextValue {
         selectChoice: (choiceId: string) => void;
         continueDialogue: () => void;
         talkTo: (characterId: string) => void;
-        takeItem: (itemId: string) => void;
         travelTo: (locationId: string) => void;
         writeNote: (title: string, text: string) => void;
         deleteNote: (noteId: string) => void;
@@ -98,15 +97,6 @@ export function GameProvider({
         [engine]
     );
 
-    // Action: Take an item
-    const takeItem = useCallback(
-        (itemId: string) => {
-            const newSnapshot = engine.takeItem(itemId);
-            setSnapshot(newSnapshot);
-        },
-        [engine]
-    );
-
     // Action: Travel to a location
     const travelTo = useCallback(
         (locationId: string) => {
@@ -168,7 +158,6 @@ export function GameProvider({
             selectChoice,
             continueDialogue,
             talkTo,
-            takeItem,
             travelTo,
             writeNote,
             deleteNote,

@@ -80,6 +80,20 @@ If no next node exists, the dialogue ends. If not currently in dialogue, returns
 const snapshot = engine.selectChoice('choice_buy_drink');
 ```
 
+### continueDialogue
+
+```typescript
+continueDialogue(): Snapshot
+```
+
+Advance past a text-only dialogue node (a node with text but no choices). If the current node has a next node, advances to it. If there is no next node, the dialogue ends.
+
+Does nothing if not currently in dialogue or if the current node has choices.
+
+```typescript
+const snapshot = engine.continueDialogue();
+```
+
 ### talkTo
 
 ```typescript

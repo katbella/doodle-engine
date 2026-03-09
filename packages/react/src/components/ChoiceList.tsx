@@ -9,7 +9,7 @@ export interface ChoiceListProps {
     choices: SnapshotChoice[];
     onSelectChoice: (choiceId: string) => void;
     /** Called when the player clicks Continue on a text-only node */
-    onContinue?: () => void;
+    onContinue: () => void;
     /** Label for the Continue button (from snapshot.ui['ui.continue']) */
     continueLabel?: string;
     className?: string;
@@ -22,13 +22,13 @@ export function ChoiceList({
     continueLabel = 'Continue',
     className = '',
 }: ChoiceListProps) {
-    const showContinue = choices.length === 0 && onContinue !== undefined;
+    const showContinue = choices.length === 0;
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
             if (showContinue && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault();
-                onContinue!();
+                onContinue();
                 return;
             }
             const num = parseInt(e.key, 10);
@@ -49,10 +49,6 @@ export function ChoiceList({
                 </button>
             </div>
         );
-    }
-
-    if (choices.length === 0) {
-        return null;
     }
 
     return (

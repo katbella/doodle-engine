@@ -121,6 +121,7 @@ If you don't define a `ui.*` key, the English default is used automatically. You
 | `ui.continue` | Continue |
 | `ui.inventory` | Inventory |
 | `ui.journal` | Journal |
+| `ui.notes` | Notes |
 | `ui.map` | Map |
 | `ui.save_load` | Save/Load |
 | `ui.settings` | Settings |
@@ -138,6 +139,7 @@ Example Spanish locale file:
 ui.continue: Continuar
 ui.inventory: Inventario
 ui.journal: Diario
+ui.notes: Notas
 ui.map: Mapa
 ui.save_load: Guardar/Cargar
 ui.settings: Configuración

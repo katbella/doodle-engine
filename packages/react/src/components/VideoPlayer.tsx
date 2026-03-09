@@ -10,11 +10,6 @@ import { useEffect, useRef } from 'react';
 export interface VideoPlayerProps {
     /** Video file path (resolved by the engine) */
     src: string;
-    /**
-     * @deprecated Video paths are resolved by the engine at snapshot time.
-     * This option is no longer used.
-     */
-    basePath?: string;
     /** Called when video ends or is skipped */
     onComplete: () => void;
     /** CSS class */

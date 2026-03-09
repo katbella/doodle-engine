@@ -4,7 +4,7 @@
  * The renderer displays snapshots but never sees raw game state.
  */
 
-import type { Time } from './state';
+import type { Time, PlayerNote } from './state';
 
 /**
  * Location information in a snapshot (localized).
@@ -205,6 +205,9 @@ export interface Snapshot {
     /** Unlocked journal entries */
     journal: SnapshotJournalEntry[];
 
+    /** Notes written by the player */
+    playerNotes: PlayerNote[];
+
     /** Game variables (gold, counters, etc.) */
     variables: Record<string, number | string>;
 
@@ -234,4 +237,7 @@ export interface Snapshot {
 
     /** Resolved UI strings for the renderer. All @keys resolved. */
     ui: Record<string, string>;
+
+    /** Current language code (e.g. "en", "es") */
+    currentLocale: string;
 }

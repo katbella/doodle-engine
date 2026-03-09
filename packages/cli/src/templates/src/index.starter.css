@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════ */
-/* Doodle Engine — Starter Styles                                    */
+/* Doodle Engine Starter Styles                                    */
 /* Variables and component scaffolds. TODO: Fill this in!     */
 /* ══════════════════════════════════════════════════════════════════ */
 
@@ -92,6 +92,7 @@ body {
 
 .choice-list { }
 .choice-button { }
+.continue-button { }
 
 /* ── Characters ───────────────────────────────────────────────────── */
 
@@ -156,14 +157,36 @@ body {
 /* ── Journal ──────────────────────────────────────────────────────── */
 
 .journal { }
+.journal-quests { }
+.journal-entries { }
+.journal-empty { }
 .quest-entry { }
 .quest-name { }
 .quest-description { }
+.quest-stage { }
 .journal-entry { }
+.entry-title { }
+.entry-text { }
+
+/* ── Player Notes ─────────────────────────────────────────────────── */
+
+.player-notes { }
+.player-notes-form { }
+.player-notes-title-input { }
+.player-notes-text-input { }
+.player-notes-add-button { }
+.player-notes-empty { }
+.player-notes-list { }
+.player-note { }
+.player-note-title { }
+.player-note-text { }
+.player-note-delete { }
 
 /* ── Map ──────────────────────────────────────────────────────────── */
 
 .map-view { }
+.map-container { }
+.map-image { }
 .map-locations { }
 .map-location-button { }
 .travel-confirm-overlay { }
@@ -180,10 +203,18 @@ body {
 .save-load-panel { }
 .save-button { }
 .load-button { }
+.save-load-message { }
 
 /* ── Settings ─────────────────────────────────────────────────────── */
 
 .settings-panel { }
+.settings-title { }
+.settings-section { }
+.settings-back-button { }
+.settings-locale-select { }
+.volume-label { }
+.volume-slider { }
+.volume-input { }
 
 /* ── Notifications ────────────────────────────────────────────────── */
 
@@ -195,8 +226,11 @@ body {
 .interlude-overlay { }
 .interlude { }
 .interlude-background { }
+.interlude-banner { }
+.interlude-scroll-container { }
 .interlude-title { }
 .interlude-text { }
+.interlude-skip-button { }
 .interlude-dismiss { }
 
 /* ── Loading Screen ───────────────────────────────────────────────── */

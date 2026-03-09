@@ -2,12 +2,22 @@
  * SettingsPanel - Volume controls and language selection
  */
 
-import type { AudioManagerControls } from '../hooks/useAudioManager';
 import type { UISoundControls } from '../hooks/useUISounds';
 
+export interface SettingsPanelAudio {
+    masterVolume: number;
+    musicVolume: number;
+    soundVolume: number;
+    voiceVolume: number;
+    setMasterVolume: (v: number) => void;
+    setMusicVolume: (v: number) => void;
+    setSoundVolume: (v: number) => void;
+    setVoiceVolume: (v: number) => void;
+}
+
 export interface SettingsPanelProps {
-    /** Audio manager controls for volume */
-    audioControls: AudioManagerControls;
+    /** Audio state and controls */
+    audio: SettingsPanelAudio;
     /** UI sound controls */
     uiSoundControls?: UISoundControls;
     /** Available languages */
@@ -23,7 +33,7 @@ export interface SettingsPanelProps {
 }
 
 export function SettingsPanel({
-    audioControls,
+    audio,
     uiSoundControls,
     availableLocales,
     currentLocale,
@@ -39,23 +49,23 @@ export function SettingsPanel({
                 <h3>Audio</h3>
                 <VolumeSlider
                     label="Master"
-                    value={1.0}
-                    onChange={audioControls.setMasterVolume}
+                    value={audio.masterVolume}
+                    onChange={audio.setMasterVolume}
                 />
                 <VolumeSlider
                     label="Music"
-                    value={0.7}
-                    onChange={audioControls.setMusicVolume}
+                    value={audio.musicVolume}
+                    onChange={audio.setMusicVolume}
                 />
                 <VolumeSlider
                     label="Sound Effects"
-                    value={0.8}
-                    onChange={audioControls.setSoundVolume}
+                    value={audio.soundVolume}
+                    onChange={audio.setSoundVolume}
                 />
                 <VolumeSlider
                     label="Voice"
-                    value={1.0}
-                    onChange={audioControls.setVoiceVolume}
+                    value={audio.voiceVolume}
+                    onChange={audio.setVoiceVolume}
                 />
                 {uiSoundControls && (
                     <VolumeSlider
@@ -109,7 +119,7 @@ function VolumeSlider({
                 min="0"
                 max="1"
                 step="0.05"
-                defaultValue={value}
+                value={value}
                 onChange={(e) => onChange(parseFloat(e.target.value))}
                 className="volume-input"
             />

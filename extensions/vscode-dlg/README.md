@@ -4,7 +4,7 @@ VS Code syntax highlighting for `.dlg` dialogue files used by [Doodle Engine](ht
 
 ## Installation
 
-The extension is bundled with the `@doodle-engine/cli` npm package — it is not published to the VS Code Marketplace.
+The extension is bundled with the `@doodle-engine/cli` npm package. It is not published to the VS Code Marketplace.
 
 After running `npm install` (or `yarn`/`pnpm`) in your Doodle Engine project:
 

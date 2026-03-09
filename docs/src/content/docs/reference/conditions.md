@@ -1,6 +1,6 @@
 ---
 title: Conditions
-description: All 14 condition types with examples.
+description: All 15 condition types with examples.
 ---
 
 Conditions are tests against game state that return true or false. They're used in dialogue choices (`REQUIRE`), conditional branches (`IF`), triggered dialogues, and node visibility.

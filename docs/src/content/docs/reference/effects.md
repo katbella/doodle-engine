@@ -1,6 +1,6 @@
 ---
 title: Effects
-description: All 25 effect types with examples.
+description: All 27 effect types with examples.
 ---
 
 Effects are mutations to game state. They run in order when a dialogue node is reached or a choice is selected.

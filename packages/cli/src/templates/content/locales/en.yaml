@@ -1,9 +1,10 @@
 # ===================
-# UI Strings (English defaults are built in — uncomment to customize)
+# UI Strings (English defaults are built in. Uncomment to customize)
 # ===================
 # ui.continue: "Continue"
 # ui.inventory: "Inventory"
 # ui.journal: "Journal"
+# ui.notes: "Notes"
 # ui.map: "Map"
 # ui.save_load: "Save/Load"
 # ui.settings: "Settings"

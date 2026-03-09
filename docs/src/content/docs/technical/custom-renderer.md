@@ -24,17 +24,23 @@ function MyCustomGame() {
                 <div>
                     <strong>{snapshot.dialogue.speakerName}:</strong>
                     <p>{snapshot.dialogue.text}</p>
+
+                    {snapshot.choices.length > 0
+                        ? snapshot.choices.map((choice) => (
+                              <button
+                                  key={choice.id}
+                                  onClick={() => actions.selectChoice(choice.id)}
+                              >
+                                  {choice.text}
+                              </button>
+                          ))
+                        : (
+                              <button onClick={actions.continueDialogue}>
+                                  Continue
+                              </button>
+                          )}
                 </div>
             )}
-
-            {snapshot.choices.map((choice) => (
-                <button
-                    key={choice.id}
-                    onClick={() => actions.selectChoice(choice.id)}
-                >
-                    {choice.text}
-                </button>
-            ))}
 
             {!snapshot.dialogue &&
                 snapshot.charactersHere.map((char) => (
@@ -94,6 +100,7 @@ function App() {
 
 ```typescript
 actions.selectChoice(choiceId: string)   // Pick a dialogue choice
+actions.continueDialogue()               // Advance past a text-only node
 actions.talkTo(characterId: string)      // Start conversation
 actions.travelTo(locationId: string)     // Travel via map
 actions.writeNote(title, text)           // Add a player note
@@ -101,6 +108,7 @@ actions.deleteNote(noteId: string)       // Remove a player note
 actions.setLocale(locale: string)        // Change language
 actions.saveGame()                       // Returns SaveData
 actions.loadGame(saveData: SaveData)     // Restore from save
+actions.dismissInterlude()               // Clear a pending interlude
 ```
 
 ## Mixing Individual Components
@@ -133,6 +141,7 @@ function MyLayout() {
             <ChoiceList
                 choices={snapshot.choices}
                 onSelectChoice={actions.selectChoice}
+                onContinue={actions.continueDialogue}
             />
 
             <CharacterList
@@ -179,6 +188,10 @@ snapshot.music; // Current music track
 snapshot.ambient; // Current ambient sound
 snapshot.notifications; // Transient notifications (shown once)
 snapshot.pendingSounds; // Sound effects to play (cleared after snapshot)
+snapshot.pendingVideo; // Video to play fullscreen (cleared after snapshot)
+snapshot.pendingInterlude; // Interlude to show (cleared after snapshot)
+snapshot.currentLocale; // Current language code (e.g. "en")
+snapshot.ui; // Resolved UI strings (e.g. snapshot.ui['ui.continue'])
 ```
 
 ## Dev Tools Console API

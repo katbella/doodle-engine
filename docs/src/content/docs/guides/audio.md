@@ -57,44 +57,43 @@ MUSIC
 
 ## useAudioManager Hook
 
-The `useAudioManager` hook manages all audio playback automatically based on the snapshot:
+The `useAudioManager` hook manages all audio playback automatically based on the snapshot. Volume values are reactive: pass current values each render and the hook applies them to the audio elements.
+
+The hook does not own volume state. Use `AudioSettingsContext` (or your own state) as the single source of truth for volumes.
 
 ```tsx
-import { useAudioManager } from '@doodle-engine/react';
+import { useAudioManager, useAudioSettings } from '@doodle-engine/react';
 
 function MyGame() {
     const { snapshot } = useGame();
+    const audioSettings = useAudioSettings();
 
-    const audioControls = useAudioManager(snapshot, {
-        masterVolume: 1.0,
-        musicVolume: 0.7,
-        soundVolume: 0.8,
-        voiceVolume: 1.0,
+    useAudioManager(snapshot, {
+        masterVolume: audioSettings.masterVolume,
+        musicVolume: audioSettings.musicVolume,
+        soundVolume: audioSettings.soundVolume,
+        voiceVolume: audioSettings.voiceVolume,
         crossfadeDuration: 1000,
     });
-
-    // audioControls provides volume setters and stopAll
 }
 ```
+
+If you're using `GameShell`, audio management is built in. You don't need to call `useAudioManager` yourself.
 
 ### Options
 
 | Option              | Type     | Default | Description                |
 | ------------------- | -------- | ------- | -------------------------- |
 | `masterVolume`      | `number` | `1.0`   | Master volume (0-1)        |
-| `musicVolume`       | `number` | `0.7`      | Music channel volume (0-1) |
-| `soundVolume`       | `number` | `0.8`      | Sound effects volume (0-1) |
-| `voiceVolume`       | `number` | `1.0`      | Voice channel volume (0-1) |
-| `crossfadeDuration` | `number` | `1000`     | Crossfade time in ms       |
+| `musicVolume`       | `number` | `0.7`   | Music channel volume (0-1) |
+| `soundVolume`       | `number` | `0.8`   | Sound effects volume (0-1) |
+| `voiceVolume`       | `number` | `1.0`   | Voice channel volume (0-1) |
+| `crossfadeDuration` | `number` | `1000`  | Crossfade time in ms       |
 
-### Controls
+### Returns
 
 ```typescript
 interface AudioManagerControls {
-    setMasterVolume: (volume: number) => void;
-    setMusicVolume: (volume: number) => void;
-    setSoundVolume: (volume: number) => void;
-    setVoiceVolume: (volume: number) => void;
     stopAll: () => void;
 }
 ```

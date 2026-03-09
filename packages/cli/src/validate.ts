@@ -184,7 +184,6 @@ const CONDITION_FIELDS: Record<string, string[]> = {
     hasFlag: ['flag'],
     notFlag: ['flag'],
     hasItem: ['itemId'],
-    notItem: ['itemId'],
     variableEquals: ['variable', 'value'],
     variableGreaterThan: ['variable', 'value'],
     variableLessThan: ['variable', 'value'],
@@ -247,12 +246,12 @@ function validateCondition(
         return errors;
     }
 
-    // Special case: timeIs requires at least one of hour or day
+    // Special case: timeIs requires startHour and endHour
     if (condition.type === 'timeIs') {
-        if (condition.hour === undefined && condition.day === undefined) {
+        if (condition.startHour === undefined || condition.endHour === undefined) {
             errors.push({
                 file,
-                message: `Node "${nodeId}" condition "timeIs" must have at least one of "hour" or "day" argument`,
+                message: `Node "${nodeId}" condition "timeIs" missing required "startHour" or "endHour" argument`,
             });
         }
         return errors;

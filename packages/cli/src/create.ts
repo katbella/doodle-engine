@@ -85,11 +85,11 @@ export async function create(projectName: string) {
             message: 'Include starter styles?',
             choices: [
                 {
-                    title: 'Yes — styled UI with dark theme and gold accents',
+                    title: 'Yes: styled UI with dark theme and gold accents',
                     value: true,
                 },
                 {
-                    title: 'No — minimal CSS, build your own',
+                    title: 'No: minimal CSS, build your own',
                     value: false,
                 },
             ],

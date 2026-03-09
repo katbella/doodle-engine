@@ -534,6 +534,51 @@ describe('Snapshot Builder', () => {
         });
     });
 
+    describe('currentLocale', () => {
+        it('should include currentLocale from state', () => {
+            const state = createTestState();
+            const registry = createTestRegistry();
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.currentLocale).toBe('en');
+        });
+
+        it('should reflect locale change in snapshot', () => {
+            const state = { ...createTestState(), currentLocale: 'es' };
+            const registry = {
+                ...createTestRegistry(),
+                locales: {
+                    en: { ...createTestRegistry().locales.en },
+                    es: {
+                        'location.tavern.name': 'El Perro Salado',
+                        'location.tavern.description': 'Una taberna oscura',
+                    },
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.currentLocale).toBe('es');
+            expect(snapshot.location.name).toBe('El Perro Salado');
+            expect(snapshot.location.description).toBe('Una taberna oscura');
+        });
+
+        it('should fall back to key when locale has no translation', () => {
+            const state = { ...createTestState(), currentLocale: 'es' };
+            const registry = {
+                ...createTestRegistry(),
+                locales: {
+                    en: { ...createTestRegistry().locales.en },
+                    es: {}, // no translations
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.currentLocale).toBe('es');
+            // Falls back to the @key itself since es has no entry
+            expect(snapshot.location.name).toBe('@location.tavern.name');
+        });
+    });
+
     describe('localization fallback', () => {
         it('should use key as fallback when translation missing', () => {
             const state = createTestState();

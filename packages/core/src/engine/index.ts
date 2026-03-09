@@ -90,7 +90,7 @@ export class Engine {
             musicOverride: null,
             pendingVideo: null,
             pendingInterlude: null,
-            currentLocale: 'en', // Default locale
+            currentLocale: this.state.currentLocale ?? 'en',
         };
 
         // Check for triggered dialogues and interludes at starting location
@@ -257,33 +257,6 @@ export class Engine {
         if (startNode.choices.length === 0) {
             this.settleAtNode(dialogue.id, startNode);
         }
-
-        return this.buildSnapshotAndClearTransients();
-    }
-
-    /**
-     * Player clicked on an item to pick it up.
-     *
-     * Adds the item to inventory if it's at the current location.
-     *
-     * @param itemId - ID of the item to take
-     * @returns New snapshot with item in inventory
-     */
-    takeItem(itemId: string): Snapshot {
-        // Check if item is at current location
-        if (this.state.itemLocations[itemId] !== this.state.currentLocation) {
-            return this.buildSnapshotAndClearTransients();
-        }
-
-        // Add to inventory
-        this.state = {
-            ...this.state,
-            inventory: [...this.state.inventory, itemId],
-            itemLocations: {
-                ...this.state.itemLocations,
-                [itemId]: 'inventory',
-            },
-        };
 
         return this.buildSnapshotAndClearTransients();
     }
@@ -526,7 +499,7 @@ export class Engine {
      *   we reach a node with text/choices or the end of the dialogue
      *
      * Handles the case where effects (e.g. endDialogue) may have already
-     * nulled dialogueState — restores it when the node has text to display.
+     * nulled dialogueState; restores it when the node has text to display.
      */
     private settleAtNode(dialogueId: string, node: DialogueNode): void {
         // Node has text → show it, wait for player click
@@ -573,7 +546,7 @@ export class Engine {
                 this.state = applyEffects(nextNode.effects, this.state);
             }
 
-            // startDialogue effect redirects to a new dialogue — signal to caller
+            // startDialogue effect redirects to a new dialogue; signal to caller
             if (this.state.dialogueState?.nodeId === '') {
                 return;
             }

@@ -233,7 +233,7 @@ npm run validate
     - All GOTO targets (from `node.next`, `choice.next`, `conditionalNext`) point to existing nodes
 - **Conditions**
     - `hasFlag`/`notFlag` have `flag` argument
-    - `hasItem`/`notItem` have `item` argument
+    - `hasItem` has `item` argument
     - `questAtStage` has `quest` and `stage` arguments
     - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
 - **Effects**

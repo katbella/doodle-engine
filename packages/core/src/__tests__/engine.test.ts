@@ -298,7 +298,7 @@ describe('Engine', () => {
             const saveData = engine.saveGame();
             expect(saveData.state.flags.visitedTavern).toBe(true);
 
-            // Player clicks Continue — no next node so dialogue ends
+            // Player clicks Continue: no next node, so dialogue ends
             const snapshot2 = engine.continueDialogue();
             expect(snapshot2.dialogue).toBeNull();
         });
@@ -309,21 +309,23 @@ describe('Engine', () => {
             const config = createTestConfig();
             engine.newGame(config);
 
-            // Make some changes
-            engine.takeItem('rusty_key');
+            // Make some changes via dialogue (items are obtained through story events)
+            engine.continueDialogue(); // dismiss the tavern_enter trigger dialogue
+            engine.talkTo('bartender');
+            engine.selectChoice('choice_hello'); // sets greetedBartender flag
 
             const saveData = engine.saveGame();
 
             expect(saveData.version).toBe('1.0');
             expect(saveData.timestamp).toBeDefined();
-            expect(saveData.state.inventory).toContain('rusty_key');
+            expect(saveData.state.flags.greetedBartender).toBe(true);
 
             // Create new engine and load
             const newEngine = new Engine(registry, saveData.state);
             const snapshot = newEngine.loadGame(saveData);
 
-            expect(snapshot.inventory).toHaveLength(1);
-            expect(snapshot.inventory[0].id).toBe('rusty_key');
+            expect(snapshot.variables.gold).toBe(100);
+            expect(snapshot.location.id).toBe('tavern');
         });
     });
 
@@ -365,7 +367,7 @@ describe('Engine', () => {
             const saveData = engine.saveGame();
             expect(saveData.state.flags.greetedBartender).toBe(true);
 
-            // Response node has text — shown, waiting for player to click Continue
+            // Response node has text, shown while waiting for player to click Continue
             expect(snapshot.dialogue?.text).toBe('Nice to meet you');
         });
 
@@ -375,7 +377,7 @@ describe('Engine', () => {
             engine.talkTo('bartender');
             engine.selectChoice('choice_hello'); // → 'Nice to meet you' shown
 
-            // Player clicks Continue — endDialogue already fired, no next → ends
+            // Player clicks Continue: endDialogue already fired, no next, dialogue ends
             const snapshot = engine.continueDialogue();
             expect(snapshot.dialogue).toBeNull();
         });
@@ -402,30 +404,6 @@ describe('Engine', () => {
             const snapshot = engine.selectChoice('thanks'); // endDialogue
 
             expect(snapshot.dialogue).toBeNull();
-        });
-    });
-
-    describe('takeItem', () => {
-        it('should add item to inventory', () => {
-            const config = createTestConfig();
-            engine.newGame(config);
-
-            const snapshot = engine.takeItem('rusty_key');
-
-            expect(snapshot.inventory).toHaveLength(1);
-            expect(snapshot.inventory[0].id).toBe('rusty_key');
-            expect(snapshot.itemsHere).not.toContainEqual(
-                expect.objectContaining({ id: 'rusty_key' })
-            );
-        });
-
-        it('should not pick up items from other locations', () => {
-            const config = createTestConfig();
-            engine.newGame(config);
-
-            const snapshot = engine.takeItem('letter'); // letter is at market
-
-            expect(snapshot.inventory).toHaveLength(0);
         });
     });
 
@@ -530,6 +508,22 @@ describe('Engine', () => {
             const saveData = engine.saveGame();
             expect(saveData.state.currentLocale).toBe('es');
         });
+
+        it('should return a snapshot with the updated currentLocale', () => {
+            const config = createTestConfig();
+            engine.newGame(config);
+
+            const snapshot = engine.setLocale('es');
+
+            expect(snapshot.currentLocale).toBe('es');
+        });
+
+        it('should reflect default locale in snapshot after newGame', () => {
+            const config = createTestConfig();
+            const snapshot = engine.newGame(config);
+
+            expect(snapshot.currentLocale).toBe('en');
+        });
     });
 
     describe('getSnapshot', () => {
@@ -616,11 +610,11 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
-            // 'start' node has text — shown first
+            // 'start' node has text, shown first
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues — conditionalNext evaluates with test_flag set
+            // Player continues: conditionalNext evaluates with test_flag set
             // Should land on 'correct' (second conditionalNext, first passing)
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Correct node');
@@ -682,11 +676,11 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
-            // 'start' node has text — shown first
+            // 'start' node has text, shown first
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues — no conditionalNext passes, falls through to node.next
+            // Player continues: no conditionalNext passes, falls through to node.next
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Fallthrough node');
         });
@@ -741,11 +735,11 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
-            // 'start' node has text — shown first
+            // 'start' node has text, shown first
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues — no conditionalNext passes, no node.next → ends
+            // Player continues: no conditionalNext passes, no node.next, dialogue ends
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue).toBeNull();
         });
@@ -810,11 +804,11 @@ describe('Engine', () => {
             const config = createTestConfig();
             customEngine.newGame(config);
 
-            // 'start' node has text — shown first (effects including setFlag('unlocked') already ran)
+            // 'start' node has text, shown first (effects including setFlag('unlocked') already ran)
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues — conditionalNext evaluates with 'unlocked' flag set
+            // Player continues: conditionalNext evaluates with 'unlocked' flag set
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Unlocked path');
         });
