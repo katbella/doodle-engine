@@ -1,5 +1,13 @@
 # @doodle-engine/react
 
+## 0.0.35
+
+### Patch Changes
+
+- 831b748: fix ambient sound implementation
+- Updated dependencies [831b748]
+    - @doodle-engine/core@0.0.35
+
 ## 0.0.34
 
 ### Patch Changes
