@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.37
+
+### Patch Changes
+
+- fcfa9bb: package manifests
+
 ## 0.0.36
 
 ### Patch Changes

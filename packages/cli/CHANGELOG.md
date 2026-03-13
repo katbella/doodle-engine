@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.37
+
+### Patch Changes
+
+- fcfa9bb: package manifests
+- Updated dependencies [fcfa9bb]
+    - @doodle-engine/react@0.0.37
+    - @doodle-engine/core@0.0.37
+
 ## 0.0.36
 
 ### Patch Changes
