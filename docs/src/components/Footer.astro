@@ -3,6 +3,7 @@ import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
 
 const creatorUrl = 'https://katbella.com';
 const issuesUrl = 'https://github.com/katbella/doodle-engine/issues';
+const starlightUrl = 'https://starlight.astro.build';
 ---
 
 <DefaultFooter />
@@ -13,6 +14,10 @@ const issuesUrl = 'https://github.com/katbella/doodle-engine/issues';
     <span aria-hidden="true">&bull;</span>
     <a href={issuesUrl} target="_blank" rel="noopener noreferrer">
         Having issues? Report them on GitHub!
+    </a>
+    <span aria-hidden="true">&bull;</span>
+    <a href={starlightUrl} target="_blank" rel="noopener noreferrer">
+        Docs built with Starlight
     </a>
 </div>
 
@@ -30,14 +35,22 @@ const issuesUrl = 'https://github.com/katbella/doodle-engine/issues';
         }
 
         .project-footer a {
-            color: inherit;
-            text-decoration: none;
+            color: var(--sl-color-gray-2);
+            text-decoration-line: underline;
+            text-decoration-color: var(--sl-color-gray-4);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
         }
 
         .project-footer a:hover {
             color: var(--sl-color-white);
-            text-decoration: underline;
-            text-underline-offset: 2px;
+            text-decoration-color: var(--sl-color-white);
+            text-decoration-thickness: 2px;
+        }
+
+        .project-footer a:focus-visible {
+            outline: 2px solid var(--sl-color-accent);
+            outline-offset: 2px;
         }
     }
 </style>
