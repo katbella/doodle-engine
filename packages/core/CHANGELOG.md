@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.0.36
+
+### Patch Changes
+
+- 00f567f: dependency updates
+
 ## 0.0.35
 
 ### Patch Changes
