@@ -23,14 +23,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install docs dependencies
-        working-directory: docs
-        run: npm install
+        run: yarn --cwd docs install --immutable
 
       - name: Build docs
-        working-directory: docs
-        run: npm run build
+        run: yarn --cwd docs build
 
       - uses: actions/upload-pages-artifact@v3
         with:
