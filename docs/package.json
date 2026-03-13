@@ -1,6 +1,13 @@
 {
     "name": "@doodle-engine/docs",
     "private": true,
+    "author": "Kat Bella",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/katbella/doodle-engine",
+        "directory": "docs"
+    },
     "scripts": {
         "dev": "astro dev",
         "build": "astro build",

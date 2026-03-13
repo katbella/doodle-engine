@@ -2,6 +2,8 @@
     "name": "@doodle-engine/core",
     "version": "0.0.36",
     "type": "module",
+    "author": "Kat Bella",
+    "license": "MIT",
     "main": "./dist/core.cjs",
     "module": "./dist/core.js",
     "types": "./dist/index.d.ts",
@@ -31,7 +33,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/katbella/doodle-engine.git",
+        "url": "https://github.com/katbella/doodle-engine",
         "directory": "packages/core"
     },
     "engines": {

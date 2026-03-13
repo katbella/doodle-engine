@@ -2,6 +2,8 @@
     "name": "@doodle-engine/react",
     "version": "0.0.36",
     "type": "module",
+    "author": "Kat Bella",
+    "license": "MIT",
     "main": "./dist/react.cjs",
     "module": "./dist/react.js",
     "types": "./dist/index.d.ts",
@@ -44,7 +46,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/katbella/doodle-engine.git",
+        "url": "https://github.com/katbella/doodle-engine",
         "directory": "packages/react"
     },
     "engines": {

@@ -1,6 +1,12 @@
 {
     "name": "doodle-engine",
     "private": true,
+    "author": "Kat Bella",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/katbella/doodle-engine"
+    },
     "packageManager": "yarn@4.6.0",
     "workspaces": [
         "packages/*"

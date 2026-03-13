@@ -8,6 +8,9 @@ export default defineConfig({
             title: 'Doodle Engine',
             description:
                 'A narrative RPG engine for text-based story-driven games.',
+            components: {
+                Footer: './src/components/Footer.astro',
+            },
             social: [
                 {
                     icon: 'github',

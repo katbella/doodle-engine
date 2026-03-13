@@ -2,6 +2,8 @@
     "name": "@doodle-engine/cli",
     "version": "0.0.36",
     "type": "module",
+    "author": "Kat Bella",
+    "license": "MIT",
     "description": "CLI tools for Doodle Engine game development",
     "bin": {
         "doodle": "./dist/cli.js"
@@ -37,7 +39,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/katbella/doodle-engine.git",
+        "url": "https://github.com/katbella/doodle-engine",
         "directory": "packages/cli"
     },
     "engines": {
