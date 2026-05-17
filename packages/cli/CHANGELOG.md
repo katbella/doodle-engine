@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.0.38
+
+### Patch Changes
+
+- 973f413: patch security vulnerabilities in deps
+- Updated dependencies [973f413]
+    - @doodle-engine/react@0.0.38
+    - @doodle-engine/core@0.0.38
+
 ## 0.0.37
 
 ### Patch Changes
