@@ -77,7 +77,8 @@ This is useful for:
 
 - **Start node exists**: The `startNode` specified in a dialogue must be a valid node ID
 - **No duplicate node IDs**: Each node ID must be unique within its dialogue
-- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalNext` targets must point to existing nodes. Exception: choices that contain `END dialogue` or `GOTO location` don't need a `GOTO` target. They terminate the dialogue.
+- **GOTO targets exist**: All `node.next`, `choice.next`, and `conditionalBranches[].next` targets must point to existing nodes. Exception: choices that contain `END dialogue` or `GOTO location` don't need a `GOTO` target. They terminate the dialogue.
+- **IF blocks are valid**: Every conditional branch must have a valid condition, and any effects inside the branch must have their required arguments.
 
 Example error:
 
@@ -113,7 +114,7 @@ content/dialogues/bartender_greeting.dlg
 
 ### Effects
 
-All effects must have their required arguments:
+All node, choice, and IF branch effects must have their required arguments:
 
 | Effect                                 | Required Arguments             |
 | -------------------------------------- | ------------------------------ |

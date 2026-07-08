@@ -104,13 +104,13 @@ After a snapshot is produced, the engine clears these fields in the next state. 
 
 ## Condition Evaluation
 
-Conditions are evaluated at snapshot build time to determine:
+Conditions are evaluated by the engine in three places:
 
-- Which dialogue choices are visible (choices with failing `REQUIRE` are hidden)
-- Which triggered dialogues activate
-- Which `IF` branches to take
+- Snapshot building filters dialogue choices; choices with failing `REQUIRE` are hidden.
+- Engine actions check triggered dialogues and interludes when a game starts or travel changes location.
+- Dialogue advancement evaluates `IF` branches; the first passing branch runs its effects and controls routing.
 
-This means the snapshot only contains valid, visible options. The renderer never evaluates conditions.
+This means the snapshot only contains valid, visible player options. The renderer never evaluates conditions.
 
 ## Effect Processing
 
@@ -118,7 +118,8 @@ Effects run in order when:
 
 1. A dialogue node is reached (node effects)
 2. A choice is selected (choice effects)
-3. An interlude triggers (interlude `effects` field, typically `setFlag` to prevent repeats)
+3. A passing `IF` branch runs (branch effects)
+4. An interlude triggers (interlude `effects` field, typically `setFlag` to prevent repeats)
 
 Effects produce a new state: setting flags, adding items, changing quest stages, moving characters, queuing interludes, rolling dice into variables, and similar operations. The engine builds a new snapshot after all effects have been applied.
 

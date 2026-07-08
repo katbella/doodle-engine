@@ -31,6 +31,8 @@ NODE resolve
 
   # Branch on whether the stored variable passes a threshold (15+)
   IF variableGreaterThan bluffRoll 14
+    SET flag bluffedMarcus
+    ADD relationship bartender 2
     GOTO success
   END
 
@@ -39,8 +41,6 @@ NODE resolve
 NODE success
   NARRATOR: @bluff.success.narration
   BARTENDER: @bluff.success.bartender
-  ADD relationship bartender 2
-  SET flag bluffedMarcus
 
   CHOICE @bluff.choice.cheers
     END dialogue

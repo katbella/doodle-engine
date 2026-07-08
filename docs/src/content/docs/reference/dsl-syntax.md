@@ -183,13 +183,25 @@ IF hasFlag metBartender
 END
 ```
 
+or with effects that fall through to the node's regular `GOTO`:
+
+```
+IF hasFlag metBartender
+  ADD relationship bartender 1
+END
+
+GOTO greeting
+```
+
 **How IF blocks work:**
 
 1. IF blocks are evaluated **in order** (top to bottom) after the node's effects run
-2. The **first** condition that passes determines where to go next
-3. If no IF conditions pass, the node falls through to its regular `GOTO` (if present)
-4. IF blocks are **invisible to the player**: they create author-controlled branching
-5. Multiple IF blocks can exist in a node, but only the first passing one executes
+2. The **first** condition that passes runs that IF block's effects
+3. If the passing IF block has a `GOTO`, that target is used
+4. If the passing IF block has no `GOTO`, the node falls through to its regular `GOTO` (if present)
+5. If no IF conditions pass, the node falls through to its regular `GOTO` (if present)
+6. IF blocks are **invisible to the player**: they create author-controlled branching
+7. Multiple IF blocks can exist in a node, but only the first passing one executes
 
 **Example:**
 
@@ -237,6 +249,8 @@ A node with **no speaker line and no text** is a **silent processing node**. The
 NODE skill_check
   ROLL result 1 20
   IF variableGreaterThan result 14
+    SET flag passedSkillCheck
+    ADD relationship bartender 1
     GOTO success
   END
   GOTO failure
@@ -257,7 +271,7 @@ NODE failure
   END
 ```
 
-`skill_check` is silent. It runs `ROLL`, evaluates the `IF`, and jumps to `success` or `failure` without the player seeing any prompt.
+`skill_check` is silent. It runs `ROLL`, evaluates the `IF`, applies the passing branch's effects, and jumps to `success` or `failure` without the player seeing any prompt.
 
 ### Summary
 
@@ -273,6 +287,7 @@ NODE failure
 
 - Invisible to the player
 - First passing condition wins
+- Effects inside the passing IF block run before its `GOTO`
 - Used for conditional story flow based on game state
 
 **CHOICE REQUIRE** (player-facing filtering):

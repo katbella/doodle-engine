@@ -230,13 +230,15 @@ npm run validate
 - **Dialogue structure**
     - `startNode` exists in dialogue
     - No duplicate node IDs within a dialogue
-    - All GOTO targets (from `node.next`, `choice.next`, `conditionalNext`) point to existing nodes
+    - All GOTO targets (from `node.next`, `choice.next`, `conditionalBranches[].next`) point to existing nodes
+    - IF branch conditions and effects have required arguments
 - **Conditions**
     - `hasFlag`/`notFlag` have `flag` argument
     - `hasItem` has `item` argument
     - `questAtStage` has `quest` and `stage` arguments
     - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
 - **Effects**
+    - Node, choice, and IF branch effects are validated
     - `setFlag`/`clearFlag` have `flag` argument
     - `setVariable`/`addVariable` have `variable` and `value` arguments
     - `addItem`/`removeItem` have `item` argument

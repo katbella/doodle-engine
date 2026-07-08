@@ -16,6 +16,7 @@ export type {
     MapLocation,
     Dialogue,
     DialogueNode,
+    ConditionalBranch,
     Choice,
     Quest,
     QuestStage,

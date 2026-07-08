@@ -292,11 +292,15 @@ ROLL bluffRoll 1 20
 NARRATOR: You rolled a {bluffRoll}.
 
 IF variableGreaterThan bluffRoll 14
+  SET flag bluffedMarcus
+  ADD relationship bartender 2
   GOTO success
 END
 
 GOTO failure
 ```
+
+Effects inside an `IF` block run only when that IF condition passes. If the IF block has a `GOTO`, the engine applies those effects before moving to the target node.
 
 For a one-shot hidden check where you don't need the value, use the `roll` condition instead:
 

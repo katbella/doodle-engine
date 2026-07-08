@@ -537,8 +537,8 @@ describe('Engine', () => {
         });
     });
 
-    describe('conditionalNext (IF blocks)', () => {
-        it('should evaluate conditionalNext and use first passing condition', () => {
+    describe('conditionalBranches (IF blocks)', () => {
+        it('should evaluate conditionalBranches and use first passing condition', () => {
             const registry: ContentRegistry = {
                 ...createTestRegistry(),
                 dialogues: {
@@ -554,7 +554,7 @@ describe('Engine', () => {
                                 effects: [
                                     { type: 'setFlag', flag: 'test_flag' },
                                 ],
-                                conditionalNext: [
+                                conditionalBranches: [
                                     {
                                         condition: {
                                             type: 'hasFlag',
@@ -614,13 +614,13 @@ describe('Engine', () => {
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues: conditionalNext evaluates with test_flag set
-            // Should land on 'correct' (second conditionalNext, first passing)
+            // Player continues: conditionalBranches evaluate with test_flag set
+            // Should land on 'correct' (second branch, first passing)
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Correct node');
         });
 
-        it('should fall through to node.next when no conditionalNext passes', () => {
+        it('should fall through to node.next when no conditional branch passes', () => {
             const registry: ContentRegistry = {
                 ...createTestRegistry(),
                 dialogues: {
@@ -633,7 +633,7 @@ describe('Engine', () => {
                                 speaker: 'bartender',
                                 text: 'Start node',
                                 choices: [],
-                                conditionalNext: [
+                                conditionalBranches: [
                                     {
                                         condition: {
                                             type: 'hasFlag',
@@ -680,12 +680,12 @@ describe('Engine', () => {
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues: no conditionalNext passes, falls through to node.next
+            // Player continues: no conditional branch passes, falls through to node.next
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Fallthrough node');
         });
 
-        it('should end dialogue when no conditionalNext passes and no node.next', () => {
+        it('should end dialogue when no conditional branch passes and no node.next', () => {
             const registry: ContentRegistry = {
                 ...createTestRegistry(),
                 dialogues: {
@@ -698,7 +698,7 @@ describe('Engine', () => {
                                 speaker: 'bartender',
                                 text: 'Start node',
                                 choices: [],
-                                conditionalNext: [
+                                conditionalBranches: [
                                     {
                                         condition: {
                                             type: 'hasFlag',
@@ -739,12 +739,12 @@ describe('Engine', () => {
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues: no conditionalNext passes, no node.next, dialogue ends
+            // Player continues: no conditional branch passes, no node.next, dialogue ends
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue).toBeNull();
         });
 
-        it('should apply effects before evaluating conditionalNext', () => {
+        it('should apply node effects before evaluating conditionalBranches', () => {
             const registry: ContentRegistry = {
                 ...createTestRegistry(),
                 dialogues: {
@@ -757,11 +757,11 @@ describe('Engine', () => {
                                 speaker: 'bartender',
                                 text: 'Start node',
                                 choices: [],
-                                // Effect sets flag that conditionalNext checks
+                                // Effect sets flag that conditionalBranches checks
                                 effects: [
                                     { type: 'setFlag', flag: 'unlocked' },
                                 ],
-                                conditionalNext: [
+                                conditionalBranches: [
                                     {
                                         condition: {
                                             type: 'hasFlag',
@@ -808,12 +808,211 @@ describe('Engine', () => {
             const snapshot = customEngine.talkTo('bartender');
             expect(snapshot.dialogue?.text).toBe('Start node');
 
-            // Player continues: conditionalNext evaluates with 'unlocked' flag set
+            // Player continues: conditionalBranches evaluate with 'unlocked' flag set
             const snapshot2 = customEngine.continueDialogue();
             expect(snapshot2.dialogue?.text).toBe('Unlocked path');
         });
 
-        it('should not evaluate conditionalNext on nodes with choices', () => {
+        it('should apply effects from the first passing conditional branch', () => {
+            const registry: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    test_dialogue: {
+                        id: 'test_dialogue',
+                        startNode: 'start',
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: 'bartender',
+                                text: 'Start node',
+                                choices: [],
+                                conditionalBranches: [
+                                    {
+                                        condition: {
+                                            type: 'hasFlag',
+                                            flag: 'metBefore',
+                                        },
+                                        effects: [
+                                            {
+                                                type: 'setFlag',
+                                                flag: 'branchApplied',
+                                            },
+                                        ],
+                                        next: 'done',
+                                    },
+                                ],
+                            },
+                            {
+                                id: 'done',
+                                speaker: 'bartender',
+                                text: 'Done',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'test_dialogue',
+                        stats: {},
+                    },
+                },
+            };
+
+            const customEngine = new Engine(registry, {} as any);
+            customEngine.newGame({
+                ...createTestConfig(),
+                startFlags: { metBefore: true },
+            });
+
+            customEngine.talkTo('bartender');
+            const snapshot = customEngine.continueDialogue();
+            const saveData = customEngine.saveGame();
+
+            expect(snapshot.dialogue?.text).toBe('Done');
+            expect(saveData.state.flags.branchApplied).toBe(true);
+        });
+
+        it('should not apply effects from a failing conditional branch', () => {
+            const registry: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    test_dialogue: {
+                        id: 'test_dialogue',
+                        startNode: 'start',
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: 'bartender',
+                                text: 'Start node',
+                                choices: [],
+                                conditionalBranches: [
+                                    {
+                                        condition: {
+                                            type: 'hasFlag',
+                                            flag: 'missingFlag',
+                                        },
+                                        effects: [
+                                            {
+                                                type: 'setFlag',
+                                                flag: 'branchApplied',
+                                            },
+                                        ],
+                                        next: 'wrong',
+                                    },
+                                ],
+                                next: 'fallback',
+                            },
+                            {
+                                id: 'fallback',
+                                speaker: 'bartender',
+                                text: 'Fallback',
+                                choices: [],
+                            },
+                            {
+                                id: 'wrong',
+                                speaker: 'bartender',
+                                text: 'Wrong',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'test_dialogue',
+                        stats: {},
+                    },
+                },
+            };
+
+            const customEngine = new Engine(registry, {} as any);
+            customEngine.newGame(createTestConfig());
+
+            customEngine.talkTo('bartender');
+            const snapshot = customEngine.continueDialogue();
+            const saveData = customEngine.saveGame();
+
+            expect(snapshot.dialogue?.text).toBe('Fallback');
+            expect(saveData.state.flags.branchApplied).toBeUndefined();
+        });
+
+        it('should fall through to node.next after a passing branch with no GOTO', () => {
+            const registry: ContentRegistry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    test_dialogue: {
+                        id: 'test_dialogue',
+                        startNode: 'start',
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: 'bartender',
+                                text: 'Start node',
+                                choices: [],
+                                conditionalBranches: [
+                                    {
+                                        condition: {
+                                            type: 'hasFlag',
+                                            flag: 'metBefore',
+                                        },
+                                        effects: [
+                                            {
+                                                type: 'setFlag',
+                                                flag: 'branchApplied',
+                                            },
+                                        ],
+                                    },
+                                ],
+                                next: 'fallback',
+                            },
+                            {
+                                id: 'fallback',
+                                speaker: 'bartender',
+                                text: 'Fallback',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+                characters: {
+                    bartender: {
+                        id: 'bartender',
+                        name: 'Marcus',
+                        biography: 'A bartender',
+                        portrait: 'bartender.png',
+                        location: 'tavern',
+                        dialogue: 'test_dialogue',
+                        stats: {},
+                    },
+                },
+            };
+
+            const customEngine = new Engine(registry, {} as any);
+            customEngine.newGame({
+                ...createTestConfig(),
+                startFlags: { metBefore: true },
+            });
+
+            customEngine.talkTo('bartender');
+            const snapshot = customEngine.continueDialogue();
+            const saveData = customEngine.saveGame();
+
+            expect(snapshot.dialogue?.text).toBe('Fallback');
+            expect(saveData.state.flags.branchApplied).toBe(true);
+        });
+
+        it('should not evaluate conditionalBranches on nodes with choices', () => {
             const registry: ContentRegistry = {
                 ...createTestRegistry(),
                 dialogues: {
@@ -832,8 +1031,8 @@ describe('Engine', () => {
                                         next: 'end',
                                     },
                                 ],
-                                // Has conditionalNext but also has choices, so should stay at this node
-                                conditionalNext: [
+                                // Has conditionalBranches but also has choices, so should stay at this node
+                                conditionalBranches: [
                                     {
                                         condition: {
                                             type: 'hasFlag',

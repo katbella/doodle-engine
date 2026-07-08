@@ -192,7 +192,7 @@ export class Engine {
             },
         };
 
-        // Apply node effects first (before evaluating conditionalNext)
+        // Apply node effects first (before evaluating conditional branches)
         if (nextNode.effects) {
             this.state = applyEffects(nextNode.effects, this.state);
         }
@@ -410,7 +410,7 @@ export class Engine {
      * Player clicked to advance past a text-only dialogue node.
      *
      * Called when the current node has text but no choices. Advances to the
-     * next node (via conditionalNext or next). If no next exists, ends the
+     * next node (via IF branch or next). If no next exists, ends the
      * dialogue.
      *
      * @returns New snapshot after advancing
@@ -432,6 +432,9 @@ export class Engine {
         }
 
         const resolvedNext = this.resolveNextNode(currentNode);
+        if (this.state.dialogueState?.nodeId === '') {
+            return this.initDialogue(this.state.dialogueState.dialogueId);
+        }
         if (!resolvedNext) {
             this.state = { ...this.state, dialogueState: null };
             return this.buildSnapshotAndClearTransients();
@@ -526,6 +529,9 @@ export class Engine {
         let currentNode = node;
         while (true) {
             const nextId = this.resolveNextNode(currentNode);
+            if (this.state.dialogueState?.nodeId === '') {
+                return;
+            }
             if (!nextId) {
                 this.state = { ...this.state, dialogueState: null };
                 return;
@@ -570,25 +576,36 @@ export class Engine {
     /**
      * Resolve the next node ID from a dialogue node.
      *
-     * Evaluates conditionalNext (IF blocks) in order, returning the first passing condition's next node.
-     * Falls through to node.next if no conditionalNext passes.
+     * Evaluates IF branches in order. The first passing branch runs its
+     * branch effects, then routes to its branch next or falls through to
+     * node.next. If no branch passes, falls through to node.next.
      * Returns null if neither exists (end dialogue).
      *
      * @param node - The dialogue node to resolve next from
      * @returns Next node ID, or null to end dialogue
      */
     private resolveNextNode(node: DialogueNode): string | null {
-        // Check conditionalNext (IF blocks) in order
-        if (node.conditionalNext && node.conditionalNext.length > 0) {
-            for (const conditionalBranch of node.conditionalNext) {
+        // Check IF branches in order; first passing branch wins.
+        if (node.conditionalBranches && node.conditionalBranches.length > 0) {
+            for (const conditionalBranch of node.conditionalBranches) {
                 if (
                     evaluateConditions(
                         [conditionalBranch.condition],
                         this.state
                     )
                 ) {
-                    // First passing condition wins
-                    return conditionalBranch.next;
+                    if (conditionalBranch.effects) {
+                        this.state = applyEffects(
+                            conditionalBranch.effects,
+                            this.state
+                        );
+                    }
+
+                    if (this.state.dialogueState === null) {
+                        return null;
+                    }
+
+                    return conditionalBranch.next ?? node.next ?? null;
                 }
             }
         }

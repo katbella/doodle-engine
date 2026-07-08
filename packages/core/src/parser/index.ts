@@ -12,7 +12,12 @@
  * - @localization keys and "inline text"
  */
 
-import type { Dialogue, DialogueNode, Choice } from '../types/entities';
+import type {
+    Dialogue,
+    DialogueNode,
+    ConditionalBranch,
+    Choice,
+} from '../types/entities';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
 
@@ -464,8 +469,8 @@ interface IfBlockParseResult {
  * Parse an IF block
  * Syntax:
  *   IF condition
+ *     effects
  *     GOTO target
- *     or effects
  *   END
  */
 function parseIfBlock(tokens: Token[], startIndex: number): IfBlockParseResult {
@@ -488,7 +493,14 @@ function parseIfBlock(tokens: Token[], startIndex: number): IfBlockParseResult {
         }
 
         if (current.line.startsWith('GOTO ')) {
-            next = current.line.substring(5).trim();
+            const gotoTarget = current.line.substring(5).trim();
+            if (gotoTarget.startsWith('location ')) {
+                const locationId = gotoTarget.substring(9).trim();
+                effects.push({ type: 'goToLocation', locationId });
+                effects.push({ type: 'endDialogue' });
+            } else {
+                next = gotoTarget;
+            }
             i++;
         } else {
             effects.push(parseEffect(current.line));
@@ -526,7 +538,7 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
     const choices: Choice[] = [];
     const effects: Effect[] = [];
     let next: string | undefined;
-    const conditionalNext: Array<{ condition: Condition; next: string }> = [];
+    const conditionalBranches: ConditionalBranch[] = [];
 
     let i = startIndex + 1;
 
@@ -563,15 +575,12 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
             i = choiceResult.nextIndex;
         } else if (current.line.startsWith('IF ')) {
             const ifResult = parseIfBlock(tokens, i);
-            if (ifResult.next) {
-                // Conditional GOTO - store for engine to evaluate at runtime
-                conditionalNext.push({
-                    condition: ifResult.condition,
-                    next: ifResult.next,
-                });
-            }
-            // Add any effects from IF block
-            effects.push(...ifResult.effects);
+            conditionalBranches.push({
+                condition: ifResult.condition,
+                effects:
+                    ifResult.effects.length > 0 ? ifResult.effects : undefined,
+                next: ifResult.next,
+            });
             i = ifResult.nextIndex;
         } else if (current.line.startsWith('GOTO ')) {
             const gotoTarget = current.line.substring(5).trim();
@@ -603,9 +612,9 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
         next,
     };
 
-    // Store conditional next if any (IF blocks)
-    if (conditionalNext.length > 0) {
-        node.conditionalNext = conditionalNext;
+    // Store conditional branches if any (IF blocks)
+    if (conditionalBranches.length > 0) {
+        node.conditionalBranches = conditionalBranches;
     }
 
     return { node, nextIndex: i };

@@ -542,9 +542,8 @@ SET flag metBartender
         const dialogue = parseDialogue(dsl, 'test');
 
         const node = dialogue.nodes[0];
-        // IF blocks are stored as conditionalNext (extension to base type)
-        expect((node as any).conditionalNext).toHaveLength(1);
-        expect((node as any).conditionalNext[0]).toEqual({
+        expect(node.conditionalBranches).toHaveLength(1);
+        expect(node.conditionalBranches?.[0]).toEqual({
             condition: { type: 'hasFlag', flag: 'metBartender' },
             next: 'returning',
         });
@@ -571,14 +570,50 @@ END
         const dialogue = parseDialogue(dsl, 'test');
 
         const node = dialogue.nodes[0];
-        // IF block effects are added to node effects
-        expect(node.effects).toHaveLength(2);
-        expect(node.effects?.[0]).toEqual({ type: 'setFlag', flag: 'rich' });
-        expect(node.effects?.[1]).toEqual({
+        expect(node.effects).toBeUndefined();
+        expect(node.conditionalBranches).toHaveLength(1);
+        expect(node.conditionalBranches?.[0].condition).toEqual({
+            type: 'variableGreaterThan',
+            variable: 'gold',
+            value: 100,
+        });
+        expect(node.conditionalBranches?.[0].effects).toHaveLength(2);
+        expect(node.conditionalBranches?.[0].effects?.[0]).toEqual({
+            type: 'setFlag',
+            flag: 'rich',
+        });
+        expect(node.conditionalBranches?.[0].effects?.[1]).toEqual({
             type: 'addVariable',
             variable: 'reputation',
             value: 5,
         });
+    });
+
+    it('should parse IF block with effects and GOTO as one branch', () => {
+        const dsl = `
+NODE intro
+
+NARRATOR: @description
+
+IF hasFlag metBartender
+  SET flag returningCustomer
+  GOTO returning
+END
+`;
+
+        const dialogue = parseDialogue(dsl, 'test');
+        const node = dialogue.nodes[0];
+
+        expect(node.effects).toBeUndefined();
+        expect(node.conditionalBranches).toEqual([
+            {
+                condition: { type: 'hasFlag', flag: 'metBartender' },
+                effects: [
+                    { type: 'setFlag', flag: 'returningCustomer' },
+                ],
+                next: 'returning',
+            },
+        ]);
     });
 });
 

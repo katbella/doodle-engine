@@ -115,10 +115,10 @@ function validateDialogueNode(
         });
     }
 
-    // Validate conditionalNext
-    if (node.conditionalNext) {
-        for (const branch of node.conditionalNext) {
-            if (!validNodeIds.has(branch.next)) {
+    // Validate IF branches
+    if (node.conditionalBranches) {
+        for (const branch of node.conditionalBranches) {
+            if (branch.next && !validNodeIds.has(branch.next)) {
                 errors.push({
                     file,
                     message: `Node "${node.id}" IF block GOTO "${branch.next}" points to non-existent node`,
@@ -128,6 +128,13 @@ function validateDialogueNode(
 
             // Validate condition
             errors.push(...validateCondition(branch.condition, node.id, file));
+
+            // Validate branch effects
+            if (branch.effects) {
+                for (const effect of branch.effects) {
+                    errors.push(...validateEffect(effect, node.id, file));
+                }
+            }
         }
     }
 

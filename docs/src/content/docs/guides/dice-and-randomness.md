@@ -56,6 +56,8 @@ NODE resolve
   NARRATOR: @bluff.rolled
 
   IF variableGreaterThan bluffRoll 14
+    ADD relationship bartender 2
+    SET flag bluffedMarcus
     GOTO success
   END
 
@@ -63,7 +65,6 @@ NODE resolve
 
 NODE success
   NARRATOR: @bluff.success
-  ADD relationship bartender 2
   END dialogue
 
 NODE failure
@@ -96,6 +97,8 @@ NODE explore
 
   GOTO continue
 ```
+
+Effects inside an `IF` block run only when that condition passes. In the hidden check above, the coin and notification are only awarded on the successful roll.
 
 ## Threshold reference
 

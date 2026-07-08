@@ -3,7 +3,7 @@ title: Conditions
 description: All 15 condition types with examples.
 ---
 
-Conditions are tests against game state that return true or false. They're used in dialogue choices (`REQUIRE`), conditional branches (`IF`), triggered dialogues, and node visibility.
+Conditions are tests against game state that return true or false. They're used in dialogue choices (`REQUIRE`), conditional branches (`IF`), triggered dialogues, and triggered interludes.
 
 Multiple conditions on the same element use AND logic: all must pass.
 
@@ -224,9 +224,12 @@ END
 
 ```
 IF questAtStage odd_jobs started
+  SET flag sawQuestUpdate
   GOTO quest_update
 END
 ```
+
+Effects inside an `IF` block run only if that IF condition passes. If multiple IF blocks pass, only the first passing block runs.
 
 ### On triggered dialogues (top-level):
 

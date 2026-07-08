@@ -101,11 +101,12 @@ END
 
 ## Conditional Branching
 
-Use `IF` blocks for automatic branching based on conditions:
+Use `IF` blocks for automatic branching based on conditions. Everything inside the first passing `IF` block runs:
 
 ```
 NODE check_quest
   IF questAtStage odd_jobs started
+    SET flag mentionedOddJobs
     GOTO quest_update
   END
   IF questAtStage odd_jobs complete
@@ -114,7 +115,7 @@ NODE check_quest
   GOTO default_greeting
 ```
 
-If the condition passes, the `GOTO` fires. Otherwise, the engine falls through to the next block.
+If the condition passes, that IF block's effects run and its `GOTO` target is used. If a passing IF block has effects but no `GOTO`, the effects run and the node falls through to its regular `GOTO`. If no IF condition passes, the engine falls through to the next block or the node's regular `GOTO`.
 
 ## Triggered Dialogues
 

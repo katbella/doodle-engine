@@ -128,9 +128,21 @@ export interface DialogueNode {
     choices: Choice[];
     /** Effects that run when this node is reached */
     effects?: Effect[];
-    /** Conditional branching (IF blocks) - evaluated in order, first passing wins */
-    conditionalNext?: Array<{ condition: Condition; next: string }>;
-    /** Default next node if no choices and no conditionalNext passes */
+    /** Conditional branches (IF blocks) - evaluated in order, first passing wins */
+    conditionalBranches?: ConditionalBranch[];
+    /** Default next node if no choices and no conditional branch passes */
+    next?: string;
+}
+
+/**
+ * A conditional IF block in a dialogue node.
+ */
+export interface ConditionalBranch {
+    /** Condition that must pass for this branch to execute */
+    condition: Condition;
+    /** Effects that run when this branch is selected */
+    effects?: Effect[];
+    /** Destination node for this branch */
     next?: string;
 }
 
