@@ -52,7 +52,7 @@ The architecture is meant to stay understandable as projects grow.
 
 The core engine does not assume a renderer or UI framework. You can build your own renderer or replace parts of the provided one.
 
-Effects and conditions are composable building blocks. They can be combined to create systems such as reputation, skill checks, shops, or other mechanics without changing the engine itself.
+For deeper customization guidance, see the documentation site.
 
 ---
 
