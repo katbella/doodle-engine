@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.1.2
+
+### Patch Changes
+
+- 49413c2: Include the starter interlude background asset in generated projects.
+- Updated dependencies [49413c2]
+    - @doodle-engine/core@0.1.2
+    - @doodle-engine/react@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
