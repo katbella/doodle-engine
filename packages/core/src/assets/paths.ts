@@ -4,8 +4,9 @@
  * Game authors write bare filenames in YAML content files.
  * The engine resolves them to full web paths based on the asset category.
  *
- * Escape hatch: if a value already starts with `/` or `assets/`, it is
- * returned as-is so authors can override the convention when needed.
+ * Escape hatch: if a value already starts with `/assets/` or another absolute
+ * URL-like prefix, it is returned as-is so authors can override the convention.
+ * Values starting with `assets/` are normalized to `/assets/...`.
  */
 
 export type AssetCategory =
@@ -36,7 +37,8 @@ const CATEGORY_PREFIX: Record<AssetCategory, string> = {
  *
  * - Bare filenames are resolved using the category convention:
  *   `resolveAssetPath('tavern.png', 'banner')` → `/assets/images/banners/tavern.png`
- * - Paths already starting with `/` or `assets/` are returned unchanged.
+ * - Paths starting with `assets/` are normalized to `/assets/...`.
+ * - Paths already starting with `/`, `http(s)://`, `data:`, or `blob:` are returned unchanged.
  * - Empty or undefined values return an empty string.
  *
  * @param filename - Bare filename or full path from a YAML field
@@ -48,8 +50,17 @@ export function resolveAssetPath(
     category: AssetCategory
 ): string {
     if (!filename) return '';
-    // Escape hatch: already an absolute path or explicitly prefixed
-    if (filename.startsWith('/') || filename.startsWith('assets/')) {
+    if (filename.startsWith('assets/')) {
+        return `/${filename}`;
+    }
+    // Escape hatch: already an absolute path or URL-like value
+    if (
+        filename.startsWith('/') ||
+        filename.startsWith('http://') ||
+        filename.startsWith('https://') ||
+        filename.startsWith('data:') ||
+        filename.startsWith('blob:')
+    ) {
         return filename;
     }
     return `/assets/${CATEGORY_PREFIX[category]}/${filename}`;

@@ -22,7 +22,9 @@ npx @doodle-engine/cli create <project-name>
 
 ### Prompts
 
-1. **Use default renderer?** Yes uses `GameRenderer` for a complete out-of-the-box UI. No sets up a skeleton `App.tsx` with `useGame` for building a custom renderer.
+1. **Use default renderer?** Yes uses `GameShell` for a complete out-of-the-box UI. No sets up a skeleton `App.tsx` with `GameProvider`, `InputProvider`, `useGame`, and `useInputAction` for building a custom renderer.
+
+The default scaffold handles shell UI, input routing, interludes, videos, save/load, settings, and asset loading through `GameShell`. The custom scaffold shows the minimum renderer responsibilities directly: render snapshots, call engine actions, route keyboard commands, and handle pending interludes/videos.
 
 ### What it creates
 
@@ -44,9 +46,14 @@ npx @doodle-engine/cli create <project-name>
     game.yaml
   assets/
     images/
+      banners/
+      items/
+      maps/
+      portraits/
     audio/
-    fonts/
-    maps/
+      music/
+      sfx/
+      voice/
   src/
     main.tsx
     App.tsx
@@ -197,13 +204,14 @@ npm run build
 ### What it does
 
 1. **Validates all content first** and fails if errors are found
-2. Runs a Vite production build
-3. Outputs to `dist/` directory
-4. Bundles and optimizes all assets
-5. Strips dev tools from production bundle
-6. **Generates `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
-7. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
-8. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
+2. Generates the asset manifest and fails if referenced local assets under `/assets/` are missing
+3. Runs a Vite production build
+4. Outputs to `dist/` directory
+5. Copies project assets to `dist/assets/`
+6. Strips dev tools from production bundle
+7. **Writes `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
+8. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
+9. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
 
 If validation errors are found, the build will exit with code 1 and display the errors. Fix all validation errors before deploying to production.
 
@@ -234,32 +242,41 @@ npm run validate
     - IF branch conditions and effects have required arguments
 - **Conditions**
     - `hasFlag`/`notFlag` have `flag` argument
-    - `hasItem` has `item` argument
-    - `questAtStage` has `quest` and `stage` arguments
+    - `hasItem` has `itemId` argument
+    - `questAtStage` has `questId` and `stageId` arguments
     - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
+    - Built-in condition references point to existing locations, items, characters, quests, and quest stages
 - **Effects**
     - Node, choice, and IF branch effects are validated
     - `setFlag`/`clearFlag` have `flag` argument
     - `setVariable`/`addVariable` have `variable` and `value` arguments
-    - `addItem`/`removeItem` have `item` argument
-    - `moveItem` has `item` and `location` arguments
-    - `setQuestStage` has `quest` and `stage` arguments
-    - `addJournalEntry` has `entry` argument
-    - `setCharacterLocation` has `character` and `location` arguments
-    - `addToParty`/`removeFromParty` have `character` argument
-    - `setRelationship`/`addRelationship` have `character` and `value` arguments
-    - `setCharacterStat`/`addCharacterStat` have `character`, `stat`, and `value` arguments
+    - `addItem`/`removeItem` have `itemId` argument
+    - `moveItem` has `itemId` and `locationId` arguments
+    - `setQuestStage` has `questId` and `stageId` arguments
+    - `addJournalEntry` has `entryId` argument
+    - `setCharacterLocation` has `characterId` and `locationId` arguments
+    - `addToParty`/`removeFromParty` have `characterId` argument
+    - `setRelationship`/`addRelationship` have `characterId` and `value` arguments
+    - `setCharacterStat`/`addCharacterStat` have `characterId`, `stat`, and `value` arguments
     - `setMapEnabled` has `enabled` argument
     - `advanceTime` has `hours` argument
-    - `goToLocation` has `location` argument
-    - `startDialogue` has `dialogue` argument
-    - `playMusic`/`playSound` have `file` argument
+    - `goToLocation` has `locationId` argument
+    - `startDialogue` has `dialogueId` argument
+    - `playMusic` has no required argument; bare `MUSIC` clears the override
+    - `playSound` has `sound` argument
     - `playVideo` has `file` argument
     - `notify` has `message` argument
     - `showInterlude` has `interludeId` argument
     - `roll` has `variable`, `min`, and `max` arguments
+    - Built-in effect references point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
 - **Character dialogue references**
     - Characters' `dialogue` field points to existing dialogue IDs
+- **Content references**
+    - `game.yaml` `startLocation` and `startInventory` point to existing content
+    - Character starting locations exist
+    - Item starting locations are `inventory`, an existing location, or an existing character
+    - Dialogue and interlude trigger locations exist
+    - Maps reference existing locations, and a location appears on at most one map
 - **Localization keys**
     - All `@key` references in locations, characters, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
 

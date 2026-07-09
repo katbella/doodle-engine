@@ -149,7 +149,7 @@ export function GameProvider({
 
     // Action: Dismiss the current interlude
     const dismissInterlude = useCallback(() => {
-        setSnapshot(engine.getSnapshot());
+        setSnapshot(engine.dismissInterlude());
     }, [engine]);
 
     const contextValue: GameContextValue = {

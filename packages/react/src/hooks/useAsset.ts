@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import { useAssetContext } from '../AssetProvider';
+import { useOptionalAssetContext } from '../AssetProvider';
 
 export interface UseAssetResult {
     /** URL to use in src / backgroundImage (returns the path directly) */
@@ -22,12 +22,17 @@ export interface UseAssetResult {
  * Returns a usable URL immediately. The asset may still be loading.
  */
 export function useAsset(path: string | undefined): UseAssetResult {
-    const { state, getAssetUrl, isReady } = useAssetContext();
+    const assetContext = useOptionalAssetContext();
 
     if (!path) {
         return { url: '', isReady: false, isLoading: false, error: null };
     }
 
+    if (!assetContext) {
+        return { url: path, isReady: true, isLoading: false, error: null };
+    }
+
+    const { state, getAssetUrl, isReady } = assetContext;
     const ready = isReady(path);
     const loading =
         !ready &&
@@ -41,16 +46,20 @@ export function useAsset(path: string | undefined): UseAssetResult {
     };
 }
 
+export function useAssetUrl(path: string | undefined): string {
+    return useAsset(path).url;
+}
+
 /**
  * Hook to prefetch assets that might be needed soon (non-blocking).
  * Useful for prefetching the next location's assets when the player arrives somewhere.
  */
 export function usePrefetch(paths: string[]): void {
-    const { prefetch } = useAssetContext();
+    const assetContext = useOptionalAssetContext();
 
     useEffect(() => {
-        if (paths.length > 0) {
-            prefetch(paths);
+        if (assetContext && paths.length > 0) {
+            assetContext.prefetch(paths);
         }
-    }, [paths, prefetch]);
+    }, [paths, assetContext]);
 }

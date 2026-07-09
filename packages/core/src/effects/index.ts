@@ -635,7 +635,7 @@ function applyNotify(message: string, state: GameState): GameState {
  *
  * Example: MUSIC romance_theme.ogg
  */
-function applyPlayMusic(track: string, state: GameState): GameState {
+function applyPlayMusic(track: string | undefined, state: GameState): GameState {
     return {
         ...state,
         musicOverride: track || null,

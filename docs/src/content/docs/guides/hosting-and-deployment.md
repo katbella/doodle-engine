@@ -14,20 +14,13 @@ npm run build        # or: yarn build / pnpm build
 This produces a `dist/` directory containing:
 
 - `index.html`: entry point
-- `assets/`: bundled JavaScript and CSS (Vite output)
+- `assets/`: bundled JavaScript/CSS plus copied game images, audio, and video
 - `api/content`: game content data
 - `api/manifest`: asset manifest
 - `asset-manifest.json`: human-readable asset manifest
 - `sw.js`: service worker for offline play
 
-Game assets (images, audio, video) from the `assets/` folder in your project root are **not** automatically included in `dist/`. Copy the `assets/` folder into `dist/` before deploying:
-
-```bash
-npm run build
-cp -r assets dist/assets
-```
-
-When you upload to a static host, upload the full `dist/` folder including the copied `assets/` subdirectory.
+Game assets from your project root `assets/` folder are copied into `dist/assets/` during `npm run build`. When you upload to a static host, upload the full `dist/` folder.
 
 ## Static Hosting
 
@@ -61,8 +54,7 @@ The build output is a standard web application, so it can also be wrapped for mo
 Most tools in this space (such as Capacitor or Cordova-based solutions) follow a similar pattern:
 
 1. Build your game with `npm run build`
-2. Copy your `assets/` folder into `dist/` as described above
-3. Configure the mobile wrapper to use `dist/` as its web root
-4. Build and sign for iOS or Android through the wrapper's toolchain
+2. Configure the mobile wrapper to use `dist/` as its web root
+3. Build and sign for iOS or Android through the wrapper's toolchain
 
 Check the documentation for whichever tool you choose, as setup steps and platform requirements vary.

@@ -8,13 +8,15 @@ The `Engine` class is the heart of Doodle Engine. It holds the content registry 
 ## Constructor
 
 ```typescript
-new Engine(registry: ContentRegistry, state: GameState)
+new Engine(registry: ContentRegistry, state?: GameState)
 ```
 
 | Parameter  | Type              | Description                                               |
 | ---------- | ----------------- | --------------------------------------------------------- |
 | `registry` | `ContentRegistry` | All game content (locations, characters, dialogues, etc.) |
-| `state`    | `GameState`       | Initial game state                                        |
+| `state`    | `GameState`       | Existing game state, usually from a save                  |
+
+Omit `state` when starting a new game with `newGame()`.
 
 ## Methods
 
@@ -27,7 +29,7 @@ newGame(config: GameConfig): Snapshot
 Start a new game. Initializes state from config, sets up character and item locations from the registry, and checks for triggered dialogues at the starting location.
 
 ```typescript
-const engine = new Engine(registry, state);
+const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 ```
 
@@ -112,9 +114,9 @@ const snapshot = engine.talkTo('bartender');
 travelTo(locationId: string): Snapshot
 ```
 
-Travel to a location on the map. Calculates travel time based on distance and map scale, advances time, ends any active dialogue, and checks for triggered dialogues at the destination.
+Travel to a location on the current map. The current map is the map that contains the player's current location. Travel calculates time from marker distance and map scale, advances time, ends any active dialogue, and checks for triggered dialogues at the destination.
 
-Does nothing if the map is disabled (`mapEnabled: false`).
+Does nothing if the map is disabled (`mapEnabled: false`), if the current location is not on a map, or if the destination is not on the current map.
 
 ```typescript
 const snapshot = engine.travelTo('market');
@@ -168,6 +170,18 @@ Get the current snapshot without making any changes. Useful for initial renderin
 const snapshot = engine.getSnapshot();
 ```
 
+### dismissInterlude
+
+```typescript
+dismissInterlude(): Snapshot
+```
+
+Clear the current pending interlude after the renderer has shown it.
+
+```typescript
+const snapshot = engine.dismissInterlude();
+```
+
 ## Data Flow
 
 All methods follow the same pattern:
@@ -175,9 +189,9 @@ All methods follow the same pattern:
 1. Validate inputs
 2. Mutate internal state
 3. Build and return a snapshot
-4. Clear transient state (notifications, pending sounds)
+4. Clear transient state for action-produced snapshots
 
-Transient state (notifications and pending sounds) appears in exactly one snapshot and is then cleared. This means each snapshot is a complete, self-contained view of the game.
+Transient state such as notifications, pending sounds, pending video, and pending interludes appears in the snapshot returned by the action that produced it. `getSnapshot()` is a read-only snapshot and does not consume transient state. Use explicit renderer actions such as `dismissInterlude()` when presentation state needs to be cleared.
 
 ## Triggered Dialogues
 

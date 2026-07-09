@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { SnapshotMap } from '@doodle-engine/core';
 import { formatHour } from './GameTime';
+import { AssetImage } from './AssetImage';
 
 export interface MapViewProps {
     map: SnapshotMap | null;
@@ -96,7 +97,11 @@ export function MapView({
 
             <div className="map-container" style={{ position: 'relative' }}>
                 {map.image && (
-                    <img src={map.image} alt={map.name} className="map-image" />
+                    <AssetImage
+                        src={map.image}
+                        alt={map.name}
+                        className="map-image"
+                    />
                 )}
 
                 {map.locations.map((location) => (

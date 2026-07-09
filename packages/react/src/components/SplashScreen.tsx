@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { ShellConfig } from '@doodle-engine/core';
+import { useAssetUrl } from '../hooks/useAsset';
 
 export interface SplashScreenProps {
     /** Shell splash config (from game.yaml) */
@@ -23,7 +24,9 @@ export function SplashScreen({
     className = '',
 }: SplashScreenProps) {
     const displayDuration = shell?.duration ?? 2000;
-    const displayLogo = shell?.logo;
+    const displayLogo = useAssetUrl(shell?.logo);
+    const background = useAssetUrl(shell?.background);
+    const sound = useAssetUrl(shell?.sound);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -33,8 +36,8 @@ export function SplashScreen({
 
     // Play splash sound if provided
     useEffect(() => {
-        if (shell?.sound) {
-            const audio = new Audio(shell.sound);
+        if (sound) {
+            const audio = new Audio(sound);
             audio.volume = 0.8;
             audioRef.current = audio;
             audio.play().catch(() => {
@@ -47,10 +50,10 @@ export function SplashScreen({
                 audioRef.current = null;
             }
         };
-    }, [shell?.sound]);
+    }, [sound]);
 
-    const bgStyle = shell?.background
-        ? { backgroundImage: `url(${shell.background})` }
+    const bgStyle = background
+        ? { backgroundImage: `url(${background})` }
         : undefined;
 
     return (

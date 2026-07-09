@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { extractAssetPaths, getAssetType } from '../assets/manifest';
+import { resolveAssetPath } from '../assets/paths';
 import type { ContentRegistry } from '../types/registry';
 import type { GameConfig } from '../types/entities';
 
@@ -38,6 +39,14 @@ describe('getAssetType', () => {
         expect(getAssetType('/assets/foo.JPG')).toBe('image');
         expect(getAssetType('/assets/foo.OGG')).toBe('audio');
         expect(getAssetType('/assets/foo.MP4')).toBe('video');
+    });
+});
+
+describe('resolveAssetPath', () => {
+    it('normalizes assets-prefixed paths to absolute asset URLs', () => {
+        expect(resolveAssetPath('assets/images/foo.png', 'banner')).toBe(
+            '/assets/images/foo.png'
+        );
     });
 });
 
@@ -105,7 +114,42 @@ function makeRegistry(): ContentRegistry {
                         text: 'Hello!',
                         voice: '/assets/audio/hello.ogg',
                         portrait: '/assets/images/bartender-happy.png',
+                        effects: [
+                            {
+                                type: 'playMusic',
+                                track: 'node-theme.ogg',
+                            },
+                        ],
+                        conditionalBranches: [
+                            {
+                                condition: { type: 'hasFlag', flag: 'storm' },
+                                effects: [
+                                    {
+                                        type: 'playSound',
+                                        sound: 'storm.ogg',
+                                    },
+                                ],
+                            },
+                        ],
                         choices: [],
+                    },
+                    {
+                        id: 'choice_node',
+                        speaker: null,
+                        text: 'Pick one',
+                        choices: [
+                            {
+                                id: 'play_cutscene',
+                                text: 'Watch',
+                                next: 'end',
+                                effects: [
+                                    {
+                                        type: 'playVideo',
+                                        file: 'intro.mp4',
+                                    },
+                                ],
+                            },
+                        ],
                     },
                 ],
             },
@@ -152,10 +196,10 @@ function makeConfig(withShell = false): GameConfig {
                           background: '/assets/images/loading-bg.jpg',
                       },
                       uiSounds: {
-                          click: '/assets/audio/click.ogg',
-                          hover: '/assets/audio/hover.ogg',
-                          menuOpen: '/assets/audio/menu-open.ogg',
-                          menuClose: '/assets/audio/menu-close.ogg',
+                          click: '/assets/audio/ui/click.ogg',
+                          hover: '/assets/audio/ui/hover.ogg',
+                          menuOpen: '/assets/audio/ui/menu_open.ogg',
+                          menuClose: '/assets/audio/ui/menu_close.ogg',
                       },
                   },
               }
@@ -213,6 +257,13 @@ describe('extractAssetPaths', () => {
         expect(game).toContain('/assets/images/bartender-happy.png');
     });
 
+    it('extracts media referenced by dialogue effects', () => {
+        const { game } = extractAssetPaths(makeRegistry(), makeConfig());
+        expect(game).toContain('/assets/audio/music/node-theme.ogg');
+        expect(game).toContain('/assets/audio/sfx/storm.ogg');
+        expect(game).toContain('/assets/video/intro.mp4');
+    });
+
     it('extracts interlude assets into game tier', () => {
         const { game } = extractAssetPaths(makeRegistry(), makeConfig());
         expect(game).toContain('/assets/images/chapter-bg.jpg');
@@ -231,10 +282,10 @@ describe('extractAssetPaths', () => {
         expect(shell).toContain('/assets/images/title-bg.jpg');
         expect(shell).toContain('/assets/audio/title.ogg');
         expect(shell).toContain('/assets/images/loading-bg.jpg');
-        expect(shell).toContain('/assets/audio/click.ogg');
-        expect(shell).toContain('/assets/audio/hover.ogg');
-        expect(shell).toContain('/assets/audio/menu-open.ogg');
-        expect(shell).toContain('/assets/audio/menu-close.ogg');
+        expect(shell).toContain('/assets/audio/ui/click.ogg');
+        expect(shell).toContain('/assets/audio/ui/hover.ogg');
+        expect(shell).toContain('/assets/audio/ui/menu_open.ogg');
+        expect(shell).toContain('/assets/audio/ui/menu_close.ogg');
     });
 
     it('shell assets are not duplicated in game tier', () => {

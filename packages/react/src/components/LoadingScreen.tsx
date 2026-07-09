@@ -3,6 +3,7 @@
  */
 
 import type { AssetLoadingState } from '@doodle-engine/core';
+import { useAssetUrl } from '../hooks/useAsset';
 
 export interface LoadingScreenProps {
     /** Asset loading state (from AssetProvider) */
@@ -36,8 +37,9 @@ export function LoadingScreen({
     renderProgress,
     className = '',
 }: LoadingScreenProps) {
-    const bgStyle = background
-        ? { backgroundImage: `url(${background})` }
+    const backgroundUrl = useAssetUrl(background);
+    const bgStyle = backgroundUrl
+        ? { backgroundImage: `url(${backgroundUrl})` }
         : undefined;
 
     const percent = Math.round(state.overallProgress * 100);

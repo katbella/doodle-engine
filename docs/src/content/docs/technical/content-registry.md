@@ -62,7 +62,7 @@ The dev server (`npm run dev`) builds the registry automatically:
 The registry is passed to the `Engine` constructor:
 
 ```ts
-const engine = new Engine(registry, initialState);
+const engine = new Engine(registry);
 ```
 
 The engine uses the registry to:
@@ -81,7 +81,8 @@ In the browser, the registry is fetched from the dev server:
 const response = await fetch('/api/content');
 const { registry, config } = await response.json();
 
-const engine = new Engine(registry, createInitialState(config));
+const engine = new Engine(registry);
+const snapshot = engine.newGame(config);
 ```
 
 ## Content References

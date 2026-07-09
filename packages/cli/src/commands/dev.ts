@@ -257,8 +257,9 @@ async function loadAllContent(contentDir: string) {
  */
 async function runValidation(contentDir: string) {
     try {
-        const { registry, fileMap } = await loadContentWithFileMap(contentDir);
-        const errors = validateContent(registry, fileMap);
+        const { registry, fileMap, config } =
+            await loadContentWithFileMap(contentDir);
+        const errors = validateContent(registry, fileMap, config);
 
         if (errors.length > 0) {
             console.log(''); // Add spacing
@@ -358,5 +359,21 @@ async function loadContentWithFileMap(contentDir: string) {
         // Dialogues directory might not exist
     }
 
-    return { registry, fileMap };
+    // Load game config
+    let config: any = null;
+    try {
+        const configPath = join(contentDir, 'game.yaml');
+        const configContent = await readFile(configPath, 'utf-8');
+        config = parseYaml(configContent);
+    } catch {
+        config = {
+            startLocation: '',
+            startTime: { day: 1, hour: 8 },
+            startFlags: {},
+            startVariables: {},
+            startInventory: [],
+        };
+    }
+
+    return { registry, fileMap, config };
 }

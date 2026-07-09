@@ -47,7 +47,7 @@ Each `AssetEntry`:
 | ------ | ------------------------------- | ------------------------------------------------ |
 | `path` | `string`                        | Path relative to public root (starts with `/`)   |
 | `type` | `'image' \| 'audio' \| 'video'` | Determined from file extension                   |
-| `size` | `number \| undefined`           | File size in bytes (undefined if file not found) |
+| `size` | `number \| undefined`           | File size in bytes. Remote/data/blob URLs may omit size |
 | `tier` | `1 \| 2`                        | Loading tier                                     |
 
 ## How Assets Are Discovered
@@ -68,11 +68,14 @@ The CLI scans these sources to build the manifest:
 - `item.icon`, `item.image`
 - `map.image`
 - `interlude.background`, `interlude.banner`, `interlude.music`, `interlude.voice`, `interlude.sounds[]`
+- Media referenced by built-in dialogue effects: `MUSIC`, `SOUND`, `VIDEO`, and `INTERLUDE`
 - `dialogueNode.voice`, `dialogueNode.portrait`
 
 Assets referenced in shell config are never duplicated in the game tier.
 
 Empty strings and undefined fields are skipped.
+
+Local asset paths under `/assets/` must exist. `npm run build` fails when a referenced local asset is missing so broken media is caught before release. External `http`, `https`, `data`, and `blob` URLs are allowed and may not have byte sizes.
 
 ## The `/api/manifest` Endpoint
 

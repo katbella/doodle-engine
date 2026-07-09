@@ -582,6 +582,16 @@ describe('Effect Processors', () => {
 
             expect(newState.musicOverride).toBeNull();
         });
+
+        it('should clear musicOverride when track is omitted', () => {
+            const effect: Effect = {
+                type: 'playMusic',
+            };
+            const state = { ...createTestState(), musicOverride: 'romance_theme.ogg' };
+            const newState = applyEffect(effect, state);
+
+            expect(newState.musicOverride).toBeNull();
+        });
     });
 
     describe('playSound', () => {

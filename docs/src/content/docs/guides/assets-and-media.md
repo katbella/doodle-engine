@@ -54,6 +54,7 @@ Write bare filenames in YAML and DSL files. The engine resolves them to full pat
 
 ```yaml
 # content/locations/tavern.yaml
+id: tavern
 banner: tavern.png          # → /assets/images/banners/tavern.png
 music: tavern_ambience.ogg  # → /assets/audio/music/tavern_ambience.ogg
 ```
@@ -173,6 +174,8 @@ VIDEO intro_cinematic.mp4
 ## Bundled Assets
 
 For most games, bundle all assets with your build. They are copied to `dist/` and served alongside the game. This works with static hosting, desktop wrappers, and typical web deployments.
+
+When you run `npm run build`, every referenced local asset under `/assets/` must exist. The CLI copies the project `assets/` folder to `dist/assets/` and fails the build if content or shell config points at a missing local file.
 
 ## Loading Behavior
 

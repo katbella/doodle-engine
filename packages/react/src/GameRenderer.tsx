@@ -25,6 +25,11 @@ import { SaveLoadPanel } from './components/SaveLoadPanel';
 import { Interlude } from './components/Interlude';
 import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
+import { AssetImage } from './components/AssetImage';
+import {
+    InputProviderBoundary,
+    useInputAction,
+} from './input/InputRouter';
 
 export interface GameRendererProps {
     className?: string;
@@ -55,11 +60,31 @@ function BottomBarButton({
     );
 }
 
-export function GameRenderer({ className = '' }: GameRendererProps) {
+export function GameRenderer(props: GameRendererProps) {
+    return (
+        <InputProviderBoundary>
+            <GameRendererInner {...props} />
+        </InputProviderBoundary>
+    );
+}
+
+function GameRendererInner({ className = '' }: GameRendererProps) {
     const { snapshot, actions } = useGame();
     const audioSettings = useContext(AudioSettingsContext);
 
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+
+    useInputAction(
+        ({ command }) => {
+            if (command !== 'cancel' || !activePanel) {
+                return false;
+            }
+
+            setActivePanel(null);
+            return true;
+        },
+        { priority: 150, enabled: activePanel !== null }
+    );
 
     // Filter out underscore-prefixed variables (internal tracking)
     const visibleVariables = Object.entries(snapshot.variables).filter(
@@ -114,7 +139,7 @@ export function GameRenderer({ className = '' }: GameRendererProps) {
                                         className="party-member"
                                     >
                                         {member.portrait ? (
-                                            <img
+                                            <AssetImage
                                                 src={member.portrait}
                                                 alt={member.name}
                                                 className="party-portrait"

@@ -2,9 +2,13 @@
  * Tests for CLI manifest generation and service worker output.
  */
 
-import { describe, it, expect } from 'vitest';
+import { mkdtemp, mkdir, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { afterEach, describe, it, expect } from 'vitest';
+import { generateAssetManifest } from '../manifest';
 import { generateServiceWorker } from '../service-worker';
-import type { AssetManifest } from '@doodle-engine/core';
+import type { AssetManifest, ContentRegistry, GameConfig } from '@doodle-engine/core';
 
 // ── generateServiceWorker ─────────────────────────────────────────────────────
 
@@ -97,5 +101,100 @@ describe('generateServiceWorker', () => {
         expect(v1).not.toEqual(v2);
         expect(v1).toContain('v1');
         expect(v2).toContain('v2');
+    });
+});
+
+// ── generateAssetManifest ────────────────────────────────────────────────────
+
+const tempDirs: string[] = [];
+
+async function makeTempProject() {
+    const root = await mkdtemp(join(tmpdir(), 'doodle-manifest-'));
+    tempDirs.push(root);
+    return root;
+}
+
+afterEach(async () => {
+    while (tempDirs.length > 0) {
+        const dir = tempDirs.pop()!;
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+function makeRegistry(): ContentRegistry {
+    return {
+        locations: {
+            tavern: {
+                id: 'tavern',
+                name: 'Tavern',
+                description: '',
+                banner: 'tavern.png',
+                music: '',
+                ambient: '',
+            },
+        },
+        characters: {},
+        items: {},
+        maps: {},
+        dialogues: {},
+        quests: {},
+        journalEntries: {},
+        interludes: {},
+        locales: {},
+    };
+}
+
+function makeConfig(): GameConfig {
+    return {
+        startLocation: 'tavern',
+        startTime: { day: 1, hour: 8 },
+        startFlags: {},
+        startVariables: {},
+        startInventory: [],
+    };
+}
+
+describe('generateAssetManifest', () => {
+    it('records byte sizes for local referenced assets', async () => {
+        const root = await makeTempProject();
+        await mkdir(join(root, 'assets', 'images', 'banners'), {
+            recursive: true,
+        });
+        await writeFile(
+            join(root, 'assets', 'images', 'banners', 'tavern.png'),
+            '12345'
+        );
+
+        const manifest = await generateAssetManifest(
+            join(root, 'assets'),
+            root,
+            makeRegistry(),
+            makeConfig(),
+            'test'
+        );
+
+        expect(manifest.game).toContainEqual({
+            path: '/assets/images/banners/tavern.png',
+            type: 'image',
+            size: 5,
+            tier: 2,
+        });
+        expect(manifest.totalSize).toBe(5);
+    });
+
+    it('fails when a local referenced asset is missing', async () => {
+        const root = await makeTempProject();
+
+        await expect(
+            generateAssetManifest(
+                join(root, 'assets'),
+                root,
+                makeRegistry(),
+                makeConfig(),
+                'test'
+            )
+        ).rejects.toThrow(
+            'Referenced asset not found: /assets/images/banners/tavern.png'
+        );
     });
 });

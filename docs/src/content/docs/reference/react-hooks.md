@@ -158,7 +158,7 @@ import { useUISounds } from '@doodle-engine/react';
 
 function MyUI() {
     const uiSounds = useUISounds({
-        basePath: '/audio/ui',
+        basePath: '/assets/audio/ui',
         volume: 0.5,
         sounds: {
             click: 'click.ogg',
@@ -185,7 +185,7 @@ function MyUI() {
 | Option             | Type      | Default            | Description                  |
 | ------------------ | --------- | ------------------ | ---------------------------- |
 | `enabled`          | `boolean` | `true`             | Enable/disable UI sounds     |
-| `basePath`         | `string`  | `'/audio/ui'`      | Base path for UI sound files |
+| `basePath`         | `string`  | `'/assets/audio/ui'` | Base path for UI sound files |
 | `volume`           | `number`  | `0.5`              | Volume level (0-1)           |
 | `sounds`           | `object`  | —                  | Custom sound file names      |
 | `sounds.click`     | `string`  | `'click.ogg'`      | Click sound file             |
@@ -215,8 +215,9 @@ interface UISoundControls {
 <GameShell
     registry={registry}
     config={config}
+    manifest={manifest}
     uiSounds={{
-        basePath: '/audio/ui',
+        basePath: '/assets/audio/ui',
         volume: 0.5,
         sounds: { click: 'click.ogg' },
     }}
@@ -224,3 +225,110 @@ interface UISoundControls {
 ```
 
 Pass `uiSounds={false}` to disable UI sounds entirely.
+
+---
+
+## useInputAction
+
+Register a renderer input command handler. Use this for keyboard/controller
+commands in custom renderer surfaces, panels, and overlays.
+
+```tsx
+import { InputProvider, useInputAction } from '@doodle-engine/react';
+
+function DialogueControls({ choices, onChoice, onContinue }) {
+    useInputAction(
+        ({ command, choiceIndex }) => {
+            if (command === 'confirm' && choices.length === 0) {
+                onContinue();
+                return true;
+            }
+
+            if (
+                choiceIndex !== undefined &&
+                choiceIndex < choices.length
+            ) {
+                onChoice(choices[choiceIndex].id);
+                return true;
+            }
+
+            return false;
+        },
+        { priority: 0 }
+    );
+
+    return null;
+}
+
+<InputProvider>
+    <DialogueControls
+        choices={snapshot.choices}
+        onChoice={actions.selectChoice}
+        onContinue={actions.continueDialogue}
+    />
+</InputProvider>;
+```
+
+`GameShell` already includes `InputProvider`. `GameRenderer` creates a provider
+boundary when used standalone, so its built-in keyboard handling works with or
+without `GameShell`.
+
+### Commands
+
+Keyboard input is translated into these commands:
+
+| Command      | Default keyboard input             |
+| ------------ | ---------------------------------- |
+| `confirm`    | Enter, Space                       |
+| `cancel`     | Escape                             |
+| `choice1`-`choice9` | Number keys 1-9            |
+| `next`       | ArrowDown, ArrowRight              |
+| `previous`   | ArrowUp, ArrowLeft                 |
+
+The command type also includes `continue`, `openInventory`, `openJournal`,
+`openMap`, and `openMenu` for custom renderers and future controller/remapping
+adapters.
+
+### Priority
+
+Higher priority handlers receive commands first. Return `true` to consume the
+command and prevent lower-priority surfaces from seeing it.
+
+Recommended priorities:
+
+| Surface                    | Priority |
+| -------------------------- | -------- |
+| Full-screen video/interlude | `300`    |
+| Modal or panel overlay      | `150`    |
+| Shell pause/settings        | `50`     |
+| Dialogue choices/Continue   | `0`      |
+
+Input events from text fields, textareas, selects, and contenteditable elements
+are ignored by the default keyboard adapter so typing into player notes does not
+trigger game commands.
+
+## useInputRouter
+
+Access the current router directly. Most custom renderers should prefer
+`useInputAction`, but `useInputRouter` is useful when integrating another input
+source, such as a future gamepad adapter.
+
+```tsx
+import { useInputRouter } from '@doodle-engine/react';
+
+function GamepadBridge() {
+    const router = useInputRouter();
+
+    useEffect(() => {
+        if (!router) return;
+
+        // When your gamepad layer detects the confirm button:
+        router.dispatchCommand({
+            command: 'confirm',
+            source: 'controller',
+        });
+    }, [router]);
+
+    return null;
+}
+```

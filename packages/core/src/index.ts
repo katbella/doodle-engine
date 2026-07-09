@@ -140,7 +140,7 @@ export { resolveText, createResolver } from './localization';
 export { buildSnapshot, buildUIStrings } from './snapshot';
 
 // Engine
-export { Engine } from './engine';
+export { Engine, createInitialState } from './engine';
 
 // Parser
 export { parseDialogue, parseCondition, parseEffect } from './parser';

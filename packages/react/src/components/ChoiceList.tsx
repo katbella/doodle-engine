@@ -2,8 +2,8 @@
  * ChoiceList - Displays available dialogue choices, or a Continue button for text-only nodes
  */
 
-import { useEffect } from 'react';
 import type { SnapshotChoice } from '@doodle-engine/core';
+import { useInputAction, type InputCommand } from '../input/InputRouter';
 
 export interface ChoiceListProps {
     choices: SnapshotChoice[];
@@ -15,6 +15,37 @@ export interface ChoiceListProps {
     className?: string;
 }
 
+export type ChoiceListInputResult =
+    | { type: 'continue' }
+    | { type: 'selectChoice'; choiceId: string }
+    | null;
+
+export function resolveChoiceListInput(
+    choices: SnapshotChoice[],
+    command: InputCommand,
+    choiceIndex?: number
+): ChoiceListInputResult {
+    if (
+        choices.length === 0 &&
+        (command === 'confirm' || command === 'continue')
+    ) {
+        return { type: 'continue' };
+    }
+
+    if (
+        choiceIndex !== undefined &&
+        choiceIndex >= 0 &&
+        choiceIndex < choices.length
+    ) {
+        return {
+            type: 'selectChoice',
+            choiceId: choices[choiceIndex].id,
+        };
+    }
+
+    return null;
+}
+
 export function ChoiceList({
     choices,
     onSelectChoice,
@@ -22,24 +53,30 @@ export function ChoiceList({
     continueLabel = 'Continue',
     className = '',
 }: ChoiceListProps) {
-    const showContinue = choices.length === 0;
+    useInputAction(
+        ({ command, choiceIndex }) => {
+            const result = resolveChoiceListInput(
+                choices,
+                command,
+                choiceIndex
+            );
 
-    useEffect(() => {
-        function handleKeyDown(e: KeyboardEvent) {
-            if (showContinue && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
+            if (result?.type === 'continue') {
                 onContinue();
-                return;
+                return true;
             }
-            const num = parseInt(e.key, 10);
-            if (num >= 1 && num <= choices.length) {
-                onSelectChoice(choices[num - 1].id);
-            }
-        }
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [choices, onSelectChoice, onContinue, showContinue]);
+            if (result?.type === 'selectChoice') {
+                onSelectChoice(result.choiceId);
+                return true;
+            }
+
+            return false;
+        },
+        { priority: 0 }
+    );
+
+    const showContinue = choices.length === 0;
 
     if (showContinue) {
         return (

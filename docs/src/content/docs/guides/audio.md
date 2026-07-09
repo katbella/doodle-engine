@@ -135,7 +135,7 @@ UI sounds (button clicks, menu open/close) are handled by a separate `useUISound
 import { useUISounds } from '@doodle-engine/react'
 
 const uiSounds = useUISounds({
-  basePath: '/audio/ui',
+  basePath: '/assets/audio/ui',
   volume: 0.5,
   sounds: {
     click: 'click.ogg',
@@ -153,7 +153,12 @@ const uiSounds = useUISounds({
 If you're using `GameShell`, UI sounds are built in. Configure them via the `uiSounds` prop:
 
 ```tsx
-<GameShell registry={registry} config={config} uiSounds={{ volume: 0.5 }} />
+<GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    uiSounds={{ volume: 0.5 }}
+/>
 ```
 
 ### UI Sound File Organization

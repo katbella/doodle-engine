@@ -179,7 +179,9 @@ async function createProjectStructure(
         'assets/images/maps',
         'assets/audio/music',
         'assets/audio/sfx',
+        'assets/audio/ui',
         'assets/audio/voice',
+        'assets/video',
         'src',
     ];
 

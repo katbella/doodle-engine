@@ -15,7 +15,7 @@
     "scripts": {
         "dev": "vite build --watch",
         "build": "vite build && tsc -p tsconfig.json",
-        "test": "echo no tests"
+        "test": "vitest run"
     },
     "dependencies": {
         "@doodle-engine/core": "workspace:*",

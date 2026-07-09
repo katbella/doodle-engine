@@ -483,10 +483,10 @@ function buildMapSnapshot(
     registry: ContentRegistry,
     resolve: (text: string) => string
 ): SnapshotMap | null {
-    const mapIds = Object.keys(registry.maps);
-    if (mapIds.length === 0) return null;
-
-    const map = registry.maps[mapIds[0]];
+    const map = Object.values(registry.maps).find(
+        (candidate) =>
+            candidate.locations.some((loc) => loc.id === state.currentLocation)
+    );
     if (!map) return null;
 
     const locations: SnapshotMapLocation[] = map.locations.map((loc) => {

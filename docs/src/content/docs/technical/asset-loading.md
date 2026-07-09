@@ -49,13 +49,13 @@ shell:
         music: /assets/audio/music/title-theme.ogg
 
     uiSounds:
-        click: /assets/audio/sfx/ui-click.ogg
-        hover: /assets/audio/sfx/ui-hover.ogg
-        menuOpen: /assets/audio/sfx/menu-open.ogg
-        menuClose: /assets/audio/sfx/menu-close.ogg
+        click: /assets/audio/ui/click.ogg
+        hover: /assets/audio/ui/hover.ogg
+        menuOpen: /assets/audio/ui/menu_open.ogg
+        menuClose: /assets/audio/ui/menu_close.ogg
 ```
 
-All fields are optional. Screens render with built-in defaults when assets are not provided. Backgrounds fall back to styled gradients, logos fall back to text, and missing sounds are ignored.
+All fields are optional. Screens render with built-in defaults when assets are not provided. Backgrounds fall back to styled gradients and logos fall back to text. If you reference a local asset under `/assets/`, that file must exist.
 
 ## Customizing the Loading Screen
 
@@ -82,6 +82,8 @@ The `state` object includes:
     phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error';
     bytesLoaded: number;
     bytesTotal: number;
+    assetsLoaded: number;
+    assetsTotal: number;
     progress: number;
     overallProgress: number;
     currentAsset: string | null;
@@ -145,7 +147,7 @@ Service workers are only registered in production. Development uses the same loa
 
 For desktop wrappers or file:// contexts where assets are already local, provide a custom loader:
 
-```ts
+```tsx
 import type { AssetLoader } from '@doodle-engine/core'
 
 const localLoader: AssetLoader = {
@@ -159,5 +161,10 @@ const localLoader: AssetLoader = {
   clear: async () => {},
 }
 
-<GameShell assetLoader={localLoader} ... />
+<GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    assetLoader={localLoader}
+/>
 ```

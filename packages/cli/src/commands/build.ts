@@ -6,8 +6,8 @@
 
 import { build as viteBuild } from 'vite';
 import react from '@vitejs/plugin-react';
-import { readFile, readdir, mkdir, writeFile } from 'fs/promises';
-import { join, extname, relative } from 'path';
+import { copyFile, readFile, readdir, mkdir, stat, writeFile } from 'fs/promises';
+import { dirname, join, extname, relative } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { parseDialogue } from '@doodle-engine/core';
 import { crayon } from 'crayon.js';
@@ -33,7 +33,7 @@ export async function build() {
         registry = loaded.registry;
         config = loaded.config;
         const { fileMap } = loaded;
-        const errors = validateContent(registry, fileMap);
+        const errors = validateContent(registry, fileMap, config);
 
         printValidationErrors(errors);
 
@@ -53,6 +53,19 @@ export async function build() {
 
     // Proceed with build
     try {
+        const publicDir = cwd; // assets live at <cwd>/assets, served from root
+        const assetsDir = join(cwd, 'assets');
+
+        // Generate asset manifest before Vite so missing media fails fast.
+        console.log(crayon.dim('Generating asset manifest...'));
+        const manifest = await generateAssetManifest(
+            assetsDir,
+            publicDir,
+            registry,
+            config,
+            Date.now().toString()
+        );
+
         await viteBuild({
             root: cwd,
             plugins: [react()],
@@ -63,17 +76,9 @@ export async function build() {
         });
 
         const distDir = join(cwd, 'dist');
-        const publicDir = cwd; // assets live at <cwd>/assets, served from root
 
-        // Generate asset manifest
-        console.log(crayon.dim('Generating asset manifest...'));
-        const manifest = await generateAssetManifest(
-            join(cwd, 'assets'),
-            publicDir,
-            registry,
-            config,
-            Date.now().toString()
-        );
+        // Copy project assets into dist/assets without deleting Vite's own files.
+        await copyProjectAssets(assetsDir, join(distDir, 'assets'));
 
         // Write content JSON to dist so vite preview can serve it at /api/content
         const apiDir = join(distDir, 'api');
@@ -210,4 +215,28 @@ async function loadContent(contentDir: string) {
     }
 
     return { registry, fileMap, config };
+}
+
+export async function copyProjectAssets(sourceDir: string, targetDir: string) {
+    try {
+        const sourceStats = await stat(sourceDir);
+        if (!sourceStats.isDirectory()) return;
+    } catch {
+        return;
+    }
+
+    await mkdir(targetDir, { recursive: true });
+
+    const entries = await readdir(sourceDir, { withFileTypes: true });
+    for (const entry of entries) {
+        const sourcePath = join(sourceDir, entry.name);
+        const targetPath = join(targetDir, entry.name);
+
+        if (entry.isDirectory()) {
+            await copyProjectAssets(sourcePath, targetPath);
+        } else if (entry.isFile()) {
+            await mkdir(dirname(targetPath), { recursive: true });
+            await copyFile(sourcePath, targetPath);
+        }
+    }
 }

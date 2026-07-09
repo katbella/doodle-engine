@@ -20,8 +20,8 @@ export async function validate() {
     console.log('');
 
     try {
-        const { registry, fileMap } = await loadContent(contentDir);
-        const errors = validateContent(registry, fileMap);
+        const { registry, fileMap, config } = await loadContent(contentDir);
+        const errors = validateContent(registry, fileMap, config);
 
         printValidationErrors(errors);
 
@@ -122,5 +122,21 @@ async function loadContent(contentDir: string) {
         // Dialogues directory might not exist
     }
 
-    return { registry, fileMap };
+    // Load game config
+    let config: any = null;
+    try {
+        const configPath = join(contentDir, 'game.yaml');
+        const configContent = await readFile(configPath, 'utf-8');
+        config = parseYaml(configContent);
+    } catch {
+        config = {
+            startLocation: '',
+            startTime: { day: 1, hour: 8 },
+            startFlags: {},
+            startVariables: {},
+            startInventory: [],
+        };
+    }
+
+    return { registry, fileMap, config };
 }

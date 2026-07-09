@@ -55,6 +55,8 @@ locations:
 
 The `x` and `y` coordinates position clickable markers on the map image. Players click a marker to travel.
 
+The engine shows the map that contains the player's current location. A game can have multiple maps, but each playable location should appear on only one map so the engine can choose the current map unambiguously. Map travel is movement between markers on the currently shown map.
+
 ### Map Scale
 
 The `scale` field controls travel time. It represents **pixels per hour** of travel.

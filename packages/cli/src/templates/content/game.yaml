@@ -20,10 +20,10 @@
 #     music: /assets/audio/music/title-theme.ogg
 #
 #   uiSounds:
-#     click: /assets/audio/sfx/ui-click.ogg
-#     hover: /assets/audio/sfx/ui-hover.ogg
-#     menuOpen: /assets/audio/sfx/menu-open.ogg
-#     menuClose: /assets/audio/sfx/menu-close.ogg
+#     click: /assets/audio/ui/click.ogg
+#     hover: /assets/audio/ui/hover.ogg
+#     menuOpen: /assets/audio/ui/menu_open.ogg
+#     menuClose: /assets/audio/ui/menu_close.ogg
 
 startLocation: tavern
 startTime:

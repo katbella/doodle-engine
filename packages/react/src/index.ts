@@ -11,7 +11,12 @@ export { GameProvider, GameContext } from './GameProvider';
 export type { GameContextValue, GameProviderProps } from './GameProvider';
 
 // Asset Provider and Context
-export { AssetProvider, AssetContext, useAssetContext } from './AssetProvider';
+export {
+    AssetProvider,
+    AssetContext,
+    useAssetContext,
+    useOptionalAssetContext,
+} from './AssetProvider';
 export type { AssetContextValue, AssetProviderProps } from './AssetProvider';
 
 // Audio Settings (persistent volume state)
@@ -27,8 +32,26 @@ export type {
 } from './hooks/useAudioManager';
 export { useUISounds } from './hooks/useUISounds';
 export type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
-export { useAsset, usePrefetch } from './hooks/useAsset';
+export { useAsset, useAssetUrl, usePrefetch } from './hooks/useAsset';
 export type { UseAssetResult } from './hooks/useAsset';
+export {
+    InputProvider,
+    InputProviderBoundary,
+    InputRouterContext,
+    dispatchToInputHandlers,
+    mapKeyboardEventToInputCommand,
+    shouldIgnoreKeyboardEvent,
+    useInputAction,
+    useInputRouter,
+} from './input/InputRouter';
+export type {
+    InputCommand,
+    InputCommandEvent,
+    InputCommandHandler,
+    InputHandlerOptions,
+    InputRouterValue,
+    KeyboardCommandDescriptor,
+} from './input/InputRouter';
 
 // Main Renderer
 export { GameRenderer } from './GameRenderer';

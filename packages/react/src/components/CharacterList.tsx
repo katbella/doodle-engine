@@ -3,6 +3,7 @@
  */
 
 import type { SnapshotCharacter } from '@doodle-engine/core';
+import { AssetImage } from './AssetImage';
 
 export interface CharacterListProps {
     characters: SnapshotCharacter[];
@@ -30,7 +31,7 @@ export function CharacterList({
                         onClick={() => onTalkTo(character.id)}
                     >
                         {character.portrait ? (
-                            <img
+                            <AssetImage
                                 src={character.portrait}
                                 alt={character.name}
                                 className="character-portrait"

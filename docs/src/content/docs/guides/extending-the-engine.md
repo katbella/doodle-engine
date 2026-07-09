@@ -11,14 +11,10 @@ The core package (`@doodle-engine/core`) has no UI dependencies. You can build a
 
 ```typescript
 import { Engine } from '@doodle-engine/core';
-import type {
-    GameState,
-    ContentRegistry,
-    GameConfig,
-} from '@doodle-engine/core';
+import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 
 // Create engine with your content
-const engine = new Engine(registry, initialState);
+const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 
 // The snapshot contains everything the renderer needs:
@@ -90,6 +86,7 @@ Instead of using `GameRenderer`, you can compose individual components:
 ```tsx
 import {
     GameProvider,
+    InputProvider,
     useGame,
     DialogueBox,
     ChoiceList,
@@ -113,6 +110,8 @@ function MyCustomUI() {
                     <ChoiceList
                         choices={snapshot.choices}
                         onSelectChoice={actions.selectChoice}
+                        onContinue={actions.continueDialogue}
+                        continueLabel={snapshot.ui['ui.continue']}
                     />
                 </>
             ) : (
@@ -127,10 +126,12 @@ function MyCustomUI() {
     );
 }
 
-// Wrap in GameProvider
-<GameProvider engine={engine} initialSnapshot={snapshot}>
-    <MyCustomUI />
-</GameProvider>;
+// Wrap in InputProvider if your custom UI uses keyboard/controller commands.
+<InputProvider>
+    <GameProvider engine={engine} initialSnapshot={snapshot}>
+        <MyCustomUI />
+    </GameProvider>
+</InputProvider>;
 ```
 
 See [React Components Reference](/reference/react-components/) for all available components and props.
@@ -143,6 +144,7 @@ Instead of using `GameShell`, build your own title screen and menu flow:
 import {
     GameProvider,
     GameRenderer,
+    InputProvider,
     useGame,
     useAudioManager,
 } from '@doodle-engine/react';
@@ -162,9 +164,11 @@ function MyGameApp() {
     }
 
     return (
-        <GameProvider engine={engine} initialSnapshot={snapshot}>
-            <MyGameUI />
-        </GameProvider>
+        <InputProvider>
+            <GameProvider engine={engine} initialSnapshot={snapshot}>
+                <MyGameUI />
+            </GameProvider>
+        </InputProvider>
     );
 }
 ```

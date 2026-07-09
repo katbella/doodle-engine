@@ -36,6 +36,10 @@ export interface AssetLoadingState {
     bytesLoaded: number;
     /** Total bytes to load in current phase */
     bytesTotal: number;
+    /** Number of assets loaded in current phase */
+    assetsLoaded?: number;
+    /** Total number of assets in current phase */
+    assetsTotal?: number;
     /** Progress 0-1 for current phase */
     progress: number;
     /** Overall progress 0-1 across all phases */

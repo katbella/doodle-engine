@@ -109,6 +109,10 @@ locations:
 | `x`   | `number` | X coordinate on the map image              |
 | `y`   | `number` | Y coordinate on the map image              |
 
+A game can contain multiple maps. At runtime, the engine shows the map that
+contains the player's current location. Validation rejects maps that reference
+missing locations or put the same location on multiple maps.
+
 ## Quest
 
 **Directory:** `content/quests/`

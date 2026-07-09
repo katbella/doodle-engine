@@ -101,8 +101,8 @@ onUnmounted(() => {
 ```js
 import { enableDevTools } from '@doodle-engine/core';
 
-let engine = new Engine(registry, initialState);
-let snapshot = engine.getSnapshot();
+let engine = new Engine(registry);
+let snapshot = engine.newGame(config);
 
 if (import.meta.env.DEV) {
     enableDevTools(engine, () => {

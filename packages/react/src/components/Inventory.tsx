@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import type { SnapshotItem } from '@doodle-engine/core';
+import { AssetImage } from './AssetImage';
 
 export interface InventoryProps {
     items: SnapshotItem[];
@@ -27,7 +28,7 @@ export function Inventory({ items, className = '' }: InventoryProps) {
                             onClick={() => setInspecting(item)}
                         >
                             {item.icon && (
-                                <img
+                                <AssetImage
                                     src={item.icon}
                                     alt={item.name}
                                     className="item-icon"
@@ -49,7 +50,7 @@ export function Inventory({ items, className = '' }: InventoryProps) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {inspecting.image && (
-                            <img
+                            <AssetImage
                                 src={inspecting.image}
                                 alt={inspecting.name}
                                 className="item-modal-image"

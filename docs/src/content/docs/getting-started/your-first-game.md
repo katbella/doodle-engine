@@ -34,6 +34,7 @@ name: "@location.tavern.name"
 description: "@location.tavern.description"
 banner: ""
 music: ""
+ambient: ""
 ```
 
 The `@key` values are locale references. They resolve to strings in `content/locales/en.yaml`. See [Adding Locations](/guides/adding-locations/) for the full schema and map setup.

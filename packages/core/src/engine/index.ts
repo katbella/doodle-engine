@@ -12,7 +12,7 @@
 
 import type { ContentRegistry } from '../types/registry';
 import type { GameState, CharacterState } from '../types/state';
-import type { GameConfig, DialogueNode } from '../types/entities';
+import type { GameConfig, DialogueNode, Map as GameMap } from '../types/entities';
 import type { Snapshot } from '../types/snapshot';
 import type { SaveData } from '../types/save';
 import { buildSnapshot } from '../snapshot';
@@ -32,9 +32,10 @@ export class Engine {
      * Create a new engine instance.
      *
      * @param registry - Content registry with all game entities
-     * @param state - Initial game state
+     * @param state - Existing game state, usually from a save. Omit this when
+     * starting with newGame().
      */
-    constructor(registry: ContentRegistry, state: GameState) {
+    constructor(registry: ContentRegistry, state: GameState = createInitialState()) {
         this.registry = registry;
         this.state = state;
     }
@@ -69,6 +70,9 @@ export class Engine {
         const itemLocations: Record<string, string> = {};
         for (const [id, item] of Object.entries(this.registry.items)) {
             itemLocations[id] = item.location;
+        }
+        for (const itemId of config.startInventory) {
+            itemLocations[itemId] = 'inventory';
         }
 
         // Create initial game state
@@ -161,6 +165,12 @@ export class Engine {
         if (!choice) {
             return this.buildSnapshotAndClearTransients();
         }
+        if (
+            choice.conditions &&
+            !evaluateConditions(choice.conditions, this.state)
+        ) {
+            return this.buildSnapshotAndClearTransients();
+        }
 
         // Apply choice effects
         if (choice.effects) {
@@ -168,8 +178,8 @@ export class Engine {
         }
 
         // If a startDialogue effect fired, nodeId will be ''. Initialize the new dialogue.
-        if (this.state.dialogueState?.nodeId === '') {
-            return this.initDialogue(this.state.dialogueState.dialogueId);
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
         }
 
         // Move to next node specified by choice
@@ -196,10 +206,16 @@ export class Engine {
         if (nextNode.effects) {
             this.state = applyEffects(nextNode.effects, this.state);
         }
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
+        }
 
         // Settle at this node: show text if any, auto-advance if silent
         if (nextNode.choices.length === 0) {
             this.settleAtNode(dialogue.id, nextNode);
+            if (this.initializePendingDialogueRedirect()) {
+                return this.buildSnapshotAndClearTransients();
+            }
         }
 
         return this.buildSnapshotAndClearTransients();
@@ -231,31 +247,8 @@ export class Engine {
             return this.buildSnapshotAndClearTransients();
         }
 
-        // Find the start node
-        const startNode = dialogue.nodes.find(
-            (n) => n.id === dialogue.startNode
-        );
-        if (!startNode) {
+        if (!this.enterDialogue(dialogue.id)) {
             return this.buildSnapshotAndClearTransients();
-        }
-
-        // Start dialogue
-        this.state = {
-            ...this.state,
-            dialogueState: {
-                dialogueId: dialogue.id,
-                nodeId: startNode.id,
-            },
-        };
-
-        // Apply start node effects
-        if (startNode.effects) {
-            this.state = applyEffects(startNode.effects, this.state);
-        }
-
-        // Settle at this node: show text if any, auto-advance if silent
-        if (startNode.choices.length === 0) {
-            this.settleAtNode(dialogue.id, startNode);
         }
 
         return this.buildSnapshotAndClearTransients();
@@ -274,14 +267,13 @@ export class Engine {
             return this.buildSnapshotAndClearTransients();
         }
 
-        // Find the map that contains both current and destination locations
-        // For simplicity, we'll just use the first map
-        const mapIds = Object.keys(this.registry.maps);
-        if (mapIds.length === 0) {
+        const currentLocation = this.registry.locations[this.state.currentLocation];
+        const destinationLocation = this.registry.locations[locationId];
+        if (!currentLocation || !destinationLocation) {
             return this.buildSnapshotAndClearTransients();
         }
 
-        const map = this.registry.maps[mapIds[0]];
+        const map = this.findMapContainingLocation(this.state.currentLocation);
         if (!map) {
             return this.buildSnapshotAndClearTransients();
         }
@@ -403,6 +395,22 @@ export class Engine {
      * @returns Current snapshot
      */
     getSnapshot(): Snapshot {
+        return buildSnapshot(this.state, this.registry);
+    }
+
+    /**
+     * Clear the current pending interlude and return the updated snapshot.
+     *
+     * Renderers call this after the player dismisses an interlude.
+     *
+     * @returns Current snapshot with no pending interlude
+     */
+    dismissInterlude(): Snapshot {
+        this.state = {
+            ...this.state,
+            pendingInterlude: null,
+        };
+
         return this.buildSnapshotAndClearTransients();
     }
 
@@ -431,9 +439,13 @@ export class Engine {
             return this.buildSnapshotAndClearTransients();
         }
 
+        if (this.hasVisibleChoices(currentNode)) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
         const resolvedNext = this.resolveNextNode(currentNode);
-        if (this.state.dialogueState?.nodeId === '') {
-            return this.initDialogue(this.state.dialogueState.dialogueId);
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
         }
         if (!resolvedNext) {
             this.state = { ...this.state, dialogueState: null };
@@ -456,15 +468,15 @@ export class Engine {
         }
 
         // startDialogue effect: initialize the new dialogue
-        if (this.state.dialogueState?.nodeId === '') {
-            return this.initDialogue(this.state.dialogueState.dialogueId);
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
         }
 
         this.settleAtNode(dialogue.id, nextNode);
 
         // settleAtNode may have triggered a startDialogue via the silent-advance loop
-        if (this.state.dialogueState?.nodeId === '') {
-            return this.initDialogue(this.state.dialogueState.dialogueId);
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
         }
 
         return this.buildSnapshotAndClearTransients();
@@ -491,6 +503,69 @@ export class Engine {
         };
 
         return snapshot;
+    }
+
+    private hasVisibleChoices(node: DialogueNode): boolean {
+        return node.choices.some((choice) => {
+            if (!choice.conditions || choice.conditions.length === 0) {
+                return true;
+            }
+            return evaluateConditions(choice.conditions, this.state);
+        });
+    }
+
+    private enterDialogue(dialogueId: string): boolean {
+        const dialogue = this.registry.dialogues[dialogueId];
+        if (!dialogue) {
+            return false;
+        }
+
+        const startNode = dialogue.nodes.find(
+            (n) => n.id === dialogue.startNode
+        );
+        if (!startNode) {
+            return false;
+        }
+
+        this.state = {
+            ...this.state,
+            dialogueState: {
+                dialogueId: dialogue.id,
+                nodeId: startNode.id,
+            },
+        };
+
+        if (startNode.effects) {
+            this.state = applyEffects(startNode.effects, this.state);
+        }
+        if (this.initializePendingDialogueRedirect()) {
+            return true;
+        }
+
+        if (startNode.choices.length === 0) {
+            this.settleAtNode(dialogue.id, startNode);
+            this.initializePendingDialogueRedirect();
+        }
+
+        return true;
+    }
+
+    private initializePendingDialogueRedirect(): boolean {
+        if (this.state.dialogueState?.nodeId !== '') {
+            return false;
+        }
+
+        const dialogueId = this.state.dialogueState.dialogueId;
+        return this.enterDialogue(dialogueId);
+    }
+
+    private findMapContainingLocation(locationId: string): GameMap | null {
+        return (
+            Object.values(this.registry.maps).find(
+                (map) =>
+                    map.locations.some((location) => location.id === locationId)
+            ) ?? null
+        );
     }
 
     /**
@@ -637,31 +712,8 @@ export class Engine {
                 continue;
             }
 
-            // Find start node
-            const startNode = dialogue.nodes.find(
-                (n) => n.id === dialogue.startNode
-            );
-            if (!startNode) {
+            if (!this.enterDialogue(dialogue.id)) {
                 continue;
-            }
-
-            // Start this dialogue
-            this.state = {
-                ...this.state,
-                dialogueState: {
-                    dialogueId: dialogue.id,
-                    nodeId: startNode.id,
-                },
-            };
-
-            // Apply start node effects
-            if (startNode.effects) {
-                this.state = applyEffects(startNode.effects, this.state);
-            }
-
-            // Settle at this node: show text if any, auto-advance if silent
-            if (startNode.choices.length === 0) {
-                this.settleAtNode(dialogue.id, startNode);
             }
 
             // Only trigger one dialogue at a time
@@ -704,4 +756,31 @@ export class Engine {
             break;
         }
     }
+}
+
+/**
+ * Create an empty game state suitable for constructing an Engine before
+ * newGame() is called.
+ */
+export function createInitialState(currentLocale = 'en'): GameState {
+    return {
+        currentLocation: '',
+        currentTime: { day: 1, hour: 0 },
+        flags: {},
+        variables: {},
+        inventory: [],
+        questProgress: {},
+        unlockedJournalEntries: [],
+        playerNotes: [],
+        dialogueState: null,
+        characterState: {},
+        itemLocations: {},
+        mapEnabled: true,
+        notifications: [],
+        pendingSounds: [],
+        musicOverride: null,
+        pendingVideo: null,
+        pendingInterlude: null,
+        currentLocale,
+    };
 }

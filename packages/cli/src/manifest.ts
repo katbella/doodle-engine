@@ -34,7 +34,14 @@ export async function generateAssetManifest(
         config
     );
 
+    const isLocalAssetPath = (assetPath: string) =>
+        assetPath.startsWith('/assets/') || assetPath.startsWith('assets/');
+
     async function getSize(assetPath: string): Promise<number | undefined> {
+        if (!isLocalAssetPath(assetPath)) {
+            return undefined;
+        }
+
         // Asset paths are like /assets/images/foo.png, so strip the leading /
         const fsPath = join(
             publicDir,
@@ -44,7 +51,9 @@ export async function generateAssetManifest(
             const s = await stat(fsPath);
             return s.size;
         } catch {
-            return undefined;
+            throw new Error(
+                `Referenced asset not found: ${assetPath} (looked in ${assetsDir})`
+            );
         }
     }
 

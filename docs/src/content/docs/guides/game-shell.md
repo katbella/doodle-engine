@@ -102,6 +102,9 @@ The settings panel provides:
 ```tsx
 // Custom UI sounds
 <GameShell
+  registry={registry}
+  config={config}
+  manifest={manifest}
   uiSounds={{
     basePath: '/assets/audio/ui',
     volume: 0.5,
@@ -114,7 +117,12 @@ The settings panel provides:
 />
 
 // Disable UI sounds
-<GameShell uiSounds={false} />
+<GameShell
+  registry={registry}
+  config={config}
+  manifest={manifest}
+  uiSounds={false}
+/>
 ```
 
 To preload UI sounds before the title screen appears, list them in `content/game.yaml` under `shell.uiSounds`:
@@ -127,15 +135,11 @@ shell:
     menuClose: /assets/audio/ui/menu_close.ogg
 ```
 
-`shell.uiSounds` in `game.yaml` controls **preloading**: it tells the asset loader which files to cache as tier 1 (shell) assets, so they are ready before the title screen renders. The `uiSounds` prop on `GameShell` controls **playback**: it tells the runtime where to find sound files when a button is clicked. The file paths in both must match.
+`shell.uiSounds` in `game.yaml` preloads the files as tier 1 shell assets and is also used as the default runtime UI sound mapping. Pass the `uiSounds` prop to override it, or `uiSounds={false}` to disable UI sounds.
 
 ## Video Cutscenes
 
-GameShell automatically plays fullscreen video cutscenes when a dialogue uses the `VIDEO` effect. Configure the video file location with `videoBasePath`:
-
-```tsx
-<GameShell videoBasePath="/assets/video" />
-```
+GameShell automatically plays fullscreen video cutscenes when a dialogue uses the `VIDEO` effect. Video files resolve from the engine's normal video asset path.
 
 See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding videos to your game.
 
@@ -144,7 +148,12 @@ See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding vid
 GameShell saves to localStorage under a configurable key:
 
 ```tsx
-<GameShell storageKey="my-game-save" />
+<GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    storageKey="my-game-save"
+/>
 ```
 
 The default key is `'doodle-engine-save'`.
@@ -155,12 +164,15 @@ Pass audio options to configure the game audio manager:
 
 ```tsx
 <GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
     audioOptions={{
-        audioBasePath: '/assets/audio',
         masterVolume: 1.0,
         musicVolume: 0.7,
         soundVolume: 0.8,
         voiceVolume: 1.0,
+        crossfadeDuration: 1000,
     }}
 />
 ```

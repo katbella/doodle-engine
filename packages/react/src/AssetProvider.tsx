@@ -4,7 +4,7 @@
  * Manages the two-tier loading flow:
  *   loading-shell → loading-game → complete
  *
- * Children don't render until shell assets are loaded.
+ * Children don't render until shell and game assets are loaded.
  * Use renderLoading to provide a loading screen during the process.
  */
 
@@ -21,6 +21,7 @@ import type {
     AssetManifest,
     AssetLoadingState,
     AssetLoader,
+    AssetEntry,
 } from '@doodle-engine/core';
 import { createAssetLoader } from '@doodle-engine/core';
 
@@ -46,10 +47,14 @@ export function useAssetContext(): AssetContextValue {
     return ctx;
 }
 
+export function useOptionalAssetContext(): AssetContextValue | null {
+    return useContext(AssetContext);
+}
+
 export interface AssetProviderProps {
     /** Asset manifest (from /api/manifest or bundled) */
     manifest: AssetManifest;
-    /** Children to render once shell assets are loaded */
+    /** Children to render once shell and game assets are loaded */
     children: ReactNode;
     /** Custom loader (for non-browser environments) */
     loader?: AssetLoader;
@@ -63,6 +68,8 @@ const IDLE_STATE: AssetLoadingState = {
     phase: 'idle',
     bytesLoaded: 0,
     bytesTotal: 0,
+    assetsLoaded: 0,
+    assetsTotal: 0,
     progress: 0,
     overallProgress: 0,
     currentAsset: null,
@@ -82,7 +89,7 @@ export function AssetProvider({
     const loader = loaderRef.current;
 
     const [state, setStateInternal] = useState<AssetLoadingState>(IDLE_STATE);
-    const [shellDone, setShellDone] = useState(false);
+    const [allDone, setAllDone] = useState(false);
     const [readyPaths, setReadyPaths] = useState<Set<string>>(new Set());
 
     const setState = useCallback(
@@ -96,18 +103,42 @@ export function AssetProvider({
     useEffect(() => {
         let cancelled = false;
 
+        const bytesFor = (entries: AssetEntry[], loaded: number) =>
+            entries
+                .slice(0, loaded)
+                .reduce((sum, entry) => sum + (entry.size ?? 0), 0);
+
+        const bytesTotalFor = (entries: AssetEntry[]) =>
+            entries.reduce((sum, entry) => sum + (entry.size ?? 0), 0);
+
+        const phaseProgress = (
+            bytesLoaded: number,
+            bytesTotal: number,
+            assetsLoaded: number,
+            assetsTotal: number
+        ) => {
+            if (bytesTotal > 0) {
+                return bytesLoaded / bytesTotal;
+            }
+            return assetsTotal > 0 ? assetsLoaded / assetsTotal : 1;
+        };
+
         async function load() {
-            const shellPaths = manifest.shell.map((e) => e.path);
-            const gamePaths = manifest.game.map((e) => e.path);
-            const shellTotal = manifest.shellSize || shellPaths.length;
-            const gameTotal =
-                manifest.totalSize - manifest.shellSize || gamePaths.length;
+            setAllDone(false);
+            const shellEntries = manifest.shell;
+            const gameEntries = manifest.game;
+            const shellPaths = shellEntries.map((e) => e.path);
+            const gamePaths = gameEntries.map((e) => e.path);
+            const shellBytesTotal = bytesTotalFor(shellEntries);
+            const gameBytesTotal = bytesTotalFor(gameEntries);
 
             // ── Phase: loading-shell ──────────────────────────────────────
             setState({
                 phase: 'loading-shell',
                 bytesLoaded: 0,
-                bytesTotal: shellTotal,
+                bytesTotal: shellBytesTotal,
+                assetsLoaded: 0,
+                assetsTotal: shellEntries.length,
                 progress: 0,
                 overallProgress: 0,
                 currentAsset: shellPaths[0] ?? null,
@@ -115,15 +146,21 @@ export function AssetProvider({
             });
 
             try {
-                let shellLoaded = 0;
                 await loader.loadMany(shellPaths, (loaded, _total, current) => {
                     if (cancelled) return;
-                    shellLoaded = loaded;
-                    const progress = _total > 0 ? loaded / _total : 1;
+                    const bytesLoaded = bytesFor(shellEntries, loaded);
+                    const progress = phaseProgress(
+                        bytesLoaded,
+                        shellBytesTotal,
+                        loaded,
+                        _total
+                    );
                     setState({
                         phase: 'loading-shell',
-                        bytesLoaded: shellLoaded,
-                        bytesTotal: _total,
+                        bytesLoaded,
+                        bytesTotal: shellBytesTotal,
+                        assetsLoaded: loaded,
+                        assetsTotal: _total,
                         progress,
                         overallProgress: progress * 0.3, // shell = first 30% of overall
                         currentAsset: current,
@@ -138,28 +175,35 @@ export function AssetProvider({
                     shellPaths.forEach((p) => next.add(p));
                     return next;
                 });
-                setShellDone(true);
 
                 // ── Phase: loading-game ───────────────────────────────────────
                 setState({
                     phase: 'loading-game',
                     bytesLoaded: 0,
-                    bytesTotal: gameTotal,
+                    bytesTotal: gameBytesTotal,
+                    assetsLoaded: 0,
+                    assetsTotal: gameEntries.length,
                     progress: 0,
                     overallProgress: 0.3,
                     currentAsset: gamePaths[0] ?? null,
                     error: null,
                 });
 
-                let gameLoaded = 0;
                 await loader.loadMany(gamePaths, (loaded, _total, current) => {
                     if (cancelled) return;
-                    gameLoaded = loaded;
-                    const progress = _total > 0 ? loaded / _total : 1;
+                    const bytesLoaded = bytesFor(gameEntries, loaded);
+                    const progress = phaseProgress(
+                        bytesLoaded,
+                        gameBytesTotal,
+                        loaded,
+                        _total
+                    );
                     setState({
                         phase: 'loading-game',
-                        bytesLoaded: gameLoaded,
-                        bytesTotal: _total,
+                        bytesLoaded,
+                        bytesTotal: gameBytesTotal,
+                        assetsLoaded: loaded,
+                        assetsTotal: _total,
                         progress,
                         overallProgress: 0.3 + progress * 0.7,
                         currentAsset: current,
@@ -175,10 +219,13 @@ export function AssetProvider({
                     return next;
                 });
 
+                setAllDone(true);
                 setState({
                     phase: 'complete',
-                    bytesLoaded: gameLoaded,
-                    bytesTotal: gameTotal,
+                    bytesLoaded: manifest.totalSize,
+                    bytesTotal: manifest.totalSize,
+                    assetsLoaded: shellEntries.length + gameEntries.length,
+                    assetsTotal: shellEntries.length + gameEntries.length,
                     progress: 1,
                     overallProgress: 1,
                     currentAsset: null,
@@ -190,6 +237,8 @@ export function AssetProvider({
                     phase: 'error',
                     bytesLoaded: 0,
                     bytesTotal: 0,
+                    assetsLoaded: 0,
+                    assetsTotal: 0,
                     progress: 0,
                     overallProgress: 0,
                     currentAsset: null,
@@ -227,8 +276,8 @@ export function AssetProvider({
         loader,
     };
 
-    // Show loading screen until shell is done
-    if (!shellDone) {
+    // Show loading screen until all required assets are done
+    if (!allDone) {
         const loadingNode = renderLoading ? renderLoading(state) : null;
         return (
             <AssetContext.Provider value={ctx}>

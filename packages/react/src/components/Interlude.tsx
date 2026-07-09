@@ -8,10 +8,38 @@
 import { useEffect, useRef, useCallback, useContext } from 'react';
 import type { SnapshotInterlude } from '@doodle-engine/core';
 import { AudioSettingsContext } from '../AudioSettingsContext';
+import { useInputAction, type InputCommand } from '../input/InputRouter';
+import { useOptionalAssetContext } from '../AssetProvider';
 
 export interface InterludeProps {
     interlude: SnapshotInterlude;
     onDismiss: () => void;
+}
+
+export type InterludeInputResult =
+    | 'dismiss'
+    | 'scrollNext'
+    | 'scrollPrevious'
+    | null;
+
+export function resolveInterludeInput(
+    command: InputCommand
+): InterludeInputResult {
+    if (command === 'next') {
+        return 'scrollNext';
+    }
+    if (command === 'previous') {
+        return 'scrollPrevious';
+    }
+    if (
+        command === 'confirm' ||
+        command === 'continue' ||
+        command === 'cancel'
+    ) {
+        return 'dismiss';
+    }
+
+    return null;
 }
 
 export function Interlude({ interlude, onDismiss }: InterludeProps) {
@@ -21,6 +49,12 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
     const scrollOffsetRef = useRef(0);
     const manualPausedRef = useRef(false);
     const lastTimeRef = useRef<number | null>(null);
+    const assetContext = useOptionalAssetContext();
+    const getAssetUrl = useCallback(
+        (path: string | undefined) =>
+            path ? assetContext?.getAssetUrl(path) ?? path : '',
+        [assetContext]
+    );
 
     // Volumes from context if available (Interlude may be used outside AudioSettingsProvider)
     const audioSettings = useContext(AudioSettingsContext);
@@ -32,34 +66,34 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
     // Music: loops for the duration of the interlude
     useEffect(() => {
         if (!interlude.music) return;
-        const audio = new Audio(interlude.music);
+        const audio = new Audio(getAssetUrl(interlude.music));
         audio.loop = true;
         audio.volume = masterVol * musicVol;
         audio.play().catch(() => {});
         return () => { audio.pause(); audio.src = ''; };
-    }, [interlude.music, masterVol, musicVol]);
+    }, [interlude.music, masterVol, musicVol, getAssetUrl]);
 
     // Voice narration: plays once
     useEffect(() => {
         if (!interlude.voice) return;
-        const audio = new Audio(interlude.voice);
+        const audio = new Audio(getAssetUrl(interlude.voice));
         audio.volume = masterVol * voiceVol;
         audio.play().catch(() => {});
         return () => { audio.pause(); audio.src = ''; };
-    }, [interlude.voice, masterVol, voiceVol]);
+    }, [interlude.voice, masterVol, voiceVol, getAssetUrl]);
 
     // Ambient sounds: each loops independently
     useEffect(() => {
         if (!interlude.sounds?.length) return;
         const audios = interlude.sounds.map((src) => {
-            const audio = new Audio(src);
+            const audio = new Audio(getAssetUrl(src));
             audio.loop = true;
             audio.volume = masterVol * soundVol;
             audio.play().catch(() => {});
             return audio;
         });
         return () => { audios.forEach((a) => { a.pause(); a.src = ''; }); };
-    }, [interlude.sounds, masterVol, soundVol]);
+    }, [interlude.sounds, masterVol, soundVol, getAssetUrl]);
 
     // Auto-scroll: refs update the DOM directly to avoid per-frame React re-renders
     useEffect(() => {
@@ -110,39 +144,46 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
         if (containerRef.current) containerRef.current.scrollTop = scrollOffsetRef.current;
     }, []);
 
-    const handleKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                manualPausedRef.current = true;
-                scrollOffsetRef.current = Math.max(
-                    0,
-                    scrollOffsetRef.current + (e.key === 'ArrowDown' ? 40 : -40)
-                );
-                if (containerRef.current) containerRef.current.scrollTop = scrollOffsetRef.current;
-            }
-            if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape') {
-                e.preventDefault();
-                onDismiss();
-            }
-        },
-        [onDismiss]
-    );
+    const scrollBy = useCallback((delta: number) => {
+        manualPausedRef.current = true;
+        scrollOffsetRef.current = Math.max(
+            0,
+            scrollOffsetRef.current + delta
+        );
+        if (containerRef.current) {
+            containerRef.current.scrollTop = scrollOffsetRef.current;
+        }
+    }, []);
 
-    useEffect(() => {
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [handleKeyDown]);
+    useInputAction(
+        ({ command }) => {
+            const result = resolveInterludeInput(command);
+
+            if (result === 'scrollNext' || result === 'scrollPrevious') {
+                scrollBy(result === 'scrollNext' ? 40 : -40);
+                return true;
+            }
+
+            if (result === 'dismiss') {
+                onDismiss();
+                return true;
+            }
+
+            return false;
+        },
+        { priority: 300 }
+    );
 
     return (
         <div
             className="interlude-overlay"
-            style={{ backgroundImage: `url(${interlude.background})` }}
+            style={{ backgroundImage: `url(${getAssetUrl(interlude.background)})` }}
             onClick={onDismiss}
         >
             {interlude.banner && (
                 <img
                     className="interlude-banner"
-                    src={interlude.banner}
+                    src={getAssetUrl(interlude.banner)}
                     alt=""
                     aria-hidden="true"
                 />

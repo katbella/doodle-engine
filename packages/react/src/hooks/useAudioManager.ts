@@ -12,8 +12,9 @@
  * (typically via AudioSettingsContext); this hook just applies them.
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { Snapshot } from '@doodle-engine/core';
+import { useOptionalAssetContext } from '../AssetProvider';
 
 export interface AudioManagerOptions {
     /** Master volume (0-1) */
@@ -49,6 +50,11 @@ export function useAudioManager(
         voiceVolume = 1.0,
         crossfadeDuration = 1000,
     } = options;
+    const assetContext = useOptionalAssetContext();
+    const getAssetUrl = useCallback(
+        (path: string) => assetContext?.getAssetUrl(path) ?? path,
+        [assetContext]
+    );
 
     // Ref for current volumes, used in callbacks/timers without stale closures
     const volumesRef = useRef({ masterVolume, musicVolume, soundVolume, voiceVolume });
@@ -114,9 +120,9 @@ export function useAudioManager(
         if (!newTrack) {
             fadeOut(musicAudio, crossfadeDuration);
         } else {
-            crossfadeMusic(musicAudio, newTrack, crossfadeDuration);
+            crossfadeMusic(musicAudio, getAssetUrl(newTrack), crossfadeDuration);
         }
-    }, [snapshot.music, crossfadeDuration]);
+    }, [snapshot.music, crossfadeDuration, getAssetUrl]);
 
     // Switch ambient track when snapshot.ambient changes
     useEffect(() => {
@@ -130,14 +136,14 @@ export function useAudioManager(
 
         ambientAudio.pause();
         if (newTrack) {
-            ambientAudio.src = newTrack;
+            ambientAudio.src = getAssetUrl(newTrack);
             const v = volumesRef.current;
             ambientAudio.volume = v.masterVolume * v.soundVolume;
             ambientAudio.play().catch(() => {});
         } else {
             ambientAudio.src = '';
         }
-    }, [snapshot.ambient]);
+    }, [snapshot.ambient, getAssetUrl]);
 
     // Play voice when dialogue.voice changes
     useEffect(() => {
@@ -148,14 +154,14 @@ export function useAudioManager(
         if (voiceFile) {
             voiceAudio.pause();
             voiceAudio.currentTime = 0;
-            voiceAudio.src = voiceFile;
+            voiceAudio.src = getAssetUrl(voiceFile);
             const v = volumesRef.current;
             voiceAudio.volume = v.masterVolume * v.voiceVolume;
             voiceAudio.play().catch((error) => {
                 console.warn('Voice playback failed:', error);
             });
         }
-    }, [snapshot.dialogue?.voice]);
+    }, [snapshot.dialogue?.voice, getAssetUrl]);
 
     // Play sound effects from pendingSounds
     useEffect(() => {
@@ -163,13 +169,13 @@ export function useAudioManager(
 
         const v = volumesRef.current;
         snapshot.pendingSounds.forEach((soundFile) => {
-            const soundAudio = new Audio(soundFile);
+            const soundAudio = new Audio(getAssetUrl(soundFile));
             soundAudio.volume = v.masterVolume * v.soundVolume;
             soundAudio.play().catch((error) => {
                 console.warn('Sound playback failed:', error);
             });
         });
-    }, [snapshot.pendingSounds]);
+    }, [snapshot.pendingSounds, getAssetUrl]);
 
     // Helper: Crossfade to new music track
     const crossfadeMusic = (

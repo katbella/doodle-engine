@@ -6,6 +6,7 @@
 import type { ContentRegistry } from '../types/registry';
 import type { GameConfig } from '../types/entities';
 import { resolveAssetPath } from './paths';
+import type { Effect } from '../types/effects';
 
 /**
  * Determine asset type from file extension.
@@ -34,38 +35,73 @@ export function extractAssetPaths(
     const shell: Set<string> = new Set();
     const game: Set<string> = new Set();
 
+    const normalizePath = (path: string) =>
+        path.startsWith('assets/') ? `/${path}` : path;
+
+    const addShell = (path: string | undefined) => {
+        if (path) shell.add(normalizePath(path));
+    };
+
     // Collect shell assets from config
     if (config.shell) {
         const { splash, loading, title, uiSounds } = config.shell;
 
         if (splash) {
-            if (splash.logo) shell.add(splash.logo);
-            if (splash.background) shell.add(splash.background);
-            if (splash.sound) shell.add(splash.sound);
+            addShell(splash.logo);
+            addShell(splash.background);
+            addShell(splash.sound);
         }
 
         if (loading) {
-            if (loading.background) shell.add(loading.background);
-            if (loading.music) shell.add(loading.music);
+            addShell(loading.background);
+            addShell(loading.music);
         }
 
         if (title) {
-            if (title.logo) shell.add(title.logo);
-            if (title.background) shell.add(title.background);
-            if (title.music) shell.add(title.music);
+            addShell(title.logo);
+            addShell(title.background);
+            addShell(title.music);
         }
 
         if (uiSounds) {
-            if (uiSounds.click) shell.add(uiSounds.click);
-            if (uiSounds.hover) shell.add(uiSounds.hover);
-            if (uiSounds.menuOpen) shell.add(uiSounds.menuOpen);
-            if (uiSounds.menuClose) shell.add(uiSounds.menuClose);
+            addShell(uiSounds.click);
+            addShell(uiSounds.hover);
+            addShell(uiSounds.menuOpen);
+            addShell(uiSounds.menuClose);
         }
     }
 
     // Add a game asset only if it's a non-empty string not already in shell
     const addGame = (path: string | undefined) => {
-        if (path && !shell.has(path)) game.add(path);
+        if (path) {
+            const normalized = normalizePath(path);
+            if (!shell.has(normalized)) game.add(normalized);
+        }
+    };
+
+    const addEffectAssets = (effects: Effect[] | undefined) => {
+        if (!effects) return;
+
+        for (const effect of effects) {
+            if (effect.type === 'playMusic') {
+                addGame(resolveAssetPath(effect.track, 'music'));
+            } else if (effect.type === 'playSound') {
+                addGame(resolveAssetPath(effect.sound, 'sfx'));
+            } else if (effect.type === 'playVideo') {
+                addGame(resolveAssetPath(effect.file, 'video'));
+            } else if (effect.type === 'showInterlude') {
+                const interlude = registry.interludes[effect.interludeId];
+                if (interlude) {
+                    addGame(resolveAssetPath(interlude.background, 'banner'));
+                    addGame(resolveAssetPath(interlude.banner, 'banner'));
+                    addGame(resolveAssetPath(interlude.music, 'music'));
+                    addGame(resolveAssetPath(interlude.voice, 'voice'));
+                    interlude.sounds?.forEach((sound) =>
+                        addGame(resolveAssetPath(sound, 'sfx'))
+                    );
+                }
+            }
+        }
     };
 
     // Locations: banner, music, ambient
@@ -102,13 +138,19 @@ export function extractAssetPaths(
                 addGame(resolveAssetPath(sound, 'sfx'));
             }
         }
+        addEffectAssets(interlude.effects);
     }
 
-    // Dialogues: voice and portrait overrides in each node
+    // Dialogues: voice, portrait overrides, and effect media in each node
     for (const dialogue of Object.values(registry.dialogues)) {
         for (const node of dialogue.nodes) {
             addGame(resolveAssetPath(node.voice, 'voice'));
             addGame(resolveAssetPath(node.portrait, 'portrait'));
+            addEffectAssets(node.effects);
+            node.conditionalBranches?.forEach((branch) =>
+                addEffectAssets(branch.effects)
+            );
+            node.choices.forEach((choice) => addEffectAssets(choice.effects));
         }
     }
 

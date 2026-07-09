@@ -240,8 +240,8 @@ export interface SetMapEnabledEffect {
  */
 export interface PlayMusicEffect {
     type: 'playMusic';
-    /** Music track filename */
-    track: string;
+    /** Music track filename. Empty or omitted clears the override. */
+    track?: string;
 }
 
 /**

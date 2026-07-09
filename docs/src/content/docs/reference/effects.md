@@ -236,6 +236,12 @@ Change the current music track.
 MUSIC tension_theme.ogg
 ```
 
+Use bare `MUSIC` to clear the override and return to the current location's music.
+
+```
+MUSIC
+```
+
 ### SOUND
 
 Play a one-shot sound effect.
@@ -248,13 +254,13 @@ SOUND door_slam.ogg
 
 ### VIDEO
 
-Play a fullscreen video/cutscene. The video file path is relative to the video base path.
+Play a fullscreen video/cutscene. Bare filenames resolve to the normal video asset path.
 
 ```
 VIDEO intro_cinematic.mp4
 ```
 
-The video appears as `pendingVideo` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared. The `VideoPlayer` component (or `GameShell`) handles playback and skip.
+The video appears as `pendingVideo` in the snapshot returned by the action that produced it. The engine clears it after that action snapshot. `GameShell` stores that value long enough for `VideoPlayer` to handle playback and skip; custom renderers should do the same.
 
 ## Interludes
 
@@ -266,7 +272,7 @@ Show a narrative interlude: a full-screen text scene with scrolling text and a b
 INTERLUDE chapter_one
 ```
 
-The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot. It's transient: it appears in one snapshot and is automatically cleared after the player dismisses it. See the [Interludes guide](/guides/interludes/) for the full YAML schema.
+The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot returned by the action that produced it. Renderers dismiss the visible interlude with `dismissInterlude()`. See the [Interludes guide](/guides/interludes/) for the full YAML schema.
 
 ## Dice Rolling
 

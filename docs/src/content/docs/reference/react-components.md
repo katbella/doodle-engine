@@ -48,6 +48,25 @@ interface GameContextValue {
 
 Access via `useGame()` hook.
 
+## InputProvider
+
+Renderer-level input command provider. It owns keyboard events and dispatches
+commands to registered handlers by priority. `GameShell` includes this provider
+automatically. `GameRenderer` creates a provider boundary when used standalone.
+
+```tsx
+import { InputProvider } from '@doodle-engine/react';
+
+<InputProvider>
+    <GameProvider engine={engine} initialSnapshot={snapshot}>
+        {children}
+    </GameProvider>
+</InputProvider>;
+```
+
+Use `useInputAction()` to register command handlers. Higher priority handlers
+receive commands first; returning `true` consumes the command.
+
 ## GameRenderer
 
 Batteries-included full-screen renderer. Provides a complete game UI with all components pre-wired.
@@ -127,6 +146,8 @@ import { ChoiceList } from '@doodle-engine/react';
 | `className`      | `string`                     | `''`         | CSS class                                   |
 
 Number keys 1–9 select choices by position. Enter and Space trigger the Continue button when it is shown.
+These shortcuts are routed through `InputProvider`, so higher-priority overlays
+such as interludes, videos, and panels can consume input before dialogue sees it.
 
 ## LocationView
 
@@ -318,6 +339,7 @@ Save and load game state via localStorage.
 import { SaveLoadPanel } from '@doodle-engine/react';
 
 <SaveLoadPanel
+    ui={snapshot.ui}
     onSave={actions.saveGame}
     onLoad={actions.loadGame}
     storageKey="my-game-save"
@@ -328,6 +350,7 @@ import { SaveLoadPanel } from '@doodle-engine/react';
 
 | Prop         | Type                           | Default                | Description      |
 | ------------ | ------------------------------ | ---------------------- | ---------------- |
+| `ui`         | `Record<string, string>`       | required               | Resolved UI strings |
 | `onSave`     | `() => SaveData`               | required               | Save handler     |
 | `onLoad`     | `(saveData: SaveData) => void` | required               | Load handler     |
 | `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key |
@@ -359,11 +382,11 @@ import { Interlude } from '@doodle-engine/react';
 | `interlude` | `SnapshotInterlude` | Interlude data from the snapshot                 |
 | `onDismiss` | `() => void`        | Called when the player skips or finishes reading |
 
-The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll.
+The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll. Keyboard commands are registered at high priority so the dialogue UI underneath does not also receive the same input.
 
 ## VideoPlayer
 
-Fullscreen video/cutscene overlay with a visible Skip button. Also supports skip via keypress (Escape, Space, Enter).
+Fullscreen video/cutscene overlay with a visible Skip button. Also supports skip via keypress (Escape, Space, Enter). Keyboard commands are registered at high priority so the gameplay UI underneath does not also receive the same input.
 
 ```tsx
 import { VideoPlayer } from '@doodle-engine/react';
@@ -474,6 +497,7 @@ Main menu with New Game, Continue, and Settings buttons.
 import { TitleScreen } from '@doodle-engine/react';
 
 <TitleScreen
+    ui={snapshot.ui}
     title="My Game"
     subtitle="A text-based adventure"
     hasSaveData={true}
@@ -487,6 +511,7 @@ import { TitleScreen } from '@doodle-engine/react';
 
 | Prop          | Type                   | Default           | Description                          |
 | ------------- | ---------------------- | ----------------- | ------------------------------------ |
+| `ui`          | `Record<string, string>` | required        | Resolved UI strings                  |
 | `shell`       | `ShellConfig['title']` | —                 | Title config from `game.yaml`        |
 | `title`       | `string`               | `'Doodle Engine'` | Game title text (shown when no logo) |
 | `subtitle`    | `string`               | —                 | Subtitle text                        |
@@ -504,6 +529,7 @@ In-game overlay with Resume, Save, Load, Settings, and Quit to Title buttons.
 import { PauseMenu } from '@doodle-engine/react';
 
 <PauseMenu
+    ui={snapshot.ui}
     onResume={handleResume}
     onSave={handleSave}
     onLoad={handleLoad}
@@ -516,6 +542,7 @@ import { PauseMenu } from '@doodle-engine/react';
 
 | Prop            | Type         | Default  | Description          |
 | --------------- | ------------ | -------- | -------------------- |
+| `ui`            | `Record<string, string>` | required | Resolved UI strings |
 | `onResume`      | `() => void` | required | Resume gameplay      |
 | `onSave`        | `() => void` | required | Save game            |
 | `onLoad`        | `() => void` | required | Load saved game      |

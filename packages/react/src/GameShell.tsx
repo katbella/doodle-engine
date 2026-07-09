@@ -7,11 +7,15 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Engine, buildUIStrings, resolveAssetPath } from '@doodle-engine/core';
+import {
+    Engine,
+    buildUIStrings,
+    createInitialState,
+    resolveAssetPath,
+} from '@doodle-engine/core';
 import type {
     ContentRegistry,
     GameConfig,
-    GameState,
     Snapshot,
     SaveData,
     AssetManifest,
@@ -22,6 +26,7 @@ import { GameProvider } from './GameProvider';
 import { GameRenderer } from './GameRenderer';
 import { AssetProvider } from './AssetProvider';
 import { useAudioManager } from './hooks/useAudioManager';
+import { useAssetUrl } from './hooks/useAsset';
 import { useUISounds } from './hooks/useUISounds';
 import { AudioSettingsProvider, useAudioSettings } from './AudioSettingsContext';
 import type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
@@ -32,6 +37,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PauseMenu } from './components/PauseMenu';
 import { SettingsPanel } from './components/SettingsPanel';
 import { VideoPlayer } from './components/VideoPlayer';
+import { InputProvider, useInputAction } from './input/InputRouter';
 
 type Screen = 'splash' | 'title' | 'playing';
 
@@ -86,37 +92,39 @@ export function GameShell({
 
     return (
         <AudioSettingsProvider defaults={audioOptions}>
-            <AssetProvider
-                manifest={manifest}
-                loader={assetLoader}
-                renderLoading={(state) => {
-                    if (renderLoading) return renderLoading(state);
-                    return (
-                        <LoadingScreen
-                            state={state}
-                            background={shell?.loading?.background}
-                        />
-                    );
-                }}
-            >
-                <GameShellInner
-                    registry={registry}
-                    config={config}
-                    title={title}
-                    subtitle={subtitle}
-                    uiSoundsConfig={uiSoundsConfig}
-                    audioOptions={audioOptions}
-                    storageKey={storageKey}
-                    availableLocales={availableLocales}
-                    className={className}
-                    devTools={devTools}
-                />
-            </AssetProvider>
+            <InputProvider>
+                <AssetProvider
+                    manifest={manifest}
+                    loader={assetLoader}
+                    renderLoading={(state) => {
+                        if (renderLoading) return renderLoading(state);
+                        return (
+                            <LoadingScreen
+                                state={state}
+                                background={shell?.loading?.background}
+                            />
+                        );
+                    }}
+                >
+                    <GameShellInner
+                        registry={registry}
+                        config={config}
+                        title={title}
+                        subtitle={subtitle}
+                        uiSoundsConfig={uiSoundsConfig}
+                        audioOptions={audioOptions}
+                        storageKey={storageKey}
+                        availableLocales={availableLocales}
+                        className={className}
+                        devTools={devTools}
+                    />
+                </AssetProvider>
+            </InputProvider>
         </AudioSettingsProvider>
     );
 }
 
-// Inner component (rendered after shell assets are loaded)
+// Inner component (rendered after shell and game assets are loaded)
 
 interface GameShellInnerProps {
     registry: ContentRegistry;
@@ -129,6 +137,17 @@ interface GameShellInnerProps {
     availableLocales?: { code: string; label: string }[];
     className: string;
     devTools: boolean;
+}
+
+export function resolveGameShellUISoundConfig(
+    shell: GameConfig['shell'],
+    uiSoundsConfig?: UISoundConfig | false
+): UISoundConfig {
+    if (uiSoundsConfig === false) {
+        return { enabled: false };
+    }
+
+    return uiSoundsConfig ?? { sounds: shell?.uiSounds ?? {} };
 }
 
 function GameShellInner({
@@ -161,34 +180,14 @@ function GameShellInner({
     } | null>(null);
 
     const uiSoundControls = useUISounds(
-        uiSoundsConfig === false ? { enabled: false } : uiSoundsConfig
+        resolveGameShellUISoundConfig(shell, uiSoundsConfig)
     );
 
     const hasSaveData = localStorage.getItem(storageKey) !== null;
 
     const createEngine = useCallback(() => {
-        const state: GameState = {
-            currentLocation: config.startLocation,
-            currentTime: { ...config.startTime },
-            flags: { ...config.startFlags },
-            variables: { ...config.startVariables },
-            inventory: [...config.startInventory],
-            questProgress: {},
-            unlockedJournalEntries: [],
-            playerNotes: [],
-            dialogueState: null,
-            characterState: {},
-            itemLocations: {},
-            mapEnabled: true,
-            notifications: [],
-            pendingSounds: [],
-            musicOverride: null,
-            pendingVideo: null,
-            pendingInterlude: null,
-            currentLocale: selectedLocale,
-        };
-        return new Engine(registry, state);
-    }, [registry, config, selectedLocale]);
+        return new Engine(registry, createInitialState(selectedLocale));
+    }, [registry, selectedLocale]);
 
     const handleNewGame = useCallback(() => {
         uiSoundControls.playClick();
@@ -254,7 +253,9 @@ function GameShellInner({
     // Title screen music
     const audioSettings = useAudioSettings();
     const titleMusicRef = useRef<HTMLAudioElement | null>(null);
-    const titleMusicPath = resolveAssetPath(shell?.title?.music, 'music');
+    const titleMusicPath = useAssetUrl(
+        resolveAssetPath(shell?.title?.music, 'music')
+    );
 
     useEffect(() => {
         if (screen !== 'title' || !titleMusicPath) return;
@@ -276,28 +277,29 @@ function GameShellInner({
         }
     }, [audioSettings.masterVolume, audioSettings.musicVolume]);
 
-    // Escape key toggles pause menu
-    useEffect(() => {
-        if (screen !== 'playing') return;
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                if (showSettings) {
-                    closeSettings();
-                } else {
-                    if (showPauseMenu) {
-                        uiSoundControls.playMenuClose();
-                    } else {
-                        uiSoundControls.playMenuOpen();
-                    }
-                    setShowPauseMenu((prev) => !prev);
-                }
+    useInputAction(
+        ({ command }) => {
+            if (command !== 'cancel' && command !== 'openMenu') {
+                return false;
             }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [screen, showPauseMenu, showSettings, closeSettings, uiSoundControls]);
+
+            if (showSettings) {
+                closeSettings();
+                return true;
+            }
+
+            if (showPauseMenu) {
+                uiSoundControls.playMenuClose();
+                setShowPauseMenu(false);
+            } else {
+                uiSoundControls.playMenuOpen();
+                setShowPauseMenu(true);
+            }
+
+            return true;
+        },
+        { priority: 50, enabled: screen === 'playing' }
+    );
 
 
     // Splash screen

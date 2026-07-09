@@ -59,6 +59,7 @@ interface GameState {
     mapEnabled: boolean;
     notifications: string[];
     pendingSounds: string[];
+    musicOverride: string | null;
     pendingVideo: string | null;
     pendingInterlude: string | null;
     currentLocale: string;
@@ -73,12 +74,14 @@ The snapshot is computed from the current state and the content registry. It enr
 interface Snapshot {
     location: SnapshotLocation;
     charactersHere: SnapshotCharacter[];
+    itemsHere: SnapshotItem[];
     party: SnapshotCharacter[];
     dialogue: SnapshotDialogue | null;
     choices: SnapshotChoice[];
     inventory: SnapshotItem[];
     quests: SnapshotQuest[];
     journal: SnapshotJournalEntry[];
+    playerNotes: PlayerNote[];
     variables: Record<string, number | string>;
     time: { day: number; hour: number };
     map: SnapshotMap | null;
@@ -88,19 +91,21 @@ interface Snapshot {
     pendingSounds: string[];
     pendingVideo: string | null;
     pendingInterlude: SnapshotInterlude | null;
+    ui: Record<string, string>;
+    currentLocale: string;
 }
 ```
 
 ## Transient State
 
-Some state is transient. It appears in exactly one snapshot and is then cleared:
+Some state is transient. It appears in the snapshot returned by the action that produced it and is then cleared from engine state:
 
 - **notifications**: messages from `NOTIFY` effects
 - **pendingSounds**: sounds from `SOUND` effects
 - **pendingVideo**: file from `VIDEO` effects (show once, then null)
-- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger (show once, then null)
+- **pendingInterlude**: interlude ID from `INTERLUDE` effects or auto-trigger
 
-After a snapshot is produced, the engine clears these fields in the next state. The renderer simply renders what is in the snapshot; no timers or cleanup are required.
+Action methods such as `newGame()`, `travelTo()`, and `selectChoice()` return a snapshot and consume those transient fields. `getSnapshot()` is read-only and does not consume state. Renderers should call explicit actions such as `dismissInterlude()` when a presentation element is finished.
 
 ## Condition Evaluation
 

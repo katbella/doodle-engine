@@ -53,6 +53,7 @@ The panel provides Save and Load buttons with feedback messages. The Load button
 import { SaveLoadPanel } from '@doodle-engine/react';
 
 <SaveLoadPanel
+    ui={snapshot.ui}
     onSave={() => engine.saveGame()}
     onLoad={(saveData) => {
         const snapshot = engine.loadGame(saveData);
@@ -66,6 +67,7 @@ import { SaveLoadPanel } from '@doodle-engine/react';
 
 | Prop         | Type                           | Default                | Description                        |
 | ------------ | ------------------------------ | ---------------------- | ---------------------------------- |
+| `ui`         | `Record<string, string>`       | required               | Resolved UI strings from snapshot  |
 | `onSave`     | `() => SaveData`               | required               | Called when the player clicks Save |
 | `onLoad`     | `(saveData: SaveData) => void` | required               | Called when the player clicks Load |
 | `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key                   |

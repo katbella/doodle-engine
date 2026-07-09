@@ -19,10 +19,17 @@ my-game/
     quests/           # Quest YAML files
     game.yaml         # Game configuration
   assets/
-    images/           # Location banners, portraits, item images
-    audio/            # Music, ambient, sound effects, voice
-    fonts/            # Custom fonts
-    maps/             # Map background images
+    images/
+      banners/        # Location and interlude banner images
+      portraits/      # Character portrait images
+      items/          # Item icons and detail images
+      maps/           # Map background images
+    audio/
+      music/          # Music tracks
+      sfx/            # Game sound effects and ambient sounds
+      ui/             # Renderer UI sounds
+      voice/          # Dialogue voice lines
+    video/            # Cutscene video files
   src/
     main.tsx          # Entry point
     App.tsx           # Root component
@@ -77,6 +84,7 @@ Referenced anywhere with `@key` syntax:
 
 ```yaml
 # content/locations/tavern.yaml
+id: tavern
 name: '@location.tavern.name'
 ```
 
@@ -85,17 +93,17 @@ name: '@location.tavern.name'
 Static files referenced by content:
 
 - **images/**: location banners (`banner` field), character portraits (`portrait`), item icons/images, interlude images
-- **audio/**: music tracks (`music` field), ambient sounds (`ambient`), sound effects, voice lines
-- **maps/**: map background images (`image` field in map YAML)
+- **audio/**: music tracks, ambient sounds, game sound effects, UI sounds, and voice lines
+- **video/**: video files used by dialogue `VIDEO` effects
 
-Asset paths in YAML are relative to the assets directory.
+Content files usually use bare filenames. The engine resolves them by field type, such as `banner: tavern.png` to `/assets/images/banners/tavern.png`. Shell config in `game.yaml` uses full `/assets/...` paths.
 
 ## Source Directory
 
 Your application code. The scaffolder creates a minimal setup:
 
 - **main.tsx**: mounts the React app
-- **App.tsx**: fetches content, initializes the engine, renders `GameProvider` + `GameRenderer`
+- **App.tsx**: fetches content and the asset manifest, then renders either `GameShell` or your custom renderer providers
 - **index.css**: default styles (fully customizable)
 
 For custom renderers, replace `GameRenderer` with your own components using the `useGame` hook. See [Custom Renderer](/technical/custom-renderer/).

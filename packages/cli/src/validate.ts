@@ -6,7 +6,7 @@
 
 import { crayon } from 'crayon.js';
 import type { ContentRegistry } from '@doodle-engine/core';
-import type { Dialogue, DialogueNode } from '@doodle-engine/core';
+import type { Dialogue, DialogueNode, GameConfig } from '@doodle-engine/core';
 
 export interface ValidationError {
     file: string;
@@ -24,7 +24,8 @@ export interface ValidationError {
  */
 export function validateContent(
     registry: ContentRegistry,
-    fileMap: Map<string, string>
+    fileMap: Map<string, string>,
+    config?: GameConfig
 ): ValidationError[] {
     const errors: ValidationError[] = [];
 
@@ -47,10 +48,392 @@ export function validateContent(
         }
     }
 
+    // Validate map structure
+    errors.push(...validateMaps(registry, fileMap));
+
+    // Validate content references
+    errors.push(...validateReferences(registry, fileMap, config));
+
     // Validate localization keys
     errors.push(...validateLocalizationKeys(registry, fileMap));
 
     return errors;
+}
+
+function validateReferences(
+    registry: ContentRegistry,
+    fileMap: Map<string, string>,
+    config?: GameConfig
+): ValidationError[] {
+    const errors: ValidationError[] = [];
+
+    if (config) {
+        if (!hasValue(config.startLocation)) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: 'Game config missing required "startLocation"',
+                suggestion: 'Set startLocation to an existing location ID',
+            });
+        } else if (!registry.locations[config.startLocation]) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: `Game config startLocation "${config.startLocation}" does not exist`,
+                suggestion: `Create location "${config.startLocation}" or update startLocation`,
+            });
+        }
+
+        if (!config.startTime || config.startTime.day === undefined || config.startTime.hour === undefined) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: 'Game config missing required "startTime.day" or "startTime.hour"',
+                suggestion: 'Set startTime.day and startTime.hour',
+            });
+        }
+
+        if (!Array.isArray(config.startInventory)) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: 'Game config startInventory must be an array',
+                suggestion: 'Set startInventory to [] or a list of item IDs',
+            });
+        } else {
+            for (const itemId of config.startInventory) {
+                if (!registry.items[itemId]) {
+                    errors.push({
+                        file: 'content/game.yaml',
+                        message: `Game config startInventory references non-existent item "${itemId}"`,
+                        suggestion: `Create item "${itemId}" or remove it from startInventory`,
+                    });
+                }
+            }
+        }
+    }
+
+    for (const character of Object.values(registry.characters)) {
+        if (character.location && !registry.locations[character.location]) {
+            errors.push({
+                file: fileMap.get(character.id) || `character:${character.id}`,
+                message: `Character "${character.id}" starts at non-existent location "${character.location}"`,
+                suggestion: `Create location "${character.location}" or update the character location`,
+            });
+        }
+    }
+
+    for (const item of Object.values(registry.items)) {
+        if (
+            item.location !== 'inventory' &&
+            !registry.locations[item.location] &&
+            !registry.characters[item.location]
+        ) {
+            errors.push({
+                file: fileMap.get(item.id) || `item:${item.id}`,
+                message: `Item "${item.id}" starts at non-existent location or character "${item.location}"`,
+                suggestion: `Use "inventory", an existing location ID, or an existing character ID`,
+            });
+        }
+    }
+
+    for (const dialogue of Object.values(registry.dialogues)) {
+        const file = fileMap.get(dialogue.id) || `dialogue:${dialogue.id}`;
+        if (
+            dialogue.triggerLocation &&
+            !registry.locations[dialogue.triggerLocation]
+        ) {
+            errors.push({
+                file,
+                message: `Dialogue "${dialogue.id}" triggers at non-existent location "${dialogue.triggerLocation}"`,
+                suggestion: `Create location "${dialogue.triggerLocation}" or update the TRIGGER`,
+            });
+        }
+
+        for (const node of dialogue.nodes) {
+            validateNodeReferences(node, file, registry, errors);
+        }
+    }
+
+    for (const interlude of Object.values(registry.interludes)) {
+        const file = fileMap.get(interlude.id) || `interlude:${interlude.id}`;
+        if (
+            interlude.triggerLocation &&
+            !registry.locations[interlude.triggerLocation]
+        ) {
+            errors.push({
+                file,
+                message: `Interlude "${interlude.id}" triggers at non-existent location "${interlude.triggerLocation}"`,
+                suggestion: `Create location "${interlude.triggerLocation}" or update triggerLocation`,
+            });
+        }
+
+        for (const effect of interlude.effects ?? []) {
+            validateEffectReferences(effect, interlude.id, file, registry, errors);
+        }
+    }
+
+    return errors;
+}
+
+function hasValue(value: unknown): boolean {
+    return value !== undefined && value !== null && value !== '';
+}
+
+function validateNodeReferences(
+    node: DialogueNode,
+    file: string,
+    registry: ContentRegistry,
+    errors: ValidationError[]
+) {
+    for (const condition of node.conditions ?? []) {
+        validateConditionReferences(condition, node.id, file, registry, errors);
+    }
+    for (const effect of node.effects ?? []) {
+        validateEffectReferences(effect, node.id, file, registry, errors);
+    }
+    for (const branch of node.conditionalBranches ?? []) {
+        validateConditionReferences(branch.condition, node.id, file, registry, errors);
+        for (const effect of branch.effects ?? []) {
+            validateEffectReferences(effect, node.id, file, registry, errors);
+        }
+    }
+    for (const choice of node.choices) {
+        for (const condition of choice.conditions ?? []) {
+            validateConditionReferences(condition, node.id, file, registry, errors);
+        }
+        for (const effect of choice.effects ?? []) {
+            validateEffectReferences(effect, node.id, file, registry, errors);
+        }
+    }
+}
+
+function validateConditionReferences(
+    condition: any,
+    nodeId: string,
+    file: string,
+    registry: ContentRegistry,
+    errors: ValidationError[]
+) {
+    const missing = (message: string, suggestion: string) =>
+        errors.push({ file, message: `Node "${nodeId}" ${message}`, suggestion });
+
+    if (
+        condition.type === 'atLocation' &&
+        hasValue(condition.locationId) &&
+        !registry.locations[condition.locationId]
+    ) {
+        missing(
+            `condition "atLocation" references non-existent location "${condition.locationId}"`,
+            `Create location "${condition.locationId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'characterAt' &&
+        hasValue(condition.characterId) &&
+        !registry.characters[condition.characterId]
+    ) {
+        missing(
+            `condition "characterAt" references non-existent character "${condition.characterId}"`,
+            `Create character "${condition.characterId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'characterAt' &&
+        hasValue(condition.locationId) &&
+        !registry.locations[condition.locationId]
+    ) {
+        missing(
+            `condition "characterAt" references non-existent location "${condition.locationId}"`,
+            `Create location "${condition.locationId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'characterInParty' &&
+        hasValue(condition.characterId) &&
+        !registry.characters[condition.characterId]
+    ) {
+        missing(
+            `condition "characterInParty" references non-existent character "${condition.characterId}"`,
+            `Create character "${condition.characterId}" or update the condition`
+        );
+    } else if (
+        (condition.type === 'relationshipAbove' ||
+            condition.type === 'relationshipBelow') &&
+        hasValue(condition.characterId) &&
+        !registry.characters[condition.characterId]
+    ) {
+        missing(
+            `condition "${condition.type}" references non-existent character "${condition.characterId}"`,
+            `Create character "${condition.characterId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'hasItem' &&
+        hasValue(condition.itemId) &&
+        !registry.items[condition.itemId]
+    ) {
+        missing(
+            `condition "hasItem" references non-existent item "${condition.itemId}"`,
+            `Create item "${condition.itemId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'itemAt' &&
+        hasValue(condition.itemId) &&
+        !registry.items[condition.itemId]
+    ) {
+        missing(
+            `condition "itemAt" references non-existent item "${condition.itemId}"`,
+            `Create item "${condition.itemId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'itemAt' &&
+        hasValue(condition.locationId) &&
+        condition.locationId !== 'inventory' &&
+        !registry.locations[condition.locationId] &&
+        !registry.characters[condition.locationId]
+    ) {
+        missing(
+            `condition "itemAt" references non-existent location or character "${condition.locationId}"`,
+            `Use "inventory", an existing location ID, or an existing character ID`
+        );
+    } else if (
+        condition.type === 'questAtStage' &&
+        hasValue(condition.questId) &&
+        !registry.quests[condition.questId]
+    ) {
+        missing(
+            `condition "questAtStage" references non-existent quest "${condition.questId}"`,
+            `Create quest "${condition.questId}" or update the condition`
+        );
+    } else if (
+        condition.type === 'questAtStage' &&
+        hasValue(condition.questId) &&
+        hasValue(condition.stageId)
+    ) {
+        const quest = registry.quests[condition.questId];
+        if (!quest.stages.some((stage) => stage.id === condition.stageId)) {
+            missing(
+                `condition "questAtStage" references non-existent quest stage "${condition.questId}.${condition.stageId}"`,
+                `Add stage "${condition.stageId}" to quest "${condition.questId}" or update the condition`
+            );
+        }
+    }
+}
+
+function validateEffectReferences(
+    effect: any,
+    nodeId: string,
+    file: string,
+    registry: ContentRegistry,
+    errors: ValidationError[]
+) {
+    const missing = (message: string, suggestion: string) =>
+        errors.push({ file, message: `Node "${nodeId}" ${message}`, suggestion });
+
+    if (
+        effect.type === 'goToLocation' &&
+        hasValue(effect.locationId) &&
+        !registry.locations[effect.locationId]
+    ) {
+        missing(
+            `effect "goToLocation" references non-existent location "${effect.locationId}"`,
+            `Create location "${effect.locationId}" or update the effect`
+        );
+    } else if (
+        (effect.type === 'addItem' || effect.type === 'removeItem') &&
+        hasValue(effect.itemId) &&
+        !registry.items[effect.itemId]
+    ) {
+        missing(
+            `effect "${effect.type}" references non-existent item "${effect.itemId}"`,
+            `Create item "${effect.itemId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'moveItem' &&
+        hasValue(effect.itemId) &&
+        !registry.items[effect.itemId]
+    ) {
+        missing(
+            `effect "moveItem" references non-existent item "${effect.itemId}"`,
+            `Create item "${effect.itemId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'moveItem' &&
+        hasValue(effect.locationId) &&
+        effect.locationId !== 'inventory' &&
+        !registry.locations[effect.locationId] &&
+        !registry.characters[effect.locationId]
+    ) {
+        missing(
+            `effect "moveItem" references non-existent location or character "${effect.locationId}"`,
+            `Use "inventory", an existing location ID, or an existing character ID`
+        );
+    } else if (
+        effect.type === 'setQuestStage' &&
+        hasValue(effect.questId) &&
+        !registry.quests[effect.questId]
+    ) {
+        missing(
+            `effect "setQuestStage" references non-existent quest "${effect.questId}"`,
+            `Create quest "${effect.questId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'setQuestStage' &&
+        hasValue(effect.questId) &&
+        hasValue(effect.stageId)
+    ) {
+        const quest = registry.quests[effect.questId];
+        if (!quest.stages.some((stage) => stage.id === effect.stageId)) {
+            missing(
+                `effect "setQuestStage" references non-existent quest stage "${effect.questId}.${effect.stageId}"`,
+                `Add stage "${effect.stageId}" to quest "${effect.questId}" or update the effect`
+            );
+        }
+    } else if (
+        effect.type === 'addJournalEntry' &&
+        hasValue(effect.entryId) &&
+        !registry.journalEntries[effect.entryId]
+    ) {
+        missing(
+            `effect "addJournalEntry" references non-existent journal entry "${effect.entryId}"`,
+            `Create journal entry "${effect.entryId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'startDialogue' &&
+        hasValue(effect.dialogueId) &&
+        !registry.dialogues[effect.dialogueId]
+    ) {
+        missing(
+            `effect "startDialogue" references non-existent dialogue "${effect.dialogueId}"`,
+            `Create dialogue "${effect.dialogueId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'showInterlude' &&
+        hasValue(effect.interludeId) &&
+        !registry.interludes[effect.interludeId]
+    ) {
+        missing(
+            `effect "showInterlude" references non-existent interlude "${effect.interludeId}"`,
+            `Create interlude "${effect.interludeId}" or update the effect`
+        );
+    } else if (
+        (effect.type === 'setCharacterLocation' ||
+            effect.type === 'addToParty' ||
+            effect.type === 'removeFromParty' ||
+            effect.type === 'setRelationship' ||
+            effect.type === 'addRelationship' ||
+            effect.type === 'setCharacterStat' ||
+            effect.type === 'addCharacterStat') &&
+        hasValue(effect.characterId) &&
+        !registry.characters[effect.characterId]
+    ) {
+        missing(
+            `effect "${effect.type}" references non-existent character "${effect.characterId}"`,
+            `Create character "${effect.characterId}" or update the effect`
+        );
+    } else if (
+        effect.type === 'setCharacterLocation' &&
+        hasValue(effect.locationId) &&
+        !registry.locations[effect.locationId]
+    ) {
+        missing(
+            `effect "setCharacterLocation" references non-existent location "${effect.locationId}"`,
+            `Create location "${effect.locationId}" or update the effect`
+        );
+    }
 }
 
 /**
@@ -227,13 +610,54 @@ const EFFECT_FIELDS: Record<string, string[]> = {
     setCharacterStat: ['characterId', 'stat', 'value'],
     addCharacterStat: ['characterId', 'stat', 'value'],
     setMapEnabled: ['enabled'],
-    playMusic: ['track'],
+    playMusic: [],
     playSound: ['sound'],
     notify: ['message'],
     playVideo: ['file'],
     showInterlude: ['interludeId'],
     roll: ['variable', 'min', 'max'],
 };
+
+function validateMaps(
+    registry: ContentRegistry,
+    fileMap: Map<string, string>
+): ValidationError[] {
+    const errors: ValidationError[] = [];
+    const mapByLocation = new Map<string, string>();
+
+    for (const map of Object.values(registry.maps)) {
+        for (const marker of map.locations) {
+            const location = registry.locations[marker.id];
+            if (!location) {
+                errors.push({
+                    file: fileMap.get(map.id) || `map:${map.id}`,
+                    message: `Map "${map.id}" references non-existent location "${marker.id}"`,
+                    suggestion: `Create location "${marker.id}" or remove it from the map`,
+                });
+                continue;
+            }
+
+            const existingMapId = mapByLocation.get(marker.id);
+            if (existingMapId === map.id) {
+                errors.push({
+                    file: fileMap.get(map.id) || `map:${map.id}`,
+                    message: `Map "${map.id}" includes location "${marker.id}" more than once`,
+                    suggestion: `Remove the duplicate marker for "${marker.id}"`,
+                });
+            } else if (existingMapId) {
+                errors.push({
+                    file: fileMap.get(map.id) || `map:${map.id}`,
+                    message: `Location "${marker.id}" appears on multiple maps: ${existingMapId}, ${map.id}`,
+                    suggestion: `Keep each location on one map so the engine can choose which map to show`,
+                });
+            } else {
+                mapByLocation.set(marker.id, map.id);
+            }
+        }
+    }
+
+    return errors;
+}
 
 /**
  * Validate a condition has required arguments.

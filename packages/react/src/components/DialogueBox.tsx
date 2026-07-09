@@ -4,6 +4,7 @@
 
 import React from 'react';
 import type { SnapshotDialogue } from '@doodle-engine/core';
+import { AssetImage } from './AssetImage';
 
 export interface DialogueBoxProps {
     dialogue: SnapshotDialogue;
@@ -15,7 +16,10 @@ export function DialogueBox({ dialogue, className = '' }: DialogueBoxProps) {
         <div className={`dialogue-box ${className}`}>
             {dialogue.portrait && (
                 <div className="dialogue-portrait">
-                    <img src={dialogue.portrait} alt={dialogue.speakerName} />
+                    <AssetImage
+                        src={dialogue.portrait}
+                        alt={dialogue.speakerName}
+                    />
                 </div>
             )}
 

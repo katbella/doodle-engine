@@ -21,18 +21,12 @@ The video plays fullscreen before the dialogue text is shown.
 
 1. The parser converts `VIDEO filename` into a `playVideo` effect
 2. The effect sets `pendingVideo` on the game state
-3. The snapshot includes `pendingVideo` as a transient field that appears once and is automatically cleared
+3. The snapshot returned by the action includes `pendingVideo` as a transient field
 4. The renderer picks up `pendingVideo` and shows the `VideoPlayer` component
 
 ## Using with GameShell
 
-If you're using `GameShell`, video playback is automatic. Configure the video file location:
-
-```tsx
-<GameShell registry={registry} config={config} videoBasePath="/assets/video" />
-```
-
-The default `videoBasePath` is `'/video'`.
+If you're using `GameShell`, video playback is automatic. Video filenames are resolved by the engine to the normal video asset path.
 
 ## Using with a Custom Renderer
 
@@ -56,7 +50,6 @@ function MyGame() {
             {video && (
                 <VideoPlayer
                     src={video}
-                    basePath="/video"
                     onComplete={() => setVideo(null)}
                 />
             )}
@@ -68,12 +61,11 @@ function MyGame() {
 
 ### VideoPlayer Props
 
-| Prop         | Type         | Default    | Description                          |
-| ------------ | ------------ | ---------- | ------------------------------------ |
-| `src`        | `string`     | required   | Video file name                      |
-| `basePath`   | `string`     | `'/video'` | Base path for video files            |
-| `onComplete` | `() => void` | required   | Called when video ends or is skipped |
-| `className`  | `string`     | `''`       | CSS class                            |
+| Prop         | Type         | Default  | Description                          |
+| ------------ | ------------ | -------- | ------------------------------------ |
+| `src`        | `string`     | required | Resolved video file path             |
+| `onComplete` | `() => void` | required | Called when video ends or is skipped |
+| `className`  | `string`     | `''`     | CSS class                            |
 
 ## Skipping Videos
 

@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react';
 import { Engine } from '@doodle-engine/core';
-import type { GameState, Snapshot } from '@doodle-engine/core';
-import { GameProvider, useGame } from '@doodle-engine/react';
+import type { AssetManifest, Snapshot } from '@doodle-engine/core';
+import {
+    AssetProvider,
+    GameProvider,
+    InputProvider,
+    Interlude,
+    VideoPlayer,
+    useGame,
+    useInputAction,
+} from '@doodle-engine/react';
 
 export function App() {
     const [game, setGame] = useState<{
         engine: Engine;
         snapshot: Snapshot;
+        manifest: AssetManifest;
     } | null>(null);
 
     useEffect(() => {
-        fetch('/api/content')
-            .then((res) => res.json())
-            .then((data) => {
-                const engine = new Engine(data.registry, createEmptyState());
-                const snapshot = engine.newGame(data.config);
-                setGame({ engine, snapshot });
-            });
+        Promise.all([
+            fetch('/api/content').then((res) => res.json()),
+            fetch('/api/manifest').then((res) => res.json()),
+        ]).then(([contentData, manifest]) => {
+            const engine = new Engine(contentData.registry);
+            const snapshot = engine.newGame(contentData.config);
+            setGame({ engine, snapshot, manifest });
+        });
     }, []);
 
     if (!game) {
@@ -28,18 +38,64 @@ export function App() {
     }
 
     return (
-        <GameProvider
-            engine={game.engine}
-            initialSnapshot={game.snapshot}
-            devTools={import.meta.env.DEV}
-        >
-            <GameUI />
-        </GameProvider>
+        <InputProvider>
+            <AssetProvider
+                manifest={game.manifest}
+                renderLoading={() => (
+                    <div className="app-bootstrap">
+                        <div className="spinner" />
+                    </div>
+                )}
+            >
+                <GameProvider
+                    engine={game.engine}
+                    initialSnapshot={game.snapshot}
+                    devTools={import.meta.env.DEV}
+                >
+                    <GameUI />
+                </GameProvider>
+            </AssetProvider>
+        </InputProvider>
     );
 }
 
 function GameUI() {
     const { snapshot, actions } = useGame();
+    const [pendingVideo, setPendingVideo] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (snapshot.pendingVideo) {
+            setPendingVideo(snapshot.pendingVideo);
+        }
+    }, [snapshot.pendingVideo]);
+
+    useInputAction(
+        ({ command, choiceIndex }) => {
+            if (!snapshot.dialogue) {
+                return false;
+            }
+
+            if (
+                snapshot.choices.length === 0 &&
+                (command === 'confirm' || command === 'continue')
+            ) {
+                actions.continueDialogue();
+                return true;
+            }
+
+            if (
+                choiceIndex !== undefined &&
+                choiceIndex >= 0 &&
+                choiceIndex < snapshot.choices.length
+            ) {
+                actions.selectChoice(snapshot.choices[choiceIndex].id);
+                return true;
+            }
+
+            return false;
+        },
+        { priority: 0 }
+    );
 
     return (
         <div
@@ -50,6 +106,20 @@ function GameUI() {
                 margin: '0 auto',
             }}
         >
+            {pendingVideo && (
+                <VideoPlayer
+                    src={pendingVideo}
+                    onComplete={() => setPendingVideo(null)}
+                />
+            )}
+
+            {snapshot.pendingInterlude && (
+                <Interlude
+                    interlude={snapshot.pendingInterlude}
+                    onDismiss={actions.dismissInterlude}
+                />
+            )}
+
             <h1>{snapshot.location.name}</h1>
             <p>{snapshot.location.description}</p>
 
@@ -117,27 +187,4 @@ function GameUI() {
 
         </div>
     );
-}
-
-function createEmptyState(): GameState {
-    return {
-        currentLocation: '',
-        currentTime: { day: 1, hour: 0 },
-        flags: {},
-        variables: {},
-        inventory: [],
-        questProgress: {},
-        unlockedJournalEntries: [],
-        playerNotes: [],
-        dialogueState: null,
-        characterState: {},
-        itemLocations: {},
-        mapEnabled: true,
-        notifications: [],
-        pendingSounds: [],
-        musicOverride: null,
-        pendingVideo: null,
-        pendingInterlude: null,
-        currentLocale: 'en',
-    };
 }

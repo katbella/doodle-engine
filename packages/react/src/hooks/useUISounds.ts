@@ -6,6 +6,7 @@
  */
 
 import { useRef, useState, useCallback } from 'react';
+import { useOptionalAssetContext } from '../AssetProvider';
 
 export interface UISoundConfig {
     /** Whether UI sounds are enabled */
@@ -51,10 +52,23 @@ const DEFAULT_SOUNDS = {
     menuClose: 'menu_close.ogg',
 };
 
+export function resolveSoundPath(basePath: string, file: string): string {
+    if (
+        file.startsWith('/') ||
+        file.startsWith('http://') ||
+        file.startsWith('https://') ||
+        file.startsWith('data:') ||
+        file.startsWith('blob:')
+    ) {
+        return file;
+    }
+    return `${basePath.replace(/\/$/, '')}/${file}`;
+}
+
 export function useUISounds(config: UISoundConfig = {}): UISoundControls {
     const {
         enabled: initialEnabled = true,
-        basePath = '/audio/ui',
+        basePath = '/assets/audio/ui',
         volume: initialVolume = 0.5,
         sounds = {},
     } = config;
@@ -62,17 +76,19 @@ export function useUISounds(config: UISoundConfig = {}): UISoundControls {
     const [enabled, setEnabled] = useState(initialEnabled);
     const [volume, setVolume] = useState(initialVolume);
     const soundMap = useRef({ ...DEFAULT_SOUNDS, ...sounds });
+    const assetContext = useOptionalAssetContext();
 
     const play = useCallback(
         (file: string) => {
             if (!enabled || !file) return;
-            const audio = new Audio(`${basePath}/${file}`);
+            const path = resolveSoundPath(basePath, file);
+            const audio = new Audio(assetContext?.getAssetUrl(path) ?? path);
             audio.volume = volume;
             audio.play().catch(() => {
                 // Ignore autoplay restrictions
             });
         },
-        [enabled, volume, basePath]
+        [enabled, volume, basePath, assetContext]
     );
 
     const playSound = useCallback(

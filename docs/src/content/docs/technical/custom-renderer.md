@@ -56,25 +56,28 @@ function MyCustomGame() {
 }
 ```
 
-Wrap it with `GameProvider`. While content is loading, render a placeholder:
+Wrap it with `AssetProvider` and `GameProvider`. While content and the asset manifest are loading, render a placeholder:
 
 ```tsx
-import { GameProvider } from '@doodle-engine/react';
+import { Engine, type AssetManifest, type Snapshot } from '@doodle-engine/core';
+import { AssetProvider, GameProvider } from '@doodle-engine/react';
 
 function App() {
     const [game, setGame] = useState<{
         engine: Engine;
         snapshot: Snapshot;
+        manifest: AssetManifest;
     } | null>(null);
 
     useEffect(() => {
-        fetch('/api/content')
-            .then((r) => r.json())
-            .then(({ registry, config }) => {
-                const engine = new Engine(registry, {} as GameState);
-                const snapshot = engine.newGame(config);
-                setGame({ engine, snapshot });
-            });
+        Promise.all([
+            fetch('/api/content').then((r) => r.json()),
+            fetch('/api/manifest').then((r) => r.json()),
+        ]).then(([{ registry, config }, manifest]) => {
+            const engine = new Engine(registry);
+            const snapshot = engine.newGame(config);
+            setGame({ engine, snapshot, manifest });
+        });
     }, []);
 
     if (!game)
@@ -85,16 +88,69 @@ function App() {
         );
 
     return (
-        <GameProvider
-            engine={game.engine}
-            initialSnapshot={game.snapshot}
-            devTools={import.meta.env.DEV}
-        >
-            <MyCustomGame />
-        </GameProvider>
+        <AssetProvider manifest={game.manifest}>
+            <GameProvider
+                engine={game.engine}
+                initialSnapshot={game.snapshot}
+                devTools={import.meta.env.DEV}
+            >
+                <MyCustomGame />
+            </GameProvider>
+        </AssetProvider>
     );
 }
 ```
+
+If your custom renderer uses keyboard input, wrap it with `InputProvider` and
+register command handlers with `useInputAction`. `GameShell` already does this
+for you.
+
+```tsx
+import {
+    GameProvider,
+    InputProvider,
+    useGame,
+    useInputAction,
+} from '@doodle-engine/react';
+
+function KeyboardDialogue() {
+    const { snapshot, actions } = useGame();
+
+    useInputAction(
+        ({ command, choiceIndex }) => {
+            if (command === 'confirm' && snapshot.choices.length === 0) {
+                actions.continueDialogue();
+                return true;
+            }
+
+            if (
+                choiceIndex !== undefined &&
+                choiceIndex < snapshot.choices.length
+            ) {
+                actions.selectChoice(snapshot.choices[choiceIndex].id);
+                return true;
+            }
+
+            return false;
+        },
+        { priority: 0 }
+    );
+
+    return null;
+}
+
+<InputProvider>
+    <GameProvider engine={engine} initialSnapshot={snapshot}>
+        <MyCustomGame />
+        <KeyboardDialogue />
+    </GameProvider>
+</InputProvider>;
+```
+
+Use higher priorities for overlays. For example, an interlude or video should
+register at priority `300`, a modal panel around `150`, shell pause/settings
+around `50`, and dialogue controls at `0`. A handler returns `true` when it
+consumes the command, preventing lower-priority UI from seeing it.
 
 ## Available Actions
 
@@ -160,6 +216,7 @@ function MyLayout() {
             <NotificationArea notifications={snapshot.notifications} />
 
             <SaveLoadPanel
+                ui={snapshot.ui}
                 onSave={actions.saveGame}
                 onLoad={actions.loadGame}
             />
@@ -186,10 +243,10 @@ snapshot.time; // Current in-game time { day, hour }
 snapshot.map; // Map data or null if disabled
 snapshot.music; // Current music track
 snapshot.ambient; // Current ambient sound
-snapshot.notifications; // Transient notifications (shown once)
-snapshot.pendingSounds; // Sound effects to play (cleared after snapshot)
-snapshot.pendingVideo; // Video to play fullscreen (cleared after snapshot)
-snapshot.pendingInterlude; // Interlude to show (cleared after snapshot)
+snapshot.notifications; // Transient notifications from the last action
+snapshot.pendingSounds; // Sound effects to play from the last action
+snapshot.pendingVideo; // Video to play fullscreen from the last action
+snapshot.pendingInterlude; // Interlude to show from the last action
 snapshot.currentLocale; // Current language code (e.g. "en")
 snapshot.ui; // Resolved UI strings (e.g. snapshot.ui['ui.continue'])
 ```
@@ -222,7 +279,7 @@ The core engine is framework-agnostic. Use it with any UI:
 ```typescript
 import { Engine } from '@doodle-engine/core';
 
-const engine = new Engine(registry, state);
+const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 
 // Render snapshot however you want

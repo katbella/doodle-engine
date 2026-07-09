@@ -345,6 +345,33 @@ describe('Snapshot Builder', () => {
             );
         });
 
+        it('should use the map that contains the current location', () => {
+            const state = createTestState();
+            const registry = {
+                ...createTestRegistry(),
+                maps: {
+                    city_gates: {
+                        id: 'city_gates',
+                        name: 'City Gates',
+                        image: 'city_gates.png',
+                        scale: 1,
+                        locations: [{ id: 'market', x: 250, y: 200 }],
+                    },
+                    market_district: {
+                        id: 'market_district',
+                        name: 'Market District',
+                        image: 'market_district.png',
+                        scale: 1,
+                        locations: [{ id: 'tavern', x: 100, y: 150 }],
+                    },
+                },
+            };
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.map?.id).toBe('market_district');
+            expect(snapshot.map?.name).toBe('Market District');
+        });
+
         it('should not include map when disabled', () => {
             const state = { ...createTestState(), mapEnabled: false };
             const registry = createTestRegistry();

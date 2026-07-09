@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Engine } from '../engine';
+import { Engine, createInitialState } from '../engine';
 import type { ContentRegistry } from '../types/registry';
 import type { GameConfig } from '../types/entities';
 
@@ -261,6 +261,21 @@ describe('Engine', () => {
     });
 
     describe('newGame', () => {
+        it('should allow constructing an engine before newGame initializes state', () => {
+            const newEngine = new Engine(registry);
+            const snapshot = newEngine.newGame(createTestConfig());
+
+            expect(snapshot.location.id).toBe('tavern');
+            expect(snapshot.currentLocale).toBe('en');
+        });
+
+        it('should preserve the bootstrap locale when newGame initializes state', () => {
+            const newEngine = new Engine(registry, createInitialState('es'));
+            const snapshot = newEngine.newGame(createTestConfig());
+
+            expect(snapshot.currentLocale).toBe('es');
+        });
+
         it('should initialize game from config', () => {
             const config = createTestConfig();
             const snapshot = engine.newGame(config);
@@ -283,6 +298,24 @@ describe('Engine', () => {
 
             expect(snapshot.itemsHere).toHaveLength(1);
             expect(snapshot.itemsHere[0].id).toBe('rusty_key');
+        });
+
+        it('should mark startInventory items as being in inventory', () => {
+            const config = {
+                ...createTestConfig(),
+                startInventory: ['rusty_key'],
+            };
+            const snapshot = engine.newGame(config);
+
+            expect(snapshot.inventory.map((item) => item.id)).toContain(
+                'rusty_key'
+            );
+            expect(snapshot.itemsHere.map((item) => item.id)).not.toContain(
+                'rusty_key'
+            );
+
+            const saveData = engine.saveGame();
+            expect(saveData.state.itemLocations.rusty_key).toBe('inventory');
         });
 
         it('should check for triggered dialogues and apply effects', () => {
@@ -395,6 +428,31 @@ describe('Engine', () => {
             expect(snapshot.dialogue?.text).toBe('You try to bluff.');
         });
 
+        it('should not select a choice whose conditions are false', () => {
+            const intro = registry.dialogues.bartender_greeting.nodes.find(
+                (node) => node.id === 'intro'
+            );
+            intro?.choices.push({
+                id: 'hidden_choice',
+                text: 'Hidden',
+                conditions: [{ type: 'hasFlag', flag: 'canSeeHiddenChoice' }],
+                effects: [{ type: 'setFlag', flag: 'pickedHiddenChoice' }],
+                next: 'response',
+            });
+
+            const config = createTestConfig();
+            engine.newGame(config);
+            engine.talkTo('bartender');
+
+            const snapshot = engine.selectChoice('hidden_choice');
+
+            expect(snapshot.dialogue?.text).toBe('Welcome!');
+            expect(snapshot.choices.map((choice) => choice.id)).not.toContain(
+                'hidden_choice'
+            );
+            expect(engine.saveGame().state.flags.pickedHiddenChoice).toBeUndefined();
+        });
+
         it('should complete flow through startDialogue to endDialogue', () => {
             const config = createTestConfig();
             engine.newGame(config);
@@ -404,6 +462,126 @@ describe('Engine', () => {
             const snapshot = engine.selectChoice('thanks'); // endDialogue
 
             expect(snapshot.dialogue).toBeNull();
+        });
+
+        it('should initialize startDialogue from a dialogue start node effect', () => {
+            registry.characters.bartender.dialogue = 'redirect_on_start';
+            registry.dialogues.redirect_on_start = {
+                id: 'redirect_on_start',
+                startNode: 'start',
+                nodes: [
+                    {
+                        id: 'start',
+                        speaker: null,
+                        text: '',
+                        choices: [],
+                        effects: [
+                            {
+                                type: 'startDialogue',
+                                dialogueId: 'bluff_check',
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            const config = createTestConfig();
+            engine.newGame(config);
+            const snapshot = engine.talkTo('bartender');
+
+            expect(snapshot.dialogue?.text).toBe('You try to bluff.');
+        });
+
+        it('should initialize startDialogue from a reached node effect', () => {
+            registry.characters.bartender.dialogue = 'redirect_after_continue';
+            registry.dialogues.redirect_after_continue = {
+                id: 'redirect_after_continue',
+                startNode: 'start',
+                nodes: [
+                    {
+                        id: 'start',
+                        speaker: null,
+                        text: 'First',
+                        choices: [],
+                        next: 'redirect',
+                    },
+                    {
+                        id: 'redirect',
+                        speaker: null,
+                        text: '',
+                        choices: [],
+                        effects: [
+                            {
+                                type: 'startDialogue',
+                                dialogueId: 'bluff_check',
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            const config = createTestConfig();
+            engine.newGame(config);
+            engine.talkTo('bartender');
+            const snapshot = engine.continueDialogue();
+
+            expect(snapshot.dialogue?.text).toBe('You try to bluff.');
+        });
+
+        it('should initialize startDialogue from a conditional branch effect', () => {
+            registry.characters.bartender.dialogue = 'redirect_from_if';
+            registry.dialogues.redirect_from_if = {
+                id: 'redirect_from_if',
+                startNode: 'start',
+                nodes: [
+                    {
+                        id: 'start',
+                        speaker: null,
+                        text: 'First',
+                        choices: [],
+                        conditionalBranches: [
+                            {
+                                condition: {
+                                    type: 'hasFlag',
+                                    flag: 'redirectNow',
+                                },
+                                effects: [
+                                    {
+                                        type: 'startDialogue',
+                                        dialogueId: 'bluff_check',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            const config = {
+                ...createTestConfig(),
+                startFlags: { redirectNow: true },
+            };
+            engine.newGame(config);
+            engine.talkTo('bartender');
+            const snapshot = engine.continueDialogue();
+
+            expect(snapshot.dialogue?.text).toBe('You try to bluff.');
+        });
+    });
+
+    describe('continueDialogue', () => {
+        it('should not advance when visible choices are available', () => {
+            const config = createTestConfig();
+            engine.newGame(config);
+            engine.talkTo('bartender');
+
+            const snapshot = engine.continueDialogue();
+
+            expect(snapshot.dialogue?.text).toBe('Welcome!');
+            expect(snapshot.choices.map((choice) => choice.id)).toEqual([
+                'choice_hello',
+                'choice_bluff',
+            ]);
         });
     });
 
@@ -467,6 +645,80 @@ describe('Engine', () => {
             const snapshot = engine.travelTo('market');
 
             expect(snapshot.location.id).toBe('tavern'); // Still at tavern
+        });
+
+        it('should use the map that contains the current location', () => {
+            registry.maps = {
+                city_gates: {
+                    id: 'city_gates',
+                    name: 'City Gates',
+                    image: 'city_gates.png',
+                    scale: 10,
+                    locations: [{ id: 'camp', x: 0, y: 0 }],
+                },
+                market_district: {
+                    id: 'market_district',
+                    name: 'Market District',
+                    image: 'market_district.png',
+                    scale: 10,
+                    locations: [
+                        { id: 'tavern', x: 0, y: 0 },
+                        { id: 'market', x: 100, y: 0 },
+                    ],
+                },
+            };
+
+            const config = createTestConfig();
+            const snapshot = engine.newGame(config);
+
+            expect(snapshot.map?.id).toBe('market_district');
+        });
+
+        it('should not allow map travel to a location on another map', () => {
+            registry.maps = {
+                city_gates: {
+                    id: 'city_gates',
+                    name: 'City Gates',
+                    image: 'city_gates.png',
+                    scale: 10,
+                    locations: [{ id: 'camp', x: 0, y: 0 }],
+                },
+                market_district: {
+                    id: 'market_district',
+                    name: 'Market District',
+                    image: 'market_district.png',
+                    scale: 10,
+                    locations: [
+                        { id: 'tavern', x: 0, y: 0 },
+                        { id: 'market', x: 100, y: 0 },
+                    ],
+                },
+            };
+
+            const config = createTestConfig();
+            engine.newGame(config);
+            const snapshot = engine.travelTo('camp');
+
+            expect(snapshot.location.id).toBe('tavern');
+        });
+
+        it('should not allow map travel to a destination missing from the current map', () => {
+            registry.maps.city.locations = registry.maps.city.locations.filter(
+                (location) => location.id !== 'camp'
+            );
+            registry.maps.wilds = {
+                id: 'wilds',
+                name: 'Wilds',
+                image: 'wilds.png',
+                scale: 10,
+                locations: [{ id: 'camp', x: 0, y: 0 }],
+            };
+
+            const config = createTestConfig();
+            engine.newGame(config);
+            const snapshot = engine.travelTo('camp');
+
+            expect(snapshot.location.id).toBe('tavern');
         });
     });
 
@@ -606,7 +858,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -672,7 +924,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -731,7 +983,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -800,7 +1052,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -864,7 +1116,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             customEngine.newGame({
                 ...createTestConfig(),
                 startFlags: { metBefore: true },
@@ -936,7 +1188,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             customEngine.newGame(createTestConfig());
 
             customEngine.talkTo('bartender');
@@ -998,7 +1250,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             customEngine.newGame({
                 ...createTestConfig(),
                 startFlags: { metBefore: true },
@@ -1070,7 +1322,7 @@ describe('Engine', () => {
                 },
             };
 
-            const customEngine = new Engine(registry, {} as any);
+            const customEngine = new Engine(registry);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -1119,7 +1371,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(reg, {} as any);
+            const customEngine = new Engine(reg);
             customEngine.newGame(createTestConfig());
 
             const snapshot1 = customEngine.talkTo('bartender');
@@ -1166,7 +1418,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(reg, {} as any);
+            const customEngine = new Engine(reg);
             customEngine.newGame(createTestConfig());
 
             const snapshot1 = customEngine.talkTo('bartender');
@@ -1225,7 +1477,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(reg, {} as any);
+            const customEngine = new Engine(reg);
             customEngine.newGame(createTestConfig());
 
             const snapshot1 = customEngine.talkTo('bartender');
@@ -1283,7 +1535,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(reg, {} as any);
+            const customEngine = new Engine(reg);
             customEngine.newGame(createTestConfig());
 
             const snapshot1 = customEngine.talkTo('bartender');
@@ -1355,7 +1607,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(registryWithEffects, {} as any);
+            const customEngine = new Engine(registryWithEffects);
             const config = createTestConfig();
             customEngine.newGame(config);
 
@@ -1387,10 +1639,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(
-                registryWithStartTrigger,
-                {} as any
-            );
+            const customEngine = new Engine(registryWithStartTrigger);
             const snapshot = customEngine.newGame(createTestConfig());
 
             expect(snapshot.pendingInterlude).not.toBeNull();
@@ -1422,7 +1671,7 @@ describe('Engine', () => {
                     },
                 },
             };
-            const customEngine = new Engine(registryWithEffect, {} as any);
+            const customEngine = new Engine(registryWithEffect);
             const config: GameConfig = {
                 ...createTestConfig(),
                 startLocation: 'tavern',

@@ -103,7 +103,7 @@ All conditions must have their required arguments:
 | `relationshipAbove`, `relationshipBelow`                    | `characterId`, `value`          |
 | `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value`             |
 | `itemAt`                                                    | `itemId`, `locationId`          |
-| `timeIs`                                                    | at least one of `hour` or `day` |
+| `timeIs`                                                    | `startHour`, `endHour`          |
 
 Example error:
 
@@ -132,7 +132,7 @@ All node, choice, and IF branch effects must have their required arguments:
 | `advanceTime`                          | `hours`                        |
 | `goToLocation`                         | `locationId`                   |
 | `startDialogue`                        | `dialogueId`                   |
-| `playMusic`                            | `track`                        |
+| `playMusic`                            | _(none; bare `MUSIC` clears override)_ |
 | `playSound`                            | `sound`                        |
 | `playVideo`                            | `file`                         |
 | `notify`                               | `message`                      |
@@ -161,8 +161,28 @@ Example error:
 ```
 content/characters/merchant.yaml
   Character "merchant" references non-existent dialogue "merchant_chat"
-  Create dialogue "merchant_chat" or fix the reference
+Create dialogue "merchant_chat" or fix the reference
 ```
+
+### Content References
+
+Validation also checks IDs used by game config and built-in gameplay references:
+
+- `game.yaml` `startLocation` must point to an existing location
+- `game.yaml` `startInventory` entries must point to existing items
+- Character starting locations must exist
+- Item starting locations must be `inventory`, an existing location, or an existing character
+- Dialogue and interlude trigger locations must exist
+- Built-in condition references must point to existing locations, items, characters, quests, and quest stages
+- Built-in effect references must point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
+
+Unknown custom condition and effect types are allowed so custom renderer or engine extensions can define their own behavior.
+
+### Maps
+
+Maps must reference existing locations. A game can contain multiple maps, but a
+location can only appear on one map. That keeps the current map unambiguous: the
+engine shows the map that contains the player's current location.
 
 ### Localization Keys
 

@@ -5,7 +5,9 @@
  * Calls onComplete when the video ends or is skipped.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useInputAction, type InputCommand } from '../input/InputRouter';
+import { useAssetUrl } from '../hooks/useAsset';
 
 export interface VideoPlayerProps {
     /** Video file path (resolved by the engine) */
@@ -16,29 +18,39 @@ export interface VideoPlayerProps {
     className?: string;
 }
 
+export function shouldCompleteVideoFromInput(command: InputCommand): boolean {
+    return (
+        command === 'cancel' ||
+        command === 'confirm' ||
+        command === 'continue'
+    );
+}
+
 export function VideoPlayer({
     src,
     onComplete,
     className = '',
 }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const videoSrc = useAssetUrl(src);
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
-                e.preventDefault();
+    useInputAction(
+        ({ command }) => {
+            if (shouldCompleteVideoFromInput(command)) {
                 onComplete();
+                return true;
             }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onComplete]);
+
+            return false;
+        },
+        { priority: 300 }
+    );
 
     return (
         <div className={`video-player-overlay ${className}`}>
             <video
                 ref={videoRef}
-                src={src}
+                src={videoSrc}
                 autoPlay
                 onEnded={onComplete}
                 className="video-player-video"
