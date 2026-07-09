@@ -92,7 +92,7 @@ npm run dev
 6. Watches `content/**/*` for changes using chokidar
 7. **Validates content on every file change** and prints errors to the terminal
 8. Triggers full page reload when content files change
-9. **Exposes `window.doodle` dev tools API** in the browser console (dev mode only)
+9. Serves the app in development mode. Scaffolded apps pass `devTools={import.meta.env.DEV}`, which exposes `window.doodle` while the game is running.
 
 ### Content loading
 
@@ -189,7 +189,7 @@ doodle.inspectState(); // Return full game state object
 doodle.inspectRegistry(); // Return content registry object
 ```
 
-**Dev tools are automatically removed from production builds** via Vite's tree-shaking.
+Scaffolded apps pass `devTools={import.meta.env.DEV}`, so `window.doodle` is not enabled in production builds.
 
 ---
 
@@ -208,7 +208,7 @@ npm run build
 3. Runs a Vite production build
 4. Outputs to `dist/` directory
 5. Copies project assets to `dist/assets/`
-6. Strips dev tools from production bundle
+6. Builds with Vite production settings. Scaffolded apps do not enable `window.doodle` in production.
 7. **Writes `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
 8. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
 9. Writes manifest to `dist/api/manifest` so `vite preview` can serve it

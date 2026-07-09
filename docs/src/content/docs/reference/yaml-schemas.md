@@ -49,7 +49,7 @@ stats: {}
 | `portrait`  | `string`                  | Portrait image filename                      |
 | `location`  | `string`                  | Starting location ID           |
 | `dialogue`  | `string`                  | Dialogue ID for conversations  |
-| `stats`     | `Record<string, unknown>` | Extensible stats object        |
+| `stats`     | `Record<string, unknown>` | Stats for game-specific data   |
 
 ## Item
 
@@ -73,7 +73,7 @@ stats: {}
 | `icon`        | `string`                  | Small icon filename                                            |
 | `image`       | `string`                  | Large image filename                                           |
 | `location`    | `string`                  | Starting location: location ID, `"inventory"`, or character ID |
-| `stats`       | `Record<string, unknown>` | Extensible stats object                                        |
+| `stats`       | `Record<string, unknown>` | Stats for game-specific data                                   |
 
 ## Map
 
@@ -98,7 +98,7 @@ locations:
 | `id`        | `string`        | Unique identifier                  |
 | `name`      | `string`        | Display name (supports `@key`)     |
 | `image`     | `string`        | Map background image filename                      |
-| `scale`     | `number`        | Distance-to-travel-time multiplier |
+| `scale`     | `number`        | Pixels per hour of travel. Higher values mean faster travel. |
 | `locations` | `MapLocation[]` | Location markers                   |
 
 ### MapLocation

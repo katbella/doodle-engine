@@ -24,7 +24,9 @@ assets/
   video/           # Video files used by VIDEO effects
 ```
 
-## Supported Formats
+## Recommended Formats
+
+The asset scanner recognizes common browser image, audio, and video extensions. These are good defaults for browser games.
 
 ### Images
 
@@ -179,11 +181,11 @@ When you run `npm run build`, every referenced local asset under `/assets/` must
 
 ## Loading Behavior
 
-Doodle Engine prepares assets before the renderer depends on them. Portraits, banners, music, and other media are requested ahead of scene transitions so they are available when UI renders or playback begins.
+GameShell and AssetProvider prepare assets before gameplay renders. Portraits, banners, music, video, and other referenced media are loaded during startup so they are available when UI renders or playback begins.
 
 Assets are divided into two loading tiers:
 
-- **Shell assets** (logo, title screen, UI sounds) load before any screen renders
-- **Game assets** (portraits, banners, music, items) load during the loading screen and are tracked by phase
+- **Shell assets** (splash, loading, title, UI sounds) load first
+- **Game assets** (portraits, banners, music, video, items) load during the loading screen and are tracked by phase
 
 See [Asset Loading](/technical/asset-loading/) for details on loading phases and configuration.

@@ -1,9 +1,9 @@
 ---
-title: Extending the Engine
-description: How to customize and extend Doodle Engine beyond the defaults.
+title: Customizing Doodle Engine
+description: How to customize Doodle Engine beyond the defaults.
 ---
 
-Doodle Engine is designed to be extended. The core is framework-agnostic, the React renderer is modular, and every layer can be swapped or customized.
+Doodle Engine is built around a stable core that can be used with different renderers, shells, save systems, and UI components. Most game behavior can be built with content: locations, dialogue, conditions, effects, flags, variables, items, quests, maps, audio, video, and interludes.
 
 ## Building a Custom Renderer
 
@@ -17,7 +17,7 @@ import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 
-// The snapshot contains everything the renderer needs:
+// The snapshot contains the current game screen data:
 // snapshot.location, snapshot.dialogue, snapshot.choices,
 // snapshot.charactersHere, snapshot.inventory, snapshot.quests, etc.
 
@@ -27,7 +27,7 @@ const newSnapshot2 = engine.selectChoice('choice_id');
 const newSnapshot3 = engine.travelTo('market');
 ```
 
-The engine follows a simple pattern: actions go in, snapshots come out. Your renderer reads the snapshot and displays the UI.
+The engine follows a simple pattern: actions go in, snapshots come out. Your renderer reads the snapshot, displays the UI, and calls engine methods when the player does something.
 
 ### With Vue
 
@@ -126,7 +126,7 @@ function MyCustomUI() {
     );
 }
 
-// Wrap in InputProvider if your custom UI uses keyboard/controller commands.
+// Wrap in InputProvider if your custom UI uses keyboard commands.
 <InputProvider>
     <GameProvider engine={engine} initialSnapshot={snapshot}>
         <MyCustomUI />
@@ -175,42 +175,41 @@ function MyGameApp() {
 
 See [Game Shell](/guides/game-shell/) for how the built-in `GameShell` works, as a reference for building your own.
 
-## Adding Custom Conditions
+## Building Rules With Conditions
 
-The condition evaluator can be extended by wrapping the engine's condition checking. Create a custom engine wrapper that handles your conditions before falling back to the built-in ones:
+Doodle Engine supports the condition types listed in the [Conditions reference](/reference/conditions/). These conditions are evaluated inside the engine for choices, `IF` blocks, triggered dialogues, and triggered interludes.
 
-```typescript
-import { Engine } from '@doodle-engine/core';
-
-// The engine evaluates conditions defined in the DSL.
-// The built-in conditions cover: hasFlag, notFlag, hasItem,
-// variableEquals, variableGreaterThan, variableLessThan,
-// questAtStage, characterInParty, characterRelationship, etc.
-
-// For custom game logic beyond what conditions support,
-// use variables and flags creatively:
-// SET variable playerClass "mage"
-// REQUIRE variableEquals playerClass "mage"
-```
-
-## Adding Custom Effects
-
-Similarly, effects can be combined creatively using the built-in types:
+For game-specific rules, use the existing conditions creatively. Store what matters in flags, variables, inventory, quests, character state, time, or rolls, then check that state later.
 
 ```
-# Custom "unlock ability" pattern using flags
+SET variable playerClass "mage"
+
+CHOICE "Ask about the old tower."
+  REQUIRE variableEquals playerClass "mage"
+  GOTO mage_tower_lore
+END
+```
+
+In this example, the game records the player's class in a variable. Later, the choice appears only when that variable is `mage`.
+
+## Combining Built-in Effects
+
+Effects are how content records that something happened. Combine them to make larger game actions, then use conditions to check those results later:
+
+```
+# Unlock an ability using flags and variables
 SET flag ability_fireball
 ADD variable mana_cost_fireball 10
 NOTIFY @notification.learned_fireball
 
-# Custom "shop purchase" pattern using variables and items
+# Shop purchase using variables and items
 REQUIRE variableGreaterThan gold 49
 ADD variable gold -50
 ADD item enchanted_sword
 NOTIFY @notification.bought_sword
 ```
 
-The 25 built-in effect types (flags, variables, items, quests, journal, characters, audio, video, notifications, etc.) can express most game mechanics through composition.
+Doodle Engine's effects cover flags, variables, items, quests, journal entries, characters, audio, video, interludes, notifications, dice rolls, map state, and dialogue flow. Combine effects with conditions to model game-specific behavior.
 
 ## Custom Save/Load Backends
 

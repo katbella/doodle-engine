@@ -48,7 +48,7 @@ The architecture is meant to stay understandable as projects grow.
 
 ---
 
-## Extensibility
+## Customization
 
 The core engine does not assume a renderer or UI framework. You can build your own renderer or replace parts of the provided one.
 

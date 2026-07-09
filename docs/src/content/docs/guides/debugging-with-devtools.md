@@ -3,24 +3,28 @@ title: Debugging with Dev Tools
 description: Use window.doodle API to debug your game during development.
 ---
 
-The Doodle Engine provides a framework-agnostic browser console API (`window.doodle`) for debugging and testing your game during development. Dev tools are part of `@doodle-engine/core` and work with any renderer (React, Vue, Svelte, vanilla JS).
+The Doodle Engine provides a browser console API (`window.doodle`) for debugging and testing your game during development. Dev tools are part of `@doodle-engine/core` and can work with any renderer when you enable them.
 
-Dev tools are automatically stripped from production builds via tree-shaking.
+The scaffolded React apps enable dev tools with `devTools={import.meta.env.DEV}`. Use the same guard in custom code so dev tools are not enabled in production.
 
 ## Enabling Dev Tools
 
-Dev tools are part of `@doodle-engine/core` and work with any framework. Import and enable them in development mode:
+Dev tools are part of `@doodle-engine/core`. Enable them only in development mode:
 
 ### React
 
-The React renderer automatically enables dev tools in development mode:
+`GameProvider` and `GameShell` enable dev tools when their `devTools` prop is true. The scaffold passes `import.meta.env.DEV`:
 
 ```tsx
-// Already integrated in GameProvider - no extra setup needed!
-import { GameProvider } from '@doodle-engine/react';
+<GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    devTools={import.meta.env.DEV}
+/>;
 ```
 
-If you're building a custom React renderer:
+If you are building a React renderer without `GameProvider`, call `enableDevTools` yourself:
 
 ```tsx
 import { useEffect } from 'react';
@@ -301,19 +305,18 @@ console.log(state.inventory);
 ## Limitations
 
 - Dev tools access **internal engine state** using private fields. This is intentional for debugging but means breaking changes to the engine internals won't be considered breaking changes to the dev tools API.
-- Dev tools only work in **development mode** (`npm run dev`). They are not available in production builds.
+- Dev tools should only be enabled in **development mode** (`npm run dev`). Use `import.meta.env.DEV` or another environment guard.
 - State changes made via dev tools **bypass all game logic**. For example, `doodle.addItem()` doesn't trigger effects or run conditions. It directly mutates the state.
 
 ## Production Safety
 
-Dev tools are completely removed from production builds:
+Dev tools are not enabled in production when you guard them with `import.meta.env.DEV`:
 
 1. `import.meta.env.DEV` is replaced with `false` by Vite during production builds
-2. The `if (import.meta.env.DEV)` block is eliminated by the minifier
-3. The `enableDevTools` function and entire devtools module are tree-shaken from the bundle
-4. `window.doodle` is undefined in production
+2. The guarded code does not run in production
+3. `window.doodle` is not created
 
-This works the same way across all frameworks (React, Vue, Svelte, vanilla JS). Your players will never see or access the dev tools.
+The scaffolded React apps use this guard. Use the same pattern in custom renderers.
 
 ## Tips
 

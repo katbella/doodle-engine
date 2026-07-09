@@ -3,7 +3,7 @@ title: Dice & Randomness
 description: Add skill checks, random outcomes, and variable interpolation to your dialogues.
 ---
 
-Doodle Engine supports two randomness primitives: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive).
+Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive).
 
 ## ROLL effect
 
@@ -22,16 +22,15 @@ The `{bluffRoll}` placeholder is replaced with the variable's value when the sna
 
 ## roll condition
 
-`roll <min> <max> <threshold>`: rolls a random integer and returns true if the result is >= threshold. No value is stored. Use this for hidden checks where the player doesn't need to see the outcome.
+`roll <min> <max> <threshold>`: rolls a random integer and returns true if the result is >= threshold. No value is stored. Use this for hidden checks in `IF` blocks or triggered content where the player does not need to see the roll.
 
 ```
-CHOICE @bluff
-  REQUIRE roll 1 20 15
-  GOTO success
+IF roll 1 20 15
+  GOTO lucky_find
 END
 ```
 
-If the roll fails, the choice is hidden. Multiple choices can each have their own `roll` require for competing outcomes.
+For player-facing skill checks, prefer `ROLL` into a variable, then branch on that variable. That gives the player one clear result and avoids re-rolling during choice display and selection.
 
 ## Skill check pattern
 
@@ -83,7 +82,7 @@ bluff.failure: 'Marcus raises an eyebrow. "Nice try."'
 
 ## Hidden check pattern
 
-For a check the player doesn't see (e.g., a random encounter, a lucky find), use the `roll` condition directly on a `REQUIRE`:
+For a check the player doesn't see, such as a random encounter or lucky find, use the `roll` condition in an `IF` block:
 
 ```
 NODE explore

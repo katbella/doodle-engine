@@ -1,5 +1,5 @@
 /**
- * Framework-agnostic asset loading primitives.
+ * Framework-agnostic asset loading helpers.
  *
  * The default implementation uses fetch + Cache API for browsers.
  * Custom implementations can be provided for other environments

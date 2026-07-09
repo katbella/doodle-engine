@@ -3,7 +3,7 @@ title: Architecture
 description: Understanding the state → action → snapshot data flow.
 ---
 
-Doodle Engine follows a one-way data flow pattern: **player actions go in, a new state is produced, and a snapshot comes out**.
+Doodle Engine follows a one-way data flow pattern: **player actions go in, engine state updates, and a snapshot comes out**.
 
 ## Overview
 
@@ -15,7 +15,7 @@ Player Action → Engine → New State → Snapshot → Renderer
 
 1. The **player** performs an action (talk to character, select choice, travel)
 2. The **engine** processes the action, evaluating conditions and applying effects
-3. A **new state** is produced (the previous state is not modified)
+3. The engine updates its state
 4. A **snapshot** is built: a renderer-ready view of the current state
 5. The **renderer** displays the snapshot and waits for the next action
 

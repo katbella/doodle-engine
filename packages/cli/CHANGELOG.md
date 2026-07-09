@@ -1,5 +1,14 @@
 # @doodle-engine/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- Update docs to reflect latest engine upgrades.
+- Updated dependencies
+    - @doodle-engine/core@0.1.1
+    - @doodle-engine/react@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

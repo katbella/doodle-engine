@@ -100,7 +100,7 @@ Volumes follow the player's current settings. All audio stops when the player sk
 
 | Action               | Effect                             |
 | -------------------- | ---------------------------------- |
-| **Click anywhere**   | Skip (dismiss)                     |
+| **Click background** | Skip (dismiss)                     |
 | **Skip >> button**   | Dismiss                            |
 | **Space or Enter**   | Dismiss                            |
 | **Escape**           | Dismiss                            |

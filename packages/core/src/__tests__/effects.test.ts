@@ -1,6 +1,6 @@
 /**
  * Tests for effect processors.
- * Each effect type is tested in isolation to verify correct state mutations.
+ * Each effect type is tested in isolation to verify correct state changes.
  */
 
 import { describe, it, expect } from 'vitest';

@@ -1,7 +1,7 @@
 /**
  * Condition type definitions for the Doodle Engine.
  * Conditions are tests against game state that return true or false.
- * All conditions use a discriminated union pattern for extensibility.
+ * Conditions use a type field so the evaluator can dispatch by condition kind.
  */
 
 /**
@@ -180,7 +180,7 @@ export interface RollCondition {
 
 /**
  * Union of all condition types.
- * This discriminated union allows authors to extend with custom conditions.
+ * Union of all supported condition types.
  */
 export type Condition =
     | HasFlagCondition

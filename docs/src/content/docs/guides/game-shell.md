@@ -38,7 +38,7 @@ shell:
     splash:
         logo: /assets/images/studio-logo.png
         background: /assets/images/splash-bg.jpg
-        sound: /assets/audio/splash.ogg
+        sound: /assets/audio/sfx/splash.ogg
         duration: 2000
 ```
 
@@ -60,7 +60,7 @@ Configure title screen music in `content/game.yaml`:
 shell:
     title:
         logo: /assets/images/logo.png
-        music: main_theme.ogg
+        music: /assets/audio/music/main_theme.ogg
 ```
 
 The music plays on loop while the title screen is visible and stops when the player starts or continues a game.

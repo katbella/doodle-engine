@@ -40,7 +40,7 @@ export interface Character {
     location: string;
     /** Dialogue ID when player talks to this character */
     dialogue: string;
-    /** Extensible stats object - engine stores but doesn't interpret */
+    /** Stats for game-specific data - engine stores but doesn't interpret */
     stats: Record<string, unknown>;
 }
 
@@ -60,7 +60,7 @@ export interface Item {
     image: string;
     /** Starting location (location ID, "inventory", or character ID) */
     location: string;
-    /** Extensible stats object - engine stores but doesn't interpret */
+    /** Stats for game-specific data - engine stores but doesn't interpret */
     stats: Record<string, unknown>;
 }
 

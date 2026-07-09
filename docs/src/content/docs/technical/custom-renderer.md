@@ -210,7 +210,12 @@ function MyLayout() {
             <Journal quests={snapshot.quests} entries={snapshot.journal} />
 
             {snapshot.map && (
-                <MapView map={snapshot.map} onTravelTo={actions.travelTo} />
+                <MapView
+                    map={snapshot.map}
+                    currentLocation={snapshot.location.id}
+                    currentTime={snapshot.time}
+                    onTravelTo={actions.travelTo}
+                />
             )}
 
             <NotificationArea notifications={snapshot.notifications} />
@@ -227,7 +232,7 @@ function MyLayout() {
 
 ## Snapshot Structure
 
-The snapshot provides everything your renderer needs:
+The snapshot provides the current game screen data:
 
 ```typescript
 snapshot.location; // Current location (name, description, banner)

@@ -23,7 +23,7 @@ export interface CharacterState {
     inParty: boolean;
     /** Disposition value toward the player */
     relationship: number;
-    /** Extensible stats object - engine stores but doesn't interpret */
+    /** Stats for game-specific data - engine stores but doesn't interpret */
     stats: Record<string, unknown>;
 }
 

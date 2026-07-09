@@ -69,8 +69,6 @@ Each action calls the corresponding engine method and updates the snapshot:
 
 ## useAudioManager
 
-Manages audio playback automatically based on snapshot changes.
-
 Manages audio playback automatically based on snapshot changes. Volumes are reactive parameters: pass current values each render and the hook applies them to the audio elements.
 
 The caller owns volume state (typically via `AudioSettingsContext`). This hook does not store volumes internally.
@@ -197,6 +195,7 @@ function MyUI() {
 ```typescript
 interface UISoundControls {
     playClick: () => void;
+    playHover: () => void;
     playMenuOpen: () => void;
     playMenuClose: () => void;
     playSound: (key: string) => void;
@@ -230,7 +229,7 @@ Pass `uiSounds={false}` to disable UI sounds entirely.
 
 ## useInputAction
 
-Register a renderer input command handler. Use this for keyboard/controller
+Register a renderer input command handler. Use this for keyboard
 commands in custom renderer surfaces, panels, and overlays.
 
 ```tsx
@@ -286,8 +285,8 @@ Keyboard input is translated into these commands:
 | `previous`   | ArrowUp, ArrowLeft                 |
 
 The command type also includes `continue`, `openInventory`, `openJournal`,
-`openMap`, and `openMenu` for custom renderers and future controller/remapping
-adapters.
+`openMap`, and `openMenu` so custom renderers can dispatch higher-level UI
+commands when they need them.
 
 ### Priority
 
@@ -311,21 +310,21 @@ trigger game commands.
 
 Access the current router directly. Most custom renderers should prefer
 `useInputAction`, but `useInputRouter` is useful when integrating another input
-source, such as a future gamepad adapter.
+source.
 
 ```tsx
 import { useInputRouter } from '@doodle-engine/react';
 
-function GamepadBridge() {
+function CustomInputBridge() {
     const router = useInputRouter();
 
     useEffect(() => {
         if (!router) return;
 
-        // When your gamepad layer detects the confirm button:
+        // When your custom input layer detects the confirm action:
         router.dispatchCommand({
             command: 'confirm',
-            source: 'controller',
+            source: 'programmatic',
         });
     }, [router]);
 

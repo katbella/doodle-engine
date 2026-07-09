@@ -49,7 +49,7 @@ export default defineConfig({
                         { label: 'Hosting & Deployment', slug: 'guides/hosting-and-deployment' },
                         { label: 'Content Validation', slug: 'guides/content-validation' },
                         { label: 'Debugging with DevTools', slug: 'guides/debugging-with-devtools' },
-                        { label: 'Extending the Engine', slug: 'guides/extending-the-engine' },
+                        { label: 'Customizing Doodle Engine', slug: 'guides/customizing-doodle-engine' },
                     ],
                 },
                 {

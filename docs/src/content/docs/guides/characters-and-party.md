@@ -25,7 +25,7 @@ stats: {}
 | `portrait`  | Portrait image                                                   |
 | `location`  | Starting location ID                                             |
 | `dialogue`  | Dialogue ID when the player talks to them                        |
-| `stats`     | Extensible stats object (e.g., `{ level: 5, class: "warrior" }`) |
+| `stats`     | Stats for game-specific data (e.g., `{ level: 5, class: "warrior" }`) |
 
 ## Characters at Location vs Party
 
@@ -117,7 +117,7 @@ END
 
 ## Character Stats
 
-Characters have an extensible `stats` object for custom data:
+Characters have a `stats` object for game-specific data:
 
 ```
 # Set a stat

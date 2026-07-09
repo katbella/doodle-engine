@@ -292,11 +292,11 @@ describe('validateContent', () => {
         );
     });
 
-    it('allows unknown custom effects', () => {
+    it('does not validate required fields for unknown effect types', () => {
         const registry = makeRegistry({
             dialogues: {
                 test_dialogue: makeDialogue([
-                    { type: 'customEffect', targetId: 'not_validated' } as any,
+                    { type: 'unknownEffect', targetId: 'not_validated' } as any,
                 ]),
             },
         });

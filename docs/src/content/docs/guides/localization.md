@@ -75,7 +75,7 @@ const { actions } = useGame();
 actions.setLocale('es');
 ```
 
-Or from a dialogue effect. This isn't built into the DSL, but can be done programmatically via the engine.
+There is no DSL effect for changing language. Do it from your renderer or shell by calling `actions.setLocale()` or `engine.setLocale()`.
 
 ## Naming Convention
 

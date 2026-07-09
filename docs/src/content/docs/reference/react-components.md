@@ -380,9 +380,9 @@ import { Interlude } from '@doodle-engine/react';
 | Prop        | Type                | Description                                      |
 | ----------- | ------------------- | ------------------------------------------------ |
 | `interlude` | `SnapshotInterlude` | Interlude data from the snapshot                 |
-| `onDismiss` | `() => void`        | Called when the player skips or finishes reading |
+| `onDismiss` | `() => void`        | Called when the player dismisses the interlude   |
 
-The player can dismiss via click, Skip button, Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll. Keyboard commands are registered at high priority so the dialogue UI underneath does not also receive the same input.
+The player can dismiss with the Skip button, by clicking the outer overlay, or with Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll. Keyboard commands are registered at high priority so the dialogue UI underneath does not also receive the same input.
 
 ## VideoPlayer
 

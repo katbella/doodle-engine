@@ -1,7 +1,7 @@
 /**
  * Effect type definitions for the Doodle Engine.
- * Effects are mutations to game state that run in order.
- * All effects use a discriminated union pattern for extensibility.
+ * Effects are changes to game state that run in order.
+ * Effects use a type field so the processor can dispatch by effect kind.
  */
 
 /**
@@ -300,7 +300,7 @@ export interface RollEffect {
 
 /**
  * Union of all effect types.
- * This discriminated union allows authors to extend with custom effects.
+ * Union of all supported effect types.
  */
 export type Effect =
     | SetFlagEffect

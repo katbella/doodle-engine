@@ -3,7 +3,7 @@ title: Audio
 description: How to add music, ambient sounds, voice lines, and sound effects.
 ---
 
-Doodle Engine supports four audio channels: background music, ambient sounds, voice lines, and one-shot sound effects.
+Doodle Engine snapshots include music, ambient sound, voice lines, and one-shot sound effects. GameShell plays them for you. Custom renderers can use `useAudioManager`.
 
 ## Setting Up Audio
 
@@ -21,7 +21,7 @@ music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
 ```
 
-Music automatically crossfades when the player travels to a new location.
+With GameShell or `useAudioManager`, music crossfades when `snapshot.music` changes.
 
 ### Voice Lines
 
@@ -103,6 +103,7 @@ interface AudioManagerControls {
 The hook reacts to snapshot changes:
 
 - **Music**: When `snapshot.music` changes, crossfades to the new track
+- **Ambient**: When `snapshot.ambient` changes, loops the new ambient track
 - **Voice**: When `snapshot.dialogue?.voice` changes, plays the voice file
 - **Sounds**: Plays all entries in `snapshot.pendingSounds` (cleared after each snapshot)
 

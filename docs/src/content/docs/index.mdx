@@ -80,7 +80,7 @@ Its scripting model draws inspiration from Infinity Engine titles such as Baldur
         cutscenes.
     </Card>
     <Card title="Asset Preloading" icon="download">
-        Images and audio load before render to prevent issues like character portrait pop-ins and audio delays.
+        GameShell and AssetProvider load referenced media before gameplay starts.
     </Card>
     <Card title="Dev Tools" icon="setting">
         Console tools for inspecting state, setting flags, teleporting, and
@@ -96,10 +96,10 @@ Its scripting model draws inspiration from Infinity Engine titles such as Baldur
 
 ---
 
-## Extensibility
+## Customization
 
-The engine core does not assume a UI or save backend. Renderers, shells, and persistence layers can be replaced or extended.
+The engine core does not assume a UI or save backend. Renderers, shells, and persistence layers can be replaced or customized.
 
 Combine effects and conditions in dialogue to implement mechanics such as reputation systems, skill checks, crafting, or shops without modifying the engine core.
 
-[Read the extending guide →](/guides/extending-the-engine/)
+[Read the customization guide →](/guides/customizing-doodle-engine/)

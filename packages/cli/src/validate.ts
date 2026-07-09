@@ -691,7 +691,7 @@ function validateCondition(
     // Check required fields for this condition type
     const requiredFields = CONDITION_FIELDS[condition.type];
     if (!requiredFields) {
-        // Unknown condition type - skip validation (allows extensibility)
+        // Unknown condition type - no required fields to check here
         return errors;
     }
 
@@ -732,7 +732,7 @@ function validateEffect(
     // Check required fields for this effect type
     const requiredFields = EFFECT_FIELDS[effect.type];
     if (!requiredFields) {
-        // Unknown effect type - skip validation (allows extensibility)
+        // Unknown effect type - no required fields to check here
         return errors;
     }
 

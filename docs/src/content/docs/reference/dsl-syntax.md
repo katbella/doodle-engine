@@ -73,6 +73,8 @@ Or to a location (ends dialogue and moves player):
 GOTO location market
 ```
 
+`GOTO location` is scripted movement. It does not calculate map travel time or check location triggers. Use map travel through `travelTo()` for normal player travel.
+
 ### TRIGGER
 
 Declares that this dialogue auto-starts when the player enters a location:

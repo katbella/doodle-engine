@@ -99,4 +99,4 @@ Entities reference each other by ID:
 - GameConfig `startLocation` → Location ID
 - GameConfig `startInventory` → Item IDs
 
-These references are resolved at runtime when the engine looks them up. Missing references are handled gracefully (the action becomes a no-op).
+These references are resolved when the engine looks them up. Runtime code tries to avoid crashing if something is missing. For example, some actions become no-ops and missing locations render a fallback snapshot. In normal projects, `doodle validate` and `doodle build` should catch broken references before release.

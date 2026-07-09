@@ -192,7 +192,9 @@ REQUIRE itemAt sword armory
 Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. The roll is not stored anywhere. Use the `ROLL` effect if you need the value.
 
 ```
-REQUIRE roll 1 20 15
+IF roll 1 20 15
+  GOTO lucky_find
+END
 ```
 
 | Field       | Type     | Description                    |
@@ -207,7 +209,7 @@ REQUIRE roll 1 20 15
 - Branch on the result in multiple places
 - Reference the roll elsewhere in the scene
 
-For a one-shot hidden check with no displayed result, the `roll` condition is simpler. See the [Dice & Randomness guide](/guides/dice-and-randomness/).
+For a hidden check with no displayed result, the `roll` condition works well in `IF` blocks or triggered content. For visible player choices, use `ROLL` first and check the stored variable. See the [Dice & Randomness guide](/guides/dice-and-randomness/).
 
 ## Using Conditions in Dialogue
 

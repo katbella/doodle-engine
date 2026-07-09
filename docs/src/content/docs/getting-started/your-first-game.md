@@ -101,7 +101,7 @@ See [Creating Quests](/guides/creating-quests/) for journal entries and multi-st
 
 ## The App Component
 
-Open `src/App.tsx`. It fetches the content registry and asset manifest from the dev server, then passes them to `GameShell`. `GameShell` handles everything: splash screen, title screen, loading, pause menu, settings, and the game itself.
+Open `src/App.tsx`. It fetches the content registry and asset manifest from the dev server, then passes them to `GameShell`. `GameShell` handles the default app flow: splash screen, title screen, loading, pause menu, settings, and the game itself.
 
 See [Game Shell](/guides/game-shell/) for configuration options, or [Custom Renderer](/technical/custom-renderer/) if you want to build your own UI instead.
 

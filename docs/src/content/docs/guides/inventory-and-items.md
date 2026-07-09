@@ -27,7 +27,7 @@ stats: {}
 | `icon`        | Small image for inventory grid                                     |
 | `image`       | Large image for detail/inspection view                             |
 | `location`    | Starting location: a location ID, `"inventory"`, or a character ID |
-| `stats`       | Extensible stats object                                            |
+| `stats`       | Stats for game-specific data                                       |
 
 ## Adding Items via Dialogue
 
@@ -84,7 +84,7 @@ END
 
 ## Inventory Display
 
-The default `GameRenderer` shows inventory in the sidebar with a grid of item icons. Players can click an item to inspect it, and a modal shows the full image, name, and description.
+The default `GameRenderer` opens inventory from the bottom bar. It shows a grid of item icons. Players can click an item to inspect it, and a modal shows the full image, name, and description.
 
 In a custom renderer, use the `Inventory` component:
 

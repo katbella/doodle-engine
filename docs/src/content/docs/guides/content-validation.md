@@ -3,7 +3,7 @@ title: Content Validation
 description: Validate your game content and fix errors before deployment.
 ---
 
-Doodle Engine validates your content automatically. It catches errors in your YAML files and dialogue DSL before you deploy. Validation runs during development and is required before production builds.
+The CLI validates your YAML files and dialogue DSL during builds, when you run validation manually, and whenever content files change during development.
 
 ## When Validation Runs
 
@@ -104,6 +104,7 @@ All conditions must have their required arguments:
 | `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value`             |
 | `itemAt`                                                    | `itemId`, `locationId`          |
 | `timeIs`                                                    | `startHour`, `endHour`          |
+| `roll`                                                      | `min`, `max`, `threshold`       |
 
 Example error:
 
@@ -135,8 +136,10 @@ All node, choice, and IF branch effects must have their required arguments:
 | `playMusic`                            | _(none; bare `MUSIC` clears override)_ |
 | `playSound`                            | `sound`                        |
 | `playVideo`                            | `file`                         |
+| `showInterlude`                        | `interludeId`                  |
 | `notify`                               | `message`                      |
 | `endDialogue`                          | _(none)_                       |
+| `roll`                                 | `variable`, `min`, `max`       |
 
 Example error:
 
@@ -176,7 +179,7 @@ Validation also checks IDs used by game config and built-in gameplay references:
 - Built-in condition references must point to existing locations, items, characters, quests, and quest stages
 - Built-in effect references must point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
 
-Unknown custom condition and effect types are allowed so custom renderer or engine extensions can define their own behavior.
+For `.dlg` files, validation follows the condition and effect names documented in the references.
 
 ### Maps
 

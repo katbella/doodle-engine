@@ -3,7 +3,7 @@ title: Asset Loading
 description: How the asset loading system works, and how to configure shell assets.
 ---
 
-Doodle Engine uses an asset loading system to prepare media before it is needed by the renderer. Portraits, banners, music, and other assets are requested ahead of scene transitions so they are available when the UI renders or playback begins.
+Doodle Engine uses an asset loading system to prepare media before gameplay renders. GameShell and AssetProvider load shell assets first, then game assets from the manifest. Custom renderers can also prefetch specific assets later.
 
 This page is primarily useful for developers building custom renderers or modifying loading behavior. Content authors usually do not need to interact with the asset loader directly.
 
@@ -13,8 +13,8 @@ Assets are organized into tiers based on when they need to be available during s
 
 | Tier               | When loaded               | What it contains                                                                                     |
 | ------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Tier 0**         | Bundled in JS             | CSS spinner, inline SVG                                                                              |
-| **Tier 1 (shell)** | Before any screen renders | Splash/title/loading backgrounds, logos, UI sounds                                                   |
+| **Tier 0**         | Bundled in JS             | CSS loading UI                                                                                       |
+| **Tier 1 (shell)** | During the first loading phase | Splash, loading, title, and UI sound assets                                                     |
 | **Tier 2 (game)**  | During the loading screen | All gameplay assets referenced by the manifest, including portraits, banners, music, and other media |
 
 ### The Loading Flow
@@ -26,7 +26,7 @@ Assets are organized into tiers based on when they need to be available during s
 4. PLAYING  → game (game assets ready)
 ```
 
-The loading screen uses CSS-only defaults (gradient background, animated spinner) so it renders immediately with zero external assets. It upgrades its appearance once shell assets arrive.
+The loading screen uses CSS-only defaults, so it can render immediately with zero external assets. If you configure a loading background, that file is part of the shell asset tier.
 
 ## Configuring Shell Assets
 

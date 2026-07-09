@@ -7,7 +7,7 @@ description: When to use Doodle Engine and what problems it solves.
 
 Doodle Engine is built for story-driven games where dialogue and world state matter more than movement or combat.
 
-Game authors write content in YAML and a simple dialogue DSL. Developers extend the engine and build renderers in TypeScript. Writers work in text files. Programmers work in code. Both can move forward without blocking each other.
+Game authors write content in YAML and a simple dialogue DSL. Developers customize the app, renderer, shell, and styling in TypeScript. Writers work in text files. Programmers work in code. Both can move forward without blocking each other.
 
 The engine supports visual presentation elements such as image banners, video triggered by dialogue effects, and narrative interludes with scrolling text. This allows games to mix prose with structured scenes and transitions.
 

@@ -24,8 +24,8 @@ ambient: ''
 | `name`        | Display name (use `@key` for localization)                        |
 | `description` | Text shown when the player is at this location                    |
 | `banner`      | Image displayed at the top of the location view                   |
-| `music`       | Background music track (auto-plays, crossfades between locations) |
-| `ambient`     | Ambient sound loop (plays alongside music)                        |
+| `music`       | Background music track used by GameShell or `useAudioManager`     |
+| `ambient`     | Ambient sound loop used by GameShell or `useAudioManager`         |
 
 ## Creating a Map
 
@@ -91,20 +91,22 @@ The `TRIGGER` keyword auto-starts this dialogue when the player enters the taver
 
 ## Travel Effects
 
-When a player travels to a location:
+When a player travels with the map:
 
 1. `currentLocation` updates to the new location
 2. Time advances based on map `scale` and distance. The formula is `travel time = distance in pixels / scale`.
 3. Any active dialogue ends
-4. Triggered dialogues at the new location are checked
+4. Triggered dialogues and interludes at the new location are checked
 
-You can also move the player via dialogue effects:
+You can also move the player from dialogue:
 
 ```
 CHOICE @npc.choice.follow_me
   GOTO location market
 END
 ```
+
+`GOTO location` changes the current location and ends the dialogue. It does not calculate map travel time or run location triggers. Use it for scripted movement, scene changes, or jumps where you control the surrounding effects yourself.
 
 ## Enabling/Disabling the Map
 

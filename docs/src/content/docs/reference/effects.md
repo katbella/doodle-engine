@@ -3,7 +3,7 @@ title: Effects
 description: All 27 effect types with examples.
 ---
 
-Effects are mutations to game state. They run in order when a dialogue node is reached or a choice is selected.
+Effects are changes to game state. They run in order when a dialogue node is reached or a choice is selected.
 
 ## Flags
 
@@ -73,13 +73,13 @@ MOVE item sword armory
 
 ### GOTO location
 
-Change the player's current location (from within dialogue).
+Change the player's current location from within dialogue.
 
 ```
 GOTO location market
 ```
 
-Note: This is different from `GOTO nodeId` which routes to another dialogue node. `GOTO location` is an effect that ends the dialogue and moves the player.
+This is different from `GOTO nodeId`, which routes to another dialogue node. `GOTO location` ends the dialogue and moves the player, but it does not calculate map travel time or run location triggers. Use `travelTo()` for normal map travel.
 
 ## Time
 
@@ -308,10 +308,12 @@ GOTO failure
 
 Effects inside an `IF` block run only when that IF condition passes. If the IF block has a `GOTO`, the engine applies those effects before moving to the target node.
 
-For a one-shot hidden check where you don't need the value, use the `roll` condition instead:
+For a hidden check where you don't need the value, use the `roll` condition in an `IF` block or triggered content:
 
 ```
-REQUIRE roll 1 20 15
+IF roll 1 20 15
+  GOTO lucky_find
+END
 ```
 
 See the [Dice & Randomness guide](/guides/dice-and-randomness/) for patterns and examples.

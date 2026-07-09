@@ -15,14 +15,14 @@ NODE dramatic_reveal
   NARRATOR: @narrator.after_video
 ```
 
-The video plays fullscreen before the dialogue text is shown.
+`GameShell` shows the video as a fullscreen overlay before the player interacts with the dialogue underneath.
 
 ## How It Works
 
 1. The parser converts `VIDEO filename` into a `playVideo` effect
 2. The effect sets `pendingVideo` on the game state
 3. The snapshot returned by the action includes `pendingVideo` as a transient field
-4. The renderer picks up `pendingVideo` and shows the `VideoPlayer` component
+4. The renderer picks up `pendingVideo` and shows the `VideoPlayer` component. `GameShell` keeps that value long enough for playback because transient fields are cleared after the action snapshot.
 
 ## Using with GameShell
 

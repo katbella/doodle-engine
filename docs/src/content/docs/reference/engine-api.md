@@ -26,7 +26,7 @@ Omit `state` when starting a new game with `newGame()`.
 newGame(config: GameConfig): Snapshot
 ```
 
-Start a new game. Initializes state from config, sets up character and item locations from the registry, and checks for triggered dialogues at the starting location.
+Start a new game. Initializes state from config, sets up character and item locations from the registry, and checks for triggered dialogues and interludes at the starting location.
 
 ```typescript
 const engine = new Engine(registry);
@@ -114,7 +114,7 @@ const snapshot = engine.talkTo('bartender');
 travelTo(locationId: string): Snapshot
 ```
 
-Travel to a location on the current map. The current map is the map that contains the player's current location. Travel calculates time from marker distance and map scale, advances time, ends any active dialogue, and checks for triggered dialogues at the destination.
+Travel to a location on the current map. The current map is the map that contains the player's current location. Travel calculates time from marker distance and map scale, advances time, ends any active dialogue, and checks for triggered dialogues and interludes at the destination.
 
 Does nothing if the map is disabled (`mapEnabled: false`), if the current location is not on a map, or if the destination is not on the current map.
 
@@ -184,10 +184,10 @@ const snapshot = engine.dismissInterlude();
 
 ## Data Flow
 
-All methods follow the same pattern:
+Player action methods follow the same pattern:
 
 1. Validate inputs
-2. Mutate internal state
+2. Update internal state
 3. Build and return a snapshot
 4. Clear transient state for action-produced snapshots
 
@@ -196,3 +196,5 @@ Transient state such as notifications, pending sounds, pending video, and pendin
 ## Triggered Dialogues
 
 After `newGame()` and `travelTo()`, the engine checks for dialogues with a `triggerLocation` matching the current location. If a dialogue's conditions pass, it auto-starts. Only one triggered dialogue fires per location change.
+
+The engine also checks triggered interludes after `newGame()` and `travelTo()`. If an interlude's `triggerLocation` and `triggerConditions` match, the snapshot includes it as `pendingInterlude`.
