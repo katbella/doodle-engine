@@ -1,7 +1,7 @@
 ---
 "@doodle-engine/core": patch
 "@doodle-engine/cli": patch
-"@doodle-engine/react": minor
+"@doodle-engine/react": patch
 ---
 
 Parser catches malformed dialogue content instead of silently mishandling it: a colon inside a CHOICE, IF, GOTO, PORTRAIT, or effect line no longer gets misread as a speaker line; a node with more than one speaker line is now a parse error; a spoken line inside a CHOICE is now a parse error; quotes and multi-word values in effect and condition arguments are now rejected; and a `roll` condition can no longer be used in a choice REQUIRE. Generated choice IDs are now unique per node.
