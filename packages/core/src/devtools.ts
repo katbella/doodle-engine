@@ -96,14 +96,24 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
             return value;
         },
 
-        // Location control
+        // Location control. Sets the location directly so it can reach any
+        // place, not just spots on the current map. Party members come along,
+        // matching the goToLocation effect.
         teleport(locationId: string) {
-            engine.travelTo(locationId);
+            engineInternal.state.currentLocation = locationId;
+            for (const charState of Object.values(
+                engineInternal.state.characterState
+            ) as any[]) {
+                if (charState.inParty) {
+                    charState.location = locationId;
+                }
+            }
             onUpdate();
             console.log(`🐾 Teleported to: ${locationId}`);
         },
 
-        // Dialogue control
+        // Dialogue control. Starts the dialogue the same way the engine does,
+        // so start-node effects run and a silent first node auto-advances.
         triggerDialogue(dialogueId: string) {
             const dialogue = engineInternal.registry.dialogues[dialogueId];
             if (!dialogue) {
@@ -111,20 +121,10 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
                 return;
             }
 
-            const startNode = dialogue.nodes.find(
-                (n: any) => n.id === dialogue.startNode
-            );
-            if (!startNode) {
-                console.error(
-                    `🐾 Start node not found for dialogue: ${dialogueId}`
-                );
+            if (!engineInternal.enterDialogue(dialogueId)) {
+                console.error(`🐾 Could not start dialogue: ${dialogueId}`);
                 return;
             }
-
-            engineInternal.state.dialogueState = {
-                dialogueId: dialogue.id,
-                nodeId: startNode.id,
-            };
 
             onUpdate();
             console.log(`🐾 Triggered dialogue: ${dialogueId}`);

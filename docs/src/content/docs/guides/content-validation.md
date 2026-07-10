@@ -73,6 +73,16 @@ This is useful for:
 
 ## What Gets Validated
 
+### Dialogue Parsing
+
+Every `.dlg` file must parse. Syntax errors are reported as validation errors that name the file, so you can fix them before the game runs. Reported syntax errors include an unknown keyword, an unknown condition or effect, a node with more than one speaker line, a spoken line inside a choice, and a quoted or multi-word value where a plain token is required.
+
+```
+content/dialogues/bartender_greeting.dlg
+  Failed to parse dialogue: Node "start" (line 3) has more than one speaker line. Each node supports a single speaker; route to another NODE to let a different character speak.
+  Fix the DSL syntax error in this .dlg file
+```
+
 ### Dialogue Structure
 
 - **Start node exists**: The `startNode` specified in a dialogue must be a valid node ID

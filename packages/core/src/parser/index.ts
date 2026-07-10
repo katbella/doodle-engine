@@ -31,6 +31,37 @@ interface Token {
 }
 
 /**
+ * Leading keywords that start an effect line. Used so that keyword detection
+ * takes precedence over the generic "line contains ':' → speaker line" rule.
+ * GOTO is intentionally excluded: it is routing, handled separately by node and
+ * choice parsing. NOTIFY is included so a NOTIFY whose text contains ':' is
+ * still parsed as an effect rather than mistaken for a speaker line.
+ */
+const EFFECT_KEYWORDS = new Set([
+    'SET',
+    'CLEAR',
+    'ADD',
+    'REMOVE',
+    'MOVE',
+    'ADVANCE',
+    'START',
+    'END',
+    'MUSIC',
+    'SOUND',
+    'VIDEO',
+    'INTERLUDE',
+    'NOTIFY',
+    'ROLL',
+]);
+
+/**
+ * True if a line begins with a recognized effect keyword.
+ */
+function isEffectLine(line: string): boolean {
+    return EFFECT_KEYWORDS.has(line.split(/\s+/)[0]);
+}
+
+/**
  * Tokenize input string into processable tokens
  * - Removes comments (anything after #)
  * - Removes blank lines
@@ -119,6 +150,14 @@ export function parseCondition(conditionStr: string): Condition {
     const parts = conditionStr.trim().split(/\s+/);
     const type = parts[0];
 
+    // Quotes are for dialogue/choice display text only. Condition arguments are
+    // plain tokens (flag names, IDs, numbers, single-token values).
+    if (parts.some((part) => part.includes('"'))) {
+        throw new Error(
+            `Quotes are not allowed in condition "${type}" arguments. Quotes are only for dialogue and choice text; use a plain value or a @locale key.`
+        );
+    }
+
     switch (type) {
         case 'hasFlag':
             return { type: 'hasFlag', flag: parts[1] };
@@ -127,6 +166,11 @@ export function parseCondition(conditionStr: string): Condition {
         case 'hasItem':
             return { type: 'hasItem', itemId: parts[1] };
         case 'variableEquals':
+            if (parts.length > 3) {
+                throw new Error(
+                    `Condition "variableEquals" takes a single value; multi-word values are not supported. Use a single token or a @locale key.`
+                );
+            }
             return {
                 type: 'variableEquals',
                 variable: parts[1],
@@ -202,10 +246,19 @@ export function parseCondition(conditionStr: string): Condition {
 export function parseEffect(effectStr: string): Effect {
     const trimmed = effectStr.trim();
 
-    // Handle special cases that may have localization keys or quoted text
+    // NOTIFY is the one effect that takes display text, so it may be quoted.
     if (trimmed.startsWith('NOTIFY ')) {
         return { type: 'notify', message: parseText(trimmed.substring(7)) };
     }
+
+    // Every other effect takes plain, unquoted tokens (filenames, IDs, numbers,
+    // values). Quotes are only for dialogue/choice text and NOTIFY.
+    if (trimmed.includes('"')) {
+        throw new Error(
+            `Quotes are not allowed in "${trimmed.split(/\s+/)[0]}" arguments. Quotes are only for dialogue/choice text and NOTIFY; use a plain value or a @locale key.`
+        );
+    }
+
     if (trimmed === 'MUSIC') {
         return { type: 'playMusic', track: '' };
     }
@@ -243,6 +296,11 @@ export function parseEffect(effectStr: string): Effect {
                 return { type: 'setFlag', flag: parts[2] };
             }
             if (parts[1] === 'variable') {
+                if (parts.length > 4) {
+                    throw new Error(
+                        `"SET variable" takes a single value; multi-word values are not supported. Use a single token or a @locale key.`
+                    );
+                }
                 return {
                     type: 'setVariable',
                     variable: parts[2],
@@ -273,6 +331,11 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'characterStat') {
+                if (parts.length > 5) {
+                    throw new Error(
+                        `"SET characterStat" takes a single value; multi-word values are not supported. Use a single token or a @locale key.`
+                    );
+                }
                 return {
                     type: 'setCharacterStat',
                     characterId: parts[2],
@@ -393,7 +456,8 @@ interface ChoiceParseResult {
 function parseChoice(
     tokens: Token[],
     startIndex: number,
-    nodeId: string
+    nodeId: string,
+    choiceIndex: number
 ): ChoiceParseResult {
     const token = tokens[startIndex];
     const choiceText = parseText(token.line.substring(7)); // Remove "CHOICE " and parse text
@@ -416,7 +480,17 @@ function parseChoice(
 
         if (current.line.startsWith('REQUIRE ')) {
             const conditionStr = current.line.substring(8).trim();
-            conditions.push(parseCondition(conditionStr));
+            const condition = parseCondition(conditionStr);
+            // A requirement decides whether the choice is shown, and it is
+            // checked again when the choice is clicked. A roll is random, so
+            // those two checks can disagree and a shown choice can do nothing.
+            // Roll on click instead: route the choice to a node with ROLL + IF.
+            if (condition.type === 'roll') {
+                throw new Error(
+                    `Choice in node "${nodeId}" (line ${current.lineNumber}) uses "roll" in a REQUIRE. A choice cannot roll in its requirement. To roll when the player clicks, send the choice to a NODE that uses ROLL and IF.`
+                );
+            }
+            conditions.push(condition);
             i++;
         } else if (current.line.startsWith('GOTO ')) {
             const gotoTarget = current.line.substring(5).trim();
@@ -430,10 +504,17 @@ function parseChoice(
                 next = gotoTarget;
             }
             i++;
-        } else if (current.line.includes(':')) {
-            // Speaker line within choice - not currently used in data model
-            // Choices don't have their own speaker/text, they just route to next node
+        } else if (isEffectLine(current.line)) {
+            // Effect keyword takes precedence over the ':' speaker heuristic, so a
+            // NOTIFY (or other effect) whose text contains ':' still parses.
+            effects.push(parseEffect(current.line));
             i++;
+        } else if (current.line.includes(':')) {
+            // A choice holds button text, conditions, effects, and a route only.
+            // A spoken line here is invalid; the author must move it to a node.
+            throw new Error(
+                `Choice in node "${nodeId}" (line ${current.lineNumber}) contains a spoken line. Choices cannot contain spoken lines; put the line in its own NODE and route the choice there with GOTO.`
+            );
         } else {
             // Must be an effect
             effects.push(parseEffect(current.line));
@@ -441,11 +522,18 @@ function parseChoice(
         }
     }
 
-    // Generate choice ID from node ID and text
+    // Generate a choice ID that is unique within the node. The index guarantees
+    // uniqueness even when two choices sanitize to the same text; the sanitized
+    // text is kept only as a human-readable hint.
     const sanitized = choiceText
         .replace(/[@"]/g, '')
-        .replace(/[^a-z0-9]/gi, '_');
-    const choiceId = `${nodeId}_choice_${sanitized.toLowerCase().substring(0, 30)}`;
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase()
+        .substring(0, 30)
+        .replace(/^_+|_+$/g, '');
+    const choiceId = sanitized
+        ? `${nodeId}_choice_${choiceIndex}_${sanitized}`
+        : `${nodeId}_choice_${choiceIndex}`;
 
     const choice: Choice = {
         id: choiceId,
@@ -534,6 +622,7 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
     let text = '';
     let voice: string | undefined;
     let portrait: string | undefined;
+    let sawSpeaker = false;
     const conditions: Condition[] = [];
     const choices: Choice[] = [];
     const effects: Effect[] = [];
@@ -550,27 +639,17 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
             break;
         }
 
-        if (current.line.includes(':') && !current.line.startsWith('VOICE')) {
-            // Speaker line
-            const colonIndex = current.line.indexOf(':');
-            const speakerName = current.line.substring(0, colonIndex).trim();
-            const speakerText = current.line.substring(colonIndex + 1).trim();
-
-            if (speakerName === 'NARRATOR') {
-                speaker = null;
-            } else {
-                speaker = speakerName.toLowerCase();
-            }
-            text = parseText(speakerText);
-            i++;
-        } else if (current.line.startsWith('VOICE ')) {
+        // Structural and effect keywords are checked before the generic
+        // "line contains ':' → speaker line" rule, so a CHOICE/IF/GOTO/PORTRAIT
+        // or effect line whose text contains ':' is not mistaken for a speaker.
+        if (current.line.startsWith('VOICE ')) {
             voice = current.line.substring(6).trim();
             i++;
         } else if (current.line.startsWith('PORTRAIT ')) {
             portrait = current.line.substring(9).trim();
             i++;
         } else if (current.line.startsWith('CHOICE ')) {
-            const choiceResult = parseChoice(tokens, i, nodeId);
+            const choiceResult = parseChoice(tokens, i, nodeId, choices.length);
             choices.push(choiceResult.choice);
             i = choiceResult.nextIndex;
         } else if (current.line.startsWith('IF ')) {
@@ -592,6 +671,32 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
             } else {
                 next = gotoTarget;
             }
+            i++;
+        } else if (isEffectLine(current.line)) {
+            // Effect keyword (incl. NOTIFY) takes precedence over the ':' rule.
+            effects.push(parseEffect(current.line));
+            i++;
+        } else if (current.line.includes(':')) {
+            // Speaker line. A node supports exactly one speaker; a second speaker
+            // line is a mistake (it would silently overwrite the first), so reject
+            // it and point the author at routing to another NODE.
+            if (sawSpeaker) {
+                throw new Error(
+                    `Node "${nodeId}" (line ${current.lineNumber}) has more than one speaker line. Each node supports a single speaker; route to another NODE to let a different character speak.`
+                );
+            }
+            sawSpeaker = true;
+
+            const colonIndex = current.line.indexOf(':');
+            const speakerName = current.line.substring(0, colonIndex).trim();
+            const speakerText = current.line.substring(colonIndex + 1).trim();
+
+            if (speakerName === 'NARRATOR') {
+                speaker = null;
+            } else {
+                speaker = speakerName.toLowerCase();
+            }
+            text = parseText(speakerText);
             i++;
         } else {
             // Must be an effect

@@ -200,10 +200,24 @@ describe('React components', () => {
         expect(resolveChoiceListInput(choices, 'choice9', 8)).toBeNull();
     });
 
-    it('renders SaveLoadPanel with supplied UI labels', () => {
+    it('renders SaveLoadPanel with saved slots', () => {
+        const slots = [
+            {
+                id: 'a',
+                kind: 'manual',
+                label: 'Day 1',
+                timestamp: '2026-01-01T00:00:00.000Z',
+                save: {
+                    version: '1.0',
+                    timestamp: '2026-01-01T00:00:00.000Z',
+                    state: {},
+                },
+            },
+        ];
         vi.stubGlobal('localStorage', {
-            getItem: vi.fn(() => null),
+            getItem: vi.fn(() => JSON.stringify(slots)),
             setItem: vi.fn(),
+            removeItem: vi.fn(),
         });
 
         const html = renderToStaticMarkup(
@@ -221,9 +235,10 @@ describe('React components', () => {
             />
         );
 
-        expect(html).toContain('Save Game');
+        expect(html).toContain('New Save');
         expect(html).toContain('Load Game');
-        expect(html).toContain('disabled');
+        expect(html).toContain('Day 1');
+        expect(html).toContain('Delete');
     });
 
     it('renders interlude text and dismiss control', () => {

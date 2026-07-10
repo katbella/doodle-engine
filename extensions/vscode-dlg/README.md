@@ -11,7 +11,7 @@ After running `npm install` (or `yarn`/`pnpm`) in your Doodle Engine project:
 1. Open VS Code
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Extensions: Install from VSIX...**
-4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.0.0.vsix` in your project
+4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix` in your project
 
 Then reload VS Code. The extension activates automatically for `.dlg` files.
 
@@ -23,10 +23,11 @@ Then reload VS Code. The extension activates automatically for `.dlg` files.
 - Flow keywords: `GOTO`, `TRIGGER`, `REQUIRE`
 - Effect keywords: `SET`, `ADD`, `REMOVE`, `MOVE`, `CLEAR`, `ADVANCE`, `START`, `ROLL`
 - Media keywords: `MUSIC`, `SOUND`, `VOICE`, `VIDEO`, `NOTIFY`, `INTERLUDE`
-- Speaker names (`BARTENDER:`)
+- Speaker names, upper or mixed case (`BARTENDER:`, `Bartender:`)
 - Condition types (`hasFlag`, `questAtStage`, `variableGreaterThan`, etc.)
 - Effect targets (`flag`, `variable`, `questStage`, `item`, etc.)
 - Localization keys (`@bartender.greeting`)
+- Variable interpolation in text (`{gold}`)
 - Quoted strings, numbers, and `#` comments
 
 Also enables line comment toggling (`Ctrl+/` / `Cmd+/`) and auto-closing quotes.

@@ -109,7 +109,9 @@ END
 BARTENDER: @bartender.greeting
 ```
 
-The text before `:` is the speaker name. It's matched to a character ID (case-insensitive). The text after `:` is the dialogue line (supports `@key` localization).
+The text before the first `:` is the speaker name. It is matched to a character ID (case-insensitive). The text after `:` is the dialogue line, which supports `@key` localization and may itself contain colons.
+
+Each node has one speaker line. To let a different character speak, route to another `NODE`. That is how a conversation moves between speakers. A node with two speaker lines is a validation error.
 
 ### NARRATOR
 
@@ -153,6 +155,8 @@ Choices are shown to the player as clickable options. They can have:
 - **Conditions**: choice is hidden if any condition fails
 - **Effects**: run when the choice is selected
 - **GOTO**: required unless the choice terminates the dialogue
+
+A choice holds button text, conditions, effects, and a route. To show narration when a choice is picked, route it to a node with `GOTO` and put the line in that node.
 
 A choice terminates the dialogue (no GOTO needed) when it contains `END dialogue` or `GOTO location`:
 
@@ -365,18 +369,18 @@ NOTIFY @notification.quest_started
 
 Dialogue text can be written in three forms:
 
-**Plain text**: Just write the words. Works for most lines.
+**Plain text**: Just write the words. Works for most lines, including text that contains colons.
 
 ```
 BARTENDER: Hello there, traveller!
 CHOICE What's the news?
+NARRATOR: The sign reads: closed until dawn.
 ```
 
-**Quoted text**: Wrap in double quotes when the text contains `:`, `#`, or starts with `@`. Quotes are stripped before display.
+**Quoted text**: Wrap in double quotes when the text contains a `#` (otherwise everything from the `#` onward is treated as a comment). Quotes are stripped before display.
 
 ```
-BARTENDER: "Hello, friend! What'll it be?"
-CHOICE "Anything starting with @ is safe in quotes"
+BARTENDER: "Room #3 is down the hall."
 ```
 
 **Localization keys** (prefixed with `@`): Reference a key from a locale file. Required for multi-language support.
@@ -389,6 +393,8 @@ CHOICE @bartender.choice.ask_news
 The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is displayed.
 
 For single-language games, plain or quoted text is simpler. Add `@keys` later when you need multiple languages.
+
+> **Quotes and `@keys` are for what characters say:** speaker and `NARRATOR` lines, `CHOICE` text, and `NOTIFY` messages. Write flag names, values, and IDs (in effects and conditions) as plain single words. For multi-word display text, use a locale string.
 
 ## Comments
 

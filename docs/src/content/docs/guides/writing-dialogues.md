@@ -11,11 +11,13 @@ You can write dialogue text directly (no locale files required). There are three
 
 ```
 BARTENDER: Hello there             # plain text, fine for simple lines
-BARTENDER: "Hello, friend!"        # quotes when text has special characters or starts with @
+BARTENDER: "Room #3, second door"  # quote text containing a # so it isn't read as a comment
 BARTENDER: @bartender.greeting     # localization key for multi-language support
 ```
 
-Use plain text for most things. Add quotes when your text contains `:`, `#`, or starts with `@`. Use `@keys` only when you need multiple languages.
+Use plain text for most things. Colons and most punctuation are fine unquoted. Add quotes only when your text contains a `#`, which would otherwise start a comment. Use `@keys` only when you need multiple languages.
+
+Quotes and `@keys` are for what characters say: speaker lines, `NARRATOR`, `CHOICE`, and `NOTIFY`. Write flag names, values, and IDs as plain single words. For multi-word display text, use a locale string.
 
 Here's a complete example using plain and quoted text:
 
@@ -74,6 +76,7 @@ NODE farewell
 
 - The first `NODE` is the start node
 - `SPEAKER:` lines set who's talking (matched to character ID, case-insensitive)
+- Each node has **one** speaker line; to let another character speak, route to another node
 - `NARRATOR:` lines have no speaker and are used for descriptions
 - `GOTO` routes to another node
 - `END dialogue` closes the conversation
@@ -98,6 +101,8 @@ END
 
 - `REQUIRE` only shows this choice if the condition passes
 - Multiple effects run in order when the choice is selected
+
+To show narration when a choice is picked, route it to a node with `GOTO` and put the line in that node.
 
 ## Conditional Branching
 

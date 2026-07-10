@@ -45,7 +45,15 @@ import { GameProvider, GameRenderer } from '@doodle-engine/react';
 </GameProvider>;
 ```
 
-The panel provides Save and Load buttons with feedback messages. The Load button is disabled when no save exists.
+The game shell keeps three kinds of save:
+
+- **Quick save**: one slot. The pause menu's Save button writes it and overwrites the previous quick save.
+- **Autosave**: one slot, written automatically when the player travels to a new place. It overwrites the previous autosave.
+- **Manual saves**: as many as the player wants. The panel's New Save button adds one, and you can delete the ones you no longer need.
+
+The panel lists the quick save and autosave first, then manual saves newest first, and Load opens any of them. The title screen's Continue button opens the most recent save of any kind.
+
+The `@doodle-engine/react` package also exports the save helpers behind this (`listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, `hasSaves`) if you want to build your own save UI over `localStorage`.
 
 ## Using SaveLoadPanel Standalone
 

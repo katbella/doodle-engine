@@ -33,7 +33,7 @@ The extension is bundled with the `@doodle-engine/cli` npm package. After runnin
 1. Open VS Code
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Extensions: Install from VSIX...**
-4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.0.0.vsix` in your project
+4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix` in your project
 
 Then reload VS Code. The extension loads automatically for any file with the `.dlg` extension.
 

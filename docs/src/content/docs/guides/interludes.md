@@ -84,7 +84,7 @@ effects:
 
 The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns. The interlude won't show again.
 
-**Important:** do NOT set the "seen" flag in a dialogue node that fires before the interlude check. The engine evaluates `triggerConditions` first, then applies `effects`. Setting the flag in a dialogue would mark the interlude as seen before the check runs, causing it to never trigger.
+Keep the "seen" flag in the interlude's own `effects`, as shown above. The engine checks `triggerConditions` and then runs the interlude's `effects`, so the check and the flag stay in step and the interlude shows exactly once.
 
 ## Audio
 

@@ -30,7 +30,28 @@ IF roll 1 20 15
 END
 ```
 
-For player-facing skill checks, prefer `ROLL` into a variable, then branch on that variable. That gives the player one clear result and avoids re-rolling during choice display and selection.
+To make a choice roll dice when the player clicks it, send the choice to a node that rolls with `ROLL` and branches with `IF`. One roll can lead to several different responses:
+
+```
+CHOICE Try to charm the guard
+  GOTO charm_roll
+END
+
+NODE charm_roll
+  ROLL charm 1 20
+  IF variableGreaterThan charm 17
+    GOTO charm_amazing
+  END
+  IF variableGreaterThan charm 12
+    GOTO charm_good
+  END
+  IF variableGreaterThan charm 7
+    GOTO charm_weak
+  END
+  GOTO charm_fail
+```
+
+The `IF` blocks are checked from top to bottom, and the first one that is true wins. A roll of 19 goes to `charm_amazing`, 14 to `charm_good`, 9 to `charm_weak`, and 3 to `charm_fail`.
 
 ## Skill check pattern
 

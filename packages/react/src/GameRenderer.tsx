@@ -33,6 +33,8 @@ import {
 
 export interface GameRendererProps {
     className?: string;
+    /** localStorage key for the save/load panel (default 'doodle-engine-save'). */
+    storageKey?: string;
 }
 
 type ActivePanel = 'inventory' | 'journal' | 'notes' | 'map' | 'saveload' | 'settings' | null;
@@ -68,7 +70,10 @@ export function GameRenderer(props: GameRendererProps) {
     );
 }
 
-function GameRendererInner({ className = '' }: GameRendererProps) {
+function GameRendererInner({
+    className = '',
+    storageKey = 'doodle-engine-save',
+}: GameRendererProps) {
     const { snapshot, actions } = useGame();
     const audioSettings = useContext(AudioSettingsContext);
 
@@ -347,6 +352,7 @@ function GameRendererInner({ className = '' }: GameRendererProps) {
                             ui={snapshot.ui}
                             onSave={actions.saveGame}
                             onLoad={actions.loadGame}
+                            storageKey={storageKey}
                         />
                         <button
                             className="panel-close"

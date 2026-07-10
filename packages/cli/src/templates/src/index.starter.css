@@ -203,7 +203,15 @@ body {
 .save-load-panel { }
 .save-button { }
 .load-button { }
+.delete-button { }
 .save-load-message { }
+.save-load-empty { }
+.save-slot-list { }
+.save-slot { }
+.save-slot-info { }
+.save-slot-label { }
+.save-slot-time { }
+.save-slot-actions { }
 
 /* ── Settings ─────────────────────────────────────────────────────── */
 

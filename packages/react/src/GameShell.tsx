@@ -17,7 +17,6 @@ import type {
     ContentRegistry,
     GameConfig,
     Snapshot,
-    SaveData,
     AssetManifest,
     AssetLoadingState,
 } from '@doodle-engine/core';
@@ -38,6 +37,7 @@ import { PauseMenu } from './components/PauseMenu';
 import { SettingsPanel } from './components/SettingsPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { InputProvider, useInputAction } from './input/InputRouter';
+import { hasSaves, latestSave, writeSave } from './saves';
 
 type Screen = 'splash' | 'title' | 'playing';
 
@@ -183,7 +183,7 @@ function GameShellInner({
         resolveGameShellUISoundConfig(shell, uiSoundsConfig)
     );
 
-    const hasSaveData = localStorage.getItem(storageKey) !== null;
+    const hasSaveData = hasSaves(localStorage, storageKey);
 
     const createEngine = useCallback(() => {
         return new Engine(registry, createInitialState(selectedLocale));
@@ -197,30 +197,32 @@ function GameShellInner({
         setScreen('playing');
     }, [createEngine, config, uiSoundControls]);
 
+    // Continue picks up the most recent save.
     const handleContinue = useCallback(() => {
         uiSoundControls.playClick();
-        const raw = localStorage.getItem(storageKey);
-        if (!raw) return;
-        const saveData: SaveData = JSON.parse(raw);
+        const saveData = latestSave(localStorage, storageKey);
+        if (!saveData) return;
         const engine = createEngine();
         const snapshot = engine.loadGame(saveData);
         setGameState({ engine, snapshot });
         setScreen('playing');
     }, [createEngine, storageKey, uiSoundControls]);
 
+    // The pause menu Save is a quick save: it overwrites the single quick-save
+    // slot. Manual saves (as many as the player wants) are made from the
+    // in-game Save/Load panel.
     const handleSave = useCallback(() => {
         if (!gameState) return;
         uiSoundControls.playClick();
-        const saveData = gameState.engine.saveGame();
-        localStorage.setItem(storageKey, JSON.stringify(saveData));
+        writeSave(localStorage, storageKey, gameState.engine.saveGame(), 'quick');
         setShowPauseMenu(false);
     }, [gameState, storageKey, uiSoundControls]);
 
+    // Quick load from the pause menu loads the most recent save.
     const handleLoad = useCallback(() => {
-        const raw = localStorage.getItem(storageKey);
-        if (!raw || !gameState) return;
+        const saveData = latestSave(localStorage, storageKey);
+        if (!saveData || !gameState) return;
         uiSoundControls.playClick();
-        const saveData: SaveData = JSON.parse(raw);
         const snapshot = gameState.engine.loadGame(saveData);
         setGameState({ engine: gameState.engine, snapshot });
         setShowPauseMenu(false);
@@ -359,6 +361,7 @@ function GameShellInner({
             >
                 <GameShellPlaying
                     audioOptions={audioOptions}
+                    storageKey={storageKey}
                     uiSoundControls={
                         uiSoundsConfig !== false ? uiSoundControls : undefined
                     }
@@ -394,6 +397,7 @@ import { useGame } from './hooks/useGame';
 
 interface GameShellPlayingProps {
     audioOptions?: AudioManagerOptions;
+    storageKey: string;
     uiSoundControls?: UISoundControls;
     showPauseMenu: boolean;
     showSettings: boolean;
@@ -411,6 +415,7 @@ interface GameShellPlayingProps {
 
 function GameShellPlaying({
     audioOptions,
+    storageKey,
     uiSoundControls,
     showPauseMenu,
     showSettings,
@@ -427,6 +432,20 @@ function GameShellPlaying({
 }: GameShellPlayingProps) {
     const { snapshot, actions } = useGame();
     const audioSettings = useAudioSettings();
+
+    // Autosave when the player travels to a new place. Overwrites the single
+    // autosave slot. Skips the first render so a fresh game isn't saved at once.
+    const prevLocationRef = useRef<string | null>(null);
+    useEffect(() => {
+        const location = snapshot.location.id;
+        if (
+            prevLocationRef.current !== null &&
+            prevLocationRef.current !== location
+        ) {
+            writeSave(localStorage, storageKey, actions.saveGame(), 'auto');
+        }
+        prevLocationRef.current = location;
+    }, [snapshot.location.id, actions, storageKey]);
 
     // Audio playback: volumes come from AudioSettingsContext (single source of truth)
     useAudioManager(snapshot, {
@@ -453,7 +472,7 @@ function GameShellPlaying({
                 />
             )}
 
-            <GameRenderer />
+            <GameRenderer storageKey={storageKey} />
 
             {!showPauseMenu && !showSettings && !pendingVideo && (
                 <button
@@ -471,6 +490,7 @@ function GameShellPlaying({
                     onResume={onResume}
                     onSave={onSave}
                     onLoad={onLoad}
+                    canLoad={hasSaves(localStorage, storageKey)}
                     onSettings={onSettings}
                     onQuitToTitle={onQuitToTitle}
                 />

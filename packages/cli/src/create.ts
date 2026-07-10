@@ -150,7 +150,7 @@ export async function create(projectName: string) {
     );
     console.log(
         crayon.dim(
-            '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.0.0.vsix'
+            '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix'
         )
     );
     console.log('');

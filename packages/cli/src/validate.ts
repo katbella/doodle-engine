@@ -521,6 +521,20 @@ function validateDialogueNode(
         }
     }
 
+    // Choice IDs must be unique within a node (the engine and snapshot resolve
+    // a selected choice by first match, so a duplicate ID would shadow another).
+    const choiceIds = new Set<string>();
+    for (const choice of node.choices) {
+        if (choiceIds.has(choice.id)) {
+            errors.push({
+                file,
+                message: `Node "${node.id}" has duplicate choice ID "${choice.id}"`,
+                suggestion: 'Choice IDs must be unique within a node',
+            });
+        }
+        choiceIds.add(choice.id);
+    }
+
     // Validate choice targets
     for (const choice of node.choices) {
         const endsDialogue = choice.effects?.some(

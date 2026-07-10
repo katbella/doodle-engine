@@ -118,3 +118,14 @@ export type { SettingsPanelProps, SettingsPanelAudio } from './components/Settin
 
 export { GameTime } from './components/GameTime';
 export type { GameTimeProps, TimeFormat } from './components/GameTime';
+
+// Save-slot helpers (multiple saves in localStorage)
+export {
+    listSaves,
+    hasSaves,
+    writeSave,
+    deleteSave,
+    loadSave,
+    latestSave,
+} from './saves';
+export type { SaveSlot, SaveStorage, WriteSaveOptions } from './saves';

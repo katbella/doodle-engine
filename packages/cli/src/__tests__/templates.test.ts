@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
+import { parseDialogue } from '@doodle-engine/core';
 import defaultApp from '../templates/src/App.default.tsx?raw';
 import customApp from '../templates/src/App.custom.tsx?raw';
 import gameYaml from '../templates/content/game.yaml?raw';
@@ -113,6 +114,18 @@ describe('scaffold templates', () => {
             expect(bundled, `${ref} should be bundled in templates/assets`).toBe(
                 true
             );
+        }
+    });
+
+    it('every starter .dlg parses cleanly', () => {
+        const dialogues = Object.entries(templateFiles).filter(([path]) =>
+            path.endsWith('.dlg')
+        );
+
+        expect(dialogues.length).toBeGreaterThan(0);
+        for (const [path, source] of dialogues) {
+            const id = path.split('/').pop()!.replace('.dlg', '');
+            expect(() => parseDialogue(source, id), path).not.toThrow();
         }
     });
 

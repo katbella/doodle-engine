@@ -1,9 +1,21 @@
 /**
- * SaveLoadPanel - Save and load game state via localStorage
+ * SaveLoadPanel - Manage saved games in localStorage.
+ *
+ * Shows the quick save and autosave (if any), then the player's manual saves.
+ * "New Save" makes a manual save. Each save can be loaded; manual saves can
+ * also be deleted. The actual save/load of game state is done by the
+ * onSave/onLoad callbacks; this panel manages the list of slots.
  */
 
 import { useState } from 'react';
 import type { SaveData } from '@doodle-engine/core';
+import {
+    listSaves,
+    writeSave,
+    loadSave,
+    deleteSave,
+    type SaveSlot,
+} from '../saves';
 
 export interface SaveLoadPanelProps {
     /** Resolved UI strings from snapshot.ui */
@@ -14,6 +26,12 @@ export interface SaveLoadPanelProps {
     className?: string;
 }
 
+function formatTimestamp(timestamp: string): string {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return isNaN(date.getTime()) ? timestamp : date.toLocaleString();
+}
+
 export function SaveLoadPanel({
     ui,
     onSave,
@@ -21,42 +39,81 @@ export function SaveLoadPanel({
     storageKey = 'doodle-engine-save',
     className = '',
 }: SaveLoadPanelProps) {
+    const [slots, setSlots] = useState<SaveSlot[]>(() =>
+        listSaves(localStorage, storageKey)
+    );
     const [message, setMessage] = useState('');
 
-    const handleSave = () => {
-        const saveData = onSave();
-        localStorage.setItem(storageKey, JSON.stringify(saveData));
-        setMessage('Saved!');
+    const flash = (text: string) => {
+        setMessage(text);
         setTimeout(() => setMessage(''), 2000);
     };
 
-    const handleLoad = () => {
-        const raw = localStorage.getItem(storageKey);
-        if (!raw) {
-            setMessage('No save found');
-            setTimeout(() => setMessage(''), 2000);
-            return;
+    const refresh = () => setSlots(listSaves(localStorage, storageKey));
+
+    const handleNewSave = () => {
+        writeSave(localStorage, storageKey, onSave(), 'manual');
+        refresh();
+        flash('Saved!');
+    };
+
+    const handleLoad = (id: string) => {
+        const data = loadSave(localStorage, storageKey, id);
+        if (data) {
+            onLoad(data);
+            flash('Loaded!');
         }
-        const saveData: SaveData = JSON.parse(raw);
-        onLoad(saveData);
-        setMessage('Loaded!');
-        setTimeout(() => setMessage(''), 2000);
     };
 
-    const hasSave = localStorage.getItem(storageKey) !== null;
+    const handleDelete = (id: string) => {
+        deleteSave(localStorage, storageKey, id);
+        refresh();
+    };
 
     return (
         <div className={`save-load-panel ${className}`}>
-            <button className="save-button" onClick={handleSave}>
-                {ui['ui.save']}
+            <button className="save-button" onClick={handleNewSave}>
+                New Save
             </button>
-            <button
-                className="load-button"
-                onClick={handleLoad}
-                disabled={!hasSave}
-            >
-                {ui['ui.load']}
-            </button>
+
+            {slots.length === 0 ? (
+                <p className="save-load-empty">No saves yet</p>
+            ) : (
+                <ul className="save-slot-list">
+                    {slots.map((slot) => (
+                        <li
+                            key={slot.id}
+                            className={`save-slot save-slot-${slot.kind}`}
+                        >
+                            <div className="save-slot-info">
+                                <span className="save-slot-label">
+                                    {slot.label}
+                                </span>
+                                <span className="save-slot-time">
+                                    {formatTimestamp(slot.timestamp)}
+                                </span>
+                            </div>
+                            <div className="save-slot-actions">
+                                <button
+                                    className="load-button"
+                                    onClick={() => handleLoad(slot.id)}
+                                >
+                                    {ui['ui.load']}
+                                </button>
+                                {slot.kind === 'manual' && (
+                                    <button
+                                        className="delete-button"
+                                        onClick={() => handleDelete(slot.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                )}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
             {message && <span className="save-load-message">{message}</span>}
         </div>
     );

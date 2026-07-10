@@ -11,6 +11,8 @@ export interface PauseMenuProps {
     onSave: () => void;
     /** Load a saved game */
     onLoad: () => void;
+    /** Whether a save exists to load (Load is disabled when false) */
+    canLoad?: boolean;
     /** Open settings */
     onSettings: () => void;
     /** Quit to title screen */
@@ -24,6 +26,7 @@ export function PauseMenu({
     onResume,
     onSave,
     onLoad,
+    canLoad = true,
     onSettings,
     onQuitToTitle,
     className = '',
@@ -39,7 +42,11 @@ export function PauseMenu({
                     <button className="pause-button" onClick={onSave}>
                         {ui['ui.save']}
                     </button>
-                    <button className="pause-button" onClick={onLoad}>
+                    <button
+                        className="pause-button"
+                        onClick={onLoad}
+                        disabled={!canLoad}
+                    >
                         {ui['ui.load']}
                     </button>
                     <button className="pause-button" onClick={onSettings}>

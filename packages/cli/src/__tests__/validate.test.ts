@@ -303,4 +303,40 @@ describe('validateContent', () => {
 
         expect(validateContent(registry, new Map())).toEqual([]);
     });
+
+    it('reports duplicate choice IDs within a node', () => {
+        const registry = makeRegistry({
+            dialogues: {
+                test_dialogue: {
+                    id: 'test_dialogue',
+                    startNode: 'start',
+                    nodes: [
+                        {
+                            id: 'start',
+                            speaker: null,
+                            text: 'Hello.',
+                            choices: [
+                                {
+                                    id: 'start_choice_yes',
+                                    text: 'Yes',
+                                    effects: [{ type: 'endDialogue' }],
+                                    next: '',
+                                },
+                                {
+                                    id: 'start_choice_yes',
+                                    text: 'Yes again',
+                                    effects: [{ type: 'endDialogue' }],
+                                    next: '',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        });
+
+        expect(messages(registry)).toContain(
+            'Node "start" has duplicate choice ID "start_choice_yes"'
+        );
+    });
 });

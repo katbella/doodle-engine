@@ -20,10 +20,14 @@ NODE start
     GOTO resolve
   END
 
+  # A choice only routes; its narration lives in a node it points to.
   CHOICE @bluff.choice.back_down
-    NARRATOR: @bluff.backed_down
-    END dialogue
+    GOTO backed_down
   END
+
+NODE backed_down
+  NARRATOR: @bluff.backed_down
+  END dialogue
 
 NODE resolve
   # Show the roll result using {bluffRoll} interpolation in the locale string
@@ -38,8 +42,14 @@ NODE resolve
 
   GOTO failure
 
+# Each node has a single speaker. To let the narrator and the bartender both
+# speak, use two nodes: a narration node (text + Continue) that routes to the
+# bartender's node.
 NODE success
   NARRATOR: @bluff.success.narration
+  GOTO success_bartender
+
+NODE success_bartender
   BARTENDER: @bluff.success.bartender
 
   CHOICE @bluff.choice.cheers
@@ -48,6 +58,9 @@ NODE success
 
 NODE failure
   NARRATOR: @bluff.failure.narration
+  GOTO failure_bartender
+
+NODE failure_bartender
   BARTENDER: @bluff.failure.bartender
 
   # Still have to pay, or just walk away

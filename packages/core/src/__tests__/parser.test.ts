@@ -713,7 +713,6 @@ SET flag visited_tavern
 ADD journalEntry tavern_discovery
 
 CHOICE @tavern.choice.look_around
-  NARRATOR: @tavern.look_around
   GOTO idle
 END
 
@@ -779,5 +778,150 @@ NARRATOR: test
 `;
 
         expect(() => parseDialogue(dsl, 'test')).toThrow('Unexpected token');
+    });
+});
+
+describe('parseDialogue - colons in choice/effect text', () => {
+    it('parses a CHOICE whose plain text contains a colon (not a speaker line)', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE Meet me at 5:00
+    END dialogue
+  END
+`;
+
+        const dialogue = parseDialogue(dsl, 'test');
+        const node = dialogue.nodes[0];
+
+        expect(node.speaker).toBeNull();
+        expect(node.text).toBe('@intro');
+        expect(node.choices).toHaveLength(1);
+        expect(node.choices[0].text).toBe('Meet me at 5:00');
+    });
+
+    it('parses a quoted CHOICE containing a colon', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE "Meet me at 5:00"
+    END dialogue
+  END
+`;
+
+        const dialogue = parseDialogue(dsl, 'test');
+        expect(dialogue.nodes[0].choices[0].text).toBe('Meet me at 5:00');
+    });
+
+    it('parses a NOTIFY with a colon inside a choice as an effect', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE @c
+    NOTIFY "Time: up"
+    END dialogue
+  END
+`;
+
+        const dialogue = parseDialogue(dsl, 'test');
+        const choice = dialogue.nodes[0].choices[0];
+
+        expect(choice.effects?.[0]).toEqual({
+            type: 'notify',
+            message: 'Time: up',
+        });
+        expect(choice.effects?.[1]).toEqual({ type: 'endDialogue' });
+    });
+});
+
+describe('parseDialogue - one speaker per node', () => {
+    it('throws when a node has more than one speaker line', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @narration
+  BARTENDER: @line
+`;
+
+        expect(() => parseDialogue(dsl, 'test')).toThrow(
+            /more than one speaker line/
+        );
+    });
+
+    it('throws when a choice contains a spoken line', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE @choice.back_down
+    NARRATOR: @backed_down
+    END dialogue
+  END
+`;
+
+        expect(() => parseDialogue(dsl, 'test')).toThrow(
+            /Choices cannot contain spoken lines/
+        );
+    });
+
+    it('throws when a choice uses roll in a REQUIRE', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE @choice.try
+    REQUIRE roll 1 20 15
+    GOTO win
+  END
+`;
+
+        expect(() => parseDialogue(dsl, 'test')).toThrow(
+            /cannot roll in its requirement/
+        );
+    });
+});
+
+describe('parseDialogue - unique choice IDs', () => {
+    it('gives distinct IDs to choices whose text sanitizes identically', () => {
+        const dsl = `
+NODE start
+  NARRATOR: @intro
+  CHOICE "Yes!"
+    END dialogue
+  END
+  CHOICE "Yes?"
+    END dialogue
+  END
+`;
+
+        const dialogue = parseDialogue(dsl, 'test');
+        const [a, b] = dialogue.nodes[0].choices;
+
+        expect(a.id).not.toBe(b.id);
+        expect(a.id).toBe('start_choice_0_yes');
+        expect(b.id).toBe('start_choice_1_yes');
+    });
+});
+
+describe('parseEffect / parseCondition - quotes and arity', () => {
+    it('rejects quoted variable values', () => {
+        expect(() => parseEffect('SET variable name "John"')).toThrow(
+            /Quotes are not allowed/
+        );
+    });
+
+    it('rejects quoted condition values', () => {
+        expect(() => parseCondition('variableEquals name "John"')).toThrow(
+            /Quotes are not allowed/
+        );
+    });
+
+    it('rejects multi-word variable values', () => {
+        expect(() => parseEffect('SET variable title Sir Reginald')).toThrow(
+            /single value/
+        );
+    });
+
+    it('rejects multi-word condition values', () => {
+        expect(() => parseCondition('variableEquals name Sir Reginald')).toThrow(
+            /single value/
+        );
     });
 });
