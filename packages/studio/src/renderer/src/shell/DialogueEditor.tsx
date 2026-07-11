@@ -70,6 +70,8 @@ export function DialogueEditor({
 
     const currentText = useMemo(() => {
         if (!dialogue) return savedText;
+        // A bare CHOICE line isn't valid .dlg, so an empty label is written as
+        // the "@choice" placeholder for validation to flag.
         const forSave: Dialogue = {
             ...dialogue,
             nodes: dialogue.nodes.map((n) => ({

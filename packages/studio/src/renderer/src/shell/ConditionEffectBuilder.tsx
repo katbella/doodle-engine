@@ -26,7 +26,7 @@ import {
 type Descriptor = ConditionDescriptor | EffectDescriptor;
 
 /**
- * The condition/effect builder popover (design spec §05).
+ * The condition/effect builder popover.
  *
  * `mode` picks the descriptor set and the entity it emits. `inRequire` is true
  * when building a choice requirement, so `roll` is rejected exactly as the
@@ -143,11 +143,7 @@ export function ConditionEffectBuilder({
             <div
                 className={`builder__preview ${result.ok ? '' : 'builder__preview--bad'}`}
             >
-                <div className="builder__preview-label">
-                    {mode === 'condition' && inRequire
-                        ? 'Generated source'
-                        : 'Generated source'}
-                </div>
+                <div className="builder__preview-label">Generated source</div>
                 <span className="builder__preview-line mono">
                     {mode === 'condition' && inRequire ? 'REQUIRE ' : ''}
                     {draftToSource(draft, descriptor)}
