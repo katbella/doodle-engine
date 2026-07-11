@@ -18,7 +18,8 @@
         "@doodle-engine/toolkit": "workspace:*",
         "@monaco-editor/react": "^4.6.0",
         "chokidar": "^4.0.0",
-        "monaco-editor": "^0.52.0"
+        "monaco-editor": "^0.52.0",
+        "yaml": "^2.8.3"
     },
     "devDependencies": {
         "@types/node": "^24.0.0",

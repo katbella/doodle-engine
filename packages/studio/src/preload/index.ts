@@ -20,6 +20,14 @@ const api: StudioApi = {
         ipcRenderer.invoke('doc:read', dir, relPath),
     writeDocument: (dir, relPath, content, expectedMtimeMs) =>
         ipcRenderer.invoke('doc:write', dir, relPath, content, expectedMtimeMs),
+    writeEntity: (dir, relPath, edits, expectedMtimeMs) =>
+        ipcRenderer.invoke(
+            'doc:writeEntity',
+            dir,
+            relPath,
+            edits,
+            expectedMtimeMs
+        ),
     saveRecovery: (dir, relPath, content) =>
         ipcRenderer.invoke('recovery:save', dir, relPath, content),
     readRecovery: (dir, relPath) =>

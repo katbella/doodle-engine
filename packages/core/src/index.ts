@@ -162,6 +162,33 @@ export type {
     Span,
 } from './parser/cst';
 
+// Serializer (dialogue entities -> .dlg source, for the visual editor)
+export {
+    serializeDialogue,
+    serializeNode,
+    serializeCondition,
+    serializeEffect,
+} from './parser/serialize';
+
+// Visual-editor write-back (splices changed nodes, preserving comments)
+export { applyDialogueEdits } from './parser/edit';
+
+// Condition/effect descriptors (single source of truth for builder UIs)
+export {
+    CONDITION_DESCRIPTORS,
+    EFFECT_DESCRIPTORS,
+    REFERENCE_KIND_TARGET,
+    conditionDescriptor,
+    effectDescriptor,
+} from './parser/descriptors';
+export type {
+    ArgKind,
+    ArgDescriptor,
+    DescriptorGroup,
+    ConditionDescriptor,
+    EffectDescriptor,
+} from './parser/descriptors';
+
 // Dev Tools (framework-agnostic debugging API)
 export type { DevTools } from './devtools';
 

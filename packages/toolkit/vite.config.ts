@@ -7,8 +7,9 @@ export default defineConfig({
             entry: {
                 toolkit: resolve(__dirname, 'src/index.ts'),
             },
-            formats: ['es'],
-            fileName: (_format, entryName) => `${entryName}.js`,
+            formats: ['es', 'cjs'],
+            fileName: (format, entryName) =>
+                `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
         },
         rollupOptions: {
             // Externalize everything that will be in node_modules at runtime.

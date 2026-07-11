@@ -314,6 +314,346 @@
     flex: 1;
     min-height: 0;
 }
+
+.dlg {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+}
+.dlg__outline {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--border-faint);
+}
+.dlg__outline-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+.node-editor__delete {
+    margin-left: auto;
+    color: var(--danger);
+}
+.dlg__node {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: 8px var(--space-3);
+    text-align: left;
+    border-left: 2px solid transparent;
+    color: var(--text-dim);
+}
+.dlg__node:hover {
+    color: var(--text);
+    background: var(--overlay-hover);
+}
+.dlg__node--active {
+    color: var(--text);
+    background: var(--accent-tint);
+    border-left-color: var(--accent);
+}
+.dlg__node-id {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+}
+.dlg__node-badge {
+    flex: none;
+    padding: 2px 6px;
+    font-size: 9.5px;
+    font-weight: 600;
+    background: var(--valid);
+    color: var(--accent-ink);
+}
+.dlg__main {
+    min-height: 0;
+    padding: var(--space-4) var(--space-5);
+}
+
+.node-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 760px;
+}
+.node-editor__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+.node-editor__label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-faint);
+}
+.node-editor__id-input {
+    width: auto;
+    min-width: 180px;
+    height: 28px;
+    font-size: 14px;
+    color: var(--text);
+}
+.node-editor__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+.node-editor__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.node-editor__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border-faint);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.dlg__input,
+.dlg__select {
+    width: 100%;
+    height: 30px;
+    padding: 0 var(--space-2);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12.5px;
+}
+.dlg__select {
+    width: auto;
+    min-width: 160px;
+}
+.dlg__input--invalid {
+    border-color: var(--error);
+}
+.dlg__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+.dlg__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+.dlg__x {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--text-faint);
+}
+.dlg__x:hover {
+    color: var(--error);
+}
+.dlg__add {
+    flex: none;
+    padding: 4px var(--space-2);
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--border);
+}
+.dlg__add:hover {
+    background: var(--surface-hover);
+}
+.dlg__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-faint);
+    border-left: 2px solid var(--border);
+}
+.dlg__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+.dlg__sub {
+    font-size: 11px;
+    color: var(--text-faint);
+}
+.dlg__target {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+.dlg__note {
+    font-size: 11px;
+    color: var(--warn);
+}
+/* A committed condition/effect, shown as a read-only chip; click to edit. */
+.dlg__chip {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    padding: 6px var(--space-2);
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-faint);
+    border-left: 2px solid var(--valid);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dlg__chip:hover {
+    background: var(--surface-hover);
+}
+/* Condition/effect builder (Phase 7) --------------------------------------- */
+.builder {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 340px;
+    padding: var(--space-3);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.builder__search {
+    height: 28px;
+    padding: 0 var(--space-2);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+}
+.builder__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 200px;
+}
+.builder__group-head {
+    padding: var(--space-1) var(--space-1);
+    margin-top: var(--space-1);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+.builder__type {
+    display: block;
+    width: 100%;
+    padding: 6px var(--space-2);
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--text-dim);
+}
+.builder__type:hover {
+    background: var(--overlay-hover);
+    color: var(--text);
+}
+.builder__type--on {
+    background: var(--accent-tint);
+    color: var(--text);
+}
+.builder__empty {
+    padding: var(--space-2);
+    font-size: 12px;
+    color: var(--text-faint);
+}
+.builder__args {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border-faint);
+}
+.builder__arg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+.builder__arg-label {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+.builder__arg-opt {
+    color: var(--text-faint);
+}
+.builder__preview {
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-input);
+    border-left: 2px solid var(--valid);
+}
+.builder__preview--bad {
+    border-left-color: var(--error);
+}
+.builder__preview-label {
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: var(--space-1);
+}
+.builder__preview-line {
+    font-size: 12px;
+    color: var(--valid);
+    word-break: break-word;
+}
+.builder__preview--bad .builder__preview-line {
+    color: var(--text-dim);
+}
+.builder__error {
+    margin-top: var(--space-1);
+    font-size: 11px;
+    color: var(--error);
+    line-height: 1.4;
+}
+.builder__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+/* Popover shell: floats over everything, positioned in JS next to its anchor.
+   Its height is capped to the space available, and it scrolls inside. */
+.popover {
+    position: fixed;
+    z-index: 40;
+    display: flex;
+    overflow: auto;
+}
+.popover-anchor {
+    position: relative;
+}
+.popover-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+}
+/* Let the builder fill the popover so its own list/args scroll within it. */
+.popover .builder {
+    max-height: 100%;
+}
+
 .editor__empty {
     height: 100%;
     display: flex;
@@ -325,6 +665,98 @@
 }
 .editor__empty-hint {
     font-size: 11px;
+}
+
+/* YAML entity forms (Phase 8) --------------------------------------------- */
+.form {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 640px;
+    padding: var(--space-4) var(--space-5);
+}
+.form__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+}
+.form__title {
+    font-size: 15px;
+    color: var(--text);
+}
+.form__kind {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+}
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+.field--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+}
+.field__labelrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+.field__label {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+.field__req {
+    font-size: 10px;
+    color: var(--text-faint);
+}
+.field__hint {
+    font-size: 11px;
+    color: var(--text-faint);
+}
+.field__textarea {
+    height: auto;
+    min-height: 72px;
+    padding: var(--space-2);
+    line-height: 1.5;
+    resize: vertical;
+}
+.seg--small .seg__opt {
+    padding: 2px var(--space-2);
+    font-size: 10px;
+}
+.form__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+}
+.form__list-item {
+    padding: 4px var(--space-2);
+    font-size: 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-faint);
+}
+.form__unknown {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: 1px dashed var(--border);
+}
+.form__unknown-head {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+}
+.form__unknown-row {
+    font-size: 12px;
+    color: var(--text-dim);
 }
 
 .detail__head {

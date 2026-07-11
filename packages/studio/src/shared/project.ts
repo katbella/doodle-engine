@@ -7,7 +7,9 @@
  */
 
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
-import type { ValidationError } from '@doodle-engine/toolkit';
+import type { ValidationError, YamlEdit } from '@doodle-engine/toolkit';
+
+export type { YamlEdit };
 
 /** Which Doodle Engine version a project targets and whether deps are installed. */
 export interface EngineInfo {
@@ -124,6 +126,16 @@ export interface StudioApi {
         projectDir: string,
         relPath: string,
         content: string,
+        expectedMtimeMs?: number
+    ) => Promise<WriteResult>;
+    /**
+     * Save form edits to a YAML entity file, keeping its comments, key order,
+     * and untouched keys. Pass the mtime it was read at to detect conflicts.
+     */
+    writeEntity: (
+        projectDir: string,
+        relPath: string,
+        edits: YamlEdit[],
         expectedMtimeMs?: number
     ) => Promise<WriteResult>;
     /** Save an unsaved-edits recovery buffer for a file. */

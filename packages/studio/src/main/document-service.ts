@@ -1,5 +1,6 @@
 import { readFile, writeFile, rename, stat } from 'fs/promises';
 import { join, resolve, dirname, basename, sep } from 'path';
+import { applyYamlEdits, type YamlEdit } from '@doodle-engine/toolkit';
 import type { DocumentContent, WriteResult } from '../shared/project';
 
 /**
@@ -65,5 +66,23 @@ export class DocumentService {
 
         const info = await stat(abs);
         return { ok: true, conflict: false, mtimeMs: info.mtimeMs };
+    }
+
+    /**
+     * Apply form field edits to a YAML file, preserving its comments, key order,
+     * and any keys the form doesn't touch. Reads the current file, splices in
+     * the changed values, and writes it back through the same atomic,
+     * conflict-checked path as `write`.
+     */
+    async writeEntityFields(
+        projectDir: string,
+        relPath: string,
+        edits: YamlEdit[],
+        expectedMtimeMs?: number
+    ): Promise<WriteResult> {
+        const abs = this.resolveInProject(projectDir, relPath);
+        const source = await readFile(abs, 'utf-8');
+        const next = applyYamlEdits(source, edits);
+        return this.write(projectDir, relPath, next, expectedMtimeMs);
     }
 }

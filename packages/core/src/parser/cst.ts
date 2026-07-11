@@ -89,6 +89,8 @@ export interface CstNode {
     idSpan: Span;
     /** The whole node, header through the line before the next node/EOF. */
     span: Span;
+    /** End of the node's last code line (excludes trailing blank/comment lines). */
+    contentEnd: number;
     /** Index of the single speaker/narration line, if present. */
     speakerLine?: number;
     choices: CstChoice[];
@@ -294,11 +296,20 @@ export function parseDialogueCst(source: string, id: string): DialogueCst {
             bodyCodeIndices
         );
 
+        // The node's content ends at its last code line; trailing blank and
+        // comment lines belong to the gap before the next node and are left
+        // untouched when the node is spliced.
+        const lastCodeIndex =
+            bodyCodeIndices.length > 0
+                ? bodyCodeIndices[bodyCodeIndices.length - 1]
+                : headerIndex;
+
         nodes.push({
             id: nodeId,
             headerLine: headerIndex,
             idSpan: { start: idOffset, end: idOffset + nodeId.length },
             span: { start: headerLine.start, end: spanEnd },
+            contentEnd: lineEnd(lines[lastCodeIndex]),
             speakerLine,
             choices,
             ifs,

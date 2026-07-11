@@ -20,6 +20,7 @@ import { ProjectService } from './project-service';
 import { DocumentService } from './document-service';
 import { RecoveryService } from './recovery-service';
 import { WatchService } from './watch-service';
+import type { YamlEdit } from '@doodle-engine/toolkit';
 import type {
     NewProjectOptions,
     OpenProject,
@@ -77,9 +78,7 @@ async function buildMenu(projects: ProjectService): Promise<void> {
         : [{ label: 'No recent projects', enabled: false }];
 
     const template: MenuItemConstructorOptions[] = [
-        ...(isMac
-            ? [{ role: 'appMenu' } as MenuItemConstructorOptions]
-            : []),
+        ...(isMac ? [{ role: 'appMenu' } as MenuItemConstructorOptions] : []),
         {
             label: 'File',
             submenu: [
@@ -186,6 +185,16 @@ app.whenReady().then(() => {
             content: string,
             expectedMtimeMs?: number
         ) => documents.write(dir, relPath, content, expectedMtimeMs)
+    );
+    ipcMain.handle(
+        'doc:writeEntity',
+        (
+            _event,
+            dir: string,
+            relPath: string,
+            edits: YamlEdit[],
+            expectedMtimeMs?: number
+        ) => documents.writeEntityFields(dir, relPath, edits, expectedMtimeMs)
     );
 
     const recovery = new RecoveryService(

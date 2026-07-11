@@ -713,6 +713,7 @@ __metadata:
     typescript: "npm:^5.7.0"
     vite: "npm:^6.4.2"
     vitest: "npm:^4.1.6"
+    yaml: "npm:^2.8.3"
   languageName: unknown
   linkType: soft
 

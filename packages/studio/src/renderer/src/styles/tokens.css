@@ -29,6 +29,9 @@
 
     --overlay-hover: rgba(255, 255, 255, 0.03);
 
+    --scrollbar-thumb: rgba(255, 255, 255, 0.14);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+
     /* Status colors must always pair with an icon or text, never color alone. */
     --valid: #4fae6d;
     --valid-tint: rgba(79, 174, 109, 0.15);
@@ -73,6 +76,9 @@
     --accent-hover: #d42a10;
 
     --overlay-hover: rgba(0, 0, 0, 0.04);
+
+    --scrollbar-thumb: rgba(0, 0, 0, 0.28);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.45);
 
     --valid: #2f8f52;
     --valid-tint: rgba(47, 143, 82, 0.12);
@@ -125,16 +131,26 @@ button {
 .scroll {
     overflow: auto;
 }
-.scroll::-webkit-scrollbar {
+
+/* One visible, themed scrollbar everywhere, so it shows in light mode too. */
+::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
-.scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
     border-radius: 6px;
 }
-.scroll::-webkit-scrollbar-track {
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+::-webkit-scrollbar-track {
     background: transparent;
+}
+
+/* Monaco draws and colors its own scrollbars; don't fight it. */
+.monaco-editor ::-webkit-scrollbar-thumb {
+    background: initial;
 }
 
 .mono {

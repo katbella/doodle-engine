@@ -5,12 +5,14 @@
     "author": "Kat Bella",
     "license": "MIT",
     "description": "Reusable project services for Doodle Engine (load, validate, build, create) shared by the CLI and Doodle Studio",
+    "main": "./dist/toolkit.cjs",
     "module": "./dist/toolkit.js",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/toolkit.js"
+            "import": "./dist/toolkit.js",
+            "require": "./dist/toolkit.cjs"
         }
     },
     "files": [

@@ -36,3 +36,12 @@ export type {
     CreateProjectOptions,
     CreateProjectResult,
 } from './create-project';
+
+// Comment-preserving YAML edits (for Studio's visual entity forms)
+export {
+    applyYamlEdits,
+    readYamlValue,
+    isYamlMap,
+    isYamlSeqAt,
+} from './yaml-edit';
+export type { YamlEdit } from './yaml-edit';

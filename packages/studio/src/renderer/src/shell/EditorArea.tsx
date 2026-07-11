@@ -4,6 +4,10 @@ import { filePathFor } from '../lib/paths';
 import { DetailView } from './DetailView';
 import { ProjectOverview } from './ProjectOverview';
 import { SourceView } from './SourceView';
+import { DialogueEditor } from './DialogueEditor';
+import { EntityForm } from './EntityForm';
+import { GameConfigForm } from './GameConfigForm';
+import { ENTITY_FORMS } from '../lib/entity-fields';
 
 export type ViewMode = 'view' | 'source';
 
@@ -49,7 +53,10 @@ export function EditorArea({
                     >
                         <span>{tab.label}</span>
                         {dirtyTabs.has(tab.key) && (
-                            <span className="tab__dirty" title="Unsaved changes" />
+                            <span
+                                className="tab__dirty"
+                                title="Unsaved changes"
+                            />
                         )}
                         <button
                             className="tab__close"
@@ -72,7 +79,11 @@ export function EditorArea({
                             className={`seg__opt ${mode === 'view' ? 'seg__opt--on' : ''}`}
                             onClick={() => onSetViewMode(active.key, 'view')}
                         >
-                            View
+                            {active.section === 'dialogues' ||
+                            active.section === 'config' ||
+                            ENTITY_FORMS[active.section]
+                                ? 'Visual'
+                                : 'View'}
                         </button>
                         <button
                             className={`seg__opt ${mode === 'source' ? 'seg__opt--on' : ''}`}
@@ -119,15 +130,51 @@ export function EditorArea({
                 );
             })}
 
-            {(!active || mode !== 'source' || !activePath) && (
-                <div className="editor__body scroll">
-                    {active ? (
-                        <DetailView project={project} tab={active} />
-                    ) : (
+            {(!active || mode !== 'source' || !activePath) &&
+                (!active ? (
+                    <div className="editor__body scroll">
                         <ProjectOverview project={project} />
-                    )}
-                </div>
-            )}
+                    </div>
+                ) : active.section === 'dialogues' && activePath ? (
+                    <div className="editor__source-body">
+                        <DialogueEditor
+                            key={active.key}
+                            project={project}
+                            tabKey={active.key}
+                            path={activePath}
+                            dialogueId={active.itemId}
+                            onDirty={onDirty}
+                            onModified={onModified}
+                        />
+                    </div>
+                ) : active.section === 'config' && activePath ? (
+                    <div className="editor__source-body">
+                        <GameConfigForm
+                            key={active.key}
+                            project={project}
+                            tabKey={active.key}
+                            path={activePath}
+                            onDirty={onDirty}
+                            onModified={onModified}
+                        />
+                    </div>
+                ) : ENTITY_FORMS[active.section] && activePath ? (
+                    <div className="editor__source-body">
+                        <EntityForm
+                            key={active.key}
+                            project={project}
+                            tabKey={active.key}
+                            section={active.section}
+                            path={activePath}
+                            onDirty={onDirty}
+                            onModified={onModified}
+                        />
+                    </div>
+                ) : (
+                    <div className="editor__body scroll">
+                        <DetailView project={project} tab={active} />
+                    </div>
+                ))}
         </div>
     );
 }
