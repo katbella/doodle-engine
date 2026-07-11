@@ -5,24 +5,19 @@ export default defineConfig({
     build: {
         lib: {
             entry: {
-                cli: resolve(__dirname, 'src/cli.ts'),
+                toolkit: resolve(__dirname, 'src/index.ts'),
             },
             formats: ['es'],
             fileName: (_format, entryName) => `${entryName}.js`,
         },
         rollupOptions: {
-            // Externalize everything that will be in node_modules at runtime
+            // Externalize everything that will be in node_modules at runtime.
             external: [
                 // Workspace packages
                 '@doodle-engine/core',
-                '@doodle-engine/react',
-                '@doodle-engine/toolkit',
                 // npm dependencies
                 '@vitejs/plugin-react',
                 'chokidar',
-                'commander',
-                'crayon.js',
-                'prompts',
                 'vite',
                 'yaml',
                 // Node.js built-ins
@@ -55,9 +50,6 @@ export default defineConfig({
                 'dgram',
                 'fsevents',
             ],
-            output: {
-                banner: '#!/usr/bin/env node',
-            },
         },
         target: 'node24',
         outDir: 'dist',

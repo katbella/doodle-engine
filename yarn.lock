@@ -455,17 +455,15 @@ __metadata:
   dependencies:
     "@doodle-engine/core": "workspace:*"
     "@doodle-engine/react": "workspace:*"
+    "@doodle-engine/toolkit": "workspace:*"
     "@types/node": "npm:^24.0.0"
     "@types/prompts": "npm:^2.4.9"
-    "@vitejs/plugin-react": "npm:^4.3.0"
-    chokidar: "npm:^4.0.0"
     commander: "npm:^12.0.0"
     crayon.js: "npm:^3.3.0"
     prompts: "npm:^2.4.2"
     typescript: "npm:^5.7.0"
     vite: "npm:^6.4.2"
     vitest: "npm:^4.1.6"
-    yaml: "npm:^2.8.3"
   bin:
     doodle: ./dist/cli.js
   languageName: unknown
@@ -499,6 +497,21 @@ __metadata:
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
+  languageName: unknown
+  linkType: soft
+
+"@doodle-engine/toolkit@workspace:*, @doodle-engine/toolkit@workspace:packages/toolkit":
+  version: 0.0.0-use.local
+  resolution: "@doodle-engine/toolkit@workspace:packages/toolkit"
+  dependencies:
+    "@doodle-engine/core": "workspace:*"
+    "@types/node": "npm:^24.0.0"
+    "@vitejs/plugin-react": "npm:^4.3.0"
+    chokidar: "npm:^4.0.0"
+    typescript: "npm:^5.7.0"
+    vite: "npm:^6.4.2"
+    vitest: "npm:^4.1.6"
+    yaml: "npm:^2.8.3"
   languageName: unknown
   linkType: soft
 

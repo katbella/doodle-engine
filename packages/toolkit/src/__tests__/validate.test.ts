@@ -1,5 +1,5 @@
 /**
- * Tests for CLI content validation.
+ * Tests for content validation.
  */
 
 import { describe, expect, it } from 'vitest';

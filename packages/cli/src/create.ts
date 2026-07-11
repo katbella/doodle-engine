@@ -1,13 +1,15 @@
 /**
  * doodle create
  *
- * Scaffolds a new Doodle Engine game project
+ * Thin wrapper over the toolkit's createProject: this file handles the
+ * interactive prompts and console output. The files are written by
+ * @doodle-engine/toolkit so the CLI and Doodle Studio scaffold projects from the
+ * same templates.
  */
 
 import prompts from 'prompts';
-import { mkdir, writeFile } from 'fs/promises';
-import { join, dirname } from 'path';
 import { crayon } from 'crayon.js';
+import { createProject } from '@doodle-engine/toolkit';
 
 const paw = '🐾';
 const dog = '🐕';
@@ -17,43 +19,7 @@ const folder = '📁';
 const check = '✅';
 const rocket = '🚀';
 
-// Vite inlines all template files as strings at build time.
-// Keys are relative paths like './templates/content/game.yaml'.
-const TEMPLATES = import.meta.glob('./templates/**/*', {
-    query: '?raw',
-    import: 'default',
-    eager: true,
-}) as Record<string, string>;
-
-/**
- * Maps a template glob key to its output path relative to the project root.
- * Returns null for files that need special handling (App variants, CSS variants).
- */
-function resolveOutputPath(key: string): string | null {
-    // Strip the './templates/' prefix
-    const rel = key.replace('./templates/', '');
-
-    // App variant files are picked separately; skip in main loop
-    if (rel === 'src/App.default.tsx' || rel === 'src/App.custom.tsx')
-        return null;
-
-    // CSS variant files are picked separately; skip in main loop
-    if (rel === 'src/index.minimal.css' || rel === 'src/index.starter.css')
-        return null;
-
-    // _root/ files go to the project root
-    if (rel.startsWith('_root/')) {
-        const filename = rel.slice('_root/'.length);
-        // _gitignore → .gitignore  (leading _ becomes .)
-        return filename.startsWith('_') ? '.' + filename.slice(1) : filename;
-    }
-
-    return rel;
-}
-
 export async function create(projectName: string) {
-    const projectPath = join(process.cwd(), projectName);
-
     console.log('');
     console.log(crayon.bold.yellow(`  ${paw} Doodle Engine ${paw}`));
     console.log(crayon.dim('  Text-based RPG and Adventure Game Scaffolder'));
@@ -107,14 +73,34 @@ export async function create(projectName: string) {
     }
 
     console.log('');
+    console.log(`  ${folder} ${crayon.bold('Creating project files...')}`);
 
-    // Create project structure
-    await createProjectStructure(
-        projectPath,
-        projectName,
+    const { projectPath } = await createProject(projectName, {
+        targetDir: process.cwd(),
         useDefaultRenderer,
-        useStarterStyles
+        useStarterStyles,
+    });
+
+    console.log(crayon.green(`  ${check} Files created`));
+    console.log('');
+    console.log(`  ${bone} ${crayon.bold('Starter content written')}`);
+    console.log('');
+    console.log(crayon.dim('  Content includes:'));
+    console.log(crayon.dim('    2 locations  (tavern, market)'));
+    console.log(crayon.dim('    2 characters (bartender, merchant)'));
+    console.log(crayon.dim('    1 item       (old coin)'));
+    console.log(crayon.dim('    1 map        (town with 2 locations)'));
+    console.log(crayon.dim('    1 quest      (odd jobs, 3 stages)'));
+    console.log(crayon.dim('    3 journal entries'));
+    console.log(
+        crayon.dim('    1 interlude  (chapter one, auto-triggers at tavern)')
     );
+    console.log(
+        crayon.dim(
+            '    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'
+        )
+    );
+    console.log(crayon.dim('    English locale with all strings'));
 
     console.log('');
     console.log(crayon.bold.green(`  ${check} Project created successfully!`));
@@ -145,129 +131,11 @@ export async function create(projectName: string) {
             '    1. Open the Command Palette (Ctrl+Shift+P / Cmd+Shift+P)'
         )
     );
-    console.log(
-        crayon.dim('    2. Run "Extensions: Install from VSIX..."')
-    );
+    console.log(crayon.dim('    2. Run "Extensions: Install from VSIX..."'));
     console.log(
         crayon.dim(
             '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix'
         )
     );
     console.log('');
-}
-
-async function createProjectStructure(
-    projectPath: string,
-    projectName: string,
-    useDefaultRenderer: boolean,
-    useStarterStyles: boolean
-) {
-    // Create directory structure
-    const dirs = [
-        'content/locations',
-        'content/characters',
-        'content/items',
-        'content/dialogues',
-        'content/quests',
-        'content/journal',
-        'content/interludes',
-        'content/locales',
-        'content/maps',
-        'assets/images/banners',
-        'assets/images/portraits',
-        'assets/images/items',
-        'assets/images/maps',
-        'assets/audio/music',
-        'assets/audio/sfx',
-        'assets/audio/ui',
-        'assets/audio/voice',
-        'assets/video',
-        'src',
-    ];
-
-    console.log(`  ${folder} ${crayon.bold('Creating directories...')}`);
-    for (const dir of dirs) {
-        await mkdir(join(projectPath, dir), { recursive: true });
-    }
-    console.log(crayon.green(`  ${check} Directories created`));
-    console.log('');
-
-    // --- package.json (generated, needs projectName) ---
-    const packageJson = {
-        name: projectName,
-        version: '0.1.0',
-        type: 'module',
-        scripts: {
-            dev: 'doodle dev',
-            build: 'doodle build',
-            validate: 'doodle validate',
-            preview: 'vite preview',
-        },
-        dependencies: {
-            '@doodle-engine/core': 'latest',
-            '@doodle-engine/react': 'latest',
-            react: '^19.0.0',
-            'react-dom': '^19.0.0',
-        },
-        devDependencies: {
-            '@doodle-engine/cli': 'latest',
-            '@types/react': '^19.0.0',
-            '@types/react-dom': '^19.0.0',
-            '@vitejs/plugin-react': '^4.3.0',
-            typescript: '^5.7.0',
-            vite: '^6.0.0',
-        },
-    };
-
-    console.log(`  ${sparkle} ${crayon.bold('Writing project files...')}`);
-    await writeFile(
-        join(projectPath, 'package.json'),
-        JSON.stringify(packageJson, null, 2)
-    );
-
-    // --- Write all template files ---
-    for (const [key, content] of Object.entries(TEMPLATES)) {
-        const outPath = resolveOutputPath(key);
-        if (outPath === null) continue;
-
-        const dest = join(projectPath, outPath);
-        // Ensure parent directory exists (templates may have paths not in the dirs list)
-        await mkdir(dirname(dest), { recursive: true });
-        await writeFile(dest, content);
-    }
-
-    // --- src/App.tsx (pick variant based on renderer choice) ---
-    const appKey = useDefaultRenderer
-        ? './templates/src/App.default.tsx'
-        : './templates/src/App.custom.tsx';
-    await writeFile(join(projectPath, 'src/App.tsx'), TEMPLATES[appKey]);
-
-    // --- src/index.css (pick variant based on styles choice) ---
-    const cssKey =
-        useDefaultRenderer && useStarterStyles
-            ? './templates/src/index.starter.css'
-            : './templates/src/index.minimal.css';
-    await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
-
-    console.log(crayon.green(`  ${check} Source files created`));
-    console.log('');
-
-    console.log(`  ${bone} ${crayon.bold('Starter content written')}`);
-    console.log('');
-    console.log(crayon.dim('  Content includes:'));
-    console.log(crayon.dim('    2 locations  (tavern, market)'));
-    console.log(crayon.dim('    2 characters (bartender, merchant)'));
-    console.log(crayon.dim('    1 item       (old coin)'));
-    console.log(crayon.dim('    1 map        (town with 2 locations)'));
-    console.log(crayon.dim('    1 quest      (odd jobs, 3 stages)'));
-    console.log(crayon.dim('    3 journal entries'));
-    console.log(
-        crayon.dim('    1 interlude  (chapter one, auto-triggers at tavern)')
-    );
-    console.log(
-        crayon.dim(
-            '    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'
-        )
-    );
-    console.log(crayon.dim('    English locale with all strings'));
 }

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, writeFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join, dirname } from 'path';
-import { loadContent } from '../content-loader';
+import { loadContent, loadProject } from '../load-project';
 
 async function makeProject(
     files: Record<string, string>
@@ -80,6 +80,35 @@ describe('loadContent', () => {
             expect(registry.dialogues.intro).toBeDefined();
             expect(registry.locations.town).toBeDefined();
             expect(config.startLocation).toBe('town');
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+});
+
+describe('loadProject', () => {
+    it('loads by project root and reports file paths relative to the project', async () => {
+        const dir = await makeProject({
+            'content/game.yaml': GAME,
+            'content/locations/town.yaml': TOWN,
+            'content/dialogues/intro.dlg':
+                'NODE start\n  NARRATOR: Hi.\n  CHOICE Bye\n    END dialogue\n  END\n',
+        });
+
+        try {
+            const { registry, fileMap, config, parseErrors } =
+                await loadProject(dir);
+
+            expect(parseErrors).toEqual([]);
+            expect(registry.locations.town).toBeDefined();
+            expect(config.startLocation).toBe('town');
+            // File paths start at the project root, so they begin with "content/".
+            expect(fileMap.get('town')).toBe(
+                join('content', 'locations', 'town.yaml')
+            );
+            expect(fileMap.get('intro')).toBe(
+                join('content', 'dialogues', 'intro.dlg')
+            );
         } finally {
             await rm(dir, { recursive: true, force: true });
         }

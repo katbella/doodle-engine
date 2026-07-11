@@ -20,6 +20,7 @@ import type {
 } from '../types/entities';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
+import { splitComment } from './comment';
 
 /**
  * Token represents a line of DSL code with metadata
@@ -76,36 +77,9 @@ function tokenize(input: string): Token[] {
             lineNumber: index + 1,
         }))
         .map(({ original, lineNumber }) => {
-            // Remove comments (but preserve # inside quotes)
-            let withoutComment = original;
-            const hashIndex = original.indexOf('#');
-            if (hashIndex === -1) {
-                // No # at all, keep as-is
-                withoutComment = original;
-            } else {
-                const quoteMatch = original.match(/"[^"]*"/);
-                if (quoteMatch) {
-                    const quoteStart = original.indexOf(quoteMatch[0]);
-                    const quoteEnd = quoteStart + quoteMatch[0].length;
-                    if (hashIndex < quoteStart) {
-                        // # is before the quote, so it's a comment
-                        withoutComment = original.substring(0, hashIndex);
-                    } else if (
-                        hashIndex >= quoteStart &&
-                        hashIndex < quoteEnd
-                    ) {
-                        // # is inside quotes. Preserve it and strip any # after the quote.
-                        withoutComment =
-                            original.substring(0, quoteEnd) +
-                            original.substring(quoteEnd).split('#')[0];
-                    } else {
-                        // # is after the quote, so strip from there
-                        withoutComment = original.substring(0, hashIndex);
-                    }
-                } else {
-                    withoutComment = original.substring(0, hashIndex);
-                }
-            }
+            // Remove comments (but preserve # inside quotes). Shared with the
+            // lossless CST layer so both agree on where a comment begins.
+            const { code: withoutComment } = splitComment(original);
 
             // Calculate indentation level
             const indent =

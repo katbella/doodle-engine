@@ -2,9 +2,12 @@
  * Content validation for Doodle Engine.
  *
  * Validates dialogues, content references, and localization keys.
+ *
+ * This is pure logic with no console or color output: it returns a list of
+ * problems and lets the caller decide how to show them. The CLI keeps its own
+ * colored printer; Doodle Studio renders the same list in its Problems panel.
  */
 
-import { crayon } from 'crayon.js';
 import type { ContentRegistry } from '@doodle-engine/core';
 import type { Dialogue, DialogueNode, GameConfig } from '@doodle-engine/core';
 
@@ -878,31 +881,4 @@ function validateLocalizationKeys(
     }
 
     return errors;
-}
-
-/**
- * Print validation errors to console.
- */
-export function printValidationErrors(errors: ValidationError[]): void {
-    if (errors.length === 0) {
-        console.log(crayon.green('✓ No validation errors'));
-        return;
-    }
-
-    console.log(
-        crayon.red(
-            `\n✗ Found ${errors.length} validation error${errors.length === 1 ? '' : 's'}:\n`
-        )
-    );
-
-    for (const error of errors) {
-        console.log(
-            crayon.bold(error.file) + (error.line ? `:${error.line}` : '')
-        );
-        console.log('  ' + crayon.red(error.message));
-        if (error.suggestion) {
-            console.log('  ' + crayon.dim(error.suggestion));
-        }
-        console.log();
-    }
 }

@@ -1,22 +1,27 @@
 /**
- * Shared content loader for the CLI (validate, build, dev).
+ * Shared content loader, used by both the CLI (validate, build, dev) and Doodle
+ * Studio.
  *
  * Loads YAML entities, locale files, dialogues, and game.yaml from a content
  * directory. Each dialogue is parsed on its own, so a single malformed .dlg
  * becomes a reported error (in parseErrors) instead of stopping the load or
  * hiding the dialogues in other files.
+ *
+ * File paths in fileMap are relative to a base directory the caller passes in,
+ * not to process.cwd(), so this works the same no matter where the app runs.
  */
 
 import { readFile, readdir } from 'fs/promises';
-import { join, extname, relative } from 'path';
+import { join, extname, relative, dirname } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { parseDialogue } from '@doodle-engine/core';
+import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 import type { ValidationError } from './validate.js';
 
 export interface LoadedContent {
-    registry: any;
+    registry: ContentRegistry;
     fileMap: Map<string, string>;
-    config: any;
+    config: GameConfig;
     parseErrors: ValidationError[];
 }
 
@@ -30,7 +35,10 @@ const ENTITY_TYPES = [
     { dir: 'interludes', key: 'interludes' },
 ];
 
-export async function loadContent(contentDir: string): Promise<LoadedContent> {
+export async function loadContent(
+    contentDir: string,
+    baseDir: string = dirname(contentDir)
+): Promise<LoadedContent> {
     const registry: any = {
         locations: {},
         characters: {},
@@ -57,7 +65,7 @@ export async function loadContent(contentDir: string): Promise<LoadedContent> {
                     const data = parseYaml(await readFile(filePath, 'utf-8'));
                     if (data && data.id) {
                         registry[key][data.id] = data;
-                        fileMap.set(data.id, relative(process.cwd(), filePath));
+                        fileMap.set(data.id, relative(baseDir, filePath));
                     }
                 }
             }
@@ -90,7 +98,7 @@ export async function loadContent(contentDir: string): Promise<LoadedContent> {
         for (const file of files) {
             if (extname(file) === '.dlg') {
                 const filePath = join(dialoguesDir, file);
-                const relPath = relative(process.cwd(), filePath);
+                const relPath = relative(baseDir, filePath);
                 const dialogueId = file.replace('.dlg', '');
                 try {
                     const content = await readFile(filePath, 'utf-8');
@@ -130,4 +138,14 @@ export async function loadContent(contentDir: string): Promise<LoadedContent> {
     }
 
     return { registry, fileMap, config, parseErrors };
+}
+
+/**
+ * Load a whole project by its root directory.
+ *
+ * The content lives in `<projectDir>/content`, and file paths in the returned
+ * fileMap are relative to the project root — the same shape the CLI reports.
+ */
+export async function loadProject(projectDir: string): Promise<LoadedContent> {
+    return loadContent(join(projectDir, 'content'), projectDir);
 }

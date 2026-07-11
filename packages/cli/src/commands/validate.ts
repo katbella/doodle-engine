@@ -6,8 +6,8 @@
 
 import { join } from 'path';
 import { crayon } from 'crayon.js';
-import { validateContent, printValidationErrors } from '../validate.js';
-import { loadContent } from '../content-loader.js';
+import { validateContent, loadContent } from '@doodle-engine/toolkit';
+import { printValidationErrors } from '../print-validation.js';
 
 export async function validate() {
     const cwd = process.cwd();

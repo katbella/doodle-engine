@@ -145,6 +145,23 @@ export { Engine, createInitialState } from './engine';
 // Parser
 export { parseDialogue, parseCondition, parseEffect } from './parser';
 
+// Lossless concrete-syntax layer (for editors: round-trip safe, position-aware)
+export {
+    parseDialogueCst,
+    printDialogueCst,
+    cstToDialogue,
+} from './parser/cst';
+export type {
+    DialogueCst,
+    CstLine,
+    CstNode,
+    CstChoice,
+    CstIf,
+    CstDirective,
+    CstEdit,
+    Span,
+} from './parser/cst';
+
 // Dev Tools (framework-agnostic debugging API)
 export type { DevTools } from './devtools';
 

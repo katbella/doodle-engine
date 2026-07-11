@@ -1,16 +1,20 @@
 {
-    "name": "@doodle-engine/cli",
+    "name": "@doodle-engine/toolkit",
     "version": "0.1.3",
     "type": "module",
     "author": "Kat Bella",
     "license": "MIT",
-    "description": "CLI tools for Doodle Engine game development",
-    "bin": {
-        "doodle": "./dist/cli.js"
+    "description": "Reusable project services for Doodle Engine (load, validate, build, create) shared by the CLI and Doodle Studio",
+    "module": "./dist/toolkit.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/toolkit.js"
+        }
     },
     "files": [
-        "dist",
-        "extensions"
+        "dist"
     ],
     "scripts": {
         "dev": "vite build --watch",
@@ -19,16 +23,13 @@
     },
     "dependencies": {
         "@doodle-engine/core": "workspace:*",
-        "@doodle-engine/react": "workspace:*",
-        "@doodle-engine/toolkit": "workspace:*",
-        "commander": "^12.0.0",
-        "crayon.js": "^3.3.0",
-        "prompts": "^2.4.2",
-        "vite": "^6.4.2"
+        "@vitejs/plugin-react": "^4.3.0",
+        "chokidar": "^4.0.0",
+        "vite": "^6.4.2",
+        "yaml": "^2.8.3"
     },
     "devDependencies": {
         "@types/node": "^24.0.0",
-        "@types/prompts": "^2.4.9",
         "typescript": "^5.7.0",
         "vitest": "^4.1.6"
     },
@@ -38,7 +39,7 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/katbella/doodle-engine",
-        "directory": "packages/cli"
+        "directory": "packages/toolkit"
     },
     "engines": {
         "node": ">=24.0.0"
