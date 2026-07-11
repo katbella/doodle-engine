@@ -68,13 +68,19 @@ export function DialogueEditor({
         };
     }, [dir, path, dialogueId]);
 
-    const currentText = useMemo(
-        () =>
-            dialogue
-                ? applyDialogueEdits(base, dialogueId, dialogue)
-                : savedText,
-        [base, dialogueId, dialogue, savedText]
-    );
+    const currentText = useMemo(() => {
+        if (!dialogue) return savedText;
+        const forSave: Dialogue = {
+            ...dialogue,
+            nodes: dialogue.nodes.map((n) => ({
+                ...n,
+                choices: n.choices.map((c) =>
+                    c.text.trim() ? c : { ...c, text: '@choice' }
+                ),
+            })),
+        };
+        return applyDialogueEdits(base, dialogueId, forSave);
+    }, [base, dialogueId, dialogue, savedText]);
     const dirty = currentText !== savedText;
     useEffect(() => onDirty(tabKey, dirty), [dirty, tabKey, onDirty]);
 
