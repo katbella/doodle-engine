@@ -2,6 +2,7 @@ node_modules
 dist
 out
 *.log
+.build-test-*
 .DS_Store
 design-docs/
 docs/.astro/

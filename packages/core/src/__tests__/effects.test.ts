@@ -141,7 +141,7 @@ describe('Effect Processors', () => {
             expect(newState.variables.newVar).toBe(100);
         });
 
-        it('should not add to string variables', () => {
+        it('overwrites a string variable when adding a number to it (edge case but could happen!)', () => {
             const effect: Effect = {
                 type: 'addVariable',
                 variable: 'playerName',
@@ -153,7 +153,6 @@ describe('Effect Processors', () => {
             };
             const newState = applyEffect(effect, state);
 
-            // Should initialize to the value instead
             expect(newState.variables.playerName).toBe(10);
         });
     });

@@ -4,14 +4,26 @@
 
 import { mkdtemp, mkdir, readFile, rm, writeFile, access } from 'fs/promises';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildProject, copyProjectAssets } from '../build-project';
+import { createProject } from '../create-project';
 
 const tempDirs: string[] = [];
 
 async function makeTempDir() {
     const root = await mkdtemp(join(tmpdir(), 'doodle-build-'));
+    tempDirs.push(root);
+    return root;
+}
+
+// The scaffolded project must sit inside the monorepo so its build can find
+// React and the engine packages in the repo's node_modules.
+const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+async function makeRepoTempDir() {
+    const root = await mkdtemp(join(packageRoot, '.build-test-'));
     tempDirs.push(root);
     return root;
 }
@@ -67,6 +79,56 @@ describe('buildProject validation gate', () => {
         // No output folder was created.
         await expect(access(join(projectDir, 'dist'))).rejects.toThrow();
     });
+});
+
+describe('buildProject success', () => {
+    it('builds a scaffolded project and writes the runtime files', async () => {
+        const targetDir = await makeRepoTempDir();
+        const { projectPath } = await createProject('test-game', {
+            targetDir,
+            useDefaultRenderer: true,
+            useStarterStyles: true,
+        });
+
+        const logs: string[] = [];
+        const result = await buildProject({
+            projectDir: projectPath,
+            onLog: (message) => logs.push(message),
+        });
+
+        expect(result.ok, result.errors.map((e) => e.message).join('; ')).toBe(
+            true
+        );
+        expect(result.errors).toEqual([]);
+        expect(result.durationMs).toBeGreaterThan(0);
+
+        // Every file the build reports it wrote actually exists on disk.
+        for (const rel of result.outputFiles) {
+            await expect(access(join(result.outDir, rel))).resolves.toBeUndefined();
+        }
+
+        // Vite produced the entry HTML.
+        await expect(
+            access(join(result.outDir, 'index.html'))
+        ).resolves.toBeUndefined();
+
+        // api/content is well-formed and carries the loaded registry + config.
+        const apiContent = JSON.parse(
+            await readFile(join(result.outDir, 'api', 'content'), 'utf-8')
+        );
+        expect(apiContent.registry).toBeDefined();
+        expect(apiContent.config.startLocation).toBeDefined();
+
+        // The asset manifest is well-formed (version + shell/game asset lists).
+        const manifest = JSON.parse(
+            await readFile(join(result.outDir, 'asset-manifest.json'), 'utf-8')
+        );
+        expect(manifest.version).toBeDefined();
+        expect(Array.isArray(manifest.shell)).toBe(true);
+        expect(Array.isArray(manifest.game)).toBe(true);
+
+        expect(logs).toContain('Generating asset manifest...');
+    }, 60_000);
 });
 
 describe('copyProjectAssets', () => {
