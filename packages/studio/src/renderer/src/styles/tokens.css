@@ -1,0 +1,142 @@
+/*
+ * Design tokens: one source of truth for color, type, and spacing. A light
+ * theme can be added later as a single `:root[data-theme="light"]` override of
+ * these variables. Font stacks fall back to system faces until Archivo and
+ * JetBrains Mono are bundled, at which point swapping them in is one change.
+ */
+
+:root {
+    color-scheme: dark;
+
+    --bg: #0d0e10;
+    --bg-editor: #101113;
+    --surface: #151618;
+    --surface-raised: #1a1b1d;
+    --surface-input: #111214;
+    --surface-hover: #1e1f22;
+
+    --border-faint: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.16);
+
+    --text: #f4f2f1;
+    --text-dim: rgba(239, 236, 235, 0.62);
+    --text-faint: rgba(255, 255, 255, 0.38);
+
+    --accent: #ec3013;
+    --accent-ink: #0d0e10;
+    --accent-tint: rgba(236, 48, 19, 0.14);
+    --accent-hover: #ff4423;
+
+    --overlay-hover: rgba(255, 255, 255, 0.03);
+
+    /* Status colors must always pair with an icon or text, never color alone. */
+    --valid: #4fae6d;
+    --valid-tint: rgba(79, 174, 109, 0.15);
+    --warn: #d9a441;
+    --warn-tint: rgba(217, 164, 65, 0.15);
+    --error: #e5484d;
+    --error-tint: rgba(229, 72, 77, 0.15);
+    --danger: #ae1800;
+
+    --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Consolas',
+        monospace;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 22px;
+
+    --radius: 0;
+}
+
+:root[data-theme='light'] {
+    color-scheme: light;
+
+    --bg: #f3f2f2;
+    --bg-editor: #ffffff;
+    --surface: #ebeae9;
+    --surface-raised: #ffffff;
+    --surface-input: #ffffff;
+    --surface-hover: #e4e2e1;
+
+    --border-faint: rgba(0, 0, 0, 0.08);
+    --border: rgba(0, 0, 0, 0.16);
+
+    --text: #201e1d;
+    --text-dim: rgba(32, 30, 29, 0.64);
+    --text-faint: rgba(32, 30, 29, 0.42);
+
+    --accent-ink: #ffffff;
+    --accent-tint: rgba(236, 48, 19, 0.1);
+    --accent-hover: #d42a10;
+
+    --overlay-hover: rgba(0, 0, 0, 0.04);
+
+    --valid: #2f8f52;
+    --valid-tint: rgba(47, 143, 82, 0.12);
+    --warn: #9a6b1a;
+    --warn-tint: rgba(154, 107, 26, 0.12);
+    --error: #c0392b;
+    --error-tint: rgba(192, 57, 43, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+}
+
+::selection {
+    background: var(--accent-tint);
+}
+
+button {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.scroll {
+    overflow: auto;
+}
+.scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+}
+.scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}

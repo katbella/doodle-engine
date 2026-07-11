@@ -8,8 +8,6 @@
  * of calling process.exit — so it can run inside a desktop app.
  */
 
-import { build as viteBuild } from 'vite';
-import react from '@vitejs/plugin-react';
 import { copyFile, readdir, mkdir, stat, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
 import { generateAssetManifest } from './manifest';
@@ -86,6 +84,12 @@ export async function buildProject(
         config,
         Date.now().toString()
     );
+
+    // Loaded here rather than at module top so callers that only load or
+    // validate content (like Doodle Studio opening a project) don't pull in the
+    // whole Vite build toolchain.
+    const { build: viteBuild } = await import('vite');
+    const { default: react } = await import('@vitejs/plugin-react');
 
     await viteBuild({
         root: projectDir,

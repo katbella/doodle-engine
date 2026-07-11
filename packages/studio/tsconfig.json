@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "lib": ["ES2023", "DOM", "DOM.Iterable"],
+        "types": ["node", "electron-vite/node"],
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true
+    },
+    "include": ["src", "electron.vite.config.ts"]
+}

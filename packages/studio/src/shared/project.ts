@@ -1,0 +1,151 @@
+/**
+ * Types shared between the Electron main process and the renderer.
+ *
+ * These describe the data that crosses the IPC bridge, so both sides agree on
+ * the shape. Everything here must be plain JSON (no Maps, no class instances),
+ * because IPC serializes it.
+ */
+
+import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
+import type { ValidationError } from '@doodle-engine/toolkit';
+
+/** Which Doodle Engine version a project targets and whether deps are installed. */
+export interface EngineInfo {
+    /** Version range the project's package.json declares for @doodle-engine/core. */
+    declared: string | null;
+    /** Version actually installed in the project's node_modules, if present. */
+    installed: string | null;
+    /** True when the project's dependencies appear to be installed. */
+    depsInstalled: boolean;
+}
+
+/** A project the user has opened, loaded through the toolkit. */
+export interface OpenProject {
+    /** Absolute path to the project root. */
+    projectDir: string;
+    /** Display name (from package.json, else the folder name). */
+    name: string;
+    /** Project version from package.json, if any. */
+    version: string | null;
+    /** All parsed content. */
+    registry: ContentRegistry;
+    /** Game configuration (game.yaml). */
+    config: GameConfig;
+    /** Map of content id to its file path, relative to the project root. */
+    files: Record<string, string>;
+    /** All problems found on open: dialogue parse errors plus content validation. */
+    problems: ValidationError[];
+    /** Engine version the project targets and whether its deps are installed. */
+    engine: EngineInfo;
+}
+
+/** An entry in the recent-projects list. */
+export interface RecentProject {
+    /** Absolute path to the project root. */
+    path: string;
+    /** Display name at the time it was opened. */
+    name: string;
+    /** ISO timestamp of the most recent open. */
+    openedAt: string;
+}
+
+/** Options for scaffolding a new project from within Studio. */
+export interface NewProjectOptions {
+    /** Project (and folder) name. */
+    name: string;
+    /** Parent directory to create the project folder inside. */
+    targetDir: string;
+    /** Use the batteries-included renderer. */
+    useDefaultRenderer: boolean;
+    /** Include the styled starter CSS. */
+    useStarterStyles: boolean;
+}
+
+/** Result of running a production build. */
+export interface StudioBuildResult {
+    /** True when the build finished; false when validation or Vite stopped it. */
+    ok: boolean;
+    /** Wall-clock time the build took, in milliseconds. */
+    durationMs: number;
+    /** Validation problems that blocked the build (empty when ok). */
+    errors: ValidationError[];
+    /** Progress and error lines to show in the build log. */
+    logs: string[];
+    /** Absolute path to the output folder. */
+    outDir: string;
+}
+
+/** A file's text and the modified time it was read at. */
+export interface DocumentContent {
+    content: string;
+    mtimeMs: number;
+}
+
+/** Result of a save attempt. */
+export interface WriteResult {
+    /** True when the file was written. */
+    ok: boolean;
+    /** True when the file changed on disk since it was read (write refused). */
+    conflict: boolean;
+    /** Current modified time on disk (new time on success, disk time on conflict). */
+    mtimeMs: number;
+    /** On conflict, the current file contents on disk. */
+    content?: string;
+}
+
+/** Handlers the renderer registers for the native File menu. */
+export interface MenuHandlers {
+    onNew: () => void;
+    onOpen: () => void;
+    onOpenRecent: (path: string) => void;
+}
+
+/** The API the preload bridge exposes to the renderer as window.studio. */
+export interface StudioApi {
+    /** Show a folder picker and open the chosen project. Null if cancelled. */
+    openProject: () => Promise<OpenProject | null>;
+    /** Open a project by an already-known path (e.g. from the recent list). */
+    openProjectPath: (projectDir: string) => Promise<OpenProject | null>;
+    /** Scaffold a new project and open it. */
+    createProject: (options: NewProjectOptions) => Promise<OpenProject | null>;
+    /** Show a folder picker and return the chosen directory, for New Project. */
+    chooseDirectory: () => Promise<string | null>;
+    /** The recent-projects list, most recent first. */
+    listRecentProjects: () => Promise<RecentProject[]>;
+    /** Reload and re-validate the project from disk (the Validate button). */
+    revalidate: (projectDir: string) => Promise<OpenProject>;
+    /** Read a project file's text and its modified time. */
+    readDocument: (
+        projectDir: string,
+        relPath: string
+    ) => Promise<DocumentContent>;
+    /** Save a project file. Pass the mtime it was read at to detect conflicts. */
+    writeDocument: (
+        projectDir: string,
+        relPath: string,
+        content: string,
+        expectedMtimeMs?: number
+    ) => Promise<WriteResult>;
+    /** Save an unsaved-edits recovery buffer for a file. */
+    saveRecovery: (
+        projectDir: string,
+        relPath: string,
+        content: string
+    ) => Promise<void>;
+    /** Read a file's recovery buffer, or null if there is none. */
+    readRecovery: (
+        projectDir: string,
+        relPath: string
+    ) => Promise<string | null>;
+    /** Clear a file's recovery buffer (after a successful save). */
+    clearRecovery: (projectDir: string, relPath: string) => Promise<void>;
+    /** Run a production build of the given project. */
+    build: (projectDir: string) => Promise<StudioBuildResult>;
+    /**
+     * Subscribe to external changes to a project file (edited outside Studio).
+     * The callback gets the file's project-relative path. Returns an unsubscribe.
+     */
+    onFileChanged: (callback: (relPath: string) => void) => () => void;
+    /** Wire the native File menu to renderer actions. Returns an unsubscribe. */
+    onMenu: (handlers: MenuHandlers) => () => void;
+}

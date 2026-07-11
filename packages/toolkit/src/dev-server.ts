@@ -9,9 +9,7 @@
  * how to show them.
  */
 
-import { createServer, type ViteDevServer, type Plugin } from 'vite';
-import react from '@vitejs/plugin-react';
-import { watch } from 'chokidar';
+import type { ViteDevServer, Plugin } from 'vite';
 import { join } from 'path';
 import { generateAssetManifest } from './manifest';
 import { loadProject } from './load-project';
@@ -54,6 +52,12 @@ export async function startDevServer(
 
     const contentDir = join(projectDir, 'content');
     const assetsDir = join(projectDir, 'assets');
+
+    // Loaded here rather than at module top so callers that only load or
+    // validate content don't pull in the whole Vite dev-server toolchain.
+    const { createServer } = await import('vite');
+    const { default: react } = await import('@vitejs/plugin-react');
+    const { watch } = await import('chokidar');
 
     const contentPlugin: Plugin = {
         name: 'doodle-content-loader',
