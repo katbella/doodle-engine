@@ -179,6 +179,11 @@ export class PlaytestSession {
         return { name, save: this.engine.saveGame() };
     }
 
+    /** The full engine state, for carrying a session across a content reload. */
+    exportState(): SaveData {
+        return this.engine.saveGame();
+    }
+
     loadTestState(state: NamedTestState): void {
         this.events = [];
         this.snapshot = this.engine.loadGame(state.save);
@@ -206,6 +211,32 @@ export class PlaytestSession {
         const text = resolveText(source, locale, state.variables);
         return source.startsWith('@') ? { text, key: source } : { text };
     }
+}
+
+/**
+ * Build a fresh session for reloaded content, carrying the previous session's
+ * state and place across the reload. The engine is rebuilt from the new registry
+ * and config, then restored to where the tester was — same flags, variables,
+ * inventory, location, and current dialogue node — so an edit shows up without
+ * losing the tester's place. The one exception: if the tester was resting on a
+ * dialogue node the edit removed, it starts fresh, so the engine never resumes
+ * on a node that no longer exists.
+ */
+export function reloadSession(
+    prev: PlaytestSession,
+    registry: ContentRegistry,
+    config: GameConfig,
+    projectKey: string
+): PlaytestSession {
+    const next = new PlaytestSession(registry, config, projectKey);
+    const ds = prev.getState().dialogueState;
+    const nodeGone =
+        !!ds &&
+        !registry.dialogues[ds.dialogueId]?.nodes.some(
+            (n) => n.id === ds.nodeId
+        );
+    if (!nodeGone) next.loadTestState({ name: '', save: prev.exportState() });
+    return next;
 }
 
 /** A short, human explanation of why a requirement failed, from the values the

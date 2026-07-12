@@ -9,8 +9,9 @@
  * so they behave exactly like in-game effects.
  */
 import { useCallback, useRef, useState } from 'react';
+import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
-import { PlaytestSession } from '../lib/playtest';
+import { PlaytestSession, reloadSession } from '../lib/playtest';
 import { useTestStates } from '../lib/useTestStates';
 import { DebugTrace } from './DebugTrace';
 import { RendererPreview } from './RendererPreview';
@@ -20,17 +21,40 @@ import { NameStateModal } from './NameStateModal';
 type InnerTab = 'playtest' | 'trace' | 'preview';
 
 export function Playtest({ project }: { project: OpenProject }) {
-    // One engine session per project. Recreated when the project changes.
+    // One engine session, rebuilt whenever the project's content changes — a new
+    // registry or config after a re-validate — so edits reach the playtest
+    // instead of it running the content from when the project first opened. On a
+    // reload of the same project the tester's state and place are carried over;
+    // opening a different project starts fresh.
     const sessionRef = useRef<PlaytestSession | null>(null);
+    const builtFrom = useRef<{
+        registry: ContentRegistry;
+        config: GameConfig;
+    } | null>(null);
+
     if (
         !sessionRef.current ||
-        sessionRef.current.projectKey !== project.projectDir
+        builtFrom.current?.registry !== project.registry ||
+        builtFrom.current?.config !== project.config
     ) {
-        sessionRef.current = new PlaytestSession(
-            project.registry,
-            project.config,
-            project.projectDir
-        );
+        const prev = sessionRef.current;
+        sessionRef.current =
+            prev && prev.projectKey === project.projectDir
+                ? reloadSession(
+                      prev,
+                      project.registry,
+                      project.config,
+                      project.projectDir
+                  )
+                : new PlaytestSession(
+                      project.registry,
+                      project.config,
+                      project.projectDir
+                  );
+        builtFrom.current = {
+            registry: project.registry,
+            config: project.config,
+        };
     }
     const session = sessionRef.current;
 

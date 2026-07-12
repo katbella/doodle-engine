@@ -39,6 +39,30 @@ const api: StudioApi = {
     clearRecovery: (dir, relPath) =>
         ipcRenderer.invoke('recovery:clear', dir, relPath),
     build: (dir) => ipcRenderer.invoke('project:build', dir),
+    cancelBuild: () => ipcRenderer.invoke('project:cancelBuild'),
+    onBuildLog: (callback) => {
+        const listener = (_event: unknown, line: string) => callback(line);
+        ipcRenderer.on('build:log', listener);
+        return () => ipcRenderer.removeListener('build:log', listener);
+    },
+    detectPackageManager: (dir) =>
+        ipcRenderer.invoke('project:packageManager', dir),
+    installDependencies: (dir) =>
+        ipcRenderer.invoke('project:installDeps', dir),
+    onInstallLog: (callback) => {
+        const listener = (_event: unknown, line: string) => callback(line);
+        ipcRenderer.on('install:log', listener);
+        return () => ipcRenderer.removeListener('install:log', listener);
+    },
+    startPreview: (dir) => ipcRenderer.invoke('preview:start', dir),
+    openPreview: () => ipcRenderer.invoke('preview:open'),
+    stopPreview: () => ipcRenderer.invoke('preview:stop'),
+    onPreviewLog: (callback) => {
+        const listener = (_event: unknown, line: string) => callback(line);
+        ipcRenderer.on('preview:log', listener);
+        return () => ipcRenderer.removeListener('preview:log', listener);
+    },
+    openPath: (targetPath) => ipcRenderer.invoke('shell:openPath', targetPath),
     onFileChanged: (callback) => {
         const listener = (_event: unknown, relPath: string) =>
             callback(relPath);

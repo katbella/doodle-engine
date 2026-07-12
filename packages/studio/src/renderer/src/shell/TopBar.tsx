@@ -1,4 +1,4 @@
-import type { OpenProject } from '../../../shared/project';
+import type { OpenProject, PreviewStatus } from '../../../shared/project';
 
 export function TopBar({
     project,
@@ -8,6 +8,12 @@ export function TopBar({
     stale,
     onBuild,
     building,
+    canBuild,
+    preview,
+    previewBusy,
+    onStartPreview,
+    onStopPreview,
+    onOpenPreview,
     onPlaytest,
     theme,
     onToggleTheme,
@@ -19,6 +25,13 @@ export function TopBar({
     stale: boolean;
     onBuild: () => void;
     building: boolean;
+    /** False when the project's dependencies aren't installed yet. */
+    canBuild: boolean;
+    preview: PreviewStatus | null;
+    previewBusy: boolean;
+    onStartPreview: () => void;
+    onStopPreview: () => void;
+    onOpenPreview: () => void;
     onPlaytest: () => void;
     theme: 'dark' | 'light';
     onToggleTheme: () => void;
@@ -82,9 +95,49 @@ export function TopBar({
             >
                 {validating ? 'Validating…' : 'Validate'}
             </button>
-            <button className="btn" onClick={onBuild} disabled={building}>
+            <button
+                className="btn"
+                onClick={onBuild}
+                disabled={building || !canBuild}
+                title={
+                    canBuild
+                        ? undefined
+                        : "Install the project's dependencies first"
+                }
+            >
                 {building ? 'Building…' : 'Build'}
             </button>
+            {preview ? (
+                <>
+                    <button
+                        className="btn"
+                        onClick={onOpenPreview}
+                        title={`Open ${preview.url} in your browser`}
+                    >
+                        ⧉ Preview :{preview.port}
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={onStopPreview}
+                        disabled={previewBusy}
+                    >
+                        ◼ Stop
+                    </button>
+                </>
+            ) : (
+                <button
+                    className="btn"
+                    onClick={onStartPreview}
+                    disabled={previewBusy || !canBuild}
+                    title={
+                        canBuild
+                            ? 'Start the dev server and open the game in your browser'
+                            : "Install the project's dependencies first"
+                    }
+                >
+                    {previewBusy ? 'Starting…' : '◐ Preview'}
+                </button>
+            )}
             <button
                 className="btn btn--accent"
                 onClick={onPlaytest}

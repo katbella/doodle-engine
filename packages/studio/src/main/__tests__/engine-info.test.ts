@@ -29,6 +29,8 @@ describe('readEngineInfo', () => {
             expect(info.declared).toBe('^0.2.0');
             expect(info.installed).toBe('0.2.0');
             expect(info.depsInstalled).toBe(true);
+            // No lockfile in the fixture, so the default package manager.
+            expect(info.packageManager).toBe('npm');
         } finally {
             await rm(dir, { recursive: true, force: true });
         }

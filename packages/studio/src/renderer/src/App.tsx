@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
     NewProjectOptions,
     OpenProject,
+    PreviewStatus,
     RecentProject,
     StudioBuildResult,
 } from '../../shared/project';
@@ -76,6 +77,14 @@ export function App() {
     const [buildResult, setBuildResult] = useState<StudioBuildResult | null>(
         null
     );
+    // Lines streamed from the build process while it runs, shown live before the
+    // final result lands.
+    const [buildLog, setBuildLog] = useState<string[]>([]);
+    const [installing, setInstalling] = useState(false);
+    const [installLog, setInstallLog] = useState<string[]>([]);
+    const [preview, setPreview] = useState<PreviewStatus | null>(null);
+    const [previewBusy, setPreviewBusy] = useState(false);
+    const [previewLog, setPreviewLog] = useState<string[]>([]);
     const [theme, setTheme] = useState<'dark' | 'light'>(() =>
         localStorage.getItem('doodle-studio-theme') === 'light'
             ? 'light'
@@ -158,6 +167,29 @@ export function App() {
         window.studio.listRecentProjects().then(setRecent);
     }, []);
 
+    // Stream build and install output as it happens.
+    useEffect(
+        () =>
+            window.studio.onBuildLog((line) =>
+                setBuildLog((prev) => [...prev, line])
+            ),
+        []
+    );
+    useEffect(
+        () =>
+            window.studio.onInstallLog((line) =>
+                setInstallLog((prev) => [...prev, line])
+            ),
+        []
+    );
+    useEffect(
+        () =>
+            window.studio.onPreviewLog((line) =>
+                setPreviewLog((prev) => [...prev, line])
+            ),
+        []
+    );
+
     const applyOpen = useCallback(
         async (run: () => Promise<OpenProject | null>) => {
             setLoading(true);
@@ -169,6 +201,10 @@ export function App() {
                     setTabs([]);
                     setActiveKey(null);
                     setBuildResult(null);
+                    setBuildLog([]);
+                    setInstallLog([]);
+                    setPreview(null);
+                    setPreviewLog([]);
                     setDockTab('problems');
                     setStaleFiles(new Set());
                     setDirtyTabs(new Set());
@@ -232,6 +268,8 @@ export function App() {
     const runBuild = useCallback(async () => {
         if (!project || building) return;
         setBuilding(true);
+        setBuildLog([]);
+        setBuildResult(null);
         setDockTab('build');
         try {
             setBuildResult(await window.studio.build(project.projectDir));
@@ -239,6 +277,52 @@ export function App() {
             setBuilding(false);
         }
     }, [project, building]);
+
+    const cancelBuild = useCallback(() => window.studio.cancelBuild(), []);
+
+    const openOutput = useCallback(() => {
+        if (buildResult?.outDir) window.studio.openPath(buildResult.outDir);
+    }, [buildResult]);
+
+    const installDeps = useCallback(async () => {
+        if (!project || installing) return;
+        setInstalling(true);
+        setInstallLog([]);
+        setDockTab('build');
+        try {
+            const result = await window.studio.installDependencies(
+                project.projectDir
+            );
+            // Re-read the project so the "dependencies not installed" banner
+            // clears and Build/Preview enable.
+            if (result.ok)
+                setProject(await window.studio.revalidate(project.projectDir));
+        } finally {
+            setInstalling(false);
+        }
+    }, [project, installing]);
+
+    const startPreview = useCallback(async () => {
+        if (!project || previewBusy) return;
+        setPreviewBusy(true);
+        setPreviewLog([]);
+        setDockTab('devserver');
+        try {
+            setPreview(await window.studio.startPreview(project.projectDir));
+        } finally {
+            setPreviewBusy(false);
+        }
+    }, [project, previewBusy]);
+
+    const stopPreview = useCallback(async () => {
+        setPreviewBusy(true);
+        try {
+            await window.studio.stopPreview();
+            setPreview(null);
+        } finally {
+            setPreviewBusy(false);
+        }
+    }, []);
 
     const openItem = useCallback(
         (section: SectionKey, itemId: string, label: string) => {
@@ -482,11 +566,21 @@ export function App() {
                     stale={staleFiles.size > 0}
                     onBuild={runBuild}
                     building={building}
+                    canBuild={project.engine.depsInstalled}
+                    preview={preview}
+                    previewBusy={previewBusy}
+                    onStartPreview={startPreview}
+                    onStopPreview={stopPreview}
+                    onOpenPreview={() => window.studio.openPreview()}
                     onPlaytest={() => setDockTab('playtest')}
                     theme={theme}
                     onToggleTheme={toggleTheme}
                 />
-                <EngineBanner engine={project.engine} />
+                <EngineBanner
+                    engine={project.engine}
+                    installing={installing}
+                    onInstall={installDeps}
+                />
             </div>
             <div className="body">
                 <LeftRail
@@ -559,6 +653,14 @@ export function App() {
                 onTabChange={setDockTab}
                 building={building}
                 buildResult={buildResult}
+                buildLog={buildLog}
+                installing={installing}
+                installLog={installLog}
+                onCancelBuild={cancelBuild}
+                onRebuild={runBuild}
+                onOpenOutput={openOutput}
+                preview={preview}
+                previewLog={previewLog}
                 onOpenProblem={openProblem}
                 flags={flags}
                 variables={variables}

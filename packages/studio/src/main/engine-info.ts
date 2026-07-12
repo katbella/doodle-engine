@@ -1,5 +1,6 @@
 import { readFile, stat } from 'fs/promises';
 import { join } from 'path';
+import { detectPackageManager } from './package-manager';
 import type { EngineInfo } from '../shared/project';
 
 async function readJson(path: string): Promise<Record<string, unknown> | null> {
@@ -30,17 +31,22 @@ export async function readEngineInfo(projectDir: string): Promise<EngineInfo> {
     const deps = (pkg?.dependencies ?? {}) as Record<string, string>;
     const devDeps = (pkg?.devDependencies ?? {}) as Record<string, string>;
     const declared =
-        deps['@doodle-engine/core'] ??
-        devDeps['@doodle-engine/core'] ??
-        null;
+        deps['@doodle-engine/core'] ?? devDeps['@doodle-engine/core'] ?? null;
 
     const installedPkg = await readJson(
-        join(projectDir, 'node_modules', '@doodle-engine', 'core', 'package.json')
+        join(
+            projectDir,
+            'node_modules',
+            '@doodle-engine',
+            'core',
+            'package.json'
+        )
     );
     const installed =
         typeof installedPkg?.version === 'string' ? installedPkg.version : null;
 
     const depsInstalled = await isDirectory(join(projectDir, 'node_modules'));
+    const packageManager = await detectPackageManager(projectDir);
 
-    return { declared, installed, depsInstalled };
+    return { declared, installed, depsInstalled, packageManager };
 }

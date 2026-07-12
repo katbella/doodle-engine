@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
-import { PlaytestSession } from '../playtest';
+import { PlaytestSession, reloadSession } from '../playtest';
 
 function registry(): ContentRegistry {
     return {
@@ -250,5 +250,45 @@ describe('PlaytestSession', () => {
         const v0 = session.version;
         session.startAtNode('bartender', 'rumors');
         expect(session.version).toBeGreaterThan(v0);
+    });
+
+    describe('reloadSession', () => {
+        it('reflects edited content while keeping the tester at the same node', () => {
+            const session = new PlaytestSession(registry(), config(), '/p');
+            session.startAtNode('bartender', 'rumors');
+            session.applyEffect({ type: 'setFlag', flag: 'poked' });
+
+            // The author edits the node's line and re-validates: a new registry.
+            const edited = registry();
+            edited.dialogues.bartender.nodes[0].text =
+                'The captain fled north.';
+
+            const reloaded = reloadSession(session, edited, config(), '/p');
+
+            // The edit reached the playtest…
+            expect(reloaded.getSnapshot().dialogue?.text).toContain(
+                'fled north'
+            );
+            // …and the tester kept their place and state.
+            expect(reloaded.getState().dialogueState?.nodeId).toBe('rumors');
+            expect(reloaded.getState().flags.poked).toBe(true);
+        });
+
+        it('starts fresh when the node the tester was on was removed', () => {
+            const session = new PlaytestSession(registry(), config(), '/p');
+            session.startAtNode('bartender', 'rumors');
+
+            // The author deletes the 'rumors' node the tester was resting on.
+            const edited = registry();
+            edited.dialogues.bartender.nodes =
+                edited.dialogues.bartender.nodes.filter(
+                    (n) => n.id !== 'rumors'
+                );
+
+            const reloaded = reloadSession(session, edited, config(), '/p');
+
+            // It didn't resume on the missing node; it's back at the start state.
+            expect(reloaded.getState().dialogueState).toBeNull();
+        });
     });
 });

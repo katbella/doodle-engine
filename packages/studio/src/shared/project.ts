@@ -11,6 +11,11 @@ import type { ValidationError, YamlEdit } from '@doodle-engine/toolkit';
 
 export type { YamlEdit };
 
+/** A line of streamed output from a build, install, or preview. */
+export interface ProcessLog {
+    line: string;
+}
+
 /** Which Doodle Engine version a project targets and whether deps are installed. */
 export interface EngineInfo {
     /** Version range the project's package.json declares for @doodle-engine/core. */
@@ -19,6 +24,8 @@ export interface EngineInfo {
     installed: string | null;
     /** True when the project's dependencies appear to be installed. */
     depsInstalled: boolean;
+    /** The package manager the project uses, inferred from its lockfile. */
+    packageManager: PackageManager;
 }
 
 /** A project the user has opened, loaded through the toolkit. */
@@ -67,6 +74,8 @@ export interface NewProjectOptions {
 export interface StudioBuildResult {
     /** True when the build finished; false when validation or Vite stopped it. */
     ok: boolean;
+    /** True when the user cancelled the build before it finished. */
+    cancelled: boolean;
     /** Wall-clock time the build took, in milliseconds. */
     durationMs: number;
     /** Validation problems that blocked the build (empty when ok). */
@@ -75,6 +84,27 @@ export interface StudioBuildResult {
     logs: string[];
     /** Absolute path to the output folder. */
     outDir: string;
+    /** Files the build wrote, relative to the output folder. */
+    outputFiles: string[];
+}
+
+/** Which package manager a project uses, inferred from its lockfile. */
+export type PackageManager = 'npm' | 'yarn' | 'pnpm';
+
+/** Result of installing a project's dependencies. */
+export interface InstallResult {
+    /** True when the install finished with a zero exit code. */
+    ok: boolean;
+    /** The package manager that ran. */
+    packageManager: PackageManager;
+}
+
+/** A running dev-server preview: the URL it serves and the port it took. */
+export interface PreviewStatus {
+    /** URL the dev server is listening on (opened in the external browser). */
+    url: string;
+    /** Port the server actually bound to (Vite may pick another if busy). */
+    port: number;
 }
 
 /** A file's text and the modified time it was read at. */
@@ -159,8 +189,38 @@ export interface StudioApi {
     ) => Promise<string | null>;
     /** Clear a file's recovery buffer (after a successful save). */
     clearRecovery: (projectDir: string, relPath: string) => Promise<void>;
-    /** Run a production build of the given project. */
+    /**
+     * Run a production build of the given project in a separate process. Log
+     * lines stream through onBuildLog while this runs; the promise resolves with
+     * the final result.
+     */
     build: (projectDir: string) => Promise<StudioBuildResult>;
+    /** Cancel a build in progress (kills the build process). */
+    cancelBuild: () => Promise<void>;
+    /** Subscribe to streamed build log lines. Returns an unsubscribe. */
+    onBuildLog: (callback: (line: string) => void) => () => void;
+    /** The package manager a project uses, inferred from its lockfile. */
+    detectPackageManager: (projectDir: string) => Promise<PackageManager>;
+    /**
+     * Install the project's dependencies with its package manager. Output
+     * streams through onInstallLog; the promise resolves when it finishes.
+     */
+    installDependencies: (projectDir: string) => Promise<InstallResult>;
+    /** Subscribe to streamed dependency-install output. Returns an unsubscribe. */
+    onInstallLog: (callback: (line: string) => void) => () => void;
+    /**
+     * Start the project's dev server in a separate process and open it in the
+     * default browser. Resolves with the URL and port, or null on failure.
+     */
+    startPreview: (projectDir: string) => Promise<PreviewStatus | null>;
+    /** Open the running preview's URL in the browser again. */
+    openPreview: () => Promise<void>;
+    /** Stop the running dev-server preview. */
+    stopPreview: () => Promise<void>;
+    /** Subscribe to streamed dev-server log lines. Returns an unsubscribe. */
+    onPreviewLog: (callback: (line: string) => void) => () => void;
+    /** Open a folder (or file) in the OS file manager. */
+    openPath: (targetPath: string) => Promise<void>;
     /**
      * Subscribe to external changes to a project file (edited outside Studio).
      * The callback gets the file's project-relative path. Returns an unsubscribe.
