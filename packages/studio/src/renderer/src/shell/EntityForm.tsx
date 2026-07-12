@@ -165,22 +165,25 @@ export function EntityForm({
                 />
             ))}
 
-            {/* Quests and maps carry a structured list the generic form doesn't
-                edit inline; show it read-only so the whole file stays coherent. */}
-            {section === 'quests' && Array.isArray(values.stages) && (
-                <ReadOnlyList
-                    label="Stages"
-                    hint="Edit stage ids and text in Source for now."
-                    items={(values.stages as { id: string }[]).map((s) => s.id)}
+            {section === 'quests' && (
+                <StageListEditor
+                    stages={
+                        Array.isArray(values.stages)
+                            ? (values.stages as Stage[])
+                            : []
+                    }
+                    onChange={(stages) => setField('stages', stages)}
                 />
             )}
-            {section === 'maps' && Array.isArray(values.locations) && (
-                <ReadOnlyList
-                    label="Map markers"
-                    hint="Edit marker coordinates in Source for now."
-                    items={(values.locations as { id: string }[]).map(
-                        (l) => l.id
-                    )}
+            {section === 'maps' && (
+                <MarkerListEditor
+                    markers={
+                        Array.isArray(values.locations)
+                            ? (values.locations as Marker[])
+                            : []
+                    }
+                    locationIds={idsFor(project, 'locations')}
+                    onChange={(markers) => setField('locations', markers)}
                 />
             )}
 
@@ -493,26 +496,161 @@ function StatsBag({
     );
 }
 
-function ReadOnlyList({
-    label,
-    hint,
-    items,
+interface Stage {
+    id: string;
+    description?: string;
+}
+
+/** Editable list of quest stages. Order matters (a quest progresses through
+ * them), so rows can move up and down. */
+function StageListEditor({
+    stages,
+    onChange,
 }: {
-    label: string;
-    hint: string;
-    items: string[];
+    stages: Stage[];
+    onChange: (stages: Stage[]) => void;
 }) {
+    const set = (i: number, patch: Partial<Stage>) =>
+        onChange(stages.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+    const remove = (i: number) =>
+        onChange(stages.filter((_, j) => j !== i));
+    const move = (i: number, delta: number) => {
+        const j = i + delta;
+        if (j < 0 || j >= stages.length) return;
+        const next = [...stages];
+        [next[i], next[j]] = [next[j], next[i]];
+        onChange(next);
+    };
+    const add = () =>
+        onChange([...stages, { id: `stage_${stages.length + 1}`, description: '' }]);
+
     return (
         <div className="field">
-            <span className="field__label">{label}</span>
-            <div className="form__list">
-                {items.map((id) => (
-                    <span key={id} className="form__list-item mono">
-                        {id}
-                    </span>
-                ))}
-            </div>
-            <span className="field__hint">{hint}</span>
+            <span className="field__label">Stages</span>
+            {stages.map((stage, i) => (
+                <div key={i} className="rowedit">
+                    <input
+                        className="dlg__input mono rowedit__id"
+                        value={stage.id}
+                        placeholder="stage_id"
+                        spellCheck={false}
+                        onChange={(e) => set(i, { id: e.target.value })}
+                    />
+                    <input
+                        className="dlg__input rowedit__grow"
+                        value={stage.description ?? ''}
+                        placeholder="@key or description text"
+                        spellCheck={false}
+                        onChange={(e) =>
+                            set(i, { description: e.target.value })
+                        }
+                    />
+                    <button
+                        className="rowedit__btn"
+                        title="Move up"
+                        disabled={i === 0}
+                        onClick={() => move(i, -1)}
+                    >
+                        ↑
+                    </button>
+                    <button
+                        className="rowedit__btn"
+                        title="Move down"
+                        disabled={i === stages.length - 1}
+                        onClick={() => move(i, 1)}
+                    >
+                        ↓
+                    </button>
+                    <button
+                        className="rowedit__btn rowedit__btn--danger"
+                        title="Remove stage"
+                        onClick={() => remove(i)}
+                    >
+                        ×
+                    </button>
+                </div>
+            ))}
+            <button className="dlg__add" onClick={add}>
+                + Add stage
+            </button>
+        </div>
+    );
+}
+
+interface Marker {
+    id: string;
+    x?: number;
+    y?: number;
+}
+
+/** Editable list of map markers: which location, and its x/y on the map. */
+function MarkerListEditor({
+    markers,
+    locationIds,
+    onChange,
+}: {
+    markers: Marker[];
+    locationIds: string[];
+    onChange: (markers: Marker[]) => void;
+}) {
+    const set = (i: number, patch: Partial<Marker>) =>
+        onChange(markers.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+    const remove = (i: number) =>
+        onChange(markers.filter((_, j) => j !== i));
+    const add = () => onChange([...markers, { id: '', x: 0, y: 0 }]);
+
+    // A marker may point at a location not in the list (e.g. a typo); keep it
+    // selectable so the value isn't silently dropped.
+    const options = (id: string) =>
+        id && !locationIds.includes(id) ? [id, ...locationIds] : locationIds;
+
+    return (
+        <div className="field">
+            <span className="field__label">Map markers</span>
+            {markers.map((marker, i) => (
+                <div key={i} className="rowedit">
+                    <select
+                        className="dlg__select rowedit__grow"
+                        value={marker.id}
+                        onChange={(e) => set(i, { id: e.target.value })}
+                    >
+                        <option value="">— location —</option>
+                        {options(marker.id).map((id) => (
+                            <option key={id} value={id}>
+                                {id}
+                            </option>
+                        ))}
+                    </select>
+                    <input
+                        className="dlg__input rowedit__num"
+                        type="number"
+                        value={marker.x ?? 0}
+                        title="x"
+                        onChange={(e) =>
+                            set(i, { x: Number(e.target.value) })
+                        }
+                    />
+                    <input
+                        className="dlg__input rowedit__num"
+                        type="number"
+                        value={marker.y ?? 0}
+                        title="y"
+                        onChange={(e) =>
+                            set(i, { y: Number(e.target.value) })
+                        }
+                    />
+                    <button
+                        className="rowedit__btn rowedit__btn--danger"
+                        title="Remove marker"
+                        onClick={() => remove(i)}
+                    >
+                        ×
+                    </button>
+                </div>
+            ))}
+            <button className="dlg__add" onClick={add}>
+                + Add marker
+            </button>
         </div>
     );
 }
@@ -532,7 +670,7 @@ function unknownFieldsFor(
     const form = ENTITY_FORMS[section];
     if (!form) return [];
     const known = new Set(['id', ...form.fields.map((f) => f.name)]);
-    // Structured lists are handled by their own read-only view.
+    // Structured lists have their own editors below the fields.
     if (section === 'quests') known.add('stages');
     if (section === 'maps') known.add('locations');
     return Object.keys(parsed).filter((k) => !known.has(k));

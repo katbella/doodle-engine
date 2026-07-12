@@ -130,6 +130,66 @@ startTime:
         ]);
         expect(parse(result).startInventory).toEqual(['old_coin', 'rusty_key']);
     });
+
+    it('rewrites a quest stages list of objects and keeps other keys/comments', () => {
+        const quest = `# The odd jobs quest
+id: odd_jobs
+name: "@quest.odd_jobs.name"
+description: "@quest.odd_jobs.description"
+stages:
+  - id: started
+    description: "@quest.odd_jobs.stage.started"
+  - id: complete
+    description: "@quest.odd_jobs.stage.complete"
+`;
+        const result = applyYamlEdits(quest, [
+            {
+                path: ['stages'],
+                value: [
+                    { id: 'started', description: '@quest.odd_jobs.stage.started' },
+                    { id: 'midway', description: '' },
+                    { id: 'complete', description: '@quest.odd_jobs.stage.complete' },
+                ],
+            },
+        ]);
+        const parsed = parse(result);
+        expect(parsed.stages.map((s: { id: string }) => s.id)).toEqual([
+            'started',
+            'midway',
+            'complete',
+        ]);
+        // Other keys and the header comment are untouched.
+        expect(parsed.id).toBe('odd_jobs');
+        expect(parsed.name).toBe('@quest.odd_jobs.name');
+        expect(result).toContain('# The odd jobs quest');
+    });
+
+    it('rewrites map markers (objects with coordinates)', () => {
+        const map = `id: town
+name: Town
+image: town.png
+scale: 10
+locations:
+  - id: tavern
+    x: 0
+    y: 0
+`;
+        const result = applyYamlEdits(map, [
+            {
+                path: ['locations'],
+                value: [
+                    { id: 'tavern', x: 10, y: 20 },
+                    { id: 'market', x: 100, y: 0 },
+                ],
+            },
+        ]);
+        const parsed = parse(result);
+        expect(parsed.locations).toEqual([
+            { id: 'tavern', x: 10, y: 20 },
+            { id: 'market', x: 100, y: 0 },
+        ]);
+        expect(parsed.scale).toBe(10);
+    });
 });
 
 describe('readYamlValue', () => {
