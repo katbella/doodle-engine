@@ -128,7 +128,11 @@ export type { SaveData } from './types/save';
 export type { ContentRegistry, LocaleData } from './types/registry';
 
 // Condition Evaluators
-export { evaluateCondition, evaluateConditions } from './conditions';
+export {
+    evaluateCondition,
+    evaluateConditions,
+    describeConditionValues,
+} from './conditions';
 
 // Effect Processors
 export { applyEffect, applyEffects } from './effects';
@@ -141,6 +145,21 @@ export { buildSnapshot, buildUIStrings } from './snapshot';
 
 // Engine
 export { Engine, createInitialState } from './engine';
+export type { ChoiceVisibility } from './engine';
+
+// Debug trace (for tooling: playtest, state inspector, debug trace)
+export type {
+    TraceSink,
+    TraceEvent,
+    NodeEnterEvent,
+    ConditionEvent,
+    ConditionContext,
+    EffectEvent,
+    StateDelta,
+    TransitionEvent,
+    ChoiceFilteredEvent,
+    TraceErrorEvent,
+} from './types/trace';
 
 // Parser
 export { parseDialogue, parseCondition, parseEffect } from './parser';

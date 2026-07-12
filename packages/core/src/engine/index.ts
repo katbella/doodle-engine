@@ -12,12 +12,28 @@
 
 import type { ContentRegistry } from '../types/registry';
 import type { GameState, CharacterState } from '../types/state';
-import type { GameConfig, DialogueNode, Map as GameMap } from '../types/entities';
+import type {
+    GameConfig,
+    DialogueNode,
+    Map as GameMap,
+} from '../types/entities';
 import type { Snapshot } from '../types/snapshot';
 import type { SaveData } from '../types/save';
+import type { Effect } from '../types/effects';
+import type { Condition } from '../types/conditions';
+import type {
+    TraceSink,
+    TraceEvent,
+    StateDelta,
+    ConditionContext,
+} from '../types/trace';
 import { buildSnapshot } from '../snapshot';
 import { applyEffects } from '../effects';
-import { evaluateConditions } from '../conditions';
+import {
+    evaluateConditions,
+    evaluateCondition,
+    describeConditionValues,
+} from '../conditions';
 
 /**
  * The Doodle Engine.
@@ -29,13 +45,25 @@ export class Engine {
     private state: GameState;
 
     /**
+     * Optional debug-trace sink. When null (the default), the engine records
+     * nothing and behaves — and performs — exactly as it does without tracing.
+     */
+    private trace: TraceSink | null = null;
+
+    /** Monotonic sequence counter for trace events; reset with each new sink. */
+    private traceSeq = 0;
+
+    /**
      * Create a new engine instance.
      *
      * @param registry - Content registry with all game entities
      * @param state - Existing game state, usually from a save. Omit this when
      * starting with newGame().
      */
-    constructor(registry: ContentRegistry, state: GameState = createInitialState()) {
+    constructor(
+        registry: ContentRegistry,
+        state: GameState = createInitialState()
+    ) {
         this.registry = registry;
         this.state = state;
     }
@@ -174,7 +202,7 @@ export class Engine {
 
         // Apply choice effects
         if (choice.effects) {
-            this.state = applyEffects(choice.effects, this.state);
+            this.state = this.applyTracedEffects(choice.effects, this.state);
         }
 
         // If a startDialogue effect fired, nodeId will be ''. Initialize the new dialogue.
@@ -186,6 +214,7 @@ export class Engine {
         const nextNode = dialogue.nodes.find((n) => n.id === choice.next);
         if (!nextNode) {
             // No next node - end dialogue
+            this.emitTransition(dialogue.id, currentNode.id, null);
             this.state = {
                 ...this.state,
                 dialogueState: null,
@@ -194,6 +223,7 @@ export class Engine {
         }
 
         // Set dialogue state to this node
+        this.emitTransition(dialogue.id, currentNode.id, nextNode.id);
         this.state = {
             ...this.state,
             dialogueState: {
@@ -201,10 +231,11 @@ export class Engine {
                 nodeId: nextNode.id,
             },
         };
+        this.emitNodeEnter(dialogue.id, nextNode.id);
 
         // Apply node effects first (before evaluating conditional branches)
         if (nextNode.effects) {
-            this.state = applyEffects(nextNode.effects, this.state);
+            this.state = this.applyTracedEffects(nextNode.effects, this.state);
         }
         if (this.initializePendingDialogueRedirect()) {
             return this.buildSnapshotAndClearTransients();
@@ -267,7 +298,8 @@ export class Engine {
             return this.buildSnapshotAndClearTransients();
         }
 
-        const currentLocation = this.registry.locations[this.state.currentLocation];
+        const currentLocation =
+            this.registry.locations[this.state.currentLocation];
         const destinationLocation = this.registry.locations[locationId];
         if (!currentLocation || !destinationLocation) {
             return this.buildSnapshotAndClearTransients();
@@ -301,7 +333,9 @@ export class Engine {
         const finalHour = newHour % 24;
 
         const updatedCharacterState = { ...this.state.characterState };
-        for (const [charId, charState] of Object.entries(updatedCharacterState)) {
+        for (const [charId, charState] of Object.entries(
+            updatedCharacterState
+        )) {
             if (charState.inParty) {
                 updatedCharacterState[charId] = {
                     ...charState,
@@ -458,13 +492,15 @@ export class Engine {
             return this.buildSnapshotAndClearTransients();
         }
 
+        this.emitTransition(dialogue.id, currentNode.id, resolvedNext);
         this.state = {
             ...this.state,
             dialogueState: { dialogueId: dialogue.id, nodeId: resolvedNext },
         };
+        this.emitNodeEnter(dialogue.id, resolvedNext);
 
         if (nextNode.effects) {
-            this.state = applyEffects(nextNode.effects, this.state);
+            this.state = this.applyTracedEffects(nextNode.effects, this.state);
         }
 
         // startDialogue effect: initialize the new dialogue
@@ -483,14 +519,320 @@ export class Engine {
     }
 
     // ===========================================================================
+    // Debug / Inspection / Trace API
+    //
+    // These methods exist for tooling (Doodle Studio's playtest, state
+    // inspector, and debug trace). They are additive: they never change how a
+    // normal game runs. Debug writes route through the same effect pipeline as
+    // in-game effects, so a debug "set flag" is the exact same code path as a
+    // SET flag in a dialogue.
+    // ===========================================================================
+
+    /**
+     * Get a deep, read-only copy of the current game state.
+     *
+     * Returns a clone so callers (e.g. a state inspector) can read every field
+     * without any risk of mutating engine internals. Changes to the returned
+     * object never reach the engine; use applyDebugEffect() to change state.
+     *
+     * @returns A deep clone of the current GameState
+     */
+    getState(): GameState {
+        return structuredClone(this.state);
+    }
+
+    /**
+     * Attach or detach a debug-trace sink.
+     *
+     * While a sink is attached, the engine reports its decisions (nodes
+     * entered, conditions evaluated with the values they saw, effects applied,
+     * transitions, and hidden choices with reasons). Pass null to detach.
+     *
+     * When no sink is attached, tracing is a no-op: normal behavior and
+     * performance are identical to running without this call.
+     *
+     * @param sink - The trace sink, or null to stop tracing
+     */
+    setTrace(sink: TraceSink | null): void {
+        this.trace = sink;
+        this.traceSeq = 0;
+    }
+
+    /**
+     * Start a dialogue at an arbitrary node.
+     *
+     * Playtest uses this to begin at any node, not just the dialogue's start
+     * node. The node's effects run and, if it is a silent node, it
+     * auto-advances — exactly as if the engine had arrived there in normal
+     * play. If the dialogue or node does not exist, the state is unchanged.
+     *
+     * @param dialogueId - ID of the dialogue to start
+     * @param nodeId - ID of the node to begin at
+     * @returns Snapshot after entering the node
+     */
+    startDialogueAt(dialogueId: string, nodeId: string): Snapshot {
+        const dialogue = this.registry.dialogues[dialogueId];
+        if (!dialogue) {
+            this.emitError(`Dialogue not found: ${dialogueId}`);
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        const node = dialogue.nodes.find((n) => n.id === nodeId);
+        if (!node) {
+            this.emitError(`Node not found: ${dialogueId}/${nodeId}`);
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        this.state = {
+            ...this.state,
+            dialogueState: { dialogueId, nodeId: node.id },
+        };
+        this.emitNodeEnter(dialogueId, node.id);
+
+        if (node.effects) {
+            this.state = this.applyTracedEffects(node.effects, this.state);
+        }
+        if (this.initializePendingDialogueRedirect()) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        if (node.choices.length === 0) {
+            this.settleAtNode(dialogue.id, node);
+            this.initializePendingDialogueRedirect();
+        }
+
+        return this.buildSnapshotAndClearTransients();
+    }
+
+    /**
+     * Apply a single effect through the official effect pipeline, for debugging.
+     *
+     * This is the principled way for a state inspector to change test state:
+     * "set this flag", "give this item", "advance the quest". It routes through
+     * the same applyEffects the runtime uses, so debug writes behave identically
+     * to in-game effects. It never touches project files — only this session's
+     * state.
+     *
+     * @param effect - The effect to apply
+     * @returns Snapshot after applying the effect
+     */
+    applyDebugEffect(effect: Effect): Snapshot {
+        this.state = this.applyTracedEffects([effect], this.state);
+        // A debug startDialogue may leave a pending redirect (nodeId ''); settle it.
+        this.initializePendingDialogueRedirect();
+        return this.buildSnapshotAndClearTransients();
+    }
+
+    /**
+     * Teleport the player to any location, bypassing map travel.
+     *
+     * Unlike the goToLocation effect (which travels within the current map),
+     * teleport reaches any location so a tester can jump anywhere. Party members
+     * come along, matching goToLocation. No travel time is added and location
+     * triggers do not fire — this is a debug jump, not in-game travel. Use
+     * applyDebugEffect({ type: 'goToLocation', ... }) for the in-game path.
+     *
+     * @param locationId - Destination location ID
+     * @returns Snapshot at the new location
+     */
+    teleport(locationId: string): Snapshot {
+        const updatedCharacterState = { ...this.state.characterState };
+        for (const [charId, charState] of Object.entries(
+            updatedCharacterState
+        )) {
+            if (charState.inParty) {
+                updatedCharacterState[charId] = {
+                    ...charState,
+                    location: locationId,
+                };
+            }
+        }
+
+        this.state = {
+            ...this.state,
+            currentLocation: locationId,
+            characterState: updatedCharacterState,
+        };
+
+        return this.buildSnapshotAndClearTransients();
+    }
+
+    /**
+     * Explain, for the current dialogue node, which choices are hidden and why.
+     *
+     * Answers the playtest question "why can't I see this choice?" For each
+     * choice on the current node, reports whether it is visible and — for a
+     * hidden one — the first requirement that failed and the state value it saw.
+     * This reads state only; it changes nothing.
+     *
+     * @returns One entry per choice on the current node, in author order
+     */
+    explainChoices(): ChoiceVisibility[] {
+        if (!this.state.dialogueState) {
+            return [];
+        }
+
+        const dialogue =
+            this.registry.dialogues[this.state.dialogueState.dialogueId];
+        const node = dialogue?.nodes.find(
+            (n) => n.id === this.state.dialogueState?.nodeId
+        );
+        if (!node) {
+            return [];
+        }
+
+        return node.choices.map((choice) => {
+            if (!choice.conditions || choice.conditions.length === 0) {
+                return { choiceId: choice.id, visible: true };
+            }
+
+            // First failing condition is the reason it's hidden (AND logic).
+            for (const condition of choice.conditions) {
+                if (!evaluateCondition(condition, this.state)) {
+                    return {
+                        choiceId: choice.id,
+                        visible: false,
+                        failedCondition: condition,
+                        resolvedValues: describeConditionValues(
+                            condition,
+                            this.state
+                        ),
+                    };
+                }
+            }
+
+            return { choiceId: choice.id, visible: true };
+        });
+    }
+
+    // ===========================================================================
     // Internal Helper Methods
     // ===========================================================================
+
+    // ---------------------------------------------------------------------------
+    // Trace emitters — all no-ops when no sink is attached.
+    // ---------------------------------------------------------------------------
+
+    private emit(event: TraceEvent): void {
+        if (!this.trace) {
+            return;
+        }
+        switch (event.kind) {
+            case 'nodeEnter':
+                this.trace.onNodeEnter?.(event);
+                break;
+            case 'condition':
+                this.trace.onCondition?.(event);
+                break;
+            case 'effect':
+                this.trace.onEffect?.(event);
+                break;
+            case 'transition':
+                this.trace.onTransition?.(event);
+                break;
+            case 'choiceFiltered':
+                this.trace.onChoiceFiltered?.(event);
+                break;
+            case 'error':
+                this.trace.onError?.(event);
+                break;
+        }
+    }
+
+    private emitNodeEnter(dialogueId: string, nodeId: string): void {
+        if (!this.trace) {
+            return;
+        }
+        this.emit({
+            kind: 'nodeEnter',
+            seq: this.traceSeq++,
+            dialogueId,
+            nodeId,
+        });
+    }
+
+    private emitTransition(
+        dialogueId: string,
+        fromNode: string,
+        toNode: string | null,
+        viaBranch?: number
+    ): void {
+        if (!this.trace) {
+            return;
+        }
+        this.emit({
+            kind: 'transition',
+            seq: this.traceSeq++,
+            dialogueId,
+            fromNode,
+            toNode,
+            ...(viaBranch !== undefined ? { viaBranch } : {}),
+        });
+    }
+
+    private emitError(message: string): void {
+        if (!this.trace) {
+            return;
+        }
+        this.emit({ kind: 'error', seq: this.traceSeq++, message });
+    }
+
+    /**
+     * Emit a choiceFiltered event for each hidden choice on the current node.
+     * Called only while tracing, just before a snapshot is built, so a debug
+     * consumer sees the reason a choice is unavailable at the resting node.
+     */
+    private emitChoiceFilters(): void {
+        for (const choice of this.explainChoices()) {
+            if (!choice.visible && choice.failedCondition) {
+                this.emit({
+                    kind: 'choiceFiltered',
+                    seq: this.traceSeq++,
+                    dialogueId: this.state.dialogueState!.dialogueId,
+                    nodeId: this.state.dialogueState!.nodeId,
+                    choiceId: choice.choiceId,
+                    failedCondition: choice.failedCondition,
+                    resolvedValues: choice.resolvedValues ?? {},
+                });
+            }
+        }
+    }
+
+    /**
+     * Apply effects, emitting one trace event per effect with the fields it
+     * changed. When tracing is off this is a straight call to applyEffects with
+     * no extra work, so behavior and performance are unchanged.
+     */
+    private applyTracedEffects(effects: Effect[], state: GameState): GameState {
+        if (!this.trace) {
+            return applyEffects(effects, state);
+        }
+
+        let current = state;
+        for (const effect of effects) {
+            const before = current;
+            current = applyEffects([effect], current);
+            this.emit({
+                kind: 'effect',
+                seq: this.traceSeq++,
+                effect,
+                delta: computeStateDelta(before, current),
+            });
+        }
+        return current;
+    }
 
     /**
      * Build a snapshot and clear transient state (notifications, pendingSounds).
      * Transient state is data that should only appear in one snapshot.
      */
     private buildSnapshotAndClearTransients(): Snapshot {
+        // While tracing, record why each hidden choice on the resting node is
+        // hidden, so the debug trace can answer "why can't I see this choice?".
+        if (this.trace) {
+            this.emitChoiceFilters();
+        }
+
         const snapshot = buildSnapshot(this.state, this.registry);
 
         // Clear transient fields after building snapshot
@@ -534,9 +876,10 @@ export class Engine {
                 nodeId: startNode.id,
             },
         };
+        this.emitNodeEnter(dialogue.id, startNode.id);
 
         if (startNode.effects) {
-            this.state = applyEffects(startNode.effects, this.state);
+            this.state = this.applyTracedEffects(startNode.effects, this.state);
         }
         if (this.initializePendingDialogueRedirect()) {
             return true;
@@ -561,9 +904,8 @@ export class Engine {
 
     private findMapContainingLocation(locationId: string): GameMap | null {
         return (
-            Object.values(this.registry.maps).find(
-                (map) =>
-                    map.locations.some((location) => location.id === locationId)
+            Object.values(this.registry.maps).find((map) =>
+                map.locations.some((location) => location.id === locationId)
             ) ?? null
         );
     }
@@ -618,13 +960,18 @@ export class Engine {
                 return;
             }
 
+            this.emitTransition(dialogueId, currentNode.id, nextId);
             this.state = {
                 ...this.state,
                 dialogueState: { dialogueId, nodeId: nextId },
             };
+            this.emitNodeEnter(dialogueId, nextId);
 
             if (nextNode.effects) {
-                this.state = applyEffects(nextNode.effects, this.state);
+                this.state = this.applyTracedEffects(
+                    nextNode.effects,
+                    this.state
+                );
             }
 
             // startDialogue effect redirects to a new dialogue; signal to caller
@@ -662,15 +1009,16 @@ export class Engine {
     private resolveNextNode(node: DialogueNode): string | null {
         // Check IF branches in order; first passing branch wins.
         if (node.conditionalBranches && node.conditionalBranches.length > 0) {
-            for (const conditionalBranch of node.conditionalBranches) {
+            for (let i = 0; i < node.conditionalBranches.length; i++) {
+                const conditionalBranch = node.conditionalBranches[i];
                 if (
-                    evaluateConditions(
-                        [conditionalBranch.condition],
-                        this.state
-                    )
+                    this.traceCondition(conditionalBranch.condition, {
+                        type: 'branch',
+                        branchIndex: i,
+                    })
                 ) {
                     if (conditionalBranch.effects) {
-                        this.state = applyEffects(
+                        this.state = this.applyTracedEffects(
                             conditionalBranch.effects,
                             this.state
                         );
@@ -687,6 +1035,29 @@ export class Engine {
 
         // Fall through to default next, or null if none
         return node.next ?? null;
+    }
+
+    /**
+     * Evaluate a single condition, emitting a condition trace event when a sink
+     * is attached. The returned value is exactly what evaluateCondition returns,
+     * so runtime behavior is unchanged whether tracing is on or off.
+     */
+    private traceCondition(
+        condition: Condition,
+        context: ConditionContext
+    ): boolean {
+        const result = evaluateCondition(condition, this.state);
+        if (this.trace) {
+            this.emit({
+                kind: 'condition',
+                seq: this.traceSeq++,
+                condition,
+                resolvedValues: describeConditionValues(condition, this.state),
+                result,
+                context,
+            });
+        }
+        return result;
     }
 
     /**
@@ -756,6 +1127,38 @@ export class Engine {
             break;
         }
     }
+}
+
+/**
+ * Visibility of a single choice on the current node, from explainChoices().
+ * A hidden choice carries the first requirement that failed and the state
+ * value that requirement saw.
+ */
+export interface ChoiceVisibility {
+    /** The choice's generated ID */
+    choiceId: string;
+    /** Whether the choice would be shown to the player */
+    visible: boolean;
+    /** For a hidden choice, the first requirement that failed */
+    failedCondition?: Condition;
+    /** For a hidden choice, the state values the failing requirement read */
+    resolvedValues?: Record<string, unknown>;
+}
+
+/**
+ * Compute a shallow delta between two states: for each top-level GameState
+ * field whose reference changed, record its before and after value. Used only
+ * for trace events, so it runs only while a trace sink is attached.
+ */
+function computeStateDelta(before: GameState, after: GameState): StateDelta {
+    const delta: StateDelta = {};
+    const keys = Object.keys(after) as (keyof GameState)[];
+    for (const key of keys) {
+        if (before[key] !== after[key]) {
+            delta[key] = { before: before[key], after: after[key] };
+        }
+    }
+    return delta;
 }
 
 /**
