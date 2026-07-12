@@ -699,7 +699,7 @@ END dialogue
 });
 
 describe('parseDialogue - complex example', () => {
-    it('should parse a complex dialogue from the design doc', () => {
+    it('should parse a complex dialogue with all features', () => {
         const dsl = `
 TRIGGER tavern
 REQUIRE notFlag visited_tavern

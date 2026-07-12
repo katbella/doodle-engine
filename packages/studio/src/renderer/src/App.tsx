@@ -91,9 +91,7 @@ export function App() {
     const [validating, setValidating] = useState(false);
     // Files edited since the last validation; their markers are stale until
     // Validate runs again.
-    const [staleFiles, setStaleFiles] = useState<Set<string>>(
-        () => new Set()
-    );
+    const [staleFiles, setStaleFiles] = useState<Set<string>>(() => new Set());
 
     const [railWidth, setRailWidth] = usePersistedSize(
         'doodle-studio-rail-w',
@@ -259,18 +257,20 @@ export function App() {
         (section: CreatableSection): string[] => {
             if (!project) return [];
             const r = project.registry;
-            const bySection: Record<CreatableSection, Record<string, unknown>> =
-                {
-                    dialogues: r.dialogues,
-                    characters: r.characters,
-                    locations: r.locations,
-                    items: r.items,
-                    quests: r.quests,
-                    maps: r.maps,
-                    interludes: r.interludes,
-                    journal: r.journalEntries,
-                    locales: r.locales,
-                };
+            const bySection: Record<
+                CreatableSection,
+                Record<string, unknown>
+            > = {
+                dialogues: r.dialogues,
+                characters: r.characters,
+                locations: r.locations,
+                items: r.items,
+                quests: r.quests,
+                maps: r.maps,
+                interludes: r.interludes,
+                journal: r.journalEntries,
+                locales: r.locales,
+            };
             return Object.keys(bySection[section]);
         },
         [project]
@@ -300,9 +300,7 @@ export function App() {
             const loc = locateFile(problem.file);
             if (!loc) return;
             const label =
-                loc.section === 'dialogues'
-                    ? `${loc.itemId}.dlg`
-                    : loc.itemId;
+                loc.section === 'dialogues' ? `${loc.itemId}.dlg` : loc.itemId;
             openItem(loc.section, loc.itemId, label);
             const key = `${loc.section}:${loc.itemId}`;
             setViewMode(key, 'source');
@@ -390,7 +388,8 @@ export function App() {
 
             // Rename the file, and set the new id inside it for YAML entities
             // (a dialogue's id is its filename, so the move covers it).
-            const oldPath = project.files[oldId] ?? pathForNewItem(section, oldId);
+            const oldPath =
+                project.files[oldId] ?? pathForNewItem(section, oldId);
             const newPath = pathForNewItem(section, newId);
             if (section !== 'dialogues' && section !== 'locales') {
                 await window.studio.writeEntity(dir, oldPath, [
@@ -483,6 +482,7 @@ export function App() {
                     stale={staleFiles.size > 0}
                     onBuild={runBuild}
                     building={building}
+                    onPlaytest={() => setDockTab('playtest')}
                     theme={theme}
                     onToggleTheme={toggleTheme}
                 />
@@ -562,9 +562,7 @@ export function App() {
                 onOpenProblem={openProblem}
                 flags={flags}
                 variables={variables}
-                onRenameFlagVar={(kind, id) =>
-                    setFlagVarTarget({ kind, id })
-                }
+                onRenameFlagVar={(kind, id) => setFlagVarTarget({ kind, id })}
             />
             {loading && (
                 <div className="overlay">
@@ -596,11 +594,7 @@ export function App() {
                         renameTarget.id
                     )}
                     onRename={(newId) =>
-                        renameItem(
-                            renameTarget.section,
-                            renameTarget.id,
-                            newId
-                        )
+                        renameItem(renameTarget.section, renameTarget.id, newId)
                     }
                     onCancel={() => setRenameTarget(null)}
                 />

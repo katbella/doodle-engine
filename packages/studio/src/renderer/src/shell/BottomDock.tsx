@@ -1,5 +1,6 @@
 import type { OpenProject, StudioBuildResult } from '../../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
+import { Playtest } from './Playtest';
 
 export type DockTab = 'problems' | 'symbols' | 'build' | 'playtest';
 
@@ -74,11 +75,7 @@ export function BottomDock({
                 {activeTab === 'build' && (
                     <BuildView building={building} result={buildResult} />
                 )}
-                {activeTab === 'playtest' && (
-                    <div className="dock__empty">
-                        Playtest arrives in a later step.
-                    </div>
-                )}
+                {activeTab === 'playtest' && <Playtest project={project} />}
             </div>
         </div>
     );

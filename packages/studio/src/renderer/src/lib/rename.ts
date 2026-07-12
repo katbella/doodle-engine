@@ -236,7 +236,7 @@ export function planRename(
  * own, so this only rewrites their uses: dialogue conditions/effects and the
  * game.yaml start block. A flag/variable can also be set implicitly by content
  * this can't see, so the caller should present it as "review these usages," not
- * a guaranteed-safe rename (§16).
+ * a guaranteed-safe rename.
  */
 export function planFlagVariableRename(
     registry: ContentRegistry,

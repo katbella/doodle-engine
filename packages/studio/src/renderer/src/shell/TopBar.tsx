@@ -8,6 +8,7 @@ export function TopBar({
     stale,
     onBuild,
     building,
+    onPlaytest,
     theme,
     onToggleTheme,
 }: {
@@ -18,6 +19,7 @@ export function TopBar({
     stale: boolean;
     onBuild: () => void;
     building: boolean;
+    onPlaytest: () => void;
     theme: 'dark' | 'light';
     onToggleTheme: () => void;
 }) {
@@ -85,8 +87,8 @@ export function TopBar({
             </button>
             <button
                 className="btn btn--accent"
-                disabled
-                title="Playtest arrives in a later step"
+                onClick={onPlaytest}
+                title="Run the game in the playtest panel"
             >
                 ▶ Playtest
             </button>

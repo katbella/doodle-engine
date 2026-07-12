@@ -1,8 +1,8 @@
 /**
  * The builders must produce entities that match the engine and source lines
- * that the engine parses. These tests are the parity gate for Phase 7: build
- * every condition/effect type from an empty draft filled with sample values,
- * and confirm the entity type and the generated source agree with the engine.
+ * that the engine parses. These tests are the parity gate: build every
+ * condition/effect type from an empty draft filled with sample values, and
+ * confirm the entity type and the generated source agree with the engine.
  */
 
 import { describe, it, expect } from 'vitest';
