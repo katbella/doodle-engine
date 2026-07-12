@@ -28,6 +28,10 @@ const api: StudioApi = {
             edits,
             expectedMtimeMs
         ),
+    deleteDocument: (dir, relPath) =>
+        ipcRenderer.invoke('doc:delete', dir, relPath),
+    renameDocument: (dir, fromRel, toRel) =>
+        ipcRenderer.invoke('doc:rename', dir, fromRel, toRel),
     saveRecovery: (dir, relPath, content) =>
         ipcRenderer.invoke('recovery:save', dir, relPath, content),
     readRecovery: (dir, relPath) =>

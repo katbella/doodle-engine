@@ -1,4 +1,4 @@
-import { readFile, writeFile, rename, stat } from 'fs/promises';
+import { readFile, writeFile, rename, stat, unlink } from 'fs/promises';
 import { join, resolve, dirname, basename, sep } from 'path';
 import { applyYamlEdits, type YamlEdit } from '@doodle-engine/toolkit';
 import type { DocumentContent, WriteResult } from '../shared/project';
@@ -66,6 +66,26 @@ export class DocumentService {
 
         const info = await stat(abs);
         return { ok: true, conflict: false, mtimeMs: info.mtimeMs };
+    }
+
+    /** Delete a project file. Notifies the write hook so the watcher ignores it. */
+    async delete(projectDir: string, relPath: string): Promise<void> {
+        const abs = this.resolveInProject(projectDir, relPath);
+        this.onWrite?.(abs);
+        await unlink(abs);
+    }
+
+    /** Rename (move) a project file within the project. */
+    async renameFile(
+        projectDir: string,
+        fromRel: string,
+        toRel: string
+    ): Promise<void> {
+        const from = this.resolveInProject(projectDir, fromRel);
+        const to = this.resolveInProject(projectDir, toRel);
+        this.onWrite?.(from);
+        this.onWrite?.(to);
+        await rename(from, to);
     }
 
     /**

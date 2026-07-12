@@ -1,7 +1,7 @@
 .app {
     height: 100%;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto var(--dock-h, 220px);
     background: var(--bg);
 }
 
@@ -104,12 +104,42 @@
     background: var(--accent-hover);
     color: var(--accent-ink);
 }
+.btn--danger {
+    background: var(--error);
+    color: #fff;
+    border-color: var(--error);
+    font-weight: 600;
+}
+.btn--danger:hover {
+    background: var(--error);
+    filter: brightness(1.1);
+    color: #fff;
+}
 
 .body {
     display: grid;
-    grid-template-columns: 236px 1fr 260px;
+    grid-template-columns: var(--rail-w, 236px) auto minmax(0, 1fr) auto var(--right-w, 260px);
     grid-template-rows: minmax(0, 1fr);
     min-height: 0;
+}
+
+.resize-handle {
+    background: transparent;
+    z-index: 5;
+}
+.resize-handle:hover,
+.resize-handle:active {
+    background: var(--accent);
+}
+.resize-handle--x {
+    width: 5px;
+    margin: 0 -2px;
+    cursor: col-resize;
+}
+.resize-handle--y {
+    height: 5px;
+    margin: -2px 0;
+    cursor: row-resize;
 }
 
 .rail {
@@ -165,13 +195,30 @@
     font-size: 10.5px;
     color: var(--text-faint);
 }
+.rail__section-row {
+    display: flex;
+    align-items: center;
+}
+.rail__section-row .rail__section {
+    flex: 1;
+}
+.rail__section-add {
+    padding: var(--space-2) var(--space-3);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--text-faint);
+    opacity: 0;
+}
+.rail__section-row:hover .rail__section-add {
+    opacity: 1;
+}
+.rail__section-add:hover {
+    color: var(--accent);
+}
 .rail__item {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
     width: 100%;
-    padding: 7px var(--space-3) 7px 26px;
-    text-align: left;
     font-size: 12px;
     color: var(--text-dim);
     border-left: 2px solid transparent;
@@ -185,11 +232,37 @@
     background: var(--accent-tint);
     border-left-color: var(--accent);
 }
+.rail__item-open {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+    padding: 7px var(--space-3) 7px 26px;
+    text-align: left;
+    color: inherit;
+}
 .rail__item-label {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.rail__item-action {
+    padding: 0 6px;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--text-faint);
+    opacity: 0;
+}
+.rail__item:hover .rail__item-action {
+    opacity: 1;
+}
+.rail__item-action:hover {
+    color: var(--accent);
+}
+.rail__item-delete:hover {
+    color: var(--error);
 }
 .rail__refs {
     font-size: 10px;
@@ -860,12 +933,12 @@
 }
 
 .dock {
-    height: 150px;
     background: var(--bg-editor);
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
 }
 .dock__tabs {
     display: flex;
@@ -916,10 +989,66 @@
 .problem__msg {
     color: var(--error);
 }
+.orphan__msg {
+    color: var(--text-dim);
+}
+.symbols__group {
+    margin-bottom: var(--space-3);
+}
+.symbols__head {
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 4px 0;
+}
+.symbol {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-faint);
+}
+.symbol__id {
+    flex: 1;
+    color: var(--text);
+}
+.symbol__count {
+    color: var(--text-faint);
+    font-size: 11px;
+}
+.symbol__rename {
+    color: var(--text-faint);
+}
+.symbol__rename:hover {
+    color: var(--accent);
+}
 .problem--button {
     width: 100%;
     text-align: left;
     cursor: pointer;
+}
+.reference {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    text-align: left;
+    padding: 6px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-faint);
+}
+.reference:hover:not(:disabled) .reference__where {
+    color: var(--accent);
+}
+.reference__where {
+    color: var(--text);
+}
+.reference__file {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
 }
 .problem--button:hover {
     background: var(--overlay-hover);
@@ -1124,6 +1253,11 @@
     font-weight: 800;
     font-size: 16px;
 }
+.modal__message {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-dim);
+}
 .modal__actions {
     display: flex;
     justify-content: flex-end;
@@ -1147,6 +1281,11 @@
     border: 1px solid var(--border);
     color: var(--text);
     font-size: 12.5px;
+}
+.field__error {
+    margin-top: var(--space-1);
+    font-size: 11px;
+    color: var(--error);
 }
 .field__row {
     display: flex;

@@ -154,6 +154,19 @@ export function DialogueEditor({
         setSelectedId(nodes[0]?.id ?? null);
     };
 
+    // The start node is whichever node comes first in the file, so making a node
+    // the start means moving it to the front.
+    const makeStart = (id: string) => {
+        if (!dialogue || dialogue.startNode === id) return;
+        const node = dialogue.nodes.find((n) => n.id === id);
+        if (!node) return;
+        setDialogue({
+            ...dialogue,
+            nodes: [node, ...dialogue.nodes.filter((n) => n.id !== id)],
+            startNode: id,
+        });
+    };
+
     // Rename a node and repoint every GOTO target (node next, choice next, IF
     // branch next) and the start node that referred to the old id.
     const renameNode = (oldId: string, newId: string) => {
@@ -246,6 +259,7 @@ export function DialogueEditor({
                         registry={project.registry}
                         onChange={updateNode}
                         onRename={renameNode}
+                        onMakeStart={() => makeStart(selected.id)}
                         onDelete={() => deleteNode(selected.id)}
                     />
                 ) : (

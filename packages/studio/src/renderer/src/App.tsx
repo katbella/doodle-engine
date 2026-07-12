@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
     NewProjectOptions,
     OpenProject,
@@ -6,17 +6,47 @@ import type {
     StudioBuildResult,
 } from '../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
+import { ReferenceIndex, type SymbolType } from '@doodle-engine/core';
+import { applyDialogueEdits } from '@doodle-engine/core';
 import type { SectionKey, Tab } from './types';
 import { buildSections } from './lib/sections';
 import { locateFile } from './lib/paths';
+import {
+    pathForNewItem,
+    templateForNewItem,
+    type CreatableSection,
+} from './lib/new-content';
+import {
+    planRename,
+    planFlagVariableRename,
+    type RenamePlan,
+} from './lib/rename';
 import { Welcome } from './shell/Welcome';
 import { NewProjectModal } from './shell/NewProjectModal';
+import { CreateItemModal } from './shell/CreateItemModal';
+import { RenameModal } from './shell/RenameModal';
+import { ConfirmModal } from './shell/ConfirmModal';
+import { FlagVarRenameModal } from './shell/FlagVarRenameModal';
 import { TopBar } from './shell/TopBar';
 import { EngineBanner } from './shell/EngineBanner';
 import { LeftRail } from './shell/LeftRail';
 import { EditorArea, type ViewMode } from './shell/EditorArea';
 import { RightPanel } from './shell/RightPanel';
 import { BottomDock, type DockTab } from './shell/BottomDock';
+import { ResizeHandle } from './shell/ResizeHandle';
+import { usePersistedSize } from './lib/usePersistedSize';
+
+/** The reference-index symbol type for each content section, where one exists.
+ * Maps and locales have no incoming references, so they're absent. */
+const SECTION_SYMBOL: Partial<Record<CreatableSection, SymbolType>> = {
+    characters: 'characters',
+    items: 'items',
+    locations: 'locations',
+    quests: 'quests',
+    dialogues: 'dialogues',
+    interludes: 'interludes',
+    journal: 'journalEntries',
+};
 
 export function App() {
     const [project, setProject] = useState<OpenProject | null>(null);
@@ -26,6 +56,21 @@ export function App() {
     const [openError, setOpenError] = useState<string | null>(null);
     const [recent, setRecent] = useState<RecentProject[]>([]);
     const [showNewProject, setShowNewProject] = useState(false);
+    const [newItemSection, setNewItemSection] =
+        useState<CreatableSection | null>(null);
+    const [renameTarget, setRenameTarget] = useState<{
+        section: CreatableSection;
+        id: string;
+    } | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{
+        section: CreatableSection;
+        id: string;
+        label: string;
+    } | null>(null);
+    const [flagVarTarget, setFlagVarTarget] = useState<{
+        kind: 'flag' | 'variable';
+        id: string;
+    } | null>(null);
     const [dockTab, setDockTab] = useState<DockTab>('problems');
     const [building, setBuilding] = useState(false);
     const [buildResult, setBuildResult] = useState<StudioBuildResult | null>(
@@ -48,6 +93,42 @@ export function App() {
     // Validate runs again.
     const [staleFiles, setStaleFiles] = useState<Set<string>>(
         () => new Set()
+    );
+
+    const [railWidth, setRailWidth] = usePersistedSize(
+        'doodle-studio-rail-w',
+        236
+    );
+    const [rightWidth, setRightWidth] = usePersistedSize(
+        'doodle-studio-right-w',
+        260
+    );
+    const [dockHeight, setDockHeight] = usePersistedSize(
+        'doodle-studio-dock-h',
+        220
+    );
+
+    const referenceIndex = useMemo(
+        () =>
+            project
+                ? new ReferenceIndex(
+                      project.registry,
+                      new Map(Object.entries(project.files)),
+                      project.config
+                  )
+                : null,
+        [project]
+    );
+
+    // How many places reference this content item (0 if the index isn't ready
+    // or the section has no symbol type, e.g. maps/locales).
+    const referenceCount = useCallback(
+        (section: CreatableSection, id: string): number => {
+            const symbol = SECTION_SYMBOL[section];
+            if (!referenceIndex || !symbol) return 0;
+            return referenceIndex.count(symbol, id);
+        },
+        [referenceIndex]
     );
 
     const setViewMode = useCallback(
@@ -174,6 +255,46 @@ export function App() {
         []
     );
 
+    const existingIds = useCallback(
+        (section: CreatableSection): string[] => {
+            if (!project) return [];
+            const r = project.registry;
+            const bySection: Record<CreatableSection, Record<string, unknown>> =
+                {
+                    dialogues: r.dialogues,
+                    characters: r.characters,
+                    locations: r.locations,
+                    items: r.items,
+                    quests: r.quests,
+                    maps: r.maps,
+                    interludes: r.interludes,
+                    journal: r.journalEntries,
+                    locales: r.locales,
+                };
+            return Object.keys(bySection[section]);
+        },
+        [project]
+    );
+
+    const createItem = useCallback(
+        async (section: CreatableSection, id: string) => {
+            if (!project) return;
+            setNewItemSection(null);
+            const relPath = pathForNewItem(section, id);
+            const result = await window.studio.writeDocument(
+                project.projectDir,
+                relPath,
+                templateForNewItem(section, id)
+            );
+            if (!result.ok) return;
+            // Reload so the new file shows in the rail, then open it.
+            setProject(await window.studio.revalidate(project.projectDir));
+            const label = section === 'dialogues' ? `${id}.dlg` : id;
+            openItem(section, id, label);
+        },
+        [project, openItem]
+    );
+
     const openProblem = useCallback(
         (problem: ValidationError) => {
             const loc = locateFile(problem.file);
@@ -219,6 +340,89 @@ export function App() {
         });
     }, []);
 
+    const deleteItem = useCallback(
+        async (section: CreatableSection, id: string) => {
+            if (!project) return;
+            setDeleteTarget(null);
+            const relPath = project.files[id] ?? pathForNewItem(section, id);
+            await window.studio.deleteDocument(project.projectDir, relPath);
+            closeTab(`${section}:${id}`);
+            setProject(await window.studio.revalidate(project.projectDir));
+        },
+        [project, closeTab]
+    );
+
+    // Apply a rename plan's reference edits (rewritten dialogues + YAML edits).
+    // Shared by entity rename and flag/variable rename.
+    const applyRenamePlan = useCallback(
+        async (dir: string, plan: RenamePlan) => {
+            for (const rewrite of plan.dialogueRewrites) {
+                const relPath =
+                    project?.files[rewrite.id] ??
+                    pathForNewItem('dialogues', rewrite.id);
+                const doc = await window.studio.readDocument(dir, relPath);
+                const next = applyDialogueEdits(
+                    doc.content,
+                    rewrite.id,
+                    rewrite.dialogue
+                );
+                await window.studio.writeDocument(dir, relPath, next);
+            }
+            for (const edit of plan.yamlEdits) {
+                const relPath =
+                    edit.id === 'game'
+                        ? 'content/game.yaml'
+                        : project?.files[edit.id];
+                if (relPath)
+                    await window.studio.writeEntity(dir, relPath, edit.edits);
+            }
+        },
+        [project]
+    );
+
+    const renameItem = useCallback(
+        async (section: CreatableSection, oldId: string, newId: string) => {
+            if (!project || oldId === newId) return;
+            setRenameTarget(null);
+            const dir = project.projectDir;
+            const plan = planRename(project.registry, section, oldId, newId);
+            await applyRenamePlan(dir, plan);
+
+            // Rename the file, and set the new id inside it for YAML entities
+            // (a dialogue's id is its filename, so the move covers it).
+            const oldPath = project.files[oldId] ?? pathForNewItem(section, oldId);
+            const newPath = pathForNewItem(section, newId);
+            if (section !== 'dialogues' && section !== 'locales') {
+                await window.studio.writeEntity(dir, oldPath, [
+                    { path: ['id'], value: newId },
+                ]);
+            }
+            await window.studio.renameDocument(dir, oldPath, newPath);
+
+            closeTab(`${section}:${oldId}`);
+            setProject(await window.studio.revalidate(dir));
+            const label = section === 'dialogues' ? `${newId}.dlg` : newId;
+            openItem(section, newId, label);
+        },
+        [project, closeTab, openItem, applyRenamePlan]
+    );
+
+    const renameFlagVariable = useCallback(
+        async (kind: 'flag' | 'variable', oldId: string, newId: string) => {
+            if (!project || oldId === newId) return;
+            const plan = planFlagVariableRename(
+                project.registry,
+                kind,
+                oldId,
+                newId,
+                project.config
+            );
+            await applyRenamePlan(project.projectDir, plan);
+            setProject(await window.studio.revalidate(project.projectDir));
+        },
+        [project, applyRenamePlan]
+    );
+
     if (!project) {
         return (
             <div className="app">
@@ -245,8 +449,31 @@ export function App() {
     const sections = buildSections(project);
     const activeTab = tabs.find((t) => t.key === activeKey) ?? null;
 
+    // Every flag and variable key used anywhere, with its usage count.
+    const flags = referenceIndex
+        ? referenceIndex.allSymbols('flags').map((id) => ({
+              id,
+              count: referenceIndex.count('flags', id),
+          }))
+        : [];
+    const variables = referenceIndex
+        ? referenceIndex.allSymbols('variables').map((id) => ({
+              id,
+              count: referenceIndex.count('variables', id),
+          }))
+        : [];
+
     return (
-        <div className="app">
+        <div
+            className="app"
+            style={
+                {
+                    '--rail-w': `${railWidth}px`,
+                    '--right-w': `${rightWidth}px`,
+                    '--dock-h': `${dockHeight}px`,
+                } as React.CSSProperties
+            }
+        >
             <div className="app__header">
                 <TopBar
                     project={project}
@@ -266,6 +493,20 @@ export function App() {
                     sections={sections}
                     activeKey={activeKey}
                     onOpenItem={openItem}
+                    onNewItem={(section) => setNewItemSection(section)}
+                    onDeleteItem={(section, id, label) =>
+                        setDeleteTarget({ section, id, label })
+                    }
+                    onRenameItem={(section, id) =>
+                        setRenameTarget({ section, id })
+                    }
+                />
+                <ResizeHandle
+                    axis="x"
+                    size={railWidth}
+                    min={160}
+                    max={480}
+                    onResize={setRailWidth}
                 />
                 <EditorArea
                     project={project}
@@ -281,8 +522,37 @@ export function App() {
                     onDirty={handleDirty}
                     onModified={markModified}
                 />
-                <RightPanel project={project} activeTab={activeTab} />
+                <ResizeHandle
+                    axis="x"
+                    size={rightWidth}
+                    min={180}
+                    max={520}
+                    invert
+                    onResize={setRightWidth}
+                />
+                <RightPanel
+                    project={project}
+                    activeTab={activeTab}
+                    referenceIndex={referenceIndex}
+                    onOpenFile={(file) => {
+                        const loc = locateFile(file);
+                        if (!loc) return;
+                        const label =
+                            loc.section === 'dialogues'
+                                ? `${loc.itemId}.dlg`
+                                : loc.itemId;
+                        openItem(loc.section, loc.itemId, label);
+                    }}
+                />
             </div>
+            <ResizeHandle
+                axis="y"
+                size={dockHeight}
+                min={120}
+                max={600}
+                invert
+                onResize={setDockHeight}
+            />
             <BottomDock
                 project={project}
                 activeTab={dockTab}
@@ -290,6 +560,11 @@ export function App() {
                 building={building}
                 buildResult={buildResult}
                 onOpenProblem={openProblem}
+                flags={flags}
+                variables={variables}
+                onRenameFlagVar={(kind, id) =>
+                    setFlagVarTarget({ kind, id })
+                }
             />
             {loading && (
                 <div className="overlay">
@@ -301,6 +576,82 @@ export function App() {
                 <NewProjectModal
                     onCreate={createProject}
                     onCancel={() => setShowNewProject(false)}
+                />
+            )}
+            {newItemSection && (
+                <CreateItemModal
+                    initialSection={newItemSection}
+                    existingIds={existingIds}
+                    onCreate={createItem}
+                    onCancel={() => setNewItemSection(null)}
+                />
+            )}
+            {renameTarget && (
+                <RenameModal
+                    section={renameTarget.section}
+                    oldId={renameTarget.id}
+                    existingIds={existingIds(renameTarget.section)}
+                    referenceCount={referenceCount(
+                        renameTarget.section,
+                        renameTarget.id
+                    )}
+                    onRename={(newId) =>
+                        renameItem(
+                            renameTarget.section,
+                            renameTarget.id,
+                            newId
+                        )
+                    }
+                    onCancel={() => setRenameTarget(null)}
+                />
+            )}
+            {deleteTarget &&
+                (() => {
+                    const n = referenceCount(
+                        deleteTarget.section,
+                        deleteTarget.id
+                    );
+                    const impact =
+                        n > 0
+                            ? ` ${n} place${n === 1 ? '' : 's'} reference it — those will show as problems until you fix them.`
+                            : ' Nothing else references it.';
+                    return (
+                        <ConfirmModal
+                            title={`Delete “${deleteTarget.label}”?`}
+                            message={`This removes the file.${impact}`}
+                            confirmLabel="Delete"
+                            danger
+                            onConfirm={() =>
+                                deleteItem(
+                                    deleteTarget.section,
+                                    deleteTarget.id
+                                )
+                            }
+                            onCancel={() => setDeleteTarget(null)}
+                        />
+                    );
+                })()}
+            {flagVarTarget && (
+                <FlagVarRenameModal
+                    kind={flagVarTarget.kind}
+                    oldId={flagVarTarget.id}
+                    usageCount={
+                        referenceIndex?.count(
+                            flagVarTarget.kind === 'flag'
+                                ? 'flags'
+                                : 'variables',
+                            flagVarTarget.id
+                        ) ?? 0
+                    }
+                    onRename={(newId) => {
+                        renameFlagVariable(
+                            flagVarTarget.kind,
+                            flagVarTarget.id,
+                            newId
+                        );
+                        setFlagVarTarget(null);
+                    }}
+                    onCancel={() => setFlagVarTarget(null)}
                 />
             )}
         </div>

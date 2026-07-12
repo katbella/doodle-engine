@@ -59,4 +59,30 @@ describe('DocumentService', () => {
             await rm(dir, { recursive: true, force: true });
         }
     });
+
+    it('deletes a file so it can no longer be read', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const svc = new DocumentService();
+            await writeFile(join(dir, 'gone.txt'), 'bye');
+
+            await svc.delete(dir, 'gone.txt');
+
+            await expect(svc.read(dir, 'gone.txt')).rejects.toThrow();
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('refuses to delete a path that escapes the project', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const svc = new DocumentService();
+            await expect(svc.delete(dir, '../secret.txt')).rejects.toThrow(
+                /escape/i
+            );
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
 });

@@ -196,6 +196,14 @@ app.whenReady().then(() => {
             expectedMtimeMs?: number
         ) => documents.writeEntityFields(dir, relPath, edits, expectedMtimeMs)
     );
+    ipcMain.handle('doc:delete', (_event, dir: string, relPath: string) =>
+        documents.delete(dir, relPath)
+    );
+    ipcMain.handle(
+        'doc:rename',
+        (_event, dir: string, fromRel: string, toRel: string) =>
+            documents.renameFile(dir, fromRel, toRel)
+    );
 
     const recovery = new RecoveryService(
         join(app.getPath('userData'), 'recovery')

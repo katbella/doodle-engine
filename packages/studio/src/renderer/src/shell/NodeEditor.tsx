@@ -382,6 +382,7 @@ export function NodeEditor({
     registry,
     onChange,
     onRename,
+    onMakeStart,
     onDelete,
 }: {
     node: DialogueNode;
@@ -391,6 +392,7 @@ export function NodeEditor({
     registry: ContentRegistry;
     onChange: (node: DialogueNode) => void;
     onRename: (oldId: string, newId: string) => void;
+    onMakeStart: () => void;
     onDelete: () => void;
 }) {
     const set = (patch: Partial<DialogueNode>) =>
@@ -416,7 +418,13 @@ export function NodeEditor({
                     nodeIds={nodeIds}
                     onRename={(newId) => onRename(node.id, newId)}
                 />
-                {isStart && <span className="dlg__node-badge">start</span>}
+                {isStart ? (
+                    <span className="dlg__node-badge">start</span>
+                ) : (
+                    <button className="dlg__add" onClick={onMakeStart}>
+                        Set as start
+                    </button>
+                )}
                 <button
                     className="dlg__add node-editor__delete"
                     onClick={onDelete}

@@ -1,7 +1,12 @@
 import type { OpenProject, StudioBuildResult } from '../../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
 
-export type DockTab = 'problems' | 'build' | 'playtest';
+export type DockTab = 'problems' | 'symbols' | 'build' | 'playtest';
+
+interface SymbolUsage {
+    id: string;
+    count: number;
+}
 
 export function BottomDock({
     project,
@@ -10,6 +15,9 @@ export function BottomDock({
     building,
     buildResult,
     onOpenProblem,
+    flags,
+    variables,
+    onRenameFlagVar,
 }: {
     project: OpenProject;
     activeTab: DockTab;
@@ -17,6 +25,9 @@ export function BottomDock({
     building: boolean;
     buildResult: StudioBuildResult | null;
     onOpenProblem: (problem: ValidationError) => void;
+    flags: SymbolUsage[];
+    variables: SymbolUsage[];
+    onRenameFlagVar: (kind: 'flag' | 'variable', id: string) => void;
 }) {
     const problems = project.problems;
 
@@ -28,6 +39,12 @@ export function BottomDock({
                     count={problems.length}
                     active={activeTab === 'problems'}
                     onClick={() => onTabChange('problems')}
+                />
+                <DockTabButton
+                    label="Flags & vars"
+                    count={flags.length + variables.length}
+                    active={activeTab === 'symbols'}
+                    onClick={() => onTabChange('symbols')}
                 />
                 <DockTabButton
                     label="Build log"
@@ -45,6 +62,13 @@ export function BottomDock({
                     <ProblemsView
                         problems={problems}
                         onOpenProblem={onOpenProblem}
+                    />
+                )}
+                {activeTab === 'symbols' && (
+                    <SymbolsView
+                        flags={flags}
+                        variables={variables}
+                        onRename={onRenameFlagVar}
                     />
                 )}
                 {activeTab === 'build' && (
@@ -82,6 +106,52 @@ function ProblemsView({
                     <span className="problem__msg">{problem.message}</span>
                 </button>
             ))}
+        </>
+    );
+}
+
+function SymbolsView({
+    flags,
+    variables,
+    onRename,
+}: {
+    flags: SymbolUsage[];
+    variables: SymbolUsage[];
+    onRename: (kind: 'flag' | 'variable', id: string) => void;
+}) {
+    if (flags.length === 0 && variables.length === 0) {
+        return (
+            <div className="dock__empty">
+                No flags or variables are used yet.
+            </div>
+        );
+    }
+    const group = (kind: 'flag' | 'variable', list: SymbolUsage[]) =>
+        list.length === 0 ? null : (
+            <div className="symbols__group">
+                <div className="symbols__head">
+                    {kind === 'flag' ? 'Flags' : 'Variables'}
+                </div>
+                {list.map((s) => (
+                    <div key={s.id} className="symbol">
+                        <span className="symbol__id mono">{s.id}</span>
+                        <span className="symbol__count">
+                            {s.count} use{s.count === 1 ? '' : 's'}
+                        </span>
+                        <button
+                            className="symbol__rename"
+                            onClick={() => onRename(kind, s.id)}
+                        >
+                            Rename
+                        </button>
+                    </div>
+                ))}
+            </div>
+        );
+    return (
+        <>
+            {group('flag', flags)}
+            {group('variable', variables)}
         </>
     );
 }

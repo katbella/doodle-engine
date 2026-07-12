@@ -138,6 +138,14 @@ export interface StudioApi {
         edits: YamlEdit[],
         expectedMtimeMs?: number
     ) => Promise<WriteResult>;
+    /** Delete a project file. */
+    deleteDocument: (projectDir: string, relPath: string) => Promise<void>;
+    /** Rename a project file within the project. */
+    renameDocument: (
+        projectDir: string,
+        fromRel: string,
+        toRel: string
+    ) => Promise<void>;
     /** Save an unsaved-edits recovery buffer for a file. */
     saveRecovery: (
         projectDir: string,

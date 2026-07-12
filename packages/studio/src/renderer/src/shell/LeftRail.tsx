@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ItemStatus, RailSection, SectionKey } from '../types';
+import type { CreatableSection } from '../lib/new-content';
 
 const STATUS_COLOR: Record<ItemStatus, string> = {
     valid: 'var(--valid)',
@@ -12,10 +13,20 @@ export function LeftRail({
     sections,
     activeKey,
     onOpenItem,
+    onNewItem,
+    onDeleteItem,
+    onRenameItem,
 }: {
     sections: RailSection[];
     activeKey: string | null;
     onOpenItem: (section: SectionKey, itemId: string, label: string) => void;
+    onNewItem: (section: CreatableSection) => void;
+    onDeleteItem: (
+        section: CreatableSection,
+        itemId: string,
+        label: string
+    ) => void;
+    onRenameItem: (section: CreatableSection, id: string) => void;
 }) {
     const [query, setQuery] = useState('');
     const [collapsed, setCollapsed] = useState<Set<SectionKey>>(
@@ -54,62 +65,119 @@ export function LeftRail({
                     // A search always expands matching sections.
                     const isCollapsed = !q && collapsed.has(section.key);
 
+                    const creatable = section.key !== 'config';
+
                     return (
                         <div key={section.key}>
-                            <button
-                                className="rail__section"
-                                onClick={() => toggle(section.key)}
-                            >
-                                <span className="rail__caret">
-                                    {isCollapsed ? '▸' : '▾'}
-                                </span>
-                                <span style={{ flex: 1 }}>{section.label}</span>
-                                <span className="rail__count">
-                                    {section.items.length}
-                                </span>
-                            </button>
+                            <div className="rail__section-row">
+                                <button
+                                    className="rail__section"
+                                    onClick={() => toggle(section.key)}
+                                >
+                                    <span className="rail__caret">
+                                        {isCollapsed ? '▸' : '▾'}
+                                    </span>
+                                    <span style={{ flex: 1 }}>
+                                        {section.label}
+                                    </span>
+                                    <span className="rail__count">
+                                        {section.items.length}
+                                    </span>
+                                </button>
+                                {creatable && (
+                                    <button
+                                        className="rail__section-add"
+                                        title={`New ${section.label.replace(/s$/, '').toLowerCase()}`}
+                                        onClick={() =>
+                                            onNewItem(
+                                                section.key as CreatableSection
+                                            )
+                                        }
+                                    >
+                                        +
+                                    </button>
+                                )}
+                            </div>
                             {!isCollapsed &&
                                 items.map((item) => {
                                     const key = `${section.key}:${item.id}`;
                                     return (
-                                        <button
+                                        <div
                                             key={item.id}
                                             className={`rail__item ${
                                                 key === activeKey
                                                     ? 'rail__item--active'
                                                     : ''
                                             }`}
-                                            onClick={() =>
-                                                onOpenItem(
-                                                    section.key,
-                                                    item.id,
-                                                    item.label
-                                                )
-                                            }
                                         >
-                                            <span className="rail__item-label">
-                                                {item.label}
-                                            </span>
-                                            {item.status !== 'none' && (
-                                                <span
-                                                    className="status__dot"
-                                                    style={{
-                                                        background:
-                                                            STATUS_COLOR[
-                                                                item.status
-                                                            ],
-                                                    }}
-                                                    title={item.status}
-                                                />
+                                            <button
+                                                className="rail__item-open"
+                                                onClick={() =>
+                                                    onOpenItem(
+                                                        section.key,
+                                                        item.id,
+                                                        item.label
+                                                    )
+                                                }
+                                            >
+                                                <span className="rail__item-label">
+                                                    {item.label}
+                                                </span>
+                                                {item.status !== 'none' && (
+                                                    <span
+                                                        className="status__dot"
+                                                        style={{
+                                                            background:
+                                                                STATUS_COLOR[
+                                                                    item.status
+                                                                ],
+                                                        }}
+                                                        title={item.status}
+                                                    />
+                                                )}
+                                            </button>
+                                            {creatable && (
+                                                <>
+                                                    <button
+                                                        className="rail__item-action"
+                                                        title={`Rename ${item.label}`}
+                                                        onClick={() =>
+                                                            onRenameItem(
+                                                                section.key as CreatableSection,
+                                                                item.id
+                                                            )
+                                                        }
+                                                    >
+                                                        ✎
+                                                    </button>
+                                                    <button
+                                                        className="rail__item-action rail__item-delete"
+                                                        title={`Delete ${item.label}`}
+                                                        onClick={() =>
+                                                            onDeleteItem(
+                                                                section.key as CreatableSection,
+                                                                item.id,
+                                                                item.label
+                                                            )
+                                                        }
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </>
                                             )}
-                                        </button>
+                                        </div>
                                     );
                                 })}
                         </div>
                     );
                 })}
             </div>
-            <button className="rail__new">+ New dialogue · character · item…</button>
+            <button
+                className="rail__new"
+                onClick={() => onNewItem('dialogues')}
+            >
+                + New content…
+            </button>
         </div>
     );
 }

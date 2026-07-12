@@ -193,3 +193,7 @@ export type {
 export type { DevTools } from './devtools';
 
 export { enableDevTools } from './devtools';
+
+// Reference index (id → usages; find-references, orphans, safe rename)
+export { ReferenceIndex } from './reference-index';
+export type { SymbolType, Reference } from './reference-index';
