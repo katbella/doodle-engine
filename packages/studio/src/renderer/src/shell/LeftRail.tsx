@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import type { ItemStatus, RailSection, SectionKey } from '../types';
 import type { CreatableSection } from '../lib/new-content';
+import {
+    ChevronRight,
+    ChevronDown,
+    Plus,
+    Pencil,
+    X,
+    Search,
+} from '../lib/icons';
 
 const STATUS_COLOR: Record<ItemStatus, string> = {
     valid: 'var(--valid)',
@@ -30,7 +38,10 @@ export function LeftRail({
 }) {
     const [query, setQuery] = useState('');
     const [collapsed, setCollapsed] = useState<Set<SectionKey>>(
-        () => new Set(sections.filter((s) => s.items.length === 0).map((s) => s.key))
+        () =>
+            new Set(
+                sections.filter((s) => s.items.length === 0).map((s) => s.key)
+            )
     );
 
     const toggle = (key: SectionKey) =>
@@ -46,6 +57,7 @@ export function LeftRail({
     return (
         <div className="rail">
             <div className="rail__search">
+                <Search className="rail__search-icon" size={14} aria-hidden />
                 <input
                     className="rail__searchbox"
                     placeholder="Search project…"
@@ -73,9 +85,14 @@ export function LeftRail({
                                 <button
                                     className="rail__section"
                                     onClick={() => toggle(section.key)}
+                                    aria-expanded={!isCollapsed}
                                 >
-                                    <span className="rail__caret">
-                                        {isCollapsed ? '▸' : '▾'}
+                                    <span className="rail__caret" aria-hidden>
+                                        {isCollapsed ? (
+                                            <ChevronRight size={15} />
+                                        ) : (
+                                            <ChevronDown size={15} />
+                                        )}
                                     </span>
                                     <span style={{ flex: 1 }}>
                                         {section.label}
@@ -88,13 +105,14 @@ export function LeftRail({
                                     <button
                                         className="rail__section-add"
                                         title={`New ${section.label.replace(/s$/, '').toLowerCase()}`}
+                                        aria-label={`New ${section.label.replace(/s$/, '').toLowerCase()}`}
                                         onClick={() =>
                                             onNewItem(
                                                 section.key as CreatableSection
                                             )
                                         }
                                     >
-                                        +
+                                        <Plus size={15} />
                                     </button>
                                 )}
                             </div>
@@ -141,6 +159,7 @@ export function LeftRail({
                                                     <button
                                                         className="rail__item-action"
                                                         title={`Rename ${item.label}`}
+                                                        aria-label={`Rename ${item.label}`}
                                                         onClick={() =>
                                                             onRenameItem(
                                                                 section.key as CreatableSection,
@@ -148,11 +167,12 @@ export function LeftRail({
                                                             )
                                                         }
                                                     >
-                                                        ✎
+                                                        <Pencil size={13} />
                                                     </button>
                                                     <button
                                                         className="rail__item-action rail__item-delete"
                                                         title={`Delete ${item.label}`}
+                                                        aria-label={`Delete ${item.label}`}
                                                         onClick={() =>
                                                             onDeleteItem(
                                                                 section.key as CreatableSection,
@@ -161,7 +181,7 @@ export function LeftRail({
                                                             )
                                                         }
                                                     >
-                                                        ×
+                                                        <X size={14} />
                                                     </button>
                                                 </>
                                             )}
@@ -176,7 +196,7 @@ export function LeftRail({
                 className="rail__new"
                 onClick={() => onNewItem('dialogues')}
             >
-                + New content…
+                <Plus size={14} /> New content…
             </button>
         </div>
     );

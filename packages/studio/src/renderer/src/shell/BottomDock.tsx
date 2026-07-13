@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Check, X } from '../lib/icons';
 import type {
     OpenProject,
     PreviewStatus,
@@ -261,13 +262,22 @@ function BuildView({
         );
     } else if (result) {
         const status = result.cancelled
-            ? { cls: 'buildlog__status--fail', text: '✗ Build cancelled' }
+            ? {
+                  cls: 'buildlog__status--fail',
+                  icon: <X size={13} />,
+                  label: 'Build cancelled',
+              }
             : result.ok
               ? {
                     cls: 'buildlog__status--ok',
-                    text: `✓ Build complete in ${result.durationMs} ms`,
+                    icon: <Check size={13} />,
+                    label: `Build complete in ${result.durationMs} ms`,
                 }
-              : { cls: 'buildlog__status--fail', text: '✗ Build failed' };
+              : {
+                    cls: 'buildlog__status--fail',
+                    icon: <X size={13} />,
+                    label: 'Build failed',
+                };
         build = (
             <div className="build">
                 {result.outDir && (
@@ -292,8 +302,10 @@ function BuildView({
                             {error.file}: {error.message}
                         </div>
                     ))}
-                    <div className={`buildlog__line ${status.cls}`}>
-                        {status.text}
+                    <div
+                        className={`buildlog__line buildlog__status ${status.cls}`}
+                    >
+                        {status.icon} {status.label}
                     </div>
                 </div>
                 {result.ok && result.outputFiles.length > 0 && (

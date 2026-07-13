@@ -1,4 +1,5 @@
 import type { EngineInfo } from '../../../shared/project';
+import { TriangleAlert } from '../lib/icons';
 
 /**
  * Warns when the opened project's dependencies aren't installed — Build and
@@ -19,7 +20,7 @@ export function EngineBanner({
     if (engine.depsInstalled) return null;
     return (
         <div className="banner">
-            <span className="banner__icon">⚠</span>
+            <TriangleAlert className="banner__icon" size={15} aria-hidden />
             <span>
                 This project's dependencies aren't installed, so Build and
                 preview won't run yet.

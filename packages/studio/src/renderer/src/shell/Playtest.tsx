@@ -9,6 +9,7 @@
  * so they behave exactly like in-game effects.
  */
 import { useCallback, useRef, useState } from 'react';
+import { Play, X } from '../lib/icons';
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { PlaytestSession, reloadSession } from '../lib/playtest';
@@ -108,7 +109,7 @@ export function Playtest({ project }: { project: OpenProject }) {
                             : 'This project has no dialogues yet'
                     }
                 >
-                    ▶ Start at node…
+                    <Play size={13} /> Start at node…
                 </button>
                 <button
                     className="btn"
@@ -142,7 +143,7 @@ export function Playtest({ project }: { project: OpenProject }) {
                                 title="Delete this test state"
                                 aria-label={`Delete test state ${s.name}`}
                             >
-                                ×
+                                <X size={13} />
                             </button>
                         </span>
                     ))}
@@ -284,7 +285,7 @@ function Playback({
                         className="btn btn--accent playback__continue"
                         onClick={() => onAct(() => session.continue())}
                     >
-                        Continue ▶
+                        Continue <Play size={13} />
                     </button>
                 )}
             </div>

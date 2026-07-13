@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { TriangleAlert, X } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
 import type { OpenProject } from '../../../shared/project';
 import type { YamlEdit } from '../../../shared/project';
@@ -141,7 +142,11 @@ export function GameConfigForm({
         <div className="form scroll">
             {conflict && (
                 <div className="banner">
-                    <span className="banner__icon">⚠</span>
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
                     <span>This file changed on disk since you opened it.</span>
                     <button className="btn" onClick={() => save(true)}>
                         Overwrite
@@ -312,7 +317,7 @@ export function GameConfigForm({
                                     )
                                 }
                             >
-                                ×
+                                <X size={15} />
                             </button>
                         </span>
                     ))}
@@ -372,7 +377,7 @@ function KeyValueEditor({
                         aria-label={`Remove ${key}`}
                         onClick={() => onRemove(key)}
                     >
-                        ×
+                        <X size={15} />
                     </button>
                 </div>
             ))}

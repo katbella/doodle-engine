@@ -1,4 +1,5 @@
 import type { OpenProject } from '../../../shared/project';
+import { X } from '../lib/icons';
 import type { Tab } from '../types';
 import { filePathFor } from '../lib/paths';
 import { DetailView } from './DetailView';
@@ -66,7 +67,7 @@ export function EditorArea({
                                 onClose(tab.key);
                             }}
                         >
-                            ×
+                            <X size={14} />
                         </button>
                     </div>
                 ))}

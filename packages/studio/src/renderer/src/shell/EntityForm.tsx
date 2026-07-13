@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { TriangleAlert, X, ChevronUp, ChevronDown, Plus } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
 import type { OpenProject } from '../../../shared/project';
 import type { YamlEdit } from '../../../shared/project';
@@ -140,7 +141,11 @@ export function EntityForm({
         <div className="form scroll">
             {conflict && (
                 <div className="banner">
-                    <span className="banner__icon">⚠</span>
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
                     <span>This file changed on disk since you opened it.</span>
                     <button className="btn" onClick={() => save(true)}>
                         Overwrite
@@ -488,7 +493,7 @@ function StatsBag({
                         onClick={() => remove(key)}
                         aria-label="Remove stat"
                     >
-                        ×
+                        <X size={15} />
                     </button>
                 </div>
             ))}
@@ -512,8 +517,7 @@ function StageListEditor({
 }) {
     const set = (i: number, patch: Partial<Stage>) =>
         onChange(stages.map((s, j) => (j === i ? { ...s, ...patch } : s)));
-    const remove = (i: number) =>
-        onChange(stages.filter((_, j) => j !== i));
+    const remove = (i: number) => onChange(stages.filter((_, j) => j !== i));
     const move = (i: number, delta: number) => {
         const j = i + delta;
         if (j < 0 || j >= stages.length) return;
@@ -522,7 +526,10 @@ function StageListEditor({
         onChange(next);
     };
     const add = () =>
-        onChange([...stages, { id: `stage_${stages.length + 1}`, description: '' }]);
+        onChange([
+            ...stages,
+            { id: `stage_${stages.length + 1}`, description: '' },
+        ]);
 
     return (
         <div className="field">
@@ -548,30 +555,33 @@ function StageListEditor({
                     <button
                         className="rowedit__btn"
                         title="Move up"
+                        aria-label="Move up"
                         disabled={i === 0}
                         onClick={() => move(i, -1)}
                     >
-                        ↑
+                        <ChevronUp size={15} />
                     </button>
                     <button
                         className="rowedit__btn"
                         title="Move down"
+                        aria-label="Move down"
                         disabled={i === stages.length - 1}
                         onClick={() => move(i, 1)}
                     >
-                        ↓
+                        <ChevronDown size={15} />
                     </button>
                     <button
                         className="rowedit__btn rowedit__btn--danger"
                         title="Remove stage"
+                        aria-label="Remove stage"
                         onClick={() => remove(i)}
                     >
-                        ×
+                        <X size={15} />
                     </button>
                 </div>
             ))}
             <button className="dlg__add" onClick={add}>
-                + Add stage
+                <Plus size={13} /> Add stage
             </button>
         </div>
     );
@@ -595,8 +605,7 @@ function MarkerListEditor({
 }) {
     const set = (i: number, patch: Partial<Marker>) =>
         onChange(markers.map((m, j) => (j === i ? { ...m, ...patch } : m)));
-    const remove = (i: number) =>
-        onChange(markers.filter((_, j) => j !== i));
+    const remove = (i: number) => onChange(markers.filter((_, j) => j !== i));
     const add = () => onChange([...markers, { id: '', x: 0, y: 0 }]);
 
     // A marker may point at a location not in the list (e.g. a typo); keep it
@@ -626,30 +635,27 @@ function MarkerListEditor({
                         type="number"
                         value={marker.x ?? 0}
                         title="x"
-                        onChange={(e) =>
-                            set(i, { x: Number(e.target.value) })
-                        }
+                        onChange={(e) => set(i, { x: Number(e.target.value) })}
                     />
                     <input
                         className="dlg__input rowedit__num"
                         type="number"
                         value={marker.y ?? 0}
                         title="y"
-                        onChange={(e) =>
-                            set(i, { y: Number(e.target.value) })
-                        }
+                        onChange={(e) => set(i, { y: Number(e.target.value) })}
                     />
                     <button
                         className="rowedit__btn rowedit__btn--danger"
                         title="Remove marker"
+                        aria-label="Remove marker"
                         onClick={() => remove(i)}
                     >
-                        ×
+                        <X size={15} />
                     </button>
                 </div>
             ))}
             <button className="dlg__add" onClick={add}>
-                + Add marker
+                <Plus size={13} /> Add marker
             </button>
         </div>
     );

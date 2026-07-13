@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { TriangleAlert } from '../lib/icons';
 import { parseDialogue, applyDialogueEdits } from '@doodle-engine/core';
 import type { Dialogue, DialogueNode } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
@@ -241,7 +242,11 @@ export function DialogueEditor({
             <div className="dlg__main scroll">
                 {conflict !== null && (
                     <div className="banner">
-                        <span className="banner__icon">⚠</span>
+                        <TriangleAlert
+                            className="banner__icon"
+                            size={15}
+                            aria-hidden
+                        />
                         <span>
                             This file changed on disk since you opened it.
                         </span>

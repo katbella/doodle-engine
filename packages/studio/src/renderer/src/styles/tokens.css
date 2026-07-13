@@ -1,49 +1,59 @@
-/*
- * Design tokens: one source of truth for color, type, and spacing. A light
- * theme can be added later as a single `:root[data-theme="light"]` override of
- * these variables. Font stacks fall back to system faces until Archivo and
- * JetBrains Mono are bundled, at which point swapping them in is one change.
- */
+/* Color, type, and spacing tokens. The Archivo and JetBrains Mono faces are
+   imported in main.tsx; the stacks fall back to system fonts if those fail. */
 
 :root {
     color-scheme: dark;
 
-    --bg: #0d0e10;
-    --bg-editor: #101113;
-    --surface: #151618;
-    --surface-raised: #1a1b1d;
-    --surface-input: #111214;
-    --surface-hover: #1e1f22;
+    --bg: #0c0d0f;
+    --bg-editor: #101214;
+    --surface: #16181b;
+    --surface-raised: #1c1f22;
+    --surface-input: #101214;
+    --surface-hover: #24272b;
 
-    --border-faint: rgba(255, 255, 255, 0.08);
-    --border: rgba(255, 255, 255, 0.16);
+    --border-faint: rgba(255, 255, 255, 0.11);
+    --border: rgba(255, 255, 255, 0.2);
+    --border-strong: rgba(255, 255, 255, 0.32);
 
-    --text: #f4f2f1;
-    --text-dim: rgba(239, 236, 235, 0.62);
-    --text-faint: rgba(255, 255, 255, 0.38);
+    /* Solid values so dim text keeps its contrast on any surface (translucent
+       greys muddy against tinted rows). */
+    --text: #f5f3f2;
+    --text-dim: #c4bfbc;
+    --text-faint: #928d8a;
 
     --accent: #ec3013;
-    --accent-ink: #0d0e10;
-    --accent-tint: rgba(236, 48, 19, 0.14);
-    --accent-hover: #ff4423;
+    --accent-ink: #ffffff;
+    --accent-tint: rgba(236, 48, 19, 0.16);
+    --accent-hover: #ff4a2c;
 
-    --overlay-hover: rgba(255, 255, 255, 0.03);
+    --overlay-hover: rgba(255, 255, 255, 0.05);
 
-    --scrollbar-thumb: rgba(255, 255, 255, 0.14);
-    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.16);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 
     /* Status colors must always pair with an icon or text, never color alone. */
-    --valid: #4fae6d;
-    --valid-tint: rgba(79, 174, 109, 0.15);
-    --warn: #d9a441;
-    --warn-tint: rgba(217, 164, 65, 0.15);
-    --error: #e5484d;
-    --error-tint: rgba(229, 72, 77, 0.15);
-    --danger: #ae1800;
+    --valid: #57b46f;
+    --valid-tint: rgba(87, 180, 111, 0.17);
+    --warn: #e0ac4b;
+    --warn-tint: rgba(224, 172, 75, 0.16);
+    --error: #ec5a5f;
+    --error-tint: rgba(236, 90, 95, 0.16);
+    --danger: #c33a29;
 
-    --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Consolas',
-        monospace;
+    --font-ui:
+        'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI',
+        sans-serif;
+    --font-mono:
+        'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
+        'Cascadia Code', 'Consolas', monospace;
+
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --fw-heavy: 800;
+
+    --track-label: 0.07em;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -57,35 +67,37 @@
 :root[data-theme='light'] {
     color-scheme: light;
 
-    --bg: #f3f2f2;
+    --bg: #f2f1f0;
     --bg-editor: #ffffff;
-    --surface: #ebeae9;
+    --surface: #e9e7e6;
     --surface-raised: #ffffff;
     --surface-input: #ffffff;
-    --surface-hover: #e4e2e1;
+    --surface-hover: #dedbd9;
 
-    --border-faint: rgba(0, 0, 0, 0.08);
-    --border: rgba(0, 0, 0, 0.16);
+    --border-faint: rgba(0, 0, 0, 0.1);
+    --border: rgba(0, 0, 0, 0.2);
+    --border-strong: rgba(0, 0, 0, 0.34);
 
-    --text: #201e1d;
-    --text-dim: rgba(32, 30, 29, 0.64);
-    --text-faint: rgba(32, 30, 29, 0.42);
+    --text: #1d1b1a;
+    --text-dim: #524e4c;
+    --text-faint: #7a7573;
 
     --accent-ink: #ffffff;
-    --accent-tint: rgba(236, 48, 19, 0.1);
+    --accent-tint: rgba(236, 48, 19, 0.12);
     --accent-hover: #d42a10;
 
-    --overlay-hover: rgba(0, 0, 0, 0.04);
+    --overlay-hover: rgba(0, 0, 0, 0.05);
 
-    --scrollbar-thumb: rgba(0, 0, 0, 0.28);
-    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.45);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.3);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.48);
 
     --valid: #2f8f52;
-    --valid-tint: rgba(47, 143, 82, 0.12);
-    --warn: #9a6b1a;
-    --warn-tint: rgba(154, 107, 26, 0.12);
+    --valid-tint: rgba(47, 143, 82, 0.13);
+    --warn: #916111;
+    --warn-tint: rgba(145, 97, 17, 0.13);
     --error: #c0392b;
     --error-tint: rgba(192, 57, 43, 0.12);
+    --danger: #a71f10;
 }
 
 * {
@@ -104,8 +116,11 @@ body {
     color: var(--text);
     font-family: var(--font-ui);
     font-size: 13px;
+    font-weight: var(--fw-normal);
     line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
+    /* Deliberately no -webkit-font-smoothing: grayscale renders the UI too thin
+       on the dark theme. */
+    text-rendering: optimizeLegibility;
     overflow: hidden;
     user-select: none;
 }
@@ -117,6 +132,7 @@ body {
 button {
     font-family: inherit;
     font-size: inherit;
+    font-weight: inherit;
     color: inherit;
     background: none;
     border: none;
@@ -155,4 +171,18 @@ button {
 
 .mono {
     font-family: var(--font-mono);
+}
+
+.lucide {
+    flex: none;
+    stroke-width: 2px;
+    vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

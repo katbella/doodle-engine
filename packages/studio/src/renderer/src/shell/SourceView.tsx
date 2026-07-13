@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { TriangleAlert } from '../lib/icons';
 import { parseDialogueCst } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { MonacoEditor, type EditorMarker } from './MonacoEditor';
@@ -18,7 +19,11 @@ function findCodeLine(content: string, token: string): number {
 }
 
 /** Best-effort line number for a problem message in the given file. */
-function lineForMessage(path: string, content: string, message: string): number {
+function lineForMessage(
+    path: string,
+    content: string,
+    message: string
+): number {
     const embedded = lineInMessage(message);
     if (embedded) return embedded;
     if (path.endsWith('.dlg')) {
@@ -205,8 +210,14 @@ export function SourceView({
         <div className="source">
             {recovered !== null && (
                 <div className="banner">
-                    <span className="banner__icon">⚠</span>
-                    <span>Unsaved changes were recovered from a previous session.</span>
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
+                    <span>
+                        Unsaved changes were recovered from a previous session.
+                    </span>
                     <button
                         className="btn"
                         onClick={() => {
@@ -229,7 +240,11 @@ export function SourceView({
             )}
             {conflict !== null && (
                 <div className="banner">
-                    <span className="banner__icon">⚠</span>
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
                     <span>This file changed on disk since you opened it.</span>
                     <button
                         className="btn"
@@ -252,7 +267,11 @@ export function SourceView({
                     {path}
                     {dirty ? ' •' : ''}
                 </span>
-                <button className="btn" onClick={() => save()} disabled={!dirty}>
+                <button
+                    className="btn"
+                    onClick={() => save()}
+                    disabled={!dirty}
+                >
                     Save
                 </button>
             </div>

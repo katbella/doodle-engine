@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { X, Plus } from '../lib/icons';
 import { serializeCondition, serializeEffect } from '@doodle-engine/core';
 import type {
     Choice,
@@ -190,7 +191,7 @@ function BuilderRow({
                 {label}
             </button>
             <button className="dlg__x" onClick={onRemove} aria-label="Remove">
-                ×
+                <X size={15} />
             </button>
         </div>
     );
@@ -233,7 +234,7 @@ function EffectList({
                     className="dlg__add"
                     onClick={() => setOpen(-1)}
                 >
-                    + Add effect
+                    <Plus size={13} /> Add effect
                 </button>
                 {open !== null && (
                     <Popover anchorRef={addRef} onClose={() => setOpen(null)}>
@@ -292,7 +293,8 @@ function ConditionList({
                     className="dlg__add"
                     onClick={() => setOpen(-1)}
                 >
-                    + Add {inRequire ? 'requirement' : 'condition'}
+                    <Plus size={13} /> Add{' '}
+                    {inRequire ? 'requirement' : 'condition'}
                 </button>
                 {open !== null && (
                     <Popover anchorRef={addRef} onClose={() => setOpen(null)}>
@@ -517,7 +519,7 @@ export function NodeEditor({
                             })
                         }
                     >
-                        + Branch
+                        <Plus size={13} /> Branch
                     </button>
                 </div>
                 {branches.map((branch, i) => (
@@ -526,6 +528,7 @@ export function NodeEditor({
                             <span>IF</span>
                             <button
                                 className="dlg__x"
+                                aria-label="Remove branch"
                                 onClick={() =>
                                     set({
                                         conditionalBranches: branches.filter(
@@ -534,7 +537,7 @@ export function NodeEditor({
                                     })
                                 }
                             >
-                                ×
+                                <X size={15} />
                             </button>
                         </div>
                         <SingleConditionField
@@ -612,7 +615,7 @@ export function NodeEditor({
                             })
                         }
                     >
-                        + Choice
+                        <Plus size={13} /> Choice
                     </button>
                 </div>
                 {node.choices.map((choice, i) => {
@@ -628,6 +631,7 @@ export function NodeEditor({
                                 <span>CHOICE</span>
                                 <button
                                     className="dlg__x"
+                                    aria-label="Remove choice"
                                     onClick={() =>
                                         set({
                                             choices: node.choices.filter(
@@ -636,7 +640,7 @@ export function NodeEditor({
                                         })
                                     }
                                 >
-                                    ×
+                                    <X size={15} />
                                 </button>
                             </div>
                             <input

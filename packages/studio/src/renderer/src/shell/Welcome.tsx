@@ -1,4 +1,5 @@
 import type { RecentProject } from '../../../shared/project';
+import { Sun, Moon } from '../lib/icons';
 
 export function Welcome({
     onOpen,
@@ -22,15 +23,20 @@ export function Welcome({
     return (
         <div className="welcome">
             <button
-                className="btn welcome__theme"
+                className="btn btn--icon welcome__theme"
                 onClick={onToggleTheme}
+                aria-label={
+                    theme === 'dark'
+                        ? 'Switch to light mode'
+                        : 'Switch to dark mode'
+                }
                 title={
                     theme === 'dark'
                         ? 'Switch to light mode'
                         : 'Switch to dark mode'
                 }
             >
-                {theme === 'dark' ? '☀' : '☾'}
+                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
             <div className="welcome__mark">DS</div>
             <div className="welcome__title">Doodle Studio</div>

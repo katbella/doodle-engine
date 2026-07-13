@@ -699,6 +699,8 @@ __metadata:
   dependencies:
     "@doodle-engine/core": "workspace:*"
     "@doodle-engine/toolkit": "workspace:*"
+    "@fontsource-variable/archivo": "npm:^5.2.8"
+    "@fontsource-variable/jetbrains-mono": "npm:^5.2.8"
     "@monaco-editor/react": "npm:^4.6.0"
     "@types/node": "npm:^24.0.0"
     "@types/react": "npm:^19.0.0"
@@ -707,6 +709,7 @@ __metadata:
     chokidar: "npm:^4.0.0"
     electron: "npm:^33.2.0"
     electron-vite: "npm:^3.0.0"
+    lucide-react: "npm:^1.24.0"
     monaco-editor: "npm:^0.52.0"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
@@ -958,6 +961,20 @@ __metadata:
   version: 0.25.12
   resolution: "@esbuild/win32-x64@npm:0.25.12"
   conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/archivo@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource-variable/archivo@npm:5.2.8"
+  checksum: 10c0/e4522f400fc6d0eb9c3b7e32c1c00e87bfa205bd57c8be664c5624076f6a5b914026e9bfa7994b22b072ae4f8d1b1951bcb5302a4fbf652d0a3e57727ca38c2c
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/jetbrains-mono@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource-variable/jetbrains-mono@npm:5.2.8"
+  checksum: 10c0/574e5463b802cfdd6ec8dd16724d2fd5ee38204815729c9dca0f457a417f0a4d32e6ec4ed2dfa0e5a5de5a9b0deaeb9f3c0b49b332763ed40172de43d6b1502f
   languageName: node
   linkType: hard
 
@@ -2839,6 +2856,15 @@ __metadata:
   dependencies:
     yallist: "npm:^3.0.2"
   checksum: 10c0/89b2ef2ef45f543011e38737b8a8622a2f8998cddf0e5437174ef8f1f70a8b9d14a918ab3e232cb3ba343b7abddffa667f0b59075b2b80e6b4d63c3de6127482
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:^1.24.0":
+  version: 1.24.0
+  resolution: "lucide-react@npm:1.24.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/8bc2a7c6cfa33bfc6df5533cec12454197f9182b98da0dcb79c6f167ca99710d9360e68b4ba7959953b4c501a48a100713e1b047a18c326c955920f72b9207ee
   languageName: node
   linkType: hard
 

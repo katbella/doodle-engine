@@ -35,7 +35,20 @@ import { EditorArea, type ViewMode } from './shell/EditorArea';
 import { RightPanel } from './shell/RightPanel';
 import { BottomDock, type DockTab } from './shell/BottomDock';
 import { ResizeHandle } from './shell/ResizeHandle';
+import { CommandPalette, type Command } from './shell/CommandPalette';
 import { usePersistedSize } from './lib/usePersistedSize';
+import {
+    FolderOpen,
+    FilePlus,
+    FileText,
+    Hammer,
+    Check,
+    Play,
+    Monitor,
+    Square,
+    Sun,
+    Moon,
+} from './lib/icons';
 
 /** The reference-index symbol type for each content section, where one exists.
  * Maps and locales have no incoming references, so they're absent. */
@@ -73,6 +86,7 @@ export function App() {
         id: string;
     } | null>(null);
     const [dockTab, setDockTab] = useState<DockTab>('problems');
+    const [showPalette, setShowPalette] = useState(false);
     const [building, setBuilding] = useState(false);
     const [buildResult, setBuildResult] = useState<StudioBuildResult | null>(
         null
@@ -162,6 +176,17 @@ export function App() {
         () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
         []
     );
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                setShowPalette((v) => !v);
+            }
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, []);
 
     useEffect(() => {
         window.studio.listRecentProjects().then(setRecent);
@@ -532,6 +557,98 @@ export function App() {
     const sections = buildSections(project);
     const activeTab = tabs.find((t) => t.key === activeKey) ?? null;
 
+    const canBuild = project.engine.depsInstalled;
+    const actionCommands: Command[] = [
+        {
+            id: 'act:open',
+            label: 'Open project…',
+            group: 'Actions',
+            icon: <FolderOpen size={15} />,
+            run: openProject,
+        },
+        {
+            id: 'act:new',
+            label: 'New project…',
+            group: 'Actions',
+            icon: <FilePlus size={15} />,
+            run: () => setShowNewProject(true),
+        },
+        {
+            id: 'act:validate',
+            label: 'Validate',
+            group: 'Actions',
+            keywords: 'problems check errors',
+            icon: <Check size={15} />,
+            run: () => revalidate(),
+        },
+        ...(canBuild
+            ? [
+                  {
+                      id: 'act:build',
+                      label: 'Build',
+                      group: 'Actions',
+                      keywords: 'production dist',
+                      icon: <Hammer size={15} />,
+                      run: () => runBuild(),
+                  },
+              ]
+            : []),
+        {
+            id: 'act:playtest',
+            label: 'Playtest',
+            group: 'Actions',
+            keywords: 'run play test engine',
+            icon: <Play size={15} />,
+            run: () => setDockTab('playtest'),
+        },
+        ...(preview
+            ? [
+                  {
+                      id: 'act:stop-preview',
+                      label: 'Stop preview',
+                      group: 'Actions',
+                      keywords: 'dev server',
+                      icon: <Square size={15} />,
+                      run: () => stopPreview(),
+                  },
+              ]
+            : canBuild
+              ? [
+                    {
+                        id: 'act:preview',
+                        label: 'Start preview',
+                        group: 'Actions',
+                        keywords: 'dev server browser',
+                        icon: <Monitor size={15} />,
+                        run: () => startPreview(),
+                    },
+                ]
+              : []),
+        {
+            id: 'act:theme',
+            label:
+                theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
+            group: 'Actions',
+            keywords: 'theme dark light appearance',
+            icon: theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />,
+            run: toggleTheme,
+        },
+    ];
+    const fileCommands: Command[] = sections.flatMap((section) =>
+        section.items.map((item) => ({
+            id: `file:${section.key}:${item.id}`,
+            label: item.label,
+            group: 'Files',
+            keywords: section.label,
+            hint: section.label,
+            icon: <FileText size={15} />,
+            run: () => openItem(section.key, item.id, item.label),
+        }))
+    );
+    const paletteCommands = [...actionCommands, ...fileCommands];
+
     // Every flag and variable key used anywhere, with its usage count.
     const flags = referenceIndex
         ? referenceIndex.allSymbols('flags').map((id) => ({
@@ -573,6 +690,7 @@ export function App() {
                     onStopPreview={stopPreview}
                     onOpenPreview={() => window.studio.openPreview()}
                     onPlaytest={() => setDockTab('playtest')}
+                    onOpenPalette={() => setShowPalette(true)}
                     theme={theme}
                     onToggleTheme={toggleTheme}
                 />
@@ -748,6 +866,12 @@ export function App() {
                         setFlagVarTarget(null);
                     }}
                     onCancel={() => setFlagVarTarget(null)}
+                />
+            )}
+            {showPalette && (
+                <CommandPalette
+                    commands={paletteCommands}
+                    onClose={() => setShowPalette(false)}
                 />
             )}
         </div>

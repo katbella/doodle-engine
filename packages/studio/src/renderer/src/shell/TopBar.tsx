@@ -1,4 +1,13 @@
 import type { OpenProject, PreviewStatus } from '../../../shared/project';
+import {
+    Sun,
+    Moon,
+    Play,
+    Square,
+    Monitor,
+    ExternalLink,
+    Command,
+} from '../lib/icons';
 
 export function TopBar({
     project,
@@ -15,6 +24,7 @@ export function TopBar({
     onStopPreview,
     onOpenPreview,
     onPlaytest,
+    onOpenPalette,
     theme,
     onToggleTheme,
 }: {
@@ -33,6 +43,7 @@ export function TopBar({
     onStopPreview: () => void;
     onOpenPreview: () => void;
     onPlaytest: () => void;
+    onOpenPalette: () => void;
     theme: 'dark' | 'light';
     onToggleTheme: () => void;
 }) {
@@ -69,21 +80,33 @@ export function TopBar({
                 {status.label}
             </span>
             <div className="topbar__spacer" />
-            <div className="topbar__palette">
+            <button
+                className="topbar__palette"
+                onClick={onOpenPalette}
+                title="Open the command palette"
+            >
+                <Command size={13} aria-hidden />
                 <span>Command palette</span>
-                <kbd>⌘K</kbd>
-            </div>
+                <kbd>
+                    {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
+                </kbd>
+            </button>
             <div className="topbar__spacer" />
             <button
-                className="btn"
+                className="btn btn--icon"
                 onClick={onToggleTheme}
+                aria-label={
+                    theme === 'dark'
+                        ? 'Switch to light mode'
+                        : 'Switch to dark mode'
+                }
                 title={
                     theme === 'dark'
                         ? 'Switch to light mode'
                         : 'Switch to dark mode'
                 }
             >
-                {theme === 'dark' ? '☀' : '☾'}
+                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </button>
             <button className="btn" onClick={onOpen}>
                 Open project…
@@ -114,14 +137,14 @@ export function TopBar({
                         onClick={onOpenPreview}
                         title={`Open ${preview.url} in your browser`}
                     >
-                        ⧉ Preview :{preview.port}
+                        <ExternalLink size={14} /> Preview :{preview.port}
                     </button>
                     <button
                         className="btn"
                         onClick={onStopPreview}
                         disabled={previewBusy}
                     >
-                        ◼ Stop
+                        <Square size={14} /> Stop
                     </button>
                 </>
             ) : (
@@ -135,7 +158,13 @@ export function TopBar({
                             : "Install the project's dependencies first"
                     }
                 >
-                    {previewBusy ? 'Starting…' : '◐ Preview'}
+                    {previewBusy ? (
+                        'Starting…'
+                    ) : (
+                        <>
+                            <Monitor size={14} /> Preview
+                        </>
+                    )}
                 </button>
             )}
             <button
@@ -143,7 +172,7 @@ export function TopBar({
                 onClick={onPlaytest}
                 title="Run the game in the playtest panel"
             >
-                ▶ Playtest
+                <Play size={14} /> Playtest
             </button>
         </header>
     );
