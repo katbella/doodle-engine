@@ -14,7 +14,9 @@ import { generateAssetManifest } from './manifest';
 import { generateServiceWorker } from './service-worker';
 import { loadProject } from './load-project';
 import { validateContent } from './validate';
+import { importFromProject } from './project-modules';
 import type { ValidationError } from './validate';
+import type * as Vite from 'vite';
 
 export interface BuildOptions {
     /** Absolute path to the project root (the folder that holds content/ and assets/). */
@@ -52,7 +54,6 @@ export async function buildProject(
     const { projectDir, outDir = 'dist', onLog = () => {} } = options;
     const start = Date.now();
 
-    const contentDir = join(projectDir, 'content');
     const assetsDir = join(projectDir, 'assets');
     const distDir = join(projectDir, outDir);
 
@@ -85,11 +86,14 @@ export async function buildProject(
         Date.now().toString()
     );
 
-    // Loaded here rather than at module top so callers that only load or
-    // validate content (like Doodle Studio opening a project) don't pull in the
-    // whole Vite build toolchain.
-    const { build: viteBuild } = await import('vite');
-    const { default: react } = await import('@vitejs/plugin-react');
+    // Vite comes from the project, not from here.
+    const { build: viteBuild } = await importFromProject<typeof Vite>(
+        projectDir,
+        'vite'
+    );
+    const { default: react } = await importFromProject<{
+        default: () => Vite.PluginOption;
+    }>(projectDir, '@vitejs/plugin-react');
 
     await viteBuild({
         root: projectDir,

@@ -11,31 +11,62 @@
         "build": "electron-vite build",
         "start": "electron-vite preview",
         "typecheck": "tsc -p tsconfig.json --noEmit",
-        "test": "vitest run"
+        "test": "vitest run",
+        "package": "electron-vite build && electron-builder --win",
+        "package:dir": "electron-vite build && electron-builder --win --dir"
     },
-    "dependencies": {
+    "devDependencies": {
         "@doodle-engine/core": "workspace:*",
         "@doodle-engine/toolkit": "workspace:*",
         "@fontsource-variable/archivo": "^5.2.8",
         "@fontsource-variable/jetbrains-mono": "^5.2.8",
         "@monaco-editor/react": "^4.6.0",
-        "chokidar": "^4.0.0",
-        "lucide-react": "^1.24.0",
-        "monaco-editor": "^0.52.0",
-        "yaml": "^2.8.3"
-    },
-    "devDependencies": {
         "@types/node": "^24.0.0",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^4.3.0",
+        "chokidar": "^4.0.0",
         "electron": "^33.2.0",
+        "electron-builder": "26.15.3",
         "electron-vite": "^3.0.0",
+        "lucide-react": "^1.24.0",
+        "monaco-editor": "^0.52.0",
+        "png-to-ico": "^3.0.2",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "typescript": "^5.7.0",
         "vite": "^6.4.2",
-        "vitest": "^4.1.6"
+        "vitest": "^4.1.6",
+        "yaml": "^2.8.3"
+    },
+    "build": {
+        "appId": "com.katbella.doodle-studio",
+        "productName": "Doodle Studio",
+        "electronVersion": "33.4.11",
+        "directories": {
+            "output": "release",
+            "buildResources": "build"
+        },
+        "files": [
+            "out/**/*",
+            "resources/**/*",
+            "package.json",
+            "!**/node_modules/**"
+        ],
+        "npmRebuild": false,
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "icon": "build/icon.png"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "shortcutName": "Doodle Studio"
+        }
     },
     "engines": {
         "node": ">=24.0.0"

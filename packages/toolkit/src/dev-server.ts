@@ -9,11 +9,13 @@
  * how to show them.
  */
 
-import type { ViteDevServer, Plugin } from 'vite';
+import type { ViteDevServer, Plugin, PluginOption } from 'vite';
+import type * as Vite from 'vite';
 import { join } from 'path';
 import { generateAssetManifest } from './manifest';
 import { loadProject } from './load-project';
 import { validateContent } from './validate';
+import { importFromProject } from './project-modules';
 import type { ValidationError } from './validate';
 
 export interface DevServerOptions {
@@ -53,10 +55,14 @@ export async function startDevServer(
     const contentDir = join(projectDir, 'content');
     const assetsDir = join(projectDir, 'assets');
 
-    // Loaded here rather than at module top so callers that only load or
-    // validate content don't pull in the whole Vite dev-server toolchain.
-    const { createServer } = await import('vite');
-    const { default: react } = await import('@vitejs/plugin-react');
+    // Vite comes from the project, not from here.
+    const { createServer } = await importFromProject<typeof Vite>(
+        projectDir,
+        'vite'
+    );
+    const { default: react } = await importFromProject<{
+        default: () => PluginOption;
+    }>(projectDir, '@vitejs/plugin-react');
     const { watch } = await import('chokidar');
 
     const contentPlugin: Plugin = {

@@ -573,16 +573,16 @@ export function App() {
             icon: <FilePlus size={15} />,
             run: () => setShowNewProject(true),
         },
-        {
-            id: 'act:validate',
-            label: 'Validate',
-            group: 'Actions',
-            keywords: 'problems check errors',
-            icon: <Check size={15} />,
-            run: () => revalidate(),
-        },
         ...(canBuild
             ? [
+                  {
+                      id: 'act:validate',
+                      label: 'Validate',
+                      group: 'Actions',
+                      keywords: 'problems check errors',
+                      icon: <Check size={15} />,
+                      run: () => revalidate(),
+                  },
                   {
                       id: 'act:build',
                       label: 'Build',

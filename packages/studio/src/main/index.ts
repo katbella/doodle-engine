@@ -20,6 +20,7 @@ import {
 } from 'electron';
 import { spawn } from 'child_process';
 import { join } from 'path';
+import icon from '../../resources/icon.png?asset';
 import { ProjectService } from './project-service';
 import { DocumentService } from './document-service';
 import { RecoveryService } from './recovery-service';
@@ -44,14 +45,23 @@ let buildProc: UtilityProcess | null = null;
 let previewProc: UtilityProcess | null = null;
 let previewStatus: PreviewStatus | null = null;
 
+// A worker can post a final log line while the window is closing. Sending to a
+// destroyed window throws "Object has been destroyed", so drop it if it's gone.
+function sendToRenderer(channel: string, ...args: unknown[]): void {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send(channel, ...args);
+    }
+}
+
 function createWindow(): void {
     mainWindow = new BrowserWindow({
         width: 1440,
         height: 900,
         minWidth: 960,
         minHeight: 600,
-        backgroundColor: '#0d0e10',
+        backgroundColor: '#0c0d0f',
         show: false,
+        icon,
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             contextIsolation: true,
@@ -76,7 +86,7 @@ function createWindow(): void {
 async function buildMenu(projects: ProjectService): Promise<void> {
     const isMac = process.platform === 'darwin';
     const send = (channel: string, ...args: unknown[]) =>
-        mainWindow?.webContents.send(channel, ...args);
+        sendToRenderer(channel, ...args);
 
     const recent = await projects.listRecent();
     const recentSubmenu: MenuItemConstructorOptions[] = recent.length
@@ -125,8 +135,7 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
     buildProc?.kill();
     const logs: string[] = [];
     const start = Date.now();
-    const send = (line: string) =>
-        mainWindow?.webContents.send('build:log', line);
+    const send = (line: string) => sendToRenderer('build:log', line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -198,8 +207,7 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
  * a fresh project folder can get it build-ready without a terminal.
  */
 async function installDependencies(projectDir: string): Promise<InstallResult> {
-    const send = (line: string) =>
-        mainWindow?.webContents.send('install:log', line);
+    const send = (line: string) => sendToRenderer('install:log', line);
     const packageManager = await detectPackageManager(projectDir);
     send(`Installing dependencies with ${packageManager}…`);
 
@@ -239,8 +247,7 @@ function startPreview(projectDir: string): Promise<PreviewStatus | null> {
         if (previewStatus) shell.openExternal(previewStatus.url);
         return Promise.resolve(previewStatus);
     }
-    const send = (line: string) =>
-        mainWindow?.webContents.send('preview:log', line);
+    const send = (line: string) => sendToRenderer('preview:log', line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -352,7 +359,7 @@ app.whenReady().then(() => {
             await buildMenu(projects);
             await watchService.watch(
                 project.projectDir,
-                (rel) => mainWindow?.webContents.send('file:changed', rel),
+                (rel) => sendToRenderer('file:changed', rel),
                 isSelfWrite
             );
         }
@@ -382,7 +389,7 @@ app.whenReady().then(() => {
             if (!info.depsInstalled) {
                 const line =
                     "This project's dependencies aren't installed. Install them, then build.";
-                mainWindow?.webContents.send('build:log', line);
+                sendToRenderer('build:log', line);
                 return {
                     ok: false,
                     cancelled: false,

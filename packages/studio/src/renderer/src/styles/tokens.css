@@ -122,6 +122,14 @@ body {
        on the dark theme. */
     text-rendering: optimizeLegibility;
     overflow: hidden;
+}
+
+/* Chrome isn't selectable; text content stays selectable so it can be copied. */
+button,
+.rail__section,
+.tab,
+.dock__tab,
+.seg__opt {
     user-select: none;
 }
 

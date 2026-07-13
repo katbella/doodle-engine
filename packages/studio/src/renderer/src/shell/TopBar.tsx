@@ -112,9 +112,14 @@ export function TopBar({
                 Open project…
             </button>
             <button
-                className={`btn ${stale ? 'btn--accent' : ''}`}
+                className={`btn ${stale && canBuild ? 'btn--accent' : ''}`}
                 onClick={onValidate}
-                disabled={validating}
+                disabled={validating || !canBuild}
+                title={
+                    canBuild
+                        ? undefined
+                        : "Install the project's dependencies first"
+                }
             >
                 {validating ? 'Validating…' : 'Validate'}
             </button>
