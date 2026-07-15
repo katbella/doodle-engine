@@ -11,6 +11,15 @@ import type { ValidationError, YamlEdit } from '@doodle-engine/toolkit';
 
 export type { YamlEdit };
 
+export type ThemeMode = 'dark' | 'light';
+
+export type ThemeColor = 'blue' | 'red' | 'violet';
+
+export interface ThemeState {
+    mode: ThemeMode;
+    color: ThemeColor;
+}
+
 /** A line of streamed output from a build, install, or preview. */
 export interface ProcessLog {
     line: string;
@@ -128,11 +137,13 @@ export interface WriteResult {
     content?: string;
 }
 
-/** Handlers the renderer registers for the native File menu. */
+/** Handlers the renderer registers for native application-menu actions. */
 export interface MenuHandlers {
     onNew: () => void;
     onOpen: () => void;
     onOpenRecent: (path: string) => void;
+    onThemeMode: (mode: ThemeMode) => void;
+    onThemeColor: (color: ThemeColor) => void;
 }
 
 /** The API the preload bridge exposes to the renderer as window.studio. */
@@ -229,6 +240,7 @@ export interface StudioApi {
      * The callback gets the file's project-relative path. Returns an unsubscribe.
      */
     onFileChanged: (callback: (relPath: string) => void) => () => void;
-    /** Wire the native File menu to renderer actions. Returns an unsubscribe. */
+    setThemeMenuState: (state: ThemeState) => void;
+    /** Wire native application-menu actions. Returns an unsubscribe. */
     onMenu: (handlers: MenuHandlers) => () => void;
 }

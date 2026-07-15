@@ -32,6 +32,23 @@ function formatTimestamp(timestamp: string): string {
     return isNaN(date.getTime()) ? timestamp : date.toLocaleString();
 }
 
+function displaySlotLabel(slot: SaveSlot, ui: Record<string, string>): string {
+    if (slot.kind === 'quick' && slot.label === 'Quick Save') {
+        return ui['ui.quick_save'] ?? slot.label;
+    }
+    if (slot.kind === 'auto' && slot.label === 'Autosave') {
+        return ui['ui.autosave'] ?? slot.label;
+    }
+    const day = slot.save.state?.currentTime?.day;
+    if (slot.kind === 'manual' && slot.label === `Day ${day}`) {
+        return (ui['ui.day'] ?? 'Day {day}').replace('{day}', String(day));
+    }
+    if (slot.kind === 'manual' && slot.label === 'Save') {
+        return ui['ui.save'] ?? slot.label;
+    }
+    return slot.label;
+}
+
 export function SaveLoadPanel({
     ui,
     onSave,
@@ -77,7 +94,9 @@ export function SaveLoadPanel({
             </button>
 
             {slots.length === 0 ? (
-                <p className="save-load-empty">{ui['ui.no_saves'] ?? 'No saves yet'}</p>
+                <p className="save-load-empty">
+                    {ui['ui.no_saves'] ?? 'No saves yet'}
+                </p>
             ) : (
                 <ul className="save-slot-list">
                     {slots.map((slot) => (
@@ -87,7 +106,7 @@ export function SaveLoadPanel({
                         >
                             <div className="save-slot-info">
                                 <span className="save-slot-label">
-                                    {slot.label}
+                                    {displaySlotLabel(slot, ui)}
                                 </span>
                                 <span className="save-slot-time">
                                     {formatTimestamp(slot.timestamp)}

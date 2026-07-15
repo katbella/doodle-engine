@@ -14,7 +14,13 @@ export interface PlayerNotesProps {
     className?: string;
 }
 
-export function PlayerNotes({ notes, onWrite, onDelete, ui, className = '' }: PlayerNotesProps) {
+export function PlayerNotes({
+    notes,
+    onWrite,
+    onDelete,
+    ui,
+    className = '',
+}: PlayerNotesProps) {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
@@ -51,13 +57,17 @@ export function PlayerNotes({ notes, onWrite, onDelete, ui, className = '' }: Pl
             </form>
 
             {notes.length === 0 ? (
-                <p className="player-notes-empty">No notes yet</p>
+                <p className="player-notes-empty">
+                    {ui?.['ui.no_notes'] ?? 'No notes yet'}
+                </p>
             ) : (
                 <ul className="player-notes-list">
                     {notes.map((note) => (
                         <li key={note.id} className="player-note">
                             {note.title && (
-                                <div className="player-note-title">{note.title}</div>
+                                <div className="player-note-title">
+                                    {note.title}
+                                </div>
                             )}
                             <div className="player-note-text">{note.text}</div>
                             <button

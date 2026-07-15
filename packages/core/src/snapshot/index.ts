@@ -53,11 +53,13 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.party': 'Party',
     'ui.resources': 'Resources',
     'ui.no_items': 'No items',
+    'ui.location_banner': 'Location Banner',
     'ui.close': 'Close',
     'ui.paused': 'Paused',
     'ui.quit_to_title': 'Quit to Title',
     'ui.active_quests': 'Active Quests',
     'ui.entries': 'Entries',
+    'ui.no_entries': 'No entries yet',
     'ui.audio': 'Audio',
     'ui.language': 'Language',
     'ui.volume_master': 'Master',
@@ -69,13 +71,21 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.saved': 'Saved!',
     'ui.loaded': 'Loaded!',
     'ui.new_save': 'New Save',
+    'ui.quick_save': 'Quick Save',
+    'ui.autosave': 'Autosave',
     'ui.no_saves': 'No saves yet',
     'ui.delete': 'Delete',
     'ui.skip': 'Skip',
+    'ui.skip_splash': 'Skip splash screen',
     'ui.menu': 'Menu',
     'ui.add_note': 'Add Note',
     'ui.note_title': 'Title',
     'ui.note_text': 'Write a note...',
+    'ui.no_notes': 'No notes yet',
+    'ui.loading': 'Loading...',
+    'ui.loading_game_assets': 'Loading game assets...',
+    'ui.ready': 'Ready!',
+    'ui.error_loading_assets': 'Error loading assets',
     'ui.travel_to': 'Travel to {destination}?',
     'ui.travel_time_one': 'The journey will take 1 hour.',
     'ui.travel_time': 'The journey will take {hours} hours.',
@@ -174,7 +184,10 @@ export function buildSnapshot(
 
     // Get music and ambient from current location, respecting any playMusic override
     const locationData = registry.locations[state.currentLocation];
-    const music = resolveAssetPath(state.musicOverride ?? locationData?.music, 'music');
+    const music = resolveAssetPath(
+        state.musicOverride ?? locationData?.music,
+        'music'
+    );
     const ambient = resolveAssetPath(locationData?.ambient, 'ambient');
 
     // Resolve notification localization keys
@@ -282,7 +295,10 @@ function buildCharactersHereSnapshot(
     for (const [characterId, characterState] of Object.entries(
         state.characterState
     )) {
-        if (characterState.location === state.currentLocation && !characterState.inParty) {
+        if (
+            characterState.location === state.currentLocation &&
+            !characterState.inParty
+        ) {
             const character = registry.characters[characterId];
             if (character) {
                 charactersHere.push({
@@ -512,9 +528,8 @@ function buildMapSnapshot(
     registry: ContentRegistry,
     resolve: (text: string) => string
 ): SnapshotMap | null {
-    const map = Object.values(registry.maps).find(
-        (candidate) =>
-            candidate.locations.some((loc) => loc.id === state.currentLocation)
+    const map = Object.values(registry.maps).find((candidate) =>
+        candidate.locations.some((loc) => loc.id === state.currentLocation)
     );
     if (!map) return null;
 

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck Studio
+        run: yarn typecheck
+
+      - name: Test with coverage
+        run: yarn test:coverage
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Studio end-to-end
+        run: xvfb-run --auto-servernum yarn workspace @doodle-engine/studio test:e2e:run

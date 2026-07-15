@@ -5,6 +5,8 @@ import type {
     PreviewStatus,
     RecentProject,
     StudioBuildResult,
+    ThemeColor,
+    ThemeMode,
 } from '../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
 import { ReferenceIndex, type SymbolType } from '@doodle-engine/core';
@@ -100,11 +102,15 @@ export function App() {
     const [preview, setPreview] = useState<PreviewStatus | null>(null);
     const [previewBusy, setPreviewBusy] = useState(false);
     const [previewLog, setPreviewLog] = useState<string[]>([]);
-    const [theme, setTheme] = useState<'dark' | 'light'>(() =>
+    const [theme, setTheme] = useState<ThemeMode>(() =>
         localStorage.getItem('doodle-studio-theme') === 'light'
             ? 'light'
             : 'dark'
     );
+    const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
+        const saved = localStorage.getItem('doodle-studio-theme-color');
+        return saved === 'red' || saved === 'violet' ? saved : 'blue';
+    });
     const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({});
     const [dirtyTabs, setDirtyTabs] = useState<Set<string>>(() => new Set());
     const [reveal, setReveal] = useState<{
@@ -178,8 +184,11 @@ export function App() {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-accent', themeColor);
         localStorage.setItem('doodle-studio-theme', theme);
-    }, [theme]);
+        localStorage.setItem('doodle-studio-theme-color', themeColor);
+        window.studio.setThemeMenuState({ mode: theme, color: themeColor });
+    }, [theme, themeColor]);
 
     const toggleTheme = useCallback(
         () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
@@ -282,8 +291,10 @@ export function App() {
                 onNew: () => setShowNewProject(true),
                 onOpen: () => openProject(),
                 onOpenRecent: (path) => openRecent(path),
+                onThemeMode: setTheme,
+                onThemeColor: setThemeColor,
             }),
-        [openProject, openRecent]
+        [openProject, openRecent, toggleTheme]
     );
 
     const markModified = useCallback((filePath: string) => {

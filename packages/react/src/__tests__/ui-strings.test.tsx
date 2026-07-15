@@ -15,7 +15,9 @@ import { PlayerNotes } from '../components/PlayerNotes';
 import { PauseMenu } from '../components/PauseMenu';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { GameTime } from '../components/GameTime';
-import { MapView } from '../components/MapView';
+import { SplashScreen } from '../components/SplashScreen';
+import { LoadingScreen } from '../components/LoadingScreen';
+import { LocationView } from '../components/LocationView';
 
 // A locale where every ui key translates to XX<key>XX, so untranslated
 // English is easy to spot.
@@ -87,14 +89,18 @@ describe('built-in labels come from ui strings', () => {
                         currentStageDescription: 'sd',
                     },
                 ]}
-                entries={[
-                    { id: 'e', title: 't', text: 'x', category: 'lore' },
-                ]}
+                entries={[{ id: 'e', title: 't', text: 'x', category: 'lore' }]}
             />
         );
         expect(html).toContain('XXui.journalXX');
         expect(html).toContain('XXui.active_questsXX');
         expect(html).toContain('XXui.entriesXX');
+
+        const empty = renderToStaticMarkup(
+            <Journal ui={ui} quests={[]} entries={[]} />
+        );
+        expect(empty).toContain('XXui.no_entriesXX');
+        expect(empty).not.toContain('No entries yet');
     });
 
     it('PlayerNotes labels and placeholders', () => {
@@ -111,6 +117,17 @@ describe('built-in labels come from ui strings', () => {
         expect(html).toContain('XXui.note_textXX');
         expect(html).toContain('XXui.add_noteXX');
         expect(html).toContain('XXui.deleteXX');
+
+        const empty = renderToStaticMarkup(
+            <PlayerNotes
+                ui={ui}
+                notes={[]}
+                onWrite={() => {}}
+                onDelete={() => {}}
+            />
+        );
+        expect(empty).toContain('XXui.no_notesXX');
+        expect(empty).not.toContain('No notes yet');
     });
 
     it('PauseMenu title and quit button', () => {
@@ -159,7 +176,6 @@ describe('built-in labels come from ui strings', () => {
 
     it('every default English label has a ui key', () => {
         const english = buildUIStrings({});
-        // Spot checks that the catalog covers what the components show.
         for (const key of [
             'ui.characters',
             'ui.party',
@@ -177,10 +193,53 @@ describe('built-in labels come from ui strings', () => {
         }
     });
 
-    it('MapView exists for completeness of the sweep', () => {
+    it('SplashScreen skip aria-label', () => {
         const html = renderToStaticMarkup(
-            <MapView ui={ui} map={null} onTravelTo={() => {}} />
+            <SplashScreen ui={ui} onComplete={() => {}} />
         );
-        expect(html).toBe('');
+        expect(html).toContain('XXui.skip_splashXX');
+        expect(html).not.toContain('Skip splash screen');
+    });
+
+    it('LocationView empty-banner label', () => {
+        const html = renderToStaticMarkup(
+            <LocationView
+                ui={ui}
+                location={{
+                    id: 'town',
+                    name: 'Town',
+                    description: '',
+                    banner: '',
+                }}
+            />
+        );
+        expect(html).toContain('XXui.location_bannerXX');
+        expect(html).not.toContain('Location Banner');
+    });
+
+    it.each([
+        ['loading-shell', 'ui.loading', 'Loading...'],
+        ['loading-game', 'ui.loading_game_assets', 'Loading game assets...'],
+        ['complete', 'ui.ready', 'Ready!'],
+        ['error', 'ui.error_loading_assets', 'Error loading assets'],
+    ] as const)('LoadingScreen %s label', (phase, key, english) => {
+        const html = renderToStaticMarkup(
+            <LoadingScreen
+                ui={ui}
+                state={{
+                    phase,
+                    bytesLoaded: 0,
+                    bytesTotal: 0,
+                    assetsLoaded: 0,
+                    assetsTotal: 0,
+                    progress: 0,
+                    overallProgress: 0,
+                    currentAsset: null,
+                    error: null,
+                }}
+            />
+        );
+        expect(html).toContain(`XX${key}XX`);
+        expect(html).not.toContain(english);
     });
 });

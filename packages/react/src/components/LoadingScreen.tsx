@@ -12,22 +12,27 @@ export interface LoadingScreenProps {
     background?: string;
     /** Custom progress bar renderer */
     renderProgress?: (progress: number, phase: string) => React.ReactNode;
+    /** Resolved UI strings; English defaults when absent. */
+    ui?: Record<string, string>;
     /** CSS class */
     className?: string;
 }
 
-function phaseLabel(phase: AssetLoadingState['phase']): string {
+function phaseLabel(
+    phase: AssetLoadingState['phase'],
+    ui?: Record<string, string>
+): string {
     switch (phase) {
         case 'loading-shell':
-            return 'Loading...';
+            return ui?.['ui.loading'] ?? 'Loading...';
         case 'loading-game':
-            return 'Loading game assets...';
+            return ui?.['ui.loading_game_assets'] ?? 'Loading game assets...';
         case 'complete':
-            return 'Ready!';
+            return ui?.['ui.ready'] ?? 'Ready!';
         case 'error':
-            return 'Error loading assets';
+            return ui?.['ui.error_loading_assets'] ?? 'Error loading assets';
         default:
-            return 'Loading...';
+            return ui?.['ui.loading'] ?? 'Loading...';
     }
 }
 
@@ -35,6 +40,7 @@ export function LoadingScreen({
     state,
     background,
     renderProgress,
+    ui,
     className = '',
 }: LoadingScreenProps) {
     const backgroundUrl = useAssetUrl(background);
@@ -43,7 +49,7 @@ export function LoadingScreen({
         : undefined;
 
     const percent = Math.round(state.overallProgress * 100);
-    const label = phaseLabel(state.phase);
+    const label = phaseLabel(state.phase, ui);
 
     return (
         <div className={`loading-screen ${className}`} style={bgStyle}>

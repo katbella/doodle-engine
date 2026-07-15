@@ -121,7 +121,6 @@ export function GameConfigForm({
     };
     useEffect(() => () => flushRef.current(), []);
 
-
     if (loading) {
         return (
             <div className="editor__empty">
@@ -160,6 +159,10 @@ export function GameConfigForm({
                     />
                     <span>This file changed on disk since you opened it.</span>
                     <button className="btn" onClick={() => save(true)}>
+                        Overwrite
+                    </button>
+                </div>
+            )}
             {missing && (
                 <div className="banner">
                     <TriangleAlert
@@ -168,13 +171,9 @@ export function GameConfigForm({
                         aria-hidden
                     />
                     <span>
-                        This file was deleted outside Studio. Close the tab,
-                        or recreate the item from the sidebar.
+                        This file was deleted outside Studio. Close the tab, or
+                        recreate the item from the sidebar.
                     </span>
-                </div>
-            )}
-                        Overwrite
-                    </button>
                 </div>
             )}
 
@@ -387,8 +386,8 @@ function KeyValueEditor({
                 </button>
             </div>
             {entries.length === 0 && <span className="field__hint">None.</span>}
-            {entries.map(([key, value]) => (
-                <div key={key} className="dlg__row">
+            {entries.map(([key, value], index) => (
+                <div key={index} className="dlg__row">
                     <input
                         className="dlg__input mono"
                         value={key}

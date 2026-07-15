@@ -334,7 +334,7 @@ function TargetSelect({
             {includeEnd && <option value="__end__">end dialogue</option>}
             {nodeIds.map((id) => (
                 <option key={id} value={id}>
-                    → {id}
+                    {id}
                 </option>
             ))}
         </select>

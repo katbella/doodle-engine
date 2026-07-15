@@ -193,13 +193,8 @@ export function SourceView({
     };
     useEffect(() => () => flushRef.current(), []);
 
-    // Live markers: a parse error (shown instantly) or the cross-reference
-    // problems from the last validation, placed on their lines.
-    // Markers reflect the last validation (project.problems), placed on the
-    // saved text. They are not recomputed on every keystroke — that was too
-    // aggressive and disrupted the cursor. Re-run with the Validate button.
-    // Hide markers for files edited since the last validation — those problems
-    // no longer match the text and would be misleading. Re-run Validate.
+    // Validation markers refer to saved text and stay hidden after an edit
+    // until validation runs again.
     const markers = useMemo<EditorMarker[]>(
         () =>
             stale

@@ -34,9 +34,12 @@ import type {
     OpenProject,
     PreviewStatus,
     StudioBuildResult,
+    ThemeState,
 } from '../shared/project';
+import { createThemeMenu, syncThemeMenuChecks } from './theme-menu';
 
 let mainWindow: BrowserWindow | null = null;
+let themeState: ThemeState = { mode: 'dark', color: 'blue' };
 
 // A build and a dev-server preview each run in their own process (they execute
 // the project's untrusted Vite config). We hold the current one so it can be
@@ -79,7 +82,7 @@ function createWindow(): void {
 }
 
 /**
- * Build the application menu. File → New/Open plus a live Open Recent submenu.
+ * Build the application menu. File owns projects; Themes owns appearance.
  * Menu clicks send events to the renderer so opening runs through the same code
  * as the on-screen buttons. Rebuilt after each open so Open Recent stays current.
  */
@@ -118,6 +121,7 @@ async function buildMenu(projects: ProjectService): Promise<void> {
         },
         { role: 'editMenu' },
         { role: 'viewMenu' },
+        createThemeMenu(themeState, send),
         { role: 'windowMenu' },
     ];
 
@@ -137,7 +141,8 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
     const start = Date.now();
     // Lines carry the project folder so the window can ignore lines that
     // belong to a project it is no longer showing.
-    const send = (line: string) => sendToRenderer('build:log', projectDir, line);
+    const send = (line: string) =>
+        sendToRenderer('build:log', projectDir, line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -209,7 +214,8 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
  * a fresh project folder can get it build-ready without a terminal.
  */
 async function installDependencies(projectDir: string): Promise<InstallResult> {
-    const send = (line: string) => sendToRenderer('install:log', projectDir, line);
+    const send = (line: string) =>
+        sendToRenderer('install:log', projectDir, line);
     const packageManager = await detectPackageManager(projectDir);
     send(`Installing dependencies with ${packageManager}…`);
 
@@ -249,7 +255,8 @@ function startPreview(projectDir: string): Promise<PreviewStatus | null> {
         if (previewStatus) shell.openExternal(previewStatus.url);
         return Promise.resolve(previewStatus);
     }
-    const send = (line: string) => sendToRenderer('preview:log', projectDir, line);
+    const send = (line: string) =>
+        sendToRenderer('preview:log', projectDir, line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -351,6 +358,15 @@ app.whenReady().then(() => {
     };
     const watchService = new WatchService();
 
+    ipcMain.on('theme:menuState', (_event, state: ThemeState) => {
+        themeState = state;
+        const menu = Menu.getApplicationMenu();
+        syncThemeMenuChecks(
+            state,
+            (id) => menu?.getMenuItemById(id) ?? undefined
+        );
+    });
+
     // After any successful open: refresh the recent menu and (re)start watching
     // this project's files, reporting external changes to the renderer.
     const afterOpen = async (project: OpenProject | null) => {
@@ -392,7 +408,7 @@ app.whenReady().then(() => {
             if (!info.depsInstalled) {
                 const line =
                     "This project's dependencies aren't installed. Install them, then build.";
-                sendToRenderer('build:log', line);
+                sendToRenderer('build:log', dir, line);
                 return {
                     ok: false,
                     cancelled: false,

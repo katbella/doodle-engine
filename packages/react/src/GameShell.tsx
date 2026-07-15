@@ -27,7 +27,10 @@ import { AssetProvider } from './AssetProvider';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useAssetUrl } from './hooks/useAsset';
 import { useUISounds } from './hooks/useUISounds';
-import { AudioSettingsProvider, useAudioSettings } from './AudioSettingsContext';
+import {
+    AudioSettingsProvider,
+    useAudioSettings,
+} from './AudioSettingsContext';
 import type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
 import type { AudioManagerOptions } from './hooks/useAudioManager';
 import { SplashScreen } from './components/SplashScreen';
@@ -89,6 +92,7 @@ export function GameShell({
     devTools = false,
 }: GameShellProps) {
     const shell = config.shell;
+    const loadingUi = buildUIStrings(registry.locales['en'] ?? {});
 
     return (
         <AudioSettingsProvider defaults={audioOptions}>
@@ -102,6 +106,7 @@ export function GameShell({
                             <LoadingScreen
                                 state={state}
                                 background={shell?.loading?.background}
+                                ui={loadingUi}
                             />
                         );
                     }}
@@ -214,7 +219,12 @@ function GameShellInner({
     const handleSave = useCallback(() => {
         if (!gameState) return;
         uiSoundControls.playClick();
-        writeSave(localStorage, storageKey, gameState.engine.saveGame(), 'quick');
+        writeSave(
+            localStorage,
+            storageKey,
+            gameState.engine.saveGame(),
+            'quick'
+        );
         setShowPauseMenu(false);
     }, [gameState, storageKey, uiSoundControls]);
 
@@ -272,7 +282,8 @@ function GameShellInner({
 
     useEffect(() => {
         if (titleMusicRef.current) {
-            titleMusicRef.current.volume = audioSettings.masterVolume * audioSettings.musicVolume;
+            titleMusicRef.current.volume =
+                audioSettings.masterVolume * audioSettings.musicVolume;
         }
     }, [audioSettings.masterVolume, audioSettings.musicVolume]);
 
@@ -300,6 +311,9 @@ function GameShellInner({
         { priority: 50, enabled: screen === 'playing' }
     );
 
+    const titleUi = buildUIStrings(
+        registry.locales[selectedLocale] ?? registry.locales['en'] ?? {}
+    );
 
     // Splash screen
     if (screen === 'splash') {
@@ -307,6 +321,7 @@ function GameShellInner({
             <div className={`game-shell ${className}`}>
                 <SplashScreen
                     shell={shell?.splash}
+                    ui={titleUi}
                     onComplete={() => setScreen('title')}
                 />
             </div>
@@ -315,9 +330,6 @@ function GameShellInner({
 
     // Title screen
     if (screen === 'title') {
-        const titleUi = buildUIStrings(
-            registry.locales[selectedLocale] ?? registry.locales['en'] ?? {}
-        );
         return (
             <div className={`game-shell ${className}`}>
                 {showSettings ? (

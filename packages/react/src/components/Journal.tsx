@@ -51,7 +51,9 @@ export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
             )}
 
             {quests.length === 0 && entries.length === 0 && (
-                <p className="journal-empty">No entries yet</p>
+                <p className="journal-empty">
+                    {ui?.['ui.no_entries'] ?? 'No entries yet'}
+                </p>
             )}
         </div>
     );

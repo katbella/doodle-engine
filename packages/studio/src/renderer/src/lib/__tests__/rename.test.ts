@@ -61,9 +61,7 @@ describe('planRename — dialogue references', () => {
     it('does NOT touch the word "bartender" in display text', () => {
         const out = rename('bartender', 'marcus');
         expect(out).toContain('The bartender wipes the counter.');
-        expect(out).toContain(
-            'Ask the bartender about the bartender'
-        );
+        expect(out).toContain('Ask the bartender about the bartender');
         // Re-parsing shows the references moved but the prose stayed.
         const reparsed = parseDialogue(out, 'chat');
         expect(reparsed.nodes[0].speaker).toBe('marcus');
@@ -114,7 +112,11 @@ describe('planRename — YAML references', () => {
         );
 
         expect(plan.yamlEdits).toEqual([
-            { collection: 'characters', id: 'guard', edits: [{ path: ['location'], value: 'inn' }] },
+            {
+                collection: 'characters',
+                id: 'guard',
+                edits: [{ path: ['location'], value: 'inn' }],
+            },
         ]);
     });
 
@@ -138,7 +140,11 @@ describe('planRename — YAML references', () => {
             'hello'
         );
         expect(plan.yamlEdits).toEqual([
-            { collection: 'characters', id: 'guard', edits: [{ path: ['dialogue'], value: 'hello' }] },
+            {
+                collection: 'characters',
+                id: 'guard',
+                edits: [{ path: ['dialogue'], value: 'hello' }],
+            },
         ]);
     });
 });
@@ -221,7 +227,7 @@ describe('planFlagVariableRename', () => {
     });
 });
 
-describe('planRename — coverage of every reference site', () => {
+describe('planRename reference sites', () => {
     it('rewrites a reference that only appears in an IF condition', () => {
         const SOURCE = [
             'NODE start',
@@ -382,9 +388,11 @@ describe('rewriteDialogueSource', () => {
 
     it('returns null when the dialogue does not reference the id', async () => {
         const { rewriteDialogueSource } = await import('../rename');
-        const DISK = ['NODE start', '  NARRATOR: Nothing here.', '  END dialogue'].join(
-            '\n'
-        );
+        const DISK = [
+            'NODE start',
+            '  NARRATOR: Nothing here.',
+            '  END dialogue',
+        ].join('\n');
         expect(
             rewriteDialogueSource(
                 DISK,

@@ -26,10 +26,7 @@ import { Interlude } from './components/Interlude';
 import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { AssetImage } from './components/AssetImage';
-import {
-    InputProviderBoundary,
-    useInputAction,
-} from './input/InputRouter';
+import { InputProviderBoundary, useInputAction } from './input/InputRouter';
 
 export interface GameRendererProps {
     className?: string;
@@ -37,7 +34,14 @@ export interface GameRendererProps {
     storageKey?: string;
 }
 
-type ActivePanel = 'inventory' | 'journal' | 'notes' | 'map' | 'saveload' | 'settings' | null;
+type ActivePanel =
+    | 'inventory'
+    | 'journal'
+    | 'notes'
+    | 'map'
+    | 'saveload'
+    | 'settings'
+    | null;
 
 function BottomBarButton({
     label,
@@ -109,7 +113,10 @@ function GameRendererInner({
 
             <div className="game-layout">
                 <main className="game-main">
-                    <LocationView location={snapshot.location} />
+                    <LocationView
+                        ui={snapshot.ui}
+                        location={snapshot.location}
+                    />
 
                     {snapshot.dialogue ? (
                         <div className="dialogue-container">
@@ -123,6 +130,7 @@ function GameRendererInner({
                         </div>
                     ) : (
                         <CharacterList
+                            ui={snapshot.ui}
                             characters={snapshot.charactersHere}
                             onTalkTo={actions.talkTo}
                         />
@@ -130,12 +138,18 @@ function GameRendererInner({
                 </main>
 
                 <aside className="game-sidebar">
-                    <GameTime ui={snapshot.ui} time={snapshot.time} format="narrative" />
+                    <GameTime
+                        ui={snapshot.ui}
+                        time={snapshot.time}
+                        format="narrative"
+                    />
 
                     <div className="party-panel">
                         <h2>{snapshot.ui['ui.party']}</h2>
                         {snapshot.party.length === 0 ? (
-                            <p className="party-empty">{snapshot.ui['ui.no_companions']}</p>
+                            <p className="party-empty">
+                                {snapshot.ui['ui.no_companions']}
+                            </p>
                         ) : (
                             <div className="party-portraits">
                                 {snapshot.party.map((member) => (
@@ -206,9 +220,7 @@ function GameRendererInner({
                     label={snapshot.ui['ui.notes']}
                     icon="notes"
                     onClick={() =>
-                        setActivePanel(
-                            activePanel === 'notes' ? null : 'notes'
-                        )
+                        setActivePanel(activePanel === 'notes' ? null : 'notes')
                     }
                     active={activePanel === 'notes'}
                 />
@@ -217,9 +229,7 @@ function GameRendererInner({
                         label={snapshot.ui['ui.map']}
                         icon="map"
                         onClick={() =>
-                            setActivePanel(
-                                activePanel === 'map' ? null : 'map'
-                            )
+                            setActivePanel(activePanel === 'map' ? null : 'map')
                         }
                         active={activePanel === 'map'}
                     />
@@ -253,11 +263,11 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Inventory ui={snapshot.ui} items={snapshot.inventory} />
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
+                        <Inventory
+                            ui={snapshot.ui}
+                            items={snapshot.inventory}
+                        />
                         <button
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
@@ -272,11 +282,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <Journal
+                            ui={snapshot.ui}
                             quests={snapshot.quests}
                             entries={snapshot.journal}
                         />
@@ -294,11 +302,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <PlayerNotes
+                            ui={snapshot.ui}
                             notes={snapshot.playerNotes}
                             onWrite={actions.writeNote}
                             onDelete={actions.deleteNote}
@@ -317,11 +323,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <MapView
+                            ui={snapshot.ui}
                             map={snapshot.map}
                             currentLocation={snapshot.location.id}
                             currentTime={snapshot.time}
@@ -344,10 +348,7 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <SaveLoadPanel
                             ui={snapshot.ui}
                             onSave={actions.saveGame}
@@ -368,11 +369,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <SettingsPanel
+                            ui={snapshot.ui}
                             audio={audioSettings}
                             onLocaleChange={actions.setLocale}
                             currentLocale={snapshot.currentLocale}

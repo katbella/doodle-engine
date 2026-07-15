@@ -126,7 +126,6 @@ export function EntityForm({
     };
     useEffect(() => () => flushRef.current(), []);
 
-
     if (loading) {
         return (
             <div className="editor__empty">
@@ -159,6 +158,10 @@ export function EntityForm({
                     />
                     <span>This file changed on disk since you opened it.</span>
                     <button className="btn" onClick={() => save(true)}>
+                        Overwrite
+                    </button>
+                </div>
+            )}
             {missing && (
                 <div className="banner">
                     <TriangleAlert
@@ -167,13 +170,9 @@ export function EntityForm({
                         aria-hidden
                     />
                     <span>
-                        This file was deleted outside Studio. Close the tab,
-                        or recreate the item from the sidebar.
+                        This file was deleted outside Studio. Close the tab, or
+                        recreate the item from the sidebar.
                     </span>
-                </div>
-            )}
-                        Overwrite
-                    </button>
                 </div>
             )}
 
@@ -251,6 +250,7 @@ function Field({
         </div>
     );
     const control = field.control;
+    const [assetDraft, setAssetDraft] = useState<string | null>(null);
 
     if (control.kind === 'reference') {
         const ids = idsFor(project, control.target);
@@ -356,16 +356,18 @@ function Field({
                 {label}
                 <input
                     className="dlg__input mono"
-                    value={text}
+                    value={assetDraft ?? text}
                     placeholder={
                         control.kind === 'assetList'
                             ? 'file1.ogg, file2.ogg'
                             : '(none)'
                     }
                     spellCheck={false}
+                    onBlur={() => setAssetDraft(null)}
                     onChange={(e) => {
                         const raw = e.target.value;
                         if (control.kind === 'assetList') {
+                            setAssetDraft(raw);
                             const list = raw
                                 .split(',')
                                 .map((s) => s.trim())

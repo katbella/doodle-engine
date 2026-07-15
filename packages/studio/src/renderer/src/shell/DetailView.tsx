@@ -6,7 +6,13 @@ import type { SectionKey, Tab } from '../types';
  * Read-only view of the selected item. This is the browse surface for now; the
  * dialogue and form editors replace these views in later steps.
  */
-export function DetailView({ project, tab }: { project: OpenProject; tab: Tab }) {
+export function DetailView({
+    project,
+    tab,
+}: {
+    project: OpenProject;
+    tab: Tab;
+}) {
     const { registry } = project;
 
     if (tab.section === 'dialogues') {
@@ -120,8 +126,8 @@ function DialogueDetail({ dialogue }: { dialogue: Dialogue }) {
                     )}
                     {node.choices.map((choice) => (
                         <div key={choice.id} className="node__choice">
-                            → {choice.text}
-                            {choice.next ? ` (→ ${choice.next})` : ''}
+                            {choice.text}
+                            {choice.next ? ` (next: ${choice.next})` : ''}
                         </div>
                     ))}
                 </div>

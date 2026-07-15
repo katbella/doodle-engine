@@ -73,7 +73,7 @@ export function validateContent(
         const site = `Interlude "${interlude.id}"`;
         for (const condition of interlude.triggerConditions ?? []) {
             errors.push(
-                ...validateCondition(condition, `${site} trigger condition`, file)
+                ...validateCondition(condition, `${site} trigger`, file)
             );
         }
         for (const effect of interlude.effects ?? []) {
@@ -295,7 +295,7 @@ function validateReferences(
         for (const condition of interlude.triggerConditions ?? []) {
             validateConditionReferences(
                 condition,
-                `${site} trigger condition`,
+                `${site} trigger`,
                 file,
                 registry,
                 errors

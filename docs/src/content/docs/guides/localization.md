@@ -119,62 +119,72 @@ If you don't define a `ui.*` key, the English default is used automatically. You
 A few keys contain placeholders in curly braces, like `{day}`. Keep the
 placeholder in your translation; the engine fills in the value.
 
-| Key | Default |
-|-----|---------|
-| `ui.continue` | Continue |
-| `ui.inventory` | Inventory |
-| `ui.journal` | Journal |
-| `ui.notes` | Notes |
-| `ui.map` | Map |
-| `ui.save_load` | Save/Load |
-| `ui.settings` | Settings |
-| `ui.save` | Save |
-| `ui.load` | Load |
-| `ui.new_game` | New Game |
-| `ui.resume` | Resume |
-| `ui.no_companions` | No companions |
-| `ui.narrator` | Narrator |
-| `ui.characters` | Characters |
-| `ui.party` | Party |
-| `ui.resources` | Resources |
-| `ui.no_items` | No items |
-| `ui.close` | Close |
-| `ui.paused` | Paused |
-| `ui.quit_to_title` | Quit to Title |
-| `ui.active_quests` | Active Quests |
-| `ui.entries` | Entries |
-| `ui.audio` | Audio |
-| `ui.language` | Language |
-| `ui.volume_master` | Master |
-| `ui.volume_music` | Music |
-| `ui.volume_sound` | Sound Effects |
-| `ui.volume_voice` | Voice |
-| `ui.volume_ui` | UI Sounds |
-| `ui.back` | Back |
-| `ui.saved` | Saved! |
-| `ui.loaded` | Loaded! |
-| `ui.new_save` | New Save |
-| `ui.no_saves` | No saves yet |
-| `ui.delete` | Delete |
-| `ui.skip` | Skip |
-| `ui.menu` | Menu |
-| `ui.add_note` | Add Note |
-| `ui.note_title` | Title |
-| `ui.note_text` | Write a note... |
-| `ui.travel_to` | Travel to {destination}? |
-| `ui.travel_time_one` | The journey will take 1 hour. |
-| `ui.travel_time` | The journey will take {hours} hours. |
-| `ui.arrive` | Arrive: Day {day}, {time} |
-| `ui.travel` | Travel |
-| `ui.cancel` | Cancel |
-| `ui.day` | Day {day} |
-| `ui.time_dawn` | Dawn |
-| `ui.time_morning` | Morning |
-| `ui.time_midday` | Midday |
-| `ui.time_afternoon` | Afternoon |
-| `ui.time_evening` | Evening |
-| `ui.time_dusk` | Dusk |
-| `ui.time_night` | Night |
+| Key                       | Default                              |
+| ------------------------- | ------------------------------------ |
+| `ui.continue`             | Continue                             |
+| `ui.inventory`            | Inventory                            |
+| `ui.journal`              | Journal                              |
+| `ui.notes`                | Notes                                |
+| `ui.map`                  | Map                                  |
+| `ui.save_load`            | Save/Load                            |
+| `ui.settings`             | Settings                             |
+| `ui.save`                 | Save                                 |
+| `ui.load`                 | Load                                 |
+| `ui.new_game`             | New Game                             |
+| `ui.resume`               | Resume                               |
+| `ui.no_companions`        | No companions                        |
+| `ui.narrator`             | Narrator                             |
+| `ui.characters`           | Characters                           |
+| `ui.party`                | Party                                |
+| `ui.resources`            | Resources                            |
+| `ui.no_items`             | No items                             |
+| `ui.location_banner`      | Location Banner                      |
+| `ui.close`                | Close                                |
+| `ui.paused`               | Paused                               |
+| `ui.quit_to_title`        | Quit to Title                        |
+| `ui.active_quests`        | Active Quests                        |
+| `ui.entries`              | Entries                              |
+| `ui.no_entries`           | No entries yet                       |
+| `ui.audio`                | Audio                                |
+| `ui.language`             | Language                             |
+| `ui.volume_master`        | Master                               |
+| `ui.volume_music`         | Music                                |
+| `ui.volume_sound`         | Sound Effects                        |
+| `ui.volume_voice`         | Voice                                |
+| `ui.volume_ui`            | UI Sounds                            |
+| `ui.back`                 | Back                                 |
+| `ui.saved`                | Saved!                               |
+| `ui.loaded`               | Loaded!                              |
+| `ui.new_save`             | New Save                             |
+| `ui.quick_save`           | Quick Save                           |
+| `ui.autosave`             | Autosave                             |
+| `ui.no_saves`             | No saves yet                         |
+| `ui.delete`               | Delete                               |
+| `ui.skip`                 | Skip                                 |
+| `ui.skip_splash`          | Skip splash screen                   |
+| `ui.menu`                 | Menu                                 |
+| `ui.add_note`             | Add Note                             |
+| `ui.note_title`           | Title                                |
+| `ui.note_text`            | Write a note...                      |
+| `ui.no_notes`             | No notes yet                         |
+| `ui.loading`              | Loading...                           |
+| `ui.loading_game_assets`  | Loading game assets...               |
+| `ui.ready`                | Ready!                               |
+| `ui.error_loading_assets` | Error loading assets                 |
+| `ui.travel_to`            | Travel to {destination}?             |
+| `ui.travel_time_one`      | The journey will take 1 hour.        |
+| `ui.travel_time`          | The journey will take {hours} hours. |
+| `ui.arrive`               | Arrive: Day {day}, {time}            |
+| `ui.travel`               | Travel                               |
+| `ui.cancel`               | Cancel                               |
+| `ui.day`                  | Day {day}                            |
+| `ui.time_dawn`            | Dawn                                 |
+| `ui.time_morning`         | Morning                              |
+| `ui.time_midday`          | Midday                               |
+| `ui.time_afternoon`       | Afternoon                            |
+| `ui.time_evening`         | Evening                              |
+| `ui.time_dusk`            | Dusk                                 |
+| `ui.time_night`           | Night                                |
 
 Example Spanish locale file:
 

@@ -57,7 +57,8 @@ describe('loader diagnostics', () => {
         const { loaded, all } = await loadAndValidate({
             'content/game.yaml': GAME,
             'content/locations/a_town.yaml': TOWN,
-            'content/locations/m_broken.yaml': 'id: broken\nname: [unclosed\n  bad: {{{\n',
+            'content/locations/m_broken.yaml':
+                'id: broken\nname: [unclosed\n  bad: {{{\n',
             'content/locations/z_later.yaml':
                 'id: later\nname: Later\ndescription: Loads fine.\n',
         });
@@ -73,11 +74,12 @@ describe('loader diagnostics', () => {
         const { all } = await loadAndValidate({
             'content/game.yaml': GAME,
             'content/locations/town.yaml': TOWN,
-            'content/items/no_id.yaml': 'name: Mystery\ndescription: Who am I\n',
+            'content/items/no_id.yaml':
+                'name: Mystery\ndescription: Who am I\n',
         });
-        expect(all.some((e) => e.includes('no_id.yaml') && e.includes('"id"'))).toBe(
-            true
-        );
+        expect(
+            all.some((e) => e.includes('no_id.yaml') && e.includes('"id"'))
+        ).toBe(true);
     });
 
     it('reports two files of one type sharing an id, first file wins', async () => {
@@ -144,15 +146,15 @@ describe('loader diagnostics', () => {
     });
 });
 
-describe('validator coverage', () => {
+describe('validation diagnostics', () => {
     it('does not crash on a location that only has an id', async () => {
         const { all } = await loadAndValidate({
             'content/game.yaml': GAME,
             'content/locations/town.yaml': 'id: town\n',
         });
-        expect(all.some((e) => e.includes('missing required field "name"'))).toBe(
-            true
-        );
+        expect(
+            all.some((e) => e.includes('missing required field "name"'))
+        ).toBe(true);
     });
 
     it('does not crash on a quest without stages', async () => {
@@ -181,9 +183,7 @@ describe('validator coverage', () => {
                 '  END dialogue',
             ].join('\n'),
         });
-        expect(
-            all.some((e) => e.includes('speaker "ghost"'))
-        ).toBe(true);
+        expect(all.some((e) => e.includes('speaker "ghost"'))).toBe(true);
     });
 
     it('reports a missing item in a dialogue top-level REQUIRE', async () => {
@@ -198,9 +198,7 @@ describe('validator coverage', () => {
             ].join('\n'),
         });
         expect(
-            all.some(
-                (e) => e.includes('REQUIRE') && e.includes('missing_key')
-            )
+            all.some((e) => e.includes('REQUIRE') && e.includes('missing_key'))
         ).toBe(true);
     });
 
@@ -224,6 +222,31 @@ describe('validator coverage', () => {
                     e.includes('missing_item')
             )
         ).toBe(true);
+        // The message reads naturally: no repeated word from the site label
+        // ("... trigger") running into the condition wording ("condition ...").
+        expect(all.some((e) => e.includes('condition condition'))).toBe(false);
+    });
+
+    it('reports a missing required argument on an interlude trigger condition', async () => {
+        const { all } = await loadAndValidate({
+            'content/game.yaml': GAME,
+            'content/locations/town.yaml': TOWN,
+            'content/interludes/intro.yaml': [
+                'id: intro',
+                'text: Chapter One',
+                'triggerLocation: town',
+                'triggerConditions:',
+                '  - type: hasItem',
+            ].join('\n'),
+        });
+        expect(
+            all.some(
+                (e) =>
+                    e.includes('trigger') &&
+                    e.includes('missing required "itemId"')
+            )
+        ).toBe(true);
+        expect(all.some((e) => e.includes('condition condition'))).toBe(false);
     });
 
     it('reports a number argument that is not a number', async () => {
@@ -237,9 +260,7 @@ describe('validator coverage', () => {
                 '  END dialogue',
             ].join('\n'),
         });
-        expect(
-            all.some((e) => e.includes('not a usable number'))
-        ).toBe(true);
+        expect(all.some((e) => e.includes('not a usable number'))).toBe(true);
     });
 
     it('reports a map scale of zero', async () => {
@@ -262,7 +283,9 @@ describe('validator coverage', () => {
                 '    y: 0',
             ].join('\n'),
         });
-        expect(all.some((e) => e.includes('scale greater than zero'))).toBe(true);
+        expect(all.some((e) => e.includes('scale greater than zero'))).toBe(
+            true
+        );
     });
 
     it('accepts a healthy project with none of these problems', async () => {

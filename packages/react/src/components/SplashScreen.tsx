@@ -14,6 +14,8 @@ export interface SplashScreenProps {
     shell?: ShellConfig['splash'];
     /** Called when splash completes */
     onComplete: () => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     /** CSS class */
     className?: string;
 }
@@ -21,6 +23,7 @@ export interface SplashScreenProps {
 export function SplashScreen({
     shell,
     onComplete,
+    ui,
     className = '',
 }: SplashScreenProps) {
     const displayDuration = shell?.duration ?? 2000;
@@ -62,7 +65,7 @@ export function SplashScreen({
             style={bgStyle}
             onClick={onComplete}
             role="button"
-            aria-label="Skip splash screen"
+            aria-label={ui?.['ui.skip_splash'] ?? 'Skip splash screen'}
             tabIndex={0}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') onComplete();
