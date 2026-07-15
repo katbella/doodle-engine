@@ -33,22 +33,8 @@ import { resolveAssetPath } from '../assets/paths';
 // UI String Defaults
 // =============================================================================
 
-const UI_KEYS = [
-    'ui.continue',
-    'ui.inventory',
-    'ui.journal',
-    'ui.map',
-    'ui.save_load',
-    'ui.settings',
-    'ui.save',
-    'ui.load',
-    'ui.new_game',
-    'ui.resume',
-    'ui.no_companions',
-    'ui.narrator',
-    'ui.notes',
-] as const;
-
+// Every label the built-in renderer shows. Locale files override any of
+// these with a matching ui.* key; the English text is the default.
 const UI_DEFAULTS: Record<string, string> = {
     'ui.continue': 'Continue',
     'ui.inventory': 'Inventory',
@@ -63,7 +49,50 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.no_companions': 'No companions',
     'ui.narrator': 'Narrator',
     'ui.notes': 'Notes',
+    'ui.characters': 'Characters',
+    'ui.party': 'Party',
+    'ui.resources': 'Resources',
+    'ui.no_items': 'No items',
+    'ui.close': 'Close',
+    'ui.paused': 'Paused',
+    'ui.quit_to_title': 'Quit to Title',
+    'ui.active_quests': 'Active Quests',
+    'ui.entries': 'Entries',
+    'ui.audio': 'Audio',
+    'ui.language': 'Language',
+    'ui.volume_master': 'Master',
+    'ui.volume_music': 'Music',
+    'ui.volume_sound': 'Sound Effects',
+    'ui.volume_voice': 'Voice',
+    'ui.volume_ui': 'UI Sounds',
+    'ui.back': 'Back',
+    'ui.saved': 'Saved!',
+    'ui.loaded': 'Loaded!',
+    'ui.new_save': 'New Save',
+    'ui.no_saves': 'No saves yet',
+    'ui.delete': 'Delete',
+    'ui.skip': 'Skip',
+    'ui.menu': 'Menu',
+    'ui.add_note': 'Add Note',
+    'ui.note_title': 'Title',
+    'ui.note_text': 'Write a note...',
+    'ui.travel_to': 'Travel to {destination}?',
+    'ui.travel_time_one': 'The journey will take 1 hour.',
+    'ui.travel_time': 'The journey will take {hours} hours.',
+    'ui.arrive': 'Arrive: Day {day}, {time}',
+    'ui.travel': 'Travel',
+    'ui.cancel': 'Cancel',
+    'ui.day': 'Day {day}',
+    'ui.time_dawn': 'Dawn',
+    'ui.time_morning': 'Morning',
+    'ui.time_midday': 'Midday',
+    'ui.time_afternoon': 'Afternoon',
+    'ui.time_evening': 'Evening',
+    'ui.time_dusk': 'Dusk',
+    'ui.time_night': 'Night',
 };
+
+const UI_KEYS = Object.keys(UI_DEFAULTS);
 
 /**
  * Build the resolved UI strings record from locale data.

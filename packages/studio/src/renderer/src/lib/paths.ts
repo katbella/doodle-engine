@@ -2,6 +2,32 @@ import type { OpenProject } from '../../../shared/project';
 import type { SectionKey, Tab } from '../types';
 
 /**
+ * The registry collection behind each browser section. The loader's file map
+ * is keyed "<collection>:<id>", so looking up a file always goes through
+ * this mapping. Locales and the game config have no registry collection;
+ * their paths are derived by convention instead.
+ */
+const SECTION_TO_COLLECTION: Partial<Record<SectionKey, string>> = {
+    dialogues: 'dialogues',
+    characters: 'characters',
+    locations: 'locations',
+    items: 'items',
+    quests: 'quests',
+    maps: 'maps',
+    interludes: 'interludes',
+    journal: 'journalEntries',
+};
+
+/** The file-map key for a section item, or null for locales/config. */
+export function sectionFileKey(
+    section: SectionKey,
+    itemId: string
+): string | null {
+    const collection = SECTION_TO_COLLECTION[section];
+    return collection ? `${collection}:${itemId}` : null;
+}
+
+/**
  * The project-relative file path backing a tab, or null when the tab has no
  * single source file to edit. Most items come from the loader's file map;
  * config, locales, and dialogues that failed to parse (and so are missing from
@@ -12,7 +38,8 @@ export function filePathFor(project: OpenProject, tab: Tab): string | null {
     if (tab.section === 'locales') {
         return `content/locales/${tab.itemId}.yaml`;
     }
-    if (project.files[tab.itemId]) return project.files[tab.itemId];
+    const key = sectionFileKey(tab.section, tab.itemId);
+    if (key && project.files[key]) return project.files[key];
     if (tab.section === 'dialogues') {
         return `content/dialogues/${tab.itemId}.dlg`;
     }
@@ -31,21 +58,21 @@ const DIR_TO_SECTION: Record<string, SectionKey> = {
     locales: 'locales',
 };
 
-const TYPE_TO_SECTION: Record<string, SectionKey> = {
-    dialogue: 'dialogues',
-    character: 'characters',
-    location: 'locations',
-    item: 'items',
-    quest: 'quests',
-    map: 'maps',
-    interlude: 'interludes',
-    journal: 'journal',
+const COLLECTION_TO_SECTION: Record<string, SectionKey> = {
+    dialogues: 'dialogues',
+    characters: 'characters',
+    locations: 'locations',
+    items: 'items',
+    quests: 'quests',
+    maps: 'maps',
+    interludes: 'interludes',
+    journalEntries: 'journal',
 };
 
 /**
  * Which browser item a validation problem's file refers to, or null if it can't
  * be mapped. Handles real relative paths (forward or backslash) and the
- * `type:id` form the validator uses when a file path isn't known.
+ * `collection:id` form the validator uses when a file path isn't known.
  */
 export function locateFile(
     file: string
@@ -63,8 +90,8 @@ export function locateFile(
     }
 
     const typed = f.match(/^(\w+):(.+)$/);
-    if (typed && TYPE_TO_SECTION[typed[1]]) {
-        return { section: TYPE_TO_SECTION[typed[1]], itemId: typed[2] };
+    if (typed && COLLECTION_TO_SECTION[typed[1]]) {
+        return { section: COLLECTION_TO_SECTION[typed[1]], itemId: typed[2] };
     }
 
     return null;

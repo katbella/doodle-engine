@@ -79,9 +79,21 @@ describe('generateServiceWorker', () => {
         expect(source).toContain("addEventListener('fetch'");
     });
 
-    it('skips /api/ paths in the fetch handler', () => {
-        const source = generateServiceWorker(makeManifest());
-        expect(source).toContain('/api/');
+    it('caches the app shell and content endpoints for offline play', () => {
+        const source = generateServiceWorker(makeManifest(), [
+            'index.html',
+            'assets/index-abc123.js',
+            'assets/index-abc123.css',
+        ]);
+        expect(source).toContain('index.html');
+        expect(source).toContain('assets/index-abc123.js');
+        expect(source).toContain('api/content');
+        expect(source).toContain('api/manifest');
+    });
+
+    it('resolves cached paths against its own location', () => {
+        const source = generateServiceWorker(makeManifest(), ['index.html']);
+        expect(source).toContain('new URL(path, self.location)');
     });
 
     it('works with empty manifests', () => {
@@ -92,7 +104,8 @@ describe('generateServiceWorker', () => {
             totalSize: 0,
         });
         const source = generateServiceWorker(manifest);
-        expect(source).toContain('PRECACHE_URLS = []');
+        // Even with no media, the content endpoints are still cached.
+        expect(source).toContain('api/content');
     });
 
     it('generates different cache names for different versions', () => {

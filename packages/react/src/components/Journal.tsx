@@ -8,17 +8,19 @@ import type { SnapshotQuest, SnapshotJournalEntry } from '@doodle-engine/core';
 export interface JournalProps {
     quests: SnapshotQuest[];
     entries: SnapshotJournalEntry[];
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
-export function Journal({ quests, entries, className = '' }: JournalProps) {
+export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
     return (
         <div className={`journal ${className}`}>
-            <h2>Journal</h2>
+            <h2>{ui?.['ui.journal'] ?? 'Journal'}</h2>
 
             {quests.length > 0 && (
                 <div className="journal-quests">
-                    <h3>Active Quests</h3>
+                    <h3>{ui?.['ui.active_quests'] ?? 'Active Quests'}</h3>
                     {quests.map((quest) => (
                         <div key={quest.id} className="quest-entry">
                             <div className="quest-name">{quest.name}</div>
@@ -35,7 +37,7 @@ export function Journal({ quests, entries, className = '' }: JournalProps) {
 
             {entries.length > 0 && (
                 <div className="journal-entries">
-                    <h3>Entries</h3>
+                    <h3>{ui?.['ui.entries'] ?? 'Entries'}</h3>
                     {entries.map((entry) => (
                         <div
                             key={entry.id}

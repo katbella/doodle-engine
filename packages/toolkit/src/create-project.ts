@@ -7,7 +7,7 @@
  * files without printing — the caller handles any prompts and messages.
  */
 
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, readdir, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
 
 // Vite inlines all template files as strings at build time.
@@ -70,6 +70,21 @@ export async function createProject(
 ): Promise<CreateProjectResult> {
     const { targetDir, useDefaultRenderer, useStarterStyles } = options;
     const projectPath = join(targetDir, projectName);
+
+    // Creating a project never touches existing work: the destination must
+    // be brand new or an empty folder.
+    let existing: string[] | null = null;
+    try {
+        existing = await readdir(projectPath);
+    } catch {
+        // The folder does not exist yet; that is the normal case.
+    }
+    if (existing && existing.length > 0) {
+        throw new Error(
+            `The folder "${projectPath}" already exists and is not empty. ` +
+                `Choose a new name or an empty folder.`
+        );
+    }
 
     // Create directory structure
     const dirs = [

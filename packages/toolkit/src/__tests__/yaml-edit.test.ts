@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parse } from 'yaml';
-import { applyYamlEdits, readYamlValue } from '../yaml-edit';
+import { applyYamlEdits } from '../yaml-edit';
 
 const CHARACTER = `# The tavern keeper
 id: bartender
@@ -192,11 +192,3 @@ locations:
     });
 });
 
-describe('readYamlValue', () => {
-    it('reads a scalar and a nested value as plain JS', () => {
-        expect(readYamlValue(CHARACTER, ['dialogue'])).toBe(
-            'bartender_greeting'
-        );
-        expect(readYamlValue(CHARACTER, ['stats', 'friendliness'])).toBe(7);
-    });
-});

@@ -9,6 +9,10 @@
  * preserved as text, and any '#' after the closing quote begins the comment.
  * (Only the first quoted span on the line participates in this decision, which
  * matches the DSL's use of quotes for a single display-text value per line.)
+ *
+ * Inside a quoted span, \" is a double quote and \\ is a backslash, so quoted
+ * text can itself contain quotes. The parser and serializer follow the same
+ * rule.
  */
 
 /**
@@ -27,7 +31,8 @@ export function splitComment(raw: string): {
         return { code: raw, comment: null };
     }
 
-    const quoteMatch = raw.match(/"[^"]*"/);
+    // The first quoted span, honoring \" and \\ escapes inside it.
+    const quoteMatch = raw.match(/"(?:\\.|[^"\\])*"/);
     if (!quoteMatch) {
         return {
             code: raw.substring(0, hashIndex),

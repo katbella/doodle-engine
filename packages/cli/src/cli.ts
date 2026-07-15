@@ -11,6 +11,10 @@ import { build } from './commands/build.js';
 import { validate } from './commands/validate.js';
 import { create } from './create.js';
 
+// Filled in from package.json at build time (see vite.config.ts), so the
+// reported version always matches the installed package.
+declare const __DOODLE_VERSION__: string;
+
 const program = new Command();
 
 program
@@ -19,7 +23,7 @@ program
         crayon.magenta('🐾 Doodle Engine') +
             crayon.dim(': Narrative RPG development tools')
     )
-    .version('0.0.1');
+    .version(typeof __DOODLE_VERSION__ === 'string' ? __DOODLE_VERSION__ : '0.0.0-dev');
 
 program
     .command('create <project-name>')

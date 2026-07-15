@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TriangleAlert, X } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
 import type { OpenProject } from '../../../shared/project';
@@ -32,6 +32,7 @@ export function GameConfigForm({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [conflict, setConflict] = useState(false);
+    const [missing, setMissing] = useState(false);
 
     useEffect(() => {
         let alive = true;
@@ -95,7 +96,8 @@ export function GameConfigForm({
             force ? undefined : mtimeMs
         );
         if (result.conflict) {
-            setConflict(true);
+            if (result.missing) setMissing(true);
+            else setConflict(true);
             setMtimeMs(result.mtimeMs);
         } else if (result.ok) {
             setSaved(config);
@@ -106,10 +108,19 @@ export function GameConfigForm({
     };
 
     useEffect(() => {
-        if (!dirty || conflict) return;
+        if (!dirty || conflict || missing) return;
         const t = setTimeout(() => void save(), 1000);
         return () => clearTimeout(t);
-    }, [config, dirty, conflict]);
+    }, [config, dirty, conflict, missing]);
+    // Save any pending edit when this editor goes away (closing the tab,
+    // switching views, or opening another project), so a quick edit
+    // followed by navigation still lands on disk.
+    const flushRef = useRef(() => {});
+    flushRef.current = () => {
+        if (dirty && !conflict && !missing) void save();
+    };
+    useEffect(() => () => flushRef.current(), []);
+
 
     if (loading) {
         return (
@@ -149,6 +160,19 @@ export function GameConfigForm({
                     />
                     <span>This file changed on disk since you opened it.</span>
                     <button className="btn" onClick={() => save(true)}>
+            {missing && (
+                <div className="banner">
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
+                    <span>
+                        This file was deleted outside Studio. Close the tab,
+                        or recreate the item from the sidebar.
+                    </span>
+                </div>
+            )}
                         Overwrite
                     </button>
                 </div>

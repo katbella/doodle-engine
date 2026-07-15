@@ -14,9 +14,10 @@ export function App() {
     const [manifest, setManifest] = useState<AssetManifest | null>(null);
 
     useEffect(() => {
+        // Relative paths, so the game works at a domain root or under a folder.
         Promise.all([
-            fetch('/api/content').then((res) => res.json()),
-            fetch('/api/manifest').then((res) => res.json()),
+            fetch('api/content').then((res) => res.json()),
+            fetch('api/manifest').then((res) => res.json()),
         ]).then(([contentData, manifestData]) => {
             setContent({
                 registry: contentData.registry,

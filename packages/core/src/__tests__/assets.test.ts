@@ -43,9 +43,22 @@ describe('getAssetType', () => {
 });
 
 describe('resolveAssetPath', () => {
-    it('normalizes assets-prefixed paths to absolute asset URLs', () => {
+    it('resolves bare filenames to relative asset paths', () => {
+        expect(resolveAssetPath('foo.png', 'banner')).toBe(
+            'assets/images/banners/foo.png'
+        );
+    });
+
+    it('keeps assets-prefixed paths as written', () => {
         expect(resolveAssetPath('assets/images/foo.png', 'banner')).toBe(
-            '/assets/images/foo.png'
+            'assets/images/foo.png'
+        );
+    });
+
+    it('leaves explicit absolute paths and URLs alone', () => {
+        expect(resolveAssetPath('/cdn/foo.png', 'banner')).toBe('/cdn/foo.png');
+        expect(resolveAssetPath('https://example.com/foo.png', 'banner')).toBe(
+            'https://example.com/foo.png'
         );
     });
 });

@@ -14,6 +14,8 @@ import { useOptionalAssetContext } from '../AssetProvider';
 export interface InterludeProps {
     interlude: SnapshotInterlude;
     onDismiss: () => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
 }
 
 export type InterludeInputResult =
@@ -42,7 +44,7 @@ export function resolveInterludeInput(
     return null;
 }
 
-export function Interlude({ interlude, onDismiss }: InterludeProps) {
+export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
     const textRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const animRef = useRef<number | null>(null);
@@ -203,7 +205,7 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
             </div>
 
             <button className="interlude-skip-button" onClick={onDismiss}>
-                Skip &raquo;
+                {ui?.['ui.skip'] ?? 'Skip'} &raquo;
             </button>
         </div>
     );

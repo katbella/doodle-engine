@@ -20,10 +20,14 @@ import type { Effect } from '../types/effects';
 const INDENT = '  ';
 
 /** Display text for a speaker/choice/notify line: @keys and plain words pass
- * through; text containing '#' is quoted so it isn't read as a comment. */
+ * through; text containing '#' or '"' is wrapped in quotes so it isn't read
+ * as a comment, with backslashes and double quotes escaped so the parser
+ * reads back exactly the same text. */
 function displayText(text: string): string {
     if (text.startsWith('@')) return text;
-    if (text.includes('#') || text.includes('"')) return `"${text}"`;
+    if (text.includes('#') || text.includes('"')) {
+        return `"${text.replace(/[\\"]/g, (ch) => '\\' + ch)}"`;
+    }
     return text;
 }
 

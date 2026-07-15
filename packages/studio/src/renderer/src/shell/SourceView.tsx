@@ -73,6 +73,7 @@ export function SourceView({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [conflict, setConflict] = useState<string | null>(null);
+    const [missing, setMissing] = useState(false);
     const [recovered, setRecovered] = useState<string | null>(null);
 
     const dir = project.projectDir;
@@ -115,11 +116,19 @@ export function SourceView({
 
     // Reflect changes made to this file outside Studio. With no unsaved edits,
     // reload it silently; with unsaved edits, offer a conflict rather than
-    // clobbering the user's work.
+    // clobbering the user's work. A file that can no longer be read was
+    // deleted outside Studio; the banner offers to recreate it.
     useEffect(() => {
         return window.studio.onFileChanged(async (changedRel) => {
             if (norm(changedRel) !== norm(path)) return;
-            const doc = await window.studio.readDocument(dir, path);
+            let doc;
+            try {
+                doc = await window.studio.readDocument(dir, path);
+            } catch {
+                setMissing(true);
+                return;
+            }
+            setMissing(false);
             if (doc.content === contentRef.current) return;
             if (contentRef.current !== savedRef.current) {
                 setConflict(doc.content);
@@ -151,12 +160,17 @@ export function SourceView({
             force ? undefined : mtimeMs
         );
         if (result.conflict) {
-            setConflict(result.content ?? '');
+            if (result.missing) {
+                setMissing(true);
+            } else {
+                setConflict(result.content ?? '');
+            }
             setMtimeMs(result.mtimeMs);
         } else if (result.ok) {
             setSaved(content);
             setMtimeMs(result.mtimeMs);
             setConflict(null);
+            setMissing(false);
             void window.studio.clearRecovery(dir, path);
             onModified(path);
         }
@@ -165,10 +179,19 @@ export function SourceView({
     // Autosave a short while after the last edit, so work isn't lost. Skipped
     // while a conflict is unresolved (the user must choose reload or overwrite).
     useEffect(() => {
-        if (!dirty || conflict !== null) return;
+        if (!dirty || conflict !== null || missing) return;
         const t = setTimeout(() => void save(), 1000);
         return () => clearTimeout(t);
-    }, [content, dirty, conflict]);
+    }, [content, dirty, conflict, missing]);
+
+    // Save any pending edit when this editor goes away (closing the tab,
+    // switching views, or opening another project), so a quick edit followed
+    // by navigation still lands on disk.
+    const flushRef = useRef(() => {});
+    flushRef.current = () => {
+        if (dirty && conflict === null && !missing) void save();
+    };
+    useEffect(() => () => flushRef.current(), []);
 
     // Live markers: a parse error (shown instantly) or the cross-reference
     // problems from the last validation, placed on their lines.
@@ -235,6 +258,19 @@ export function SourceView({
                         }}
                     >
                         Discard
+                    </button>
+                </div>
+            )}
+            {missing && (
+                <div className="banner">
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
+                    <span>This file was deleted outside Studio.</span>
+                    <button className="btn" onClick={() => save(true)}>
+                        Recreate it
                     </button>
                 </div>
             )}

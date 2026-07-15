@@ -1,7 +1,17 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
+
+// `doodle --version` reports the version from package.json, so releases only
+// ever bump the version in one place.
+const pkg = JSON.parse(
+    readFileSync(resolve(__dirname, 'package.json'), 'utf-8')
+);
 
 export default defineConfig({
+    define: {
+        __DOODLE_VERSION__: JSON.stringify(pkg.version),
+    },
     build: {
         lib: {
             entry: {

@@ -9,7 +9,7 @@ The CLI validates your YAML files and dialogue DSL during builds, when you run v
 
 ### During Development (`npm run dev`)
 
-When you run `npm run dev`, validation runs automatically whenever you change a content file:
+When you run `npm run dev`, validation runs automatically whenever a content file is added, edited, or deleted:
 
 ```bash
 npm run dev
@@ -177,6 +177,16 @@ content/characters/merchant.yaml
 Create dialogue "merchant_chat" or fix the reference
 ```
 
+### Files and Required Fields
+
+Every content file must load cleanly before anything else is checked:
+
+- A YAML file with a syntax error is reported by name, and the other files in its folder still load
+- A YAML entity file must have an `id`
+- Two files of the same type cannot share an `id`; the clash is reported with both file names
+- A broken `game.yaml` is reported instead of being quietly replaced with defaults
+- Each entity must have the fields the engine reads: locations need `name` and `description`, characters need `name`, items need `name` and `location`, maps need `name`, quests need `name` and at least one stage, journal entries need `title` and `text`, interludes need `text`
+
 ### Content References
 
 Validation also checks IDs used by game config and built-in gameplay references:
@@ -185,17 +195,34 @@ Validation also checks IDs used by game config and built-in gameplay references:
 - `game.yaml` `startInventory` entries must point to existing items
 - Character starting locations must exist
 - Item starting locations must be `inventory`, an existing location, or an existing character
+- Dialogue speakers must be existing characters
 - Dialogue and interlude trigger locations must exist
+- Top-level dialogue `REQUIRE` conditions and interlude `triggerConditions` are checked like any other condition
 - Built-in condition references must point to existing locations, items, characters, quests, and quest stages
 - Built-in effect references must point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
 
 For `.dlg` files, validation follows the condition and effect names documented in the references.
 
+### Numbers
+
+Arguments that hold a number must be a real, usable number. A typo like
+`ADD variable gold ten` is reported instead of quietly turning the variable
+into a non-number during play.
+
 ### Maps
 
-Maps must reference existing locations. A game can contain multiple maps, but a
-location can only appear on one map. That keeps the current map unambiguous: the
-engine shows the map that contains the player's current location.
+Maps must reference existing locations, and `scale` must be greater than zero
+(it turns marker distance into travel hours). A game can contain multiple
+maps, but a location can only appear on one map. That keeps the current map
+unambiguous: the engine shows the map that contains the player's current
+location.
+
+### Asset Files
+
+Missing image, audio, and video files are caught when the asset manifest is
+generated: during `npm run dev` when the browser loads the game, and at the
+start of every build. `npm run validate` checks content and references, not
+files on disk.
 
 ### Localization Keys
 

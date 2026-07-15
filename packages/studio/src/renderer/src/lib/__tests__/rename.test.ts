@@ -114,7 +114,7 @@ describe('planRename — YAML references', () => {
         );
 
         expect(plan.yamlEdits).toEqual([
-            { id: 'guard', edits: [{ path: ['location'], value: 'inn' }] },
+            { collection: 'characters', id: 'guard', edits: [{ path: ['location'], value: 'inn' }] },
         ]);
     });
 
@@ -138,7 +138,7 @@ describe('planRename — YAML references', () => {
             'hello'
         );
         expect(plan.yamlEdits).toEqual([
-            { id: 'guard', edits: [{ path: ['dialogue'], value: 'hello' }] },
+            { collection: 'characters', id: 'guard', edits: [{ path: ['dialogue'], value: 'hello' }] },
         ]);
     });
 });
@@ -185,6 +185,7 @@ describe('planFlagVariableRename', () => {
         );
         expect(plan.yamlEdits).toEqual([
             {
+                collection: 'game',
                 id: 'game',
                 edits: [
                     { path: ['startFlags', 'metMarcus'], value: true },
@@ -217,5 +218,181 @@ describe('planFlagVariableRename', () => {
         );
         expect(out).toContain('variableGreaterThan coins 5');
         expect(out).toContain('ADD variable coins -5');
+    });
+});
+
+describe('planRename — coverage of every reference site', () => {
+    it('rewrites a reference that only appears in an IF condition', () => {
+        const SOURCE = [
+            'NODE start',
+            '  NARRATOR: Checking.',
+            '  IF hasItem coin',
+            '    GOTO rich',
+            '  END',
+            '',
+            'NODE rich',
+            '  NARRATOR: Rich.',
+            '  END dialogue',
+        ].join('\n');
+        const dialogue = parseDialogue(SOURCE, 'check');
+        const plan = planRename(
+            registry({
+                dialogues: { check: dialogue },
+                items: {
+                    coin: {
+                        id: 'coin',
+                        name: 'Coin',
+                        description: '',
+                        location: 'inventory',
+                        icon: '',
+                        image: '',
+                        stats: {},
+                    },
+                },
+            }),
+            'items',
+            'coin',
+            'gold_coin'
+        );
+        expect(plan.dialogueRewrites.map((r) => r.id)).toEqual(['check']);
+    });
+
+    it('rewrites a reference in a top-level REQUIRE', () => {
+        const SOURCE = [
+            'REQUIRE hasItem coin',
+            'NODE start',
+            '  NARRATOR: Gated.',
+            '  END dialogue',
+        ].join('\n');
+        const dialogue = parseDialogue(SOURCE, 'gated');
+        const plan = planRename(
+            registry({ dialogues: { gated: dialogue } }),
+            'items',
+            'coin',
+            'gold_coin'
+        );
+        expect(plan.dialogueRewrites).toHaveLength(1);
+        const out = applyDialogueEdits(
+            SOURCE,
+            'gated',
+            plan.dialogueRewrites[0].dialogue
+        );
+        expect(out).toContain('REQUIRE hasItem gold_coin');
+    });
+
+    it('plans edits for interlude trigger conditions and effects', () => {
+        const plan = planRename(
+            registry({
+                interludes: {
+                    intro: {
+                        id: 'intro',
+                        background: 'bg.png',
+                        text: 'Chapter One',
+                        triggerConditions: [
+                            { type: 'hasItem', itemId: 'coin' },
+                        ],
+                        effects: [{ type: 'addItem', itemId: 'coin' }],
+                    },
+                },
+            }),
+            'items',
+            'coin',
+            'gold_coin'
+        );
+        expect(plan.yamlEdits).toEqual([
+            {
+                collection: 'interludes',
+                id: 'intro',
+                edits: [
+                    {
+                        path: ['triggerConditions', 0, 'itemId'],
+                        value: 'gold_coin',
+                    },
+                    { path: ['effects', 0, 'itemId'], value: 'gold_coin' },
+                ],
+            },
+        ]);
+    });
+
+    it('plans edits for game.yaml startLocation and startInventory', () => {
+        const config = {
+            startLocation: 'town',
+            startTime: { day: 1, hour: 8 },
+            startFlags: {},
+            startVariables: {},
+            startInventory: ['coin', 'map'],
+        };
+        const locationPlan = planRename(
+            registry({}),
+            'locations',
+            'town',
+            'harbor',
+            config
+        );
+        expect(locationPlan.yamlEdits).toEqual([
+            {
+                collection: 'game',
+                id: 'game',
+                edits: [{ path: ['startLocation'], value: 'harbor' }],
+            },
+        ]);
+
+        const itemPlan = planRename(
+            registry({}),
+            'items',
+            'coin',
+            'gold_coin',
+            config
+        );
+        expect(itemPlan.yamlEdits).toEqual([
+            {
+                collection: 'game',
+                id: 'game',
+                edits: [{ path: ['startInventory', 0], value: 'gold_coin' }],
+            },
+        ]);
+    });
+});
+
+describe('rewriteDialogueSource', () => {
+    it('renames references in the source as it is on disk, keeping newer text', async () => {
+        const { rewriteDialogueSource } = await import('../rename');
+        // The file on disk has newer text and an extra node that no loaded
+        // registry has seen. The rename touches the references and nothing else.
+        const DISK = [
+            'NODE start',
+            '  BARTENDER: Newly saved author edit.',
+            '  GOTO extra',
+            '',
+            'NODE extra',
+            '  NARRATOR: A whole new node.',
+            '  END dialogue',
+        ].join('\n');
+        const out = rewriteDialogueSource(
+            DISK,
+            'chat',
+            { section: 'characters' },
+            'bartender',
+            'marcus'
+        );
+        expect(out).not.toBeNull();
+        expect(out).toContain('MARCUS: Newly saved author edit.');
+        expect(out).toContain('A whole new node.');
+    });
+
+    it('returns null when the dialogue does not reference the id', async () => {
+        const { rewriteDialogueSource } = await import('../rename');
+        const DISK = ['NODE start', '  NARRATOR: Nothing here.', '  END dialogue'].join(
+            '\n'
+        );
+        expect(
+            rewriteDialogueSource(
+                DISK,
+                'chat',
+                { section: 'characters' },
+                'bartender',
+                'marcus'
+            )
+        ).toBeNull();
     });
 });

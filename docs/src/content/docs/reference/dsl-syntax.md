@@ -383,6 +383,14 @@ NARRATOR: The sign reads: closed until dawn.
 BARTENDER: "Room #3 is down the hall."
 ```
 
+Inside quoted text, write `\"` for a double quote and `\\` for a backslash. This is how a line can contain both quotes and a `#`:
+
+```
+NARRATOR: "He said \"room #3\" and walked off."
+```
+
+The player sees: He said "room #3" and walked off. Doodle Studio writes these escapes for you when you type quotes in the visual editor.
+
 **Localization keys** (prefixed with `@`): Reference a key from a locale file. Required for multi-language support.
 
 ```

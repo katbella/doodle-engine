@@ -186,6 +186,39 @@ describe('Effect Processors', () => {
 
             expect(newState.inventory).not.toContain('rusty_key');
         });
+
+        it('removes the item from the world, not just the inventory', () => {
+            const effect: Effect = { type: 'removeItem', itemId: 'rusty_key' };
+            const state = createTestState();
+            state.inventory = ['rusty_key'];
+            state.itemLocations = { rusty_key: 'inventory' };
+            const newState = applyEffect(effect, state);
+
+            expect(newState.inventory).toEqual([]);
+            expect(newState.itemLocations.rusty_key).toBeUndefined();
+        });
+
+        it('removes an item that sits at a location', () => {
+            const effect: Effect = { type: 'removeItem', itemId: 'rusty_key' };
+            const state = createTestState();
+            state.itemLocations = { rusty_key: 'tavern', letter: 'market' };
+            const newState = applyEffect(effect, state);
+
+            expect(newState.itemLocations.rusty_key).toBeUndefined();
+            expect(newState.itemLocations.letter).toBe('market');
+        });
+
+        it('is safe to apply twice', () => {
+            const effect: Effect = { type: 'removeItem', itemId: 'rusty_key' };
+            const state = createTestState();
+            state.inventory = ['rusty_key'];
+            state.itemLocations = { rusty_key: 'inventory' };
+            const once = applyEffect(effect, state);
+            const twice = applyEffect(effect, once);
+
+            expect(twice.inventory).toEqual([]);
+            expect(twice.itemLocations.rusty_key).toBeUndefined();
+        });
     });
 
     describe('moveItem', () => {

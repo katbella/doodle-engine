@@ -41,7 +41,7 @@ const api: StudioApi = {
     build: (dir) => ipcRenderer.invoke('project:build', dir),
     cancelBuild: () => ipcRenderer.invoke('project:cancelBuild'),
     onBuildLog: (callback) => {
-        const listener = (_event: unknown, line: string) => callback(line);
+        const listener = (_event: unknown, dir: string, line: string) => callback(dir, line);
         ipcRenderer.on('build:log', listener);
         return () => ipcRenderer.removeListener('build:log', listener);
     },
@@ -50,7 +50,7 @@ const api: StudioApi = {
     installDependencies: (dir) =>
         ipcRenderer.invoke('project:installDeps', dir),
     onInstallLog: (callback) => {
-        const listener = (_event: unknown, line: string) => callback(line);
+        const listener = (_event: unknown, dir: string, line: string) => callback(dir, line);
         ipcRenderer.on('install:log', listener);
         return () => ipcRenderer.removeListener('install:log', listener);
     },
@@ -58,7 +58,7 @@ const api: StudioApi = {
     openPreview: () => ipcRenderer.invoke('preview:open'),
     stopPreview: () => ipcRenderer.invoke('preview:stop'),
     onPreviewLog: (callback) => {
-        const listener = (_event: unknown, line: string) => callback(line);
+        const listener = (_event: unknown, dir: string, line: string) => callback(dir, line);
         ipcRenderer.on('preview:log', listener);
         return () => ipcRenderer.removeListener('preview:log', listener);
     },

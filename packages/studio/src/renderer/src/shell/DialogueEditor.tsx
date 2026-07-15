@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TriangleAlert } from '../lib/icons';
 import { parseDialogue, applyDialogueEdits } from '@doodle-engine/core';
 import type { Dialogue, DialogueNode } from '@doodle-engine/core';
@@ -34,6 +34,7 @@ export function DialogueEditor({
     const [loading, setLoading] = useState(true);
     const [parseError, setParseError] = useState<string | null>(null);
     const [conflict, setConflict] = useState<string | null>(null);
+    const [missing, setMissing] = useState(false);
 
     const dir = project.projectDir;
 
@@ -95,23 +96,37 @@ export function DialogueEditor({
             force ? undefined : mtimeMs
         );
         if (result.conflict) {
-            setConflict(result.content ?? '');
+            if (result.missing) {
+                setMissing(true);
+            } else {
+                setConflict(result.content ?? '');
+            }
             setMtimeMs(result.mtimeMs);
         } else if (result.ok) {
             setSavedText(currentText);
             setBase(currentText);
             setMtimeMs(result.mtimeMs);
             setConflict(null);
+            setMissing(false);
             onModified(path);
         }
     };
 
     // Autosave a short while after the last edit.
     useEffect(() => {
-        if (!dirty || conflict !== null) return;
+        if (!dirty || conflict !== null || missing) return;
         const t = setTimeout(() => void save(), 1000);
         return () => clearTimeout(t);
-    }, [currentText, dirty, conflict]);
+    }, [currentText, dirty, conflict, missing]);
+
+    // Save any pending edit when this editor goes away (closing the tab,
+    // switching views, or opening another project), so a quick edit followed
+    // by navigation still lands on disk.
+    const flushRef = useRef(() => {});
+    flushRef.current = () => {
+        if (dirty && conflict === null && !missing) void save();
+    };
+    useEffect(() => () => flushRef.current(), []);
 
     const updateNode = (updated: DialogueNode) => {
         setDialogue((d) =>
@@ -252,6 +267,21 @@ export function DialogueEditor({
                         </span>
                         <button className="btn" onClick={() => save(true)}>
                             Overwrite
+                        </button>
+                    </div>
+                )}
+                {missing && (
+                    <div className="banner">
+                        <TriangleAlert
+                            className="banner__icon"
+                            size={15}
+                            aria-hidden
+                        />
+                        <span>
+                            This file was deleted outside Studio.
+                        </span>
+                        <button className="btn" onClick={() => save(true)}>
+                            Recreate it
                         </button>
                     </div>
                 )}

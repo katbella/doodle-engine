@@ -5,6 +5,11 @@ description: Schema reference for all YAML entity types.
 
 All content entities are defined in YAML files placed in the appropriate `content/` subdirectory.
 
+Every entity has an `id`. Ids must be unique within their type: two location
+files cannot both be `id: town`, and validation reports the clash with both
+file names. Different types may reuse an id (a location and an item can both
+be called `key`).
+
 ## Location
 
 **Directory:** `content/locations/`
@@ -98,7 +103,7 @@ locations:
 | `id`        | `string`        | Unique identifier                  |
 | `name`      | `string`        | Display name (supports `@key`)     |
 | `image`     | `string`        | Map background image filename                      |
-| `scale`     | `number`        | Pixels per hour of travel. Higher values mean faster travel. |
+| `scale`     | `number`        | Pixels per hour of travel. Must be greater than zero. Higher values mean faster travel. |
 | `locations` | `MapLocation[]` | Location markers                   |
 
 ### MapLocation

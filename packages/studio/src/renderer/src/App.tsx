@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
     NewProjectOptions,
     OpenProject,
@@ -8,10 +8,9 @@ import type {
 } from '../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
 import { ReferenceIndex, type SymbolType } from '@doodle-engine/core';
-import { applyDialogueEdits } from '@doodle-engine/core';
 import type { SectionKey, Tab } from './types';
 import { buildSections } from './lib/sections';
-import { locateFile } from './lib/paths';
+import { locateFile, sectionFileKey } from './lib/paths';
 import {
     pathForNewItem,
     templateForNewItem,
@@ -20,7 +19,9 @@ import {
 import {
     planRename,
     planFlagVariableRename,
+    rewriteDialogueSource,
     type RenamePlan,
+    type RenameTarget,
 } from './lib/rename';
 import { Welcome } from './shell/Welcome';
 import { NewProjectModal } from './shell/NewProjectModal';
@@ -116,6 +117,14 @@ export function App() {
     // Validate runs again.
     const [staleFiles, setStaleFiles] = useState<Set<string>>(() => new Set());
 
+    // The folder of the project on screen right now. Long-running work
+    // (builds, installs) checks this when it finishes, so results from one
+    // project never land in another that was opened in the meantime.
+    const currentDirRef = useRef<string | null>(null);
+    useEffect(() => {
+        currentDirRef.current = project?.projectDir ?? null;
+    }, [project]);
+
     const [railWidth, setRailWidth] = usePersistedSize(
         'doodle-studio-rail-w',
         236
@@ -192,26 +201,30 @@ export function App() {
         window.studio.listRecentProjects().then(setRecent);
     }, []);
 
-    // Stream build and install output as it happens.
+    // Stream build and install output as it happens. Lines are tagged with
+    // the project they came from; lines for any other project are ignored.
     useEffect(
         () =>
-            window.studio.onBuildLog((line) =>
-                setBuildLog((prev) => [...prev, line])
-            ),
+            window.studio.onBuildLog((dir, line) => {
+                if (dir !== currentDirRef.current) return;
+                setBuildLog((prev) => [...prev, line]);
+            }),
         []
     );
     useEffect(
         () =>
-            window.studio.onInstallLog((line) =>
-                setInstallLog((prev) => [...prev, line])
-            ),
+            window.studio.onInstallLog((dir, line) => {
+                if (dir !== currentDirRef.current) return;
+                setInstallLog((prev) => [...prev, line]);
+            }),
         []
     );
     useEffect(
         () =>
-            window.studio.onPreviewLog((line) =>
-                setPreviewLog((prev) => [...prev, line])
-            ),
+            window.studio.onPreviewLog((dir, line) => {
+                if (dir !== currentDirRef.current) return;
+                setPreviewLog((prev) => [...prev, line]);
+            }),
         []
     );
 
@@ -292,12 +305,15 @@ export function App() {
 
     const runBuild = useCallback(async () => {
         if (!project || building) return;
+        const dir = project.projectDir;
         setBuilding(true);
         setBuildLog([]);
         setBuildResult(null);
         setDockTab('build');
         try {
-            setBuildResult(await window.studio.build(project.projectDir));
+            const result = await window.studio.build(dir);
+            // Show the result only if this is still the open project.
+            if (currentDirRef.current === dir) setBuildResult(result);
         } finally {
             setBuilding(false);
         }
@@ -311,17 +327,19 @@ export function App() {
 
     const installDeps = useCallback(async () => {
         if (!project || installing) return;
+        const dir = project.projectDir;
         setInstalling(true);
         setInstallLog([]);
         setDockTab('build');
         try {
-            const result = await window.studio.installDependencies(
-                project.projectDir
-            );
+            const result = await window.studio.installDependencies(dir);
             // Re-read the project so the "dependencies not installed" banner
-            // clears and Build/Preview enable.
-            if (result.ok)
-                setProject(await window.studio.revalidate(project.projectDir));
+            // clears and Build/Preview enable. Only if this is still the
+            // open project; otherwise the finished install changes nothing
+            // on screen.
+            if (result.ok && currentDirRef.current === dir) {
+                setProject(await window.studio.revalidate(dir));
+            }
         } finally {
             setInstalling(false);
         }
@@ -451,7 +469,10 @@ export function App() {
         async (section: CreatableSection, id: string) => {
             if (!project) return;
             setDeleteTarget(null);
-            const relPath = project.files[id] ?? pathForNewItem(section, id);
+            const key = sectionFileKey(section, id);
+            const relPath =
+                (key ? project.files[key] : undefined) ??
+                pathForNewItem(section, id);
             await window.studio.deleteDocument(project.projectDir, relPath);
             closeTab(`${section}:${id}`);
             setProject(await window.studio.revalidate(project.projectDir));
@@ -459,32 +480,54 @@ export function App() {
         [project, closeTab]
     );
 
-    // Apply a rename plan's reference edits (rewritten dialogues + YAML edits).
-    // Shared by entity rename and flag/variable rename.
+    // Apply a rename plan's reference edits. Every dialogue is rewritten from
+    // the file as it is on disk right now, and every write carries the read's
+    // timestamp, so a rename can only ever change the references themselves.
     const applyRenamePlan = useCallback(
-        async (dir: string, plan: RenamePlan) => {
+        async (
+            dir: string,
+            fresh: OpenProject,
+            plan: RenamePlan,
+            target: RenameTarget,
+            oldId: string,
+            newId: string
+        ) => {
             for (const rewrite of plan.dialogueRewrites) {
                 const relPath =
-                    project?.files[rewrite.id] ??
+                    fresh.files[`dialogues:${rewrite.id}`] ??
                     pathForNewItem('dialogues', rewrite.id);
-                const doc = await window.studio.readDocument(dir, relPath);
-                const next = applyDialogueEdits(
-                    doc.content,
-                    rewrite.id,
-                    rewrite.dialogue
-                );
-                await window.studio.writeDocument(dir, relPath, next);
+
+                // Read, rewrite from the current text, write with the read's
+                // timestamp. One retry if the file changed in between.
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    const doc = await window.studio.readDocument(dir, relPath);
+                    const next = rewriteDialogueSource(
+                        doc.content,
+                        rewrite.id,
+                        target,
+                        oldId,
+                        newId
+                    );
+                    if (next === null) break;
+                    const result = await window.studio.writeDocument(
+                        dir,
+                        relPath,
+                        next,
+                        doc.mtimeMs
+                    );
+                    if (!result.conflict) break;
+                }
             }
             for (const edit of plan.yamlEdits) {
                 const relPath =
-                    edit.id === 'game'
+                    edit.collection === 'game'
                         ? 'content/game.yaml'
-                        : project?.files[edit.id];
+                        : fresh.files[`${edit.collection}:${edit.id}`];
                 if (relPath)
                     await window.studio.writeEntity(dir, relPath, edit.edits);
             }
         },
-        [project]
+        []
     );
 
     const renameItem = useCallback(
@@ -492,13 +535,27 @@ export function App() {
             if (!project || oldId === newId) return;
             setRenameTarget(null);
             const dir = project.projectDir;
-            const plan = planRename(project.registry, section, oldId, newId);
-            await applyRenamePlan(dir, plan);
+
+            // Re-read the project first so the plan reflects the files as
+            // they are now, including everything saved since the last
+            // validation.
+            const fresh = await window.studio.revalidate(dir);
+            setProject(fresh);
+            const plan = planRename(
+                fresh.registry,
+                section,
+                oldId,
+                newId,
+                fresh.config
+            );
+            await applyRenamePlan(dir, fresh, plan, { section }, oldId, newId);
 
             // Rename the file, and set the new id inside it for YAML entities
             // (a dialogue's id is its filename, so the move covers it).
+            const key = sectionFileKey(section, oldId);
             const oldPath =
-                project.files[oldId] ?? pathForNewItem(section, oldId);
+                (key ? fresh.files[key] : undefined) ??
+                pathForNewItem(section, oldId);
             const newPath = pathForNewItem(section, newId);
             if (section !== 'dialogues' && section !== 'locales') {
                 await window.studio.writeEntity(dir, oldPath, [
@@ -518,15 +575,18 @@ export function App() {
     const renameFlagVariable = useCallback(
         async (kind: 'flag' | 'variable', oldId: string, newId: string) => {
             if (!project || oldId === newId) return;
+            const dir = project.projectDir;
+            const fresh = await window.studio.revalidate(dir);
+            setProject(fresh);
             const plan = planFlagVariableRename(
-                project.registry,
+                fresh.registry,
                 kind,
                 oldId,
                 newId,
-                project.config
+                fresh.config
             );
-            await applyRenamePlan(project.projectDir, plan);
-            setProject(await window.studio.revalidate(project.projectDir));
+            await applyRenamePlan(dir, fresh, plan, { kind }, oldId, newId);
+            setProject(await window.studio.revalidate(dir));
         },
         [project, applyRenamePlan]
     );

@@ -6,24 +6,24 @@
 #
 # shell:
 #   splash:
-#     logo: /assets/images/studio-logo.png
-#     background: /assets/images/splash-bg.jpg
-#     sound: /assets/audio/sfx/splash-sting.ogg
+#     logo: assets/images/studio-logo.png
+#     background: assets/images/splash-bg.jpg
+#     sound: assets/audio/sfx/splash-sting.ogg
 #     duration: 2000
 #
 #   loading:
-#     background: /assets/images/loading-bg.jpg
+#     background: assets/images/loading-bg.jpg
 #
 #   title:
-#     logo: /assets/images/game-logo.png
-#     background: /assets/images/title-bg.jpg
-#     music: /assets/audio/music/title-theme.ogg
+#     logo: assets/images/game-logo.png
+#     background: assets/images/title-bg.jpg
+#     music: assets/audio/music/title-theme.ogg
 #
 #   uiSounds:
-#     click: /assets/audio/ui/click.ogg
-#     hover: /assets/audio/ui/hover.ogg
-#     menuOpen: /assets/audio/ui/menu_open.ogg
-#     menuClose: /assets/audio/ui/menu_close.ogg
+#     click: assets/audio/ui/click.ogg
+#     hover: assets/audio/ui/hover.ogg
+#     menuOpen: assets/audio/ui/menu_open.ogg
+#     menuClose: assets/audio/ui/menu_close.ogg
 
 startLocation: tavern
 startTime:

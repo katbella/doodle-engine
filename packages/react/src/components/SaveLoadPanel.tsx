@@ -54,14 +54,14 @@ export function SaveLoadPanel({
     const handleNewSave = () => {
         writeSave(localStorage, storageKey, onSave(), 'manual');
         refresh();
-        flash('Saved!');
+        flash(ui['ui.saved'] ?? 'Saved!');
     };
 
     const handleLoad = (id: string) => {
         const data = loadSave(localStorage, storageKey, id);
         if (data) {
             onLoad(data);
-            flash('Loaded!');
+            flash(ui['ui.loaded'] ?? 'Loaded!');
         }
     };
 
@@ -73,11 +73,11 @@ export function SaveLoadPanel({
     return (
         <div className={`save-load-panel ${className}`}>
             <button className="save-button" onClick={handleNewSave}>
-                New Save
+                {ui['ui.new_save'] ?? 'New Save'}
             </button>
 
             {slots.length === 0 ? (
-                <p className="save-load-empty">No saves yet</p>
+                <p className="save-load-empty">{ui['ui.no_saves'] ?? 'No saves yet'}</p>
             ) : (
                 <ul className="save-slot-list">
                     {slots.map((slot) => (
@@ -105,7 +105,7 @@ export function SaveLoadPanel({
                                         className="delete-button"
                                         onClick={() => handleDelete(slot.id)}
                                     >
-                                        Delete
+                                        {ui['ui.delete'] ?? 'Delete'}
                                     </button>
                                 )}
                             </div>

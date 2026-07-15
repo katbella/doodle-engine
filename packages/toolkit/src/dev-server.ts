@@ -26,7 +26,7 @@ export interface DevServerOptions {
     /** Whether to open a browser on start. Defaults to true. */
     open?: boolean;
     /** Called when a content file changes, before the browser reloads. */
-    onContentChange?: (path: string, kind: 'change' | 'add') => void;
+    onContentChange?: (path: string, kind: 'change' | 'add' | 'unlink') => void;
     /** Called after each change with the current validation problems (empty when clean). */
     onValidation?: (errors: ValidationError[]) => void;
     /** Called when loading, manifest generation, or validation throws. */
@@ -127,7 +127,10 @@ export async function startDevServer(
             // Debounce so multiple rapid events from one save don't run
             // validation and reload several times.
             let reloadTimer: ReturnType<typeof setTimeout> | null = null;
-            const scheduleReload = (path: string, kind: 'change' | 'add') => {
+            const scheduleReload = (
+                path: string,
+                kind: 'change' | 'add' | 'unlink'
+            ) => {
                 if (reloadTimer) clearTimeout(reloadTimer);
                 reloadTimer = setTimeout(async () => {
                     reloadTimer = null;
@@ -152,6 +155,10 @@ export async function startDevServer(
                 if (!ready) return;
                 scheduleReload(path, 'add');
             });
+            // Deleting a file is a content change too: the browser reloads
+            // without it and anything still pointing at it becomes a
+            // validation problem.
+            watcher.on('unlink', (path) => scheduleReload(path, 'unlink'));
         },
     };
 

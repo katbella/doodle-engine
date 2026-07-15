@@ -86,3 +86,67 @@ describe('DocumentService', () => {
         }
     });
 });
+
+describe('DocumentService external deletes and links', () => {
+    it('reports a conflict instead of recreating a deleted file', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const svc = new DocumentService();
+            await writeFile(join(dir, 'f.txt'), 'original');
+            const read = await svc.read(dir, 'f.txt');
+
+            const { unlink, stat } = await import('node:fs/promises');
+            await unlink(join(dir, 'f.txt'));
+
+            const result = await svc.write(dir, 'f.txt', 'mine', read.mtimeMs);
+            expect(result.ok).toBe(false);
+            expect(result.conflict).toBe(true);
+            expect(result.missing).toBe(true);
+            await expect(stat(join(dir, 'f.txt'))).rejects.toThrow();
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('refuses to write through a link that points outside the project', async () => {
+        const outside = await mkdtemp(join(tmpdir(), 'doodle-outside-'));
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const { mkdir, symlink } = await import('node:fs/promises');
+            await writeFile(join(outside, 'linked.yaml'), 'id: linked\n');
+            await mkdir(join(dir, 'content'), { recursive: true });
+            await symlink(outside, join(dir, 'content', 'locations'), 'junction');
+
+            const svc = new DocumentService();
+            await expect(
+                svc.write(dir, 'content/locations/linked.yaml', 'changed')
+            ).rejects.toThrow('escapes the project');
+
+            const untouched = await import('node:fs/promises').then((fs) =>
+                fs.readFile(join(outside, 'linked.yaml'), 'utf-8')
+            );
+            expect(untouched).toBe('id: linked\n');
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+            await rm(outside, { recursive: true, force: true });
+        }
+    });
+
+    it('creates a missing content folder when saving a brand-new file', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const svc = new DocumentService();
+            const result = await svc.write(
+                dir,
+                'content/interludes/new.yaml',
+                'id: new\n'
+            );
+            expect(result.ok).toBe(true);
+            expect(
+                (await svc.read(dir, 'content/interludes/new.yaml')).content
+            ).toBe('id: new\n');
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+});

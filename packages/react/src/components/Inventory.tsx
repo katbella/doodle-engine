@@ -8,17 +8,21 @@ import { AssetImage } from './AssetImage';
 
 export interface InventoryProps {
     items: SnapshotItem[];
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
-export function Inventory({ items, className = '' }: InventoryProps) {
+export function Inventory({ items, ui, className = '' }: InventoryProps) {
     const [inspecting, setInspecting] = useState<SnapshotItem | null>(null);
 
     return (
         <div className={`inventory ${className}`}>
-            <h2>Inventory</h2>
+            <h2>{ui?.['ui.inventory'] ?? 'Inventory'}</h2>
             {items.length === 0 ? (
-                <p className="inventory-empty">No items</p>
+                <p className="inventory-empty">
+                    {ui?.['ui.no_items'] ?? 'No items'}
+                </p>
             ) : (
                 <div className="inventory-grid">
                     {items.map((item) => (
@@ -64,7 +68,7 @@ export function Inventory({ items, className = '' }: InventoryProps) {
                             className="item-modal-close"
                             onClick={() => setInspecting(null)}
                         >
-                            Close
+                            {ui?.['ui.close'] ?? 'Close'}
                         </button>
                     </div>
                 </div>

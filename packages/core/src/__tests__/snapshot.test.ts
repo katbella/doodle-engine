@@ -385,8 +385,8 @@ describe('Snapshot Builder', () => {
             const registry = createTestRegistry();
             const snapshot = buildSnapshot(state, registry);
 
-            expect(snapshot.music).toBe('/assets/audio/music/tavern_theme.ogg');
-            expect(snapshot.ambient).toBe('/assets/audio/sfx/tavern_ambience.ogg');
+            expect(snapshot.music).toBe('assets/audio/music/tavern_theme.ogg');
+            expect(snapshot.ambient).toBe('assets/audio/sfx/tavern_ambience.ogg');
         });
 
         it('should resolve notification localization', () => {
@@ -402,7 +402,7 @@ describe('Snapshot Builder', () => {
             const registry = createTestRegistry();
             const snapshot = buildSnapshot(state, registry);
 
-            expect(snapshot.pendingVideo).toBe('/assets/video/intro.mp4');
+            expect(snapshot.pendingVideo).toBe('assets/video/intro.mp4');
         });
 
         it('should have null pendingVideo by default', () => {

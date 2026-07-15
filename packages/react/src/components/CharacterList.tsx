@@ -8,12 +8,15 @@ import { AssetImage } from './AssetImage';
 export interface CharacterListProps {
     characters: SnapshotCharacter[];
     onTalkTo: (characterId: string) => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
 export function CharacterList({
     characters,
     onTalkTo,
+    ui,
     className = '',
 }: CharacterListProps) {
     if (characters.length === 0) {
@@ -22,7 +25,7 @@ export function CharacterList({
 
     return (
         <div className={`character-list ${className}`}>
-            <h2>Characters</h2>
+            <h2>{ui?.['ui.characters'] ?? 'Characters'}</h2>
             <div className="character-grid">
                 {characters.map((character) => (
                     <button

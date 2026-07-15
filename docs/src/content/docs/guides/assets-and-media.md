@@ -57,8 +57,8 @@ Write bare filenames in YAML and DSL files. The engine resolves them to full pat
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-banner: tavern.png          # → /assets/images/banners/tavern.png
-music: tavern_ambience.ogg  # → /assets/audio/music/tavern_ambience.ogg
+banner: tavern.png          # → assets/images/banners/tavern.png
+music: tavern_ambience.ogg  # → assets/audio/music/tavern_ambience.ogg
 ```
 
 Resolution happens at snapshot build time. Components receive full paths and use them directly.
@@ -67,30 +67,34 @@ Resolution happens at snapshot build time. Components receive full paths and use
 
 | Field                                        | Resolves to                              |
 | -------------------------------------------- | ---------------------------------------- |
-| `location.banner`                            | `/assets/images/banners/{filename}`      |
-| `location.music`                             | `/assets/audio/music/{filename}`         |
-| `location.ambient`                           | `/assets/audio/sfx/{filename}`           |
-| `character.portrait`                         | `/assets/images/portraits/{filename}`    |
-| `item.icon`, `item.image`                    | `/assets/images/items/{filename}`        |
-| `map.image`                                  | `/assets/images/maps/{filename}`         |
-| `interlude.background`, `interlude.banner`   | `/assets/images/banners/{filename}`      |
-| `interlude.music`                            | `/assets/audio/music/{filename}`         |
-| `interlude.voice`                            | `/assets/audio/voice/{filename}`         |
-| `interlude.sounds[]`                         | `/assets/audio/sfx/{filename}`           |
-| DSL `MUSIC`                                  | `/assets/audio/music/{filename}`         |
-| DSL `SOUND`                                  | `/assets/audio/sfx/{filename}`           |
-| DSL `VOICE`                                  | `/assets/audio/voice/{filename}`         |
-| DSL `VIDEO`                                  | `/assets/video/{filename}`               |
+| `location.banner`                            | `assets/images/banners/{filename}`      |
+| `location.music`                             | `assets/audio/music/{filename}`         |
+| `location.ambient`                           | `assets/audio/sfx/{filename}`           |
+| `character.portrait`                         | `assets/images/portraits/{filename}`    |
+| `item.icon`, `item.image`                    | `assets/images/items/{filename}`        |
+| `map.image`                                  | `assets/images/maps/{filename}`         |
+| `interlude.background`, `interlude.banner`   | `assets/images/banners/{filename}`      |
+| `interlude.music`                            | `assets/audio/music/{filename}`         |
+| `interlude.voice`                            | `assets/audio/voice/{filename}`         |
+| `interlude.sounds[]`                         | `assets/audio/sfx/{filename}`           |
+| DSL `MUSIC`                                  | `assets/audio/music/{filename}`         |
+| DSL `SOUND`                                  | `assets/audio/sfx/{filename}`           |
+| DSL `VOICE`                                  | `assets/audio/voice/{filename}`         |
+| DSL `VIDEO`                                  | `assets/video/{filename}`               |
 
 ### Escape Hatch
 
-If you need to reference a file outside the convention, use a path starting with `/` or `assets/`:
+If you need to reference a file outside the convention, write the path
+yourself, starting with `assets/`:
 
 ```yaml
-banner: /assets/images/special/custom_layout.png
+banner: assets/images/special/custom_layout.png
 ```
 
-These paths are used as-is without modification.
+These paths are used as-is without modification. A path starting with `/` or
+a full `http(s)://` address also passes through untouched, but a leading `/`
+ties the game to being hosted at a domain root, so prefer the `assets/`
+form.
 
 ### Shell Config Paths
 
@@ -99,9 +103,9 @@ Shell assets configured in `game.yaml` under `shell:` use full paths. They are n
 ```yaml
 shell:
   splash:
-    logo: /assets/images/studio-logo.png
-    background: /assets/images/splash-bg.jpg
-    sound: /assets/audio/sfx/splash-sting.ogg
+    logo: assets/images/studio-logo.png
+    background: assets/images/splash-bg.jpg
+    sound: assets/audio/sfx/splash-sting.ogg
 ```
 
 Content YAML files (locations, characters, items, and so on) use bare filenames that the engine resolves at snapshot time. Shell config paths are read directly by the asset loader before any game content is processed, so they must be complete.
@@ -177,7 +181,7 @@ VIDEO intro_cinematic.mp4
 
 For most games, bundle all assets with your build. They are copied to `dist/` and served alongside the game. This works with static hosting, desktop wrappers, and typical web deployments.
 
-When you run `npm run build`, every referenced local asset under `/assets/` must exist. The CLI copies the project `assets/` folder to `dist/assets/` and fails the build if content or shell config points at a missing local file.
+When you run `npm run build`, every referenced local asset under `assets/` must exist. The CLI copies the project `assets/` folder to `dist/assets/` and fails the build if content or shell config points at a missing local file.
 
 ## Loading Behavior
 

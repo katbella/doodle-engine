@@ -20,6 +20,10 @@ Scaffold a new game project.
 npx @doodle-engine/cli create <project-name>
 ```
 
+The destination must be a new name or an empty folder. Creating never
+overwrites existing files; if the folder already has content, the command
+stops and tells you.
+
 ### Prompts
 
 1. **Use default renderer?** Yes uses `GameShell` for a complete out-of-the-box UI. No sets up a skeleton `App.tsx` with `GameProvider`, `InputProvider`, `useGame`, and `useInputAction` for building a custom renderer.
@@ -204,13 +208,13 @@ npm run build
 ### What it does
 
 1. **Validates all content first** and fails if errors are found
-2. Generates the asset manifest and fails if referenced local assets under `/assets/` are missing
-3. Runs a Vite production build
+2. Generates the asset manifest and fails if referenced local assets under `assets/` are missing
+3. Runs a Vite production build with relative URLs, so the output works at a domain root or hosted under a folder
 4. Outputs to `dist/` directory
 5. Copies project assets to `dist/assets/`
 6. Builds with Vite production settings. Scaffolded apps do not enable `window.doodle` in production.
 7. **Writes `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
-8. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
+8. **Generates `dist/sw.js`**, a service worker that caches the app, the content, and the assets, so the game keeps working offline after the first visit
 9. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
 
 If validation errors are found, the build will exit with code 1 and display the errors. Fix all validation errors before deploying to production.

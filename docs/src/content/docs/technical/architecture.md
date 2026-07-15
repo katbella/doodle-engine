@@ -131,9 +131,11 @@ Effects produce a new state: setting flags, adding items, changing quest stages,
 ## Package Separation
 
 ```text
-@doodle-engine/core    Engine, types, conditions, effects, parser, snapshot builder
-@doodle-engine/react   React components, hooks, context provider
-@doodle-engine/cli     Dev server, project scaffolder, production build
+@doodle-engine/core      Engine, types, conditions, effects, parser, snapshot builder
+@doodle-engine/react     React components, hooks, context provider
+@doodle-engine/toolkit   Project loading, validation, dev server, builds, scaffolding
+@doodle-engine/cli       The doodle command line, a thin wrapper over the toolkit
+@doodle-engine/studio    Doodle Studio desktop editor (not published)
 ```
 
-The core package has no UI or framework dependencies. It can be used with any framework or runtime. The React package is one possible renderer. The CLI package provides development tooling.
+The core package has no UI or framework dependencies. It can be used with any framework or runtime. The React package is one possible renderer. The toolkit owns every operation that touches a project's files, and both the CLI and Doodle Studio call it, so the command line and the visual editor always agree.

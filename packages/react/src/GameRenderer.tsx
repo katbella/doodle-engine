@@ -130,10 +130,10 @@ function GameRendererInner({
                 </main>
 
                 <aside className="game-sidebar">
-                    <GameTime time={snapshot.time} format="narrative" />
+                    <GameTime ui={snapshot.ui} time={snapshot.time} format="narrative" />
 
                     <div className="party-panel">
-                        <h2>Party</h2>
+                        <h2>{snapshot.ui['ui.party']}</h2>
                         {snapshot.party.length === 0 ? (
                             <p className="party-empty">{snapshot.ui['ui.no_companions']}</p>
                         ) : (
@@ -163,7 +163,7 @@ function GameRendererInner({
 
                     {visibleVariables.length > 0 && (
                         <div className="resources-panel">
-                            <h2>Resources</h2>
+                            <h2>{snapshot.ui['ui.resources']}</h2>
                             <ul className="resources-list">
                                 {visibleVariables.map(([key, value]) => (
                                     <li key={key} className="resource-entry">
@@ -257,12 +257,12 @@ function GameRendererInner({
                         className="panel"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <Inventory items={snapshot.inventory} />
+                        <Inventory ui={snapshot.ui} items={snapshot.inventory} />
                         <button
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -284,7 +284,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -307,7 +307,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -334,7 +334,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -358,7 +358,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>

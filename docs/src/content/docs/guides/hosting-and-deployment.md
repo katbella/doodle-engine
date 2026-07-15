@@ -22,6 +22,18 @@ This produces a `dist/` directory containing:
 
 Game assets from your project root `assets/` folder are copied into `dist/assets/` during `npm run build`. When you upload to a static host, upload the full `dist/` folder.
 
+The build uses relative URLs throughout, so the same `dist/` works at a
+domain root (`https://mygame.example/`) or under a folder
+(`https://example.com/games/my-game/`). No configuration is needed for
+either.
+
+### Offline play
+
+`sw.js` caches the app, the game content, and the media the first time a
+player loads the game. After that first visit, the game opens and plays
+without a network connection. Each new build refreshes the cache the next
+time the player is online.
+
 ## Static Hosting
 
 The build output is fully static. Upload the `dist/` folder to any static host. Most hosts need:
@@ -33,12 +45,12 @@ For **itch.io**: zip the contents of `dist/` and upload as an HTML5 game project
 
 ## Desktop Packaging
 
-Doodle Engine games can be packaged as desktop applications using standard web-to-desktop wrappers. No special engine configuration is needed.
+Doodle Engine games can be packaged as desktop applications using standard web-to-desktop wrappers. One rule applies to all of them: the wrapper must serve `dist/` over HTTP (a small local server inside the app), not open `index.html` straight from the file system. Browsers block the game's content requests on `file://` addresses.
 
 **[Electron](https://www.electronjs.org/)**: wraps your game in a Chromium window:
 
 1. Build with `npm run build`
-2. Create an Electron main process that loads `dist/index.html`
+2. Create an Electron main process that serves `dist/` from a local HTTP server and opens a window pointed at it (Electron's `protocol.handle` or a small `http` server both work)
 3. Package with `electron-builder` or `electron-forge`
 
 **[Tauri](https://tauri.app/)**: lighter alternative using the system webview:

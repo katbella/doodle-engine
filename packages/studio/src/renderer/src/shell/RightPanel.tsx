@@ -1,6 +1,7 @@
 import type { OpenProject } from '../../../shared/project';
 import type { Tab } from '../types';
 import type { ReferenceIndex, SymbolType } from '@doodle-engine/core';
+import { filePathFor } from '../lib/paths';
 
 /** The reference-index symbol type for each section, where one exists. */
 const SECTION_SYMBOL: Partial<Record<Tab['section'], SymbolType>> = {
@@ -25,7 +26,7 @@ export function RightPanel({
     /** Open a file by its project-relative path. */
     onOpenFile: (file: string) => void;
 }) {
-    const file = activeTab ? project.files[activeTab.itemId] : undefined;
+    const file = activeTab ? filePathFor(project, activeTab) : undefined;
     const itemProblems = file
         ? project.problems.filter((p) => p.file === file)
         : [];

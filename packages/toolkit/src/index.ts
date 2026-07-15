@@ -9,7 +9,7 @@
  */
 
 // Loading a project's content
-export { loadContent, loadProject } from './load-project';
+export { loadContent, loadProject, fileMapKey } from './load-project';
 export type { LoadedContent } from './load-project';
 
 // Validation (pure — returns a list of problems, no printing)
@@ -38,10 +38,5 @@ export type {
 } from './create-project';
 
 // Comment-preserving YAML edits (for Studio's visual entity forms)
-export {
-    applyYamlEdits,
-    readYamlValue,
-    isYamlMap,
-    isYamlSeqAt,
-} from './yaml-edit';
+export { applyYamlEdits } from './yaml-edit';
 export type { YamlEdit } from './yaml-edit';

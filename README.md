@@ -69,11 +69,13 @@ npm run dev
 
 ## Packages
 
-| Package                | Description                                    |
-| ---------------------- | ---------------------------------------------- |
-| `@doodle-engine/core`  | Engine state, parsing, conditions, and effects |
-| `@doodle-engine/react` | React components and hooks                     |
-| `@doodle-engine/cli`   | Dev server, scaffolding, builds                |
+| Package                  | Description                                                      |
+| ------------------------ | ---------------------------------------------------------------- |
+| `@doodle-engine/core`    | Engine state, parsing, conditions, and effects                   |
+| `@doodle-engine/react`   | React components and hooks                                       |
+| `@doodle-engine/toolkit` | Project loading, validation, dev server, builds, and scaffolding |
+| `@doodle-engine/cli`     | The `doodle` command line over the toolkit                       |
+| `@doodle-engine/studio`  | Doodle Studio, a desktop editor for game projects (not published) |
 
 ---
 

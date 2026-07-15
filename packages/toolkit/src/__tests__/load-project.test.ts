@@ -103,10 +103,11 @@ describe('loadProject', () => {
             expect(registry.locations.town).toBeDefined();
             expect(config.startLocation).toBe('town');
             // File paths start at the project root, so they begin with "content/".
-            expect(fileMap.get('town')).toBe(
+            // Keys carry the entity type so two types can share an id.
+            expect(fileMap.get('locations:town')).toBe(
                 join('content', 'locations', 'town.yaml')
             );
-            expect(fileMap.get('intro')).toBe(
+            expect(fileMap.get('dialogues:intro')).toBe(
                 join('content', 'dialogues', 'intro.dlg')
             );
         } finally {

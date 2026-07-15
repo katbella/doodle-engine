@@ -218,15 +218,12 @@ function GameShellInner({
         setShowPauseMenu(false);
     }, [gameState, storageKey, uiSoundControls]);
 
-    // Quick load from the pause menu loads the most recent save.
-    const handleLoad = useCallback(() => {
-        const saveData = latestSave(localStorage, storageKey);
-        if (!saveData || !gameState) return;
+    // The pause menu's Load happens inside GameShellPlaying (which owns the
+    // live game view); this handles the click sound and closes the menu.
+    const handleLoadFeedback = useCallback(() => {
         uiSoundControls.playClick();
-        const snapshot = gameState.engine.loadGame(saveData);
-        setGameState({ engine: gameState.engine, snapshot });
         setShowPauseMenu(false);
-    }, [gameState, storageKey, uiSoundControls]);
+    }, [uiSoundControls]);
 
     const handleQuitToTitle = useCallback(() => {
         uiSoundControls.playClick();
@@ -318,10 +315,14 @@ function GameShellInner({
 
     // Title screen
     if (screen === 'title') {
+        const titleUi = buildUIStrings(
+            registry.locales[selectedLocale] ?? registry.locales['en'] ?? {}
+        );
         return (
             <div className={`game-shell ${className}`}>
                 {showSettings ? (
                     <SettingsPanel
+                        ui={titleUi}
                         audio={audioSettings}
                         uiSoundControls={
                             uiSoundsConfig !== false
@@ -335,7 +336,7 @@ function GameShellInner({
                     />
                 ) : (
                     <TitleScreen
-                        ui={buildUIStrings(registry.locales[selectedLocale] ?? registry.locales['en'] ?? {})}
+                        ui={titleUi}
                         shell={shell?.title}
                         title={title}
                         subtitle={subtitle}
@@ -379,7 +380,7 @@ function GameShellInner({
                         setShowPauseMenu(false);
                     }}
                     onSave={handleSave}
-                    onLoad={handleLoad}
+                    onLoad={handleLoadFeedback}
                     onSettings={() => openSettings('pause')}
                     onQuitToTitle={handleQuitToTitle}
                     onCloseSettings={closeSettings}
@@ -433,6 +434,15 @@ function GameShellPlaying({
     const { snapshot, actions } = useGame();
     const audioSettings = useAudioSettings();
 
+    // Quick load from the pause menu: load the newest save through the
+    // provider action, so the screen shows the loaded game right away.
+    const quickLoad = useCallback(() => {
+        const saveData = latestSave(localStorage, storageKey);
+        if (!saveData) return;
+        actions.loadGame(saveData);
+        onLoad();
+    }, [storageKey, actions, onLoad]);
+
     // Autosave when the player travels to a new place. Overwrites the single
     // autosave slot. Skips the first render so a fresh game isn't saved at once.
     const prevLocationRef = useRef<string | null>(null);
@@ -467,6 +477,7 @@ function GameShellPlaying({
         <>
             {pendingVideo && (
                 <VideoPlayer
+                    ui={snapshot.ui}
                     src={pendingVideo}
                     onComplete={() => setPendingVideo(null)}
                 />
@@ -478,9 +489,9 @@ function GameShellPlaying({
                 <button
                     className="game-shell-menu-button"
                     onClick={onPause}
-                    aria-label="Menu"
+                    aria-label={snapshot.ui['ui.menu'] ?? 'Menu'}
                 >
-                    Menu
+                    {snapshot.ui['ui.menu'] ?? 'Menu'}
                 </button>
             )}
 
@@ -489,7 +500,7 @@ function GameShellPlaying({
                     ui={snapshot.ui}
                     onResume={onResume}
                     onSave={onSave}
-                    onLoad={onLoad}
+                    onLoad={quickLoad}
                     canLoad={hasSaves(localStorage, storageKey)}
                     onSettings={onSettings}
                     onQuitToTitle={onQuitToTitle}
@@ -498,6 +509,7 @@ function GameShellPlaying({
 
             {showSettings && (
                 <SettingsPanel
+                    ui={snapshot.ui}
                     audio={audioSettings}
                     uiSoundControls={uiSoundControls}
                     availableLocales={availableLocales}

@@ -55,11 +55,16 @@ ADD item old_coin
 
 ### REMOVE item
 
-Remove an item from the player's inventory.
+Remove an item from the game. The item leaves the inventory and no longer
+has a location anywhere, so `hasItem` and `itemAt` both answer no for it
+afterward. Use this when an item is consumed, destroyed, or handed over for
+good.
 
 ```
 REMOVE item rusty_key
 ```
+
+To put an item somewhere instead of removing it, use `MOVE item`.
 
 ### MOVE item
 

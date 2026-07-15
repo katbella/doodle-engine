@@ -44,7 +44,7 @@ describe('scaffold templates', () => {
     it('custom app wires input routing and transient presentation surfaces', () => {
         expect(customApp).toContain('InputProvider');
         expect(customApp).toContain('AssetProvider');
-        expect(customApp).toContain("fetch('/api/manifest')");
+        expect(customApp).toContain("fetch('api/manifest')");
         expect(customApp).toContain('useInputAction');
         expect(customApp).toContain('choiceIndex');
         expect(customApp).toContain('Interlude');
@@ -131,7 +131,7 @@ describe('scaffold templates', () => {
 
     it('starter shell config shows uiSounds as runtime-capable config', () => {
         expect(gameYaml).toContain('uiSounds:');
-        expect(gameYaml).toContain('click: /assets/audio/ui/click.ogg');
-        expect(gameYaml).toContain('menuOpen: /assets/audio/ui/menu_open.ogg');
+        expect(gameYaml).toContain('click: assets/audio/ui/click.ogg');
+        expect(gameYaml).toContain('menuOpen: assets/audio/ui/menu_open.ogg');
     });
 });

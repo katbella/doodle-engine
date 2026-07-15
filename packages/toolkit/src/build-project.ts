@@ -98,11 +98,19 @@ export async function buildProject(
     await viteBuild({
         root: projectDir,
         plugins: [react()],
+        // Relative URLs, so the build runs at a domain root, under a folder
+        // like example.com/games/my-game/, or from a local server.
+        base: './',
         build: {
             outDir,
             emptyOutDir: true,
         },
     });
+
+    // Everything Vite just wrote is the app shell (index.html plus bundled
+    // scripts and styles); the service worker caches it for offline play.
+    // Listed now, before the game's media is copied in next to it.
+    const shellFiles = await listFiles(distDir);
 
     // Copy project assets into <dist>/assets without deleting Vite's own files.
     await copyProjectAssets(assetsDir, join(distDir, 'assets'));
@@ -123,7 +131,10 @@ export async function buildProject(
     );
 
     onLog('Generating service worker...');
-    await writeFile(join(distDir, 'sw.js'), generateServiceWorker(manifest));
+    await writeFile(
+        join(distDir, 'sw.js'),
+        generateServiceWorker(manifest, shellFiles)
+    );
 
     return {
         ok: true,
@@ -137,6 +148,23 @@ export async function buildProject(
             'sw.js',
         ],
     };
+}
+
+/**
+ * Every file under a directory, as forward-slash paths relative to it.
+ */
+async function listFiles(dir: string, prefix = ''): Promise<string[]> {
+    const out: string[] = [];
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+        const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+            out.push(...(await listFiles(join(dir, entry.name), rel)));
+        } else if (entry.isFile()) {
+            out.push(rel);
+        }
+    }
+    return out;
 }
 
 /**

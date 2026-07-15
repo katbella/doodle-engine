@@ -75,11 +75,22 @@ export async function create(projectName: string) {
     console.log('');
     console.log(`  ${folder} ${crayon.bold('Creating project files...')}`);
 
-    const { projectPath } = await createProject(projectName, {
-        targetDir: process.cwd(),
-        useDefaultRenderer,
-        useStarterStyles,
-    });
+    let projectPath: string;
+    try {
+        ({ projectPath } = await createProject(projectName, {
+            targetDir: process.cwd(),
+            useDefaultRenderer,
+            useStarterStyles,
+        }));
+    } catch (error) {
+        console.log('');
+        console.log(
+            crayon.red(
+                `  ${bone} ${error instanceof Error ? error.message : String(error)}`
+            )
+        );
+        process.exit(1);
+    }
 
     console.log(crayon.green(`  ${check} Files created`));
     console.log('');

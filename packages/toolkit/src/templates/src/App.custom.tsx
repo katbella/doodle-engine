@@ -20,8 +20,8 @@ export function App() {
 
     useEffect(() => {
         Promise.all([
-            fetch('/api/content').then((res) => res.json()),
-            fetch('/api/manifest').then((res) => res.json()),
+            fetch('api/content').then((res) => res.json()),
+            fetch('api/manifest').then((res) => res.json()),
         ]).then(([contentData, manifest]) => {
             const engine = new Engine(contentData.registry);
             const snapshot = engine.newGame(contentData.config);

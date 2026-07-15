@@ -176,7 +176,9 @@ REQUIRE timeIs 20 6
 
 ## itemAt
 
-Check if an item is at a specific location.
+Check if an item is at a specific location. An item that was removed with
+`REMOVE item` is nowhere, so this answers no for it at every location,
+including `inventory`.
 
 ```
 REQUIRE itemAt sword armory

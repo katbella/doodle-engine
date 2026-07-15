@@ -93,7 +93,8 @@ function tokenize(input: string): Token[] {
 /**
  * Parse text that may be a localization key or inline text
  * - @key -> returns "@key" (localization reference, resolved at snapshot time)
- * - "text" -> returns "text" (inline literal, quotes stripped)
+ * - "text" -> returns "text" (inline literal, quotes stripped; \" and \\
+ *   inside the quotes stand for a double quote and a backslash)
  * - text -> returns "text" (plain text)
  */
 function parseText(text: string): string {
@@ -105,9 +106,11 @@ function parseText(text: string): string {
         return trimmed;
     }
 
-    // Quoted inline text - strip quotes
+    // Quoted inline text - strip quotes and resolve escapes
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-        return trimmed.substring(1, trimmed.length - 1);
+        return trimmed
+            .substring(1, trimmed.length - 1)
+            .replace(/\\(["\\])/g, '$1');
     }
 
     // Plain text (shouldn't normally happen in well-formed DSL, but handle it)

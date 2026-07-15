@@ -1,5 +1,7 @@
 import type { OpenProject } from '../../../shared/project';
 import type { RailSection, RailItem, ItemStatus } from '../types';
+import type { SectionKey } from '../types';
+import { sectionFileKey } from './paths';
 
 const norm = (s: string) => s.replace(/\\/g, '/');
 
@@ -16,10 +18,17 @@ export function buildSections(project: OpenProject): RailSection[] {
     const statusForPath = (path: string | undefined): ItemStatus =>
         path && errorFiles.has(norm(path)) ? 'error' : 'valid';
 
+    const fileFor = (section: SectionKey, id: string): string | undefined => {
+        const key = sectionFileKey(section, id);
+        return key ? files[key] : undefined;
+    };
+
     const listed = (
+        section: SectionKey,
         ids: string[],
         label: (id: string) => string = (id) => id,
-        status: (id: string) => ItemStatus = (id) => statusForPath(files[id])
+        status: (id: string) => ItemStatus = (id) =>
+            statusForPath(fileFor(section, id))
     ): RailItem[] =>
         [...ids]
             .sort()
@@ -40,45 +49,55 @@ export function buildSections(project: OpenProject): RailSection[] {
             key: 'dialogues',
             label: 'Dialogues',
             items: listed(
+                'dialogues',
                 dialogueIds,
                 (id) => `${id}.dlg`,
                 (id) =>
                     statusForPath(
-                        files[id] ?? `content/dialogues/${id}.dlg`
+                        fileFor('dialogues', id) ??
+                            `content/dialogues/${id}.dlg`
                     )
             ),
         },
         {
             key: 'characters',
             label: 'Characters',
-            items: listed(Object.keys(r.characters)),
+            items: listed('characters', Object.keys(r.characters)),
         },
         {
             key: 'locations',
             label: 'Locations',
-            items: listed(Object.keys(r.locations)),
+            items: listed('locations', Object.keys(r.locations)),
         },
-        { key: 'items', label: 'Items', items: listed(Object.keys(r.items)) },
+        {
+            key: 'items',
+            label: 'Items',
+            items: listed('items', Object.keys(r.items)),
+        },
         {
             key: 'quests',
             label: 'Quests',
-            items: listed(Object.keys(r.quests)),
+            items: listed('quests', Object.keys(r.quests)),
         },
-        { key: 'maps', label: 'Maps', items: listed(Object.keys(r.maps)) },
+        {
+            key: 'maps',
+            label: 'Maps',
+            items: listed('maps', Object.keys(r.maps)),
+        },
         {
             key: 'interludes',
             label: 'Interludes',
-            items: listed(Object.keys(r.interludes)),
+            items: listed('interludes', Object.keys(r.interludes)),
         },
         {
             key: 'journal',
             label: 'Journal',
-            items: listed(Object.keys(r.journalEntries)),
+            items: listed('journal', Object.keys(r.journalEntries)),
         },
         {
             key: 'locales',
             label: 'Locales',
-            items: listed(Object.keys(r.locales), (id) => id, () => 'none'),
+            items: listed('locales', Object.keys(r.locales), (id) => id, () => 'none'),
         },
         {
             key: 'config',

@@ -135,7 +135,9 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
     buildProc?.kill();
     const logs: string[] = [];
     const start = Date.now();
-    const send = (line: string) => sendToRenderer('build:log', line);
+    // Lines carry the project folder so the window can ignore lines that
+    // belong to a project it is no longer showing.
+    const send = (line: string) => sendToRenderer('build:log', projectDir, line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -207,7 +209,7 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
  * a fresh project folder can get it build-ready without a terminal.
  */
 async function installDependencies(projectDir: string): Promise<InstallResult> {
-    const send = (line: string) => sendToRenderer('install:log', line);
+    const send = (line: string) => sendToRenderer('install:log', projectDir, line);
     const packageManager = await detectPackageManager(projectDir);
     send(`Installing dependencies with ${packageManager}…`);
 
@@ -247,7 +249,7 @@ function startPreview(projectDir: string): Promise<PreviewStatus | null> {
         if (previewStatus) shell.openExternal(previewStatus.url);
         return Promise.resolve(previewStatus);
     }
-    const send = (line: string) => sendToRenderer('preview:log', line);
+    const send = (line: string) => sendToRenderer('preview:log', projectDir, line);
 
     return new Promise((resolve) => {
         const proc = utilityProcess.fork(
@@ -353,9 +355,10 @@ app.whenReady().then(() => {
     // this project's files, reporting external changes to the renderer.
     const afterOpen = async (project: OpenProject | null) => {
         if (project) {
-            // A preview points at whichever project started it; opening another
-            // (or reopening) leaves it stale, so stop it.
+            // A preview and a build point at whichever project started them;
+            // opening another (or reopening) leaves them stale, so stop both.
             stopPreview();
+            buildProc?.kill();
             await buildMenu(projects);
             await watchService.watch(
                 project.projectDir,

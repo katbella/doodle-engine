@@ -77,10 +77,10 @@ function build() {
         dialogues: { chat: dialogue },
     });
     const fileMap = new Map([
-        ['bartender', 'content/characters/bartender.yaml'],
-        ['tavern', 'content/locations/tavern.yaml'],
-        ['old_coin', 'content/items/old_coin.yaml'],
-        ['chat', 'content/dialogues/chat.dlg'],
+        ['characters:bartender', 'content/characters/bartender.yaml'],
+        ['locations:tavern', 'content/locations/tavern.yaml'],
+        ['items:old_coin', 'content/items/old_coin.yaml'],
+        ['dialogues:chat', 'content/dialogues/chat.dlg'],
     ]);
     const config: GameConfig = {
         startLocation: 'tavern',
@@ -141,5 +141,72 @@ describe('ReferenceIndex.orphans', () => {
 
     it('does not report a referenced location as an orphan', () => {
         expect(build().orphans('locations')).not.toContain('tavern');
+    });
+});
+
+describe('ReferenceIndex trigger conditions', () => {
+    it('finds an item used by a dialogue top-level REQUIRE', () => {
+        const index = new ReferenceIndex(
+            registry({
+                items: {
+                    coin: {
+                        id: 'coin',
+                        name: 'Coin',
+                        description: '',
+                        location: 'inventory',
+                        stats: {},
+                    },
+                },
+                dialogues: {
+                    gated: {
+                        id: 'gated',
+                        startNode: 'start',
+                        conditions: [{ type: 'hasItem', itemId: 'coin' }],
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: null,
+                                text: 'Hello.',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            }),
+            new Map()
+        );
+        const refs = index.find('items', 'coin');
+        expect(refs.length).toBe(1);
+        expect(refs[0].where).toContain('requirement');
+    });
+
+    it('finds an item used by an interlude trigger condition', () => {
+        const index = new ReferenceIndex(
+            registry({
+                items: {
+                    coin: {
+                        id: 'coin',
+                        name: 'Coin',
+                        description: '',
+                        location: 'inventory',
+                        stats: {},
+                    },
+                },
+                interludes: {
+                    intro: {
+                        id: 'intro',
+                        text: 'Chapter One',
+                        triggerConditions: [
+                            { type: 'hasItem', itemId: 'coin' },
+                        ],
+                        effects: [],
+                    },
+                },
+            }),
+            new Map()
+        );
+        const refs = index.find('items', 'coin');
+        expect(refs.length).toBe(1);
+        expect(refs[0].where).toContain('trigger condition');
     });
 });

@@ -36,6 +36,14 @@ import {
 } from '../conditions';
 
 /**
+ * How many automatic dialogue steps (silent nodes and START dialogue
+ * redirects) one player action may take. Authored content never needs
+ * anywhere near this many; the cap exists so a GOTO cycle between silent
+ * nodes ends the dialogue instead of freezing the game.
+ */
+const MAX_AUTO_STEPS = 200;
+
+/**
  * The Doodle Engine.
  *
  * Manages game state, processes actions, and produces snapshots.
@@ -43,6 +51,12 @@ import {
 export class Engine {
     private registry: ContentRegistry;
     private state: GameState;
+
+    /**
+     * Automatic dialogue steps taken during the current player action.
+     * Reset when the action's snapshot is built.
+     */
+    private autoSteps = 0;
 
     /**
      * Optional debug-trace sink. When null (the default), the engine records
@@ -317,6 +331,13 @@ export class Engine {
         const destLoc = map.locations.find((l) => l.id === locationId);
 
         if (!currentLoc || !destLoc) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        // Turning distance into hours needs a positive, finite scale.
+        // Validation tells the author about a bad scale; the engine refuses
+        // the trip so the game clock always stays a real number.
+        if (!Number.isFinite(map.scale) || map.scale <= 0) {
             return this.buildSnapshotAndClearTransients();
         }
 
@@ -844,7 +865,29 @@ export class Engine {
             pendingInterlude: null,
         };
 
+        // The action is over; the next one gets a fresh routing allowance.
+        this.autoSteps = 0;
+
         return snapshot;
+    }
+
+    /**
+     * Count one automatic dialogue step (a silent-node advance or a
+     * START dialogue redirect). Returns true while the current action is
+     * within its allowance. When the allowance runs out, the dialogue is
+     * ended and a trace error is reported, so the game keeps responding.
+     */
+    private takeAutoStep(dialogueId: string): boolean {
+        this.autoSteps++;
+        if (this.autoSteps <= MAX_AUTO_STEPS) {
+            return true;
+        }
+        this.emitError(
+            `Dialogue "${dialogueId}" ended after ${MAX_AUTO_STEPS} automatic steps. ` +
+                `Check its GOTO and START dialogue routing for a loop.`
+        );
+        this.state = { ...this.state, dialogueState: null };
+        return false;
     }
 
     private hasVisibleChoices(node: DialogueNode): boolean {
@@ -899,6 +942,10 @@ export class Engine {
         }
 
         const dialogueId = this.state.dialogueState.dialogueId;
+        if (!this.takeAutoStep(dialogueId)) {
+            // Out of automatic steps; the dialogue has been ended.
+            return true;
+        }
         return this.enterDialogue(dialogueId);
     }
 
@@ -945,6 +992,9 @@ export class Engine {
 
         let currentNode = node;
         while (true) {
+            if (!this.takeAutoStep(dialogueId)) {
+                return;
+            }
             const nextId = this.resolveNextNode(currentNode);
             if (this.state.dialogueState?.nodeId === '') {
                 return;

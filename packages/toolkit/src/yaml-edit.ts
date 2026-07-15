@@ -14,7 +14,7 @@
  * and never opened in Studio is unaffected.
  */
 
-import { parseDocument, isMap, isSeq, type Document } from 'yaml';
+import { parseDocument, type Document } from 'yaml';
 
 /** One field change from a form. `path` is the key chain, e.g. ["startTime","hour"]. */
 export interface YamlEdit {
@@ -65,29 +65,3 @@ function deleteIn(doc: Document, path: (string | number)[]): void {
     }
 }
 
-/**
- * Read the current value at a path from YAML source, as plain JS. Used by forms
- * to seed their fields from the file (rather than the parsed registry) so the
- * form and the file agree even for keys the engine ignores.
- */
-export function readYamlValue(
-    source: string,
-    path: (string | number)[]
-): unknown {
-    const doc = parseDocument(source);
-    return doc.getIn(path, false);
-}
-
-/** True when the top-level document is a mapping (the shape every entity has). */
-export function isYamlMap(source: string): boolean {
-    return isMap(parseDocument(source).contents);
-}
-
-/** True when the value at a path is a sequence (array). */
-export function isYamlSeqAt(
-    source: string,
-    path: (string | number)[]
-): boolean {
-    const node = parseDocument(source).getIn(path, true);
-    return isSeq(node);
-}

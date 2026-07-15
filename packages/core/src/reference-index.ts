@@ -63,6 +63,10 @@ export class ReferenceIndex {
     /** symbol key → true, for every defined symbol (to find orphans). */
     private readonly defined = new Map<string, SymbolType>();
 
+    /**
+     * @param fileMap - Source file per entity, keyed "<collection>:<id>"
+     * (the shape the toolkit loader returns).
+     */
     constructor(
         private readonly registry: ContentRegistry,
         private readonly fileMap: Map<string, string>,
@@ -104,8 +108,8 @@ export class ReferenceIndex {
         return out.sort();
     }
 
-    private fileFor(id: string): string | null {
-        return this.fileMap.get(id) ?? null;
+    private fileFor(collection: string, id: string): string | null {
+        return this.fileMap.get(`${collection}:${id}`) ?? null;
     }
 
     private add(type: SymbolType, id: string, ref: Reference) {
@@ -140,7 +144,7 @@ export class ReferenceIndex {
 
         // Character fields.
         for (const c of Object.values(r.characters)) {
-            const file = this.fileFor(c.id);
+            const file = this.fileFor('characters', c.id);
             if (c.location)
                 this.add('locations', c.location, {
                     file,
@@ -155,7 +159,7 @@ export class ReferenceIndex {
 
         // Item fields.
         for (const item of Object.values(r.items)) {
-            const file = this.fileFor(item.id);
+            const file = this.fileFor('items', item.id);
             if (item.location && item.location !== 'inventory') {
                 // A container is a location or a character; record under both,
                 // whichever the id actually names.
@@ -174,7 +178,7 @@ export class ReferenceIndex {
 
         // Map markers reference locations.
         for (const map of Object.values(r.maps)) {
-            const file = this.fileFor(map.id);
+            const file = this.fileFor('maps', map.id);
             for (const marker of map.locations)
                 this.add('locations', marker.id, {
                     file,
@@ -187,14 +191,20 @@ export class ReferenceIndex {
             this.indexDialogue(dialogue);
         }
 
-        // Interlude trigger + effects.
+        // Interlude trigger location, trigger conditions, and effects.
         for (const interlude of Object.values(r.interludes)) {
-            const file = this.fileFor(interlude.id);
+            const file = this.fileFor('interludes', interlude.id);
             if (interlude.triggerLocation)
                 this.add('locations', interlude.triggerLocation, {
                     file,
                     where: `interlude "${interlude.id}" trigger`,
                 });
+            for (const condition of interlude.triggerConditions ?? [])
+                this.indexCondition(
+                    condition,
+                    file,
+                    `interlude "${interlude.id}" trigger condition`
+                );
             for (const effect of interlude.effects ?? [])
                 this.indexEffect(effect, file, `interlude "${interlude.id}"`);
         }
@@ -226,7 +236,7 @@ export class ReferenceIndex {
     }
 
     private indexDialogue(dialogue: Dialogue) {
-        const file = this.fileFor(dialogue.id);
+        const file = this.fileFor('dialogues', dialogue.id);
         const at = `dialogue "${dialogue.id}"`;
 
         if (dialogue.triggerLocation)
@@ -234,6 +244,10 @@ export class ReferenceIndex {
                 file,
                 where: `${at} trigger`,
             });
+
+        // Top-level REQUIRE lines gate the whole dialogue.
+        for (const condition of dialogue.conditions ?? [])
+            this.indexCondition(condition, file, `${at} requirement`);
 
         for (const node of dialogue.nodes) {
             if (node.speaker)

@@ -119,6 +119,9 @@ export interface WriteResult {
     ok: boolean;
     /** True when the file changed on disk since it was read (write refused). */
     conflict: boolean;
+    /** True when the file was deleted outside Studio since it was read
+     * (write refused; also a conflict). */
+    missing?: boolean;
     /** Current modified time on disk (new time on success, disk time on conflict). */
     mtimeMs: number;
     /** On conflict, the current file contents on disk. */
@@ -198,7 +201,7 @@ export interface StudioApi {
     /** Cancel a build in progress (kills the build process). */
     cancelBuild: () => Promise<void>;
     /** Subscribe to streamed build log lines. Returns an unsubscribe. */
-    onBuildLog: (callback: (line: string) => void) => () => void;
+    onBuildLog: (callback: (dir: string, line: string) => void) => () => void;
     /** The package manager a project uses, inferred from its lockfile. */
     detectPackageManager: (projectDir: string) => Promise<PackageManager>;
     /**
@@ -207,7 +210,7 @@ export interface StudioApi {
      */
     installDependencies: (projectDir: string) => Promise<InstallResult>;
     /** Subscribe to streamed dependency-install output. Returns an unsubscribe. */
-    onInstallLog: (callback: (line: string) => void) => () => void;
+    onInstallLog: (callback: (dir: string, line: string) => void) => () => void;
     /**
      * Start the project's dev server in a separate process and open it in the
      * default browser. Resolves with the URL and port, or null on failure.
@@ -218,7 +221,7 @@ export interface StudioApi {
     /** Stop the running dev-server preview. */
     stopPreview: () => Promise<void>;
     /** Subscribe to streamed dev-server log lines. Returns an unsubscribe. */
-    onPreviewLog: (callback: (line: string) => void) => () => void;
+    onPreviewLog: (callback: (dir: string, line: string) => void) => () => void;
     /** Open a folder (or file) in the OS file manager. */
     openPath: (targetPath: string) => Promise<void>;
     /**

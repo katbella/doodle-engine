@@ -15,6 +15,7 @@ const paw = '🐾';
 const sparkle = '✨';
 const pencil = '✏️';
 const plus = '➕';
+const wave = '👋';
 
 export async function dev() {
     const cwd = process.cwd();
@@ -34,8 +35,10 @@ export async function dev() {
                 console.log(
                     crayon.yellow(`  ${pencil} Content changed: ${path}`)
                 );
-            } else {
+            } else if (kind === 'add') {
                 console.log(crayon.green(`  ${plus} Content added: ${path}`));
+            } else {
+                console.log(crayon.red(`  ${wave} Content removed: ${path}`));
             }
         },
         onValidation: (errors) => {

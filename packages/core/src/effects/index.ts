@@ -258,17 +258,19 @@ function applyAddItem(itemId: string, state: GameState): GameState {
 }
 
 /**
- * Remove an item from the player's inventory.
- * The item's location in itemLocations is preserved (it goes to its last known location).
+ * Remove an item from the game entirely: it leaves the inventory and no
+ * longer has a location, so hasItem and itemAt both answer no for it.
+ * Use moveItem to put an item somewhere instead of removing it.
  *
  * Example: REMOVE item rusty_key
  */
 function applyRemoveItem(itemId: string, state: GameState): GameState {
+    const itemLocations = { ...state.itemLocations };
+    delete itemLocations[itemId];
     return {
         ...state,
         inventory: state.inventory.filter((id) => id !== itemId),
-        // Note: itemLocation is NOT updated here - the item stays at "inventory"
-        // or wherever it was. Use moveItem to relocate it.
+        itemLocations,
     };
 }
 

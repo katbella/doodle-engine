@@ -34,7 +34,7 @@ export function PauseMenu({
     return (
         <div className={`pause-menu-overlay ${className}`}>
             <div className="pause-menu">
-                <h2 className="pause-title">Paused</h2>
+                <h2 className="pause-title">{ui['ui.paused'] ?? 'Paused'}</h2>
                 <div className="pause-buttons">
                     <button className="pause-button" onClick={onResume}>
                         {ui['ui.resume']}
@@ -56,7 +56,7 @@ export function PauseMenu({
                         className="pause-button pause-button-quit"
                         onClick={onQuitToTitle}
                     >
-                        Quit to Title
+                        {ui['ui.quit_to_title'] ?? 'Quit to Title'}
                     </button>
                 </div>
             </div>

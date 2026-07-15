@@ -5,7 +5,11 @@
  * Framework-agnostic - manages game state, evaluates conditions, processes effects, builds snapshots.
  */
 
-export const VERSION = '0.0.1';
+// Filled in from package.json at build time (see vite.config.ts), so the
+// constant always matches the published package version.
+declare const __DOODLE_VERSION__: string;
+export const VERSION: string =
+    typeof __DOODLE_VERSION__ === 'string' ? __DOODLE_VERSION__ : '0.0.0-dev';
 
 // Content Entities
 export type {
@@ -138,7 +142,7 @@ export {
 export { applyEffect, applyEffects } from './effects';
 
 // Localization
-export { resolveText, createResolver } from './localization';
+export { resolveText } from './localization';
 
 // Snapshot Builder
 export { buildSnapshot, buildUIStrings } from './snapshot';
