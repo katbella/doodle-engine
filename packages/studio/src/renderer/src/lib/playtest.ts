@@ -157,6 +157,11 @@ export class PlaytestSession {
         this.version++;
     }
 
+    setLocale(locale: string): void {
+        this.snapshot = this.engine.setLocale(locale);
+        this.version++;
+    }
+
     applyEffect(effect: Effect): void {
         this.snapshot = this.engine.applyDebugEffect(effect);
         this.version++;

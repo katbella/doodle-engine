@@ -52,7 +52,7 @@ const project: OpenProject = {
                     {
                         id: 'start',
                         speaker: 'guide',
-                        text: 'Welcome.',
+                        text: '@door.welcome',
                         choices: [
                             {
                                 id: 'open',
@@ -91,7 +91,10 @@ const project: OpenProject = {
         },
         journalEntries: {},
         interludes: {},
-        locales: {},
+        locales: {
+            en: { 'door.welcome': 'Welcome.' },
+            sv: { 'door.welcome': 'Välkommen.' },
+        },
     },
     config: {
         startLocation: 'room',
@@ -126,6 +129,11 @@ describe('Playtest author journeys', () => {
         await user.click(startNode);
 
         expect(screen.getByText('Welcome.')).toBeTruthy();
+        await user.selectOptions(
+            screen.getByLabelText('Playtest locale'),
+            'sv'
+        );
+        expect(screen.getByText('Välkommen.')).toBeTruthy();
         expect(screen.getByText('AVAILABLE')).toBeTruthy();
         expect(screen.getByText('HIDDEN')).toBeTruthy();
         expect(

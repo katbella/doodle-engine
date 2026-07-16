@@ -10,12 +10,14 @@ import {
     useGame,
     useInputAction,
 } from '@doodle-engine/react';
+import { getAvailableLocales, type LocaleOption } from './locale-options';
 
 export function App() {
     const [game, setGame] = useState<{
         engine: Engine;
         snapshot: Snapshot;
         manifest: AssetManifest;
+        availableLocales: LocaleOption[];
     } | null>(null);
 
     useEffect(() => {
@@ -25,7 +27,14 @@ export function App() {
         ]).then(([contentData, manifest]) => {
             const engine = new Engine(contentData.registry);
             const snapshot = engine.newGame(contentData.config);
-            setGame({ engine, snapshot, manifest });
+            setGame({
+                engine,
+                snapshot,
+                manifest,
+                availableLocales: getAvailableLocales(
+                    contentData.registry.locales
+                ),
+            });
         });
     }, []);
 
@@ -52,14 +61,14 @@ export function App() {
                     initialSnapshot={game.snapshot}
                     devTools={import.meta.env.DEV}
                 >
-                    <GameUI />
+                    <GameUI availableLocales={game.availableLocales} />
                 </GameProvider>
             </AssetProvider>
         </InputProvider>
     );
 }
 
-function GameUI() {
+function GameUI({ availableLocales }: { availableLocales: LocaleOption[] }) {
     const { snapshot, actions } = useGame();
     const [pendingVideo, setPendingVideo] = useState<string | null>(null);
 
@@ -106,6 +115,24 @@ function GameUI() {
                 margin: '0 auto',
             }}
         >
+            {availableLocales.length > 1 && (
+                <label>
+                    {snapshot.ui['ui.language']}{' '}
+                    <select
+                        value={snapshot.currentLocale}
+                        onChange={(event) =>
+                            actions.setLocale(event.target.value)
+                        }
+                    >
+                        {availableLocales.map((locale) => (
+                            <option key={locale.code} value={locale.code}>
+                                {locale.label}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            )}
+
             {pendingVideo && (
                 <VideoPlayer
                     src={pendingVideo}
@@ -159,7 +186,7 @@ function GameUI() {
                                       cursor: 'pointer',
                                   }}
                               >
-                                  Continue
+                                  {snapshot.ui['ui.continue']}
                               </button>
                           )}
                 </div>
@@ -167,7 +194,7 @@ function GameUI() {
 
             {!snapshot.dialogue && snapshot.charactersHere.length > 0 && (
                 <div>
-                    <h2>Characters here</h2>
+                    <h2>{snapshot.ui['ui.characters']}</h2>
                     {snapshot.charactersHere.map((char) => (
                         <button
                             key={char.id}
@@ -179,7 +206,7 @@ function GameUI() {
                                 cursor: 'pointer',
                             }}
                         >
-                            Talk to {char.name}
+                            {char.name}
                         </button>
                     ))}
                 </div>

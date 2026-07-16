@@ -13,6 +13,7 @@ import tavernYaml from '../templates/content/locations/tavern.yaml?raw';
 import marketYaml from '../templates/content/locations/market.yaml?raw';
 import townMapYaml from '../templates/content/maps/town.yaml?raw';
 import interludeBackgroundSvg from '../templates/assets/images/banners/interlude_background.svg?raw';
+import { getAvailableLocales } from '../templates/src/locale-options';
 
 const templateFiles = import.meta.glob('../templates/**/*', {
     query: '?raw',
@@ -51,6 +52,23 @@ describe('scaffold templates', () => {
         expect(customApp).toContain('actions.dismissInterlude');
         expect(customApp).toContain('VideoPlayer');
         expect(customApp).toContain('snapshot.pendingVideo');
+        expect(customApp).toContain('getAvailableLocales(');
+        expect(customApp).toContain("snapshot.ui['ui.continue']");
+        expect(customApp).toContain("snapshot.ui['ui.characters']");
+        expect(customApp).not.toContain('Characters here');
+        expect(customApp).not.toContain('Talk to {char.name}');
+        expect(defaultApp).not.toContain('Made with Doodle Engine');
+    });
+
+    it('discovers locale options from loaded locale files', () => {
+        expect(
+            getAvailableLocales({ sv: {}, en: {}, fr: {} }).map(
+                (locale) => locale.code
+            )
+        ).toEqual(['en', 'fr', 'sv']);
+        expect(getAvailableLocales({ custom_locale: {} })).toEqual([
+            { code: 'custom_locale', label: 'custom_locale' },
+        ]);
     });
 
     it('app TSX templates parse', () => {
@@ -68,6 +86,9 @@ describe('scaffold templates', () => {
     it('starter interlude references a bundled background asset', () => {
         expect(chapterOneYaml).toContain(
             'background: interlude_background.svg'
+        );
+        expect(chapterOneYaml).toContain(
+            'text: "@interlude.chapter_one.text"'
         );
         expect(interludeBackgroundSvg).toContain('<svg');
     });
@@ -111,9 +132,10 @@ describe('scaffold templates', () => {
                 ? assetTemplatePaths.includes(expectedPath)
                 : assetTemplatePaths.some((path) => path.endsWith(`/${ref}`));
 
-            expect(bundled, `${ref} should be bundled in templates/assets`).toBe(
-                true
-            );
+            expect(
+                bundled,
+                `${ref} should be bundled in templates/assets`
+            ).toBe(true);
         }
     });
 

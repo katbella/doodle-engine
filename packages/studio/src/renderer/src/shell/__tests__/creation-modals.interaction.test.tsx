@@ -98,6 +98,12 @@ describe('NewProjectModal', () => {
         );
         await user.click(screen.getByRole('button', { name: 'Choose…' }));
         expect(screen.getByText('C:/games')).toBeTruthy();
+        await user.selectOptions(
+            screen.getByRole('combobox', {
+                name: 'Localization',
+            }),
+            'localized'
+        );
 
         const checks = screen.getAllByRole('checkbox');
         await user.click(checks[0]);
@@ -110,6 +116,7 @@ describe('NewProjectModal', () => {
             targetDir: 'C:/games',
             useDefaultRenderer: false,
             useStarterStyles: true,
+            localizationMode: 'localized',
         });
     });
 

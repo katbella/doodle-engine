@@ -90,6 +90,7 @@ describe('buildProject success', () => {
             subtitle: 'A "Quoted" Subtitle',
             useDefaultRenderer: true,
             useStarterStyles: true,
+            localizationMode: 'literal',
         });
 
         expect(
@@ -103,7 +104,7 @@ describe('buildProject success', () => {
         ).toContain('const GAME_SUBTITLE = "A \\"Quoted\\" Subtitle";');
         expect(
             await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
-        ).toContain('credits={');
+        ).not.toContain('Made with Doodle Engine');
 
         const logs: string[] = [];
         const result = await buildProject({

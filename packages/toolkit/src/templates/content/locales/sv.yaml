@@ -1,0 +1,232 @@
+# ===================
+# UI Strings
+# ===================
+ui.continue: "Fortsätt"
+ui.end_dialogue: "Avsluta dialog"
+ui.inventory: "Föremål"
+ui.journal: "Dagbok"
+ui.notes: "Anteckningar"
+ui.map: "Karta"
+ui.save_load: "Spara/Ladda"
+ui.settings: "Inställningar"
+ui.credits: "Eftertexter"
+ui.made_with_doodle_engine: "Skapat med Doodle Engine"
+ui.save: "Spara"
+ui.load: "Ladda"
+ui.new_game: "Nytt spel"
+ui.resume: "Fortsätt spela"
+ui.no_companions: "Inga följeslagare"
+ui.narrator: "Berättare"
+ui.characters: "Karaktärer"
+ui.party: "Grupp"
+ui.resources: "Resurser"
+ui.no_items: "Inga föremål"
+ui.location_banner: "Platsbild"
+ui.close: "Stäng"
+ui.paused: "Pausat"
+ui.quit_to_title: "Tillbaka till titelskärmen"
+ui.active_quests: "Aktiva uppdrag"
+ui.entries: "Inlägg"
+ui.no_entries: "Inga inlägg ännu"
+ui.audio: "Ljud"
+ui.language: "Språk"
+ui.volume_master: "Huvudvolym"
+ui.volume_music: "Musik"
+ui.volume_sound: "Ljudeffekter"
+ui.volume_voice: "Röster"
+ui.volume_ui: "Gränssnittsljud"
+ui.back: "Tillbaka"
+ui.saved: "Sparat!"
+ui.loaded: "Laddat!"
+ui.new_save: "Ny sparfil"
+ui.quick_save: "Snabbsparning"
+ui.autosave: "Autosparning"
+ui.no_saves: "Inga sparfiler ännu"
+ui.delete: "Ta bort"
+ui.skip: "Hoppa över"
+ui.skip_splash: "Hoppa över startskärmen"
+ui.menu: "Meny"
+ui.add_note: "Lägg till anteckning"
+ui.note_title: "Titel"
+ui.note_text: "Skriv en anteckning..."
+ui.no_notes: "Inga anteckningar ännu"
+ui.loading: "Laddar..."
+ui.loading_game_assets: "Laddar spelresurser..."
+ui.ready: "Klart!"
+ui.error_loading_assets: "Kunde inte ladda resurser"
+ui.travel_to: "Res till {destination}?"
+ui.travel_time_one: "Resan tar 1 timme."
+ui.travel_time: "Resan tar {hours} timmar."
+ui.arrive: "Ankomst: dag {day}, {time}"
+ui.travel: "Res"
+ui.cancel: "Avbryt"
+ui.day: "Dag {day}"
+ui.time_dawn: "Gryning"
+ui.time_morning: "Morgon"
+ui.time_midday: "Mitt på dagen"
+ui.time_afternoon: "Eftermiddag"
+ui.time_evening: "Kväll"
+ui.time_dusk: "Skymning"
+ui.time_night: "Natt"
+
+# ===================
+# Narrator Intros
+# ===================
+narrator.tavern_intro: "Du skjuter upp den tunga ekdörren och kliver in. Först slår värmen emot dig, sedan doften av avslagen öl, vedrök och något som steks i köket. Några gäster sitter böjda över sina stop. Bakom baren torkar en bredaxlad man glas och betraktar dig med stilla intresse."
+narrator.market_intro: "Torget öppnar sig framför dig i ett myller av färg och ljud. Stånd med färgglada markiser kantar varje sida. Köpmän ropar ut sina priser, barn ilar mellan vagnarna och någonstans spelar en gatumusikant på en ostämd fiol."
+narrator.choice.look_around: "Se dig omkring."
+
+# ===================
+# Locations
+# ===================
+location.tavern.name: "Den Salta Hunden"
+location.tavern.description: "En dunkelt upplyst krog som luktar salt och avslagen öl. Ljus fladdrar på grova träbord och sorlet av samtal fyller rummet."
+location.market.name: "Torget"
+location.market.description: "En livlig utomhusmarknad där köpmän ropar ut sina varor. Doften av nybakat bröd blandas med exotiska kryddor."
+
+# ===================
+# Characters
+# ===================
+character.bartender.name: "Marcus, bartendern"
+character.bartender.bio: "En barsk man med vänliga ögon som har hört varje historia två gånger. Han håller ordning på Den Salta Hunden med fast hand och generösa mått."
+character.merchant.name: "Elena, köpmannen"
+character.merchant.bio: "En skarpögd handelsman som alltid tycks känna värdet på allt och priset på alla."
+
+# ===================
+# Items
+# ===================
+item.old_coin.name: "Gammalt mynt"
+item.old_coin.description: "Ett anlupet mynt med märkliga tecken. Det liknar ingen valuta du har sett förut."
+
+# ===================
+# Maps
+# ===================
+map.town.name: "Staden"
+
+# ===================
+# Quests
+# ===================
+quest.odd_jobs.name: "Småjobb"
+quest.odd_jobs.description: "Bartendern nämnde någon på marknaden som kunde behöva hjälp."
+quest.odd_jobs.stage.started: "Marcus nämnde ett arbete på marknaden. Jag borde prata med köpmannen där."
+quest.odd_jobs.stage.talked_to_merchant: "Elena behöver någon som vaktar en leverans. Dags att bege sig till hamnen."
+quest.odd_jobs.stage.complete: "Ett väl utfört jobb. Elena betalade 50 guld för besväret."
+
+# ===================
+# Journal Entries
+# ===================
+journal.tavern_discovery.title: "Den Salta Hunden"
+journal.tavern_discovery.text: "Jag hittade en krog i hamnkvarteren som heter Den Salta Hunden. Bartendern Marcus verkar ha goda kontakter. Det sägs att märkligt folk har rört sig vid hamnen om nätterna."
+journal.odd_jobs_accepted.title: "Arbete på marknaden"
+journal.odd_jobs_accepted.text: "Marcus hänvisade mig till en köpman på torget: Elena. Hon söker någon pålitlig. Jag borde gå dit och presentera mig."
+journal.market_square.title: "Torget"
+journal.market_square.text: "Torget är hjärtat i den här lilla staden. Elena har handlat här i femton år. Ett bra ställe att fylla på förråden."
+
+# ===================
+# Interludes
+# ===================
+interlude.chapter_one.text: |
+  Kapitel ett: En ny början
+
+  Vägen bakom dig sträcker sig lång och tom.
+  Framför dig fladdrar stadens ljus genom kvällsdimman.
+
+  Du har hört ryktena. Märkliga saker händer.
+  Människor försvinner. Skuggor som rör sig fel.
+
+  Någon måste undersöka det.
+
+  Det kan lika gärna vara du.
+
+# ===================
+# Bartender Dialogue
+# ===================
+bartender.greeting: "Välkommen till Den Salta Hunden, främling. Vad får det lov att vara?"
+bartender.farewell: "Var försiktig där ute. Gatorna är inte lika säkra som förr."
+
+# Choices
+bartender.choice.whats_news: "Vad händer här omkring?"
+bartender.choice.order_drink: "Jag tar något att dricka."
+bartender.choice.looking_for_work: "Jag söker arbete."
+bartender.choice.about_that_job: "Angående jobbet du nämnde..."
+bartender.choice.thanks_for_work: "Tack för att du tipsade mig om jobbet."
+bartender.choice.nevermind: "Glöm det, jag passerar bara."
+bartender.choice.tell_me_more: "Berätta mer om det."
+bartender.choice.interesting: "Intressant. Jag ska ha det i åtanke."
+bartender.choice.sure_pay: "Visst, här är fem guld."
+bartender.choice.try_bluff: "Försök prata dig till en gratis drink."
+bartender.choice.too_rich: "Vid närmare eftertanke avstår jag."
+bartender.choice.back_to_chat: "Så, vad mer?"
+bartender.choice.accept_work: "Visst, jag kan behöva pengarna."
+bartender.choice.not_interested: "Inte just nu, tack."
+bartender.choice.on_my_way: "Jag beger mig dit nu."
+bartender.choice.more_details: "Vad är det exakt de behöver?"
+bartender.choice.got_it: "Jag förstår. Jag tar hand om det."
+bartender.choice.anytime: "Ingen orsak."
+
+# Responses
+bartender.rumors: "Det sägs att märkligt folk stryker omkring vid hamnen om nätterna. Och köpmannen på torget söker visst hjälp. Jag hittade förresten det här på golvet häromdagen. Märkliga tecken. Du kan få det."
+bartender.rumors_detail: "Några säger att de har sett ljus ute på den gamla piren efter midnatt. Förmodligen smugglare, men vem vet nu för tiden. Håll ögonen öppna."
+bartender.order_drink: "Fem guld för husets special, det starkaste på den här sidan floden. Vad säger du?"
+bartender.after_drink: "Kul att du gillar den! Jag bryggde den själv. Nåväl, något annat?"
+bartender.work_intro: "Nå, du ser duglig ut. Det finns en köpman på torget. Elena har frågat efter någon pålitlig. Säg att Marcus skickade dig."
+bartender.work_accepted: "Bra. Elena betalar rättvist. Gå till torget när du är redo."
+bartender.work_details: "Något om en leverans som behöver eskort. Inget alltför farligt, säger hon, men det brukar de alltid säga."
+bartender.work_followup: "Arbetar du fortfarande med Elenas uppdrag? Hon är på torget om du inte har hittat henne än. Låt henne inte vänta för länge."
+bartender.work_done: "Jag hörde Elena lovorda dig. Bra jobbat. Jag visste att du hade det i dig."
+
+# ===================
+# Merchant Dialogue
+# ===================
+merchant.greeting: "Välkommen, välkommen! Elenas Emporium har allt du behöver och mycket du inte visste att du ville ha."
+merchant.farewell: "Trevlig resa! Kom tillbaka när du vill."
+
+# Choices
+merchant.choice.browse_wares: "Låt mig se vad du har."
+merchant.choice.heard_about_work: "Marcus skickade mig angående ett jobb."
+merchant.choice.delivery_done: "Leveransen är klar."
+merchant.choice.whats_this_place: "Berätta om marknaden."
+merchant.choice.goodbye: "Jag tittar bara. Hej då."
+merchant.choice.buy_map: "Jag tar kartan. (20 guld)"
+merchant.choice.too_pricey: "Lite för dyrt för mig."
+merchant.choice.accept_task: "Jag är med. Vad behöver du?"
+merchant.choice.need_to_think: "Låt mig tänka på saken."
+merchant.choice.thanks_info: "Tack för informationen."
+merchant.choice.back_to_browse: "Jag tittar vidare."
+merchant.choice.on_it: "Betrakta det som klart."
+merchant.choice.glad_to_help: "Glad att kunna hjälpa."
+
+# Responses
+merchant.browse: "Ta en titt! Jag har en fin karta över området om du är ny här. Bara tjugo guld, ett fynd om du vill slippa gå vilse."
+merchant.sold_map: "Utmärkt val! Den här hindrar dig från att irra in i fel del av staden."
+merchant.too_pricey: "Ha! Du skulle betala dubbelt om du gick vilse i hamnen om natten. Men ingen brådska. Jag finns här."
+merchant.odd_jobs: "Jaså, Marcus skickade dig? Bra karl. Jag har en leverans på väg in och behöver någon som håller ett öga på den. Intresserad?"
+merchant.task_details: "Gå ner till hamnen vid solnedgången. Där möter du min kontakt, en kvinna som heter Ria. Se till att lasten kommer hit hel."
+merchant.quest_complete: "Allt kom fram i perfekt skick! Du har förtjänat det här: femtio guld, som utlovat. Behöver jag hjälp igen blir du den första jag kontaktar."
+merchant.about_market: "Torget är hjärtat i den här lilla staden. Här finns nästan vad som helst om man vet var man ska leta. Jag har handlat här i femton år."
+
+# ===================
+# Notifications
+# ===================
+notification.journal_updated: "Dagboken uppdaterad"
+notification.quest_started: "Nytt uppdrag: Småjobb"
+notification.quest_updated: "Uppdrag uppdaterat: Småjobb"
+notification.quest_complete: "Uppdrag slutfört: Småjobb (+50 guld, +10 anseende)"
+notification.bought_drink: "Köpte en drink (-5 guld)"
+notification.bought_map: "Köpte en karta (-20 guld)"
+
+# ===================
+# Skill Check (bluff_check.dlg)
+# ===================
+bluff.setup: "Marcus betraktar dig över bardisken. Du överväger att dra en historia för att få rabatt på drinken..."
+bluff.choice.attempt: "Försök lura honom."
+bluff.choice.back_down: "Förresten, glöm det."
+bluff.backed_down: "Vissa strider är inte värda att ta."
+bluff.rolled: "Du drar din historia med {bluffRoll} på slaget och Marcus lyssnar noga."
+bluff.success.narration: "Historien går hem perfekt. Marcus skrattar och skjuter över en gratis drink."
+bluff.success.bartender: "Visst, den här bjuder huset på."
+bluff.failure.narration: "Marcus höjer ett ögonbryn, fullständigt övertygad om att du ljuger."
+bluff.failure.bartender: "Nej. Det blir fem guld."
+bluff.choice.cheers: "Skål!"
+bluff.choice.fine_pay: "Okej. Här är fem guld."
+bluff.choice.walk_away: "Glöm det då."

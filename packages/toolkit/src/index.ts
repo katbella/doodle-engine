@@ -35,6 +35,7 @@ export { createProject } from './create-project';
 export type {
     CreateProjectOptions,
     CreateProjectResult,
+    ScaffoldLocalizationMode,
 } from './create-project';
 
 // Comment-preserving YAML edits (for Studio's visual entity forms)

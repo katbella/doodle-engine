@@ -94,6 +94,8 @@ export function Playtest({ project }: { project: OpenProject }) {
     );
 
     const hasDialogues = Object.keys(project.registry.dialogues).length > 0;
+    const currentLocale = session.getState().currentLocale;
+    const localeIds = Object.keys(project.registry.locales).sort();
 
     return (
         <div className="playtest">
@@ -116,6 +118,25 @@ export function Playtest({ project }: { project: OpenProject }) {
                 >
                     Restart
                 </button>
+                {localeIds.length > 0 && (
+                    <label className="playtest__field">
+                        <span>Locale</span>
+                        <select
+                            className="playtest__select"
+                            value={currentLocale}
+                            aria-label="Playtest locale"
+                            onChange={(event) =>
+                                act(() => session.setLocale(event.target.value))
+                            }
+                        >
+                            {localeIds.map((localeId) => (
+                                <option key={localeId} value={localeId}>
+                                    {localeId}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                )}
                 <div className="playtest__spacer" />
                 <button className="btn" onClick={() => setNaming(true)}>
                     Save test state

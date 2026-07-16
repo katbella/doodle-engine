@@ -57,6 +57,30 @@ export async function create(projectName: string) {
         process.exit(0);
     }
 
+    const { localizationMode } = await prompts({
+        type: 'select',
+        name: 'localizationMode',
+        message: 'How should starter text be stored?',
+        choices: [
+            {
+                title: 'English text: simple content with a locale starter file',
+                value: 'literal',
+            },
+            {
+                title: 'English + Swedish: localization keys and translations',
+                value: 'localized',
+            },
+        ],
+        initial: 0,
+    });
+
+    if (localizationMode === undefined) {
+        console.log(
+            crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
+        );
+        process.exit(0);
+    }
+
     // Prompt for renderer choice
     const { useDefaultRenderer } = await prompts({
         type: 'confirm',
@@ -113,6 +137,7 @@ export async function create(projectName: string) {
             subtitle: subtitle.trim(),
             useDefaultRenderer,
             useStarterStyles,
+            localizationMode,
         }));
     } catch (error) {
         console.log('');
@@ -143,7 +168,13 @@ export async function create(projectName: string) {
             '    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'
         )
     );
-    console.log(crayon.dim('    English locale with all strings'));
+    console.log(
+        crayon.dim(
+            localizationMode === 'localized'
+                ? '    English and Swedish locales'
+                : '    Literal English text and a commented locale starter'
+        )
+    );
 
     console.log('');
     console.log(crayon.bold.green(`  ${check} Project created successfully!`));

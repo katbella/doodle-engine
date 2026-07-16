@@ -5,6 +5,7 @@ import type {
     AssetManifest,
 } from '@doodle-engine/core';
 import { GameShell } from '@doodle-engine/react';
+import { getAvailableLocales } from './locale-options';
 
 const GAME_TITLE = __GAME_TITLE_JSON__;
 const GAME_SUBTITLE = __GAME_SUBTITLE_JSON__;
@@ -46,13 +47,7 @@ export function App() {
             manifest={manifest}
             title={GAME_TITLE}
             subtitle={GAME_SUBTITLE || undefined}
-            credits={
-                <>
-                    <p>{GAME_TITLE}</p>
-                    <p>Made with Doodle Engine</p>
-                </>
-            }
-            availableLocales={[{ code: 'en', label: 'English' }]}
+            availableLocales={getAvailableLocales(content.registry.locales)}
             devTools={import.meta.env.DEV}
         />
     );

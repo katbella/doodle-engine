@@ -1,3 +1,9 @@
+import { useRef, useState } from 'react';
+import type {
+    CSSProperties,
+    KeyboardEvent,
+    PointerEvent,
+} from 'react';
 import type { ContentRegistry, Dialogue } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { SectionKey, Tab } from '../types';
@@ -145,18 +151,107 @@ function FieldList({
     kind: string;
     fields: Record<string, unknown>;
 }) {
+    const [keyWidth, setKeyWidth] = useState(220);
+    const tableRef = useRef<HTMLDivElement>(null);
+    const dragRef = useRef<{
+        pointerId: number;
+        startX: number;
+        startWidth: number;
+    } | null>(null);
+
+    const clampWidth = (width: number) => {
+        const tableWidth = tableRef.current?.getBoundingClientRect().width ?? 0;
+        const maxWidth = tableWidth > 0 ? tableWidth - 120 : 600;
+        return Math.min(Math.max(width, 100), Math.max(maxWidth, 100));
+    };
+
+    const startResize = (event: PointerEvent<HTMLDivElement>) => {
+        dragRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startWidth: keyWidth,
+        };
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+    };
+
+    const resize = (event: PointerEvent<HTMLDivElement>) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        setKeyWidth(clampWidth(drag.startWidth + event.clientX - drag.startX));
+    };
+
+    const stopResize = (event: PointerEvent<HTMLDivElement>) => {
+        if (dragRef.current?.pointerId !== event.pointerId) return;
+        dragRef.current = null;
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+    };
+
+    const resizeWithKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        setKeyWidth((width) =>
+            clampWidth(width + (event.key === 'ArrowLeft' ? -12 : 12))
+        );
+    };
+
     return (
         <div>
             <div className="detail__head">
                 <span className="detail__title">{title}</span>
                 <span className="detail__kind">{kind}</span>
             </div>
-            {Object.entries(fields).map(([key, value]) => (
-                <div key={key} className="detail__row">
-                    <span className="detail__key">{key}</span>
-                    <span className="detail__value">{formatValue(value)}</span>
-                </div>
-            ))}
+            <div
+                ref={tableRef}
+                className="detail__field-table"
+                role="table"
+                aria-label={`${title} fields`}
+                style={
+                    {
+                        '--detail-key-width': `${keyWidth}px`,
+                    } as CSSProperties
+                }
+            >
+                {Object.entries(fields).map(([key, value]) => {
+                    const displayValue = formatValue(value);
+                    return (
+                        <div
+                            key={key}
+                            className="detail__row detail__field-row"
+                            role="row"
+                        >
+                            <span
+                                className="detail__key detail__field-cell"
+                                role="rowheader"
+                                title={key}
+                            >
+                                {key}
+                            </span>
+                            <span
+                                className="detail__value detail__field-cell"
+                                role="cell"
+                                title={displayValue}
+                            >
+                                {displayValue}
+                            </span>
+                        </div>
+                    );
+                })}
+                <div
+                    className="detail__resize-handle"
+                    role="separator"
+                    aria-label="Resize key column"
+                    aria-orientation="vertical"
+                    aria-valuemin={100}
+                    aria-valuemax={600}
+                    aria-valuenow={keyWidth}
+                    tabIndex={0}
+                    onPointerDown={startResize}
+                    onPointerMove={resize}
+                    onPointerUp={stopResize}
+                    onPointerCancel={stopResize}
+                    onKeyDown={resizeWithKeyboard}
+                />
+            </div>
         </div>
     );
 }

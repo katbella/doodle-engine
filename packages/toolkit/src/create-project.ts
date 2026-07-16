@@ -9,6 +9,7 @@
 
 import { mkdir, readdir, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
+import { parse as parseYaml } from 'yaml';
 
 // Vite inlines all template files as strings at build time.
 // Keys are relative paths like './templates/content/game.yaml'.
@@ -17,6 +18,8 @@ const TEMPLATES = import.meta.glob('./templates/**/*', {
     import: 'default',
     eager: true,
 }) as Record<string, string>;
+
+export type ScaffoldLocalizationMode = 'literal' | 'localized';
 
 export interface CreateProjectOptions {
     /** Directory to create the new project folder inside (usually the cwd). */
@@ -29,6 +32,8 @@ export interface CreateProjectOptions {
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS (only meaningful with the default renderer). */
     useStarterStyles: boolean;
+    /** Use literal English text or demonstrate localization with English and Swedish. */
+    localizationMode?: ScaffoldLocalizationMode;
 }
 
 export interface CreateProjectResult {
@@ -75,6 +80,7 @@ export async function createProject(
     const { targetDir, useDefaultRenderer, useStarterStyles } = options;
     const title = options.title?.trim() || projectName;
     const subtitle = options.subtitle?.trim() ?? '';
+    const localizationMode = options.localizationMode ?? 'literal';
     const projectPath = join(targetDir, projectName);
 
     // Creating a project never touches existing work: the destination must
@@ -156,14 +162,30 @@ export async function createProject(
     for (const [key, content] of Object.entries(TEMPLATES)) {
         const outPath = resolveOutputPath(key);
         if (outPath === null) continue;
+        if (
+            localizationMode === 'literal' &&
+            outPath === 'content/locales/sv.yaml'
+        ) {
+            continue;
+        }
 
         const dest = join(projectPath, outPath);
         // Ensure parent directory exists (templates may have paths not in the dirs list)
         await mkdir(dirname(dest), { recursive: true });
-        const output =
-            outPath === 'index.html'
-                ? content.replace('{{GAME_TITLE}}', escapeHtml(title))
-                : content;
+        let output = content;
+        if (outPath === 'index.html') {
+            output = content.replace('{{GAME_TITLE}}', escapeHtml(title));
+        } else if (outPath === 'content/locales/en.yaml') {
+            output =
+                localizationMode === 'literal'
+                    ? ENGLISH_LOCALE_STARTER
+                    : content;
+        } else if (
+            localizationMode === 'literal' &&
+            outPath.startsWith('content/')
+        ) {
+            output = replaceLocaleKeysWithEnglish(content);
+        }
         await writeFile(dest, output);
     }
 
@@ -184,6 +206,60 @@ export async function createProject(
     await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
 
     return { projectPath };
+}
+
+const ENGLISH_TRANSLATIONS = parseYaml(
+    TEMPLATES['./templates/content/locales/en.yaml']
+) as Record<string, string>;
+
+const ENGLISH_LOCALE_STARTER = `# ===================
+# English Locale Starter
+# ===================
+#
+# This project uses literal English text, so it does not need locale keys yet.
+# To localize a string later:
+# 1. Replace the text in a content file with a key such as @location.tavern.name
+# 2. Add that key and its English text below
+# 3. Copy this file to another language code, such as sv.yaml, and translate it
+# Locale filenames become language codes automatically; no React changes are needed.
+#
+# ===================
+# Example
+# ===================
+# location.tavern.name: "The Salty Dog"
+#
+# Built-in interface labels can also be overridden, for example:
+# ui.continue: "Continue"
+# ui.end_dialogue: "End Dialogue"
+`;
+
+function replaceLocaleKeysWithEnglish(content: string): string {
+    return content
+        .split(/(\r?\n)/)
+        .map((part) => {
+            if (/^\r?\n$/.test(part) || part.trimStart().startsWith('#')) {
+                return part;
+            }
+
+            return part
+                .replace(/"@([A-Za-z0-9_.-]+)"/g, (_match, key: string) =>
+                    JSON.stringify(englishTranslation(key))
+                )
+                .replace(/@([A-Za-z0-9_.-]+)/g, (_match, key: string) =>
+                    JSON.stringify(englishTranslation(key))
+                );
+        })
+        .join('');
+}
+
+function englishTranslation(key: string): string {
+    const value = ENGLISH_TRANSLATIONS[key];
+    if (typeof value !== 'string') {
+        throw new Error(
+            `Starter content is missing the English locale key "${key}".`
+        );
+    }
+    return value;
 }
 
 function escapeHtml(value: string): string {

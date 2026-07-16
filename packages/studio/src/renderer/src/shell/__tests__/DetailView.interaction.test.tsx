@@ -1,5 +1,8 @@
+// @vitest-environment jsdom
+
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { OpenProject } from '../../../../shared/project';
 import type { SectionKey, Tab } from '../../types';
 import { DetailView } from '../DetailView';
@@ -29,7 +32,13 @@ const project = {
         maps: { world: { id: 'world', name: 'World' } },
         interludes: { opening: { id: 'opening', text: 'Opening' } },
         journalEntries: { clue: { id: 'clue', title: 'Clue' } },
-        locales: { en: { greeting: 'Hello' } },
+        locales: {
+            en: {
+                greeting: 'Hello',
+                'interlude.chapter_one.text':
+                    'A long localized value that should not overlap the key column.',
+            },
+        },
     },
     config: {
         startLocation: 'town',
@@ -45,6 +54,8 @@ function tab(section: SectionKey, itemId: string): Tab {
 }
 
 describe('DetailView', () => {
+    afterEach(cleanup);
+
     it('renders dialogue structure, trigger, start node, narrator, and choices', () => {
         const html = renderToStaticMarkup(
             <DetailView project={project} tab={tab('dialogues', 'intro')} />
@@ -90,6 +101,41 @@ describe('DetailView', () => {
         expect(config).toContain('—');
         expect(config).toContain('&quot;&quot;');
         expect(config).toContain('{&quot;enabled&quot;:true}');
+    });
+
+    it('resizes field columns and exposes full ellipsized cell text', () => {
+        render(<DetailView project={project} tab={tab('locales', 'en')} />);
+
+        const table = screen.getByRole('table', { name: 'en fields' });
+        vi.spyOn(table, 'getBoundingClientRect').mockReturnValue({
+            width: 800,
+            height: 300,
+            top: 0,
+            right: 800,
+            bottom: 300,
+            left: 0,
+            x: 0,
+            y: 0,
+            toJSON: () => ({}),
+        });
+        const separator = screen.getByRole('separator', {
+            name: 'Resize key column',
+        });
+
+        fireEvent.pointerDown(separator, { pointerId: 1, clientX: 220 });
+        fireEvent.pointerMove(separator, { pointerId: 1, clientX: 300 });
+        fireEvent.pointerUp(separator, { pointerId: 1, clientX: 300 });
+
+        expect(table.style.getPropertyValue('--detail-key-width')).toBe(
+            '300px'
+        );
+        expect(
+            screen.getByRole('cell', {
+                name: /A long localized value/,
+            }).getAttribute('title')
+        ).toBe(
+            'A long localized value that should not overlap the key column.'
+        );
     });
 
     it('renders a not-found state for every missing category', () => {

@@ -130,6 +130,7 @@ describe('ProjectService', () => {
             targetDir: 'C:/games',
             useDefaultRenderer: true,
             useStarterStyles: false,
+            localizationMode: 'localized',
         });
 
         expect(createProject).toHaveBeenCalledWith('new-story', {
@@ -138,6 +139,7 @@ describe('ProjectService', () => {
             subtitle: 'A New Story',
             useDefaultRenderer: true,
             useStarterStyles: false,
+            localizationMode: 'localized',
         });
         expect(loadProject).toHaveBeenCalledWith('C:/games/new-story');
         expect(project.projectDir).toBe('C:/games/new-story');

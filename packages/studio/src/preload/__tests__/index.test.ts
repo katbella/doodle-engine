@@ -50,6 +50,7 @@ describe('preload bridge', () => {
                         targetDir: 'games',
                         useDefaultRenderer: true,
                         useStarterStyles: false,
+                        localizationMode: 'literal',
                     }),
                 'project:create',
                 [
@@ -60,6 +61,7 @@ describe('preload bridge', () => {
                         targetDir: 'games',
                         useDefaultRenderer: true,
                         useStarterStyles: false,
+                        localizationMode: 'literal',
                     },
                 ],
             ],

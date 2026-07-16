@@ -23,6 +23,8 @@ export type StudioAssetKind =
 
 export type ThemeMode = 'dark' | 'light';
 
+export type ScaffoldLocalizationMode = 'literal' | 'localized';
+
 export type ThemeColor = 'blue' | 'red' | 'violet' | 'green' | 'pink' | 'gold';
 
 export interface ThemeState {
@@ -91,6 +93,8 @@ export interface NewProjectOptions {
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS. */
     useStarterStyles: boolean;
+    /** How starter content stores player-facing text. */
+    localizationMode: ScaffoldLocalizationMode;
 }
 
 export interface ProjectDestinationStatus {

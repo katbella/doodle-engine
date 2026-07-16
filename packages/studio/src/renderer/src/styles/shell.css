@@ -980,6 +980,50 @@
     font-family: var(--font-mono);
     word-break: break-word;
 }
+.detail__field-table {
+    --detail-key-width: 220px;
+    position: relative;
+    min-width: 0;
+}
+.detail__field-row {
+    display: grid;
+    grid-template-columns: minmax(0, var(--detail-key-width)) minmax(0, 1fr);
+}
+.detail__field-row .detail__key {
+    width: auto;
+    min-width: 0;
+}
+.detail__field-cell {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.detail__resize-handle {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--detail-key-width) + 6px);
+    width: 9px;
+    transform: translateX(-50%);
+    cursor: col-resize;
+    touch-action: none;
+    outline: none;
+}
+.detail__resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 4px;
+    width: 1px;
+    background: var(--border-faint);
+}
+.detail__resize-handle:hover::after,
+.detail__resize-handle:focus-visible::after {
+    background: var(--accent);
+}
 .node {
     padding: var(--space-3);
     margin-bottom: var(--space-2);

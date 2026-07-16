@@ -18,6 +18,8 @@ export function NewProjectModal({
     const [targetDir, setTargetDir] = useState('');
     const [useDefaultRenderer, setUseDefaultRenderer] = useState(true);
     const [useStarterStyles, setUseStarterStyles] = useState(true);
+    const [localizationMode, setLocalizationMode] =
+        useState<NewProjectOptions['localizationMode']>('literal');
     const [destinationError, setDestinationError] = useState<string | null>(
         null
     );
@@ -64,6 +66,7 @@ export function NewProjectModal({
                 targetDir,
                 useDefaultRenderer,
                 useStarterStyles,
+                localizationMode,
             });
         } catch (checkError) {
             setDestinationError(
@@ -132,6 +135,27 @@ export function NewProjectModal({
                         </button>
                     </div>
                 </div>
+
+                <label className="field">
+                    <span className="field__label">Localization</span>
+                    <select
+                        className="field__input"
+                        value={localizationMode}
+                        onChange={(event) =>
+                            setLocalizationMode(
+                                event.target
+                                    .value as NewProjectOptions['localizationMode']
+                            )
+                        }
+                    >
+                        <option value="literal">
+                            English text with a locale starter file
+                        </option>
+                        <option value="localized">
+                            English + Swedish localization example
+                        </option>
+                    </select>
+                </label>
 
                 <label className="field field--check">
                     <input

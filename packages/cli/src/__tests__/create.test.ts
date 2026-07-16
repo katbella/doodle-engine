@@ -29,6 +29,7 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Story Title' })
             .mockResolvedValueOnce({ subtitle: 'A Story Subtitle' })
+            .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
             .mockResolvedValueOnce({ starterStyles: true });
 
@@ -40,6 +41,7 @@ describe('create command', () => {
             subtitle: 'A Story Subtitle',
             useDefaultRenderer: true,
             useStarterStyles: true,
+            localizationMode: 'literal',
         });
         expect(console.log).toHaveBeenCalledWith(
             expect.stringContaining('Project created successfully')
@@ -50,17 +52,19 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Custom Story' })
             .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ localizationMode: 'localized' })
             .mockResolvedValueOnce({ useDefaultRenderer: false });
 
         await create('custom-story');
 
-        expect(prompts).toHaveBeenCalledTimes(3);
+        expect(prompts).toHaveBeenCalledTimes(4);
         expect(createProject).toHaveBeenCalledWith('custom-story', {
             targetDir: 'C:/games',
             title: 'Custom Story',
             subtitle: '',
             useDefaultRenderer: false,
             useStarterStyles: false,
+            localizationMode: 'localized',
         });
     });
 
@@ -75,6 +79,7 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Cancelled Styles' })
             .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
             .mockResolvedValueOnce({ starterStyles: undefined });
         await expect(create('cancelled-styles')).rejects.toBe(exitError);
@@ -85,6 +90,7 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Story' })
             .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: false });
         createProject.mockRejectedValueOnce(new Error('already exists'));
 
