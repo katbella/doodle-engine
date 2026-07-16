@@ -1,6 +1,6 @@
 import { dialog } from 'electron';
 import { basename, join } from 'path';
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import { addRecentProject, readRecentProjects } from './recent-projects';
 import { readEngineInfo } from './engine-info';
 import type {
@@ -47,10 +47,51 @@ export class ProjectService {
         const { createProject } = await import('@doodle-engine/toolkit');
         const { projectPath } = await createProject(options.name, {
             targetDir: options.targetDir,
+            title: options.title,
+            subtitle: options.subtitle,
             useDefaultRenderer: options.useDefaultRenderer,
             useStarterStyles: options.useStarterStyles,
         });
         return this.openPath(projectPath);
+    }
+
+    async checkDestination(
+        targetDir: string,
+        name: string
+    ): Promise<{ available: boolean; message?: string }> {
+        const trimmedName = name.trim();
+        if (
+            !trimmedName ||
+            trimmedName === '.' ||
+            trimmedName === '..' ||
+            basename(trimmedName) !== trimmedName
+        ) {
+            return {
+                available: false,
+                message: 'Use a folder name without slashes.',
+            };
+        }
+
+        const projectPath = join(targetDir, trimmedName);
+        try {
+            const entries = await readdir(projectPath);
+            return entries.length === 0
+                ? { available: true }
+                : {
+                      available: false,
+                      message: `A non-empty folder named "${trimmedName}" already exists in this location. Choose another name or an empty folder.`,
+                  };
+        } catch (error) {
+            const code = (error as NodeJS.ErrnoException).code;
+            if (code === 'ENOENT') return { available: true };
+            if (code === 'ENOTDIR') {
+                return {
+                    available: false,
+                    message: `A file named "${trimmedName}" already exists in this location. Choose another name.`,
+                };
+            }
+            throw error;
+        }
     }
 
     /** Reload and re-validate a project from disk (for the Validate button). */
@@ -63,9 +104,8 @@ export class ProjectService {
     }
 
     private async load(projectDir: string): Promise<OpenProject> {
-        const { loadProject, validateContent } = await import(
-            '@doodle-engine/toolkit'
-        );
+        const { loadProject, validateContent } =
+            await import('@doodle-engine/toolkit');
         const { registry, config, fileMap, parseErrors } =
             await loadProject(projectDir);
         const problems = [

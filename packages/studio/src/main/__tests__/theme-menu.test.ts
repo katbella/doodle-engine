@@ -21,6 +21,15 @@ describe('Themes menu', () => {
             expect.objectContaining({ label: 'Default Blue', checked: true }),
             expect.objectContaining({ label: 'Awesome Red', checked: false }),
             expect.objectContaining({ label: 'Very Violet', checked: false }),
+            expect.objectContaining({ label: 'Goodly Green', checked: false }),
+            expect.objectContaining({
+                label: 'Primetime Pink',
+                checked: false,
+            }),
+            expect.objectContaining({
+                label: 'Gold-plated Gold',
+                checked: false,
+            }),
         ]);
         expect(colors.every((item) => item.type === 'checkbox')).toBe(true);
 
@@ -35,6 +44,9 @@ describe('Themes menu', () => {
             ['menu:themeColor', 'blue'],
             ['menu:themeColor', 'red'],
             ['menu:themeColor', 'violet'],
+            ['menu:themeColor', 'green'],
+            ['menu:themeColor', 'pink'],
+            ['menu:themeColor', 'gold'],
         ]);
     });
 
@@ -46,6 +58,9 @@ describe('Themes menu', () => {
                 'theme-color-blue',
                 'theme-color-red',
                 'theme-color-violet',
+                'theme-color-green',
+                'theme-color-pink',
+                'theme-color-gold',
             ].map((id) => [id, { checked: true }])
         );
 
@@ -59,6 +74,9 @@ describe('Themes menu', () => {
             'theme-color-blue': { checked: false },
             'theme-color-red': { checked: true },
             'theme-color-violet': { checked: false },
+            'theme-color-green': { checked: false },
+            'theme-color-pink': { checked: false },
+            'theme-color-gold': { checked: false },
         });
     });
 });

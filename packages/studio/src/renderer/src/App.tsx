@@ -27,6 +27,7 @@ import {
 } from './lib/rename';
 import { Welcome } from './shell/Welcome';
 import { NewProjectModal } from './shell/NewProjectModal';
+import { AboutModal } from './shell/AboutModal';
 import { CreateItemModal } from './shell/CreateItemModal';
 import { RenameModal } from './shell/RenameModal';
 import { ConfirmModal } from './shell/ConfirmModal';
@@ -65,6 +66,14 @@ const SECTION_SYMBOL: Partial<Record<CreatableSection, SymbolType>> = {
     journal: 'journalEntries',
 };
 
+function displayError(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.replace(
+        /^Error invoking remote method '[^']+': Error: /,
+        ''
+    );
+}
+
 export function App() {
     const [project, setProject] = useState<OpenProject | null>(null);
     const [tabs, setTabs] = useState<Tab[]>([]);
@@ -73,6 +82,7 @@ export function App() {
     const [openError, setOpenError] = useState<string | null>(null);
     const [recent, setRecent] = useState<RecentProject[]>([]);
     const [showNewProject, setShowNewProject] = useState(false);
+    const [aboutVersion, setAboutVersion] = useState<string | null>(null);
     const [newItemSection, setNewItemSection] =
         useState<CreatableSection | null>(null);
     const [renameTarget, setRenameTarget] = useState<{
@@ -109,7 +119,13 @@ export function App() {
     );
     const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
         const saved = localStorage.getItem('doodle-studio-theme-color');
-        return saved === 'red' || saved === 'violet' ? saved : 'blue';
+        return saved === 'red' ||
+            saved === 'violet' ||
+            saved === 'green' ||
+            saved === 'pink' ||
+            saved === 'gold'
+            ? saved
+            : 'blue';
     });
     const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({});
     const [dirtyTabs, setDirtyTabs] = useState<Set<string>>(() => new Set());
@@ -122,6 +138,31 @@ export function App() {
     // Files edited since the last validation; their markers are stale until
     // Validate runs again.
     const [staleFiles, setStaleFiles] = useState<Set<string>>(() => new Set());
+
+    useEffect(() => {
+        const report = (context: string, value: unknown) => {
+            const error =
+                value instanceof Error ? value : new Error(String(value));
+            window.studio.reportError({
+                context,
+                message: error.message,
+                stack: error.stack,
+            });
+        };
+        const onError = (event: ErrorEvent) =>
+            report('renderer:error', event.error ?? event.message);
+        const onUnhandledRejection = (event: PromiseRejectionEvent) =>
+            report('renderer:unhandledRejection', event.reason);
+        window.addEventListener('error', onError);
+        window.addEventListener('unhandledrejection', onUnhandledRejection);
+        return () => {
+            window.removeEventListener('error', onError);
+            window.removeEventListener(
+                'unhandledrejection',
+                onUnhandledRejection
+            );
+        };
+    }, []);
 
     // The folder of the project on screen right now. Long-running work
     // (builds, installs) checks this when it finishes, so results from one
@@ -257,11 +298,12 @@ export function App() {
                     setDirtyTabs(new Set());
                     setViewModes({});
                     setRecent(await window.studio.listRecentProjects());
+                    return true;
                 }
+                return false;
             } catch (error) {
-                setOpenError(
-                    error instanceof Error ? error.message : String(error)
-                );
+                setOpenError(displayError(error));
+                return false;
             } finally {
                 setLoading(false);
             }
@@ -278,23 +320,30 @@ export function App() {
         [applyOpen]
     );
     const createProject = useCallback(
-        (options: NewProjectOptions) => {
-            setShowNewProject(false);
-            return applyOpen(() => window.studio.createProject(options));
+        async (options: NewProjectOptions) => {
+            const created = await applyOpen(() =>
+                window.studio.createProject(options)
+            );
+            if (created) setShowNewProject(false);
         },
         [applyOpen]
     );
+    const openNewProjectModal = useCallback(() => {
+        setOpenError(null);
+        setShowNewProject(true);
+    }, []);
 
     useEffect(
         () =>
             window.studio.onMenu({
-                onNew: () => setShowNewProject(true),
+                onNew: openNewProjectModal,
                 onOpen: () => openProject(),
                 onOpenRecent: (path) => openRecent(path),
+                onAbout: setAboutVersion,
                 onThemeMode: setTheme,
                 onThemeColor: setThemeColor,
             }),
-        [openProject, openRecent, toggleTheme]
+        [openProject, openRecent, openNewProjectModal]
     );
 
     const markModified = useCallback((filePath: string) => {
@@ -607,7 +656,7 @@ export function App() {
             <div className="app">
                 <Welcome
                     onOpen={openProject}
-                    onNew={() => setShowNewProject(true)}
+                    onNew={openNewProjectModal}
                     onOpenRecent={openRecent}
                     recent={recent}
                     loading={loading}
@@ -619,6 +668,14 @@ export function App() {
                     <NewProjectModal
                         onCreate={createProject}
                         onCancel={() => setShowNewProject(false)}
+                        error={openError}
+                        onClearError={() => setOpenError(null)}
+                    />
+                )}
+                {aboutVersion && (
+                    <AboutModal
+                        version={aboutVersion}
+                        onClose={() => setAboutVersion(null)}
                     />
                 )}
             </div>
@@ -642,7 +699,7 @@ export function App() {
             label: 'New project…',
             group: 'Actions',
             icon: <FilePlus size={15} />,
-            run: () => setShowNewProject(true),
+            run: openNewProjectModal,
         },
         ...(canBuild
             ? [
@@ -865,6 +922,14 @@ export function App() {
                 <NewProjectModal
                     onCreate={createProject}
                     onCancel={() => setShowNewProject(false)}
+                    error={openError}
+                    onClearError={() => setOpenError(null)}
+                />
+            )}
+            {aboutVersion && (
+                <AboutModal
+                    version={aboutVersion}
+                    onClose={() => setAboutVersion(null)}
                 />
             )}
             {newItemSection && (

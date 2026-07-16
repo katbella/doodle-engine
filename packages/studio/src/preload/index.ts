@@ -13,6 +13,8 @@ const api: StudioApi = {
     openProject: () => ipcRenderer.invoke('project:open'),
     openProjectPath: (dir) => ipcRenderer.invoke('project:openPath', dir),
     createProject: (options) => ipcRenderer.invoke('project:create', options),
+    checkProjectDestination: (targetDir, name) =>
+        ipcRenderer.invoke('project:checkDestination', targetDir, name),
     chooseDirectory: () => ipcRenderer.invoke('project:chooseDir'),
     listRecentProjects: () => ipcRenderer.invoke('project:listRecent'),
     revalidate: (dir) => ipcRenderer.invoke('project:revalidate', dir),
@@ -66,6 +68,7 @@ const api: StudioApi = {
         return () => ipcRenderer.removeListener('preview:log', listener);
     },
     openPath: (targetPath) => ipcRenderer.invoke('shell:openPath', targetPath),
+    reportError: (details) => ipcRenderer.send('log:error', details),
     onFileChanged: (callback) => {
         const listener = (_event: unknown, relPath: string) =>
             callback(relPath);
@@ -78,6 +81,8 @@ const api: StudioApi = {
         const onOpen = () => handlers.onOpen();
         const onOpenRecent = (_event: unknown, path: string) =>
             handlers.onOpenRecent(path);
+        const onAbout = (_event: unknown, version: string) =>
+            handlers.onAbout(version);
         const onThemeMode = (
             _event: unknown,
             mode: Parameters<typeof handlers.onThemeMode>[0]
@@ -89,12 +94,14 @@ const api: StudioApi = {
         ipcRenderer.on('menu:new', onNew);
         ipcRenderer.on('menu:open', onOpen);
         ipcRenderer.on('menu:openRecent', onOpenRecent);
+        ipcRenderer.on('menu:about', onAbout);
         ipcRenderer.on('menu:themeMode', onThemeMode);
         ipcRenderer.on('menu:themeColor', onThemeColor);
         return () => {
             ipcRenderer.removeListener('menu:new', onNew);
             ipcRenderer.removeListener('menu:open', onOpen);
             ipcRenderer.removeListener('menu:openRecent', onOpenRecent);
+            ipcRenderer.removeListener('menu:about', onAbout);
             ipcRenderer.removeListener('menu:themeMode', onThemeMode);
             ipcRenderer.removeListener('menu:themeColor', onThemeColor);
         };

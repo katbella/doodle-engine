@@ -21,6 +21,10 @@ const TEMPLATES = import.meta.glob('./templates/**/*', {
 export interface CreateProjectOptions {
     /** Directory to create the new project folder inside (usually the cwd). */
     targetDir: string;
+    /** Player-facing game title used by the generated HTML and renderer. */
+    title?: string;
+    /** Optional player-facing subtitle used by the generated renderer. */
+    subtitle?: string;
     /** Use the batteries-included GameShell renderer instead of a custom one. */
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS (only meaningful with the default renderer). */
@@ -69,6 +73,8 @@ export async function createProject(
     options: CreateProjectOptions
 ): Promise<CreateProjectResult> {
     const { targetDir, useDefaultRenderer, useStarterStyles } = options;
+    const title = options.title?.trim() || projectName;
+    const subtitle = options.subtitle?.trim() ?? '';
     const projectPath = join(targetDir, projectName);
 
     // Creating a project never touches existing work: the destination must
@@ -153,14 +159,21 @@ export async function createProject(
         const dest = join(projectPath, outPath);
         // Ensure parent directory exists (templates may have paths not in the dirs list)
         await mkdir(dirname(dest), { recursive: true });
-        await writeFile(dest, content);
+        const output =
+            outPath === 'index.html'
+                ? content.replace('{{GAME_TITLE}}', escapeHtml(title))
+                : content;
+        await writeFile(dest, output);
     }
 
     // --- src/App.tsx (pick variant based on renderer choice) ---
     const appKey = useDefaultRenderer
         ? './templates/src/App.default.tsx'
         : './templates/src/App.custom.tsx';
-    await writeFile(join(projectPath, 'src/App.tsx'), TEMPLATES[appKey]);
+    const app = TEMPLATES[appKey]
+        .replace('__GAME_TITLE_JSON__', JSON.stringify(title))
+        .replace('__GAME_SUBTITLE_JSON__', JSON.stringify(subtitle));
+    await writeFile(join(projectPath, 'src/App.tsx'), app);
 
     // --- src/index.css (pick variant based on styles choice) ---
     const cssKey =
@@ -170,4 +183,13 @@ export async function createProject(
     await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
 
     return { projectPath };
+}
+
+function escapeHtml(value: string): string {
+    return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
 }

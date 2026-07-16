@@ -6,6 +6,9 @@ import type {
 } from '@doodle-engine/core';
 import { GameShell } from '@doodle-engine/react';
 
+const GAME_TITLE = __GAME_TITLE_JSON__;
+const GAME_SUBTITLE = __GAME_SUBTITLE_JSON__;
+
 export function App() {
     const [content, setContent] = useState<{
         registry: ContentRegistry;
@@ -41,8 +44,14 @@ export function App() {
             registry={content.registry}
             config={content.config}
             manifest={manifest}
-            title="My Doodle Game"
-            subtitle="A text-based adventure"
+            title={GAME_TITLE}
+            subtitle={GAME_SUBTITLE || undefined}
+            credits={
+                <>
+                    <p>{GAME_TITLE}</p>
+                    <p>Made with Doodle Engine</p>
+                </>
+            }
             availableLocales={[{ code: 'en', label: 'English' }]}
             devTools={import.meta.env.DEV}
         />

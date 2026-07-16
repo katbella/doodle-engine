@@ -49,6 +49,27 @@ export function createThemeMenu(
                         checked: state.color === 'violet',
                         click: () => send('menu:themeColor', 'violet'),
                     },
+                    {
+                        id: 'theme-color-green',
+                        label: 'Goodly Green',
+                        type: 'checkbox',
+                        checked: state.color === 'green',
+                        click: () => send('menu:themeColor', 'green'),
+                    },
+                    {
+                        id: 'theme-color-pink',
+                        label: 'Primetime Pink',
+                        type: 'checkbox',
+                        checked: state.color === 'pink',
+                        click: () => send('menu:themeColor', 'pink'),
+                    },
+                    {
+                        id: 'theme-color-gold',
+                        label: 'Gold-plated Gold',
+                        type: 'checkbox',
+                        checked: state.color === 'gold',
+                        click: () => send('menu:themeColor', 'gold'),
+                    },
                 ],
             },
         ],
@@ -63,7 +84,14 @@ export function syncThemeMenuChecks(
         const item = getItem(`theme-mode-${mode}`);
         if (item) item.checked = state.mode === mode;
     }
-    for (const color of ['blue', 'red', 'violet'] as ThemeColor[]) {
+    for (const color of [
+        'blue',
+        'red',
+        'violet',
+        'green',
+        'pink',
+        'gold',
+    ] as ThemeColor[]) {
         const item = getItem(`theme-color-${color}`);
         if (item) item.checked = state.color === color;
     }

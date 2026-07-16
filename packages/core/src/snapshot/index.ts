@@ -42,6 +42,8 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.map': 'Map',
     'ui.save_load': 'Save/Load',
     'ui.settings': 'Settings',
+    'ui.credits': 'Credits',
+    'ui.made_with_doodle_engine': 'Made with Doodle Engine',
     'ui.save': 'Save',
     'ui.load': 'Load',
     'ui.new_game': 'New Game',

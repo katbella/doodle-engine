@@ -69,10 +69,15 @@ describe('CreateItemModal', () => {
 });
 
 describe('NewProjectModal', () => {
-    function installBridge(chooseDirectory: StudioApi['chooseDirectory']) {
+    function installBridge(
+        chooseDirectory: StudioApi['chooseDirectory'],
+        checkProjectDestination: StudioApi['checkProjectDestination'] = vi.fn(
+            async () => ({ available: true })
+        )
+    ) {
         Object.defineProperty(window, 'studio', {
             configurable: true,
-            value: { chooseDirectory },
+            value: { chooseDirectory, checkProjectDestination },
         });
     }
 
@@ -83,6 +88,14 @@ describe('NewProjectModal', () => {
         render(<NewProjectModal onCreate={onCreate} onCancel={vi.fn()} />);
 
         await user.type(screen.getByPlaceholderText('my-game'), ' Story Game ');
+        await user.type(
+            screen.getByPlaceholderText('My Great Adventure'),
+            ' The Story '
+        );
+        await user.type(
+            screen.getByPlaceholderText('Optional'),
+            ' A Subtitle '
+        );
         await user.click(screen.getByRole('button', { name: 'Choose…' }));
         expect(screen.getByText('C:/games')).toBeTruthy();
 
@@ -92,6 +105,8 @@ describe('NewProjectModal', () => {
         await user.click(screen.getByRole('button', { name: 'Create' }));
         expect(onCreate).toHaveBeenCalledWith({
             name: 'Story Game',
+            title: 'The Story',
+            subtitle: 'A Subtitle',
             targetDir: 'C:/games',
             useDefaultRenderer: false,
             useStarterStyles: true,
@@ -103,7 +118,14 @@ describe('NewProjectModal', () => {
         const onCancel = vi.fn();
         const user = userEvent.setup();
         const { container } = render(
-            <NewProjectModal onCreate={vi.fn()} onCancel={onCancel} />
+            <NewProjectModal
+                onCreate={vi.fn()}
+                onCancel={onCancel}
+                error="folder already exists"
+            />
+        );
+        expect(screen.getByRole('alert').textContent).toContain(
+            'folder already exists'
         );
         await user.type(screen.getByPlaceholderText('my-game'), 'game');
         await user.click(screen.getByRole('button', { name: 'Choose…' }));
@@ -118,5 +140,33 @@ describe('NewProjectModal', () => {
         await user.click(screen.getByRole('button', { name: 'Cancel' }));
         fireEvent.click(container.querySelector('.modal-backdrop')!);
         expect(onCancel).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not submit when the project folder is already occupied', async () => {
+        const checkProjectDestination = vi.fn(async () => ({
+            available: false,
+            message: 'A non-empty folder named "game" already exists.',
+        }));
+        installBridge(
+            vi.fn(async () => 'C:/games'),
+            checkProjectDestination
+        );
+        const onCreate = vi.fn();
+        const user = userEvent.setup();
+        render(<NewProjectModal onCreate={onCreate} onCancel={vi.fn()} />);
+
+        await user.type(screen.getByPlaceholderText('my-game'), 'game');
+        await user.type(
+            screen.getByPlaceholderText('My Great Adventure'),
+            'Game'
+        );
+        await user.click(screen.getByRole('button', { name: 'Choose…' }));
+        await user.click(screen.getByRole('button', { name: 'Create' }));
+
+        expect(await screen.findByRole('alert')).toBeTruthy();
+        expect(screen.getByRole('alert').textContent).toContain(
+            'already exists'
+        );
+        expect(onCreate).not.toHaveBeenCalled();
     });
 });

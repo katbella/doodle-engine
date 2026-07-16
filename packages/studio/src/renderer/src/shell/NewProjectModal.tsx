@@ -4,35 +4,120 @@ import type { NewProjectOptions } from '../../../shared/project';
 export function NewProjectModal({
     onCreate,
     onCancel,
+    error,
+    onClearError,
 }: {
-    onCreate: (options: NewProjectOptions) => void;
+    onCreate: (options: NewProjectOptions) => void | Promise<void>;
     onCancel: () => void;
+    error?: string | null;
+    onClearError?: () => void;
 }) {
     const [name, setName] = useState('');
+    const [title, setTitle] = useState('');
+    const [subtitle, setSubtitle] = useState('');
     const [targetDir, setTargetDir] = useState('');
     const [useDefaultRenderer, setUseDefaultRenderer] = useState(true);
     const [useStarterStyles, setUseStarterStyles] = useState(true);
+    const [destinationError, setDestinationError] = useState<string | null>(
+        null
+    );
+    const [checkingDestination, setCheckingDestination] = useState(false);
+
+    const clearError = () => {
+        setDestinationError(null);
+        onClearError?.();
+    };
 
     const chooseDir = async () => {
         const dir = await window.studio.chooseDirectory();
-        if (dir) setTargetDir(dir);
+        if (dir) {
+            setTargetDir(dir);
+            clearError();
+        }
     };
 
-    const valid = name.trim().length > 0 && targetDir.length > 0;
+    const valid =
+        name.trim().length > 0 &&
+        title.trim().length > 0 &&
+        targetDir.length > 0;
+
+    const create = async () => {
+        if (!valid || checkingDestination) return;
+        setCheckingDestination(true);
+        setDestinationError(null);
+        try {
+            const trimmedName = name.trim();
+            const status = await window.studio.checkProjectDestination(
+                targetDir,
+                trimmedName
+            );
+            if (!status.available) {
+                setDestinationError(
+                    status.message ?? 'Choose another project name.'
+                );
+                return;
+            }
+            await onCreate({
+                name: trimmedName,
+                title: title.trim(),
+                subtitle: subtitle.trim(),
+                targetDir,
+                useDefaultRenderer,
+                useStarterStyles,
+            });
+        } catch (checkError) {
+            setDestinationError(
+                checkError instanceof Error
+                    ? checkError.message
+                    : String(checkError)
+            );
+        } finally {
+            setCheckingDestination(false);
+        }
+    };
 
     return (
         <div className="modal-backdrop" onClick={onCancel}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal__title">New project</div>
 
+                {(destinationError || error) && (
+                    <div className="modal__error" role="alert">
+                        {destinationError || error}
+                    </div>
+                )}
+
                 <label className="field">
                     <span className="field__label">Name</span>
                     <input
                         className="field__input"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            clearError();
+                        }}
                         placeholder="my-game"
                         autoFocus
+                    />
+                </label>
+
+                <label className="field">
+                    <span className="field__label">Game title</span>
+                    <input
+                        className="field__input"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="My Great Adventure"
+                    />
+                </label>
+
+                <label className="field">
+                    <span className="field__label">Subtitle</span>
+                    <input
+                        className="field__input"
+                        value={subtitle}
+                        onChange={(e) => setSubtitle(e.target.value)}
+                        placeholder="Optional"
                     />
                 </label>
 
@@ -52,7 +137,9 @@ export function NewProjectModal({
                     <input
                         type="checkbox"
                         checked={useDefaultRenderer}
-                        onChange={(e) => setUseDefaultRenderer(e.target.checked)}
+                        onChange={(e) =>
+                            setUseDefaultRenderer(e.target.checked)
+                        }
                     />
                     <span>Use the default renderer</span>
                 </label>
@@ -73,17 +160,10 @@ export function NewProjectModal({
                     </button>
                     <button
                         className="btn btn--accent"
-                        disabled={!valid}
-                        onClick={() =>
-                            onCreate({
-                                name: name.trim(),
-                                targetDir,
-                                useDefaultRenderer,
-                                useStarterStyles,
-                            })
-                        }
+                        disabled={!valid || checkingDestination}
+                        onClick={create}
                     >
-                        Create
+                        {checkingDestination ? 'Checking…' : 'Create'}
                     </button>
                 </div>
             </div>

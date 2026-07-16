@@ -17,6 +17,7 @@ import { loadProject } from './load-project';
 import { validateContent } from './validate';
 import { importFromProject } from './project-modules';
 import type { ValidationError } from './validate';
+import { engineSourceAliases } from './engine-source';
 
 export interface DevServerOptions {
     /** Absolute path to the project root (the folder that holds content/ and assets/). */
@@ -31,6 +32,8 @@ export interface DevServerOptions {
     onValidation?: (errors: ValidationError[]) => void;
     /** Called when loading, manifest generation, or validation throws. */
     onError?: (message: string, error: unknown) => void;
+    /** Monorepo root whose engine sources should replace installed packages. */
+    engineSourceRoot?: string;
 }
 
 /**
@@ -50,6 +53,7 @@ export async function startDevServer(
         onContentChange,
         onValidation,
         onError,
+        engineSourceRoot,
     } = options;
 
     const contentDir = join(projectDir, 'content');
@@ -165,7 +169,19 @@ export async function startDevServer(
     const server = await createServer({
         root: projectDir,
         plugins: [react(), contentPlugin],
-        server: { port, open },
+        resolve: engineSourceRoot
+            ? {
+                  alias: engineSourceAliases(engineSourceRoot),
+                  dedupe: ['react', 'react-dom'],
+              }
+            : undefined,
+        server: {
+            port,
+            open,
+            ...(engineSourceRoot
+                ? { fs: { allow: [projectDir, engineSourceRoot] } }
+                : {}),
+        },
     });
 
     await server.listen();

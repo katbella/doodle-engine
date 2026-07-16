@@ -15,11 +15,10 @@ import type { OpenProject } from '../../../shared/project';
 import { PlaytestSession, reloadSession } from '../lib/playtest';
 import { useTestStates } from '../lib/useTestStates';
 import { DebugTrace } from './DebugTrace';
-import { RendererPreview } from './RendererPreview';
 import { StartNodePicker, type NodeTarget } from './StartNodePicker';
 import { NameStateModal } from './NameStateModal';
 
-type InnerTab = 'playtest' | 'trace' | 'preview';
+type InnerTab = 'playtest' | 'trace';
 
 export function Playtest({ project }: { project: OpenProject }) {
     // One engine session, rebuilt whenever the project's content changes — a new
@@ -161,11 +160,6 @@ export function Playtest({ project }: { project: OpenProject }) {
                     active={tab === 'trace'}
                     onClick={() => setTab('trace')}
                 />
-                <InnerTabButton
-                    label="Renderer preview"
-                    active={tab === 'preview'}
-                    onClick={() => setTab('preview')}
-                />
             </div>
 
             {tab === 'playtest' && (
@@ -179,7 +173,6 @@ export function Playtest({ project }: { project: OpenProject }) {
                 </div>
             )}
             {tab === 'trace' && <DebugTrace trace={session.getTrace()} />}
-            {tab === 'preview' && <RendererPreview />}
 
             {picking && (
                 <StartNodePicker

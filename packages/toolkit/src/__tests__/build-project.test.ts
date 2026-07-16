@@ -68,9 +68,9 @@ describe('buildProject validation gate', () => {
 
         expect(result.ok).toBe(false);
         expect(result.errors.length).toBeGreaterThan(0);
-        expect(
-            result.errors.some((e) => e.message.includes('nowhere'))
-        ).toBe(true);
+        expect(result.errors.some((e) => e.message.includes('nowhere'))).toBe(
+            true
+        );
 
         // It validated but never got as far as generating the manifest.
         expect(logs).toContain('Validating content...');
@@ -86,13 +86,29 @@ describe('buildProject success', () => {
         const targetDir = await makeRepoTempDir();
         const { projectPath } = await createProject('test-game', {
             targetDir,
+            title: 'Test "Quoted" & Game',
+            subtitle: 'A "Quoted" Subtitle',
             useDefaultRenderer: true,
             useStarterStyles: true,
         });
 
+        expect(
+            await readFile(join(projectPath, 'index.html'), 'utf-8')
+        ).toContain('<title>Test &quot;Quoted&quot; &amp; Game</title>');
+        expect(
+            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
+        ).toContain('const GAME_TITLE = "Test \\"Quoted\\" & Game";');
+        expect(
+            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
+        ).toContain('const GAME_SUBTITLE = "A \\"Quoted\\" Subtitle";');
+        expect(
+            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
+        ).toContain('credits={');
+
         const logs: string[] = [];
         const result = await buildProject({
             projectDir: projectPath,
+            engineSourceRoot: join(packageRoot, '..', '..'),
             onLog: (message) => logs.push(message),
         });
 
@@ -104,7 +120,9 @@ describe('buildProject success', () => {
 
         // Every file the build reports it wrote actually exists on disk.
         for (const rel of result.outputFiles) {
-            await expect(access(join(result.outDir, rel))).resolves.toBeUndefined();
+            await expect(
+                access(join(result.outDir, rel))
+            ).resolves.toBeUndefined();
         }
 
         // Vite produced the entry HTML.
@@ -139,7 +157,10 @@ describe('copyProjectAssets', () => {
 
         await mkdir(join(source, 'images', 'banners'), { recursive: true });
         await mkdir(target, { recursive: true });
-        await writeFile(join(source, 'images', 'banners', 'tavern.png'), 'asset');
+        await writeFile(
+            join(source, 'images', 'banners', 'tavern.png'),
+            'asset'
+        );
         await writeFile(join(target, 'index-generated.js'), 'vite');
 
         await copyProjectAssets(source, target);

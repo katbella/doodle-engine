@@ -38,8 +38,19 @@ describe('preview worker', () => {
 
         await import('../preview-worker');
         await handleMessage!({
-            data: { type: 'start', projectDir: 'C:/games/story', port: 4173 },
+            data: {
+                type: 'start',
+                projectDir: 'C:/games/story',
+                port: 4173,
+                engineSourceRoot: 'C:/code/doodle-engine',
+            },
         });
+        expect(startDevServer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                projectDir: 'C:/games/story',
+                engineSourceRoot: 'C:/code/doodle-engine',
+            })
+        );
         expect(parentPort.postMessage).toHaveBeenCalledWith({
             type: 'ready',
             url: 'http://localhost:4173/',

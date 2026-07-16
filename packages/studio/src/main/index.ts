@@ -16,10 +16,11 @@ import {
     shell,
     utilityProcess,
     type MenuItemConstructorOptions,
+    type IpcMainInvokeEvent,
     type UtilityProcess,
 } from 'electron';
 import { spawn } from 'child_process';
-import { join } from 'path';
+import { join, resolve as resolvePath } from 'path';
 import icon from '../../resources/icon.png?asset';
 import { ProjectService } from './project-service';
 import { DocumentService } from './document-service';
@@ -37,6 +38,7 @@ import type {
     ThemeState,
 } from '../shared/project';
 import { createThemeMenu, syncThemeMenuChecks } from './theme-menu';
+import { ErrorLog } from './error-log';
 
 let mainWindow: BrowserWindow | null = null;
 let themeState: ThemeState = { mode: 'dark', color: 'blue' };
@@ -47,6 +49,19 @@ let themeState: ThemeState = { mode: 'dark', color: 'blue' };
 let buildProc: UtilityProcess | null = null;
 let previewProc: UtilityProcess | null = null;
 let previewStatus: PreviewStatus | null = null;
+let errorLog: ErrorLog | null = null;
+
+function developmentEngineRoot(): string | undefined {
+    return app.isPackaged ? undefined : resolvePath(__dirname, '../../../..');
+}
+
+async function recordError(context: string, error: unknown): Promise<void> {
+    try {
+        await errorLog?.write(context, error);
+    } catch (logError) {
+        console.error(logError);
+    }
+}
 
 // A worker can post a final log line while the window is closing. Sending to a
 // destroyed window throws "Object has been destroyed", so drop it if it's gone.
@@ -122,6 +137,34 @@ async function buildMenu(projects: ProjectService): Promise<void> {
         { role: 'editMenu' },
         { role: 'viewMenu' },
         createThemeMenu(themeState, send),
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'Documentation',
+                    click: () =>
+                        void shell.openExternal('https://doodleengine.dev/'),
+                },
+                {
+                    label: 'Open Error Log',
+                    click: () => {
+                        const log = errorLog;
+                        if (!log) return;
+                        void log
+                            .initialize()
+                            .then(() => shell.openPath(log.path))
+                            .catch((error) =>
+                                recordError('help:openErrorLog', error)
+                            );
+                    },
+                },
+                { type: 'separator' },
+                {
+                    label: 'About…',
+                    click: () => send('menu:about', app.getVersion()),
+                },
+            ],
+        },
         { role: 'windowMenu' },
     ];
 
@@ -204,7 +247,11 @@ function runBuild(projectDir: string): Promise<StudioBuildResult> {
             })
         );
 
-        proc.postMessage({ projectDir });
+        const engineSourceRoot = developmentEngineRoot();
+        proc.postMessage({
+            projectDir,
+            ...(engineSourceRoot ? { engineSourceRoot } : {}),
+        });
     });
 }
 
@@ -308,7 +355,12 @@ function startPreview(projectDir: string): Promise<PreviewStatus | null> {
             }
         });
 
-        proc.postMessage({ type: 'start', projectDir });
+        const engineSourceRoot = developmentEngineRoot();
+        proc.postMessage({
+            type: 'start',
+            projectDir,
+            ...(engineSourceRoot ? { engineSourceRoot } : {}),
+        });
     });
 }
 
@@ -343,6 +395,26 @@ type PreviewWorkerMessage =
     | { type: 'stopped' };
 
 app.whenReady().then(() => {
+    errorLog = new ErrorLog(join(app.getPath('logs'), 'doodle-studio.log'));
+    void errorLog.initialize().catch((error) => console.error(error));
+
+    const handle = <Args extends unknown[], Result>(
+        channel: string,
+        listener: (
+            event: IpcMainInvokeEvent,
+            ...args: Args
+        ) => Result | Promise<Result>
+    ): void => {
+        ipcMain.handle(channel, async (event, ...args) => {
+            try {
+                return await listener(event, ...(args as Args));
+            } catch (error) {
+                await recordError(channel, error);
+                throw error;
+            }
+        });
+    };
+
     const projects = new ProjectService(
         join(app.getPath('userData'), 'recent-projects.json')
     );
@@ -366,6 +438,13 @@ app.whenReady().then(() => {
             (id) => menu?.getMenuItemById(id) ?? undefined
         );
     });
+    ipcMain.on(
+        'log:error',
+        (
+            _event,
+            details: { context: string; message: string; stack?: string }
+        ) => void recordError(details.context, details.stack ?? details.message)
+    );
 
     // After any successful open: refresh the recent menu and (re)start watching
     // this project's files, reporting external changes to the renderer.
@@ -385,21 +464,24 @@ app.whenReady().then(() => {
         return project;
     };
 
-    ipcMain.handle('project:open', () => projects.open().then(afterOpen));
-    ipcMain.handle('project:openPath', (_event, dir: string) =>
+    handle('project:open', () => projects.open().then(afterOpen));
+    handle('project:openPath', (_event, dir: string) =>
         projects.openPath(dir).then(afterOpen)
     );
-    ipcMain.handle('project:create', (_event, options: NewProjectOptions) =>
+    handle('project:create', (_event, options: NewProjectOptions) =>
         projects.create(options).then(afterOpen)
     );
-    ipcMain.handle('project:chooseDir', () =>
+    handle(
+        'project:checkDestination',
+        (_event, targetDir: string, name: string) =>
+            projects.checkDestination(targetDir, name)
+    );
+    handle('project:chooseDir', () =>
         projects.chooseDirectory('Choose where to create the project')
     );
-    ipcMain.handle('project:listRecent', () => projects.listRecent());
-    ipcMain.handle('project:revalidate', (_event, dir: string) =>
-        projects.reload(dir)
-    );
-    ipcMain.handle(
+    handle('project:listRecent', () => projects.listRecent());
+    handle('project:revalidate', (_event, dir: string) => projects.reload(dir));
+    handle(
         'project:build',
         async (_event, dir: string): Promise<StudioBuildResult> => {
             // Refuse early with a readable message rather than letting Vite fail
@@ -422,29 +504,29 @@ app.whenReady().then(() => {
             return runBuild(dir);
         }
     );
-    ipcMain.handle('project:cancelBuild', () => {
+    handle('project:cancelBuild', () => {
         buildProc?.kill();
     });
-    ipcMain.handle('project:packageManager', (_event, dir: string) =>
+    handle('project:packageManager', (_event, dir: string) =>
         detectPackageManager(dir)
     );
-    ipcMain.handle('project:installDeps', (_event, dir: string) =>
+    handle('project:installDeps', (_event, dir: string) =>
         installDependencies(dir)
     );
-    ipcMain.handle('preview:start', (_event, dir: string) => startPreview(dir));
-    ipcMain.handle('preview:open', () => {
+    handle('preview:start', (_event, dir: string) => startPreview(dir));
+    handle('preview:open', () => {
         if (previewStatus) shell.openExternal(previewStatus.url);
     });
-    ipcMain.handle('preview:stop', () => stopPreview());
-    ipcMain.handle('shell:openPath', async (_event, targetPath: string) => {
+    handle('preview:stop', () => stopPreview());
+    handle('shell:openPath', async (_event, targetPath: string) => {
         await shell.openPath(targetPath);
     });
 
     const documents = new DocumentService(markSelfWrite);
-    ipcMain.handle('doc:read', (_event, dir: string, relPath: string) =>
+    handle('doc:read', (_event, dir: string, relPath: string) =>
         documents.read(dir, relPath)
     );
-    ipcMain.handle(
+    handle(
         'doc:write',
         (
             _event,
@@ -454,7 +536,7 @@ app.whenReady().then(() => {
             expectedMtimeMs?: number
         ) => documents.write(dir, relPath, content, expectedMtimeMs)
     );
-    ipcMain.handle(
+    handle(
         'doc:writeEntity',
         (
             _event,
@@ -464,10 +546,10 @@ app.whenReady().then(() => {
             expectedMtimeMs?: number
         ) => documents.writeEntityFields(dir, relPath, edits, expectedMtimeMs)
     );
-    ipcMain.handle('doc:delete', (_event, dir: string, relPath: string) =>
+    handle('doc:delete', (_event, dir: string, relPath: string) =>
         documents.delete(dir, relPath)
     );
-    ipcMain.handle(
+    handle(
         'doc:rename',
         (_event, dir: string, fromRel: string, toRel: string) =>
             documents.renameFile(dir, fromRel, toRel)
@@ -476,15 +558,15 @@ app.whenReady().then(() => {
     const recovery = new RecoveryService(
         join(app.getPath('userData'), 'recovery')
     );
-    ipcMain.handle(
+    handle(
         'recovery:save',
         (_event, dir: string, relPath: string, content: string) =>
             recovery.save(dir, relPath, content)
     );
-    ipcMain.handle('recovery:read', (_event, dir: string, relPath: string) =>
+    handle('recovery:read', (_event, dir: string, relPath: string) =>
         recovery.read(dir, relPath)
     );
-    ipcMain.handle('recovery:clear', (_event, dir: string, relPath: string) =>
+    handle('recovery:clear', (_event, dir: string, relPath: string) =>
         recovery.clear(dir, relPath)
     );
 

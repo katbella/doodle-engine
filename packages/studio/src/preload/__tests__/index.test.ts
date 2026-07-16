@@ -45,6 +45,8 @@ describe('preload bridge', () => {
                 () =>
                     api.createProject({
                         name: 'story',
+                        title: 'Story',
+                        subtitle: 'A subtitle',
                         targetDir: 'games',
                         useDefaultRenderer: true,
                         useStarterStyles: false,
@@ -53,6 +55,8 @@ describe('preload bridge', () => {
                 [
                     {
                         name: 'story',
+                        title: 'Story',
+                        subtitle: 'A subtitle',
                         targetDir: 'games',
                         useDefaultRenderer: true,
                         useStarterStyles: false,
@@ -60,6 +64,11 @@ describe('preload bridge', () => {
                 ],
             ],
             [() => api.chooseDirectory(), 'project:chooseDir', []],
+            [
+                () => api.checkProjectDestination('games', 'story'),
+                'project:checkDestination',
+                ['games', 'story'],
+            ],
             [() => api.listRecentProjects(), 'project:listRecent', []],
             [() => api.revalidate('dir'), 'project:revalidate', ['dir']],
             [
@@ -168,9 +177,15 @@ describe('preload bridge', () => {
             onNew: vi.fn(),
             onOpen: vi.fn(),
             onOpenRecent: vi.fn(),
+            onAbout: vi.fn(),
             onThemeMode: vi.fn(),
             onThemeColor: vi.fn(),
         };
+        api.reportError({ context: 'render', message: 'failed' });
+        expect(send).toHaveBeenCalledWith('log:error', {
+            context: 'render',
+            message: 'failed',
+        });
         api.setThemeMenuState({ mode: 'light', color: 'violet' });
         expect(send).toHaveBeenCalledWith('theme:menuState', {
             mode: 'light',
@@ -181,15 +196,17 @@ describe('preload bridge', () => {
         listeners['menu:new']();
         listeners['menu:open']();
         listeners['menu:openRecent']({}, 'C:/games/story');
+        listeners['menu:about']({}, '0.2.0');
         listeners['menu:themeMode']({}, 'dark');
         listeners['menu:themeColor']({}, 'red');
         expect(handlers.onNew).toHaveBeenCalledOnce();
         expect(handlers.onOpen).toHaveBeenCalledOnce();
         expect(handlers.onOpenRecent).toHaveBeenCalledWith('C:/games/story');
+        expect(handlers.onAbout).toHaveBeenCalledWith('0.2.0');
         expect(handlers.onThemeMode).toHaveBeenCalledWith('dark');
         expect(handlers.onThemeColor).toHaveBeenCalledWith('red');
 
         unsubscribe();
-        expect(removeListener).toHaveBeenCalledTimes(5);
+        expect(removeListener).toHaveBeenCalledTimes(6);
     });
 });

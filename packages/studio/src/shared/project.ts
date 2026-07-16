@@ -13,7 +13,7 @@ export type { YamlEdit };
 
 export type ThemeMode = 'dark' | 'light';
 
-export type ThemeColor = 'blue' | 'red' | 'violet';
+export type ThemeColor = 'blue' | 'red' | 'violet' | 'green' | 'pink' | 'gold';
 
 export interface ThemeState {
     mode: ThemeMode;
@@ -71,12 +71,21 @@ export interface RecentProject {
 export interface NewProjectOptions {
     /** Project (and folder) name. */
     name: string;
+    /** Player-facing game title. */
+    title: string;
+    /** Optional player-facing game subtitle. */
+    subtitle: string;
     /** Parent directory to create the project folder inside. */
     targetDir: string;
     /** Use the batteries-included renderer. */
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS. */
     useStarterStyles: boolean;
+}
+
+export interface ProjectDestinationStatus {
+    available: boolean;
+    message?: string;
 }
 
 /** Result of running a production build. */
@@ -142,6 +151,7 @@ export interface MenuHandlers {
     onNew: () => void;
     onOpen: () => void;
     onOpenRecent: (path: string) => void;
+    onAbout: (version: string) => void;
     onThemeMode: (mode: ThemeMode) => void;
     onThemeColor: (color: ThemeColor) => void;
 }
@@ -154,6 +164,11 @@ export interface StudioApi {
     openProjectPath: (projectDir: string) => Promise<OpenProject | null>;
     /** Scaffold a new project and open it. */
     createProject: (options: NewProjectOptions) => Promise<OpenProject | null>;
+    /** Check whether a new project folder can be created without overwriting files. */
+    checkProjectDestination: (
+        targetDir: string,
+        name: string
+    ) => Promise<ProjectDestinationStatus>;
     /** Show a folder picker and return the chosen directory, for New Project. */
     chooseDirectory: () => Promise<string | null>;
     /** The recent-projects list, most recent first. */
@@ -235,6 +250,12 @@ export interface StudioApi {
     onPreviewLog: (callback: (dir: string, line: string) => void) => () => void;
     /** Open a folder (or file) in the OS file manager. */
     openPath: (targetPath: string) => Promise<void>;
+    /** Persist a renderer error in Studio's error log. */
+    reportError: (details: {
+        context: string;
+        message: string;
+        stack?: string;
+    }) => void;
     /**
      * Subscribe to external changes to a project file (edited outside Studio).
      * The callback gets the file's project-relative path. Returns an unsubscribe.

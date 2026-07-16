@@ -74,6 +74,7 @@ const state = vi.hoisted(() => {
         open: vi.fn(),
         openPath: vi.fn(),
         create: vi.fn(),
+        checkDestination: vi.fn(),
         chooseDirectory: vi.fn(),
         listRecent: vi.fn(),
         reload: vi.fn(),
@@ -95,17 +96,27 @@ const state = vi.hoisted(() => {
     const detectPackageManager = vi.fn();
     const syncThemeMenuChecks = vi.fn();
     const createThemeMenu = vi.fn(() => ({ label: 'Themes' }));
+    const errorLog = {
+        path: 'C:/studio-data/doodle-studio.log',
+        initialize: vi.fn(async () => {}),
+        write: vi.fn(async () => {}),
+    };
+    const ErrorLog = vi.fn(function () {
+        return errorLog;
+    });
     const shell = {
         openExternal: vi.fn(),
         openPath: vi.fn(),
     };
     const app = {
+        isPackaged: true,
         whenReady: vi.fn(() => ({
             then: (listener: Listener) => {
                 state.ready = listener;
             },
         })),
         getPath: vi.fn(() => 'C:/studio-data'),
+        getVersion: vi.fn(() => '0.2.0'),
         on: vi.fn((event: string, listener: Listener) => {
             appListeners.set(event, listener);
         }),
@@ -156,6 +167,7 @@ const state = vi.hoisted(() => {
             projects.open,
             projects.openPath,
             projects.create,
+            projects.checkDestination,
             projects.chooseDirectory,
             projects.listRecent,
             projects.reload,
@@ -172,6 +184,9 @@ const state = vi.hoisted(() => {
             detectPackageManager,
             syncThemeMenuChecks,
             createThemeMenu,
+            ErrorLog,
+            errorLog.initialize,
+            errorLog.write,
             shell.openExternal,
             shell.openPath,
             app.whenReady,
@@ -202,6 +217,7 @@ const state = vi.hoisted(() => {
         projects.open.mockResolvedValue(null);
         projects.openPath.mockResolvedValue(null);
         projects.create.mockResolvedValue(null);
+        projects.checkDestination.mockResolvedValue({ available: true });
         projects.chooseDirectory.mockResolvedValue(null);
         projects.reload.mockResolvedValue(null);
         watch.mockResolvedValue(undefined);
@@ -209,12 +225,15 @@ const state = vi.hoisted(() => {
         detectPackageManager.mockResolvedValue('yarn');
         shell.openPath.mockResolvedValue('');
         createThemeMenu.mockReturnValue({ label: 'Themes' });
+        errorLog.initialize.mockResolvedValue(undefined);
+        errorLog.write.mockResolvedValue(undefined);
         app.whenReady.mockImplementation(() => ({
             then: (listener: Listener) => {
                 state.ready = listener;
             },
         }));
         app.getPath.mockReturnValue('C:/studio-data');
+        app.isPackaged = true;
         app.on.mockImplementation((event: string, listener: Listener) => {
             appListeners.set(event, listener);
         });
@@ -253,6 +272,8 @@ const state = vi.hoisted(() => {
         detectPackageManager,
         syncThemeMenuChecks,
         createThemeMenu,
+        ErrorLog,
+        errorLog,
         shell,
         app,
         Menu,
@@ -315,11 +336,14 @@ vi.mock('../theme-menu', () => ({
     createThemeMenu: state.createThemeMenu,
     syncThemeMenuChecks: state.syncThemeMenuChecks,
 }));
+vi.mock('../error-log', () => ({ ErrorLog: state.ErrorLog }));
 
 async function boot(): Promise<void> {
     await import('../index');
     state.ready?.();
-    await vi.waitFor(() => expect(state.Menu.setApplicationMenu).toHaveBeenCalled());
+    await vi.waitFor(() =>
+        expect(state.Menu.setApplicationMenu).toHaveBeenCalled()
+    );
 }
 
 describe('Studio main process', () => {
@@ -386,6 +410,24 @@ describe('Studio main process', () => {
             'menu:openRecent',
             'C:/games/story'
         );
+        const helpMenu = state.menuTemplate?.find(
+            (item) => item.label === 'Help'
+        );
+        helpMenu.submenu[0].click();
+        expect(state.shell.openExternal).toHaveBeenCalledWith(
+            'https://doodleengine.dev/'
+        );
+        helpMenu.submenu[1].click();
+        await vi.waitFor(() =>
+            expect(state.shell.openPath).toHaveBeenCalledWith(
+                'C:/studio-data/doodle-studio.log'
+            )
+        );
+        helpMenu.submenu[3].click();
+        expect(state.webContents.send).toHaveBeenCalledWith(
+            'menu:about',
+            '0.2.0'
+        );
 
         await expect(
             state.ipcHandlers.get('project:openPath')?.({}, 'C:/games/story')
@@ -393,10 +435,20 @@ describe('Studio main process', () => {
         await state.ipcHandlers.get('project:open')?.({});
         await state.ipcHandlers.get('project:create')?.({}, { name: 'Story' });
         await expect(
+            state.ipcHandlers.get('project:checkDestination')?.(
+                {},
+                'C:/games',
+                'Story'
+            )
+        ).resolves.toEqual({ available: true });
+        await expect(
             state.ipcHandlers.get('project:chooseDir')?.({})
         ).resolves.toBe('C:/games');
         await state.ipcHandlers.get('project:listRecent')?.({});
-        await state.ipcHandlers.get('project:revalidate')?.({}, 'C:/games/story');
+        await state.ipcHandlers.get('project:revalidate')?.(
+            {},
+            'C:/games/story'
+        );
         expect(state.watch).toHaveBeenCalledTimes(3);
 
         const [, onChange, isSelfWrite] = state.watch.mock.calls.at(-1)!;
@@ -427,28 +479,36 @@ describe('Studio main process', () => {
             )
         ).resolves.toBe('entity');
         await state.ipcHandlers.get('doc:delete')?.({}, 'dir', 'file');
-        await state.ipcHandlers
-            .get('doc:rename')
-            ?.({}, 'dir', 'old.yaml', 'new.yaml');
-        await state.ipcHandlers
-            .get('recovery:save')
-            ?.({}, 'dir', 'file', 'draft');
+        await state.ipcHandlers.get('doc:rename')?.(
+            {},
+            'dir',
+            'old.yaml',
+            'new.yaml'
+        );
+        await state.ipcHandlers.get('recovery:save')?.(
+            {},
+            'dir',
+            'file',
+            'draft'
+        );
         await expect(
             state.ipcHandlers.get('recovery:read')?.({}, 'dir', 'file')
         ).resolves.toBe('draft');
         await state.ipcHandlers.get('recovery:clear')?.({}, 'dir', 'file');
 
-        state.ipcListeners
-            .get('theme:menuState')
-            ?.({}, { mode: 'light', color: 'red' });
+        state.ipcListeners.get('theme:menuState')?.(
+            {},
+            { mode: 'light', color: 'red' }
+        );
         expect(state.syncThemeMenuChecks).toHaveBeenCalledWith(
             { mode: 'light', color: 'red' },
             expect.any(Function)
         );
 
-        await state.ipcHandlers
-            .get('shell:openPath')
-            ?.({}, 'C:/games/story/dist');
+        await state.ipcHandlers.get('shell:openPath')?.(
+            {},
+            'C:/games/story/dist'
+        );
         expect(state.shell.openPath).toHaveBeenCalledWith(
             'C:/games/story/dist'
         );
@@ -459,6 +519,31 @@ describe('Studio main process', () => {
         state.appListeners.get('window-all-closed')?.();
         expect(state.app.quit).toHaveBeenCalled();
         state.appListeners.get('before-quit')?.();
+    });
+
+    it('logs rejected handlers and renderer errors', async () => {
+        await boot();
+        const failure = new Error('folder already exists');
+        state.projects.create.mockRejectedValueOnce(failure);
+
+        await expect(
+            state.ipcHandlers.get('project:create')?.({}, { name: 'Story' })
+        ).rejects.toBe(failure);
+        expect(state.errorLog.write).toHaveBeenCalledWith(
+            'project:create',
+            failure
+        );
+
+        state.ipcListeners.get('log:error')?.(
+            {},
+            { context: 'renderer:error', message: 'render failed' }
+        );
+        await vi.waitFor(() =>
+            expect(state.errorLog.write).toHaveBeenCalledWith(
+                'renderer:error',
+                'render failed'
+            )
+        );
     });
 
     it('handles successful, failed, missing-dependency, and cancelled builds', async () => {
@@ -517,6 +602,40 @@ describe('Studio main process', () => {
         await expect(cancelled).resolves.toEqual(
             expect.objectContaining({ cancelled: true })
         );
+    });
+
+    it('runs local builds and previews against the monorepo engine sources', async () => {
+        state.app.isPackaged = false;
+        await boot();
+
+        const build = state.ipcHandlers.get('project:build')?.(
+            {},
+            'C:/games/story'
+        );
+        await vi.waitFor(() => expect(state.forked).toHaveLength(1));
+        const buildProc = state.forked.at(-1);
+        expect(buildProc.postMessage).toHaveBeenCalledWith({
+            projectDir: 'C:/games/story',
+            engineSourceRoot: expect.stringMatching(/doodle-engine$/),
+        });
+        buildProc.emit('message', { type: 'error', message: 'finished test' });
+        await build;
+
+        const preview = state.ipcHandlers.get('preview:start')?.(
+            {},
+            'C:/games/story'
+        );
+        const previewProc = state.forked.at(-1);
+        expect(previewProc.postMessage).toHaveBeenCalledWith({
+            type: 'start',
+            projectDir: 'C:/games/story',
+            engineSourceRoot: expect.stringMatching(/doodle-engine$/),
+        });
+        previewProc.emit('message', {
+            type: 'error',
+            message: 'finished test',
+        });
+        await preview;
     });
 
     it('installs dependencies and manages preview processes', async () => {

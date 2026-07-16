@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EngineBanner } from '../EngineBanner';
-import { RendererPreview } from '../RendererPreview';
 import { ResizeHandle } from '../ResizeHandle';
 import { Welcome } from '../Welcome';
 
@@ -107,13 +106,6 @@ describe('shell surfaces', () => {
             />
         );
         expect(container.firstChild).toBeNull();
-    });
-
-    it('renders the renderer boundary as a clearly labeled placeholder', () => {
-        render(<RendererPreview />);
-        expect(
-            screen.getByText(/project's own renderer runs here/)
-        ).toBeTruthy();
     });
 
     it('resizes on captured pointer movement with axis, inversion, and clamps', () => {

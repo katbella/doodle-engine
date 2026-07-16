@@ -23,7 +23,12 @@ let server: ViteDevServer | null = null;
 
 parentPort.on('message', async (event) => {
     const msg = event.data as
-        | { type: 'start'; projectDir: string; port?: number }
+        | {
+              type: 'start';
+              projectDir: string;
+              port?: number;
+              engineSourceRoot?: string;
+          }
         | { type: 'stop' };
 
     if (msg.type === 'start') {
@@ -33,6 +38,7 @@ parentPort.on('message', async (event) => {
                 projectDir: msg.projectDir,
                 port: msg.port ?? 3000,
                 open: false,
+                engineSourceRoot: msg.engineSourceRoot,
                 onContentChange: (path, kind) =>
                     parentPort.postMessage({
                         type: 'log',

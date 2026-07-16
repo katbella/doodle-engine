@@ -27,6 +27,36 @@ export async function create(projectName: string) {
     console.log(`  ${dog} Creating new game: ${crayon.bold.cyan(projectName)}`);
     console.log('');
 
+    const { title } = await prompts({
+        type: 'text',
+        name: 'title',
+        message: 'Game title?',
+        initial: projectName,
+        validate: (value: string) =>
+            value.trim().length > 0 || 'Enter a game title',
+    });
+
+    if (title === undefined) {
+        console.log(
+            crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
+        );
+        process.exit(0);
+    }
+
+    const { subtitle } = await prompts({
+        type: 'text',
+        name: 'subtitle',
+        message: 'Game subtitle? (optional)',
+        initial: '',
+    });
+
+    if (subtitle === undefined) {
+        console.log(
+            crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
+        );
+        process.exit(0);
+    }
+
     // Prompt for renderer choice
     const { useDefaultRenderer } = await prompts({
         type: 'confirm',
@@ -79,6 +109,8 @@ export async function create(projectName: string) {
     try {
         ({ projectPath } = await createProject(projectName, {
             targetDir: process.cwd(),
+            title: title.trim(),
+            subtitle: subtitle.trim(),
             useDefaultRenderer,
             useStarterStyles,
         }));

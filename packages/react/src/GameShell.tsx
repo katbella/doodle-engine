@@ -35,6 +35,7 @@ import type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
 import type { AudioManagerOptions } from './hooks/useAudioManager';
 import { SplashScreen } from './components/SplashScreen';
 import { TitleScreen } from './components/TitleScreen';
+import { CreditsScreen } from './components/CreditsScreen';
 import { LoadingScreen } from './components/LoadingScreen';
 import { PauseMenu } from './components/PauseMenu';
 import { SettingsPanel } from './components/SettingsPanel';
@@ -42,7 +43,7 @@ import { VideoPlayer } from './components/VideoPlayer';
 import { InputProvider, useInputAction } from './input/InputRouter';
 import { hasSaves, latestSave, writeSave } from './saves';
 
-type Screen = 'splash' | 'title' | 'playing';
+type Screen = 'splash' | 'title' | 'credits' | 'playing';
 
 export interface GameShellProps {
     /** Content registry (from /api/content) */
@@ -57,6 +58,8 @@ export interface GameShellProps {
     title?: string;
     /** Subtitle text */
     subtitle?: string;
+    /** Credits content. Defaults to the game title and Doodle Engine credit. */
+    credits?: React.ReactNode;
     /** UI sound configuration, or false to disable */
     uiSounds?: UISoundConfig | false;
     /** Audio manager options (crossfade duration, etc.) */
@@ -83,6 +86,7 @@ export function GameShell({
     assetLoader,
     title = 'Doodle Engine',
     subtitle,
+    credits,
     uiSounds: uiSoundsConfig,
     audioOptions,
     storageKey = 'doodle-engine-save',
@@ -116,6 +120,7 @@ export function GameShell({
                         config={config}
                         title={title}
                         subtitle={subtitle}
+                        credits={credits}
                         uiSoundsConfig={uiSoundsConfig}
                         audioOptions={audioOptions}
                         storageKey={storageKey}
@@ -136,6 +141,7 @@ interface GameShellInnerProps {
     config: GameConfig;
     title: string;
     subtitle?: string;
+    credits?: React.ReactNode;
     uiSoundsConfig?: UISoundConfig | false;
     audioOptions?: AudioManagerOptions;
     storageKey: string;
@@ -160,6 +166,7 @@ function GameShellInner({
     config,
     title,
     subtitle,
+    credits,
     uiSoundsConfig,
     audioOptions,
     storageKey,
@@ -356,8 +363,23 @@ function GameShellInner({
                         onNewGame={handleNewGame}
                         onContinue={handleContinue}
                         onSettings={() => openSettings('title')}
+                        onCredits={() => setScreen('credits')}
                     />
                 )}
+            </div>
+        );
+    }
+
+    if (screen === 'credits') {
+        return (
+            <div className={`game-shell ${className}`}>
+                <CreditsScreen
+                    ui={titleUi}
+                    title={title}
+                    onBack={() => setScreen('title')}
+                >
+                    {credits}
+                </CreditsScreen>
             </div>
         );
     }

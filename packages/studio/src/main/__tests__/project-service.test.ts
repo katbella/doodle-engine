@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const showOpenDialog = vi.hoisted(() => vi.fn());
 const readFile = vi.hoisted(() => vi.fn());
+const readdir = vi.hoisted(() => vi.fn());
 const loadProject = vi.hoisted(() => vi.fn());
 const validateContent = vi.hoisted(() => vi.fn());
 const createProject = vi.hoisted(() => vi.fn());
@@ -10,7 +11,7 @@ const readRecentProjects = vi.hoisted(() => vi.fn());
 const readEngineInfo = vi.hoisted(() => vi.fn());
 
 vi.mock('electron', () => ({ dialog: { showOpenDialog } }));
-vi.mock('fs/promises', () => ({ readFile }));
+vi.mock('fs/promises', () => ({ readFile, readdir }));
 vi.mock('@doodle-engine/toolkit', () => ({
     loadProject,
     validateContent,
@@ -36,6 +37,11 @@ describe('ProjectService', () => {
             .mockReset()
             .mockResolvedValue(
                 JSON.stringify({ name: 'story-game', version: '1.2.3' })
+            );
+        readdir
+            .mockReset()
+            .mockRejectedValue(
+                Object.assign(new Error('missing'), { code: 'ENOENT' })
             );
         loadProject.mockReset().mockResolvedValue({
             registry: { locations: {} },
@@ -119,6 +125,8 @@ describe('ProjectService', () => {
     it('creates through Toolkit and opens the resulting project', async () => {
         const project = await service.create({
             name: 'new-story',
+            title: 'New Story',
+            subtitle: 'A New Story',
             targetDir: 'C:/games',
             useDefaultRenderer: true,
             useStarterStyles: false,
@@ -126,11 +134,40 @@ describe('ProjectService', () => {
 
         expect(createProject).toHaveBeenCalledWith('new-story', {
             targetDir: 'C:/games',
+            title: 'New Story',
+            subtitle: 'A New Story',
             useDefaultRenderer: true,
             useStarterStyles: false,
         });
         expect(loadProject).toHaveBeenCalledWith('C:/games/new-story');
         expect(project.projectDir).toBe('C:/games/new-story');
+    });
+
+    it('checks whether the destination is missing, empty, occupied, or a file', async () => {
+        await expect(
+            service.checkDestination('C:/games', 'new-story')
+        ).resolves.toEqual({ available: true });
+
+        readdir.mockResolvedValueOnce([]);
+        await expect(
+            service.checkDestination('C:/games', 'empty')
+        ).resolves.toEqual({ available: true });
+
+        readdir.mockResolvedValueOnce(['package.json']);
+        await expect(
+            service.checkDestination('C:/games', 'occupied')
+        ).resolves.toEqual(expect.objectContaining({ available: false }));
+
+        readdir.mockRejectedValueOnce(
+            Object.assign(new Error('not a directory'), { code: 'ENOTDIR' })
+        );
+        await expect(
+            service.checkDestination('C:/games', 'existing-file')
+        ).resolves.toEqual(expect.objectContaining({ available: false }));
+
+        await expect(
+            service.checkDestination('C:/games', 'nested/name')
+        ).resolves.toEqual(expect.objectContaining({ available: false }));
     });
 
     it('returns the stored recent-project list', async () => {

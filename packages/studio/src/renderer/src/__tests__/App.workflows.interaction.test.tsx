@@ -23,10 +23,13 @@ vi.mock('../shell/Welcome', () => ({
 vi.mock('../shell/NewProjectModal', () => ({
     NewProjectModal: (props: any) => (
         <div>
+            {props.error && <div role="alert">{props.error}</div>}
             <button
                 onClick={() =>
                     props.onCreate({
                         name: 'Created',
+                        title: 'Created Game',
+                        subtitle: 'Created Subtitle',
                         targetDir: 'C:/games',
                         useDefaultRenderer: true,
                         useStarterStyles: true,
@@ -299,6 +302,7 @@ function installBridge(
         openProject: vi.fn(async () => initialProject),
         openProjectPath: vi.fn(async () => initialProject),
         createProject: vi.fn(async () => initialProject),
+        checkProjectDestination: vi.fn(async () => ({ available: true })),
         chooseDirectory: vi.fn(async () => 'C:/games'),
         revalidate: vi.fn(async () => initialProject),
         build: vi.fn(async () => ({
@@ -320,6 +324,7 @@ function installBridge(
         stopPreview: vi.fn(async () => {}),
         openPreview: vi.fn(async () => {}),
         openPath: vi.fn(async () => {}),
+        reportError: vi.fn(),
         readDocument: vi.fn(async () => ({ content: '', mtimeMs: 1 })),
         writeDocument: vi.fn(async () => ({
             ok: true,
@@ -402,6 +407,31 @@ describe('App workflows', () => {
         expect(bridge.createProject).toHaveBeenCalledWith(
             expect.objectContaining({ name: 'Created' })
         );
+        act(() => callbacks.menu?.onAbout('0.2.0'));
+        expect(
+            screen.getByRole('dialog', { name: 'Doodle Studio' })
+        ).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+    });
+
+    it('keeps project creation open and displays creation failures', async () => {
+        const createProject = vi
+            .fn<StudioApi['createProject']>()
+            .mockRejectedValue(new Error('folder already exists'));
+        const { callbacks } = installBridge({ createProject });
+        const user = await openApp();
+
+        act(() => callbacks.menu?.onNew());
+        await user.click(
+            screen.getByRole('button', { name: 'Submit new project' })
+        );
+
+        expect((await screen.findByRole('alert')).textContent).toContain(
+            'folder already exists'
+        );
+        expect(
+            screen.getByRole('button', { name: 'Submit new project' })
+        ).toBeTruthy();
     });
 
     it('runs validation, install, build, preview, streamed logs, and output actions', async () => {

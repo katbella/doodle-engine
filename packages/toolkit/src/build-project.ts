@@ -17,6 +17,7 @@ import { validateContent } from './validate';
 import { importFromProject } from './project-modules';
 import type { ValidationError } from './validate';
 import type * as Vite from 'vite';
+import { engineSourceAliases } from './engine-source';
 
 export interface BuildOptions {
     /** Absolute path to the project root (the folder that holds content/ and assets/). */
@@ -25,6 +26,8 @@ export interface BuildOptions {
     outDir?: string;
     /** Called with each progress message so the caller can show or ignore it. */
     onLog?: (message: string) => void;
+    /** Monorepo root whose engine sources should replace installed packages. */
+    engineSourceRoot?: string;
 }
 
 export interface BuildResult {
@@ -51,7 +54,12 @@ export interface BuildResult {
 export async function buildProject(
     options: BuildOptions
 ): Promise<BuildResult> {
-    const { projectDir, outDir = 'dist', onLog = () => {} } = options;
+    const {
+        projectDir,
+        outDir = 'dist',
+        onLog = () => {},
+        engineSourceRoot,
+    } = options;
     const start = Date.now();
 
     const assetsDir = join(projectDir, 'assets');
@@ -98,6 +106,12 @@ export async function buildProject(
     await viteBuild({
         root: projectDir,
         plugins: [react()],
+        resolve: engineSourceRoot
+            ? {
+                  alias: engineSourceAliases(engineSourceRoot),
+                  dedupe: ['react', 'react-dom'],
+              }
+            : undefined,
         // Relative URLs, so the build runs at a domain root, under a folder
         // like example.com/games/my-game/, or from a local server.
         base: './',

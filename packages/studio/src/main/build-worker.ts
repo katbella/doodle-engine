@@ -20,14 +20,16 @@ const parentPort = (process as unknown as { parentPort: Electron.ParentPort })
     .parentPort;
 
 parentPort.once('message', async (event) => {
-    const { projectDir, outDir } = event.data as {
+    const { projectDir, outDir, engineSourceRoot } = event.data as {
         projectDir: string;
         outDir?: string;
+        engineSourceRoot?: string;
     };
     try {
         const result = await buildProject({
             projectDir,
             outDir,
+            engineSourceRoot,
             onLog: (line) => parentPort.postMessage({ type: 'log', line }),
         });
         parentPort.postMessage({ type: 'done', result });

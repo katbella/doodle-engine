@@ -30,12 +30,17 @@ describe('build worker', () => {
 
         await import('../build-worker');
         await handleMessage!({
-            data: { projectDir: 'C:/games/story', outDir: 'release' },
+            data: {
+                projectDir: 'C:/games/story',
+                outDir: 'release',
+                engineSourceRoot: 'C:/code/doodle-engine',
+            },
         });
         expect(buildProject).toHaveBeenCalledWith(
             expect.objectContaining({
                 projectDir: 'C:/games/story',
                 outDir: 'release',
+                engineSourceRoot: 'C:/code/doodle-engine',
             })
         );
         expect(parentPort.postMessage).toHaveBeenCalledWith({

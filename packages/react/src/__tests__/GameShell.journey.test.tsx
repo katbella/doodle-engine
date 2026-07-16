@@ -160,6 +160,20 @@ function renderShell({
 }
 
 describe('GameShell player journeys', () => {
+    it('opens credits from the title screen and returns', async () => {
+        const user = userEvent.setup();
+        renderShell();
+
+        await user.click(
+            await screen.findByRole('button', { name: 'Credits' })
+        );
+        expect(screen.getByRole('heading', { name: 'Credits' })).toBeTruthy();
+        expect(screen.getByText('Made with Doodle Engine')).toBeTruthy();
+
+        await user.click(screen.getByRole('button', { name: 'Back' }));
+        expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
+    });
+
     it('starts a game and completes a dialogue choice through the composed shell', async () => {
         const user = await startGame();
 

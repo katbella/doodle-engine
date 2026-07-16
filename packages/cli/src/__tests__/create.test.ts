@@ -27,6 +27,8 @@ describe('create command', () => {
 
     it('creates a default-renderer project with the selected styles', async () => {
         prompts
+            .mockResolvedValueOnce({ title: 'Story Title' })
+            .mockResolvedValueOnce({ subtitle: 'A Story Subtitle' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
             .mockResolvedValueOnce({ starterStyles: true });
 
@@ -34,6 +36,8 @@ describe('create command', () => {
 
         expect(createProject).toHaveBeenCalledWith('story', {
             targetDir: 'C:/games',
+            title: 'Story Title',
+            subtitle: 'A Story Subtitle',
             useDefaultRenderer: true,
             useStarterStyles: true,
         });
@@ -43,24 +47,34 @@ describe('create command', () => {
     });
 
     it('creates a custom-renderer project without asking about styles', async () => {
-        prompts.mockResolvedValueOnce({ useDefaultRenderer: false });
+        prompts
+            .mockResolvedValueOnce({ title: 'Custom Story' })
+            .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ useDefaultRenderer: false });
 
         await create('custom-story');
 
-        expect(prompts).toHaveBeenCalledOnce();
+        expect(prompts).toHaveBeenCalledTimes(3);
         expect(createProject).toHaveBeenCalledWith('custom-story', {
             targetDir: 'C:/games',
+            title: 'Custom Story',
+            subtitle: '',
             useDefaultRenderer: false,
             useStarterStyles: false,
         });
     });
 
     it('stops when either prompt is cancelled', async () => {
-        prompts.mockResolvedValueOnce({ useDefaultRenderer: undefined });
+        prompts
+            .mockResolvedValueOnce({ title: 'Cancelled' })
+            .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ useDefaultRenderer: undefined });
         await expect(create('cancelled')).rejects.toBe(exitError);
         expect(createProject).not.toHaveBeenCalled();
 
         prompts
+            .mockResolvedValueOnce({ title: 'Cancelled Styles' })
+            .mockResolvedValueOnce({ subtitle: '' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
             .mockResolvedValueOnce({ starterStyles: undefined });
         await expect(create('cancelled-styles')).rejects.toBe(exitError);
@@ -68,7 +82,10 @@ describe('create command', () => {
     });
 
     it('reports project creation failures', async () => {
-        prompts.mockResolvedValueOnce({ useDefaultRenderer: false });
+        prompts
+            .mockResolvedValueOnce({ title: 'Story' })
+            .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ useDefaultRenderer: false });
         createProject.mockRejectedValueOnce(new Error('already exists'));
 
         await expect(create('story')).rejects.toBe(exitError);

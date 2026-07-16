@@ -127,6 +127,38 @@ describe('development server', () => {
         expect(onError).not.toHaveBeenCalled();
     });
 
+    it('uses monorepo engine sources when Studio supplies its local root', async () => {
+        await startDevServer({
+            projectDir: 'C:/games/story',
+            engineSourceRoot: 'C:/code/doodle-engine',
+        });
+
+        expect(createServer).toHaveBeenCalledWith(
+            expect.objectContaining({
+                resolve: {
+                    alias: expect.arrayContaining([
+                        expect.objectContaining({
+                            replacement: expect.stringMatching(
+                                /packages[\\/]react[\\/]src[\\/]index\.ts$/
+                            ),
+                        }),
+                        expect.objectContaining({
+                            replacement: expect.stringMatching(
+                                /packages[\\/]core[\\/]src[\\/]index\.ts$/
+                            ),
+                        }),
+                    ]),
+                    dedupe: ['react', 'react-dom'],
+                },
+                server: expect.objectContaining({
+                    fs: {
+                        allow: ['C:/games/story', 'C:/code/doodle-engine'],
+                    },
+                }),
+            })
+        );
+    });
+
     it('reports endpoint failures as JSON errors', async () => {
         const onError = vi.fn();
         await startDevServer({ projectDir: 'C:/games/story', onError });
