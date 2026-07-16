@@ -226,6 +226,111 @@ describe('automatic routing allowance', () => {
     });
 });
 
+describe('dialogue continuation labels', () => {
+    it('marks only the final displayed node as ending the dialogue', () => {
+        const engine = new Engine(
+            registryWith({
+                conversation: {
+                    id: 'conversation',
+                    startNode: 'start',
+                    nodes: [
+                        {
+                            id: 'start',
+                            speaker: 'bob',
+                            text: 'First.',
+                            choices: [],
+                            next: 'middle',
+                        },
+                        {
+                            id: 'middle',
+                            speaker: 'bob',
+                            text: 'Second.',
+                            choices: [],
+                            conditionalBranches: [
+                                {
+                                    condition: {
+                                        type: 'hasFlag',
+                                        flag: 'takeEnding',
+                                    },
+                                    next: 'end',
+                                },
+                            ],
+                        },
+                        {
+                            id: 'end',
+                            speaker: 'bob',
+                            text: 'Last.',
+                            choices: [],
+                        },
+                    ],
+                },
+            })
+        );
+        engine.newGame({
+            ...config,
+            startFlags: { takeEnding: true },
+        });
+
+        const first = engine.talkTo('bob');
+        expect(first.dialogue?.continueEndsDialogue).toBe(false);
+        const middle = engine.continueDialogue();
+        expect(middle.dialogue?.continueEndsDialogue).toBe(false);
+        const last = engine.continueDialogue();
+        expect(last.dialogue?.continueEndsDialogue).toBe(true);
+        expect(engine.continueDialogue().dialogue).toBeNull();
+    });
+
+    it('does not call a node terminal when its passing branch starts another dialogue', () => {
+        const engine = new Engine(
+            registryWith({
+                first: {
+                    id: 'first',
+                    startNode: 'handoff',
+                    nodes: [
+                        {
+                            id: 'handoff',
+                            speaker: 'bob',
+                            text: 'Let me introduce you.',
+                            choices: [],
+                            conditionalBranches: [
+                                {
+                                    condition: {
+                                        type: 'hasFlag',
+                                        flag: 'redirect',
+                                    },
+                                    effects: [
+                                        {
+                                            type: 'startDialogue',
+                                            dialogueId: 'second',
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                second: {
+                    id: 'second',
+                    startNode: 'hello',
+                    nodes: [
+                        {
+                            id: 'hello',
+                            speaker: null,
+                            text: 'Hello.',
+                            choices: [],
+                        },
+                    ],
+                },
+            })
+        );
+        engine.newGame({ ...config, startFlags: { redirect: true } });
+
+        const snapshot = engine.talkTo('bob');
+        expect(snapshot.dialogue?.continueEndsDialogue).toBe(false);
+        expect(engine.continueDialogue().dialogue?.text).toBe('Hello.');
+    });
+});
+
 describe('travel with a bad map scale', () => {
     function registryWithScale(scale: number): ContentRegistry {
         return {

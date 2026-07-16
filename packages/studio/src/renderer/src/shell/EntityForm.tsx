@@ -9,6 +9,7 @@ import {
     type FieldDescriptor,
     type RefTarget,
 } from '../lib/entity-fields';
+import { AssetField } from './AssetField';
 
 /**
  * Visual form for a YAML entity (character, location, item, quest, map,
@@ -342,7 +343,6 @@ function Field({
     }
 
     if (control.kind === 'asset' || control.kind === 'assetList') {
-        // Assets are plain filenames; existence is checked by validation, not here.
         const text =
             control.kind === 'assetList'
                 ? Array.isArray(value)
@@ -352,36 +352,40 @@ function Field({
                   ? value
                   : '';
         return (
-            <label className="field">
-                {label}
-                <input
-                    className="dlg__input mono"
-                    value={assetDraft ?? text}
-                    placeholder={
-                        control.kind === 'assetList'
-                            ? 'file1.ogg, file2.ogg'
-                            : '(none)'
+            <AssetField
+                label={label}
+                name={field.label}
+                value={assetDraft ?? text}
+                projectDir={project.projectDir}
+                kind={control.category}
+                placeholder={
+                    control.kind === 'assetList'
+                        ? 'file1.ogg, file2.ogg'
+                        : '(none)'
+                }
+                hint={field.hint}
+                onChange={(raw) => {
+                    if (control.kind === 'assetList') {
+                        setAssetDraft(raw);
+                        const list = raw
+                            .split(',')
+                            .map((entry) => entry.trim())
+                            .filter(Boolean);
+                        onChange(list.length ? list : undefined);
+                    } else {
+                        onChange(raw);
                     }
-                    spellCheck={false}
-                    onBlur={() => setAssetDraft(null)}
-                    onChange={(e) => {
-                        const raw = e.target.value;
-                        if (control.kind === 'assetList') {
-                            setAssetDraft(raw);
-                            const list = raw
-                                .split(',')
-                                .map((s) => s.trim())
-                                .filter(Boolean);
-                            onChange(list.length ? list : undefined);
-                        } else {
-                            onChange(raw);
-                        }
-                    }}
-                />
-                {field.hint && (
-                    <span className="field__hint">{field.hint}</span>
-                )}
-            </label>
+                }}
+                onPick={(selected) => {
+                    if (control.kind === 'assetList') {
+                        const current = Array.isArray(value) ? value : [];
+                        setAssetDraft(null);
+                        onChange([...current, selected]);
+                    } else {
+                        onChange(selected);
+                    }
+                }}
+            />
         );
     }
 

@@ -294,7 +294,9 @@ describe('Snapshot Builder', () => {
             // pixel should appear in party, not in charactersHere
             expect(snapshot.party).toHaveLength(1);
             expect(snapshot.party[0].id).toBe('pixel_the_dog');
-            expect(snapshot.charactersHere.find((c) => c.id === 'pixel_the_dog')).toBeUndefined();
+            expect(
+                snapshot.charactersHere.find((c) => c.id === 'pixel_the_dog')
+            ).toBeUndefined();
         });
 
         it('should include inventory items', () => {
@@ -386,7 +388,9 @@ describe('Snapshot Builder', () => {
             const snapshot = buildSnapshot(state, registry);
 
             expect(snapshot.music).toBe('assets/audio/music/tavern_theme.ogg');
-            expect(snapshot.ambient).toBe('assets/audio/sfx/tavern_ambience.ogg');
+            expect(snapshot.ambient).toBe(
+                'assets/audio/sfx/tavern_ambience.ogg'
+            );
         });
 
         it('should resolve notification localization', () => {
@@ -656,6 +660,7 @@ describe('Snapshot Builder', () => {
             expect(snapshot.ui['ui.no_companions']).toBe('No companions');
             expect(snapshot.ui['ui.narrator']).toBe('Narrator');
             expect(snapshot.ui['ui.continue']).toBe('Continue');
+            expect(snapshot.ui['ui.end_dialogue']).toBe('End Dialogue');
         });
 
         it('should override defaults with locale-defined ui.* keys', () => {

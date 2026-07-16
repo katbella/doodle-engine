@@ -850,6 +850,23 @@
     font-size: 11px;
     color: var(--text-faint);
 }
+
+.asset-field {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-2);
+}
+
+.asset-field .dlg__input {
+    min-width: 0;
+    flex: 1;
+}
+
+.asset-field__choose {
+    flex: none;
+    gap: var(--space-1);
+    white-space: nowrap;
+}
 .field__textarea {
     height: auto;
     min-height: 72px;

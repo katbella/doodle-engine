@@ -90,6 +90,7 @@ function installBridge(
     }: { content?: string; readError?: Error | null } = {}
 ) {
     const writeEntity = vi.fn<StudioApi['writeEntity']>(async () => result);
+    const importAsset = vi.fn<StudioApi['importAsset']>(async () => null);
     Object.defineProperty(window, 'studio', {
         configurable: true,
         value: {
@@ -98,9 +99,10 @@ function installBridge(
                 return { content, mtimeMs: 10 };
             }),
             writeEntity,
+            importAsset,
         },
     });
-    return writeEntity;
+    return { writeEntity, importAsset };
 }
 
 function renderForm() {
@@ -119,7 +121,7 @@ afterEach(cleanup);
 
 describe('GameConfigForm author journeys', () => {
     it('saves all owned configuration fields without touching the shell block', async () => {
-        const writeEntity = installBridge({
+        const { writeEntity } = installBridge({
             ok: true,
             conflict: false,
             mtimeMs: 11,
@@ -174,7 +176,7 @@ describe('GameConfigForm author journeys', () => {
     });
 
     it('shows an external-deletion warning and does not keep autosaving', async () => {
-        const writeEntity = installBridge({
+        const { writeEntity } = installBridge({
             ok: false,
             conflict: true,
             missing: true,
@@ -197,7 +199,7 @@ describe('GameConfigForm author journeys', () => {
     });
 
     it('renames, adds, and removes initial flags, variables, and inventory entries', async () => {
-        const writeEntity = installBridge({
+        const { writeEntity } = installBridge({
             ok: true,
             conflict: false,
             mtimeMs: 11,
@@ -250,7 +252,7 @@ describe('GameConfigForm author journeys', () => {
     });
 
     it('forces an overwrite after an external-change conflict', async () => {
-        const writeEntity = installBridge({
+        const { writeEntity } = installBridge({
             ok: true,
             conflict: false,
             mtimeMs: 12,
@@ -302,7 +304,54 @@ startInventory: []
             }
         );
         renderForm();
-        expect(await screen.findByText(/Not set\. Add splash/i)).toBeTruthy();
+        expect(await screen.findByText('Splash screen')).toBeTruthy();
+        expect(screen.getByLabelText('Title background')).toBeTruthy();
         expect(screen.getAllByText('None.')).toHaveLength(3);
+    });
+
+    it('imports shell screen assets and preserves unmodeled shell fields', async () => {
+        const bridge = installBridge({
+            ok: true,
+            conflict: false,
+            mtimeMs: 11,
+        });
+        bridge.importAsset
+            .mockResolvedValueOnce('assets/images/ui/title.png')
+            .mockResolvedValueOnce('assets/audio/ui/splash.ogg');
+        const user = userEvent.setup();
+        const view = renderForm();
+
+        await user.click(
+            await screen.findByRole('button', {
+                name: 'Choose Title background file',
+            })
+        );
+        await user.click(
+            screen.getByRole('button', { name: 'Choose Splash sound file' })
+        );
+
+        expect(bridge.importAsset).toHaveBeenNthCalledWith(
+            1,
+            project.projectDir,
+            'shellImage'
+        );
+        expect(bridge.importAsset).toHaveBeenNthCalledWith(
+            2,
+            project.projectDir,
+            'shellSound'
+        );
+
+        view.unmount();
+        await waitFor(() => expect(bridge.writeEntity).toHaveBeenCalledOnce());
+        expect(bridge.writeEntity.mock.calls[0][2]).toEqual([
+            {
+                path: ['shell', 'splash', 'sound'],
+                value: 'assets/audio/ui/splash.ogg',
+            },
+            {
+                path: ['shell', 'title', 'background'],
+                value: 'assets/images/ui/title.png',
+            },
+        ]);
     });
 });

@@ -47,6 +47,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
         pendingInterlude: null,
         ui: {
             'ui.continue': 'Continue',
+            'ui.end_dialogue': 'End Dialogue',
             'ui.no_companions': 'No companions',
             'ui.inventory': 'Inventory',
             'ui.journal': 'Journal',
@@ -291,6 +292,7 @@ describe('React components', () => {
                 speaker: null,
                 speakerName: 'Narrator',
                 text: 'You arrive in town.',
+                continueEndsDialogue: true,
             },
             choices: [],
             pendingInterlude: {
@@ -312,5 +314,6 @@ describe('React components', () => {
         expect(html).toContain('interlude-overlay');
         expect(html).toContain('You arrive in town.');
         expect(html).toContain('continue-button');
+        expect(html).toContain('End Dialogue');
     });
 });

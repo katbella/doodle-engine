@@ -125,7 +125,13 @@ function GameRendererInner({
                                 choices={snapshot.choices}
                                 onSelectChoice={actions.selectChoice}
                                 onContinue={actions.continueDialogue}
-                                continueLabel={snapshot.ui['ui.continue']}
+                                continueLabel={
+                                    snapshot.dialogue.continueEndsDialogue
+                                        ? (snapshot.ui['ui.end_dialogue'] ??
+                                          'End Dialogue')
+                                        : (snapshot.ui['ui.continue'] ??
+                                          'Continue')
+                                }
                             />
                         </div>
                     ) : (

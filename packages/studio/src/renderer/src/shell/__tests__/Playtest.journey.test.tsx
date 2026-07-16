@@ -134,6 +134,9 @@ describe('Playtest author journeys', () => {
 
         await user.click(screen.getByRole('button', { name: 'Ask openly' }));
         expect(screen.getByText('Inside the room.')).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: /End Dialogue/ })
+        ).toBeTruthy();
 
         await user.click(screen.getByRole('button', { name: 'false' }));
         expect(screen.getByRole('button', { name: 'true' })).toBeTruthy();

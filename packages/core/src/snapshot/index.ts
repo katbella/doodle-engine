@@ -12,6 +12,7 @@
 
 import type { ContentRegistry, LocaleData } from '../types/registry';
 import type { GameState } from '../types/state';
+import type { Dialogue, DialogueNode } from '../types/entities';
 import type {
     Snapshot,
     SnapshotLocation,
@@ -37,6 +38,7 @@ import { resolveAssetPath } from '../assets/paths';
 // these with a matching ui.* key; the English text is the default.
 const UI_DEFAULTS: Record<string, string> = {
     'ui.continue': 'Continue',
+    'ui.end_dialogue': 'End Dialogue',
     'ui.inventory': 'Inventory',
     'ui.journal': 'Journal',
     'ui.map': 'Map',
@@ -392,6 +394,7 @@ function buildDialogueSnapshot(
             'portrait'
         ),
         voice: resolveAssetPath(node.voice, 'voice'),
+        continueEndsDialogue: willContinueEndDialogue(node, dialogue, state),
     };
 
     // Build choices - only include those whose conditions pass
@@ -410,6 +413,37 @@ function buildDialogueSnapshot(
         }));
 
     return { dialogue: dialogueSnapshot, choices };
+}
+
+function willContinueEndDialogue(
+    node: DialogueNode,
+    dialogue: Dialogue,
+    state: GameState
+): boolean {
+    if (
+        node.choices.some(
+            (choice) =>
+                !choice.conditions?.length ||
+                evaluateConditions(choice.conditions, state)
+        )
+    ) {
+        return false;
+    }
+
+    const branch = node.conditionalBranches?.find((candidate) =>
+        evaluateConditions([candidate.condition], state)
+    );
+    const effects = branch?.effects ?? [];
+    let dialogueEffect: 'start' | 'end' | null = null;
+    for (const effect of effects) {
+        if (effect.type === 'startDialogue') dialogueEffect = 'start';
+        if (effect.type === 'endDialogue') dialogueEffect = 'end';
+    }
+    if (dialogueEffect === 'start') return false;
+    if (dialogueEffect === 'end') return true;
+
+    const next = branch?.next ?? node.next;
+    return !next || !dialogue.nodes.some((candidate) => candidate.id === next);
 }
 
 /**

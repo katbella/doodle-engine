@@ -6,10 +6,20 @@
  * because IPC serializes it.
  */
 
-import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
+import type {
+    AssetCategory,
+    ContentRegistry,
+    GameConfig,
+} from '@doodle-engine/core';
 import type { ValidationError, YamlEdit } from '@doodle-engine/toolkit';
 
 export type { YamlEdit };
+
+export type StudioAssetKind =
+    | AssetCategory
+    | 'shellImage'
+    | 'shellMusic'
+    | 'shellSound';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -205,6 +215,11 @@ export interface StudioApi {
         fromRel: string,
         toRel: string
     ) => Promise<void>;
+    /** Choose a file, copy it into the project's asset tree, and return its content value. */
+    importAsset: (
+        projectDir: string,
+        kind: StudioAssetKind
+    ) => Promise<string | null>;
     /** Save an unsaved-edits recovery buffer for a file. */
     saveRecovery: (
         projectDir: string,

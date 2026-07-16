@@ -97,6 +97,11 @@ describe('preload bridge', () => {
                 ['dir', 'from', 'to'],
             ],
             [
+                () => api.importAsset('dir', 'portrait'),
+                'asset:import',
+                ['dir', 'portrait'],
+            ],
+            [
                 () => api.saveRecovery('dir', 'file', 'text'),
                 'recovery:save',
                 ['dir', 'file', 'text'],

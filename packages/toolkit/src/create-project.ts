@@ -107,6 +107,7 @@ export async function createProject(
         'assets/images/portraits',
         'assets/images/items',
         'assets/images/maps',
+        'assets/images/ui',
         'assets/audio/music',
         'assets/audio/sfx',
         'assets/audio/ui',

@@ -86,6 +86,7 @@ function Harness({ isStart = false }: { isStart?: boolean }) {
                 characters={['hero']}
                 nodeIds={['start', 'end']}
                 registry={registry}
+                projectDir="C:/story"
                 onChange={setNode}
                 onRename={(oldId, newId) =>
                     setNode((value) => ({ ...value, id: `${oldId}->${newId}` }))
@@ -104,6 +105,14 @@ function state(): DialogueNode {
 
 describe('NodeEditor', () => {
     it('validates and commits node ids and edits scalar fields', async () => {
+        const importAsset = vi
+            .fn()
+            .mockResolvedValueOnce('chosen.ogg')
+            .mockResolvedValueOnce('chosen.png');
+        Object.defineProperty(window, 'studio', {
+            configurable: true,
+            value: { importAsset },
+        });
         const user = userEvent.setup();
         const { rerender } = render(<Harness />);
         const id = screen.getByTitle('Node id (used by GOTO targets)');
@@ -133,6 +142,16 @@ describe('NodeEditor', () => {
         const line = screen.getByPlaceholderText('@locale.key or plain text');
         await user.clear(line);
         await user.type(line, 'Changed line');
+        await user.click(
+            screen.getByRole('button', { name: 'Choose Voice file' })
+        );
+        await user.click(
+            screen.getByRole('button', { name: 'Choose Portrait file' })
+        );
+        expect(importAsset).toHaveBeenNthCalledWith(1, 'C:/story', 'voice');
+        expect(importAsset).toHaveBeenNthCalledWith(2, 'C:/story', 'portrait');
+        expect(state().voice).toBe('chosen.ogg');
+        expect(state().portrait).toBe('chosen.png');
         const media = screen.getAllByPlaceholderText('(none)');
         await user.clear(media[0]);
         await user.clear(media[1]);

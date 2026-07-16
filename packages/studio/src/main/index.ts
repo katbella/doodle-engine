@@ -34,11 +34,13 @@ import type {
     NewProjectOptions,
     OpenProject,
     PreviewStatus,
+    StudioAssetKind,
     StudioBuildResult,
     ThemeState,
 } from '../shared/project';
 import { createThemeMenu, syncThemeMenuChecks } from './theme-menu';
 import { ErrorLog } from './error-log';
+import { AssetService } from './asset-service';
 
 let mainWindow: BrowserWindow | null = null;
 let themeState: ThemeState = { mode: 'dark', color: 'blue' };
@@ -523,6 +525,7 @@ app.whenReady().then(() => {
     });
 
     const documents = new DocumentService(markSelfWrite);
+    const assets = new AssetService(markSelfWrite);
     handle('doc:read', (_event, dir: string, relPath: string) =>
         documents.read(dir, relPath)
     );
@@ -553,6 +556,9 @@ app.whenReady().then(() => {
         'doc:rename',
         (_event, dir: string, fromRel: string, toRel: string) =>
             documents.renameFile(dir, fromRel, toRel)
+    );
+    handle('asset:import', (_event, dir: string, kind: StudioAssetKind) =>
+        assets.chooseAndImport(dir, kind)
     );
 
     const recovery = new RecoveryService(

@@ -108,6 +108,7 @@ const state = vi.hoisted(() => {
         openExternal: vi.fn(),
         openPath: vi.fn(),
     };
+    const showOpenDialog = vi.fn();
     const app = {
         isPackaged: true,
         whenReady: vi.fn(() => ({
@@ -189,6 +190,7 @@ const state = vi.hoisted(() => {
             errorLog.write,
             shell.openExternal,
             shell.openPath,
+            showOpenDialog,
             app.whenReady,
             app.getPath,
             app.on,
@@ -224,6 +226,7 @@ const state = vi.hoisted(() => {
         readEngineInfo.mockResolvedValue({ depsInstalled: true });
         detectPackageManager.mockResolvedValue('yarn');
         shell.openPath.mockResolvedValue('');
+        showOpenDialog.mockResolvedValue({ canceled: true, filePaths: [] });
         createThemeMenu.mockReturnValue({ label: 'Themes' });
         errorLog.initialize.mockResolvedValue(undefined);
         errorLog.write.mockResolvedValue(undefined);
@@ -275,6 +278,7 @@ const state = vi.hoisted(() => {
         ErrorLog,
         errorLog,
         shell,
+        showOpenDialog,
         app,
         Menu,
         utilityProcess,
@@ -298,6 +302,7 @@ vi.mock('electron', () => ({
         ),
     },
     Menu: state.Menu,
+    dialog: { showOpenDialog: state.showOpenDialog },
     shell: state.shell,
     utilityProcess: state.utilityProcess,
 }));
@@ -484,6 +489,16 @@ describe('Studio main process', () => {
             'dir',
             'old.yaml',
             'new.yaml'
+        );
+        await expect(
+            state.ipcHandlers.get('asset:import')?.(
+                {},
+                'C:/games/story',
+                'portrait'
+            )
+        ).resolves.toBeNull();
+        expect(state.showOpenDialog).toHaveBeenCalledWith(
+            expect.objectContaining({ properties: ['openFile'] })
         );
         await state.ipcHandlers.get('recovery:save')?.(
             {},

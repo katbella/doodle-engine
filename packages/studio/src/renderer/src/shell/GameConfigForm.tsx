@@ -3,12 +3,11 @@ import { TriangleAlert, X } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
 import type { OpenProject } from '../../../shared/project';
 import type { YamlEdit } from '../../../shared/project';
+import { AssetField } from './AssetField';
 
 /**
- * Form for game.yaml: start location, start time, start flags, start variables,
- * start inventory, and a note about the optional shell block. Saves through
- * writeEntity, so comments (including a commented-out `shell:` block) and key
- * order are kept, and the shell block is never disturbed by this form.
+ * Form for game.yaml: starting state and shell media. Saves through writeEntity,
+ * so comments, key order, and unmodeled fields are kept.
  */
 export function GameConfigForm({
     project,
@@ -27,7 +26,6 @@ export function GameConfigForm({
 
     const [config, setConfig] = useState<Record<string, unknown>>({});
     const [saved, setSaved] = useState<Record<string, unknown>>({});
-    const [hasShell, setHasShell] = useState(false);
     const [mtimeMs, setMtimeMs] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,7 +47,6 @@ export function GameConfigForm({
                 >;
                 setConfig(parsed);
                 setSaved(parsed);
-                setHasShell('shell' in parsed);
                 setMtimeMs(doc.mtimeMs);
             } catch (e) {
                 if (alive) setError(e instanceof Error ? e.message : String(e));
@@ -62,8 +59,6 @@ export function GameConfigForm({
         };
     }, [dir, path]);
 
-    // Only the top-level keys this form owns are diffed; `shell` and any other
-    // key are never in the edit set, so they're left exactly as written.
     const OWNED = [
         'startLocation',
         'startTime',
@@ -76,6 +71,13 @@ export function GameConfigForm({
         for (const key of OWNED) {
             if (!deepEqual(config[key], saved[key])) {
                 out.push({ path: [key], value: config[key] });
+            }
+        }
+        for (const [section, key] of SHELL_FIELDS) {
+            const path = ['shell', section, key];
+            const next = valueAt(config, path);
+            if (!deepEqual(next, valueAt(saved, path))) {
+                out.push({ path, value: next });
             }
         }
         return out;
@@ -147,6 +149,19 @@ export function GameConfigForm({
     const inventory = Array.isArray(config.startInventory)
         ? (config.startInventory as string[])
         : [];
+    const shell = (config.shell as Record<string, unknown> | undefined) ?? {};
+    const shellSection = (name: string) =>
+        (shell[name] as Record<string, unknown> | undefined) ?? {};
+    const setShellField = (section: string, key: string, value: unknown) => {
+        const nextSection = { ...shellSection(section) };
+        if (value === '' || value === undefined) delete nextSection[key];
+        else nextSection[key] = value;
+        set('shell', { ...shell, [section]: nextSection });
+    };
+    const shellValue = (section: string, key: string) => {
+        const value = shellSection(section)[key];
+        return typeof value === 'string' ? value : '';
+    };
 
     return (
         <div className="form scroll">
@@ -347,13 +362,148 @@ export function GameConfigForm({
                 </div>
             </div>
 
-            <div className="form__unknown">
-                <div className="form__unknown-head">Shell block</div>
-                <span className="field__hint">
-                    {hasShell
-                        ? 'A shell block is set. Edit splash, title, loading screens and UI sounds in Source.'
-                        : 'Not set. Add splash, title, loading screens and UI sounds in Source. The game runs fine without it.'}
-                </span>
+            <div className="node-editor__section">
+                <div className="node-editor__section-head">Splash screen</div>
+                <div className="node-editor__grid">
+                    <AssetField
+                        label="Logo"
+                        name="Splash logo"
+                        value={shellValue('splash', 'logo')}
+                        projectDir={dir}
+                        kind="shellImage"
+                        onChange={(value) =>
+                            setShellField('splash', 'logo', value)
+                        }
+                    />
+                    <AssetField
+                        label="Background"
+                        name="Splash background"
+                        value={shellValue('splash', 'background')}
+                        projectDir={dir}
+                        kind="shellImage"
+                        onChange={(value) =>
+                            setShellField('splash', 'background', value)
+                        }
+                    />
+                    <AssetField
+                        label="Sound"
+                        name="Splash sound"
+                        value={shellValue('splash', 'sound')}
+                        projectDir={dir}
+                        kind="shellSound"
+                        onChange={(value) =>
+                            setShellField('splash', 'sound', value)
+                        }
+                    />
+                    <label className="field">
+                        <span className="field__label">Duration (ms)</span>
+                        <input
+                            className="dlg__input mono"
+                            aria-label="Splash duration"
+                            type="number"
+                            min={0}
+                            value={
+                                (shellSection('splash').duration as number) ??
+                                ''
+                            }
+                            onChange={(event) =>
+                                setShellField(
+                                    'splash',
+                                    'duration',
+                                    event.target.value === ''
+                                        ? undefined
+                                        : Number(event.target.value)
+                                )
+                            }
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <div className="node-editor__section">
+                <div className="node-editor__section-head">Loading screen</div>
+                <div className="node-editor__grid">
+                    <AssetField
+                        label="Background"
+                        name="Loading background"
+                        value={shellValue('loading', 'background')}
+                        projectDir={dir}
+                        kind="shellImage"
+                        onChange={(value) =>
+                            setShellField('loading', 'background', value)
+                        }
+                    />
+                    <AssetField
+                        label="Music"
+                        name="Loading music"
+                        value={shellValue('loading', 'music')}
+                        projectDir={dir}
+                        kind="shellMusic"
+                        onChange={(value) =>
+                            setShellField('loading', 'music', value)
+                        }
+                    />
+                </div>
+            </div>
+
+            <div className="node-editor__section">
+                <div className="node-editor__section-head">Title screen</div>
+                <div className="node-editor__grid">
+                    <AssetField
+                        label="Logo"
+                        name="Title logo"
+                        value={shellValue('title', 'logo')}
+                        projectDir={dir}
+                        kind="shellImage"
+                        onChange={(value) =>
+                            setShellField('title', 'logo', value)
+                        }
+                    />
+                    <AssetField
+                        label="Background"
+                        name="Title background"
+                        value={shellValue('title', 'background')}
+                        projectDir={dir}
+                        kind="shellImage"
+                        onChange={(value) =>
+                            setShellField('title', 'background', value)
+                        }
+                    />
+                    <AssetField
+                        label="Music"
+                        name="Title music"
+                        value={shellValue('title', 'music')}
+                        projectDir={dir}
+                        kind="shellMusic"
+                        onChange={(value) =>
+                            setShellField('title', 'music', value)
+                        }
+                    />
+                </div>
+            </div>
+
+            <div className="node-editor__section">
+                <div className="node-editor__section-head">UI sounds</div>
+                <div className="node-editor__grid">
+                    {[
+                        ['click', 'Click'],
+                        ['hover', 'Hover'],
+                        ['menuOpen', 'Menu open'],
+                        ['menuClose', 'Menu close'],
+                    ].map(([key, label]) => (
+                        <AssetField
+                            key={key}
+                            label={label}
+                            name={`UI ${label.toLowerCase()} sound`}
+                            value={shellValue('uiSounds', key)}
+                            projectDir={dir}
+                            kind="shellSound"
+                            onChange={(value) =>
+                                setShellField('uiSounds', key, value)
+                            }
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -410,4 +560,32 @@ function KeyValueEditor({
 
 function deepEqual(a: unknown, b: unknown): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
+}
+
+const SHELL_FIELDS = [
+    ['splash', 'logo'],
+    ['splash', 'background'],
+    ['splash', 'sound'],
+    ['splash', 'duration'],
+    ['loading', 'background'],
+    ['loading', 'music'],
+    ['title', 'logo'],
+    ['title', 'background'],
+    ['title', 'music'],
+    ['uiSounds', 'click'],
+    ['uiSounds', 'hover'],
+    ['uiSounds', 'menuOpen'],
+    ['uiSounds', 'menuClose'],
+] as const;
+
+function valueAt(
+    root: Record<string, unknown>,
+    path: readonly string[]
+): unknown {
+    let value: unknown = root;
+    for (const key of path) {
+        if (!value || typeof value !== 'object') return undefined;
+        value = (value as Record<string, unknown>)[key];
+    }
+    return value;
 }

@@ -39,11 +39,12 @@ function installBridge(
     }))
 ) {
     const readDocument = vi.fn(async () => ({ content, mtimeMs: 1 }));
+    const importAsset = vi.fn(async () => 'chosen.png');
     Object.defineProperty(window, 'studio', {
         configurable: true,
-        value: { readDocument, writeEntity },
+        value: { readDocument, writeEntity, importAsset },
     });
-    return { readDocument, writeEntity };
+    return { readDocument, writeEntity, importAsset };
 }
 
 function editor(section: SectionKey, onDirty = vi.fn(), onModified = vi.fn()) {
@@ -61,7 +62,7 @@ function editor(section: SectionKey, onDirty = vi.fn(), onModified = vi.fn()) {
 
 describe('EntityForm field controls', () => {
     it('edits localizable, reference, asset, stats, and unknown character fields', async () => {
-        installBridge(`id: hero
+        const bridge = installBridge(`id: hero
 name: Hero
 biography: "@bio.hero"
 portrait: hero.png
@@ -80,6 +81,12 @@ extension:
         expect(
             screen.getByRole('option', { name: 'missing (missing)' })
         ).toBeTruthy();
+
+        await user.click(
+            screen.getByRole('button', { name: 'Choose Portrait file' })
+        );
+        expect(bridge.importAsset).toHaveBeenCalledWith('C:/story', 'portrait');
+        expect(screen.getByDisplayValue('chosen.png')).toBeTruthy();
 
         const literal = screen.getAllByRole('button', { name: 'literal' });
         await user.click(literal[1]);

@@ -2,6 +2,7 @@
 # UI Strings (English defaults are built in. Uncomment to customize)
 # ===================
 # ui.continue: "Continue"
+# ui.end_dialogue: "End Dialogue"
 # ui.inventory: "Inventory"
 # ui.journal: "Journal"
 # ui.notes: "Notes"

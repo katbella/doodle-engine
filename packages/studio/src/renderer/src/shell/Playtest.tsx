@@ -278,7 +278,10 @@ function Playback({
                         className="btn btn--accent playback__continue"
                         onClick={() => onAct(() => session.continue())}
                     >
-                        Continue <Play size={13} />
+                        {dialogue.continueEndsDialogue
+                            ? (snapshot.ui['ui.end_dialogue'] ?? 'End Dialogue')
+                            : (snapshot.ui['ui.continue'] ?? 'Continue')}{' '}
+                        <Play size={13} />
                     </button>
                 )}
             </div>

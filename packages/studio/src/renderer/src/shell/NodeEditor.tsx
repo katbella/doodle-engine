@@ -10,6 +10,7 @@ import type {
     Effect,
 } from '@doodle-engine/core';
 import { ConditionEffectBuilder } from './ConditionEffectBuilder';
+import { AssetField } from './AssetField';
 
 /** Editable node id. Commits on blur if the new id is non-empty, has no spaces,
  * and doesn't collide with another node. */
@@ -382,6 +383,7 @@ export function NodeEditor({
     characters,
     nodeIds,
     registry,
+    projectDir,
     onChange,
     onRename,
     onMakeStart,
@@ -392,6 +394,7 @@ export function NodeEditor({
     characters: string[];
     nodeIds: string[];
     registry: ContentRegistry;
+    projectDir: string;
     onChange: (node: DialogueNode) => void;
     onRename: (oldId: string, newId: string) => void;
     onMakeStart: () => void;
@@ -463,30 +466,22 @@ export function NodeEditor({
             </label>
 
             <div className="node-editor__grid">
-                <label className="field">
-                    <span className="field__label">Voice</span>
-                    <input
-                        className="dlg__input mono"
-                        value={node.voice ?? ''}
-                        placeholder="(none)"
-                        spellCheck={false}
-                        onChange={(e) =>
-                            set({ voice: e.target.value || undefined })
-                        }
-                    />
-                </label>
-                <label className="field">
-                    <span className="field__label">Portrait</span>
-                    <input
-                        className="dlg__input mono"
-                        value={node.portrait ?? ''}
-                        placeholder="(none)"
-                        spellCheck={false}
-                        onChange={(e) =>
-                            set({ portrait: e.target.value || undefined })
-                        }
-                    />
-                </label>
+                <AssetField
+                    label="Voice"
+                    name="Voice"
+                    value={node.voice ?? ''}
+                    projectDir={projectDir}
+                    kind="voice"
+                    onChange={(value) => set({ voice: value || undefined })}
+                />
+                <AssetField
+                    label="Portrait"
+                    name="Portrait"
+                    value={node.portrait ?? ''}
+                    projectDir={projectDir}
+                    kind="portrait"
+                    onChange={(value) => set({ portrait: value || undefined })}
+                />
             </div>
 
             <div className="node-editor__section">

@@ -277,9 +277,7 @@ export function DialogueEditor({
                             size={15}
                             aria-hidden
                         />
-                        <span>
-                            This file was deleted outside Studio.
-                        </span>
+                        <span>This file was deleted outside Studio.</span>
                         <button className="btn" onClick={() => save(true)}>
                             Recreate it
                         </button>
@@ -292,6 +290,7 @@ export function DialogueEditor({
                         characters={Object.keys(project.registry.characters)}
                         nodeIds={dialogue.nodes.map((n) => n.id)}
                         registry={project.registry}
+                        projectDir={project.projectDir}
                         onChange={updateNode}
                         onRename={renameNode}
                         onMakeStart={() => makeStart(selected.id)}

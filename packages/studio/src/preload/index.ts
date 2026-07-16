@@ -34,6 +34,7 @@ const api: StudioApi = {
         ipcRenderer.invoke('doc:delete', dir, relPath),
     renameDocument: (dir, fromRel, toRel) =>
         ipcRenderer.invoke('doc:rename', dir, fromRel, toRel),
+    importAsset: (dir, kind) => ipcRenderer.invoke('asset:import', dir, kind),
     saveRecovery: (dir, relPath, content) =>
         ipcRenderer.invoke('recovery:save', dir, relPath, content),
     readRecovery: (dir, relPath) =>
