@@ -69,6 +69,7 @@ const api: StudioApi = {
         return () => ipcRenderer.removeListener('preview:log', listener);
     },
     openPath: (targetPath) => ipcRenderer.invoke('shell:openPath', targetPath),
+    openDocumentation: () => ipcRenderer.invoke('help:documentation'),
     reportError: (details) => ipcRenderer.send('log:error', details),
     onFileChanged: (callback) => {
         const listener = (_event: unknown, relPath: string) =>

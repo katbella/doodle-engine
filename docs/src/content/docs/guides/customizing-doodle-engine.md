@@ -3,11 +3,11 @@ title: Customizing Doodle Engine
 description: How to customize Doodle Engine beyond the defaults.
 ---
 
-Doodle Engine is built around a stable core that can be used with different renderers, shells, save systems, and UI components. Most game behavior can be built with content: locations, dialogue, conditions, effects, flags, variables, items, quests, maps, audio, video, and interludes.
+Doodle Engine keeps game state separate from presentation. A renderer is the code that turns that state into the interface the player sees. You can restyle the built-in renderer, compose a different interface from Doodle's React components, or build your own renderer. Conditions, effects, and custom save storage provide further ways to shape the game.
 
 ## Building a Custom Renderer
 
-The core package (`@doodle-engine/core`) has no UI dependencies. You can build a renderer with any framework, or no framework at all.
+The core package (`@doodle-engine/core`) has no UI dependencies. You can build a renderer with any framework, or no framework at all. The engine receives a content registry, the loaded collection of game definitions, when it starts.
 
 ```typescript
 import { Engine } from '@doodle-engine/core';
@@ -27,37 +27,7 @@ const newSnapshot2 = engine.selectChoice('choice_id');
 const newSnapshot3 = engine.travelTo('market');
 ```
 
-The engine follows a simple pattern: actions go in, snapshots come out. Your renderer reads the snapshot, displays the UI, and calls engine methods when the player does something.
-
-### With Vue
-
-```javascript
-import { ref, watchEffect } from 'vue';
-import { Engine } from '@doodle-engine/core';
-
-const snapshot = ref(engine.newGame(config));
-
-function talkTo(characterId) {
-    snapshot.value = engine.talkTo(characterId);
-}
-
-function selectChoice(choiceId) {
-    snapshot.value = engine.selectChoice(choiceId);
-}
-```
-
-### With Svelte
-
-```javascript
-import { writable } from 'svelte/store';
-import { Engine } from '@doodle-engine/core';
-
-const snapshot = writable(engine.newGame(config));
-
-function talkTo(characterId) {
-    snapshot.set(engine.talkTo(characterId));
-}
-```
+After each player action, the engine returns a snapshot describing what the renderer should show. Your renderer displays that snapshot and calls engine methods when the player takes another action.
 
 ### With Vanilla JS
 
@@ -81,7 +51,7 @@ function talkTo(characterId) {
 
 ## Custom React Components
 
-Instead of using `GameRenderer`, you can compose individual components:
+Use individual React components to assemble a different interface:
 
 ```tsx
 import {
@@ -138,7 +108,7 @@ See [React Components Reference](/reference/react-components/) for all available
 
 ## Custom Game Shell
 
-Instead of using `GameShell`, build your own title screen and menu flow:
+Build a custom title screen and menu flow by composing the providers and components directly:
 
 ```tsx
 import {
@@ -181,11 +151,11 @@ Doodle Engine supports the condition types listed in the [Conditions reference](
 
 For game-specific rules, use the existing conditions creatively. Store what matters in flags, variables, inventory, quests, character state, time, or rolls, then check that state later.
 
-```
-SET variable playerClass "mage"
+```text
+SET variable playerClass mage
 
-CHOICE "Ask about the old tower."
-  REQUIRE variableEquals playerClass "mage"
+CHOICE Ask about the old tower.
+  REQUIRE variableEquals playerClass mage
   GOTO mage_tower_lore
 END
 ```
@@ -196,20 +166,20 @@ In this example, the game records the player's class in a variable. Later, the c
 
 Effects are how content records that something happened. Combine them to make larger game actions, then use conditions to check those results later:
 
-```
+```text
 # Unlock an ability using flags and variables
 SET flag ability_fireball
 ADD variable mana_cost_fireball 10
-NOTIFY @notification.learned_fireball
+NOTIFY You learned Fireball.
 
 # Shop purchase using variables and items
 REQUIRE variableGreaterThan gold 49
 ADD variable gold -50
 ADD item enchanted_sword
-NOTIFY @notification.bought_sword
+NOTIFY Enchanted sword added to inventory.
 ```
 
-Doodle Engine's effects cover flags, variables, items, quests, journal entries, characters, audio, video, interludes, notifications, dice rolls, map state, and dialogue flow. Combine effects with conditions to model game-specific behavior.
+Combine effects with conditions to model rules and behavior specific to your game.
 
 ## Custom Save/Load Backends
 
@@ -229,6 +199,8 @@ const saveData = await response.json();
 const snapshot = engine.loadGame(saveData);
 ```
 
+You can also store saves in IndexedDB, the browser's built-in database:
+
 ```typescript
 // Save to IndexedDB
 const db = await openDB('my-game', 1);
@@ -239,4 +211,4 @@ const saveData = await db.get('saves', 'slot-1');
 const snapshot = engine.loadGame(saveData);
 ```
 
-The `SaveData` object is a plain JSON-serializable object. Store it however you like.
+`SaveData` is a plain object that can be converted to JSON and stored wherever your application needs it.

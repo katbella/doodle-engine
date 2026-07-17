@@ -145,6 +145,13 @@ describe('buildProject success', () => {
         expect(manifest.version).toBeDefined();
         expect(Array.isArray(manifest.shell)).toBe(true);
         expect(Array.isArray(manifest.game)).toBe(true);
+        const localAssetPaths = [...manifest.shell, ...manifest.game].map(
+            (entry) => entry.path as string
+        );
+        expect(localAssetPaths.length).toBeGreaterThan(0);
+        expect(
+            localAssetPaths.every((path) => path.startsWith('assets/'))
+        ).toBe(true);
 
         expect(logs).toContain('Generating asset manifest...');
     }, 60_000);

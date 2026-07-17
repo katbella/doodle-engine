@@ -1,9 +1,9 @@
 ---
 title: Content Validation
-description: Validate your game content and fix errors before deployment.
+description: Check game content for errors during development and before release.
 ---
 
-The CLI validates your YAML files and dialogue DSL during builds, when you run validation manually, and whenever content files change during development.
+Validation checks the structure of YAML and dialogue files and confirms that references point to existing content. It runs during development, before builds, and whenever you run it manually.
 
 ## When Validation Runs
 
@@ -15,11 +15,11 @@ When you run `npm run dev`, validation runs automatically whenever a content fil
 npm run dev
 ```
 
-If errors are found, they're printed to the terminal, but **the dev server keeps running**. You can continue working while fixing errors.
+Errors appear in the terminal while the development server continues running, so you can fix them without restarting it.
 
 Example output:
 
-```
+```text
   ✏️ Content changed: content/dialogues/bartender_greeting.dlg
 
 ✗ Found 1 validation error:
@@ -31,7 +31,7 @@ content/dialogues/bartender_greeting.dlg
 
 ### Before Building (`npm run build`)
 
-When you run `npm run build`, validation runs first. If errors are found, **the build fails** and no production bundle is created:
+When you run `npm run build`, validation runs first. The release build begins after the content passes validation:
 
 ```bash
 npm run build
@@ -39,7 +39,7 @@ npm run build
 
 Example output:
 
-```
+```text
 🐕 Building Doodle Engine game...
 
 Validating content...
@@ -65,19 +65,19 @@ You can run validation manually without starting the dev server or building:
 npm run validate
 ```
 
-This is useful for:
+Run this command for:
 
 - Quick content checks before committing
-- CI/CD pipelines (validation returns exit code 1 on errors)
-- Manual testing of specific changes
+- Automated checks (validation returns exit code 1 on errors)
+- Checking a specific group of changes
 
 ## What Gets Validated
 
 ### Dialogue Parsing
 
-Every `.dlg` file must parse. Syntax errors are reported as validation errors that name the file, so you can fix them before the game runs. Reported syntax errors include an unknown keyword, an unknown condition or effect, a node with more than one speaker line, a spoken line inside a choice, and a quoted or multi-word value where a plain token is required.
+Validation parses each `.dlg` file, turning its text into dialogue data. If the syntax is invalid, the error names the file and the part that could not be read. Examples include an unknown keyword, condition, or effect; more than one speaker line in a node; a spoken line inside a choice; or a quoted value where the language expects a plain token.
 
-```
+```text
 content/dialogues/bartender_greeting.dlg
   Failed to parse dialogue: Node "start" (line 3) has more than one speaker line. Each node supports a single speaker; route to another NODE to let a different character speak.
   Fix the DSL syntax error in this .dlg file
@@ -92,7 +92,7 @@ content/dialogues/bartender_greeting.dlg
 
 Example error:
 
-```
+```text
 content/dialogues/bartender_greeting.dlg
   Start node "invalid" not found
   Add a NODE invalid or fix the startNode reference
@@ -118,7 +118,7 @@ All conditions must have their required arguments:
 
 Example error:
 
-```
+```text
 content/dialogues/bartender_greeting.dlg
   Node "ask_rumors" condition "hasFlag" missing required "flag" argument
 ```
@@ -153,7 +153,7 @@ All node, choice, and IF branch effects must have their required arguments:
 
 Example error:
 
-```
+```text
 content/dialogues/bartender_greeting.dlg
   Node "greet" effect "setVariable" missing required "value" argument
 ```
@@ -171,7 +171,7 @@ dialogue: bartender_greeting # Must exist in content/dialogues/
 
 Example error:
 
-```
+```text
 content/characters/merchant.yaml
   Character "merchant" references non-existent dialogue "merchant_chat"
 Create dialogue "merchant_chat" or fix the reference
@@ -179,13 +179,14 @@ Create dialogue "merchant_chat" or fix the reference
 
 ### Files and Required Fields
 
-Every content file must load cleanly before anything else is checked:
+Every content file must load before its fields and references can be checked:
 
 - A YAML file with a syntax error is reported by name, and the other files in its folder still load
 - A YAML entity file must have an `id`
 - Two files of the same type cannot share an `id`; the clash is reported with both file names
-- A broken `game.yaml` is reported instead of being quietly replaced with defaults
+- An invalid `game.yaml` is reported by name
 - Each entity must have the fields the engine reads: locations need `name` and `description`, characters need `name`, items need `name` and `location`, maps need `name`, quests need `name` and at least one stage, journal entries need `title` and `text`, interludes need `text`
+- Content IDs, dialogue node IDs, quest stage IDs, flags, and variables may contain only letters, numbers, and underscores
 
 ### Content References
 
@@ -205,9 +206,8 @@ For `.dlg` files, validation follows the condition and effect names documented i
 
 ### Numbers
 
-Arguments that hold a number must be a real, usable number. A typo like
-`ADD variable gold ten` is reported instead of quietly turning the variable
-into a non-number during play.
+Arguments that hold a number must contain a numeric value. For example,
+`ADD variable gold ten` reports an error because `ten` is text.
 
 ### Maps
 
@@ -219,10 +219,10 @@ location.
 
 ### Asset Files
 
-Missing image, audio, and video files are caught when the asset manifest is
-generated: during `npm run dev` when the browser loads the game, and at the
-start of every build. `npm run validate` checks content and references, not
-files on disk.
+The asset manifest is the list of media files included with the game. Missing
+images, audio, and video are reported when this list is created: during
+`npm run dev` when the browser loads the game and at the start of every build.
+`npm run validate` checks content and references; it does not scan media files.
 
 ### Localization Keys
 
@@ -237,7 +237,7 @@ description: '@location.tavern.desc' # Must exist in locales/*.yaml
 
 Example error:
 
-```
+```text
 content/locations/tavern.yaml
   Localization key "@location.tavern.name" not found in any locale file
   Add "location.tavern.name: ..." to your locale files
@@ -249,7 +249,7 @@ content/locations/tavern.yaml
 
 **Error:**
 
-```
+```text
 Node "greet" GOTO "continue" points to non-existent node
 ```
 
@@ -257,7 +257,7 @@ Node "greet" GOTO "continue" points to non-existent node
 
 **Fix:** Either create the missing node or fix the typo:
 
-```
+```text
 NODE greet
   Bartender: "Welcome to the tavern!"
   GOTO continue  # Make sure this matches exactly
@@ -270,7 +270,7 @@ NODE continue  # Add this node
 
 **Error:**
 
-```
+```text
 Duplicate node ID "greet"
 ```
 
@@ -278,7 +278,7 @@ Duplicate node ID "greet"
 
 **Fix:** Rename one of the nodes:
 
-```
+```text
 NODE greet
   Bartender: "Welcome!"
 
@@ -290,7 +290,7 @@ NODE greet_again  # Changed from "greet"
 
 **Error:**
 
-```
+```text
 Node "greet" condition "hasFlag" missing required "flag" argument
 ```
 
@@ -298,7 +298,7 @@ Node "greet" condition "hasFlag" missing required "flag" argument
 
 **Fix:** Add the missing argument:
 
-```
+```text
 CHOICE "Ask about the quest"
   REQUIRE hasFlag quest_started
   GOTO ask_quest
@@ -309,7 +309,7 @@ END
 
 **Error:**
 
-```
+```text
 Character "merchant" references non-existent dialogue "merchant_chat"
 ```
 
@@ -328,7 +328,7 @@ dialogue: merchant_intro # Fix: changed from merchant_chat
 
 **Error:**
 
-```
+```text
 Localization key "@location.tavern.name" not found in any locale file
 ```
 
@@ -342,9 +342,9 @@ location.tavern.name: 'The Rusty Tankard'
 location.tavern.desc: 'A cozy tavern with warm firelight.'
 ```
 
-## Validation in CI/CD
+## Automated Validation
 
-Add validation to your CI pipeline to catch errors before merging:
+Continuous integration (CI) services can run validation whenever changes are pushed:
 
 ```yaml
 # .github/workflows/validate.yml
@@ -364,35 +364,23 @@ jobs:
             - run: npm run validate
 ```
 
-`npm run validate` exits with code 1 if errors are found, which fails the CI build.
+`npm run validate` returns exit code 1 when it finds errors, which tells the CI service that the check failed.
 
 ## Best Practices
 
-1. **Fix errors as they appear**: Don't let validation errors accumulate. Fix them immediately when they appear in `npm run dev`.
+1. **Fix errors while the change is fresh**: Resolve errors when they appear in `npm run dev`.
 
 2. **Run validation before committing**: Run `npm run validate` before pushing changes to catch errors early.
 
 3. **Use descriptive IDs**: Clear node IDs, quest IDs, and dialogue IDs make validation errors easier to understand.
 
-4. **Keep dialogue files small**: Smaller files make it easier to locate errors. Split large dialogues into multiple files.
+4. **Split long dialogues when it improves navigation**: Focused files make errors easier to locate.
 
 5. **Use locale keys consistently**: Follow a naming convention for locale keys (e.g., `entity_type.entity_id.field`) to make missing keys easier to spot.
 
-## Limitations
+## Validation and Playtesting
 
-Validation catches **structural errors** but not **logic errors**:
-
-✅ **Catches:**
-
-- Missing nodes
-- Missing required arguments
-- Non-existent references
-
-❌ **Doesn't catch:**
-
-- Dialogue that doesn't make narrative sense
-- Incorrectly set flags (e.g., setting `quest_completed` too early)
-- Logic that creates softlocks or dead ends
-- Typos in text content
-
-You still need to playtest your game to catch logic and narrative issues.
+Validation finds structural problems such as missing nodes, required arguments,
+and references to content that does not exist. Playtesting shows whether the
+story and rules behave as intended, including flag timing, dead ends, and text
+that needs revision. Use both before release.

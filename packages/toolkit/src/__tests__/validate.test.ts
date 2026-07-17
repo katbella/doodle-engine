@@ -3,7 +3,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { ContentRegistry, Dialogue, GameConfig } from '@doodle-engine/core';
+import type {
+    ContentRegistry,
+    Dialogue,
+    GameConfig,
+} from '@doodle-engine/core';
 import { validateContent } from '../validate';
 
 function makeRegistry(
@@ -92,6 +96,90 @@ describe('validateContent', () => {
         expect(
             validateContent(makeRegistry(), new Map(), makeConfig())
         ).toEqual([]);
+    });
+
+    it('rejects unsupported characters in content and dialogue ids', () => {
+        const dialogue: Dialogue = {
+            id: 'bad-dialogue',
+            startNode: 'start-node',
+            nodes: [
+                {
+                    id: 'start-node',
+                    speaker: null,
+                    text: 'Hello.',
+                    choices: [],
+                },
+            ],
+        };
+        const errors = messages(
+            makeRegistry({
+                locations: {
+                    'old-town': {
+                        id: 'old-town',
+                        name: 'Old Town',
+                        description: 'A town.',
+                        banner: '',
+                        music: '',
+                        ambient: '',
+                    },
+                },
+                dialogues: { 'bad-dialogue': dialogue },
+            })
+        );
+
+        expect(errors).toContain(
+            'Location id "old-town" must use only letters, numbers, and underscores'
+        );
+        expect(errors).toContain(
+            'Dialogue id "bad-dialogue" must use only letters, numbers, and underscores'
+        );
+        expect(errors).toContain(
+            'Dialogue "bad-dialogue" node id "start-node" must use only letters, numbers, and underscores'
+        );
+    });
+
+    it('rejects unsupported characters in flags and variables', () => {
+        const dialogue: Dialogue = {
+            id: 'test_dialogue',
+            startNode: 'start',
+            nodes: [
+                {
+                    id: 'start',
+                    speaker: null,
+                    text: 'Hello.',
+                    choices: [],
+                    conditions: [{ type: 'hasFlag', flag: 'met-bartender' }],
+                    effects: [
+                        {
+                            type: 'setVariable',
+                            variable: 'player-name',
+                            value: 'Kat',
+                        },
+                    ],
+                },
+            ],
+        };
+        const errors = validateContent(
+            makeRegistry({ dialogues: { test_dialogue: dialogue } }),
+            new Map(),
+            makeConfig({
+                startFlags: { 'seen-intro': false },
+                startVariables: { 'starting-gold': 5 },
+            })
+        ).map((error) => error.message);
+
+        expect(errors).toContain(
+            'Game config flag "seen-intro" must use only letters, numbers, and underscores'
+        );
+        expect(errors).toContain(
+            'Game config variable "starting-gold" must use only letters, numbers, and underscores'
+        );
+        expect(errors).toContain(
+            'Node "start" condition "hasFlag" argument "flag" must use only letters, numbers, and underscores'
+        );
+        expect(errors).toContain(
+            'Node "start" effect "setVariable" argument "variable" must use only letters, numbers, and underscores'
+        );
     });
 
     it('rejects game config with missing start location', () => {

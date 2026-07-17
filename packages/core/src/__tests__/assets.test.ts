@@ -272,9 +272,19 @@ describe('extractAssetPaths', () => {
 
     it('extracts media referenced by dialogue effects', () => {
         const { game } = extractAssetPaths(makeRegistry(), makeConfig());
-        expect(game).toContain('/assets/audio/music/node-theme.ogg');
-        expect(game).toContain('/assets/audio/sfx/storm.ogg');
-        expect(game).toContain('/assets/video/intro.mp4');
+        expect(game).toContain('assets/audio/music/node-theme.ogg');
+        expect(game).toContain('assets/audio/sfx/storm.ogg');
+        expect(game).toContain('assets/video/intro.mp4');
+    });
+
+    it('keeps generated project asset paths relative', () => {
+        const registry = makeRegistry();
+        registry.locations.tavern.banner = 'tavern.jpg';
+
+        const { game } = extractAssetPaths(registry, makeConfig());
+
+        expect(game).toContain('assets/images/banners/tavern.jpg');
+        expect(game).not.toContain('/assets/images/banners/tavern.jpg');
     });
 
     it('extracts interlude assets into game tier', () => {

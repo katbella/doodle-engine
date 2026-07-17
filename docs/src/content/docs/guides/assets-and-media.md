@@ -3,11 +3,11 @@ title: Assets & Media
 description: How to organize and use images, audio, and video in your game.
 ---
 
-Doodle Engine games can include images, audio, and video. Assets are served as static files by the dev server and included in production builds.
+Doodle Engine games can include images, audio, and video. The development server loads these files while you work, and production builds include them with the finished game.
 
 ## Project Structure
 
-The scaffolded project includes these asset directories:
+New projects include these asset directories:
 
 ```text
 assets/
@@ -40,28 +40,28 @@ The asset scanner recognizes common browser image, audio, and video extensions. 
 
 | Format | Use Case                                                   |
 | ------ | ---------------------------------------------------------- |
-| OGG    | Recommended for all audio (good compression, wide support) |
-| MP3    | Alternative for music and voice (universal support)        |
+| OGG    | Good compression and broad browser support                 |
+| MP3    | Widely supported option for music and voice                |
 
 ### Video
 
 | Format      | Use Case                                                   |
 | ----------- | ---------------------------------------------------------- |
-| MP4 (H.264) | Recommended for video playback (universal browser support) |
+| MP4 (H.264) | Widely supported option for video playback                |
 | WebM (VP9)  | Alternative with better compression (most modern browsers) |
 
-## Referencing Assets in Content
+## Add Asset Filenames to Content
 
-Write bare filenames in YAML and DSL files. The engine resolves them to full paths based on the field type.
+Place each file in the folder for its media type, then write only its filename in the matching content field. Doodle uses the field to find the correct folder.
 
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-banner: tavern.png          # → assets/images/banners/tavern.png
-music: tavern_ambience.ogg  # → assets/audio/music/tavern_ambience.ogg
+banner: tavern.png
+music: tavern_ambience.ogg
 ```
 
-Resolution happens at snapshot build time. Components receive full paths and use them directly.
+Here, Doodle loads `tavern.png` from `assets/images/banners/` and `tavern_ambience.ogg` from `assets/audio/music/`.
 
 ### Convention Table
 
@@ -82,7 +82,7 @@ Resolution happens at snapshot build time. Components receive full paths and use
 | DSL `VOICE`                                  | `assets/audio/voice/{filename}`         |
 | DSL `VIDEO`                                  | `assets/video/{filename}`               |
 
-### Escape Hatch
+### Custom Paths
 
 If you need to reference a file outside the convention, write the path
 yourself, starting with `assets/`:
@@ -91,14 +91,13 @@ yourself, starting with `assets/`:
 banner: assets/images/special/custom_layout.png
 ```
 
-These paths are used as-is without modification. A path starting with `/` or
-a full `http(s)://` address also passes through untouched, but a leading `/`
-ties the game to being hosted at a domain root, so prefer the `assets/`
-form.
+The engine uses that path as written. Paths can also begin with
+`/` or a full `http(s)://` address. A leading `/` works only when the game is
+hosted at the root of a domain, so an `assets/` path is usually more portable.
 
 ### Shell Config Paths
 
-Shell assets configured in `game.yaml` under `shell:` use full paths. They are not processed by the convention table above.
+Shell assets configured in `game.yaml` under `shell:` use project-relative paths beginning with `assets/`. They are not processed by the convention table above.
 
 ```yaml
 shell:
@@ -108,15 +107,15 @@ shell:
     sound: assets/audio/sfx/splash-sting.ogg
 ```
 
-Content YAML files (locations, characters, items, and so on) use bare filenames that the engine resolves at snapshot time. Shell config paths are read directly by the asset loader before any game content is processed, so they must be complete.
+Content YAML files use bare filenames that the engine expands using the convention table. Shell settings name the complete path within the project instead.
 
 ### Location Banners
 
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: '@location.tavern.name'
-description: '@location.tavern.description'
+name: The Salty Dog
+description: A warm tavern overlooking the harbor.
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
@@ -127,7 +126,7 @@ ambient: fire_crackling.ogg
 ```yaml
 # content/characters/bartender.yaml
 id: bartender
-name: '@character.bartender.name'
+name: Marcus the Bartender
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -138,8 +137,8 @@ dialogue: bartender_greeting
 ```yaml
 # content/items/old_coin.yaml
 id: old_coin
-name: '@item.old_coin.name'
-description: '@item.old_coin.description'
+name: Old Coin
+description: A salt-stained coin stamped with an unfamiliar crest.
 icon: old_coin_icon.png
 image: old_coin.png
 ```
@@ -152,13 +151,13 @@ image: old_coin.png
 ```yaml
 # content/maps/town.yaml
 id: town
-name: '@map.town.name'
+name: Harbor Town
 image: town_map.png
 ```
 
 ### Audio in Dialogues
 
-```
+```text
 MUSIC tension_theme.ogg
 SOUND door_slam.ogg
 VOICE bartender_greeting.ogg
@@ -166,15 +165,15 @@ VOICE bartender_greeting.ogg
 
 ### Video in Dialogues
 
-```
+```text
 VIDEO intro_cinematic.mp4
 ```
 
 ## Compression Tips
 
-- Use compressed formats to keep downloads reasonable
+- Compress media to keep downloads reasonable
+- Resize images to the largest dimensions the game displays
 - Trim silence from the beginning and end of audio files
-- Avoid unnecessarily large images or long uncompressed video
 - Prefer modern formats (WebP, OGG, WebM) when compatibility allows
 
 ## Bundled Assets
@@ -185,11 +184,11 @@ When you run `npm run build`, every referenced local asset under `assets/` must 
 
 ## Loading Behavior
 
-GameShell and AssetProvider prepare assets before gameplay renders. Portraits, banners, music, video, and other referenced media are loaded during startup so they are available when UI renders or playback begins.
+`GameShell` and `AssetProvider` prepare assets before gameplay begins. They load referenced media during startup so images and playback are ready when needed.
 
-Assets are divided into two loading tiers:
+Assets load in two stages:
 
 - **Shell assets** (splash, loading, title, UI sounds) load first
-- **Game assets** (portraits, banners, music, video, items) load during the loading screen and are tracked by phase
+- **Game assets** (portraits, banners, music, video, items) load during the loading screen
 
 See [Asset Loading](/technical/asset-loading/) for details on loading phases and configuration.

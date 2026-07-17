@@ -12,9 +12,10 @@ hero:
         - text: View on GitHub
           link: https://github.com/katbella/doodle-engine
           icon: external
+          variant: secondary
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
 
 ## About
 
@@ -26,73 +27,127 @@ The engine is written in TypeScript and designed to be ruleset-agnostic, giving 
 
 Its scripting model draws inspiration from Infinity Engine titles such as Baldur’s Gate I and II, Icewind Dale, and Planescape: Torment.
 
+Planning a story-driven game? [See whether Doodle Engine is a good fit](/getting-started/why-doodle-engine/).
+
 ---
 
-## For Writers
+## Writing and Narrative
 
 <CardGrid>
     <Card title="Dialogue System" icon="pencil">
         Branching conversations with speakers, choices, conditions, and effects
-        in a readable script format.
+        with visual editing and a readable script format.
     </Card>
     <Card title="World Content" icon="document">
-        Define locations, characters, items, quests, journal entries, and maps
-        in YAML.
-    </Card>
-    <Card title="Conditions and Dice" icon="list-format">
-        Control flow using flags, variables, items, quest stages, relationships,
-        time of day, and rolls.
+        Create locations, characters, items, quests, journal entries, and maps
+        as connected game content.
     </Card>
     <Card title="Localization" icon="translate">
-        Use translation keys and add languages by creating locale files.
+        Add languages, manage translation strings, and test localized content.
     </Card>
     <Card title="Narrative Interludes" icon="open-book">
         Full-screen text sequences for chapter introductions, dreams,
         flashbacks, and story moments.
     </Card>
-    <Card title="Validation" icon="approve-check">
-        Catch broken references, missing nodes, and invalid conditions before
-        running the game.
-    </Card>
 </CardGrid>
-
-[Start writing your first game →](/getting-started/installation/)
 
 ---
 
-## For Developers
+## Game Design and Presentation
 
 <CardGrid>
+    <Card title="Persistent World State" icon="database">
+        Let choices change flags, variables, relationships, character
+        locations, inventory, quests, journal entries, and the wider world.
+    </Card>
+    <Card title="Conditions and Dice" icon="random">
+        Branch on game state, time of day, inventory, quest progress,
+        relationships, character stats, and random rolls.
+    </Card>
+    <Card title="Quests, Inventory, and Maps" icon="list-format">
+        Build multi-stage quests, inventory items, journals,
+        connected locations, and navigable maps.
+    </Card>
+    <Card title="Audio and Music" icon="seti:audio">
+        Use music, ambience, sound effects, interface sounds, and voiced
+        dialogue throughout the game.
+    </Card>
+    <Card title="Images and Video" icon="seti:image">
+        Present location banners, character portraits, item art, interlude
+        imagery, interface screens, and video cutscenes.
+    </Card>
+    <Card title="Validation and Playtesting" icon="approve-check">
+        Catch broken references and invalid content, then test individual story
+        paths or preview the complete game.
+    </Card>
+</CardGrid>
+
+---
+
+## Programming and Integration
+
+<CardGrid>
+    <Card title="Complete Game Shell" icon="rocket">
+        Start with a full game flow including splash and title screens,
+        settings, save and load, pause menus, credits, and input handling.
+    </Card>
     <Card title="Framework-Agnostic Core" icon="puzzle">
         Core engine written in TypeScript with no UI dependencies.
         Integrate with any renderer or frontend framework.
     </Card>
     <Card title="Predictable State Flow" icon="right-arrow">
-        Actions produce snapshots. Renderers display snapshots. State moves in
-        one direction.
+        Game actions update the engine state, and the renderer uses that state
+        to update the interface. This keeps game logic separate from
+        presentation and makes changes easier to follow.
     </Card>
-    <Card title="React Renderer" icon="rocket">
+    <Card title="React Components" icon="seti:react">
         Components for dialogue, choices, inventory, journal, map, and
-        characters, plus a full game shell.
+        characters that can be used together or replaced individually.
     </Card>
-    <Card title="Audio and Video" icon="star">
-        Music playback, sound effects, voice lines, UI sounds, and video
-        cutscenes.
+    <Card title="Asset Pipeline" icon="download">
+        Discover referenced media, preload it before gameplay, validate missing
+        files, and include project assets in production builds.
     </Card>
-    <Card title="Asset Preloading" icon="download">
-        GameShell and AssetProvider load referenced media before gameplay starts.
-    </Card>
-    <Card title="Dev Tools" icon="setting">
+    <Card title="Development Tools" icon="setting">
         Console tools for inspecting state, setting flags, teleporting, and
         triggering dialogues.
     </Card>
     <Card title="CLI" icon="seti:shell">
-        Project scaffolding, dev server with hot reload, production builds, and
-        content validation.
+        A development server with hot reload, production builds, and content
+        validation for Studio projects.
+    </Card>
+    <Card title="Web, Desktop, and Mobile" icon="desktop">
+        Host production builds on the web or package them for desktop and
+        mobile using standard web application wrappers.
     </Card>
 </CardGrid>
 
-[Learn the architecture →](/technical/architecture/)
+[Learn the architecture](/technical/architecture/)
+
+---
+
+## Create with Doodle Studio
+
+Doodle Studio is the purpose-built desktop editor for creating Doodle Engine games. From one workspace, you can:
+
+- Write branching dialogue visually
+- Create and connect characters, locations, quests, and world state
+- Import voice, portraits, music, and video
+- Validate content, test story paths, preview the complete game, and create production builds
+
+Studio works directly with the same project files as the engine and CLI, so you can move between visual editing and source-level customization whenever your game needs it.
+
+[![Editing a branching conversation in the Doodle Studio workspace](/images/studio/studio-dialogue-workspace.png)](/images/studio/studio-dialogue-workspace.png)
+
+<LinkButton href="/studio/" variant="primary" icon="right-arrow">Explore Doodle Studio</LinkButton>
+
+### Prefer working in code?
+
+The Doodle Engine CLI works inside the projects created by Studio. Use it to run the game while editing files directly, automate validation and builds, or develop a custom application and renderer.
+
+<LinkButton href="/getting-started/installation/#command-line-setup" variant="secondary" icon="seti:shell" iconPlacement="start">Set up the command line</LinkButton>
+
+[See how Studio and the CLI fit together](/getting-started/studio-or-cli/)
 
 ---
 
@@ -102,4 +157,4 @@ The engine core does not assume a UI or save backend. Renderers, shells, and per
 
 Combine effects and conditions in dialogue to implement mechanics such as reputation systems, skill checks, crafting, or shops without modifying the engine core.
 
-[Read the customization guide →](/guides/customizing-doodle-engine/)
+[Read the customization guide](/guides/customizing-doodle-engine/)

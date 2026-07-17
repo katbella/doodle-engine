@@ -3,7 +3,7 @@ title: Inventory & Items
 description: How to define items and manage inventory through dialogue effects.
 ---
 
-Items are defined in YAML and added to the player's inventory through dialogue effects. Since this is a text-based game, items aren't picked up from the ground. They're given through story events.
+Items are defined in YAML. Place them in the starting inventory, give them to the player through story events, or move them between characters and locations.
 
 ## Defining an Item
 
@@ -11,8 +11,8 @@ Create `content/items/old_coin.yaml`:
 
 ```yaml
 id: old_coin
-name: '@item.old_coin.name'
-description: '@item.old_coin.description'
+name: Old Coin
+description: A salt-stained coin stamped with an unfamiliar crest.
 icon: old_coin_icon.png
 image: old_coin.png
 location: inventory
@@ -22,7 +22,7 @@ stats: {}
 | Field         | Description                                                        |
 | ------------- | ------------------------------------------------------------------ |
 | `id`          | Unique identifier                                                  |
-| `name`        | Display name (supports `@key` localization)                        |
+| `name`        | Display name                                                        |
 | `description` | Full description shown on inspection                               |
 | `icon`        | Small image for inventory grid                                     |
 | `image`       | Large image for detail/inspection view                             |
@@ -33,17 +33,17 @@ stats: {}
 
 Items are added to inventory through dialogue effects:
 
-```
+```text
 NODE find_coin
-  BARTENDER: @bartender.found_something
+  BARTENDER: I found this by the docks. You should take it.
   ADD item old_coin
-  NOTIFY @notification.found_coin
+  NOTIFY Old coin added to inventory.
 ```
 
 ## Removing Items
 
-```
-CHOICE @merchant.choice.trade_coin
+```text
+CHOICE Sell the old coin.
   REQUIRE hasItem old_coin
   REMOVE item old_coin
   ADD variable gold 25
@@ -55,7 +55,7 @@ END
 
 Move items to specific locations:
 
-```
+```text
 # Move to a location
 MOVE item sword armory
 
@@ -67,8 +67,8 @@ ADD item sword
 
 Use `hasItem` to show choices only when the player has an item:
 
-```
-CHOICE @merchant.choice.show_coin
+```text
+CHOICE Show Elena the old coin.
   REQUIRE hasItem old_coin
   GOTO coin_conversation
 END
@@ -76,7 +76,7 @@ END
 
 Use `itemAt` to check if an item is at a specific location:
 
-```
+```text
 IF itemAt sword armory
   GOTO sword_available
 END
@@ -84,7 +84,7 @@ END
 
 ## Inventory Display
 
-The default `GameRenderer` opens inventory from the bottom bar. It shows a grid of item icons. Players can click an item to inspect it, and a modal shows the full image, name, and description.
+The default `GameRenderer` opens inventory from the bottom bar. It shows a grid of item icons. Selecting an item opens its full image, name, and description.
 
 In a custom renderer, use the `Inventory` component:
 
@@ -94,7 +94,7 @@ import { Inventory } from '@doodle-engine/react';
 <Inventory items={snapshot.inventory} />;
 ```
 
-Or build your own using `snapshot.inventory`, which contains `SnapshotItem` objects:
+To build a different inventory interface, use `snapshot.inventory`, which contains the items currently available to the player. See [Custom Renderer](/technical/custom-renderer/) for the surrounding setup and [React Components](/reference/react-components/#inventory) for the built-in component.
 
 ```typescript
 interface SnapshotItem {

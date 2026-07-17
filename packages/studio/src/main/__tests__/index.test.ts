@@ -420,8 +420,10 @@ describe('Studio main process', () => {
         );
         helpMenu.submenu[0].click();
         expect(state.shell.openExternal).toHaveBeenCalledWith(
-            'https://doodleengine.dev/'
+            'https://doodleengine.dev/studio/'
         );
+        await state.ipcHandlers.get('help:documentation')?.({});
+        expect(state.shell.openExternal).toHaveBeenCalledTimes(2);
         helpMenu.submenu[1].click();
         await vi.waitFor(() =>
             expect(state.shell.openPath).toHaveBeenCalledWith(

@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     cleanup,
+    fireEvent,
     render,
     screen,
     waitFor,
@@ -120,6 +121,50 @@ function renderForm() {
 afterEach(cleanup);
 
 describe('GameConfigForm author journeys', () => {
+    it('saves pending configuration changes with Cmd+S', async () => {
+        const { writeEntity } = installBridge({
+            ok: true,
+            conflict: false,
+            mtimeMs: 11,
+        });
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.selectOptions(
+            await screen.findByLabelText('Start location'),
+            'market'
+        );
+        fireEvent.keyDown(window, { key: 's', metaKey: true });
+
+        await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
+        expect(writeEntity.mock.calls[0][2]).toEqual([
+            { path: ['startLocation'], value: 'market' },
+        ]);
+    });
+
+    it('does not save an invalid flag name', async () => {
+        const { writeEntity } = installBridge({
+            ok: true,
+            conflict: false,
+            mtimeMs: 11,
+        });
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.click(
+            await screen.findByRole('button', { name: '+ Add flag' })
+        );
+        const name = screen.getByDisplayValue('newFlag');
+        await user.clear(name);
+        await user.type(name, 'seen-intro');
+
+        expect(
+            screen.getByText('Use letters, numbers, and underscores only.')
+        ).toBeTruthy();
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+        expect(writeEntity).not.toHaveBeenCalled();
+    });
+
     it('saves all owned configuration fields without touching the shell block', async () => {
         const { writeEntity } = installBridge({
             ok: true,

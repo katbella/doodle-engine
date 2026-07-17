@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isValidIdentifier } from '@doodle-engine/core';
 import type { CreatableSection } from '../lib/new-content';
 
 /**
@@ -27,7 +28,7 @@ export function RenameModal({
 
     const trimmed = id.trim();
     const taken = trimmed !== oldId && existingIds.includes(trimmed);
-    const badChars = trimmed !== '' && !/^[A-Za-z0-9_]+$/.test(trimmed);
+    const badChars = trimmed !== '' && !isValidIdentifier(trimmed);
     const valid = trimmed !== '' && trimmed !== oldId && !taken && !badChars;
 
     const error = taken

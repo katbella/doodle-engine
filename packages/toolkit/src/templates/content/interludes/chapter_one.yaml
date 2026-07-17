@@ -4,10 +4,10 @@ id: chapter_one
 background: interlude_background.svg
 
 # Optional: decorative border/frame image overlaid on the background.
-# banner: /assets/images/ui/chapter_frame.png
+# banner: assets/images/ui/chapter_frame.png
 
 # Optional: music to play during this interlude.
-# music: /assets/audio/music/chapter_theme.ogg
+# music: assets/audio/music/chapter_theme.ogg
 
 # The narrative text. Supports @localization.key or plain text.
 text: "@interlude.chapter_one.text"

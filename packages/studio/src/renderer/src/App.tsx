@@ -52,6 +52,7 @@ import {
     Square,
     Sun,
     Moon,
+    CircleHelp,
 } from './lib/icons';
 
 /** The reference-index symbol type for each content section, where one exists.
@@ -752,6 +753,14 @@ export function App() {
                     },
                 ]
               : []),
+        {
+            id: 'act:documentation',
+            label: 'Documentation',
+            group: 'Actions',
+            keywords: 'help guide studio manual',
+            icon: <CircleHelp size={15} />,
+            run: () => void window.studio.openDocumentation(),
+        },
         {
             id: 'act:theme',
             label:

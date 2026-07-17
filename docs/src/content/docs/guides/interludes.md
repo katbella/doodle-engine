@@ -3,7 +3,7 @@ title: Narrative Interludes
 description: Full-screen text scenes for chapter transitions and dream sequences.
 ---
 
-Interludes are full-screen text scenes (chapter cards, dream sequences, journal entries read aloud), like the parchment screens between chapters in Infinity Engine games like Baldur's Gate. They show a background image with scrolling narrative text. The player can read at their own pace and skip when ready.
+Interludes are full-screen narrative scenes for chapter breaks, dreams, and other story transitions. Inspired by the chapter screens in Infinity Engine games such as *Baldur's Gate*, they combine scrolling text with background art and optional audio. Players can read at their own pace or skip when ready.
 
 ## Creating an Interlude
 
@@ -50,7 +50,7 @@ text: |
 
 Use `INTERLUDE <id>` in any dialogue node:
 
-```
+```text
 NODE find_letter
   NARRATOR: You open the envelope with trembling hands.
   SET flag foundLetter
@@ -58,9 +58,9 @@ NODE find_letter
   END dialogue
 ```
 
-### Auto-trigger on Location Enter
+### Start When the Player Enters a Location
 
-Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effects` field runs immediately when the interlude triggers. Use it to set a "seen" flag so the interlude doesn't repeat on return visits:
+Set `triggerLocation`, `triggerConditions`, and `effects` in the YAML. The `effects` field runs as soon as the interlude starts. Set a "seen" flag to limit the interlude to the first visit:
 
 ```yaml
 id: chapter_two
@@ -82,17 +82,15 @@ effects:
       flag: seenChapterTwo
 ```
 
-The effects run at trigger time (before the player even sees the interlude), so `notFlag seenChapterTwo` will fail if the player returns. The interlude won't show again.
-
-Keep the "seen" flag in the interlude's own `effects`, as shown above. The engine checks `triggerConditions` and then runs the interlude's `effects`, so the check and the flag stay in step and the interlude shows exactly once.
+The engine checks `triggerConditions` and then runs the interlude's `effects`. Keeping the `notFlag` condition and matching `setFlag` effect together makes the interlude appear once.
 
 ## Audio
 
-The `Interlude` component plays audio fields automatically when the interlude appears:
+The `Interlude` component plays the configured audio when the interlude appears:
 
-- **`music`**: loops for the full duration and stops on dismiss
-- **`voice`**: plays once as narration and stops on dismiss if still playing
-- **`sounds`**: each entry loops as ambient audio and stops on dismiss
+- **Music** loops for the full duration and stops when the interlude closes.
+- **Voice** plays once as narration and stops when the interlude closes if it is still playing.
+- **Sounds** loop as ambient audio and stop when the interlude closes.
 
 Volumes follow the player's current settings. All audio stops when the player skips.
 
@@ -105,7 +103,7 @@ Volumes follow the player's current settings. All audio stops when the player sk
 | **Space or Enter**   | Dismiss                            |
 | **Escape**           | Dismiss                            |
 | **Mouse wheel**      | Manual scroll (pauses auto-scroll) |
-| **↑ / ↓ arrow keys** | Manual scroll (pauses auto-scroll) |
+| **Up or Down arrow key** | Manual scroll (pauses auto-scroll) |
 
 ## Localized Text
 
@@ -129,7 +127,7 @@ chapter.one.intro: |
 
 ## Custom Renderer
 
-If you're building a custom renderer (not using `GameShell`), render the interlude yourself:
+[Custom renderers](/technical/custom-renderer/) can display the pending interlude with the `Interlude` component:
 
 ```tsx
 import { Interlude } from '@doodle-engine/react';

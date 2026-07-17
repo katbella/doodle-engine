@@ -3,7 +3,7 @@ title: VS Code Extension
 description: Syntax highlighting for .dlg dialogue files in VS Code.
 ---
 
-The Doodle Engine VS Code extension adds syntax highlighting for `.dlg` dialogue files. It is included in the repository under `extensions/vscode-dlg/` and is not published to the VS Code Marketplace.
+The Doodle Engine VS Code extension adds syntax highlighting for `.dlg` dialogue files. It is distributed as a VSIX installation file with the `@doodle-engine/cli` package.
 
 ## What It Highlights
 
@@ -33,8 +33,6 @@ The extension is bundled with the `@doodle-engine/cli` npm package. After runnin
 1. Open VS Code
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Extensions: Install from VSIX...**
-4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix` in your project
+4. Open `node_modules/@doodle-engine/cli/extensions/` in your project and select the `doodle-dlg-syntax-*.vsix` file
 
 Then reload VS Code. The extension loads automatically for any file with the `.dlg` extension.
-
-> The extension is not published to the VS Code Marketplace - the `.vsix` bundled in the npm package is the distribution method.

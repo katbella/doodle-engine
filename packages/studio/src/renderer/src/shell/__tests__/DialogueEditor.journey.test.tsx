@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     cleanup,
+    fireEvent,
     render,
     screen,
     waitFor,
@@ -101,6 +102,22 @@ function renderEditor() {
 afterEach(cleanup);
 
 describe('DialogueEditor author journeys', () => {
+    it('saves pending dialogue changes with Ctrl+S', async () => {
+        const writeDocument = installBridge();
+        const user = userEvent.setup();
+        renderEditor();
+
+        const line = await screen.findByDisplayValue('Welcome.');
+        await user.clear(line);
+        await user.type(line, 'Saved now.');
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+
+        await waitFor(() => expect(writeDocument).toHaveBeenCalledOnce());
+        expect(writeDocument.mock.calls[0][2]).toContain(
+            'BARTENDER: Saved now.'
+        );
+    });
+
     it('renames a node, repoints choices, preserves comments, and shows clean targets', async () => {
         const writeDocument = installBridge();
         const user = userEvent.setup();

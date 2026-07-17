@@ -53,6 +53,12 @@ let previewProc: UtilityProcess | null = null;
 let previewStatus: PreviewStatus | null = null;
 let errorLog: ErrorLog | null = null;
 
+const STUDIO_DOCUMENTATION_URL = 'https://doodleengine.dev/studio/';
+
+function openDocumentation(): Promise<void> {
+    return shell.openExternal(STUDIO_DOCUMENTATION_URL);
+}
+
 function developmentEngineRoot(): string | undefined {
     return app.isPackaged ? undefined : resolvePath(__dirname, '../../../..');
 }
@@ -144,8 +150,7 @@ async function buildMenu(projects: ProjectService): Promise<void> {
             submenu: [
                 {
                     label: 'Documentation',
-                    click: () =>
-                        void shell.openExternal('https://doodleengine.dev/'),
+                    click: () => void openDocumentation(),
                 },
                 {
                     label: 'Open Error Log',
@@ -523,6 +528,7 @@ app.whenReady().then(() => {
     handle('shell:openPath', async (_event, targetPath: string) => {
         await shell.openPath(targetPath);
     });
+    handle('help:documentation', () => openDocumentation());
 
     const documents = new DocumentService(markSelfWrite);
     const assets = new AssetService(markSelfWrite);

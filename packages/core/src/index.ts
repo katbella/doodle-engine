@@ -11,6 +11,8 @@ declare const __DOODLE_VERSION__: string;
 export const VERSION: string =
     typeof __DOODLE_VERSION__ === 'string' ? __DOODLE_VERSION__ : '0.0.0-dev';
 
+export { isValidIdentifier } from './identifiers';
+
 // Content Entities
 export type {
     Location,

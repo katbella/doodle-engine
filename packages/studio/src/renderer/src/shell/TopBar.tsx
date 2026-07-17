@@ -7,6 +7,7 @@ import {
     Monitor,
     ExternalLink,
     Command,
+    CircleHelp,
 } from '../lib/icons';
 
 export function TopBar({
@@ -92,6 +93,14 @@ export function TopBar({
                 </kbd>
             </button>
             <div className="topbar__spacer" />
+            <button
+                className="btn btn--icon"
+                onClick={() => void window.studio.openDocumentation()}
+                aria-label="Open Doodle Studio documentation"
+                title="Open Doodle Studio documentation"
+            >
+                <CircleHelp size={16} />
+            </button>
             <button
                 className="btn btn--icon"
                 onClick={onToggleTheme}

@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EntityForm } from '../EntityForm';
 import type { OpenProject, StudioApi } from '../../../../shared/project';
@@ -124,6 +130,27 @@ describe('EntityForm author journeys', () => {
         await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
         expect(writeEntity.mock.calls[0][2]).toEqual([
             { path: ['name'], value: 'New Town' },
+        ]);
+    });
+
+    it('saves a pending edit when the author presses Ctrl+S', async () => {
+        const writeEntity = vi.fn<StudioApi['writeEntity']>(async () => ({
+            ok: true,
+            conflict: false,
+            mtimeMs: 11,
+        }));
+        installBridge(writeEntity);
+        renderEditor();
+        const user = userEvent.setup();
+
+        const name = await screen.findByDisplayValue('Old Town');
+        await user.clear(name);
+        await user.type(name, 'Saved Town');
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+
+        await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
+        expect(writeEntity.mock.calls[0][2]).toEqual([
+            { path: ['name'], value: 'Saved Town' },
         ]);
     });
 

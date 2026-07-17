@@ -46,11 +46,11 @@ import { hasSaves, latestSave, writeSave } from './saves';
 type Screen = 'splash' | 'title' | 'credits' | 'playing';
 
 export interface GameShellProps {
-    /** Content registry (from /api/content) */
+    /** Content registry (from api/content) */
     registry: ContentRegistry;
-    /** Game config (from /api/content), includes shell config */
+    /** Game config (from api/content), includes shell config */
     config: GameConfig;
-    /** Asset manifest (from /api/manifest) */
+    /** Asset manifest (from api/manifest) */
     manifest: AssetManifest;
     /** Custom asset loader (for non-browser environments) */
     assetLoader?: AssetLoader;

@@ -1,5 +1,5 @@
 import type { RecentProject } from '../../../shared/project';
-import { Sun, Moon } from '../lib/icons';
+import { Sun, Moon, CircleHelp } from '../lib/icons';
 
 export function Welcome({
     onOpen,
@@ -22,23 +22,39 @@ export function Welcome({
 }) {
     return (
         <div className="welcome">
-            <button
-                className="btn btn--icon welcome__theme"
-                onClick={onToggleTheme}
-                aria-label={
-                    theme === 'dark'
-                        ? 'Switch to light mode'
-                        : 'Switch to dark mode'
-                }
-                title={
-                    theme === 'dark'
-                        ? 'Switch to light mode'
-                        : 'Switch to dark mode'
-                }
-            >
-                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-            <div className="welcome__mark">DS</div>
+            <div className="welcome__tools">
+                <button
+                    className="btn btn--icon"
+                    onClick={() => void window.studio.openDocumentation()}
+                    aria-label="Open Doodle Studio documentation"
+                    title="Open Doodle Studio documentation"
+                >
+                    <CircleHelp size={16} />
+                </button>
+                <button
+                    className="btn btn--icon"
+                    onClick={onToggleTheme}
+                    aria-label={
+                        theme === 'dark'
+                            ? 'Switch to light mode'
+                            : 'Switch to dark mode'
+                    }
+                    title={
+                        theme === 'dark'
+                            ? 'Switch to light mode'
+                            : 'Switch to dark mode'
+                    }
+                >
+                    {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                </button>
+            </div>
+            <div className="welcome__mark" aria-hidden="true">
+                <img
+                    className="welcome__mark-image"
+                    src="./apple-touch-icon.png"
+                    alt=""
+                />
+            </div>
             <div className="welcome__title">Doodle Studio</div>
             <div className="welcome__sub">
                 Open or create a Doodle project to browse and edit its
@@ -69,19 +85,27 @@ export function Welcome({
 
             {recent.length > 0 && !loading && (
                 <div className="recent">
-                    <div className="recent__label">Recent</div>
-                    {recent.map((entry) => (
-                        <button
-                            key={entry.path}
-                            className="recent__item"
-                            onClick={() => onOpenRecent(entry.path)}
-                        >
-                            <span className="recent__name">{entry.name}</span>
-                            <span className="recent__path mono">
-                                {entry.path}
-                            </span>
-                        </button>
-                    ))}
+                    <div className="recent__label">Recent Projects</div>
+                    <div
+                        className="recent__list scroll"
+                        role="region"
+                        aria-label="Recent projects"
+                    >
+                        {recent.map((entry) => (
+                            <button
+                                key={entry.path}
+                                className="recent__item"
+                                onClick={() => onOpenRecent(entry.path)}
+                            >
+                                <span className="recent__name">
+                                    {entry.name}
+                                </span>
+                                <span className="recent__path mono">
+                                    {entry.path}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>

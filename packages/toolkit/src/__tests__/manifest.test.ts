@@ -8,7 +8,11 @@ import { join } from 'path';
 import { afterEach, describe, it, expect } from 'vitest';
 import { generateAssetManifest } from '../manifest';
 import { generateServiceWorker } from '../service-worker';
-import type { AssetManifest, ContentRegistry, GameConfig } from '@doodle-engine/core';
+import type {
+    AssetManifest,
+    ContentRegistry,
+    GameConfig,
+} from '@doodle-engine/core';
 
 // ── generateServiceWorker ─────────────────────────────────────────────────────
 
@@ -17,13 +21,13 @@ function makeManifest(overrides?: Partial<AssetManifest>): AssetManifest {
         version: 'test-1',
         shell: [
             {
-                path: '/assets/images/logo.png',
+                path: 'assets/images/logo.png',
                 type: 'image',
                 size: 1024,
                 tier: 1,
             },
             {
-                path: '/assets/audio/splash.ogg',
+                path: 'assets/audio/splash.ogg',
                 type: 'audio',
                 size: 2048,
                 tier: 1,
@@ -31,13 +35,13 @@ function makeManifest(overrides?: Partial<AssetManifest>): AssetManifest {
         ],
         game: [
             {
-                path: '/assets/images/tavern.jpg',
+                path: 'assets/images/tavern.jpg',
                 type: 'image',
                 size: 40000,
                 tier: 2,
             },
             {
-                path: '/assets/audio/music.ogg',
+                path: 'assets/audio/music.ogg',
                 type: 'audio',
                 size: 300000,
                 tier: 2,
@@ -60,10 +64,10 @@ describe('generateServiceWorker', () => {
     it('includes all asset paths in the precache list', () => {
         const manifest = makeManifest();
         const source = generateServiceWorker(manifest);
-        expect(source).toContain('/assets/images/logo.png');
-        expect(source).toContain('/assets/audio/splash.ogg');
-        expect(source).toContain('/assets/images/tavern.jpg');
-        expect(source).toContain('/assets/audio/music.ogg');
+        expect(source).toContain('assets/images/logo.png');
+        expect(source).toContain('assets/audio/splash.ogg');
+        expect(source).toContain('assets/images/tavern.jpg');
+        expect(source).toContain('assets/audio/music.ogg');
     });
 
     it('includes the cache name with the manifest version', () => {
@@ -187,7 +191,7 @@ describe('generateAssetManifest', () => {
         );
 
         expect(manifest.game).toContainEqual({
-            path: '/assets/images/banners/tavern.png',
+            path: 'assets/images/banners/tavern.png',
             type: 'image',
             size: 5,
             tier: 2,
@@ -207,7 +211,7 @@ describe('generateAssetManifest', () => {
                 'test'
             )
         ).rejects.toThrow(
-            'Referenced asset not found: /assets/images/banners/tavern.png'
+            'Referenced asset not found: assets/images/banners/tavern.png'
         );
     });
 });

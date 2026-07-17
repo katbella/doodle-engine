@@ -269,6 +269,7 @@ export interface StudioApi {
     onPreviewLog: (callback: (dir: string, line: string) => void) => () => void;
     /** Open a folder (or file) in the OS file manager. */
     openPath: (targetPath: string) => Promise<void>;
+    openDocumentation: () => Promise<void>;
     /** Persist a renderer error in Studio's error log. */
     reportError: (details: {
         context: string;

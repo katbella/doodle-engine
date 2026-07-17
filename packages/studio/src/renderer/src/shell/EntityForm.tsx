@@ -126,6 +126,19 @@ export function EntityForm({
         if (dirty && !conflict && !missing) void save();
     };
     useEffect(() => () => flushRef.current(), []);
+    useEffect(() => {
+        const handleSaveShortcut = (event: KeyboardEvent) => {
+            if (
+                (event.ctrlKey || event.metaKey) &&
+                event.key.toLowerCase() === 's'
+            ) {
+                event.preventDefault();
+                flushRef.current();
+            }
+        };
+        window.addEventListener('keydown', handleSaveShortcut);
+        return () => window.removeEventListener('keydown', handleSaveShortcut);
+    }, []);
 
     if (loading) {
         return (

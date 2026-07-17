@@ -1,29 +1,23 @@
 ---
 title: Architecture
-description: Understanding the state → action → snapshot data flow.
+description: How player actions update game state and produce snapshots.
 ---
 
 Doodle Engine follows a one-way data flow pattern: **player actions go in, engine state updates, and a snapshot comes out**.
 
 ## Overview
 
-```text
-Player Action → Engine → New State → Snapshot → Renderer
-      ↑                                             |
-      └─────────────────────────────────────────────┘
-```
-
 1. The **player** performs an action (talk to character, select choice, travel)
 2. The **engine** processes the action, evaluating conditions and applying effects
-3. The engine updates its state
-4. A **snapshot** is built: a renderer-ready view of the current state
+3. The engine updates its **state**
+4. A **snapshot** is built: a description of the current game screen
 5. The **renderer** displays the snapshot and waits for the next action
 
 ## Three Layers
 
 ### Content (Static)
 
-Game content is defined in YAML and `.dlg` files. It never changes at runtime. Content is loaded into a `ContentRegistry`:
+Game content is defined in YAML and `.dlg` files. At startup, it is loaded into a `ContentRegistry`: the read-only collection of locations, characters, dialogues, and other game definitions.
 
 ```ts
 interface ContentRegistry {
@@ -68,7 +62,7 @@ interface GameState {
 
 ### Snapshot (Derived)
 
-The snapshot is computed from the current state and the content registry. It enriches IDs with full entity data, resolves localization keys, and evaluates conditions to determine what is visible:
+The snapshot is computed from the current state and content registry. It looks up the content referenced by IDs, resolves localization keys, and evaluates conditions to determine what is visible:
 
 ```ts
 interface Snapshot {
@@ -115,7 +109,7 @@ Conditions are evaluated by the engine in three places:
 - Engine actions check triggered dialogues and interludes when a game starts or travel changes location.
 - Dialogue advancement evaluates `IF` branches; the first passing branch runs its effects and controls routing.
 
-This means the snapshot only contains valid, visible player options. The renderer never evaluates conditions.
+The snapshot contains the player options whose conditions passed, ready for the renderer to display.
 
 ## Effect Processing
 
@@ -133,9 +127,9 @@ Effects produce a new state: setting flags, adding items, changing quest stages,
 ```text
 @doodle-engine/core      Engine, types, conditions, effects, parser, snapshot builder
 @doodle-engine/react     React components, hooks, context provider
-@doodle-engine/toolkit   Project loading, validation, dev server, builds, scaffolding
+@doodle-engine/toolkit   Project loading, validation, dev server, builds, project creation
 @doodle-engine/cli       The doodle command line, a thin wrapper over the toolkit
-@doodle-engine/studio    Doodle Studio desktop editor (not published)
+@doodle-engine/studio    Doodle Studio desktop editor
 ```
 
-The core package has no UI or framework dependencies. It can be used with any framework or runtime. The React package is one possible renderer. The toolkit owns every operation that touches a project's files, and both the CLI and Doodle Studio call it, so the command line and the visual editor always agree.
+The core package has no UI framework dependency, so it can run with different renderers and runtimes. The React package provides one renderer. The toolkit handles project-file operations for both the CLI and Doodle Studio, giving both applications the same loading, validation, and build behavior.

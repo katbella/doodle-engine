@@ -42,7 +42,7 @@ export async function generateAssetManifest(
             return undefined;
         }
 
-        // Asset paths are like /assets/images/foo.png, so strip the leading /
+        // Explicit absolute paths retain their leading slash; project paths do not.
         const fsPath = join(
             publicDir,
             assetPath.startsWith('/') ? assetPath.slice(1) : assetPath

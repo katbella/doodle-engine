@@ -3,60 +3,71 @@ title: Why Doodle Engine
 description: When to use Doodle Engine and what problems it solves.
 ---
 
-## Philosophy
+## The Idea Behind Doodle Engine
 
-Doodle Engine is built for story-driven games where dialogue and world state matter more than movement or combat.
+Doodle Engine is for story-rich games built around dialogue, exploration, and a world that remembers what the player has done. It supports traditional text adventures and games with the hallmarks of a classic computer RPG.
 
-Game authors write content in YAML and a simple dialogue DSL. Developers customize the app, renderer, shell, and styling in TypeScript. Writers work in text files. Programmers work in code. Both can move forward without blocking each other.
+It takes inspiration from the Infinity Engine games of the late 1990s and early 2000s, especially *Baldur's Gate*, *Icewind Dale*, and *Planescape: Torment*. In those games, story is closely tied to game state. Conversations respond to the world and change it in return, allowing dialogue, exploration, and player choices to shape one another.
 
-The engine supports visual presentation elements such as image banners, video triggered by dialogue effects, and narrative interludes with scrolling text. This allows games to mix prose with structured scenes and transitions.
+A Doodle game can pair that structure with rich artwork, animation, sound, video, and a custom interface. Projects can create polished visual experiences without building around real-time movement, physics, or combat.
 
-Games built with Doodle Engine can be shipped as standalone titles. Projects typically run in the browser during development and can be packaged for web, desktop, or mobile. Desktop and mobile deployment can be accomplished using standard web wrapping tools.
+Doodle Engine provides a focused foundation for building and shipping narrative RPGs and adventures.
 
-The goal is to make narrative games easier to build without locking projects into a specific ruleset, genre, or visual style.
+## Why "Doodle"?
+
+Doodle Engine is named after doodles, the goofy (but lovable!) family of poodle mixes. A doodle is also a freeform sketch: a place to explore an idea and see what it becomes.
+
+Stories matter in games. When the story and game world are connected, player choices can influence both. The best stories often come from combining interesting concepts and influences. Doodle Engine grew in the same way, drawing inspiration from games and engines I have enjoyed. My goal is to bring those ideas together in a tool that feels approachable and easy to use.
+
+## Design Philosophy
+
+Doodle Engine follows four practical principles:
+
+- **Narrative and game systems belong together.** Dialogue reads and changes the same state as the rest of the game.
+- **Content should be approachable.** Doodle Studio provides visual authoring and playtesting, and the project remains in readable files for direct editing and version control.
+- **Projects should start with useful defaults.** A new project includes a playable shell and established patterns for content, saving, and validation. Each part can evolve with the game.
+- **Presentation should stay flexible.** The engine keeps game state separate from the interface. You can use the built-in React renderer, customize it, or create your own.
 
 ## Comparison to Other Tools
 
-### vs Twine
+Twine, Ink, Ren'Py, and Doodle Engine can all be used to make branching narrative games. They organize the work in different ways.
 
-[Twine](https://twinery.org/) is designed for hypertext fiction: stories told through linked passages. Doodle Engine is aimed at games with persistent state and world structure, such as locations, inventory, and quests.
+### Twine
 
-### vs Ink
+[Twine](https://twinery.org/) centers authoring on passages and links. The chosen story format defines how the finished story runs and which authoring features are available. Doodle organizes dialogue as part of a larger RPG world and its systems.
 
-[Ink](https://www.inklestudios.com/ink/) is a language for branching dialogue and narrative flow. It assumes you will provide the surrounding game systems yourself.
+### Ink
 
-Doodle Engine includes those systems so dialogue, inventory, quests, and world state are part of the same model.
+[Ink](https://www.inklestudios.com/ink/) is a scripting language for highly branching narrative. It can power a web story or be embedded in a larger game. Doodle's dialogue format belongs to a complete narrative game project with its own world model, authoring tools, and renderer.
 
-### vs Ren'Py
+### Ren'Py
 
-[Ren'Py](https://www.renpy.org/) is a visual novel engine with a Python-based scripting language and a renderer designed around sprites, backgrounds, and scene composition.
-
-Doodle Engine focuses on text-driven games and leaves presentation to the renderer.
+[Ren'Py](https://www.renpy.org/) centers visual novel creation on scenes, character sprites, dialogue, menus, and transitions. Doodle focuses on narrative RPGs and adventures, where dialogue, exploration, and persistent game systems work together.
 
 ## When to Use Doodle Engine
 
 Doodle Engine is a good fit when:
 
-- You are building a **text-based RPG** with dialogue, quests, and inventory
-- You want to **separate content from code** so writers and programmers can work independently
-- You want to build a **complete narrative game** that can ship on Steam or itch.io
-- You want a development workflow that runs in the browser but packages to web, desktop, or mobile
-- You want to present story moments using **images, video, or narrative interludes** alongside dialogue
-- You want to **control the UI** with CSS or build your own renderer
-- You need **localization** built in from the start
-- You want **hot reload** while writing and testing content
+- Dialogue, exploration, and player choice are central to the game
+- Conversations need to reflect and change a persistent world
+- You want the structure of a classic RPG without building the game around real-time movement or combat
+- You want to combine text with rich visuals, music, voice, and video
+- You want a visual workspace for building and playtesting the game
+- You want control over the game's interface and visual presentation
+- You plan to release the game on web, desktop, or mobile
 
-Doodle Engine is not a good fit when:
+Another engine may fit better when:
 
 - You need **real-time combat**, **pathfinding**, or **physics**
 - You are building a **visual novel** centered on character sprites and scene composition
 - You want a **pure hypertext** tool with minimal structure
-- You want to write everything in a **single scripting language** without external data files
 
 ## Who Is It For
 
-- **Writers** who want to build narrative games without writing code
-- **Interactive fiction authors** who need inventory, quests, and world state
-- **Web developers** who want to build narrative games with familiar tools
-- **Game jam teams** that need scaffolding and fast iteration
-- **Educators** teaching narrative design or game development
+Doodle supports solo creators working across several disciplines and teams whose members contribute different parts of the game.
+
+- **Writers and narrative designers** can create dialogue, characters, quests, and branching stories.
+- **Game designers** can shape locations, progression, inventory, relationships, and world state.
+- **Programmers** can extend the game and its presentation with TypeScript and web technologies.
+- **Visual artists and audio creators** can provide the portraits, backgrounds, music, voice, sound, and video used by the game.
+- **Educators and students** can use the project structure to teach or learn narrative game development.

@@ -5,7 +5,7 @@ description: How game content is loaded and organized.
 
 The `ContentRegistry` is a read-only data structure that holds all game content. It is built at load time from the `content/` directory and is never modified by the engine or renderer during gameplay.
 
-The registry provides a single indexed source of truth for all static game data, allowing the engine to resolve IDs quickly and build snapshots without scanning files.
+The registry organizes content by ID so the engine can find it without scanning project files during play.
 
 ## Structure
 
@@ -23,21 +23,21 @@ interface ContentRegistry {
 }
 ```
 
-Every entity is indexed by its `id` field. For example, a location with `id: tavern` is stored at `registry.locations.tavern`.
+Every content entity, such as a location or character, is indexed by its `id` field. For example, a location with `id: tavern` is stored at `registry.locations.tavern`.
 
 ## How Content is Loaded
 
 The dev server (`npm run dev`) builds the registry automatically:
 
 1. Scans `content/` subdirectories
-2. Parses `.yaml` files as entities based on their directory
-3. Parses `.dlg` files with the dialogue parser
-4. Loads locale files as flat key-value dictionaries
+2. Reads `.yaml` files as entities based on their directory
+3. Converts `.dlg` files into dialogue data
+4. Loads the translation entries from each locale file
 5. Serves the complete registry via `/api/content`
 
 ### Loading by Directory
 
-| Directory                   | → Registry Field          | Loader                        |
+| Directory                   | Registry Field            | Loader                        |
 | --------------------------- | ------------------------- | ----------------------------- |
 | `content/locations/*.yaml`  | `registry.locations`      | YAML parse, keyed by `id`     |
 | `content/characters/*.yaml` | `registry.characters`     | YAML parse, keyed by `id`     |
@@ -51,9 +51,9 @@ The dev server (`npm run dev`) builds the registry automatically:
 
 ### Special Cases
 
-**Locale files** don't have an `id` field. They're keyed by filename: `en.yaml` → `registry.locales.en`.
+**Locale files** use their filename as the locale code. For example, `en.yaml` becomes `registry.locales.en`.
 
-**Dialogue files** use the filename (without extension) as the dialogue ID: `bartender_greeting.dlg` → `registry.dialogues.bartender_greeting`.
+**Dialogue files** use the filename without its extension as the dialogue ID. For example, `bartender_greeting.dlg` becomes `registry.dialogues.bartender_greeting`.
 
 **game.yaml** is loaded separately as a `GameConfig`, not part of the registry.
 
@@ -89,14 +89,14 @@ const snapshot = engine.newGame(config);
 
 Entities reference each other by ID:
 
-- Character `dialogue` field → Dialogue ID
-- Character `location` field → Location ID
-- Item `location` field → Location ID, `"inventory"`, or Character ID
-- Map `locations[].id` → Location ID
-- Dialogue `triggerLocation` → Location ID
-- Interlude `triggerLocation` → Location ID
-- `INTERLUDE <id>` effect → Interlude ID
-- GameConfig `startLocation` → Location ID
-- GameConfig `startInventory` → Item IDs
+- Character `dialogue` field references a dialogue ID
+- Character `location` field references a location ID
+- Item `location` field references a location ID, `"inventory"`, or a character ID
+- Map `locations[].id` references a location ID
+- Dialogue `triggerLocation` references a location ID
+- Interlude `triggerLocation` references a location ID
+- `INTERLUDE <id>` references an interlude ID
+- `GameConfig.startLocation` references a location ID
+- `GameConfig.startInventory` contains item IDs
 
-These references are resolved when the engine looks them up. Runtime code tries to avoid crashing if something is missing. For example, some actions become no-ops and missing locations render a fallback snapshot. In normal projects, `doodle validate` and `doodle build` should catch broken references before release.
+`doodle validate` and `doodle build` check these references before release. At runtime, the engine uses fallback behavior where possible: some actions leave state unchanged, and a missing location produces a fallback snapshot.

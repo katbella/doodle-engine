@@ -3,7 +3,7 @@ title: YAML Schemas
 description: Schema reference for all YAML entity types.
 ---
 
-All content entities are defined in YAML files placed in the appropriate `content/` subdirectory.
+A schema describes the fields a file can contain and which ones are required. An entity is one structured piece of game content, such as a location, character, or quest. Define each entity in a YAML file in the matching `content/` subdirectory.
 
 Every entity has an `id`. Ids must be unique within their type: two location
 files cannot both be `id: town`, and validation reports the clash with both
@@ -228,7 +228,7 @@ startInventory: []
 
 **Directory:** `content/locales/`
 
-Locale files are flat key-value dictionaries (not entities). They're loaded by filename.
+Locale files contain localization keys and their translated text. The filename sets the locale code.
 
 ```yaml
 # content/locales/en.yaml

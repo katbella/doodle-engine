@@ -11,7 +11,7 @@ Effects are changes to game state. They run in order when a dialogue node is rea
 
 Set a boolean flag to true.
 
-```
+```text
 SET flag metBartender
 ```
 
@@ -19,7 +19,7 @@ SET flag metBartender
 
 Set a boolean flag to false.
 
-```
+```text
 CLEAR flag doorLocked
 ```
 
@@ -29,7 +29,7 @@ CLEAR flag doorLocked
 
 Set a variable to a specific value.
 
-```
+```text
 SET variable gold 100
 SET variable playerName "Aria"
 ```
@@ -38,7 +38,7 @@ SET variable playerName "Aria"
 
 Add to (or subtract from) a numeric variable.
 
-```
+```text
 ADD variable gold 50
 ADD variable gold -5
 ```
@@ -49,18 +49,17 @@ ADD variable gold -5
 
 Add an item to the player's inventory.
 
-```
+```text
 ADD item old_coin
 ```
 
 ### REMOVE item
 
-Remove an item from the game. The item leaves the inventory and no longer
-has a location anywhere, so `hasItem` and `itemAt` both answer no for it
-afterward. Use this when an item is consumed, destroyed, or handed over for
-good.
+Remove an item from the game by clearing its location. Afterward, `hasItem`
+and `itemAt` both return false for it. Use this when an item is consumed,
+destroyed, or handed over permanently.
 
-```
+```text
 REMOVE item rusty_key
 ```
 
@@ -70,7 +69,7 @@ To put an item somewhere instead of removing it, use `MOVE item`.
 
 Move an item to a specific location.
 
-```
+```text
 MOVE item sword armory
 ```
 
@@ -80,11 +79,11 @@ MOVE item sword armory
 
 Change the player's current location from within dialogue.
 
-```
+```text
 GOTO location market
 ```
 
-This is different from `GOTO nodeId`, which routes to another dialogue node. `GOTO location` ends the dialogue and moves the player, but it does not calculate map travel time or run location triggers. Use `travelTo()` for normal map travel.
+`GOTO nodeId` routes to another dialogue node. `GOTO location` ends the dialogue and moves the player. Map travel through `travelTo()` also calculates travel time and runs location triggers.
 
 ## Time
 
@@ -92,7 +91,7 @@ This is different from `GOTO nodeId`, which routes to another dialogue node. `GO
 
 Advance game time by a number of hours.
 
-```
+```text
 ADVANCE time 2
 ```
 
@@ -104,7 +103,7 @@ Time wraps at 24 hours and increments the day counter.
 
 Set a quest to a specific stage.
 
-```
+```text
 SET questStage odd_jobs started
 SET questStage odd_jobs complete
 ```
@@ -115,7 +114,7 @@ SET questStage odd_jobs complete
 
 Unlock a journal entry.
 
-```
+```text
 ADD journalEntry tavern_discovery
 ```
 
@@ -127,26 +126,26 @@ Journal entries are only added once. Adding the same entry again has no effect.
 
 Replace the current dialogue with a different one, starting from its first node.
 
-```
+```text
 START dialogue merchant_intro
 ```
 
-The current dialogue ends and the new one starts from scratch. There is no return path. Once the new dialogue ends, the player is back at the idle state, not back in the original conversation.
+The current dialogue ends, and the new one begins at its first node. When the new dialogue ends, the player returns to the idle game state.
 
-**Use `START dialogue` when** the sub-dialogue is self-contained and doesn't need to flow back into the caller (a cutscene, a one-off encounter, a modal quiz).
+Use `START dialogue` for a self-contained sequence such as a cutscene, one-off encounter, or quiz.
 
-**Use inline `GOTO` instead when** you need the player to return to earlier choices after the sub-flow. Add the sub-flow nodes directly to the same `.dlg` file and route them back:
+For a branch that returns to earlier choices, keep its nodes in the same `.dlg` file and route them back with `GOTO`:
 
-```
+```text
 # inline: bluff nodes live in bartender_greeting.dlg and GOTO start when done
 CHOICE "Try to bluff a free drink."
   GOTO bluff_attempt
 END
 ```
 
-vs.
+For a standalone dialogue:
 
-```
+```text
 # START dialogue: the bluff is a standalone file, conversation ends when it's done
 CHOICE "Tell me about yourself."
   START dialogue npc_backstory
@@ -157,7 +156,7 @@ END
 
 End the current dialogue and return to the idle state.
 
-```
+```text
 END dialogue
 ```
 
@@ -167,7 +166,7 @@ END dialogue
 
 Move a character to a specific location.
 
-```
+```text
 SET characterLocation merchant tavern
 ```
 
@@ -175,7 +174,7 @@ SET characterLocation merchant tavern
 
 Add a character to the player's party.
 
-```
+```text
 ADD toParty elisa
 ```
 
@@ -183,7 +182,7 @@ ADD toParty elisa
 
 Remove a character from the player's party.
 
-```
+```text
 REMOVE fromParty elisa
 ```
 
@@ -191,7 +190,7 @@ REMOVE fromParty elisa
 
 Set the relationship value with a character (absolute).
 
-```
+```text
 SET relationship bartender 5
 ```
 
@@ -199,7 +198,7 @@ SET relationship bartender 5
 
 Add to (or subtract from) a character's relationship value.
 
-```
+```text
 ADD relationship bartender 1
 ADD relationship bartender -2
 ```
@@ -208,7 +207,7 @@ ADD relationship bartender -2
 
 Set a stat value on a character.
 
-```
+```text
 SET characterStat elisa level 5
 ```
 
@@ -216,7 +215,7 @@ SET characterStat elisa level 5
 
 Add to (or subtract from) a character's stat.
 
-```
+```text
 ADD characterStat elisa health -10
 ```
 
@@ -226,7 +225,7 @@ ADD characterStat elisa health -10
 
 Enable or disable the map.
 
-```
+```text
 SET mapEnabled true
 SET mapEnabled false
 ```
@@ -237,13 +236,13 @@ SET mapEnabled false
 
 Change the current music track.
 
-```
+```text
 MUSIC tension_theme.ogg
 ```
 
 Use bare `MUSIC` to clear the override and return to the current location's music.
 
-```
+```text
 MUSIC
 ```
 
@@ -251,7 +250,7 @@ MUSIC
 
 Play a one-shot sound effect.
 
-```
+```text
 SOUND door_slam.ogg
 ```
 
@@ -261,11 +260,11 @@ SOUND door_slam.ogg
 
 Play a fullscreen video/cutscene. Bare filenames resolve to the normal video asset path.
 
-```
+```text
 VIDEO intro_cinematic.mp4
 ```
 
-The video appears as `pendingVideo` in the snapshot returned by the action that produced it. The engine clears it after that action snapshot. `GameShell` stores that value long enough for `VideoPlayer` to handle playback and skip; custom renderers should do the same.
+The video appears as `pendingVideo` in the snapshot returned by the action. This is a transient field, meaning it lasts for one engine update. `GameShell` keeps the value until `VideoPlayer` finishes; custom renderers need to retain it for playback as well.
 
 ## Interludes
 
@@ -273,11 +272,11 @@ The video appears as `pendingVideo` in the snapshot returned by the action that 
 
 Show a narrative interlude: a full-screen text scene with scrolling text and a background image, like chapter cards in Infinity Engine games such as Baldur's Gate.
 
-```
+```text
 INTERLUDE chapter_one
 ```
 
-The interlude ID must match an entity in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot returned by the action that produced it. Renderers dismiss the visible interlude with `dismissInterlude()`. See the [Interludes guide](/guides/interludes/) for the full YAML schema.
+The interlude ID must match an ID in `content/interludes/`. The interlude appears as `pendingInterlude` in the snapshot returned by the action. Renderers dismiss it with `dismissInterlude()`. See the [Interludes guide](/guides/interludes/) for the full YAML schema.
 
 ## Dice Rolling
 
@@ -285,7 +284,7 @@ The interlude ID must match an entity in `content/interludes/`. The interlude ap
 
 Roll a random integer between `min` and `max` (inclusive) and store the result in a variable.
 
-```
+```text
 ROLL bluffRoll 1 20
 ```
 
@@ -297,7 +296,7 @@ ROLL bluffRoll 1 20
 
 The stored variable can then be displayed in dialogue using `{varName}` interpolation, or tested with `variableGreaterThan` / `variableLessThan` conditions.
 
-```
+```text
 # Roll once, then branch and display the result
 ROLL bluffRoll 1 20
 NARRATOR: You rolled a {bluffRoll}.
@@ -315,7 +314,7 @@ Effects inside an `IF` block run only when that IF condition passes. If the IF b
 
 For a hidden check where you don't need the value, use the `roll` condition in an `IF` block or triggered content:
 
-```
+```text
 IF roll 1 20 15
   GOTO lucky_find
 END
@@ -329,12 +328,12 @@ See the [Dice & Randomness guide](/guides/dice-and-randomness/) for patterns and
 
 Show a notification to the player. Supports `@key` localization.
 
-```
+```text
 NOTIFY @notification.quest_started
 NOTIFY "You found something!"
 ```
 
-Notifications are transient. They appear in one snapshot and are automatically cleared.
+Notifications are transient: they appear in one snapshot and then clear.
 
 ## TypeScript API
 
@@ -352,7 +351,7 @@ const newState = applyEffects(effects, gameState);
 
 Effects within a node or choice are applied sequentially, top to bottom. This means later effects can depend on earlier ones:
 
-```
+```text
 SET flag questStarted
 SET questStage odd_jobs started
 ADD journalEntry odd_jobs_accepted

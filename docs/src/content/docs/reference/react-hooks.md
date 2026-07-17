@@ -3,9 +3,11 @@ title: React Hooks
 description: Reference for useGame and useAudioManager hooks.
 ---
 
+A React hook is a function that gives a component access to shared state or behavior. Doodle's hooks provide game state, player actions, audio, and input handling.
+
 ## useGame
 
-Access the game context (snapshot and actions) from any component inside a `GameProvider`.
+Access the shared game state and actions from any component inside a `GameProvider`.
 
 ```tsx
 import { useGame } from '@doodle-engine/react';
@@ -69,9 +71,9 @@ Each action calls the corresponding engine method and updates the snapshot:
 
 ## useAudioManager
 
-Manages audio playback automatically based on snapshot changes. Volumes are reactive parameters: pass current values each render and the hook applies them to the audio elements.
+Manages audio playback as the snapshot changes. Pass the current volume values each time the component renders; active audio updates when those values change.
 
-The caller owns volume state (typically via `AudioSettingsContext`). This hook does not store volumes internally.
+Store volume state in `AudioSettingsContext` or another application store and pass the values to the hook.
 
 ```tsx
 import { useAudioManager, useAudioSettings, AudioSettingsProvider } from '@doodle-engine/react';
@@ -149,14 +151,14 @@ The hook manages four channels:
 
 ## useUISounds
 
-Standalone hook for UI chrome sounds (clicks, menu open/close). This is separate from `useAudioManager` because it handles renderer UI sounds, not game content audio.
+Hook for interface sounds such as clicks and menus opening or closing. `useAudioManager` handles audio from game content, while `useUISounds` handles the renderer's controls.
 
 ```tsx
 import { useUISounds } from '@doodle-engine/react';
 
 function MyUI() {
     const uiSounds = useUISounds({
-        basePath: '/assets/audio/ui',
+        basePath: 'assets/audio/ui',
         volume: 0.5,
         sounds: {
             click: 'click.ogg',
@@ -183,7 +185,7 @@ function MyUI() {
 | Option             | Type      | Default            | Description                  |
 | ------------------ | --------- | ------------------ | ---------------------------- |
 | `enabled`          | `boolean` | `true`             | Enable/disable UI sounds     |
-| `basePath`         | `string`  | `'/assets/audio/ui'` | Base path for UI sound files |
+| `basePath`         | `string`  | `'assets/audio/ui'` | Base path for UI sound files |
 | `volume`           | `number`  | `0.5`              | Volume level (0-1)           |
 | `sounds`           | `object`  | —                  | Custom sound file names      |
 | `sounds.click`     | `string`  | `'click.ogg'`      | Click sound file             |
@@ -216,7 +218,7 @@ interface UISoundControls {
     config={config}
     manifest={manifest}
     uiSounds={{
-        basePath: '/assets/audio/ui',
+        basePath: 'assets/audio/ui',
         volume: 0.5,
         sounds: { click: 'click.ogg' },
     }}
@@ -290,8 +292,8 @@ commands when they need them.
 
 ### Priority
 
-Higher priority handlers receive commands first. Return `true` to consume the
-command and prevent lower-priority surfaces from seeing it.
+Higher-priority handlers receive commands first. Return `true` to consume the
+command, which stops it from reaching lower-priority handlers.
 
 Recommended priorities:
 
@@ -308,9 +310,8 @@ trigger game commands.
 
 ## useInputRouter
 
-Access the current router directly. Most custom renderers should prefer
-`useInputAction`, but `useInputRouter` is useful when integrating another input
-source.
+Access the current input router directly. Use `useInputAction` for component
+commands and `useInputRouter` when connecting another input source.
 
 ```tsx
 import { useInputRouter } from '@doodle-engine/react';

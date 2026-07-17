@@ -3,59 +3,58 @@ title: Save & Load
 description: How to save and load game state.
 ---
 
-Doodle Engine supports saving and loading the complete game state.
+Doodle Engine’s built-in game shell lets players continue their latest game, make manual saves, use a quick save, and return to an autosave after traveling. Saves are stored in the player’s browser by default.
 
-## Save Data Format
-
-```typescript
-interface SaveData {
-    version: string; // Save format version
-    timestamp: string; // ISO 8601 timestamp
-    state: GameState; // Complete game state
-}
-```
-
-The `SaveData` contains the entire `GameState`, including current location, time, flags, variables, inventory, quest progress, dialogue state, and more.
-
-## Engine API
-
-### Saving
-
-```typescript
-const saveData = engine.saveGame();
-// saveData is a plain object, ready to serialize
-```
-
-### Loading
-
-```typescript
-const snapshot = engine.loadGame(saveData);
-// Restores state and returns a fresh snapshot
-```
-
-## Using the Default SaveLoadPanel
-
-The `GameRenderer` includes a `SaveLoadPanel` component that saves to `localStorage`:
-
-```tsx
-import { GameProvider, GameRenderer } from '@doodle-engine/react';
-
-<GameProvider engine={engine} initialSnapshot={snapshot}>
-    <GameRenderer />
-</GameProvider>;
-```
+## Saving in the Built-in Renderer
 
 The game shell keeps three kinds of save:
 
 - **Quick save**: one slot. The pause menu's Save button writes it and overwrites the previous quick save.
 - **Autosave**: one slot, written automatically when the player travels to a new place. It overwrites the previous autosave.
-- **Manual saves**: as many as the player wants. The panel's New Save button adds one, and you can delete the ones you no longer need.
+- **Manual saves**: as many as the player wants. The Save/Load panel’s **New Save** button adds one, and manual saves can be deleted from the same panel.
 
-The panel lists the quick save and autosave first, then manual saves newest first, and Load opens any of them. The title screen's Continue button opens the most recent save of any kind.
+The Save/Load panel lists the quick save and autosave first, followed by manual saves with the newest at the top. **Load** restores the selected save. The title screen’s **Continue** button restores the most recent save of any kind.
 
-The `@doodle-engine/react` package also exports the save helpers behind this (`listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, `hasSaves`) if you want to build your own save UI over `localStorage`.
+All three kinds are stored in the browser’s local storage (`localStorage`) under the key passed to `GameShell`. The default key is `doodle-engine-save`; give each game a different `storageKey` when several games may share the same site.
 
-## Using SaveLoadPanel Standalone
+```tsx
+<GameShell
+    registry={registry}
+    config={config}
+    manifest={manifest}
+    storageKey="harbor-lights-saves"
+/>
+```
+
+## What a Save Contains
+
+`engine.saveGame()` returns a `SaveData` object containing:
+
+- Current location and time
+- Flags and variables
+- Inventory and item locations
+- Quest progress and unlocked journal entries
+- Player notes
+- Current dialogue state
+- Character locations, party membership, relationships, and stats
+- Map availability and the current locale
+
+`SaveData` also includes a save-format version and timestamp. It contains game state rather than the content definitions themselves, so loading uses the content from the current version of the game.
+
+## Saving and Loading in Code
+
+Call `saveGame()` to capture the current state. Pass that object to `loadGame()` to restore it; `loadGame()` returns the new snapshot for the renderer.
+
+```typescript
+const saveData = engine.saveGame();
+const restoredSnapshot = engine.loadGame(saveData);
+```
+
+`SaveData` is an ordinary JavaScript object. Browser storage and web servers usually store or transmit it as JSON, a text representation of that object.
+
+## Using SaveLoadPanel in a Custom Renderer
+
+The built-in `GameRenderer` already includes this panel. A custom React renderer can add it directly:
 
 ```tsx
 import { SaveLoadPanel } from '@doodle-engine/react';
@@ -64,8 +63,8 @@ import { SaveLoadPanel } from '@doodle-engine/react';
     ui={snapshot.ui}
     onSave={() => engine.saveGame()}
     onLoad={(saveData) => {
-        const snapshot = engine.loadGame(saveData);
-        // update your state with the new snapshot
+        const restoredSnapshot = engine.loadGame(saveData);
+        updateSnapshot(restoredSnapshot);
     }}
     storageKey="my-game-save"
 />;
@@ -78,12 +77,14 @@ import { SaveLoadPanel } from '@doodle-engine/react';
 | `ui`         | `Record<string, string>`       | required               | Resolved UI strings from snapshot  |
 | `onSave`     | `() => SaveData`               | required               | Called when the player clicks Save |
 | `onLoad`     | `(saveData: SaveData) => void` | required               | Called when the player clicks Load |
-| `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key                   |
+| `storageKey` | `string`                       | `'doodle-engine-save'` | Browser storage key               |
 | `className`  | `string`                       | `''`                   | CSS class                          |
 
-## Custom Save/Load
+The `@doodle-engine/react` package also exports `listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, and `hasSaves` for a custom save interface that still uses browser storage.
 
-For custom storage (server-side, IndexedDB, etc.), use the engine API directly:
+## Storing Saves Elsewhere
+
+Use the engine API directly when saves belong on a server, in a desktop application, or in another storage system. Convert the save to JSON when sending it in an HTTP request:
 
 ```typescript
 // Save to server
@@ -96,21 +97,7 @@ await fetch('/api/save', {
 // Load from server
 const response = await fetch('/api/save');
 const saveData = await response.json();
-const snapshot = engine.loadGame(saveData);
+const restoredSnapshot = engine.loadGame(saveData);
 ```
 
-## What Gets Saved
-
-The complete `GameState` is saved, including:
-
-- Current location and time
-- All flags and variables
-- Inventory
-- Quest progress
-- Unlocked journal entries
-- Player notes
-- Current dialogue state
-- Character locations, party membership, relationships, stats
-- Item locations
-- Map enabled/disabled state
-- Current locale
+See the [Engine API](/reference/engine-api/#savegame) for the method signatures and [React Components](/reference/react-components/#saveloadpanel) for every panel prop.

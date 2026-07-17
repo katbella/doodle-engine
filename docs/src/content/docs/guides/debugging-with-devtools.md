@@ -3,17 +3,17 @@ title: Debugging with Dev Tools
 description: Use window.doodle API to debug your game during development.
 ---
 
-The Doodle Engine provides a browser console API (`window.doodle`) for debugging and testing your game during development. Dev tools are part of `@doodle-engine/core` and can work with any renderer when you enable them.
+The browser console API, `window.doodle`, lets you inspect and change game state while testing. It works with any renderer when dev tools are enabled.
 
-The scaffolded React apps enable dev tools with `devTools={import.meta.env.DEV}`. Use the same guard in custom code so dev tools are not enabled in production.
+New React projects use `devTools={import.meta.env.DEV}` to enable these commands during development and omit them from release builds.
 
 ## Enabling Dev Tools
 
-Dev tools are part of `@doodle-engine/core`. Enable them only in development mode:
+Enable dev tools in development mode:
 
 ### React
 
-`GameProvider` and `GameShell` enable dev tools when their `devTools` prop is true. The scaffold passes `import.meta.env.DEV`:
+`GameProvider` and `GameShell` enable dev tools when their `devTools` prop is true. New projects pass `import.meta.env.DEV`:
 
 ```tsx
 <GameShell
@@ -47,59 +47,6 @@ function MyRenderer({ engine }) {
 }
 ```
 
-### Vue
-
-```vue
-<script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
-import { enableDevTools } from '@doodle-engine/core';
-
-const props = defineProps(['engine']);
-const snapshot = ref(props.engine.getSnapshot());
-
-onMounted(() => {
-    if (import.meta.env.DEV) {
-        enableDevTools(props.engine, () => {
-            snapshot.value = props.engine.getSnapshot();
-        });
-    }
-});
-
-onUnmounted(() => {
-    if (import.meta.env.DEV) {
-        delete window.doodle;
-    }
-});
-</script>
-```
-
-### Svelte
-
-```svelte
-<script>
-  import { onMount, onDestroy } from 'svelte'
-  import { enableDevTools } from '@doodle-engine/core'
-
-  export let engine
-
-  $: snapshot = engine.getSnapshot()
-
-  onMount(() => {
-    if (import.meta.env.DEV) {
-      enableDevTools(engine, () => {
-        snapshot = engine.getSnapshot()
-      })
-    }
-  })
-
-  onDestroy(() => {
-    if (import.meta.env.DEV) {
-      delete window.doodle
-    }
-  })
-</script>
-```
-
 ### Vanilla JavaScript
 
 ```js
@@ -126,7 +73,7 @@ if (import.meta.env.DEV) {
 
 2. Open your game in the browser (usually `http://localhost:3000`)
 
-3. Open the browser console (F12 or right-click → Inspect → Console)
+3. Open the browser console with F12, or right-click the page, select **Inspect**, and open **Console**
 
 4. Type `doodle.inspect()` to see all available commands
 
@@ -158,14 +105,14 @@ doodle.setVariable('player_name', 'Alice');
 
 // Get a variable's current value
 doodle.getVariable('gold');
-// → 500
+// 500
 ```
 
 **Use case**: Test shop systems, stat checks, or any mechanic that depends on variables.
 
 ### Location Control
 
-Instantly teleport to any location without using the map.
+Move the player directly to any location.
 
 ```js
 doodle.teleport('tavern');
@@ -177,7 +124,7 @@ doodle.teleport('dungeon_entrance');
 
 ### Dialogue Control
 
-Trigger any dialogue directly, bypassing normal game flow.
+Start any dialogue directly.
 
 ```js
 doodle.triggerDialogue('bartender_greeting');
@@ -232,7 +179,7 @@ console.log(registry.dialogues);
 console.log(registry.characters);
 ```
 
-**Use case**: Debug state issues, verify content loaded correctly, or understand what's happening behind the scenes.
+**Use case**: Debug state issues, verify that content loaded, or inspect the engine's current data.
 
 ## Example Debugging Workflows
 
@@ -286,7 +233,7 @@ doodle.triggerDialogue('wizard_greeting');
 
 ### Debugging State Issues
 
-Something's not working as expected:
+Inspect the current state when game behavior differs from what you expected:
 
 ```js
 // Check current state
@@ -302,21 +249,17 @@ console.log(state.variables);
 console.log(state.inventory);
 ```
 
-## Limitations
+## Important behavior
 
-- Dev tools access **internal engine state** using private fields. This is intentional for debugging but means breaking changes to the engine internals won't be considered breaking changes to the dev tools API.
-- Dev tools should only be enabled in **development mode** (`npm run dev`). Use `import.meta.env.DEV` or another environment guard.
-- State changes made via dev tools **bypass all game logic**. For example, `doodle.addItem()` doesn't trigger effects or run conditions. It directly mutates the state.
+- The dev tools API is designed for debugging and can change when engine internals change.
+- Enable it in **development mode** (`npm run dev`) with `import.meta.env.DEV` or another environment guard.
+- Dev tools commands change state directly. For example, `doodle.addItem()` adds an item without running effects or evaluating conditions.
 
-## Production Safety
+## Release builds
 
-Dev tools are not enabled in production when you guard them with `import.meta.env.DEV`:
+Vite replaces `import.meta.env.DEV` with `false` when it creates a release build. Code protected by that check does not run, and `window.doodle` is not created.
 
-1. `import.meta.env.DEV` is replaced with `false` by Vite during production builds
-2. The guarded code does not run in production
-3. `window.doodle` is not created
-
-The scaffolded React apps use this guard. Use the same pattern in custom renderers.
+New React projects include this check. Use the same pattern in custom renderers.
 
 ## Tips
 

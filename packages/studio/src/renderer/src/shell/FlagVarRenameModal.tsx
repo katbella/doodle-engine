@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isValidIdentifier } from '@doodle-engine/core';
 
 /**
  * Rename a flag or variable key. Unlike an entity, a flag/variable has no file
@@ -24,7 +25,7 @@ export function FlagVarRenameModal({
     const [id, setId] = useState(oldId);
 
     const trimmed = id.trim();
-    const badChars = trimmed !== '' && !/^[A-Za-z0-9_]+$/.test(trimmed);
+    const badChars = trimmed !== '' && !isValidIdentifier(trimmed);
     const valid = trimmed !== '' && trimmed !== oldId && !badChars;
 
     return (

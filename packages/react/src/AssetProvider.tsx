@@ -52,7 +52,7 @@ export function useOptionalAssetContext(): AssetContextValue | null {
 }
 
 export interface AssetProviderProps {
-    /** Asset manifest (from /api/manifest or bundled) */
+    /** Asset manifest (from api/manifest or bundled) */
     manifest: AssetManifest;
     /** Children to render once shell and game assets are loaded */
     children: ReactNode;

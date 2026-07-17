@@ -22,4 +22,5 @@ export {
     FilePlus,
     FileText,
     Hammer,
+    CircleHelp,
 } from 'lucide-react';

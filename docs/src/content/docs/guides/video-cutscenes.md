@@ -9,24 +9,25 @@ Doodle Engine supports fullscreen video cutscenes triggered from dialogue. Video
 
 Use the `VIDEO` keyword in a dialogue node:
 
-```
+```text
 NODE dramatic_reveal
   VIDEO intro_cinematic.mp4
-  NARRATOR: @narrator.after_video
+  NARRATOR: The harbor looks different when the light returns.
 ```
 
 `GameShell` shows the video as a fullscreen overlay before the player interacts with the dialogue underneath.
 
 ## How It Works
 
-1. The parser converts `VIDEO filename` into a `playVideo` effect
-2. The effect sets `pendingVideo` on the game state
-3. The snapshot returned by the action includes `pendingVideo` as a transient field
-4. The renderer picks up `pendingVideo` and shows the `VideoPlayer` component. `GameShell` keeps that value long enough for playback because transient fields are cleared after the action snapshot.
+1. The dialogue parser converts `VIDEO filename` into a `playVideo` effect.
+2. The effect adds `pendingVideo` to the snapshot returned after the dialogue action.
+3. The renderer reads `pendingVideo` and opens the `VideoPlayer` component.
+
+`pendingVideo` is transient, which means it appears for one engine update. `GameShell` keeps the filename until playback finishes.
 
 ## Using with GameShell
 
-If you're using `GameShell`, video playback is automatic. Video filenames are resolved by the engine to the normal video asset path.
+`GameShell` plays the video automatically. The engine resolves its filename to the video asset path.
 
 ## Using with a Custom Renderer
 
@@ -78,7 +79,7 @@ Players can skip a video using:
 
 Place video files in your assets directory:
 
-```
+```text
 assets/
   video/
     intro_cinematic.mp4
@@ -90,47 +91,47 @@ assets/
 
 ### Intro cutscene on first visit
 
-```
+```text
 TRIGGER tavern
 REQUIRE notFlag seenIntro
 
 NODE start
   VIDEO intro_cinematic.mp4
-  NARRATOR: @narrator.intro
+  NARRATOR: The ship reaches the harbor at dawn.
   SET flag seenIntro
 
-  CHOICE @narrator.choice.continue
+  CHOICE Step onto the dock.
     END dialogue
   END
 ```
 
 ### Video mid-conversation
 
-```
+```text
 NODE reveal
-  BARTENDER: @bartender.dramatic_line
+  BARTENDER: There is something you need to see.
   VIDEO dramatic_reveal.mp4
   GOTO after_reveal
 
 NODE after_reveal
-  BARTENDER: @bartender.after_reveal
+  BARTENDER: Now you understand why the town is afraid.
 
-  CHOICE @bartender.choice.respond
+  CHOICE Ask what happens next.
     GOTO next
   END
 ```
 
 ### Multiple cutscenes in a quest
 
-```
+```text
 NODE quest_complete
   VIDEO quest_complete_cinematic.mp4
-  MERCHANT: @merchant.quest_complete
+  MERCHANT: The delivery arrived safely. Here is your payment.
   SET questStage odd_jobs complete
   ADD variable gold 50
-  NOTIFY @notification.quest_complete
+  NOTIFY Quest complete: Odd Jobs
 
-  CHOICE @merchant.choice.thanks
+  CHOICE Thank Elena.
     GOTO farewell
   END
 ```

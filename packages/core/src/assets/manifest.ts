@@ -35,11 +35,8 @@ export function extractAssetPaths(
     const shell: Set<string> = new Set();
     const game: Set<string> = new Set();
 
-    const normalizePath = (path: string) =>
-        path.startsWith('assets/') ? `/${path}` : path;
-
     const addShell = (path: string | undefined) => {
-        if (path) shell.add(normalizePath(path));
+        if (path) shell.add(path);
     };
 
     // Collect shell assets from config
@@ -73,10 +70,7 @@ export function extractAssetPaths(
 
     // Add a game asset only if it's a non-empty string not already in shell
     const addGame = (path: string | undefined) => {
-        if (path) {
-            const normalized = normalizePath(path);
-            if (!shell.has(normalized)) game.add(normalized);
-        }
+        if (path && !shell.has(path)) game.add(path);
     };
 
     const addEffectAssets = (effects: Effect[] | undefined) => {

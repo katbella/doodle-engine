@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import {
-    CREATABLE_SECTIONS,
-    type CreatableSection,
-} from '../lib/new-content';
+import { CREATABLE_SECTIONS, type CreatableSection } from '../lib/new-content';
+import { isValidIdentifier } from '@doodle-engine/core';
 
 /**
  * Modal for creating a new content item. Asks for the type and an id, checks the
@@ -25,7 +23,7 @@ export function CreateItemModal({
 
     const trimmed = id.trim();
     const taken = existingIds(section).includes(trimmed);
-    const badChars = trimmed !== '' && !/^[A-Za-z0-9_]+$/.test(trimmed);
+    const badChars = trimmed !== '' && !isValidIdentifier(trimmed);
     const valid = trimmed !== '' && !taken && !badChars;
 
     const error = taken
@@ -72,9 +70,7 @@ export function CreateItemModal({
                                 onCreate(section, trimmed);
                         }}
                     />
-                    {error && (
-                        <span className="field__error">{error}</span>
-                    )}
+                    {error && <span className="field__error">{error}</span>}
                 </label>
 
                 <div className="modal__actions">

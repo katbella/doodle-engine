@@ -11,9 +11,15 @@
 import {
     conditionDescriptor,
     effectDescriptor,
+    isValidIdentifier,
 } from '@doodle-engine/core';
 import type { ContentRegistry } from '@doodle-engine/core';
-import type { Dialogue, DialogueNode, GameConfig } from '@doodle-engine/core';
+import type {
+    ArgDescriptor,
+    Dialogue,
+    DialogueNode,
+    GameConfig,
+} from '@doodle-engine/core';
 import { fileMapKey } from './load-project.js';
 
 export interface ValidationError {
@@ -48,6 +54,7 @@ export function validateContent(
 
     // Check required fields first, so every later check can trust the shapes.
     errors.push(...validateEntityShapes(registry, fileMap));
+    errors.push(...validateIdentifiers(registry, fileMap, config));
 
     // Validate dialogues
     for (const dialogue of Object.values(registry.dialogues)) {
@@ -101,14 +108,84 @@ const REQUIRED_FIELDS: {
     label: string;
     fields: string[];
 }[] = [
-    { collection: 'locations', label: 'Location', fields: ['name', 'description'] },
+    {
+        collection: 'locations',
+        label: 'Location',
+        fields: ['name', 'description'],
+    },
     { collection: 'characters', label: 'Character', fields: ['name'] },
     { collection: 'items', label: 'Item', fields: ['name', 'location'] },
     { collection: 'maps', label: 'Map', fields: ['name'] },
     { collection: 'quests', label: 'Quest', fields: ['name'] },
-    { collection: 'journalEntries', label: 'Journal entry', fields: ['title', 'text'] },
+    {
+        collection: 'journalEntries',
+        label: 'Journal entry',
+        fields: ['title', 'text'],
+    },
     { collection: 'interludes', label: 'Interlude', fields: ['text'] },
 ];
+
+function validateIdentifiers(
+    registry: ContentRegistry,
+    fileMap: Map<string, string>,
+    config?: GameConfig
+): ValidationError[] {
+    const errors: ValidationError[] = [];
+    const check = (value: unknown, subject: string, file: string) => {
+        if (isValidIdentifier(value)) return;
+        errors.push({
+            file,
+            message: `${subject} "${String(value)}" must use only letters, numbers, and underscores`,
+            suggestion:
+                'Replace spaces, dashes, and punctuation with underscores',
+        });
+    };
+
+    const collections = [
+        ['locations', 'Location'],
+        ['characters', 'Character'],
+        ['items', 'Item'],
+        ['maps', 'Map'],
+        ['quests', 'Quest'],
+        ['journalEntries', 'Journal entry'],
+        ['interludes', 'Interlude'],
+        ['dialogues', 'Dialogue'],
+    ] as const;
+
+    for (const [collection, label] of collections) {
+        for (const entity of Object.values(registry[collection]) as Array<{
+            id: unknown;
+        }>) {
+            const id = String(entity.id);
+            check(entity.id, `${label} id`, fileFor(fileMap, collection, id));
+        }
+    }
+
+    for (const quest of Object.values(registry.quests)) {
+        const file = fileFor(fileMap, 'quests', quest.id);
+        for (const stage of quest.stages ?? []) {
+            check(stage.id, `Quest "${quest.id}" stage id`, file);
+        }
+    }
+
+    for (const dialogue of Object.values(registry.dialogues)) {
+        const file = fileFor(fileMap, 'dialogues', dialogue.id);
+        for (const node of dialogue.nodes) {
+            check(node.id, `Dialogue "${dialogue.id}" node id`, file);
+        }
+    }
+
+    if (config) {
+        for (const flag of Object.keys(config.startFlags ?? {})) {
+            check(flag, 'Game config flag', 'content/game.yaml');
+        }
+        for (const variable of Object.keys(config.startVariables ?? {})) {
+            check(variable, 'Game config variable', 'content/game.yaml');
+        }
+    }
+
+    return errors;
+}
 
 /**
  * Check that every entity has the fields the engine needs, with sensible
@@ -142,7 +219,8 @@ function validateEntityShapes(
             errors.push({
                 file,
                 message: `Quest "${quest.id}" has no stages`,
-                suggestion: 'Add a stages list with at least one { id, description } entry',
+                suggestion:
+                    'Add a stages list with at least one { id, description } entry',
             });
         }
     }
@@ -156,7 +234,11 @@ function validateEntityShapes(
                 suggestion: 'Add a locations list of { id, x, y } markers',
             });
         }
-        if (typeof map.scale !== 'number' || !Number.isFinite(map.scale) || map.scale <= 0) {
+        if (
+            typeof map.scale !== 'number' ||
+            !Number.isFinite(map.scale) ||
+            map.scale <= 0
+        ) {
             errors.push({
                 file,
                 message: `Map "${map.id}" needs a scale greater than zero (it turns distance into travel hours)`,
@@ -190,10 +272,15 @@ function validateReferences(
             });
         }
 
-        if (!config.startTime || config.startTime.day === undefined || config.startTime.hour === undefined) {
+        if (
+            !config.startTime ||
+            config.startTime.day === undefined ||
+            config.startTime.hour === undefined
+        ) {
             errors.push({
                 file: 'content/game.yaml',
-                message: 'Game config missing required "startTime.day" or "startTime.hour"',
+                message:
+                    'Game config missing required "startTime.day" or "startTime.hour"',
                 suggestion: 'Set startTime.day and startTime.hour',
             });
         }
@@ -327,14 +414,26 @@ function validateNodeReferences(
         validateEffectReferences(effect, site, file, registry, errors);
     }
     for (const branch of node.conditionalBranches ?? []) {
-        validateConditionReferences(branch.condition, site, file, registry, errors);
+        validateConditionReferences(
+            branch.condition,
+            site,
+            file,
+            registry,
+            errors
+        );
         for (const effect of branch.effects ?? []) {
             validateEffectReferences(effect, site, file, registry, errors);
         }
     }
     for (const choice of node.choices) {
         for (const condition of choice.conditions ?? []) {
-            validateConditionReferences(condition, site, file, registry, errors);
+            validateConditionReferences(
+                condition,
+                site,
+                file,
+                registry,
+                errors
+            );
         }
         for (const effect of choice.effects ?? []) {
             validateEffectReferences(effect, site, file, registry, errors);
@@ -616,7 +715,11 @@ function validateDialogue(dialogue: Dialogue, file: string): ValidationError[] {
     // Top-level REQUIRE conditions need their arguments like any other
     for (const condition of dialogue.conditions ?? []) {
         errors.push(
-            ...validateCondition(condition, `Dialogue "${dialogue.id}" REQUIRE`, file)
+            ...validateCondition(
+                condition,
+                `Dialogue "${dialogue.id}" REQUIRE`,
+                file
+            )
         );
     }
 
@@ -792,7 +895,9 @@ function validateMaps(
     for (const map of Object.values(registry.maps)) {
         const file = fileFor(fileMap, 'maps', map.id);
         // A missing locations list is reported by the shape check.
-        for (const marker of Array.isArray(map.locations) ? map.locations : []) {
+        for (const marker of Array.isArray(map.locations)
+            ? map.locations
+            : []) {
             const location = registry.locations[marker.id];
             if (!location) {
                 errors.push({
@@ -854,6 +959,41 @@ function validateNumberArgs(
     }
 }
 
+const IDENTIFIER_ARGUMENT_KINDS = new Set([
+    'flag',
+    'variable',
+    'itemId',
+    'characterId',
+    'locationId',
+    'questId',
+    'stageId',
+    'journalId',
+    'dialogueId',
+    'interludeId',
+]);
+
+function validateIdentifierArgs(
+    entity: any,
+    args: ArgDescriptor[],
+    site: string,
+    label: string,
+    file: string,
+    errors: ValidationError[]
+): void {
+    for (const arg of args) {
+        if (!IDENTIFIER_ARGUMENT_KINDS.has(arg.kind)) continue;
+        const value = entity[arg.name];
+        if (value === undefined || value === null || value === '') continue;
+        if (isValidIdentifier(value)) continue;
+        errors.push({
+            file,
+            message: `${site} ${label} "${entity.type}" argument "${arg.name}" must use only letters, numbers, and underscores`,
+            suggestion:
+                'Replace spaces, dashes, and punctuation with underscores',
+        });
+    }
+}
+
 /**
  * Validate a condition has required arguments with usable values.
  */
@@ -874,7 +1014,10 @@ function validateCondition(
 
     // Special case: timeIs requires startHour and endHour
     if (condition.type === 'timeIs') {
-        if (condition.startHour === undefined || condition.endHour === undefined) {
+        if (
+            condition.startHour === undefined ||
+            condition.endHour === undefined
+        ) {
             errors.push({
                 file,
                 message: `${site} condition "timeIs" missing required "startHour" or "endHour" argument`,
@@ -913,6 +1056,14 @@ function validateCondition(
     }
 
     validateNumberArgs(
+        condition,
+        conditionDescriptor(condition.type).args,
+        site,
+        'condition',
+        file,
+        errors
+    );
+    validateIdentifierArgs(
         condition,
         conditionDescriptor(condition.type).args,
         site,
@@ -963,6 +1114,14 @@ function validateEffect(
     }
 
     validateNumberArgs(
+        effect,
+        effectDescriptor(effect.type).args,
+        site,
+        'effect',
+        file,
+        errors
+    );
+    validateIdentifierArgs(
         effect,
         effectDescriptor(effect.type).args,
         site,

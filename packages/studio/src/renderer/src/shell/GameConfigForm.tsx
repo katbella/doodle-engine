@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TriangleAlert, X } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
+import { isValidIdentifier } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { YamlEdit } from '../../../shared/project';
 import { AssetField } from './AssetField';
@@ -84,13 +85,19 @@ export function GameConfigForm({
     }, [config, saved]);
 
     const dirty = edits.length > 0;
+    const hasInvalidIdentifiers = ['startFlags', 'startVariables'].some(
+        (field) =>
+            Object.keys(
+                (config[field] as Record<string, unknown> | undefined) ?? {}
+            ).some((key) => !isValidIdentifier(key))
+    );
     useEffect(() => onDirty(tabKey, dirty), [dirty, tabKey, onDirty]);
 
     const set = (key: string, value: unknown) =>
         setConfig((c) => ({ ...c, [key]: value }));
 
     const save = async (force = false) => {
-        if (edits.length === 0) return;
+        if (edits.length === 0 || hasInvalidIdentifiers) return;
         const result = await window.studio.writeEntity(
             dir,
             path,
@@ -110,18 +117,33 @@ export function GameConfigForm({
     };
 
     useEffect(() => {
-        if (!dirty || conflict || missing) return;
+        if (!dirty || conflict || missing || hasInvalidIdentifiers) return;
         const t = setTimeout(() => void save(), 1000);
         return () => clearTimeout(t);
-    }, [config, dirty, conflict, missing]);
+    }, [config, dirty, conflict, missing, hasInvalidIdentifiers]);
     // Save any pending edit when this editor goes away (closing the tab,
     // switching views, or opening another project), so a quick edit
     // followed by navigation still lands on disk.
     const flushRef = useRef(() => {});
     flushRef.current = () => {
-        if (dirty && !conflict && !missing) void save();
+        if (dirty && !conflict && !missing && !hasInvalidIdentifiers) {
+            void save();
+        }
     };
     useEffect(() => () => flushRef.current(), []);
+    useEffect(() => {
+        const handleSaveShortcut = (event: KeyboardEvent) => {
+            if (
+                (event.ctrlKey || event.metaKey) &&
+                event.key.toLowerCase() === 's'
+            ) {
+                event.preventDefault();
+                flushRef.current();
+            }
+        };
+        window.addEventListener('keydown', handleSaveShortcut);
+        return () => window.removeEventListener('keydown', handleSaveShortcut);
+    }, []);
 
     if (loading) {
         return (
@@ -538,12 +560,20 @@ function KeyValueEditor({
             {entries.length === 0 && <span className="field__hint">None.</span>}
             {entries.map(([key, value], index) => (
                 <div key={index} className="dlg__row">
-                    <input
-                        className="dlg__input mono"
-                        value={key}
-                        spellCheck={false}
-                        onChange={(e) => onRename(key, e.target.value)}
-                    />
+                    <div className="node-editor__id-field">
+                        <input
+                            className={`dlg__input mono ${isValidIdentifier(key) ? '' : 'dlg__input--invalid'}`}
+                            value={key}
+                            spellCheck={false}
+                            aria-invalid={!isValidIdentifier(key)}
+                            onChange={(e) => onRename(key, e.target.value)}
+                        />
+                        {!isValidIdentifier(key) && (
+                            <span className="field__error">
+                                Use letters, numbers, and underscores only.
+                            </span>
+                        )}
+                    </div>
                     {renderValue(key, value)}
                     <button
                         className="dlg__x"

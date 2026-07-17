@@ -126,6 +126,12 @@ describe('NodeEditor', () => {
         fireEvent.blur(id);
         expect(id.className).toContain('dlg__input--invalid');
         await user.clear(id);
+        await user.type(id, 'bad-id');
+        fireEvent.blur(id);
+        expect(
+            screen.getByText('Use letters, numbers, and underscores only.')
+        ).toBeTruthy();
+        await user.clear(id);
         await user.type(id, 'opening');
         fireEvent.blur(id);
         expect(state().id).toBe('start->opening');

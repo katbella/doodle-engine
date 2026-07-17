@@ -134,6 +134,7 @@ describe('preload bridge', () => {
             [() => api.openPreview(), 'preview:open', []],
             [() => api.stopPreview(), 'preview:stop', []],
             [() => api.openPath('target'), 'shell:openPath', ['target']],
+            [() => api.openDocumentation(), 'help:documentation', []],
         ];
 
         for (const [call, channel, args] of calls) {

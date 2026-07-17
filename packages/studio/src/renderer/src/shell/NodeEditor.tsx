@@ -1,6 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { X, Plus } from '../lib/icons';
-import { serializeCondition, serializeEffect } from '@doodle-engine/core';
+import {
+    isValidIdentifier,
+    serializeCondition,
+    serializeEffect,
+} from '@doodle-engine/core';
 import type {
     Choice,
     ConditionalBranch,
@@ -12,8 +16,7 @@ import type {
 import { ConditionEffectBuilder } from './ConditionEffectBuilder';
 import { AssetField } from './AssetField';
 
-/** Editable node id. Commits on blur if the new id is non-empty, has no spaces,
- * and doesn't collide with another node. */
+/** Editable node id. */
 function NodeIdField({
     id,
     nodeIds,
@@ -24,31 +27,39 @@ function NodeIdField({
     onRename: (newId: string) => void;
 }) {
     const [text, setText] = useState(id);
-    const [invalid, setInvalid] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     useEffect(() => {
         setText(id);
-        setInvalid(false);
+        setError(null);
     }, [id]);
 
     const commit = () => {
         const value = text.trim();
-        const ok =
-            value !== '' &&
-            !/\s/.test(value) &&
-            (value === id || !nodeIds.includes(value));
-        setInvalid(!ok);
-        if (ok && value !== id) onRename(value);
+        if (!isValidIdentifier(value)) {
+            setError('Use letters, numbers, and underscores only.');
+            return;
+        }
+        if (value !== id && nodeIds.includes(value)) {
+            setError('A node with this ID already exists.');
+            return;
+        }
+        setError(null);
+        if (value !== id) onRename(value);
     };
 
     return (
-        <input
-            className={`dlg__input mono node-editor__id-input ${invalid ? 'dlg__input--invalid' : ''}`}
-            value={text}
-            spellCheck={false}
-            onChange={(e) => setText(e.target.value)}
-            onBlur={commit}
-            title="Node id (used by GOTO targets)"
-        />
+        <div className="node-editor__id-field">
+            <input
+                className={`dlg__input mono node-editor__id-input ${error ? 'dlg__input--invalid' : ''}`}
+                value={text}
+                spellCheck={false}
+                onChange={(e) => setText(e.target.value)}
+                onBlur={commit}
+                title="Node id (used by GOTO targets)"
+                aria-invalid={Boolean(error)}
+            />
+            {error && <span className="field__error">{error}</span>}
+        </div>
     );
 }
 

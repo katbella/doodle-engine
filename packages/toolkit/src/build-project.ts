@@ -129,7 +129,7 @@ export async function buildProject(
     // Copy project assets into <dist>/assets without deleting Vite's own files.
     await copyProjectAssets(assetsDir, join(distDir, 'assets'));
 
-    // Write content JSON so `vite preview` can serve it at /api/content.
+    // Write content JSON so `vite preview` can serve it at api/content.
     const apiDir = join(distDir, 'api');
     await mkdir(apiDir, { recursive: true });
     await writeFile(
