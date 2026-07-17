@@ -92,10 +92,7 @@ function planHeaderEdits(
     }
 
     const edits: CstEdit[] = [];
-    const pair = (
-        directives: typeof have,
-        lines: typeof wanted
-    ) => {
+    const pair = (directives: typeof have, lines: typeof wanted) => {
         for (let i = 0; i < directives.length; i++) {
             const line = cst.lines[directives[i].lineIndex];
             if (line.content !== lines[i].text) {
@@ -153,6 +150,7 @@ function renderNode(
     // Step 1: reuse old lines whose code is identical to a new line.
     const reusedOriginals = new Set<number>();
     const matchedNew = new Set<number>();
+    const outputForOriginal = new Map<number, number>();
     for (let n = 0; n < out.length; n++) {
         for (let o = 0; o < originals.length; o++) {
             if (reusedOriginals.has(o)) continue;
@@ -162,6 +160,7 @@ function renderNode(
                 out[n] = line.raw;
                 reusedOriginals.add(o);
                 matchedNew.add(n);
+                outputForOriginal.set(o, n);
                 break;
             }
         }
@@ -183,31 +182,43 @@ function renderNode(
         );
         if (at < 0) at = 1;
         out.splice(at, 0, ...orphaned);
+        for (const [original, output] of outputForOriginal) {
+            if (output >= at) {
+                outputForOriginal.set(original, output + orphaned.length);
+            }
+        }
     }
 
-    // Step 3: put standalone comment lines back beside their neighbors,
-    // found by text so earlier insertions cannot throw them off.
-    // Insertions walk forward so a group of comments keeps its order.
-    let fallbackAt = 1; // right under the node header
+    // Step 3: put standalone comment lines back beside their neighbors.
+    const commentsByAnchor = new Map<number, string[]>();
+    const unanchored: string[] = [];
     for (let o = 0; o < originals.length; o++) {
         const line = originals[o];
         if (!line.blankOrComment || !line.comment) continue;
 
-        // The line this comment sat above, if it still exists.
-        let anchorAt = -1;
+        let anchorAt: number | undefined;
         for (let next = o + 1; next < originals.length; next++) {
             const candidate = originals[next];
             if (candidate.blankOrComment) continue;
-            const target = candidate.raw;
-            anchorAt = out.findIndex(
-                (text, index) => index >= fallbackAt && text === target
-            );
+            anchorAt = outputForOriginal.get(next);
             break;
         }
 
-        const at = anchorAt >= 0 ? anchorAt : fallbackAt;
-        out.splice(at, 0, line.raw);
-        fallbackAt = at + 1;
+        if (anchorAt === undefined) {
+            unanchored.push(line.raw);
+        } else {
+            const comments = commentsByAnchor.get(anchorAt) ?? [];
+            comments.push(line.raw);
+            commentsByAnchor.set(anchorAt, comments);
+        }
+    }
+    for (const [anchor, comments] of [...commentsByAnchor].sort(
+        ([a], [b]) => b - a
+    )) {
+        out.splice(anchor, 0, ...comments);
+    }
+    if (unanchored.length > 0) {
+        out.splice(1, 0, ...unanchored);
     }
 
     return out.join(newline);
@@ -247,7 +258,10 @@ export function applyDialogueEdits(
             if (!cstNode) continue;
             if (serializeNode(before) !== serializeNode(node)) {
                 edits.push({
-                    span: { start: cstNode.span.start, end: cstNode.contentEnd },
+                    span: {
+                        start: cstNode.span.start,
+                        end: cstNode.contentEnd,
+                    },
                     text: renderNode(node, cstNode, cst, newline),
                 });
             }
@@ -272,7 +286,8 @@ export function applyDialogueEdits(
             : indexById.get(edited.nodes[editedIndex].id);
 
     // Everything before the first node: leading comments and the header.
-    const preambleEnd = cst.nodes.length > 0 ? cst.nodes[0].span.start : source.length;
+    const preambleEnd =
+        cst.nodes.length > 0 ? cst.nodes[0].span.start : source.length;
     let preamble = source.slice(0, preambleEnd);
     if (headerEdits === null) {
         // The header's shape changed; keep the leading comments and blank
@@ -287,7 +302,9 @@ export function applyDialogueEdits(
         preamble = parts.length > 0 ? parts.join(newline) + newline : '';
     } else if (headerEdits.length > 0) {
         // Same shape, different values: splice the changed directive lines.
-        const sorted = [...headerEdits].sort((a, b) => a.span.start - b.span.start);
+        const sorted = [...headerEdits].sort(
+            (a, b) => a.span.start - b.span.start
+        );
         let result = '';
         let cursor = 0;
         for (const edit of sorted) {
@@ -309,7 +326,11 @@ export function applyDialogueEdits(
                 : undefined;
 
         let piece: string;
-        if (cstNode && before && serializeNode(before) === serializeNode(node)) {
+        if (
+            cstNode &&
+            before &&
+            serializeNode(before) === serializeNode(node)
+        ) {
             piece = source.slice(cstNode.span.start, cstNode.span.end);
         } else if (cstNode) {
             piece =

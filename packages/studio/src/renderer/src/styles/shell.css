@@ -625,6 +625,27 @@
     text-transform: uppercase;
     color: var(--text-faint);
 }
+.dlg__card-actions {
+    display: flex;
+    align-items: center;
+}
+.dlg__move {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--text-faint);
+}
+.dlg__move:hover:not(:disabled) {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+.dlg__move:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
 .dlg__sub {
     font-size: 11px;
     color: var(--text-faint);
@@ -669,7 +690,9 @@
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 .builder__search {
+    flex: 0 0 28px;
     height: 28px;
+    min-height: 28px;
     padding: 0 var(--space-2);
     background: var(--surface-input);
     border: 1px solid var(--border);
@@ -782,7 +805,6 @@
     inset: 0;
     z-index: 39;
 }
-/* Let the builder fill the popover so its own list/args scroll within it. */
 .popover .builder {
     max-height: 100%;
 }

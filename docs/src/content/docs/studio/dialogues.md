@@ -34,7 +34,7 @@ Each node can contain:
 
 ## Add choices
 
-Each choice has the words shown to the player and the place the conversation goes next. Point it at another node, or choose **end dialogue** when it should close the conversation.
+Each choice has the words shown to the player and the place the conversation goes next. Choices appear in the listed order; use the up and down controls to rearrange them. Point a choice at another node, or choose **end dialogue** when it should close the conversation.
 
 [![Editing a dialogue choice and its route](/images/studio/dialogue-choice.png)](/images/studio/dialogue-choice.png)
 

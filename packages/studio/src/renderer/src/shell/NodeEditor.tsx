@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { X, Plus } from '../lib/icons';
+import { ChevronDown, ChevronUp, X, Plus } from '../lib/icons';
 import {
     isValidIdentifier,
     serializeCondition,
@@ -388,6 +388,28 @@ function setChoiceTarget(choice: Choice, value: string): Choice {
     };
 }
 
+function moveChoice(
+    choices: Choice[],
+    index: number,
+    direction: -1 | 1
+): Choice[] {
+    const target = index + direction;
+    if (
+        index < 0 ||
+        index >= choices.length ||
+        target < 0 ||
+        target >= choices.length
+    ) {
+        return choices;
+    }
+    const reordered = [...choices];
+    [reordered[index], reordered[target]] = [
+        reordered[target],
+        reordered[index],
+    ];
+    return reordered;
+}
+
 export function NodeEditor({
     node,
     isStart,
@@ -635,19 +657,55 @@ export function NodeEditor({
                         <div key={choice.id} className="dlg__card">
                             <div className="dlg__card-head">
                                 <span>CHOICE</span>
-                                <button
-                                    className="dlg__x"
-                                    aria-label="Remove choice"
-                                    onClick={() =>
-                                        set({
-                                            choices: node.choices.filter(
-                                                (_, j) => j !== i
-                                            ),
-                                        })
-                                    }
-                                >
-                                    <X size={15} />
-                                </button>
+                                <div className="dlg__card-actions">
+                                    <button
+                                        className="dlg__move"
+                                        aria-label="Move choice up"
+                                        title="Move choice up"
+                                        disabled={i === 0}
+                                        onClick={() =>
+                                            set({
+                                                choices: moveChoice(
+                                                    node.choices,
+                                                    i,
+                                                    -1
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <ChevronUp size={15} />
+                                    </button>
+                                    <button
+                                        className="dlg__move"
+                                        aria-label="Move choice down"
+                                        title="Move choice down"
+                                        disabled={i === node.choices.length - 1}
+                                        onClick={() =>
+                                            set({
+                                                choices: moveChoice(
+                                                    node.choices,
+                                                    i,
+                                                    1
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <ChevronDown size={15} />
+                                    </button>
+                                    <button
+                                        className="dlg__x"
+                                        aria-label="Remove choice"
+                                        onClick={() =>
+                                            set({
+                                                choices: node.choices.filter(
+                                                    (_, j) => j !== i
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <X size={15} />
+                                    </button>
+                                </div>
                             </div>
                             <input
                                 className="dlg__input mono"

@@ -130,6 +130,35 @@ describe('structural edits keep comments', () => {
         expect(result).toContain('GOTO finale');
         expect(result).not.toContain('NODE second');
     });
+
+    it('keeps comments with choices when their order changes', () => {
+        const source = [
+            'NODE start',
+            '  NARRATOR: Choose.',
+            '  # first option',
+            '  CHOICE First',
+            '    END dialogue',
+            '  END',
+            '  # second option',
+            '  CHOICE Second',
+            '    END dialogue',
+            '  END',
+            '',
+        ].join('\n');
+        const result = edit(source, (d) => {
+            d.nodes[0].choices = [d.nodes[0].choices[1], d.nodes[0].choices[0]];
+        });
+
+        expect(result.indexOf('CHOICE Second')).toBeLessThan(
+            result.indexOf('CHOICE First')
+        );
+        expect(result.indexOf('# second option')).toBeLessThan(
+            result.indexOf('CHOICE Second')
+        );
+        expect(result.indexOf('# first option')).toBeLessThan(
+            result.indexOf('CHOICE First')
+        );
+    });
 });
 
 describe('header edits', () => {

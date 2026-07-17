@@ -169,6 +169,41 @@ describe('DialogueEditor author journeys', () => {
         expect(saved).toContain('END dialogue');
     });
 
+    it('saves choices in the order selected in the visual editor', async () => {
+        const content = `NODE start
+  NARRATOR: Choose.
+  # first option
+  CHOICE First
+    END dialogue
+  END
+  # second option
+  CHOICE Second
+    END dialogue
+  END
+`;
+        const writeDocument = installBridge(content);
+        const user = userEvent.setup();
+        const view = renderEditor();
+
+        await screen.findByDisplayValue('First');
+        await user.click(
+            screen.getAllByRole('button', { name: 'Move choice down' })[0]
+        );
+
+        view.unmount();
+        await waitFor(() => expect(writeDocument).toHaveBeenCalledOnce());
+        const saved = writeDocument.mock.calls[0][2];
+        expect(saved.indexOf('CHOICE Second')).toBeLessThan(
+            saved.indexOf('CHOICE First')
+        );
+        expect(saved.indexOf('# second option')).toBeLessThan(
+            saved.indexOf('CHOICE Second')
+        );
+        expect(saved.indexOf('# first option')).toBeLessThan(
+            saved.indexOf('CHOICE First')
+        );
+    });
+
     it('guides the author to Source when the dialogue cannot be parsed', async () => {
         installBridge('NODE start\n  this is not valid dialogue syntax\n');
         renderEditor();

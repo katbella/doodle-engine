@@ -98,20 +98,20 @@
 :root[data-theme='light'] {
     color-scheme: light;
 
-    --bg: #f2f1f0;
+    --bg: #f4f6f8;
     --bg-editor: #ffffff;
-    --surface: #e9e7e6;
+    --surface: #e8edf2;
     --surface-raised: #ffffff;
     --surface-input: #ffffff;
-    --surface-hover: #dedbd9;
+    --surface-hover: #dce3e9;
 
     --border-faint: rgba(0, 0, 0, 0.1);
     --border: rgba(0, 0, 0, 0.2);
     --border-strong: rgba(0, 0, 0, 0.34);
 
-    --text: #1d1b1a;
-    --text-dim: #524e4c;
-    --text-faint: #7a7573;
+    --text: #202428;
+    --text-dim: #4b5563;
+    --text-faint: #59636f;
 
     --accent: #006ae5;
     --accent-ink: #ffffff;

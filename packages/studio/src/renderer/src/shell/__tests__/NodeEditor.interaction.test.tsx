@@ -243,6 +243,39 @@ describe('NodeEditor', () => {
         );
         await user.click(choices.getByRole('button', { name: /Choice/ }));
         expect(state().choices).toHaveLength(2);
+
+        let moveUp = choices.getAllByRole('button', {
+            name: 'Move choice up',
+        }) as HTMLButtonElement[];
+        let moveDown = choices.getAllByRole('button', {
+            name: 'Move choice down',
+        }) as HTMLButtonElement[];
+        expect(moveUp[0].disabled).toBe(true);
+        expect(moveDown[0].disabled).toBe(false);
+        expect(moveUp[1].disabled).toBe(false);
+        expect(moveDown[1].disabled).toBe(true);
+
+        fireEvent.click(moveUp[0]);
+        fireEvent.click(moveDown[1]);
+        expect(state().choices.map((choice) => choice.id)).toEqual([
+            'leave',
+            'start_choice_1',
+        ]);
+
+        await user.click(moveDown[0]);
+        expect(state().choices.map((choice) => choice.id)).toEqual([
+            'start_choice_1',
+            'leave',
+        ]);
+        moveUp = choices.getAllByRole('button', {
+            name: 'Move choice up',
+        }) as HTMLButtonElement[];
+        moveDown = choices.getAllByRole('button', {
+            name: 'Move choice down',
+        }) as HTMLButtonElement[];
+        expect(moveUp[0].disabled).toBe(true);
+        expect(moveDown[1].disabled).toBe(true);
+
         await user.click(
             choices.getAllByRole('button', { name: 'Remove choice' })[1]
         );
