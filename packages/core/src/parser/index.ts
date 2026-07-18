@@ -20,7 +20,7 @@ import type {
 } from '../types/entities';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
-import { splitComment } from './comment';
+import { findUnescapedQuote, splitComment } from './comment';
 
 /**
  * Token represents a line of DSL code with metadata
@@ -70,24 +70,71 @@ function isEffectLine(line: string): boolean {
  * - Tracks indentation for nested structures
  */
 function tokenize(input: string): Token[] {
-    return input
-        .split('\n')
-        .map((line, index) => ({
-            original: line,
-            lineNumber: index + 1,
-        }))
-        .map(({ original, lineNumber }) => {
-            // Remove comments (but preserve # inside quotes). Shared with the
-            // lossless CST layer so both agree on where a comment begins.
-            const { code: withoutComment } = splitComment(original);
+    const physicalLines = input.replace(/\r\n?/g, '\n').split('\n');
+    const tokens: Token[] = [];
 
-            // Calculate indentation level
-            const indent =
-                withoutComment.length - withoutComment.trimStart().length;
-            const line = withoutComment.trim();
-            return { line, lineNumber, indent };
-        })
-        .filter((token) => token.line.length > 0);
+    for (let i = 0; i < physicalLines.length; i++) {
+        const original = physicalLines[i];
+        const lineNumber = i + 1;
+        const { code: withoutComment } = splitComment(original);
+        const indent =
+            withoutComment.length - withoutComment.trimStart().length;
+        let line = withoutComment.trim();
+        if (line.length === 0) continue;
+
+        const openingQuote = findUnescapedQuote(line);
+        if (
+            openingQuote !== -1 &&
+            findUnescapedQuote(line, openingQuote + 1) === -1
+        ) {
+            const parts = [line];
+            let closed = false;
+
+            while (++i < physicalLines.length) {
+                const continuation = stripIndent(physicalLines[i], indent);
+                const closingQuote = findUnescapedQuote(continuation);
+                if (closingQuote === -1) {
+                    parts.push(continuation);
+                    continue;
+                }
+
+                const afterQuote = continuation
+                    .substring(closingQuote + 1)
+                    .trim();
+                if (afterQuote !== '' && !afterQuote.startsWith('#')) {
+                    throw new Error(
+                        `Unexpected text after closing quote at line ${i + 1}: ${afterQuote}`
+                    );
+                }
+                parts.push(continuation.substring(0, closingQuote + 1));
+                closed = true;
+                break;
+            }
+
+            if (!closed) {
+                throw new Error(
+                    `Unterminated quoted text starting at line ${lineNumber}`
+                );
+            }
+            line = parts.join('\n');
+        }
+
+        tokens.push({ line, lineNumber, indent });
+    }
+
+    return tokens;
+}
+
+function stripIndent(line: string, width: number): string {
+    let offset = 0;
+    while (
+        offset < line.length &&
+        offset < width &&
+        (line[offset] === ' ' || line[offset] === '\t')
+    ) {
+        offset++;
+    }
+    return line.substring(offset);
 }
 
 /**

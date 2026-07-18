@@ -73,12 +73,34 @@ describe('DebugTrace', () => {
         await user.clear(screen.getByRole('textbox'));
         await user.type(screen.getByRole('textbox'), 'does-not-exist');
         expect(
-            screen.getByText('No trace rows match this filter.')
+            screen.getByText('No results for “does-not-exist”.')
         ).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Clear search' }));
+        expect(screen.getByText(/SET flag asked/i)).toBeTruthy();
+    });
+
+    it('explains an empty event category and returns to all events', async () => {
+        const user = userEvent.setup();
+        render(
+            <DebugTrace
+                trace={trace.filter((event) => event.kind !== 'transition')}
+            />
+        );
+
+        await user.click(screen.getByRole('button', { name: 'Transitions' }));
+        expect(
+            screen.getByText('No transitions were recorded in this playtest.')
+        ).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: 'Show all events' })
+        );
+        expect(screen.getByText(/SET flag asked/i)).toBeTruthy();
     });
 
     it('distinguishes an empty trace from an empty filter result', () => {
         render(<DebugTrace trace={[]} />);
-        expect(screen.getByText(/Nothing traced yet/)).toBeTruthy();
+        expect(
+            screen.getByText('Start a dialogue to begin the trace.')
+        ).toBeTruthy();
     });
 });

@@ -20,6 +20,16 @@ Most punctuation can be used directly. Put quotation marks around text containin
 BARTENDER: "Room #3, second door."
 ```
 
+To keep a paragraph break inside one dialogue entry, wrap the entry in quotation marks and continue it on the following lines:
+
+```text
+BARTENDER: "I've been having a good time.
+
+It's been 84 years."
+```
+
+The full entry appears before the player continues or chooses a response. Single-line dialogue does not need quotation marks.
+
 Speaker lines, narrator lines, choices, and notifications all accept plain text. IDs and effect arguments use letters, numbers, and underscores, as in `bartender`, `heardRumors`, and `odd_jobs`. See [Localization](/guides/localization/) when you are ready to replace displayed text with `@keys` for another language.
 
 Here is a complete example using plain text:
@@ -77,6 +87,7 @@ NODE farewell
 - The first `NODE` is the start node
 - `SPEAKER:` lines set who's talking (matched to character ID, case-insensitive)
 - Each node has **one** speaker line; to let another character speak, route to another node
+- A quoted speaker line can span several lines while remaining one dialogue entry
 - `NARRATOR:` lines have no speaker and are used for descriptions
 - `GOTO` routes to another node
 - `END dialogue` closes the conversation

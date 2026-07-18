@@ -436,6 +436,25 @@ describe('Snapshot Builder', () => {
             expect(snapshot.dialogue?.text).toBe('Welcome stranger');
         });
 
+        it('preserves paragraph breaks from localization', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'bartender_greeting',
+                    nodeId: 'intro',
+                },
+            };
+            const registry = createTestRegistry();
+            registry.locales.en['bartender.greeting'] =
+                'First paragraph.\n\nSecond paragraph.';
+
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.dialogue?.text).toBe(
+                'First paragraph.\n\nSecond paragraph.'
+            );
+        });
+
         it('should filter choices by conditions', () => {
             const state = {
                 ...createTestState(),

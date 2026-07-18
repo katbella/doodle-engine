@@ -83,7 +83,10 @@ describe('shell surfaces', () => {
                 onInstall={onInstall}
             />
         );
-        expect(screen.getByText('yarn install')).toBeTruthy();
+        expect(
+            screen.getByText(/Install project dependencies to enable/)
+        ).toBeTruthy();
+        expect(screen.queryByText('yarn install')).toBeNull();
         await user.click(
             screen.getByRole('button', { name: 'Install dependencies' })
         );

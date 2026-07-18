@@ -94,7 +94,7 @@ export class PlaytestSession {
     }
 
     getTrace(): readonly TraceEvent[] {
-        return this.events;
+        return [...this.events];
     }
 
     /** Whether a dialogue is currently active (drives the playback column). */

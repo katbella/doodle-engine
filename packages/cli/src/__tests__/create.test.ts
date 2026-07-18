@@ -46,6 +46,10 @@ describe('create command', () => {
         expect(console.log).toHaveBeenCalledWith(
             expect.stringContaining('Project created successfully')
         );
+
+        const titlePrompt = prompts.mock.calls[0][0];
+        expect(titlePrompt.validate('')).toBe('Enter a game title');
+        expect(titlePrompt.validate('A title')).toBe(true);
     });
 
     it('creates a custom-renderer project without asking about styles', async () => {
@@ -68,21 +72,42 @@ describe('create command', () => {
         });
     });
 
-    it('stops when either prompt is cancelled', async () => {
-        prompts
-            .mockResolvedValueOnce({ title: 'Cancelled' })
-            .mockResolvedValueOnce({ subtitle: '' })
-            .mockResolvedValueOnce({ useDefaultRenderer: undefined });
-        await expect(create('cancelled')).rejects.toBe(exitError);
-        expect(createProject).not.toHaveBeenCalled();
+    it.each([
+        ['title', [{ title: undefined }]],
+        ['subtitle', [{ title: 'Cancelled' }, { subtitle: undefined }]],
+        [
+            'localization',
+            [
+                { title: 'Cancelled' },
+                { subtitle: '' },
+                { localizationMode: undefined },
+            ],
+        ],
+        [
+            'renderer',
+            [
+                { title: 'Cancelled' },
+                { subtitle: '' },
+                { localizationMode: 'literal' },
+                { useDefaultRenderer: undefined },
+            ],
+        ],
+        [
+            'styles',
+            [
+                { title: 'Cancelled' },
+                { subtitle: '' },
+                { localizationMode: 'literal' },
+                { useDefaultRenderer: true },
+                { starterStyles: undefined },
+            ],
+        ],
+    ])('stops when the %s prompt is cancelled', async (_name, responses) => {
+        for (const response of responses) {
+            prompts.mockResolvedValueOnce(response);
+        }
 
-        prompts
-            .mockResolvedValueOnce({ title: 'Cancelled Styles' })
-            .mockResolvedValueOnce({ subtitle: '' })
-            .mockResolvedValueOnce({ localizationMode: 'literal' })
-            .mockResolvedValueOnce({ useDefaultRenderer: true })
-            .mockResolvedValueOnce({ starterStyles: undefined });
-        await expect(create('cancelled-styles')).rejects.toBe(exitError);
+        await expect(create('cancelled')).rejects.toBe(exitError);
         expect(createProject).not.toHaveBeenCalled();
     });
 

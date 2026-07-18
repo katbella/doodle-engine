@@ -47,6 +47,23 @@ describe('applyDialogueEdits', () => {
         expect(applyDialogueEdits(SOURCE, 'd', dialogue)).toBe(SOURCE);
     });
 
+    it('saves multiline text and removes quotes when changed back to one line', () => {
+        const dialogue = parseDialogue(SOURCE, 'd');
+        dialogue.nodes[0].text = 'First paragraph.\n\nSecond paragraph.';
+
+        const multiline = applyDialogueEdits(SOURCE, 'd', dialogue);
+        expect(multiline).toContain(
+            'BARTENDER: "First paragraph.\n  \n  Second paragraph."'
+        );
+        expect(parseDialogue(multiline, 'd')).toEqual(dialogue);
+
+        dialogue.nodes[0].text = 'One line again.';
+        const singleLine = applyDialogueEdits(multiline, 'd', dialogue);
+        expect(singleLine).toContain('BARTENDER: One line again.');
+        expect(singleLine).not.toContain('BARTENDER: "One line again."');
+        expect(parseDialogue(singleLine, 'd')).toEqual(dialogue);
+    });
+
     it('re-serializes when a node is added (structural change)', () => {
         const dialogue = parseDialogue(SOURCE, 'd');
         dialogue.nodes.push({

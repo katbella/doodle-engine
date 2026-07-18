@@ -191,9 +191,7 @@ export function EntityForm({
             )}
 
             <div className="form__head">
-                <span className="form__title mono">
-                    {String(values.id ?? '')}
-                </span>
+                <span className="form__title">{String(values.id ?? '')}</span>
                 <span className="form__kind">{form.label}</span>
             </div>
 
@@ -231,9 +229,7 @@ export function EntityForm({
 
             {unknownKeys.length > 0 && (
                 <div className="form__unknown">
-                    <div className="form__unknown-head">
-                        Other fields — kept as written
-                    </div>
+                    <div className="form__unknown-head">Custom fields</div>
                     {unknownKeys.map((key) => (
                         <div key={key} className="form__unknown-row mono">
                             {key}: {formatValue(values[key])}
@@ -463,7 +459,7 @@ function LocalizableField({
                 </div>
             </div>
             <input
-                className="dlg__input mono"
+                className={`dlg__input ${isKey ? 'mono' : ''}`}
                 value={value}
                 placeholder={isKey ? '@some.key' : 'plain text'}
                 spellCheck={false}
@@ -506,11 +502,6 @@ function StatsBag({
                     + Add stat
                 </button>
             </div>
-            {entries.length === 0 && (
-                <span className="field__hint">
-                    None. The engine stores these but doesn’t read them.
-                </span>
-            )}
             {entries.map(([key, v]) => (
                 <div key={key} className="dlg__row">
                     <input

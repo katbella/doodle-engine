@@ -332,9 +332,7 @@ function BuildView({
         );
     } else if (!install) {
         build = (
-            <div className="dock__empty">
-                No build run yet. Click Build to produce a production bundle.
-            </div>
+            <div className="dock__empty">Build output will appear here.</div>
         );
     } else {
         build = null;

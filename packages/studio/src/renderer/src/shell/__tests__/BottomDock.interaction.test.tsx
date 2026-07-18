@@ -125,7 +125,7 @@ describe('BottomDock', () => {
     it('shows idle, installing, active, successful, failed, and cancelled builds', async () => {
         const user = userEvent.setup();
         const { rerender } = render(<BottomDock {...props('build')} />);
-        expect(screen.getByText(/No build run yet/)).toBeTruthy();
+        expect(screen.getByText('Build output will appear here.')).toBeTruthy();
 
         rerender(
             <BottomDock

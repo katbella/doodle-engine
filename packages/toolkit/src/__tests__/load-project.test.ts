@@ -9,9 +9,7 @@ import { tmpdir } from 'os';
 import { join, dirname } from 'path';
 import { loadContent, loadProject } from '../load-project';
 
-async function makeProject(
-    files: Record<string, string>
-): Promise<string> {
+async function makeProject(files: Record<string, string>): Promise<string> {
     const dir = await mkdtemp(join(tmpdir(), 'doodle-'));
     for (const [rel, content] of Object.entries(files)) {
         const full = join(dir, rel);
@@ -80,6 +78,33 @@ describe('loadContent', () => {
             expect(registry.dialogues.intro).toBeDefined();
             expect(registry.locations.town).toBeDefined();
             expect(config.startLocation).toBe('town');
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('loads multiline dialogue from a project', async () => {
+        const dir = await makeProject({
+            'content/game.yaml': GAME,
+            'content/locations/town.yaml': TOWN,
+            'content/dialogues/intro.dlg': [
+                'NODE start',
+                '  NARRATOR: "First paragraph.',
+                '  ',
+                '  Second paragraph."',
+                '  END dialogue',
+            ].join('\n'),
+        });
+
+        try {
+            const { registry, parseErrors } = await loadContent(
+                join(dir, 'content')
+            );
+
+            expect(parseErrors).toEqual([]);
+            expect(registry.dialogues.intro.nodes[0].text).toBe(
+                'First paragraph.\n\nSecond paragraph.'
+            );
         } finally {
             await rm(dir, { recursive: true, force: true });
         }

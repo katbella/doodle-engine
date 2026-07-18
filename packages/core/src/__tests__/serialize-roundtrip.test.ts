@@ -39,6 +39,22 @@ describe('serialize/parse round trip for display text', () => {
         expect(roundTrip(text)).toBe(text);
     });
 
+    it('quotes multiline text without quoting ordinary lines', () => {
+        const multiline = serializeDialogue(
+            narratorDialogue('First paragraph.\n\nSecond paragraph.')
+        );
+        const singleLine = serializeDialogue(narratorDialogue('One line.'));
+
+        expect(multiline).toContain(
+            'NARRATOR: "First paragraph.\n  \n  Second paragraph."'
+        );
+        expect(roundTrip('First paragraph.\n\nSecond paragraph.')).toBe(
+            'First paragraph.\n\nSecond paragraph.'
+        );
+        expect(singleLine).toContain('NARRATOR: One line.');
+        expect(singleLine).not.toContain('NARRATOR: "One line."');
+    });
+
     it('round-trips choice text with quotes and hashes', () => {
         const dialogue: Dialogue = {
             id: 'd',
@@ -60,7 +76,9 @@ describe('serialize/parse round trip for display text', () => {
             ],
         };
         const reparsed = parseDialogue(serializeDialogue(dialogue), 'd');
-        expect(reparsed.nodes[0].choices[0].text).toBe('Say "hello" # politely');
+        expect(reparsed.nodes[0].choices[0].text).toBe(
+            'Say "hello" # politely'
+        );
     });
 
     it('round-trips NOTIFY text with quotes and hashes', () => {

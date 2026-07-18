@@ -146,8 +146,9 @@ describe('NodeEditor', () => {
         expect(state().speaker).toBeNull();
 
         const line = screen.getByPlaceholderText('@locale.key or plain text');
+        expect(line.tagName).toBe('TEXTAREA');
         await user.clear(line);
-        await user.type(line, 'Changed line');
+        await user.type(line, 'Changed line{enter}{enter}Second paragraph');
         await user.click(
             screen.getByRole('button', { name: 'Choose Voice file' })
         );
@@ -161,7 +162,7 @@ describe('NodeEditor', () => {
         const media = screen.getAllByPlaceholderText('(none)');
         await user.clear(media[0]);
         await user.clear(media[1]);
-        expect(state().text).toBe('Changed line');
+        expect(state().text).toBe('Changed line\n\nSecond paragraph');
         expect(state()).not.toHaveProperty('voice');
         expect(state()).not.toHaveProperty('portrait');
 

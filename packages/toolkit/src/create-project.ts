@@ -184,7 +184,10 @@ export async function createProject(
             localizationMode === 'literal' &&
             outPath.startsWith('content/')
         ) {
-            output = replaceLocaleKeysWithEnglish(content);
+            output = replaceLocaleKeysWithEnglish(
+                content,
+                outPath.endsWith('.dlg')
+            );
         }
         await writeFile(dest, output);
     }
@@ -233,7 +236,10 @@ const ENGLISH_LOCALE_STARTER = `# ===================
 # ui.end_dialogue: "End Dialogue"
 `;
 
-function replaceLocaleKeysWithEnglish(content: string): string {
+function replaceLocaleKeysWithEnglish(
+    content: string,
+    isDialogue: boolean
+): string {
     return content
         .split(/(\r?\n)/)
         .map((part) => {
@@ -241,15 +247,30 @@ function replaceLocaleKeysWithEnglish(content: string): string {
                 return part;
             }
 
-            return part
-                .replace(/"@([A-Za-z0-9_.-]+)"/g, (_match, key: string) =>
-                    JSON.stringify(englishTranslation(key))
-                )
-                .replace(/@([A-Za-z0-9_.-]+)/g, (_match, key: string) =>
-                    JSON.stringify(englishTranslation(key))
-                );
+            const indentation = part.match(/^\s*/)?.[0] ?? '';
+            return part.replace(
+                /"@([A-Za-z0-9_.-]+)"|@([A-Za-z0-9_.-]+)/g,
+                (_match, quotedKey: string, plainKey: string) => {
+                    const translation = englishTranslation(
+                        quotedKey ?? plainKey
+                    );
+                    const formatted = isDialogue
+                        ? formatDialogueText(translation)
+                        : JSON.stringify(translation);
+                    return isDialogue
+                        ? formatted.replace(/\n/g, `\n${indentation}`)
+                        : formatted;
+                }
+            );
         })
         .join('');
+}
+
+function formatDialogueText(text: string): string {
+    if (text.includes('\n') || text.includes('#') || text.includes('"')) {
+        return `"${text.replace(/[\\"]/g, (character) => '\\' + character)}"`;
+    }
+    return text;
 }
 
 function englishTranslation(key: string): string {

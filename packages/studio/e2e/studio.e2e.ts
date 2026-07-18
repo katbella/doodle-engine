@@ -90,24 +90,26 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 ...launchEnv,
                 ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
             },
-        })
-    );
+        }));
 
     try {
-        const window = await test.step('wait for the renderer and preload', async () => {
-            const firstWindow = await app.firstWindow();
-            await expect(firstWindow.getByText('Doodle Studio')).toBeVisible();
-            await expect
-                .poll(() =>
-                    firstWindow.evaluate(
-                        () =>
-                            typeof window.studio?.openProjectPath ===
-                                'function' && !('require' in window)
+        const window =
+            await test.step('wait for the renderer and preload', async () => {
+                const firstWindow = await app.firstWindow();
+                await expect(
+                    firstWindow.getByText('Doodle Studio')
+                ).toBeVisible();
+                await expect
+                    .poll(() =>
+                        firstWindow.evaluate(
+                            () =>
+                                typeof window.studio?.openProjectPath ===
+                                    'function' && !('require' in window)
+                        )
                     )
-                )
-                .toBe(true);
-            return firstWindow;
-        });
+                    .toBe(true);
+                return firstWindow;
+            });
 
         await test.step('open the fixture through the menu event', async () => {
             await app.evaluate(({ BrowserWindow }, projectPath) => {
@@ -119,6 +121,34 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await expect(
                 window.getByText('studio-e2e-story').first()
             ).toBeVisible();
+        });
+
+        await test.step('keep toolbar actions visible at the minimum window width', async () => {
+            await app.evaluate(({ BrowserWindow }) => {
+                BrowserWindow.getAllWindows()[0]?.setSize(960, 700);
+            });
+            await expect
+                .poll(() =>
+                    window.evaluate(() => {
+                        const bar = document.querySelector('.topbar');
+                        if (!bar) return false;
+                        const bounds = bar.getBoundingClientRect();
+                        return Array.from(bar.querySelectorAll('button')).every(
+                            (button) => {
+                                const buttonBounds =
+                                    button.getBoundingClientRect();
+                                return (
+                                    buttonBounds.left >= bounds.left &&
+                                    buttonBounds.right <= bounds.right
+                                );
+                            }
+                        );
+                    })
+                )
+                .toBe(true);
+            await app.evaluate(({ BrowserWindow }) => {
+                BrowserWindow.getAllWindows()[0]?.setSize(1440, 900);
+            });
         });
 
         await test.step('edit the location and change tabs', async () => {
@@ -133,9 +163,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 .locator('.rail__item-open')
                 .filter({ hasText: 'market' })
                 .click();
-            await expect(
-                window.locator('input[value="Market"]')
-            ).toBeVisible();
+            await expect(window.locator('input[value="Market"]')).toBeVisible();
         });
 
         await test.step('verify the saved YAML', async () => {

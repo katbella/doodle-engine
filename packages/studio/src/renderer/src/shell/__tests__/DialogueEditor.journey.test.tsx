@@ -118,6 +118,42 @@ describe('DialogueEditor author journeys', () => {
         );
     });
 
+    it('saves paragraph breaks and returns to unquoted single-line source', async () => {
+        const writeMultiline = installBridge();
+        const firstView = renderEditor();
+        const line = await screen.findByDisplayValue('Welcome.');
+
+        fireEvent.change(line, {
+            target: { value: 'First paragraph.\n\nSecond paragraph.' },
+        });
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+
+        await waitFor(() => expect(writeMultiline).toHaveBeenCalledOnce());
+        const multilineSource = writeMultiline.mock.calls[0][2];
+        expect(multilineSource).toContain(
+            'BARTENDER: "First paragraph.\n  \n  Second paragraph."'
+        );
+
+        firstView.unmount();
+        const writeSingleLine = installBridge(multilineSource);
+        renderEditor();
+        const multilineField = await screen.findByPlaceholderText(
+            '@locale.key or plain text'
+        );
+        expect((multilineField as HTMLTextAreaElement).value).toBe(
+            'First paragraph.\n\nSecond paragraph.'
+        );
+        fireEvent.change(multilineField, {
+            target: { value: 'One line again.' },
+        });
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+
+        await waitFor(() => expect(writeSingleLine).toHaveBeenCalledOnce());
+        const singleLineSource = writeSingleLine.mock.calls[0][2];
+        expect(singleLineSource).toContain('BARTENDER: One line again.');
+        expect(singleLineSource).not.toContain('BARTENDER: "One line again."');
+    });
+
     it('renames a node, repoints choices, preserves comments, and shows clean targets', async () => {
         const writeDocument = installBridge();
         const user = userEvent.setup();

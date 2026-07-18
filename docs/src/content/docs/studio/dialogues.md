@@ -32,6 +32,8 @@ Each node can contain:
 
 [![Speaker, line, voice, and portrait controls for a node](/images/studio/dialogue-node-fields.png)](/images/studio/dialogue-node-fields.png)
 
+Press Enter in the Line field to add paragraph breaks without creating another node. The paragraphs remain one dialogue entry, followed by the same choices or Continue action. Studio adds the required quotes in Source mode and removes them again when the entry returns to one line.
+
 ## Add choices
 
 Each choice has the words shown to the player and the place the conversation goes next. Choices appear in the listed order; use the up and down controls to rearrange them. Point a choice at another node, or choose **end dialogue** when it should close the conversation.

@@ -4,7 +4,7 @@
  * live values and pass/fail), effects run, and transitions. Rows are filtered
  * by kind and searched by id.
  */
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
     serializeCondition,
     serializeEffect,
@@ -25,16 +25,14 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
     const [filter, setFilter] = useState<KindFilter>('all');
     const [search, setSearch] = useState('');
 
-    const rows = useMemo(() => {
-        const query = search.trim().toLowerCase();
-        return trace
-            .map((event) => ({ event, row: describe(event) }))
-            .filter(({ event }) => filter === 'all' || event.kind === filter)
-            .filter(
-                ({ row }) =>
-                    query === '' || row.text.toLowerCase().includes(query)
-            );
-    }, [trace, filter, search]);
+    const query = search.trim().toLowerCase();
+    const rows = trace
+        .map((event) => ({ event, row: describe(event) }))
+        .filter(({ event }) => filter === 'all' || event.kind === filter)
+        .filter(
+            ({ row }) => query === '' || row.text.toLowerCase().includes(query)
+        );
+    const selectedFilter = FILTERS.find(({ key }) => key === filter)!;
 
     return (
         <div className="trace">
@@ -46,6 +44,7 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
                             filter === f.key ? 'trace__filter--active' : ''
                         }`}
                         onClick={() => setFilter(f.key)}
+                        aria-pressed={filter === f.key}
                     >
                         {f.label}
                     </button>
@@ -61,9 +60,25 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
             <div className="trace__log scroll">
                 {rows.length === 0 ? (
                     <div className="dock__empty">
-                        {trace.length === 0
-                            ? 'Nothing traced yet. Start a dialogue or make a choice.'
-                            : 'No trace rows match this filter.'}
+                        {trace.length === 0 ? (
+                            'Start a dialogue to begin the trace.'
+                        ) : (
+                            <>
+                                <span>
+                                    {query
+                                        ? `No results for “${search.trim()}”.`
+                                        : `No ${selectedFilter.label.toLowerCase()} were recorded in this playtest.`}
+                                </span>
+                                <button
+                                    className="trace__clear"
+                                    onClick={() =>
+                                        query ? setSearch('') : setFilter('all')
+                                    }
+                                >
+                                    {query ? 'Clear search' : 'Show all events'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 ) : (
                     rows.map(({ event, row }) => (

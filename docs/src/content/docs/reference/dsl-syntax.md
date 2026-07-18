@@ -281,11 +281,11 @@ NODE failure
 
 ### Summary
 
-| Node type | Has text? | Has choices? | Player sees |
-|-----------|-----------|--------------|-------------|
-| Text-only | Yes | No | Text + Continue button |
-| Choice node | Yes or no | Yes | Text + choice buttons |
-| Silent processing | No | No | Auto-advances instantly |
+| Node type         | Has text? | Has choices? | Player sees             |
+| ----------------- | --------- | ------------ | ----------------------- |
+| Text-only         | Yes       | No           | Text + Continue button  |
+| Choice node       | Yes or no | Yes          | Text + choice buttons   |
+| Silent processing | No        | No           | Auto-advances instantly |
 
 ### IF vs CHOICE REQUIRE
 
@@ -390,6 +390,16 @@ NARRATOR: "He said \"room #3\" and walked off."
 ```
 
 The player sees: He said "room #3" and walked off. Doodle Studio writes these escapes for you when you type quotes in the visual editor.
+
+Quoted speaker and narrator text can also span several lines:
+
+```text
+NARRATOR: "The road was empty.
+
+By morning, the snow had covered our tracks."
+```
+
+The line breaks are part of the displayed text, but the passage remains one dialogue entry. Use plain text without quotes for ordinary single-line dialogue.
 
 **Localization keys** (prefixed with `@`): Reference a key from a locale file. Required for multi-language support.
 

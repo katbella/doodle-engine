@@ -31,34 +31,28 @@ export function splitComment(raw: string): {
         return { code: raw, comment: null };
     }
 
-    // The first quoted span, honoring \" and \\ escapes inside it.
-    const quoteMatch = raw.match(/"(?:\\.|[^"\\])*"/);
-    if (!quoteMatch) {
+    const quoteStart = findUnescapedQuote(raw);
+    if (quoteStart === -1 || hashIndex < quoteStart) {
         return {
             code: raw.substring(0, hashIndex),
             comment: raw.substring(hashIndex),
         };
     }
 
-    const quoteStart = raw.indexOf(quoteMatch[0]);
-    const quoteEnd = quoteStart + quoteMatch[0].length;
-
-    if (hashIndex < quoteStart) {
-        // '#' before the quote: it is a comment.
-        return {
-            code: raw.substring(0, hashIndex),
-            comment: raw.substring(hashIndex),
-        };
+    const quoteEnd = findUnescapedQuote(raw, quoteStart + 1);
+    if (quoteEnd === -1) {
+        return { code: raw, comment: null };
     }
-    if (hashIndex < quoteEnd) {
+    if (hashIndex < quoteEnd + 1) {
         // '#' inside the quotes: preserve it; strip any '#' after the quote.
-        const after = raw.substring(quoteEnd);
+        const after = raw.substring(quoteEnd + 1);
         const afterHash = after.indexOf('#');
         if (afterHash === -1) {
             return { code: raw, comment: null };
         }
         return {
-            code: raw.substring(0, quoteEnd) + after.substring(0, afterHash),
+            code:
+                raw.substring(0, quoteEnd + 1) + after.substring(0, afterHash),
             comment: after.substring(afterHash),
         };
     }
@@ -67,4 +61,14 @@ export function splitComment(raw: string): {
         code: raw.substring(0, hashIndex),
         comment: raw.substring(hashIndex),
     };
+}
+
+export function findUnescapedQuote(text: string, from = 0): number {
+    for (let i = from; i < text.length; i++) {
+        if (text[i] !== '"') continue;
+        let backslashes = 0;
+        for (let j = i - 1; j >= 0 && text[j] === '\\'; j--) backslashes++;
+        if (backslashes % 2 === 0) return i;
+    }
+    return -1;
 }

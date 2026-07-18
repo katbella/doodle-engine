@@ -45,6 +45,19 @@ describe('createProject language setup', () => {
             )
         ).rejects.toThrow();
 
+        const bartenderSource = await readFile(
+            join(projectPath, 'content', 'dialogues', 'bartender_greeting.dlg'),
+            'utf-8'
+        );
+        expect(bartenderSource).toContain(
+            'BARTENDER: Welcome to the Salty Dog, stranger. What can I get you?'
+        );
+        expect(bartenderSource).toContain(
+            "CHOICE What's the news around here?"
+        );
+        expect(bartenderSource).not.toContain('BARTENDER: "');
+        expect(bartenderSource).not.toContain('CHOICE "');
+
         const contentDir = join(projectPath, 'content');
         const contentFiles = await readdir(contentDir, { recursive: true });
         for (const relativePath of contentFiles) {

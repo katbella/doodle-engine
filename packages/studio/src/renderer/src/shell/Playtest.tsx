@@ -235,11 +235,20 @@ function Playback({
 
     const rows = session.choiceRows();
     const line = session.speakerLine();
+    const currentNode = session.getState().dialogueState;
     // A node with text but no visible choices waits for Continue.
     const canContinue = dialogue.text !== '' && snapshot.choices.length === 0;
 
     return (
         <div className="playback scroll">
+            {currentNode && (
+                <div className="playback__node">
+                    <span className="playback__node-label">Current node</span>
+                    <span className="playback__node-value mono">
+                        {currentNode.dialogueId} / {currentNode.nodeId}
+                    </span>
+                </div>
+            )}
             <div className="playback__line">
                 <span className="playback__speaker">
                     {dialogue.speakerName}

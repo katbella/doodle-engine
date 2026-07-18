@@ -76,7 +76,7 @@ extension:
         const user = userEvent.setup();
         editor('characters');
         expect(await screen.findByText('hero')).toBeTruthy();
-        expect(screen.getByText('Other fields — kept as written')).toBeTruthy();
+        expect(screen.getByText('Custom fields')).toBeTruthy();
         expect(screen.getByText(/extension:/)).toBeTruthy();
         expect(
             screen.getByRole('option', { name: 'missing (missing)' })

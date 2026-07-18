@@ -131,7 +131,7 @@ describe('GameConfigForm author journeys', () => {
         renderForm();
 
         await user.selectOptions(
-            await screen.findByLabelText('Start location'),
+            await screen.findByLabelText('Location'),
             'market'
         );
         fireEvent.keyDown(window, { key: 's', metaKey: true });
@@ -175,16 +175,14 @@ describe('GameConfigForm author journeys', () => {
         const view = renderForm();
 
         await user.selectOptions(
-            await screen.findByLabelText('Start location'),
+            await screen.findByLabelText('Location'),
             'market'
         );
-        const day = screen.getByLabelText('Start day');
+        const day = screen.getByLabelText('Day');
         await user.clear(day);
         await user.type(day, '2');
 
-        const flags = screen
-            .getByText('Start flags')
-            .closest<HTMLElement>('.field')!;
+        const flags = screen.getByText('Flags').closest<HTMLElement>('.field')!;
         await user.selectOptions(within(flags).getByRole('combobox'), 'true');
 
         const gold = screen.getByDisplayValue('5');
@@ -192,7 +190,7 @@ describe('GameConfigForm author journeys', () => {
         await user.type(gold, '12');
 
         const inventory = screen
-            .getByText('Start inventory')
+            .getByText('Initial inventory')
             .closest<HTMLElement>('.field')!;
         await user.selectOptions(
             within(inventory).getByRole('combobox'),
@@ -231,7 +229,7 @@ describe('GameConfigForm author journeys', () => {
         renderForm();
 
         await user.selectOptions(
-            await screen.findByLabelText('Start location'),
+            await screen.findByLabelText('Location'),
             'market'
         );
 
@@ -274,7 +272,7 @@ describe('GameConfigForm author journeys', () => {
         await user.click(screen.getByRole('button', { name: 'Remove gold' }));
 
         const inventory = screen
-            .getByText('Start inventory')
+            .getByText('Initial inventory')
             .closest<HTMLElement>('.field')!;
         await user.selectOptions(
             within(inventory).getByRole('combobox'),
@@ -311,7 +309,7 @@ describe('GameConfigForm author journeys', () => {
         renderForm();
 
         await user.selectOptions(
-            await screen.findByLabelText('Start location'),
+            await screen.findByLabelText('Location'),
             'market'
         );
         const overwrite = await screen.findByRole(

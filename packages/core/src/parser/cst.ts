@@ -22,7 +22,7 @@
 
 import type { Dialogue } from '../types/entities';
 import { parseDialogue } from './index';
-import { splitComment } from './comment';
+import { findUnescapedQuote, splitComment } from './comment';
 
 /** A byte range [start, end) into the CST's original source string. */
 export interface Span {
@@ -54,6 +54,7 @@ export interface CstLine {
     comment: string | null;
     /** True when the line has no code — it is blank or only a comment. */
     blankOrComment: boolean;
+    multilineContinuation: boolean;
 }
 
 /** A top-level TRIGGER or REQUIRE directive (before the first NODE). */
@@ -134,8 +135,38 @@ function splitPhysicalLines(
 
 /** Build the per-line model from raw source. */
 function buildLines(source: string): CstLine[] {
+    let insideQuotedText = false;
     return splitPhysicalLines(source).map(({ raw, newline, start }) => {
-        const { code, comment } = splitComment(raw);
+        const multilineContinuation = insideQuotedText;
+        let code: string;
+        let comment: string | null;
+
+        if (insideQuotedText) {
+            const closingQuote = findUnescapedQuote(raw);
+            if (closingQuote === -1) {
+                code = raw;
+                comment = null;
+            } else {
+                const afterQuote = raw.substring(closingQuote + 1);
+                const hash = afterQuote.indexOf('#');
+                if (hash === -1) {
+                    code = raw;
+                    comment = null;
+                } else {
+                    const commentStart = closingQuote + 1 + hash;
+                    code = raw.substring(0, commentStart);
+                    comment = raw.substring(commentStart);
+                }
+                insideQuotedText = false;
+            }
+        } else {
+            ({ code, comment } = splitComment(raw));
+            const openingQuote = findUnescapedQuote(code);
+            insideQuotedText =
+                openingQuote !== -1 &&
+                findUnescapedQuote(code, openingQuote + 1) === -1;
+        }
+
         const trimmedStart = code.length - code.trimStart().length;
         const content = code.trim();
         return {
@@ -146,7 +177,8 @@ function buildLines(source: string): CstLine[] {
             content,
             contentStart: start + trimmedStart,
             comment,
-            blankOrComment: content.length === 0,
+            blankOrComment: !multilineContinuation && content.length === 0,
+            multilineContinuation,
         };
     });
 }
@@ -173,6 +205,7 @@ function collectBlocks(
     for (let k = 0; k < codeIndices.length; k++) {
         const idx = codeIndices[k];
         const line = lines[idx];
+        if (line.multilineContinuation) continue;
         const first = line.content.split(/\s+/)[0];
 
         if (first === 'CHOICE' || first === 'IF') {
@@ -186,7 +219,10 @@ function collectBlocks(
                 }
                 // A new NODE or a sibling block header at the same indent closes
                 // an unterminated block defensively (best-effort, never throws).
-                if (cand.indent <= line.indent && cand.content.startsWith('NODE ')) {
+                if (
+                    cand.indent <= line.indent &&
+                    cand.content.startsWith('NODE ')
+                ) {
                     endIndex = codeIndices[j - 1] ?? idx;
                     break;
                 }
@@ -214,9 +250,28 @@ function collectBlocks(
 
 /** Leading keywords that are structure or effects, not speaker lines. */
 const NON_SPEAKER_KEYWORDS = new Set([
-    'NODE', 'CHOICE', 'IF', 'END', 'GOTO', 'REQUIRE', 'TRIGGER', 'VOICE',
-    'PORTRAIT', 'SET', 'CLEAR', 'ADD', 'REMOVE', 'MOVE', 'ADVANCE', 'START',
-    'MUSIC', 'SOUND', 'VIDEO', 'INTERLUDE', 'NOTIFY', 'ROLL',
+    'NODE',
+    'CHOICE',
+    'IF',
+    'END',
+    'GOTO',
+    'REQUIRE',
+    'TRIGGER',
+    'VOICE',
+    'PORTRAIT',
+    'SET',
+    'CLEAR',
+    'ADD',
+    'REMOVE',
+    'MOVE',
+    'ADVANCE',
+    'START',
+    'MUSIC',
+    'SOUND',
+    'VIDEO',
+    'INTERLUDE',
+    'NOTIFY',
+    'ROLL',
 ]);
 
 function isStructuralOrEffect(keyword: string): boolean {
@@ -247,6 +302,7 @@ export function parseDialogueCst(source: string, id: string): DialogueCst {
     const nodeHeaderPositions: number[] = [];
     for (let k = 0; k < codeIndices.length; k++) {
         const line = lines[codeIndices[k]];
+        if (line.multilineContinuation) continue;
         if (line.content.startsWith('NODE ')) {
             nodeHeaderPositions.push(k);
         } else if (nodeHeaderPositions.length === 0) {
@@ -359,6 +415,9 @@ export function printDialogueCst(
  * parseDialogue, so a file's meaning is decided in one place only and this tree
  * can never drift from what the engine actually does.
  */
-export function cstToDialogue(cst: DialogueCst, edits: CstEdit[] = []): Dialogue {
+export function cstToDialogue(
+    cst: DialogueCst,
+    edits: CstEdit[] = []
+): Dialogue {
     return parseDialogue(printDialogueCst(cst, edits), cst.id);
 }

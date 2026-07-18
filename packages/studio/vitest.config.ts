@@ -1,8 +1,19 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        alias: {
+            '@doodle-engine/core': fileURLToPath(
+                new URL('../core/src/index.ts', import.meta.url)
+            ),
+            '@doodle-engine/toolkit': fileURLToPath(
+                new URL('../toolkit/src/index.ts', import.meta.url)
+            ),
+        },
+    },
     test: {
         environment: 'node',
         projects: [

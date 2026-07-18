@@ -116,7 +116,15 @@ function Popover({
 
         place();
         window.addEventListener('resize', place);
-        return () => window.removeEventListener('resize', place);
+        const observer =
+            typeof ResizeObserver === 'undefined'
+                ? null
+                : new ResizeObserver(place);
+        observer?.observe(panel);
+        return () => {
+            window.removeEventListener('resize', place);
+            observer?.disconnect();
+        };
     }, [anchorRef]);
 
     useEffect(() => {
@@ -489,11 +497,12 @@ export function NodeEditor({
 
             <label className="field">
                 <span className="field__label">Line</span>
-                <input
-                    className="dlg__input mono"
+                <textarea
+                    className="dlg__input node-editor__line-input"
                     value={node.text}
                     placeholder="@locale.key or plain text"
-                    spellCheck={false}
+                    rows={5}
+                    spellCheck={!node.text.startsWith('@')}
                     onChange={(e) => set({ text: e.target.value })}
                 />
             </label>
@@ -708,7 +717,7 @@ export function NodeEditor({
                                 </div>
                             </div>
                             <input
-                                className="dlg__input mono"
+                                className="dlg__input"
                                 value={choice.text}
                                 placeholder="@choice.key or plain text"
                                 spellCheck={false}
@@ -768,7 +777,7 @@ export function NodeEditor({
 
             <div className="node-editor__section">
                 <div className="dlg__target">
-                    <span className="field__label">Default next</span>
+                    <span className="field__label">Next node</span>
                     <TargetSelect
                         value={node.next ?? ''}
                         nodeIds={nodeIds}

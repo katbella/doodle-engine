@@ -64,23 +64,24 @@ export function TopBar({
 
     return (
         <header className="topbar">
-            <span className="topbar__name">{project.name}</span>
-            <span
-                className={`status ${status.cls}`}
-                title={
-                    stale && !validating
-                        ? 'Changes since the last validation — click Validate'
-                        : undefined
-                }
-            >
-                {status.spin ? (
-                    <span className="spinner spinner--sm" />
-                ) : (
-                    <span className="status__dot" />
-                )}
-                {status.label}
-            </span>
-            <div className="topbar__spacer" />
+            <div className="topbar__project">
+                <span className="topbar__name">{project.name}</span>
+                <span
+                    className={`status ${status.cls}`}
+                    title={
+                        stale && !validating
+                            ? 'Changes since the last validation — click Validate'
+                            : undefined
+                    }
+                >
+                    {status.spin ? (
+                        <span className="spinner spinner--sm" />
+                    ) : (
+                        <span className="status__dot" />
+                    )}
+                    {status.label}
+                </span>
+            </div>
             <button
                 className="topbar__palette"
                 onClick={onOpenPalette}
@@ -92,102 +93,104 @@ export function TopBar({
                     {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
                 </kbd>
             </button>
-            <div className="topbar__spacer" />
-            <button
-                className="btn btn--icon"
-                onClick={() => void window.studio.openDocumentation()}
-                aria-label="Open Doodle Studio documentation"
-                title="Open Doodle Studio documentation"
-            >
-                <CircleHelp size={16} />
-            </button>
-            <button
-                className="btn btn--icon"
-                onClick={onToggleTheme}
-                aria-label={
-                    theme === 'dark'
-                        ? 'Switch to light mode'
-                        : 'Switch to dark mode'
-                }
-                title={
-                    theme === 'dark'
-                        ? 'Switch to light mode'
-                        : 'Switch to dark mode'
-                }
-            >
-                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-            <button className="btn" onClick={onOpen}>
-                Open project…
-            </button>
-            <button
-                className={`btn ${stale && canBuild ? 'btn--accent' : ''}`}
-                onClick={onValidate}
-                disabled={validating || !canBuild}
-                title={
-                    canBuild
-                        ? undefined
-                        : "Install the project's dependencies first"
-                }
-            >
-                {validating ? 'Validating…' : 'Validate'}
-            </button>
-            <button
-                className="btn"
-                onClick={onBuild}
-                disabled={building || !canBuild}
-                title={
-                    canBuild
-                        ? undefined
-                        : "Install the project's dependencies first"
-                }
-            >
-                {building ? 'Building…' : 'Build'}
-            </button>
-            {preview ? (
-                <>
-                    <button
-                        className="btn"
-                        onClick={onOpenPreview}
-                        title={`Open ${preview.url} in your browser`}
-                    >
-                        <ExternalLink size={14} /> Preview :{preview.port}
-                    </button>
-                    <button
-                        className="btn"
-                        onClick={onStopPreview}
-                        disabled={previewBusy}
-                    >
-                        <Square size={14} /> Stop
-                    </button>
-                </>
-            ) : (
+            <div className="topbar__actions">
                 <button
-                    className="btn"
-                    onClick={onStartPreview}
-                    disabled={previewBusy || !canBuild}
+                    className="btn btn--icon"
+                    onClick={() => void window.studio.openDocumentation()}
+                    aria-label="Open Doodle Studio documentation"
+                    title="Open Doodle Studio documentation"
+                >
+                    <CircleHelp size={16} />
+                </button>
+                <button
+                    className="btn btn--icon"
+                    onClick={onToggleTheme}
+                    aria-label={
+                        theme === 'dark'
+                            ? 'Switch to light mode'
+                            : 'Switch to dark mode'
+                    }
+                    title={
+                        theme === 'dark'
+                            ? 'Switch to light mode'
+                            : 'Switch to dark mode'
+                    }
+                >
+                    {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                </button>
+                <span className="topbar__divider" aria-hidden />
+                <button className="btn" onClick={onOpen}>
+                    Open project…
+                </button>
+                <button
+                    className={`btn ${stale && canBuild ? 'btn--accent' : ''}`}
+                    onClick={onValidate}
+                    disabled={validating || !canBuild}
                     title={
                         canBuild
-                            ? 'Start the dev server and open the game in your browser'
+                            ? undefined
                             : "Install the project's dependencies first"
                     }
                 >
-                    {previewBusy ? (
-                        'Starting…'
-                    ) : (
-                        <>
-                            <Monitor size={14} /> Preview
-                        </>
-                    )}
+                    {validating ? 'Validating…' : 'Validate'}
                 </button>
-            )}
-            <button
-                className="btn btn--accent"
-                onClick={onPlaytest}
-                title="Run the game in the playtest panel"
-            >
-                <Play size={14} /> Playtest
-            </button>
+                <button
+                    className="btn"
+                    onClick={onBuild}
+                    disabled={building || !canBuild}
+                    title={
+                        canBuild
+                            ? undefined
+                            : "Install the project's dependencies first"
+                    }
+                >
+                    {building ? 'Building…' : 'Build'}
+                </button>
+                {preview ? (
+                    <>
+                        <button
+                            className="btn"
+                            onClick={onOpenPreview}
+                            title={`Open ${preview.url} in your browser`}
+                        >
+                            <ExternalLink size={14} /> Preview :{preview.port}
+                        </button>
+                        <button
+                            className="btn"
+                            onClick={onStopPreview}
+                            disabled={previewBusy}
+                        >
+                            <Square size={14} /> Stop
+                        </button>
+                    </>
+                ) : (
+                    <button
+                        className="btn"
+                        onClick={onStartPreview}
+                        disabled={previewBusy || !canBuild}
+                        title={
+                            canBuild
+                                ? 'Start the dev server and open the game in your browser'
+                                : "Install the project's dependencies first"
+                        }
+                    >
+                        {previewBusy ? (
+                            'Starting…'
+                        ) : (
+                            <>
+                                <Monitor size={14} /> Preview
+                            </>
+                        )}
+                    </button>
+                )}
+                <button
+                    className="btn btn--accent"
+                    onClick={onPlaytest}
+                    title="Run the game in the playtest panel"
+                >
+                    <Play size={14} /> Playtest
+                </button>
+            </div>
         </header>
     );
 }

@@ -186,7 +186,7 @@ export function GameConfigForm({
     };
 
     return (
-        <div className="form scroll">
+        <div className="form game-config scroll">
             {conflict && (
                 <div className="banner">
                     <TriangleAlert
@@ -215,297 +215,324 @@ export function GameConfigForm({
             )}
 
             <div className="form__head">
-                <span className="form__title mono">game.yaml</span>
-                <span className="form__kind">game config</span>
+                <span className="form__title">game.yaml</span>
+                <span className="game-config__kind">Game configuration</span>
             </div>
 
-            <label className="field">
-                <span className="field__label">Start location</span>
-                <select
-                    className="dlg__select"
-                    value={(config.startLocation as string) ?? ''}
-                    onChange={(e) => set('startLocation', e.target.value)}
-                >
-                    <option value="">— none —</option>
-                    {locationIds.map((id) => (
-                        <option key={id} value={id}>
-                            {id}
-                        </option>
-                    ))}
-                </select>
-            </label>
-
-            <div className="node-editor__grid">
-                <label className="field">
-                    <span className="field__label">Start day</span>
-                    <input
-                        className="dlg__input mono"
-                        type="number"
-                        value={time.day ?? 1}
-                        onChange={(e) =>
-                            set('startTime', {
-                                ...time,
-                                day: Number(e.target.value),
-                            })
-                        }
-                    />
-                </label>
-                <label className="field">
-                    <span className="field__label">Start hour (0–23)</span>
-                    <input
-                        className="dlg__input mono"
-                        type="number"
-                        min={0}
-                        max={23}
-                        value={time.hour ?? 0}
-                        onChange={(e) =>
-                            set('startTime', {
-                                ...time,
-                                hour: Number(e.target.value),
-                            })
-                        }
-                    />
-                </label>
-            </div>
-
-            <KeyValueEditor
-                label="Start flags"
-                addLabel="+ Add flag"
-                entries={Object.entries(flags)}
-                renderValue={(key, value) => (
-                    <select
-                        className="dlg__select"
-                        value={value ? 'true' : 'false'}
-                        onChange={(e) =>
-                            set('startFlags', {
-                                ...flags,
-                                [key]: e.target.value === 'true',
-                            })
-                        }
-                    >
-                        <option value="true">true</option>
-                        <option value="false">false</option>
-                    </select>
-                )}
-                onRename={(oldKey, newKey) => {
-                    const next = { ...flags };
-                    const v = next[oldKey];
-                    delete next[oldKey];
-                    next[newKey] = v;
-                    set('startFlags', next);
-                }}
-                onRemove={(key) => {
-                    const next = { ...flags };
-                    delete next[key];
-                    set('startFlags', next);
-                }}
-                onAdd={() => set('startFlags', { ...flags, newFlag: false })}
-            />
-
-            <KeyValueEditor
-                label="Start variables"
-                addLabel="+ Add variable"
-                entries={Object.entries(variables)}
-                renderValue={(key, value) => (
-                    <input
-                        className="dlg__input mono"
-                        value={String(value)}
-                        spellCheck={false}
-                        onChange={(e) => {
-                            const raw = e.target.value;
-                            const num = Number(raw);
-                            set('startVariables', {
-                                ...variables,
-                                [key]: raw !== '' && !isNaN(num) ? num : raw,
-                            });
-                        }}
-                    />
-                )}
-                onRename={(oldKey, newKey) => {
-                    const next = { ...variables };
-                    const v = next[oldKey];
-                    delete next[oldKey];
-                    next[newKey] = v;
-                    set('startVariables', next);
-                }}
-                onRemove={(key) => {
-                    const next = { ...variables };
-                    delete next[key];
-                    set('startVariables', next);
-                }}
-                onAdd={() => set('startVariables', { ...variables, newVar: 0 })}
-            />
-
-            <div className="field">
-                <div className="field__labelrow">
-                    <span className="field__label">Start inventory</span>
-                    <select
-                        className="dlg__select"
-                        value=""
-                        onChange={(e) => {
-                            if (e.target.value)
-                                set('startInventory', [
-                                    ...inventory,
-                                    e.target.value,
-                                ]);
-                        }}
-                    >
-                        <option value="">+ Add item…</option>
-                        {itemIds
-                            .filter((id) => !inventory.includes(id))
-                            .map((id) => (
+            <section className="game-config__section">
+                <h2 className="game-config__section-title">Starting state</h2>
+                <div className="game-config__starting-grid">
+                    <label className="field">
+                        <span className="field__label">Location</span>
+                        <select
+                            className="dlg__select"
+                            value={(config.startLocation as string) ?? ''}
+                            onChange={(e) =>
+                                set('startLocation', e.target.value)
+                            }
+                        >
+                            <option value="">— none —</option>
+                            {locationIds.map((id) => (
                                 <option key={id} value={id}>
                                     {id}
                                 </option>
                             ))}
-                    </select>
-                </div>
-                {inventory.length === 0 && (
-                    <span className="field__hint">None.</span>
-                )}
-                <div className="form__list">
-                    {inventory.map((id) => (
-                        <span key={id} className="form__list-item mono">
-                            {id}
-                            <button
-                                className="dlg__x"
-                                aria-label={`Remove ${id}`}
-                                onClick={() =>
-                                    set(
-                                        'startInventory',
-                                        inventory.filter((x) => x !== id)
-                                    )
-                                }
-                            >
-                                <X size={15} />
-                            </button>
-                        </span>
-                    ))}
-                </div>
-            </div>
-
-            <div className="node-editor__section">
-                <div className="node-editor__section-head">Splash screen</div>
-                <div className="node-editor__grid">
-                    <AssetField
-                        label="Logo"
-                        name="Splash logo"
-                        value={shellValue('splash', 'logo')}
-                        projectDir={dir}
-                        kind="shellImage"
-                        onChange={(value) =>
-                            setShellField('splash', 'logo', value)
-                        }
-                    />
-                    <AssetField
-                        label="Background"
-                        name="Splash background"
-                        value={shellValue('splash', 'background')}
-                        projectDir={dir}
-                        kind="shellImage"
-                        onChange={(value) =>
-                            setShellField('splash', 'background', value)
-                        }
-                    />
-                    <AssetField
-                        label="Sound"
-                        name="Splash sound"
-                        value={shellValue('splash', 'sound')}
-                        projectDir={dir}
-                        kind="shellSound"
-                        onChange={(value) =>
-                            setShellField('splash', 'sound', value)
-                        }
-                    />
+                        </select>
+                    </label>
                     <label className="field">
-                        <span className="field__label">Duration (ms)</span>
+                        <span className="field__label">Day</span>
                         <input
                             className="dlg__input mono"
-                            aria-label="Splash duration"
+                            type="number"
+                            value={time.day ?? 1}
+                            onChange={(e) =>
+                                set('startTime', {
+                                    ...time,
+                                    day: Number(e.target.value),
+                                })
+                            }
+                        />
+                    </label>
+                    <label className="field">
+                        <span className="field__label">Hour (0–23)</span>
+                        <input
+                            className="dlg__input mono"
                             type="number"
                             min={0}
-                            value={
-                                (shellSection('splash').duration as number) ??
-                                ''
-                            }
-                            onChange={(event) =>
-                                setShellField(
-                                    'splash',
-                                    'duration',
-                                    event.target.value === ''
-                                        ? undefined
-                                        : Number(event.target.value)
-                                )
+                            max={23}
+                            value={time.hour ?? 0}
+                            onChange={(e) =>
+                                set('startTime', {
+                                    ...time,
+                                    hour: Number(e.target.value),
+                                })
                             }
                         />
                     </label>
                 </div>
-            </div>
 
-            <div className="node-editor__section">
-                <div className="node-editor__section-head">Loading screen</div>
-                <div className="node-editor__grid">
-                    <AssetField
-                        label="Background"
-                        name="Loading background"
-                        value={shellValue('loading', 'background')}
-                        projectDir={dir}
-                        kind="shellImage"
-                        onChange={(value) =>
-                            setShellField('loading', 'background', value)
+                <div className="field">
+                    <div className="field__labelrow">
+                        <span className="field__label">Initial inventory</span>
+                        <select
+                            className="dlg__select game-config__add-select"
+                            value=""
+                            onChange={(e) => {
+                                if (e.target.value)
+                                    set('startInventory', [
+                                        ...inventory,
+                                        e.target.value,
+                                    ]);
+                            }}
+                        >
+                            <option value="">+ Add item…</option>
+                            {itemIds
+                                .filter((id) => !inventory.includes(id))
+                                .map((id) => (
+                                    <option key={id} value={id}>
+                                        {id}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+                    {inventory.length === 0 && (
+                        <span className="field__hint">None.</span>
+                    )}
+                    <div className="form__list">
+                        {inventory.map((id) => (
+                            <span key={id} className="form__list-item">
+                                {id}
+                                <button
+                                    className="dlg__x"
+                                    aria-label={`Remove ${id}`}
+                                    onClick={() =>
+                                        set(
+                                            'startInventory',
+                                            inventory.filter((x) => x !== id)
+                                        )
+                                    }
+                                >
+                                    <X size={15} />
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <section className="game-config__section">
+                <h2 className="game-config__section-title">
+                    Flags and variables
+                </h2>
+                <div className="game-config__state-grid">
+                    <KeyValueEditor
+                        label="Flags"
+                        addLabel="+ Add flag"
+                        entries={Object.entries(flags)}
+                        renderValue={(key, value) => (
+                            <select
+                                className="dlg__select"
+                                value={value ? 'true' : 'false'}
+                                onChange={(e) =>
+                                    set('startFlags', {
+                                        ...flags,
+                                        [key]: e.target.value === 'true',
+                                    })
+                                }
+                            >
+                                <option value="true">true</option>
+                                <option value="false">false</option>
+                            </select>
+                        )}
+                        onRename={(oldKey, newKey) => {
+                            const next = { ...flags };
+                            const v = next[oldKey];
+                            delete next[oldKey];
+                            next[newKey] = v;
+                            set('startFlags', next);
+                        }}
+                        onRemove={(key) => {
+                            const next = { ...flags };
+                            delete next[key];
+                            set('startFlags', next);
+                        }}
+                        onAdd={() =>
+                            set('startFlags', { ...flags, newFlag: false })
                         }
                     />
-                    <AssetField
-                        label="Music"
-                        name="Loading music"
-                        value={shellValue('loading', 'music')}
-                        projectDir={dir}
-                        kind="shellMusic"
-                        onChange={(value) =>
-                            setShellField('loading', 'music', value)
+
+                    <KeyValueEditor
+                        label="Variables"
+                        addLabel="+ Add variable"
+                        entries={Object.entries(variables)}
+                        renderValue={(key, value) => (
+                            <input
+                                className="dlg__input mono"
+                                value={String(value)}
+                                spellCheck={false}
+                                onChange={(e) => {
+                                    const raw = e.target.value;
+                                    const num = Number(raw);
+                                    set('startVariables', {
+                                        ...variables,
+                                        [key]:
+                                            raw !== '' && !isNaN(num)
+                                                ? num
+                                                : raw,
+                                    });
+                                }}
+                            />
+                        )}
+                        onRename={(oldKey, newKey) => {
+                            const next = { ...variables };
+                            const v = next[oldKey];
+                            delete next[oldKey];
+                            next[newKey] = v;
+                            set('startVariables', next);
+                        }}
+                        onRemove={(key) => {
+                            const next = { ...variables };
+                            delete next[key];
+                            set('startVariables', next);
+                        }}
+                        onAdd={() =>
+                            set('startVariables', { ...variables, newVar: 0 })
                         }
                     />
                 </div>
-            </div>
+            </section>
 
-            <div className="node-editor__section">
-                <div className="node-editor__section-head">Title screen</div>
-                <div className="node-editor__grid">
-                    <AssetField
-                        label="Logo"
-                        name="Title logo"
-                        value={shellValue('title', 'logo')}
-                        projectDir={dir}
-                        kind="shellImage"
-                        onChange={(value) =>
-                            setShellField('title', 'logo', value)
-                        }
-                    />
-                    <AssetField
-                        label="Background"
-                        name="Title background"
-                        value={shellValue('title', 'background')}
-                        projectDir={dir}
-                        kind="shellImage"
-                        onChange={(value) =>
-                            setShellField('title', 'background', value)
-                        }
-                    />
-                    <AssetField
-                        label="Music"
-                        name="Title music"
-                        value={shellValue('title', 'music')}
-                        projectDir={dir}
-                        kind="shellMusic"
-                        onChange={(value) =>
-                            setShellField('title', 'music', value)
-                        }
-                    />
+            <section className="game-config__section">
+                <h2 className="game-config__section-title">Game screens</h2>
+                <div className="game-config__subsection">
+                    <h3 className="game-config__subsection-title">
+                        Splash screen
+                    </h3>
+                    <div className="node-editor__grid">
+                        <AssetField
+                            label="Logo"
+                            name="Splash logo"
+                            value={shellValue('splash', 'logo')}
+                            projectDir={dir}
+                            kind="shellImage"
+                            onChange={(value) =>
+                                setShellField('splash', 'logo', value)
+                            }
+                        />
+                        <AssetField
+                            label="Background"
+                            name="Splash background"
+                            value={shellValue('splash', 'background')}
+                            projectDir={dir}
+                            kind="shellImage"
+                            onChange={(value) =>
+                                setShellField('splash', 'background', value)
+                            }
+                        />
+                        <AssetField
+                            label="Sound"
+                            name="Splash sound"
+                            value={shellValue('splash', 'sound')}
+                            projectDir={dir}
+                            kind="shellSound"
+                            onChange={(value) =>
+                                setShellField('splash', 'sound', value)
+                            }
+                        />
+                        <label className="field">
+                            <span className="field__label">Duration (ms)</span>
+                            <input
+                                className="dlg__input mono"
+                                aria-label="Splash duration"
+                                type="number"
+                                min={0}
+                                value={
+                                    (shellSection('splash')
+                                        .duration as number) ?? ''
+                                }
+                                onChange={(event) =>
+                                    setShellField(
+                                        'splash',
+                                        'duration',
+                                        event.target.value === ''
+                                            ? undefined
+                                            : Number(event.target.value)
+                                    )
+                                }
+                            />
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <div className="node-editor__section">
-                <div className="node-editor__section-head">UI sounds</div>
+                <div className="game-config__subsection">
+                    <h3 className="game-config__subsection-title">
+                        Loading screen
+                    </h3>
+                    <div className="node-editor__grid">
+                        <AssetField
+                            label="Background"
+                            name="Loading background"
+                            value={shellValue('loading', 'background')}
+                            projectDir={dir}
+                            kind="shellImage"
+                            onChange={(value) =>
+                                setShellField('loading', 'background', value)
+                            }
+                        />
+                        <AssetField
+                            label="Music"
+                            name="Loading music"
+                            value={shellValue('loading', 'music')}
+                            projectDir={dir}
+                            kind="shellMusic"
+                            onChange={(value) =>
+                                setShellField('loading', 'music', value)
+                            }
+                        />
+                    </div>
+                </div>
+
+                <div className="game-config__subsection">
+                    <h3 className="game-config__subsection-title">
+                        Title screen
+                    </h3>
+                    <div className="node-editor__grid">
+                        <AssetField
+                            label="Logo"
+                            name="Title logo"
+                            value={shellValue('title', 'logo')}
+                            projectDir={dir}
+                            kind="shellImage"
+                            onChange={(value) =>
+                                setShellField('title', 'logo', value)
+                            }
+                        />
+                        <AssetField
+                            label="Background"
+                            name="Title background"
+                            value={shellValue('title', 'background')}
+                            projectDir={dir}
+                            kind="shellImage"
+                            onChange={(value) =>
+                                setShellField('title', 'background', value)
+                            }
+                        />
+                        <AssetField
+                            label="Music"
+                            name="Title music"
+                            value={shellValue('title', 'music')}
+                            projectDir={dir}
+                            kind="shellMusic"
+                            onChange={(value) =>
+                                setShellField('title', 'music', value)
+                            }
+                        />
+                    </div>
+                </div>
+            </section>
+
+            <section className="game-config__section">
+                <h2 className="game-config__section-title">Interface sounds</h2>
                 <div className="node-editor__grid">
                     {[
                         ['click', 'Click'],
@@ -526,7 +553,7 @@ export function GameConfigForm({
                         />
                     ))}
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

@@ -206,7 +206,10 @@ describe('PlaytestSession', () => {
         const session = new PlaytestSession(registry(), config());
         session.startAtNode('bartender', 'rumors');
 
-        const kinds = new Set(session.getTrace().map((e) => e.kind));
+        const firstRead = session.getTrace();
+        const secondRead = session.getTrace();
+        const kinds = new Set(firstRead.map((e) => e.kind));
+        expect(secondRead).not.toBe(firstRead);
         expect(kinds.has('nodeEnter')).toBe(true);
         expect(kinds.has('effect')).toBe(true); // addItem old_coin ran on entry
         expect(kinds.has('choiceFiltered')).toBe(true); // two gated choices

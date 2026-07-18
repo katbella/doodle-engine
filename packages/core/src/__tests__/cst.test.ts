@@ -96,6 +96,21 @@ describe('parseDialogueCst / printDialogueCst — round-trip identity', () => {
         const cst = parseDialogueCst(src, 'crlf');
         expect(printDialogueCst(cst)).toBe(src);
     });
+
+    it('preserves multiline dialogue byte-for-byte', () => {
+        const src =
+            'NODE start\r\n' +
+            '  NARRATOR: "First paragraph.\r\n' +
+            '  \r\n' +
+            '  Second # paragraph." # note\r\n';
+        const cst = parseDialogueCst(src, 'multiline');
+
+        expect(printDialogueCst(cst)).toBe(src);
+        expect(cstToDialogue(cst).nodes[0].text).toBe(
+            'First paragraph.\n\nSecond # paragraph.'
+        );
+        expect(cst.nodes).toHaveLength(1);
+    });
 });
 
 describe('cstToDialogue — semantic parity with parseDialogue', () => {
@@ -146,9 +161,9 @@ describe('parseDialogueCst — structure and spans', () => {
         // The span covers the block including its leading indentation, so an
         // edit that replaces the block controls its own indentation.
         const text = RICH.slice(firstChoice.span.start, firstChoice.span.end);
-        expect(text.trimStart().startsWith('CHOICE @bartender.choice.ask_rumors')).toBe(
-            true
-        );
+        expect(
+            text.trimStart().startsWith('CHOICE @bartender.choice.ask_rumors')
+        ).toBe(true);
         expect(text.trimEnd().endsWith('END')).toBe(true);
     });
 

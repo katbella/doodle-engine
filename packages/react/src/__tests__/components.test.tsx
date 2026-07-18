@@ -148,6 +148,9 @@ describe('React components', () => {
         expect(resolveChoiceListInput([], 'confirm')).toEqual({
             type: 'continue',
         });
+        expect(resolveChoiceListInput([], 'continue')).toEqual({
+            type: 'continue',
+        });
         expect(resolveChoiceListInput(choices, 'choice2', 1)).toEqual({
             type: 'selectChoice',
             choiceId: 'leave',
@@ -213,11 +216,14 @@ describe('React components', () => {
                     dialogue={{
                         speaker: 'narrator',
                         speakerName: 'Narrator',
-                        text: 'Look there.',
+                        text: 'Look there.\n\nThe room is empty.',
                         portrait: '/assets/images/portraits/narrator.png',
                     }}
                 />
             )
+        );
+        expect(dialogueHtml).toContain(
+            'Look there.<br/><br/>The room is empty.'
         );
         const characterHtml = renderToStaticMarkup(
             withAssetContext(

@@ -7,6 +7,15 @@ const pkg = JSON.parse(
 );
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            '@doodle-engine/core': resolve(__dirname, '../core/src/index.ts'),
+            '@doodle-engine/toolkit': resolve(
+                __dirname,
+                '../toolkit/src/index.ts'
+            ),
+        },
+    },
     define: {
         __DOODLE_VERSION__: JSON.stringify(pkg.version),
     },

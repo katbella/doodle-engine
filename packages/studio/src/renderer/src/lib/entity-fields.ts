@@ -245,6 +245,7 @@ const interlude: EntityForm = {
             name: 'scrollSpeed',
             label: 'Scroll speed',
             control: { kind: 'number' },
+            hint: 'Pixels per second',
         },
         {
             name: 'triggerLocation',

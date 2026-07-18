@@ -25,7 +25,7 @@ const INDENT = '  ';
  * reads back exactly the same text. */
 function displayText(text: string): string {
     if (text.startsWith('@')) return text;
-    if (text.includes('#') || text.includes('"')) {
+    if (text.includes('\n') || text.includes('#') || text.includes('"')) {
         return `"${text.replace(/[\\"]/g, (ch) => '\\' + ch)}"`;
     }
     return text;
@@ -160,7 +160,9 @@ function branchLines(branch: ConditionalBranch): string[] {
 function choiceLines(choice: Choice): string[] {
     const lines = [`${INDENT}CHOICE ${displayText(choice.text)}`];
     for (const condition of choice.conditions ?? []) {
-        lines.push(`${INDENT + INDENT}REQUIRE ${serializeCondition(condition)}`);
+        lines.push(
+            `${INDENT + INDENT}REQUIRE ${serializeCondition(condition)}`
+        );
     }
     lines.push(...effectLines(choice.effects, INDENT + INDENT));
 
@@ -186,7 +188,8 @@ export function serializeNode(node: DialogueNode): string {
     if (node.text) {
         const who =
             node.speaker === null ? 'NARRATOR' : node.speaker.toUpperCase();
-        lines.push(`${INDENT}${who}: ${displayText(node.text)}`);
+        const text = displayText(node.text).replace(/\n/g, `\n${INDENT}`);
+        lines.push(`${INDENT}${who}: ${text}`);
     }
     if (node.voice) lines.push(`${INDENT}VOICE ${node.voice}`);
     if (node.portrait) lines.push(`${INDENT}PORTRAIT ${node.portrait}`);

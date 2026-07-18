@@ -129,6 +129,13 @@ describe('Playtest author journeys', () => {
         await user.click(startNode);
 
         expect(screen.getByText('Welcome.')).toBeTruthy();
+        expect(screen.getByText('door / start')).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Debug trace' }));
+        expect(screen.getByText('start')).toBeTruthy();
+        expect(
+            screen.queryByText(/No matching trace|No trace rows/i)
+        ).toBeNull();
+        await user.click(screen.getByRole('button', { name: 'Playtest' }));
         await user.selectOptions(
             screen.getByLabelText('Playtest locale'),
             'sv'
@@ -142,6 +149,7 @@ describe('Playtest author journeys', () => {
 
         await user.click(screen.getByRole('button', { name: 'Ask openly' }));
         expect(screen.getByText('Inside the room.')).toBeTruthy();
+        expect(screen.getByText('door / inside')).toBeTruthy();
         expect(
             screen.getByRole('button', { name: /End Dialogue/ })
         ).toBeTruthy();
@@ -182,5 +190,8 @@ describe('Playtest author journeys', () => {
 
         await user.click(screen.getByRole('button', { name: 'Debug trace' }));
         expect(screen.getByLabelText('Search trace by id')).toBeTruthy();
+        expect(
+            screen.queryByText(/No matching trace|No trace rows/i)
+        ).toBeNull();
     });
 });

@@ -51,8 +51,6 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
                     </div>
                 ))}
             </div>
-
-            <p className="overview__hint">Pick an item from the left to open it.</p>
         </div>
     );
 }

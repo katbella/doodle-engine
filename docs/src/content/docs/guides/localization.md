@@ -29,6 +29,17 @@ bartender.greeting: '¡Bienvenido! ¿Qué puedo hacer por ti?'
 
 The filename sets the locale code: `en.yaml` becomes `"en"`, and `es.yaml` becomes `"es"`.
 
+For a translation with paragraph breaks, use YAML's `|` marker. It keeps the line breaks in the indented text that follows:
+
+```yaml
+bartender.memory: |
+    I've been having a good time.
+
+    It's been 84 years.
+```
+
+Dialogue using `@bartender.memory` displays those paragraphs as one entry.
+
 ## Using @keys
 
 Reference locale strings with the `@` prefix in YAML content:
