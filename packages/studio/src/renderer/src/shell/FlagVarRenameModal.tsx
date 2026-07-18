@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { isValidIdentifier } from '@doodle-engine/core';
+import { useModalDismiss } from '../lib/useModalDismiss';
+import { OverlayPortal } from './OverlayPortal';
 
 /**
  * Rename a flag or variable key. Unlike an entity, a flag/variable has no file
@@ -22,6 +24,7 @@ export function FlagVarRenameModal({
     onRename: (newId: string) => void;
     onCancel: () => void;
 }) {
+    useModalDismiss(onCancel);
     const [id, setId] = useState(oldId);
 
     const trimmed = id.trim();
@@ -29,53 +32,56 @@ export function FlagVarRenameModal({
     const valid = trimmed !== '' && trimmed !== oldId && !badChars;
 
     return (
-        <div className="modal-backdrop" onClick={onCancel}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal__title">
-                    Rename {kind} “{oldId}”
-                </div>
+        <OverlayPortal>
+            <div className="modal-backdrop" onClick={onCancel}>
+                <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal__title">
+                        Rename {kind} “{oldId}”
+                    </div>
 
-                <label className="field">
-                    <span className="field__label">New name</span>
-                    <input
-                        className={`field__input mono ${
-                            badChars ? 'dlg__input--invalid' : ''
-                        }`}
-                        value={id}
-                        onChange={(e) => setId(e.target.value)}
-                        spellCheck={false}
-                        autoFocus
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && valid) onRename(trimmed);
-                        }}
-                    />
-                    {badChars && (
-                        <span className="field__error">
-                            Use letters, numbers, and underscores only.
-                        </span>
-                    )}
-                </label>
+                    <label className="field">
+                        <span className="field__label">New name</span>
+                        <input
+                            className={`field__input mono ${
+                                badChars ? 'dlg__input--invalid' : ''
+                            }`}
+                            value={id}
+                            onChange={(e) => setId(e.target.value)}
+                            spellCheck={false}
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && valid)
+                                    onRename(trimmed);
+                            }}
+                        />
+                        {badChars && (
+                            <span className="field__error">
+                                Use letters, numbers, and underscores only.
+                            </span>
+                        )}
+                    </label>
 
-                <p className="modal__message">
-                    {usageCount} known usage
-                    {usageCount === 1 ? '' : 's'} will be updated. A {kind} can
-                    also be set by content that isn’t indexed, so review the
-                    Problems panel after renaming.
-                </p>
+                    <p className="modal__message">
+                        {usageCount} known usage
+                        {usageCount === 1 ? '' : 's'} will be updated. A {kind}{' '}
+                        can also be set by content that isn’t indexed, so review
+                        the Problems panel after renaming.
+                    </p>
 
-                <div className="modal__actions">
-                    <button className="btn" onClick={onCancel}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn--accent"
-                        disabled={!valid}
-                        onClick={() => onRename(trimmed)}
-                    >
-                        Rename
-                    </button>
+                    <div className="modal__actions">
+                        <button className="btn" onClick={onCancel}>
+                            Cancel
+                        </button>
+                        <button
+                            className="btn btn--accent"
+                            disabled={!valid}
+                            onClick={() => onRename(trimmed)}
+                        >
+                            Rename
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </OverlayPortal>
     );
 }

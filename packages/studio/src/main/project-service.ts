@@ -1,7 +1,11 @@
 import { dialog } from 'electron';
 import { basename, join } from 'path';
 import { readFile, readdir } from 'fs/promises';
-import { addRecentProject, readRecentProjects } from './recent-projects';
+import {
+    addRecentProject,
+    pruneRecentProjects,
+    removeRecentProject,
+} from './recent-projects';
 import { readEngineInfo } from './engine-info';
 import type {
     NewProjectOptions,
@@ -101,7 +105,11 @@ export class ProjectService {
     }
 
     listRecent(): Promise<RecentProject[]> {
-        return readRecentProjects(this.recentFile);
+        return pruneRecentProjects(this.recentFile);
+    }
+
+    removeRecent(projectDir: string): Promise<RecentProject[]> {
+        return removeRecentProject(this.recentFile, projectDir);
     }
 
     private async load(projectDir: string): Promise<OpenProject> {

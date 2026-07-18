@@ -23,6 +23,7 @@ describe('shell surfaces', () => {
                 onOpen={actions.open}
                 onNew={actions.newProject}
                 onOpenRecent={actions.recent}
+                onRemoveRecent={vi.fn()}
                 recent={[
                     {
                         name: 'Story',
@@ -38,7 +39,11 @@ describe('shell surfaces', () => {
         );
         await user.click(screen.getByRole('button', { name: 'Open project…' }));
         await user.click(screen.getByRole('button', { name: 'New project…' }));
-        await user.click(screen.getByRole('button', { name: /Story/ }));
+        await user.click(
+            screen.getByRole('button', {
+                name: 'Open recent project Story',
+            })
+        );
         await user.click(
             screen.getByRole('button', { name: 'Switch to light mode' })
         );
@@ -53,6 +58,7 @@ describe('shell surfaces', () => {
                 onOpen={actions.open}
                 onNew={actions.newProject}
                 onOpenRecent={actions.recent}
+                onRemoveRecent={vi.fn()}
                 recent={[]}
                 loading={true}
                 error="hidden"

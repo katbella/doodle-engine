@@ -4,6 +4,9 @@ import { parseDialogue, applyDialogueEdits } from '@doodle-engine/core';
 import type { Dialogue, DialogueNode } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { NodeEditor } from './NodeEditor';
+import { authoredTextPreview } from '../lib/localized-text';
+import { LocaleWriterBoundary, useLocaleWriter } from '../lib/locale-writer';
+import { ConfirmModal } from './ConfirmModal';
 
 /**
  * Visual editor for a .dlg file. It parses the file into a dialogue, edits that
@@ -11,21 +14,34 @@ import { NodeEditor } from './NodeEditor';
  * for content edits). A file that doesn't parse can't be shown visually — the
  * user is pointed to the Source view to fix it.
  */
-export function DialogueEditor({
-    project,
-    tabKey,
-    path,
-    dialogueId,
-    onDirty,
-    onModified,
-}: {
+interface DialogueEditorProps {
     project: OpenProject;
     tabKey: string;
     path: string;
     dialogueId: string;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
-}) {
+}
+
+export function DialogueEditor(props: DialogueEditorProps) {
+    return (
+        <LocaleWriterBoundary
+            project={props.project}
+            onModified={props.onModified}
+        >
+            <DialogueEditorInner {...props} />
+        </LocaleWriterBoundary>
+    );
+}
+
+function DialogueEditorInner({
+    project,
+    tabKey,
+    path,
+    dialogueId,
+    onDirty,
+    onModified,
+}: DialogueEditorProps) {
     const [base, setBase] = useState('');
     const [savedText, setSavedText] = useState('');
     const [mtimeMs, setMtimeMs] = useState(0);
@@ -35,6 +51,8 @@ export function DialogueEditor({
     const [parseError, setParseError] = useState<string | null>(null);
     const [conflict, setConflict] = useState<string | null>(null);
     const [missing, setMissing] = useState(false);
+    const [deleteNodeId, setDeleteNodeId] = useState<string | null>(null);
+    const localeWriter = useLocaleWriter();
 
     const dir = project.projectDir;
 
@@ -169,6 +187,24 @@ export function DialogueEditor({
         setSelectedId(id);
     };
 
+    // Create a node a target dropdown asked for, and jump to it so the author
+    // can write its line right away. Functional update so it composes with the
+    // choice edit that points at the new node in the same tick.
+    const createNode = (id: string) => {
+        setDialogue((d) =>
+            d && !d.nodes.some((n) => n.id === id)
+                ? {
+                      ...d,
+                      nodes: [
+                          ...d.nodes,
+                          { id, speaker: null, text: '', choices: [] },
+                      ],
+                  }
+                : d
+        );
+        setSelectedId(id);
+    };
+
     const deleteNode = (id: string) => {
         if (!dialogue) return;
         const nodes = dialogue.nodes.filter((n) => n.id !== id);
@@ -243,6 +279,41 @@ export function DialogueEditor({
     }
 
     const selected = dialogue.nodes.find((n) => n.id === selectedId) ?? null;
+    const displayedText = (source: string) => {
+        if (!source.startsWith('@')) return source;
+        const locale = localeWriter?.authoringLocale;
+        const value = locale
+            ? localeWriter?.files[locale]?.values[source.slice(1)]
+            : undefined;
+        return (
+            value ??
+            authoredTextPreview(source, project.registry)?.text ??
+            source
+        );
+    };
+    const routeImpact = deleteNodeId
+        ? dialogue.nodes
+              .filter((node) => node.id !== deleteNodeId)
+              .reduce(
+                  (impact, node) => ({
+                      gotos:
+                          impact.gotos + (node.next === deleteNodeId ? 1 : 0),
+                      choices:
+                          impact.choices +
+                          node.choices.filter(
+                              (choice) => choice.next === deleteNodeId
+                          ).length,
+                      branches:
+                          impact.branches +
+                          (node.conditionalBranches ?? []).filter(
+                              (branch) => branch.next === deleteNodeId
+                          ).length,
+                  }),
+                  { gotos: 0, choices: 0, branches: 0 }
+              )
+        : { gotos: 0, choices: 0, branches: 0 };
+    const routeCount =
+        routeImpact.gotos + routeImpact.choices + routeImpact.branches;
 
     return (
         <div className="dlg">
@@ -257,12 +328,16 @@ export function DialogueEditor({
                     <button
                         key={node.id}
                         className={`dlg__node ${node.id === selectedId ? 'dlg__node--active' : ''}`}
+                        aria-label={node.id}
                         onClick={() => setSelectedId(node.id)}
                     >
                         <span className="dlg__node-id">{node.id}</span>
                         {node.id === dialogue.startNode && (
                             <span className="dlg__node-badge">start</span>
                         )}
+                        <span className="dlg__node-preview">
+                            {displayedText(node.text)}
+                        </span>
                     </button>
                 ))}
             </div>
@@ -307,7 +382,8 @@ export function DialogueEditor({
                         onChange={updateNode}
                         onRename={renameNode}
                         onMakeStart={() => makeStart(selected.id)}
-                        onDelete={() => deleteNode(selected.id)}
+                        onDelete={() => setDeleteNodeId(selected.id)}
+                        onCreateNode={createNode}
                     />
                 ) : (
                     <div className="editor__empty">
@@ -315,6 +391,40 @@ export function DialogueEditor({
                     </div>
                 )}
             </div>
+            {deleteNodeId && (
+                <ConfirmModal
+                    title={`Delete node “${deleteNodeId}”?`}
+                    message={
+                        'This removes its line, choices, conditions, effects, and routing. ' +
+                        (routeCount > 0
+                            ? routeCount +
+                              ' surviving route' +
+                              (routeCount === 1 ? ' points' : 's point') +
+                              ' here (' +
+                              routeImpact.choices +
+                              ' choice' +
+                              (routeImpact.choices === 1 ? '' : 's') +
+                              ', ' +
+                              routeImpact.gotos +
+                              ' node GOTO' +
+                              (routeImpact.gotos === 1 ? '' : 's') +
+                              ', ' +
+                              routeImpact.branches +
+                              ' branch' +
+                              (routeImpact.branches === 1 ? '' : 'es') +
+                              '); deleting will break those routes.'
+                            : 'No surviving routes point here.') +
+                        ' Studio does not have undo.'
+                    }
+                    confirmLabel="Delete node"
+                    danger
+                    onConfirm={() => {
+                        deleteNode(deleteNodeId);
+                        setDeleteNodeId(null);
+                    }}
+                    onCancel={() => setDeleteNodeId(null)}
+                />
+            )}
         </div>
     );
 }

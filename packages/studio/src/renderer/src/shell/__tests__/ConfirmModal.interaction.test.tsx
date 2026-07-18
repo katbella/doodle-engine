@@ -57,6 +57,21 @@ describe('ConfirmModal real interaction', () => {
         expect(onCancel).toHaveBeenCalledOnce();
     });
 
+    it('pressing Escape cancels the modal', () => {
+        const onCancel = vi.fn();
+        render(
+            <ConfirmModal
+                title="Delete?"
+                message="msg"
+                confirmLabel="Delete"
+                onConfirm={() => {}}
+                onCancel={onCancel}
+            />
+        );
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledOnce();
+    });
+
     it('clicking inside the modal body does not cancel', () => {
         const onCancel = vi.fn();
         render(

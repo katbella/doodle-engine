@@ -83,8 +83,8 @@ function createWindow(): void {
     mainWindow = new BrowserWindow({
         width: 1440,
         height: 900,
-        minWidth: 960,
-        minHeight: 600,
+        minWidth: 1024,
+        minHeight: 640,
         backgroundColor: '#0c0d0f',
         show: false,
         icon,
@@ -487,6 +487,11 @@ app.whenReady().then(() => {
         projects.chooseDirectory('Choose where to create the project')
     );
     handle('project:listRecent', () => projects.listRecent());
+    handle('project:removeRecent', async (_event, dir: string) => {
+        const recent = await projects.removeRecent(dir);
+        await buildMenu(projects);
+        return recent;
+    });
     handle('project:revalidate', (_event, dir: string) => projects.reload(dir));
     handle(
         'project:build',
@@ -565,6 +570,11 @@ app.whenReady().then(() => {
     );
     handle('asset:import', (_event, dir: string, kind: StudioAssetKind) =>
         assets.chooseAndImport(dir, kind)
+    );
+    handle(
+        'asset:readDataUrl',
+        (_event, dir: string, kind: StudioAssetKind, value: string) =>
+            assets.previewDataUrl(dir, kind, value)
     );
 
     const recovery = new RecoveryService(

@@ -1,10 +1,11 @@
 import type { RecentProject } from '../../../shared/project';
-import { Sun, Moon, CircleHelp } from '../lib/icons';
+import { Sun, Moon, CircleHelp, X } from '../lib/icons';
 
 export function Welcome({
     onOpen,
     onNew,
     onOpenRecent,
+    onRemoveRecent,
     recent,
     loading,
     error,
@@ -14,6 +15,7 @@ export function Welcome({
     onOpen: () => void;
     onNew: () => void;
     onOpenRecent: (path: string) => void;
+    onRemoveRecent: (path: string) => void;
     recent: RecentProject[];
     loading: boolean;
     error: string | null;
@@ -92,22 +94,50 @@ export function Welcome({
                         aria-label="Recent projects"
                     >
                         {recent.map((entry) => (
-                            <button
-                                key={entry.path}
-                                className="recent__item"
-                                onClick={() => onOpenRecent(entry.path)}
-                            >
-                                <span className="recent__name">
-                                    {entry.name}
-                                </span>
-                                <span className="recent__path mono">
-                                    {entry.path}
-                                </span>
-                            </button>
+                            <div key={entry.path} className="recent__item">
+                                <button
+                                    className="recent__open"
+                                    aria-label={`Open recent project ${entry.name}`}
+                                    onClick={() => onOpenRecent(entry.path)}
+                                >
+                                    <span className="recent__name">
+                                        {entry.name}
+                                    </span>
+                                    <span
+                                        className="recent__path mono"
+                                        title={entry.path}
+                                    >
+                                        <RecentPath path={entry.path} />
+                                    </span>
+                                </button>
+                                <button
+                                    className="recent__remove"
+                                    aria-label={`Remove ${entry.name} from recent projects`}
+                                    title="Remove from recent projects"
+                                    onClick={() => onRemoveRecent(entry.path)}
+                                >
+                                    <X size={15} />
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
             )}
         </div>
+    );
+}
+
+function RecentPath({ path }: { path: string }) {
+    const normalized = path.replace(/\\/g, '/');
+    const slash = normalized.lastIndexOf('/');
+    return (
+        <>
+            <span className="recent__path-dir">
+                {slash >= 0 ? normalized.slice(0, slash + 1) : ''}
+            </span>
+            <span className="recent__path-name">
+                {slash >= 0 ? normalized.slice(slash + 1) : normalized}
+            </span>
+        </>
     );
 }

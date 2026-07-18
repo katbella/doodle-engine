@@ -67,6 +67,15 @@ const SECTION_SYMBOL: Partial<Record<CreatableSection, SymbolType>> = {
     journal: 'journalEntries',
 };
 
+const DOCK_DEFAULT_HEIGHTS: Record<DockTab, number> = {
+    problems: 112,
+    symbols: 220,
+    build: 260,
+    devserver: 260,
+    playtest: Math.min(600, Math.max(360, Math.round(innerHeight * 0.48))),
+};
+const ZOOM_FACTORS = [0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.6];
+
 function displayError(error: unknown): string {
     const message = error instanceof Error ? error.message : String(error);
     return message.replace(
@@ -128,6 +137,10 @@ export function App() {
             ? saved
             : 'blue';
     });
+    const [zoomFactor, setZoomFactor] = useState(() => {
+        const stored = Number(localStorage.getItem('doodle-studio-zoom'));
+        return ZOOM_FACTORS.includes(stored) ? stored : 1;
+    });
     const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({});
     const [dirtyTabs, setDirtyTabs] = useState<Set<string>>(() => new Set());
     const [reveal, setReveal] = useState<{
@@ -181,9 +194,32 @@ export function App() {
         'doodle-studio-right-w',
         260
     );
-    const [dockHeight, setDockHeight] = usePersistedSize(
-        'doodle-studio-dock-h',
-        220
+    const [dockSizes, setDockSizes] = useState<Record<DockTab, number>>(
+        () =>
+            Object.fromEntries(
+                (Object.keys(DOCK_DEFAULT_HEIGHTS) as DockTab[]).map((tab) => {
+                    const stored = Number(
+                        localStorage.getItem(`doodle-studio-dock-h-${tab}`)
+                    );
+                    return [
+                        tab,
+                        Number.isFinite(stored) && stored > 0
+                            ? stored
+                            : DOCK_DEFAULT_HEIGHTS[tab],
+                    ];
+                })
+            ) as Record<DockTab, number>
+    );
+    const dockHeight = dockSizes[dockTab];
+    const setDockHeight = useCallback(
+        (value: number) => {
+            setDockSizes((sizes) => ({ ...sizes, [dockTab]: value }));
+            localStorage.setItem(
+                `doodle-studio-dock-h-${dockTab}`,
+                String(value)
+            );
+        },
+        [dockTab]
     );
 
     const referenceIndex = useMemo(
@@ -232,6 +268,11 @@ export function App() {
         window.studio.setThemeMenuState({ mode: theme, color: themeColor });
     }, [theme, themeColor]);
 
+    useEffect(() => {
+        localStorage.setItem('doodle-studio-zoom', String(zoomFactor));
+        window.studio.setZoomFactor?.(zoomFactor);
+    }, [zoomFactor]);
+
     const toggleTheme = useCallback(
         () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
         []
@@ -239,7 +280,39 @@ export function App() {
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
+            if (e.metaKey || e.ctrlKey) {
+                const zoomDirection =
+                    e.key === '+' || e.key === '=' ? 1 : e.key === '-' ? -1 : 0;
+                if (zoomDirection !== 0) {
+                    e.preventDefault();
+                    setZoomFactor((current) => {
+                        const index = ZOOM_FACTORS.indexOf(current);
+                        const next = Math.max(
+                            0,
+                            Math.min(
+                                ZOOM_FACTORS.length - 1,
+                                index + zoomDirection
+                            )
+                        );
+                        return ZOOM_FACTORS[next];
+                    });
+                    return;
+                }
+                if (e.key === '0') {
+                    e.preventDefault();
+                    setZoomFactor(1);
+                    return;
+                }
+            }
             if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+                // Modal and builder dialogs own keyboard focus. Never stack the
+                // command palette over one of them.
+                if (
+                    document.querySelector('.modal-backdrop, .popover-backdrop')
+                ) {
+                    e.preventDefault();
+                    return;
+                }
                 e.preventDefault();
                 setShowPalette((v) => !v);
             }
@@ -320,6 +393,9 @@ export function App() {
         (path: string) => applyOpen(() => window.studio.openProjectPath(path)),
         [applyOpen]
     );
+    const removeRecent = useCallback(async (path: string) => {
+        setRecent(await window.studio.removeRecentProject(path));
+    }, []);
     const createProject = useCallback(
         async (options: NewProjectOptions) => {
             const created = await applyOpen(() =>
@@ -477,8 +553,7 @@ export function App() {
             if (!result.ok) return;
             // Reload so the new file shows in the rail, then open it.
             setProject(await window.studio.revalidate(project.projectDir));
-            const label = section === 'dialogues' ? `${id}.dlg` : id;
-            openItem(section, id, label);
+            openItem(section, id, id);
         },
         [project, openItem]
     );
@@ -487,9 +562,7 @@ export function App() {
         (problem: ValidationError) => {
             const loc = locateFile(problem.file);
             if (!loc) return;
-            const label =
-                loc.section === 'dialogues' ? `${loc.itemId}.dlg` : loc.itemId;
-            openItem(loc.section, loc.itemId, label);
+            openItem(loc.section, loc.itemId, loc.itemId);
             const key = `${loc.section}:${loc.itemId}`;
             setViewMode(key, 'source');
             setReveal((prev) => ({
@@ -627,8 +700,7 @@ export function App() {
 
             closeTab(`${section}:${oldId}`);
             setProject(await window.studio.revalidate(dir));
-            const label = section === 'dialogues' ? `${newId}.dlg` : newId;
-            openItem(section, newId, label);
+            openItem(section, newId, newId);
         },
         [project, closeTab, openItem, applyRenamePlan]
     );
@@ -659,6 +731,7 @@ export function App() {
                     onOpen={openProject}
                     onNew={openNewProjectModal}
                     onOpenRecent={openRecent}
+                    onRemoveRecent={(path) => void removeRecent(path)}
                     recent={recent}
                     loading={loading}
                     error={openError}
@@ -702,16 +775,16 @@ export function App() {
             icon: <FilePlus size={15} />,
             run: openNewProjectModal,
         },
+        {
+            id: 'act:validate',
+            label: 'Validate',
+            group: 'Actions',
+            keywords: 'problems check errors',
+            icon: <Check size={15} />,
+            run: () => revalidate(),
+        },
         ...(canBuild
             ? [
-                  {
-                      id: 'act:validate',
-                      label: 'Validate',
-                      group: 'Actions',
-                      keywords: 'problems check errors',
-                      icon: <Check size={15} />,
-                      run: () => revalidate(),
-                  },
                   {
                       id: 'act:build',
                       label: 'Build',
@@ -791,14 +864,21 @@ export function App() {
         ? referenceIndex.allSymbols('flags').map((id) => ({
               id,
               count: referenceIndex.count('flags', id),
+              references: referenceIndex.find('flags', id),
           }))
         : [];
     const variables = referenceIndex
         ? referenceIndex.allSymbols('variables').map((id) => ({
               id,
               count: referenceIndex.count('variables', id),
+              references: referenceIndex.find('variables', id),
           }))
         : [];
+    const openReferencedFile = (file: string) => {
+        const loc = locateFile(file);
+        if (!loc) return;
+        openItem(loc.section, loc.itemId, loc.itemId);
+    };
 
     return (
         <div
@@ -814,7 +894,6 @@ export function App() {
             <div className="app__header">
                 <TopBar
                     project={project}
-                    onOpen={openProject}
                     onValidate={revalidate}
                     validating={validating}
                     stale={staleFiles.size > 0}
@@ -870,6 +949,9 @@ export function App() {
                     onSetViewMode={setViewMode}
                     onDirty={handleDirty}
                     onModified={markModified}
+                    onOpenLocale={(locale) =>
+                        openItem('locales', locale, locale)
+                    }
                 />
                 <ResizeHandle
                     axis="x"
@@ -883,21 +965,13 @@ export function App() {
                     project={project}
                     activeTab={activeTab}
                     referenceIndex={referenceIndex}
-                    onOpenFile={(file) => {
-                        const loc = locateFile(file);
-                        if (!loc) return;
-                        const label =
-                            loc.section === 'dialogues'
-                                ? `${loc.itemId}.dlg`
-                                : loc.itemId;
-                        openItem(loc.section, loc.itemId, label);
-                    }}
+                    onOpenFile={openReferencedFile}
                 />
             </div>
             <ResizeHandle
                 axis="y"
                 size={dockHeight}
-                min={120}
+                min={96}
                 max={600}
                 invert
                 onResize={setDockHeight}
@@ -920,6 +994,7 @@ export function App() {
                 flags={flags}
                 variables={variables}
                 onRenameFlagVar={(kind, id) => setFlagVarTarget({ kind, id })}
+                onOpenReference={openReferencedFile}
             />
             {loading && (
                 <div className="overlay">

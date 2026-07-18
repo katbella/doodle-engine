@@ -6,13 +6,12 @@ import {
     Square,
     Monitor,
     ExternalLink,
-    Command,
+    Search,
     CircleHelp,
 } from '../lib/icons';
 
 export function TopBar({
     project,
-    onOpen,
     onValidate,
     validating,
     stale,
@@ -30,7 +29,6 @@ export function TopBar({
     onToggleTheme,
 }: {
     project: OpenProject;
-    onOpen: () => void;
     onValidate: () => void;
     validating: boolean;
     stale: boolean;
@@ -87,7 +85,7 @@ export function TopBar({
                 onClick={onOpenPalette}
                 title="Open the command palette"
             >
-                <Command size={13} aria-hidden />
+                <Search size={13} aria-hidden />
                 <span>Command palette</span>
                 <kbd>
                     {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
@@ -119,18 +117,10 @@ export function TopBar({
                     {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
                 </button>
                 <span className="topbar__divider" aria-hidden />
-                <button className="btn" onClick={onOpen}>
-                    Open project…
-                </button>
                 <button
-                    className={`btn ${stale && canBuild ? 'btn--accent' : ''}`}
+                    className={`btn ${stale ? 'btn--accent' : ''}`}
                     onClick={onValidate}
-                    disabled={validating || !canBuild}
-                    title={
-                        canBuild
-                            ? undefined
-                            : "Install the project's dependencies first"
-                    }
+                    disabled={validating}
                 >
                     {validating ? 'Validating…' : 'Validate'}
                 </button>

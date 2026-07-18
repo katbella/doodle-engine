@@ -64,6 +64,7 @@ function props(activeTab: DockTab, overrides: Record<string, unknown> = {}) {
         flags: [],
         variables: [],
         onRenameFlagVar: vi.fn(),
+        onOpenReference: vi.fn(),
         ...overrides,
     };
 }
@@ -104,12 +105,25 @@ describe('BottomDock', () => {
         ).toBeTruthy();
 
         const onRenameFlagVar = vi.fn();
+        const onOpenReference = vi.fn();
         rerender(
             <BottomDock
                 {...props('symbols', {
-                    flags: [{ id: 'met_hero', count: 1 }],
-                    variables: [{ id: 'gold', count: 2 }],
+                    flags: [
+                        {
+                            id: 'met_hero',
+                            count: 1,
+                            references: [
+                                {
+                                    file: 'content/dialogues/intro.dlg',
+                                    where: 'dialogue "intro" node "start"',
+                                },
+                            ],
+                        },
+                    ],
+                    variables: [{ id: 'gold', count: 2, references: [] }],
                     onRenameFlagVar,
+                    onOpenReference,
                 })}
             />
         );
@@ -120,6 +134,13 @@ describe('BottomDock', () => {
         await user.click(rename[1]);
         expect(onRenameFlagVar).toHaveBeenNthCalledWith(1, 'flag', 'met_hero');
         expect(onRenameFlagVar).toHaveBeenNthCalledWith(2, 'variable', 'gold');
+
+        await user.click(screen.getByRole('button', { name: '1 use' }));
+        expect(screen.getByText('node “start”')).toBeTruthy();
+        await user.click(screen.getByTitle('content/dialogues/intro.dlg'));
+        expect(onOpenReference).toHaveBeenCalledWith(
+            'content/dialogues/intro.dlg'
+        );
     });
 
     it('shows idle, installing, active, successful, failed, and cancelled builds', async () => {

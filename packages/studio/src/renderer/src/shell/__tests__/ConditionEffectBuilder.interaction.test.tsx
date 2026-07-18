@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ContentRegistry } from '@doodle-engine/core';
 import { ConditionEffectBuilder } from '../ConditionEffectBuilder';
@@ -31,6 +31,25 @@ const registry: ContentRegistry = {
 afterEach(cleanup);
 
 describe('ConditionEffectBuilder interactions', () => {
+    it('keeps requirements neutral until the author leaves a field', async () => {
+        const user = userEvent.setup();
+        render(
+            <ConditionEffectBuilder
+                mode="effect"
+                registry={registry}
+                onCommit={() => {}}
+                onCancel={() => {}}
+            />
+        );
+
+        await user.click(screen.getByRole('button', { name: 'Set flag' }));
+        expect(screen.queryByText('Flag is required.')).toBeNull();
+        expect(screen.getByText(/Complete the required fields/)).toBeTruthy();
+
+        fireEvent.blur(screen.getByPlaceholderText('flagName'));
+        expect(screen.getByText('Flag is required.')).toBeTruthy();
+    });
+
     it('builds a choice requirement from authored input', async () => {
         const onCommit = vi.fn();
         const user = userEvent.setup();

@@ -15,8 +15,7 @@ export function EngineBanner({
         <div className="banner">
             <TriangleAlert className="banner__icon" size={15} aria-hidden />
             <span>
-                Install project dependencies to enable Validate, Build, and
-                Preview.
+                Install project dependencies to enable Build and Preview.
             </span>
             <button
                 className="btn btn--accent banner__action"

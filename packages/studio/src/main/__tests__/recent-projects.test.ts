@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { mkdtemp, rm } from 'fs/promises';
+import { mkdir, mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
     mergeRecent,
     readRecentProjects,
     addRecentProject,
+    pruneRecentProjects,
+    removeRecentProject,
 } from '../recent-projects';
 
 describe('mergeRecent', () => {
@@ -38,7 +40,9 @@ describe('mergeRecent', () => {
 describe('readRecentProjects / addRecentProject', () => {
     it('returns [] for a missing file', async () => {
         expect(
-            await readRecentProjects(join(tmpdir(), 'no-such-doodle-recent.json'))
+            await readRecentProjects(
+                join(tmpdir(), 'no-such-doodle-recent.json')
+            )
         ).toEqual([]);
     });
 
@@ -58,6 +62,36 @@ describe('readRecentProjects / addRecentProject', () => {
             });
             const list = await readRecentProjects(file);
             expect(list.map((p) => p.path)).toEqual(['/two', '/one']);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('prunes missing folders and lets the user remove a surviving entry', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-recent-prune-'));
+        const existing = join(dir, 'story');
+        const missing = join(dir, 'deleted-story');
+        const file = join(dir, 'recent.json');
+        await mkdir(existing);
+        try {
+            await addRecentProject(file, {
+                path: existing,
+                name: 'Story',
+                openedAt: '1',
+            });
+            await addRecentProject(file, {
+                path: missing,
+                name: 'Deleted',
+                openedAt: '2',
+            });
+
+            await expect(pruneRecentProjects(file)).resolves.toEqual([
+                expect.objectContaining({ path: existing }),
+            ]);
+            await expect(removeRecentProject(file, existing)).resolves.toEqual(
+                []
+            );
+            await expect(readRecentProjects(file)).resolves.toEqual([]);
         } finally {
             await rm(dir, { recursive: true, force: true });
         }

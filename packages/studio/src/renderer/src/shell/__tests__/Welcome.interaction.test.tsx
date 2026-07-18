@@ -15,12 +15,14 @@ describe('Welcome', () => {
             value: { openDocumentation },
         });
         const user = userEvent.setup();
+        const onRemoveRecent = vi.fn();
 
         render(
             <Welcome
                 onOpen={vi.fn()}
                 onNew={vi.fn()}
                 onOpenRecent={vi.fn()}
+                onRemoveRecent={onRemoveRecent}
                 recent={[
                     {
                         name: 'The Salty Dog',
@@ -54,5 +56,11 @@ describe('Welcome', () => {
                 .classList.contains('scroll')
         ).toBe(true);
         expect(document.querySelector('.welcome__mark-image')).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', {
+                name: 'Remove The Salty Dog from recent projects',
+            })
+        );
+        expect(onRemoveRecent).toHaveBeenCalledWith('C:/games/salty-dog');
     });
 });

@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OpenProject, StudioApi } from '../../../shared/project';
 
@@ -22,7 +29,7 @@ vi.mock('../shell/Welcome', () => ({
 
 vi.mock('../shell/NewProjectModal', () => ({
     NewProjectModal: (props: any) => (
-        <div>
+        <div className="modal-backdrop">
             {props.error && <div role="alert">{props.error}</div>}
             <button
                 onClick={() =>
@@ -380,6 +387,25 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('App workflows', () => {
+    it('suppresses the Ctrl+K palette shortcut while a modal is open', async () => {
+        const { callbacks } = installBridge();
+        const user = await openApp();
+
+        act(() => callbacks.menu?.onNew());
+        fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+        expect(
+            screen.queryByRole('button', { name: 'Close palette' })
+        ).toBeNull();
+
+        await user.click(
+            screen.getByRole('button', { name: 'Cancel new project' })
+        );
+        fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+        expect(
+            screen.getByRole('button', { name: 'Close palette' })
+        ).toBeTruthy();
+    });
+
     it('handles failed opens, recent projects, project creation, and menu events', async () => {
         const openProject = vi
             .fn<StudioApi['openProject']>()
@@ -568,6 +594,14 @@ describe('App workflows', () => {
             screen.getByRole('button', { name: 'Palette Playtest' })
         );
         expect(screen.getByText('dock:playtest')).toBeTruthy();
+        expect(
+            Number.parseInt(
+                document
+                    .querySelector<HTMLElement>('.app')!
+                    .style.getPropertyValue('--dock-h'),
+                10
+            )
+        ).toBeGreaterThanOrEqual(360);
         await user.click(screen.getByRole('button', { name: 'Open palette' }));
         await user.click(
             screen.getByRole('button', { name: /Palette Switch to light mode/ })

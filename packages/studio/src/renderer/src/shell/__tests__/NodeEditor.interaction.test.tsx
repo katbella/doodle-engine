@@ -93,6 +93,7 @@ function Harness({ isStart = false }: { isStart?: boolean }) {
                 }
                 onMakeStart={vi.fn()}
                 onDelete={vi.fn()}
+                onCreateNode={vi.fn()}
             />
             <output data-testid="node-state">{JSON.stringify(node)}</output>
         </>
@@ -145,7 +146,7 @@ describe('NodeEditor', () => {
         await user.selectOptions(speaker, '');
         expect(state().speaker).toBeNull();
 
-        const line = screen.getByPlaceholderText('@locale.key or plain text');
+        const line = screen.getByRole('textbox', { name: 'Line' });
         expect(line.tagName).toBe('TEXTAREA');
         await user.clear(line);
         await user.type(line, 'Changed line{enter}{enter}Second paragraph');
@@ -222,6 +223,7 @@ describe('NodeEditor', () => {
         await user.click(
             branches.getAllByRole('button', { name: 'Remove branch' })[1]
         );
+        await user.click(screen.getByRole('button', { name: 'Delete branch' }));
         expect(state().conditionalBranches).toHaveLength(1);
 
         expect(screen.getByText(/Routes to a location/)).toBeTruthy();
@@ -280,10 +282,11 @@ describe('NodeEditor', () => {
         await user.click(
             choices.getAllByRole('button', { name: 'Remove choice' })[1]
         );
+        await user.click(screen.getByRole('button', { name: 'Delete choice' }));
         expect(state().choices).toHaveLength(1);
-        const choiceText = choices.getByPlaceholderText(
-            '@choice.key or plain text'
-        );
+        const choiceText = choices.getByRole('textbox', {
+            name: 'Choice 1 text',
+        });
         await user.clear(choiceText);
         await user.type(choiceText, 'Stay');
         expect(state().choices[0].text).toBe('Stay');
@@ -293,6 +296,7 @@ describe('NodeEditor', () => {
         await user.click(
             branches.getByRole('button', { name: 'Remove branch' })
         );
+        await user.click(screen.getByRole('button', { name: 'Delete branch' }));
         expect(state().conditionalBranches).toEqual([]);
     });
 });

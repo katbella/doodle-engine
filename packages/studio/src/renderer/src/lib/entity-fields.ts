@@ -49,6 +49,8 @@ export interface FieldDescriptor {
     /** Label shown above the control. */
     label: string;
     control: FieldControl;
+    /** Writing shape for textual controls. Prose wraps and grows vertically. */
+    textKind?: 'identifier' | 'short' | 'prose';
     /** Required fields are marked inline; missing them is a form error. */
     required?: boolean;
     /** Short hint shown under the label. */
@@ -70,12 +72,14 @@ const character: EntityForm = {
             name: 'name',
             label: 'Name',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
         {
             name: 'biography',
             label: 'Biography',
             control: { kind: 'localizable' },
+            textKind: 'prose',
         },
         {
             name: 'portrait',
@@ -104,12 +108,14 @@ const location: EntityForm = {
             name: 'name',
             label: 'Name',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
         {
             name: 'description',
             label: 'Description',
             control: { kind: 'localizable' },
+            textKind: 'prose',
         },
         {
             name: 'banner',
@@ -136,12 +142,14 @@ const item: EntityForm = {
             name: 'name',
             label: 'Name',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
         {
             name: 'description',
             label: 'Description',
             control: { kind: 'localizable' },
+            textKind: 'prose',
         },
         {
             name: 'icon',
@@ -157,7 +165,7 @@ const item: EntityForm = {
             name: 'location',
             label: 'Starting location',
             control: { kind: 'reference', target: 'locations' },
-            hint: 'A location id, a character id, or "inventory".',
+            hint: '“— none —” keeps the item out of play until an effect adds it.',
         },
         { name: 'stats', label: 'Stats', control: { kind: 'statsBag' } },
     ],
@@ -170,12 +178,14 @@ const quest: EntityForm = {
             name: 'name',
             label: 'Name',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
         {
             name: 'description',
             label: 'Description',
             control: { kind: 'localizable' },
+            textKind: 'prose',
         },
         // `stages` is a list of {id, description}; the form renders it specially.
     ],
@@ -188,6 +198,7 @@ const map: EntityForm = {
             name: 'name',
             label: 'Name',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
         {
@@ -199,7 +210,7 @@ const map: EntityForm = {
             name: 'scale',
             label: 'Scale',
             control: { kind: 'number' },
-            hint: 'Map units to travel-time factor.',
+            hint: 'At scale 100, a marker 300 units away takes 3 hours to reach.',
         },
         // `locations` is a list of {id, x, y}; the form renders it specially.
     ],
@@ -238,6 +249,7 @@ const interlude: EntityForm = {
             name: 'text',
             label: 'Text',
             control: { kind: 'localizable' },
+            textKind: 'prose',
             required: true,
         },
         { name: 'scroll', label: 'Auto-scroll', control: { kind: 'boolean' } },
@@ -262,10 +274,21 @@ const journal: EntityForm = {
             name: 'title',
             label: 'Title',
             control: { kind: 'localizable' },
+            textKind: 'short',
             required: true,
         },
-        { name: 'text', label: 'Text', control: { kind: 'localizable' } },
-        { name: 'category', label: 'Category', control: { kind: 'text' } },
+        {
+            name: 'text',
+            label: 'Text',
+            control: { kind: 'localizable' },
+            textKind: 'prose',
+        },
+        {
+            name: 'category',
+            label: 'Category',
+            control: { kind: 'text' },
+            textKind: 'short',
+        },
     ],
 };
 

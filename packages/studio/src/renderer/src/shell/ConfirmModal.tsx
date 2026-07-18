@@ -1,3 +1,6 @@
+import { useModalDismiss } from '../lib/useModalDismiss';
+import { OverlayPortal } from './OverlayPortal';
+
 /** A simple confirm/cancel modal, used in place of window.confirm (which, as a
  * native dialog, leaves Electron's focus in a broken state for later modals). */
 export function ConfirmModal({
@@ -16,23 +19,26 @@ export function ConfirmModal({
     onConfirm: () => void;
     onCancel: () => void;
 }) {
+    useModalDismiss(onCancel);
     return (
-        <div className="modal-backdrop" onClick={onCancel}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal__title">{title}</div>
-                <p className="modal__message">{message}</p>
-                <div className="modal__actions">
-                    <button className="btn" onClick={onCancel} autoFocus>
-                        Cancel
-                    </button>
-                    <button
-                        className={`btn ${danger ? 'btn--danger' : 'btn--accent'}`}
-                        onClick={onConfirm}
-                    >
-                        {confirmLabel}
-                    </button>
+        <OverlayPortal>
+            <div className="modal-backdrop" onClick={onCancel}>
+                <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal__title">{title}</div>
+                    <p className="modal__message">{message}</p>
+                    <div className="modal__actions">
+                        <button className="btn" onClick={onCancel} autoFocus>
+                            Cancel
+                        </button>
+                        <button
+                            className={`btn ${danger ? 'btn--danger' : 'btn--accent'}`}
+                            onClick={onConfirm}
+                        >
+                            {confirmLabel}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </OverlayPortal>
     );
 }

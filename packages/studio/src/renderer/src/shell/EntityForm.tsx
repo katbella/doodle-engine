@@ -10,6 +10,9 @@ import {
     type RefTarget,
 } from '../lib/entity-fields';
 import { AssetField } from './AssetField';
+import { LocalizedTextField } from './LocalizedTextField';
+import { LocaleWriterBoundary } from '../lib/locale-writer';
+import { ConfirmModal } from './ConfirmModal';
 
 /**
  * Visual form for a YAML entity (character, location, item, quest, map,
@@ -20,21 +23,34 @@ import { AssetField } from './AssetField';
  * Values are read from the file text, not the parsed registry, so the form and
  * the file agree even for keys the engine ignores.
  */
-export function EntityForm({
-    project,
-    tabKey,
-    section,
-    path,
-    onDirty,
-    onModified,
-}: {
+interface EntityFormProps {
     project: OpenProject;
     tabKey: string;
     section: SectionKey;
     path: string;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
-}) {
+}
+
+export function EntityForm(props: EntityFormProps) {
+    return (
+        <LocaleWriterBoundary
+            project={props.project}
+            onModified={props.onModified}
+        >
+            <EntityFormInner {...props} />
+        </LocaleWriterBoundary>
+    );
+}
+
+function EntityFormInner({
+    project,
+    tabKey,
+    section,
+    path,
+    onDirty,
+    onModified,
+}: EntityFormProps) {
     const form = ENTITY_FORMS[section];
     const dir = project.projectDir;
 
@@ -112,10 +128,11 @@ export function EntityForm({
         }
     };
 
-    // Autosave a short while after the last edit.
+    // Autosave a short while after the last edit (same debounce as the locale
+    // writer, so the dirty dot behaves identically everywhere).
     useEffect(() => {
         if (!dirty || conflict || missing) return;
-        const t = setTimeout(() => void save(), 1000);
+        const t = setTimeout(() => void save(), 700);
         return () => clearTimeout(t);
     }, [values, dirty, conflict, missing]);
     // Save any pending edit when this editor goes away (closing the tab,
@@ -201,6 +218,7 @@ export function EntityForm({
                     field={field}
                     value={values[field.name]}
                     project={project}
+                    section={section}
                     onChange={(v) => setField(field.name, v)}
                 />
             ))}
@@ -212,6 +230,7 @@ export function EntityForm({
                             ? (values.stages as Stage[])
                             : []
                     }
+                    project={project}
                     onChange={(stages) => setField('stages', stages)}
                 />
             )}
@@ -223,6 +242,8 @@ export function EntityForm({
                             : []
                     }
                     locationIds={idsFor(project, 'locations')}
+                    image={typeof values.image === 'string' ? values.image : ''}
+                    projectDir={project.projectDir}
                     onChange={(markers) => setField('locations', markers)}
                 />
             )}
@@ -246,17 +267,24 @@ function Field({
     field,
     value,
     project,
+    section,
     onChange,
 }: {
     field: FieldDescriptor;
     value: unknown;
     project: OpenProject;
+    section: SectionKey;
     onChange: (value: unknown) => void;
 }) {
-    const label = (
-        <div className="field__labelrow">
+    const labelContent = (
+        <>
             <span className="field__label">{field.label}</span>
             {field.required && <span className="field__req">required</span>}
+        </>
+    );
+    const label = (
+        <div className="field__labelrow">
+            <span className="field__labelgroup">{labelContent}</span>
         </div>
     );
     const control = field.control;
@@ -265,7 +293,16 @@ function Field({
     if (control.kind === 'reference') {
         const ids = idsFor(project, control.target);
         const current = typeof value === 'string' ? value : '';
-        const missing = current !== '' && !ids.includes(current);
+        const itemDestination =
+            section === 'items' && field.name === 'location';
+        const characterIds = itemDestination
+            ? idsFor(project, 'characters')
+            : [];
+        const missing =
+            current !== '' &&
+            current !== 'inventory' &&
+            !ids.includes(current) &&
+            !characterIds.includes(current);
         return (
             <label className="field">
                 {label}
@@ -276,13 +313,38 @@ function Field({
                 >
                     <option value="">— none —</option>
                     {missing && (
-                        <option value={current}>{current} (missing)</option>
-                    )}
-                    {ids.map((id) => (
-                        <option key={id} value={id}>
-                            {id}
+                        <option value={current}>
+                            {current} (
+                            {itemDestination ? 'unrecognized' : 'missing'})
                         </option>
-                    ))}
+                    )}
+                    {itemDestination ? (
+                        <>
+                            <optgroup label="Inventory">
+                                <option value="inventory">inventory</option>
+                            </optgroup>
+                            <optgroup label="Locations">
+                                {ids.map((id) => (
+                                    <option key={id} value={id}>
+                                        {id}
+                                    </option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="Characters">
+                                {characterIds.map((id) => (
+                                    <option key={id} value={id}>
+                                        {id}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        </>
+                    ) : (
+                        ids.map((id) => (
+                            <option key={id} value={id}>
+                                {id}
+                            </option>
+                        ))
+                    )}
                 </select>
                 {field.hint && (
                     <span className="field__hint">{field.hint}</span>
@@ -333,11 +395,13 @@ function Field({
 
     if (control.kind === 'localizable') {
         return (
-            <LocalizableField
-                label={label}
+            <LocalizedTextField
+                label={labelContent}
                 hint={field.hint}
-                value={typeof value === 'string' ? value : ''}
-                onChange={onChange}
+                source={typeof value === 'string' ? value : ''}
+                registry={project.registry}
+                textKind={field.textKind === 'prose' ? 'prose' : 'short'}
+                onSourceChange={onChange}
             />
         );
     }
@@ -422,54 +486,6 @@ function Field({
     );
 }
 
-/** A text field with a @key/literal toggle, matching the dialogue line field. */
-function LocalizableField({
-    label,
-    hint,
-    value,
-    onChange,
-}: {
-    label: React.ReactNode;
-    hint?: string;
-    value: string;
-    onChange: (value: string) => void;
-}) {
-    const isKey = value.startsWith('@');
-    return (
-        <div className="field">
-            <div className="field__labelrow">
-                {label}
-                <div className="seg seg--small">
-                    <button
-                        type="button"
-                        className={`seg__opt ${isKey ? 'seg__opt--on' : ''}`}
-                        onClick={() => !isKey && onChange('@' + value)}
-                    >
-                        @key
-                    </button>
-                    <button
-                        type="button"
-                        className={`seg__opt ${!isKey ? 'seg__opt--on' : ''}`}
-                        onClick={() =>
-                            isKey && onChange(value.replace(/^@/, ''))
-                        }
-                    >
-                        literal
-                    </button>
-                </div>
-            </div>
-            <input
-                className={`dlg__input ${isKey ? 'mono' : ''}`}
-                value={value}
-                placeholder={isKey ? '@some.key' : 'plain text'}
-                spellCheck={false}
-                onChange={(e) => onChange(e.target.value)}
-            />
-            {hint && <span className="field__hint">{hint}</span>}
-        </div>
-    );
-}
-
 /** The open key/value `stats` bag: add, edit, remove arbitrary keys. */
 function StatsBag({
     value,
@@ -544,11 +560,14 @@ interface Stage {
  * them), so rows can move up and down. */
 function StageListEditor({
     stages,
+    project,
     onChange,
 }: {
     stages: Stage[];
+    project: OpenProject;
     onChange: (stages: Stage[]) => void;
 }) {
+    const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
     const set = (i: number, patch: Partial<Stage>) =>
         onChange(stages.map((s, j) => (j === i ? { ...s, ...patch } : s)));
     const remove = (i: number) => onChange(stages.filter((_, j) => j !== i));
@@ -568,55 +587,91 @@ function StageListEditor({
     return (
         <div className="field">
             <span className="field__label">Stages</span>
-            {stages.map((stage, i) => (
-                <div key={i} className="rowedit">
-                    <input
-                        className="dlg__input mono rowedit__id"
-                        value={stage.id}
-                        placeholder="stage_id"
-                        spellCheck={false}
-                        onChange={(e) => set(i, { id: e.target.value })}
-                    />
-                    <input
-                        className="dlg__input rowedit__grow"
-                        value={stage.description ?? ''}
-                        placeholder="@key or description text"
-                        spellCheck={false}
-                        onChange={(e) =>
-                            set(i, { description: e.target.value })
-                        }
-                    />
-                    <button
-                        className="rowedit__btn"
-                        title="Move up"
-                        aria-label="Move up"
-                        disabled={i === 0}
-                        onClick={() => move(i, -1)}
-                    >
-                        <ChevronUp size={15} />
-                    </button>
-                    <button
-                        className="rowedit__btn"
-                        title="Move down"
-                        aria-label="Move down"
-                        disabled={i === stages.length - 1}
-                        onClick={() => move(i, 1)}
-                    >
-                        <ChevronDown size={15} />
-                    </button>
-                    <button
-                        className="rowedit__btn rowedit__btn--danger"
-                        title="Remove stage"
-                        aria-label="Remove stage"
-                        onClick={() => remove(i)}
-                    >
-                        <X size={15} />
-                    </button>
-                </div>
-            ))}
+            {stages.map((stage, i) => {
+                return (
+                    <div key={i} className="rowedit__stack">
+                        <div className="rowedit rowedit--stage">
+                            <div className="field rowedit__id">
+                                <div className="field__labelrow">
+                                    <span className="field__labelgroup">
+                                        <span className="field__label">
+                                            Stage id
+                                        </span>
+                                    </span>
+                                </div>
+                                <input
+                                    className="dlg__input mono"
+                                    value={stage.id}
+                                    title={stage.id}
+                                    placeholder="stage_id"
+                                    spellCheck={false}
+                                    onChange={(e) =>
+                                        set(i, { id: e.target.value })
+                                    }
+                                />
+                            </div>
+                            <div className="rowedit__grow">
+                                <LocalizedTextField
+                                    label={
+                                        <span className="field__label">
+                                            Description
+                                        </span>
+                                    }
+                                    source={stage.description ?? ''}
+                                    registry={project.registry}
+                                    textKind="prose"
+                                    placeholder="Stage description"
+                                    onSourceChange={(description) =>
+                                        set(i, { description })
+                                    }
+                                />
+                            </div>
+                            <button
+                                className="rowedit__btn"
+                                title="Move up"
+                                aria-label="Move up"
+                                disabled={i === 0}
+                                onClick={() => move(i, -1)}
+                            >
+                                <ChevronUp size={15} />
+                            </button>
+                            <button
+                                className="rowedit__btn"
+                                title="Move down"
+                                aria-label="Move down"
+                                disabled={i === stages.length - 1}
+                                onClick={() => move(i, 1)}
+                            >
+                                <ChevronDown size={15} />
+                            </button>
+                            <button
+                                className="rowedit__btn rowedit__btn--danger"
+                                title="Remove stage"
+                                aria-label="Remove stage"
+                                onClick={() => setDeleteIndex(i)}
+                            >
+                                <X size={15} />
+                            </button>
+                        </div>
+                    </div>
+                );
+            })}
             <button className="dlg__add" onClick={add}>
                 <Plus size={13} /> Add stage
             </button>
+            {deleteIndex !== null && (
+                <ConfirmModal
+                    title={`Delete stage “${stages[deleteIndex]?.id ?? ''}”?`}
+                    message="This stage and its authored description will be removed. Studio does not have undo."
+                    confirmLabel="Delete stage"
+                    danger
+                    onConfirm={() => {
+                        remove(deleteIndex);
+                        setDeleteIndex(null);
+                    }}
+                    onCancel={() => setDeleteIndex(null)}
+                />
+            )}
         </div>
     );
 }
@@ -631,63 +686,264 @@ interface Marker {
 function MarkerListEditor({
     markers,
     locationIds,
+    image,
+    projectDir,
     onChange,
 }: {
     markers: Marker[];
     locationIds: string[];
+    image: string;
+    projectDir: string;
     onChange: (markers: Marker[]) => void;
 }) {
+    const [preview, setPreview] = useState<{
+        loaded: boolean;
+        url: string | null;
+    }>({ loaded: false, url: null });
+    const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+    const previewRef = useRef<HTMLDivElement>(null);
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [drag, setDrag] = useState<{
+        index: number;
+        pointerId: number;
+        x: number;
+        y: number;
+    } | null>(null);
     const set = (i: number, patch: Partial<Marker>) =>
         onChange(markers.map((m, j) => (j === i ? { ...m, ...patch } : m)));
-    const remove = (i: number) => onChange(markers.filter((_, j) => j !== i));
-    const add = () => onChange([...markers, { id: '', x: 0, y: 0 }]);
+    const remove = (i: number) => {
+        onChange(markers.filter((_, j) => j !== i));
+        setSelectedIndex((current) => {
+            if (current === null) return null;
+            if (current === i) return null;
+            return current > i ? current - 1 : current;
+        });
+    };
+    const add = () => {
+        setSelectedIndex(markers.length);
+        onChange([...markers, { id: '', x: 0, y: 0 }]);
+    };
 
     // A marker may point at a location not in the list (e.g. a typo); keep it
     // selectable so the value isn't silently dropped.
     const options = (id: string) =>
         id && !locationIds.includes(id) ? [id, ...locationIds] : locationIds;
 
+    useEffect(() => {
+        let alive = true;
+        setNaturalSize({ width: 0, height: 0 });
+        if (!image) {
+            setPreview({ loaded: true, url: null });
+            return;
+        }
+        setPreview({ loaded: false, url: null });
+        if (typeof window.studio.readAssetDataUrl !== 'function') {
+            setPreview({ loaded: true, url: null });
+            return;
+        }
+        void window.studio
+            .readAssetDataUrl(projectDir, 'map', image)
+            .then((url) => alive && setPreview({ loaded: true, url }));
+        return () => {
+            alive = false;
+        };
+    }, [image, projectDir]);
+
+    const width =
+        naturalSize.width ||
+        Math.max(1, ...markers.map((marker) => (marker.x ?? 0) * 1.08));
+    const height =
+        naturalSize.height ||
+        Math.max(1, ...markers.map((marker) => (marker.y ?? 0) * 1.08));
+    const pointFromClient = (clientX: number, clientY: number) => {
+        const rect = previewRef.current?.getBoundingClientRect();
+        if (!rect || rect.width <= 0 || rect.height <= 0) return null;
+        const px = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const py = Math.max(0, Math.min(rect.height, clientY - rect.top));
+        return {
+            x: Math.round((px / rect.width) * width),
+            y: Math.round((py / rect.height) * height),
+        };
+    };
+    const placeSelected = (event: React.MouseEvent<HTMLDivElement>) => {
+        const fallback = markers.findIndex((marker) => !marker.id);
+        const index =
+            selectedIndex !== null && markers[selectedIndex]
+                ? selectedIndex
+                : fallback;
+        const point = pointFromClient(event.clientX, event.clientY);
+        if (index >= 0 && point) {
+            setSelectedIndex(index);
+            set(index, point);
+        }
+    };
+
     return (
         <div className="field">
             <span className="field__label">Map markers</span>
-            {markers.map((marker, i) => (
-                <div key={i} className="rowedit">
-                    <select
-                        className="dlg__select rowedit__grow"
-                        value={marker.id}
-                        onChange={(e) => set(i, { id: e.target.value })}
-                    >
-                        <option value="">— location —</option>
-                        {options(marker.id).map((id) => (
-                            <option key={id} value={id}>
-                                {id}
-                            </option>
-                        ))}
-                    </select>
-                    <input
-                        className="dlg__input rowedit__num"
-                        type="number"
-                        value={marker.x ?? 0}
-                        title="x"
-                        onChange={(e) => set(i, { x: Number(e.target.value) })}
+            <div
+                ref={previewRef}
+                className="map-preview"
+                style={{ aspectRatio: `${width} / ${height}` }}
+                onClick={placeSelected}
+            >
+                {preview.url ? (
+                    <img
+                        className="map-preview__image"
+                        src={preview.url}
+                        alt="Map marker preview"
+                        onLoad={(event) =>
+                            setNaturalSize({
+                                width: event.currentTarget.naturalWidth,
+                                height: event.currentTarget.naturalHeight,
+                            })
+                        }
                     />
-                    <input
-                        className="dlg__input rowedit__num"
-                        type="number"
-                        value={marker.y ?? 0}
-                        title="y"
-                        onChange={(e) => set(i, { y: Number(e.target.value) })}
-                    />
-                    <button
-                        className="rowedit__btn rowedit__btn--danger"
-                        title="Remove marker"
-                        aria-label="Remove marker"
-                        onClick={() => remove(i)}
+                ) : (
+                    <div className="map-preview__empty">
+                        {!preview.loaded
+                            ? 'Loading map image…'
+                            : image
+                              ? `No image file found at “${image}”.`
+                              : 'Choose a map image to preview marker placement.'}
+                    </div>
+                )}
+                {markers.map((marker, index) => {
+                    const shown =
+                        drag?.index === index
+                            ? { ...marker, x: drag.x, y: drag.y }
+                            : marker;
+                    const minimum = preview.url ? 0 : 2;
+                    const maximum = preview.url ? 100 : 98;
+                    const left = Math.max(
+                        minimum,
+                        Math.min(maximum, ((shown.x ?? 0) / width) * 100)
+                    );
+                    const top = Math.max(
+                        minimum,
+                        Math.min(maximum, ((shown.y ?? 0) / height) * 100)
+                    );
+                    return (
+                        <span
+                            key={`${marker.id}-${index}`}
+                            className={`map-preview__marker ${
+                                selectedIndex === index
+                                    ? 'map-preview__marker--selected'
+                                    : ''
+                            } ${
+                                drag?.index === index
+                                    ? 'map-preview__marker--dragging'
+                                    : ''
+                            }`}
+                            style={{ left: `${left}%`, top: `${top}%` }}
+                            title={`${marker.id || 'Unnamed location'} — ${shown.x ?? 0}, ${shown.y ?? 0}`}
+                            onClick={(event) => event.stopPropagation()}
+                            onPointerDown={(event) => {
+                                event.stopPropagation();
+                                const point = pointFromClient(
+                                    event.clientX,
+                                    event.clientY
+                                );
+                                if (!point) return;
+                                setSelectedIndex(index);
+                                event.currentTarget.setPointerCapture(
+                                    event.pointerId
+                                );
+                                setDrag({
+                                    index,
+                                    pointerId: event.pointerId,
+                                    ...point,
+                                });
+                            }}
+                            onPointerMove={(event) => {
+                                if (
+                                    drag?.index !== index ||
+                                    drag.pointerId !== event.pointerId
+                                ) {
+                                    return;
+                                }
+                                const point = pointFromClient(
+                                    event.clientX,
+                                    event.clientY
+                                );
+                                if (point) setDrag({ ...drag, ...point });
+                            }}
+                            onPointerUp={(event) => {
+                                if (
+                                    drag?.index !== index ||
+                                    drag.pointerId !== event.pointerId
+                                ) {
+                                    return;
+                                }
+                                set(index, { x: drag.x, y: drag.y });
+                                event.currentTarget.releasePointerCapture(
+                                    event.pointerId
+                                );
+                                setDrag(null);
+                            }}
+                            onPointerCancel={() => setDrag(null)}
+                        >
+                            <span className="map-preview__dot" />
+                            <span className="map-preview__label">
+                                {marker.id || 'unnamed'}
+                            </span>
+                        </span>
+                    );
+                })}
+            </div>
+            {markers.map((marker, i) => {
+                // Rows track the drag live, exactly like the dots do.
+                const shown =
+                    drag?.index === i
+                        ? { ...marker, x: drag.x, y: drag.y }
+                        : marker;
+                return (
+                    <div
+                        key={i}
+                        className="rowedit"
+                        onPointerDown={() => setSelectedIndex(i)}
                     >
-                        <X size={15} />
-                    </button>
-                </div>
-            ))}
+                        <select
+                            className="dlg__select rowedit__grow"
+                            value={marker.id}
+                            onChange={(e) => set(i, { id: e.target.value })}
+                        >
+                            <option value="">— location —</option>
+                            {options(marker.id).map((id) => (
+                                <option key={id} value={id}>
+                                    {id}
+                                </option>
+                            ))}
+                        </select>
+                        <input
+                            className="dlg__input rowedit__num"
+                            type="number"
+                            value={shown.x ?? 0}
+                            title="x"
+                            onChange={(e) =>
+                                set(i, { x: Number(e.target.value) })
+                            }
+                        />
+                        <input
+                            className="dlg__input rowedit__num"
+                            type="number"
+                            value={shown.y ?? 0}
+                            title="y"
+                            onChange={(e) =>
+                                set(i, { y: Number(e.target.value) })
+                            }
+                        />
+                        <button
+                            className="rowedit__btn rowedit__btn--danger"
+                            title="Remove marker"
+                            aria-label="Remove marker"
+                            onClick={() => remove(i)}
+                        >
+                            <X size={15} />
+                        </button>
+                    </div>
+                );
+            })}
             <button className="dlg__add" onClick={add}>
                 <Plus size={13} /> Add marker
             </button>

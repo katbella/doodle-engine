@@ -52,6 +52,7 @@ export function ConditionEffectBuilder({
         mode === 'condition' ? CONDITION_DESCRIPTORS : EFFECT_DESCRIPTORS;
 
     const [query, setQuery] = useState('');
+    const [touched, setTouched] = useState<Set<string>>(() => new Set());
     const [draft, setDraft] = useState<BuilderDraft>(() => {
         if (initial)
             return mode === 'condition'
@@ -92,10 +93,23 @@ export function ConditionEffectBuilder({
                 ? conditionDescriptor(type as Condition['type'])
                 : effectDescriptor(type as Effect['type']);
         setDraft(emptyDraft(next));
+        setTouched(new Set());
     };
+
+    const showError = !result.ok && touched.size > 0;
+
+    const noun =
+        mode === 'condition'
+            ? inRequire
+                ? 'requirement'
+                : 'condition'
+            : 'effect';
 
     return (
         <div className="builder" role="dialog" aria-label={`Build ${mode}`}>
+            <div className="modal__title">
+                {initial ? `Edit ${noun}` : `Add ${noun}`}
+            </div>
             <input
                 className="builder__search"
                 placeholder={`Search ${mode}s…`}
@@ -135,21 +149,37 @@ export function ConditionEffectBuilder({
                             registry={registry}
                             questId={draft.values.questId}
                             onChange={(v) => setValue(arg.name, v)}
+                            onBlur={() =>
+                                setTouched((current) =>
+                                    new Set(current).add(arg.name)
+                                )
+                            }
                         />
                     ))}
                 </div>
             )}
 
             <div
-                className={`builder__preview ${result.ok ? '' : 'builder__preview--bad'}`}
+                className={`builder__preview ${
+                    result.ok
+                        ? ''
+                        : showError
+                          ? 'builder__preview--bad'
+                          : 'builder__preview--pending'
+                }`}
             >
                 <div className="builder__preview-label">Generated source</div>
                 <span className="builder__preview-line mono">
                     {mode === 'condition' && inRequire ? 'REQUIRE ' : ''}
                     {draftToSource(draft, descriptor)}
                 </span>
-                {!result.ok && result.error && (
+                {showError && result.error && (
                     <div className="builder__error">{result.error}</div>
+                )}
+                {!result.ok && !showError && (
+                    <div className="builder__requirement">
+                        Complete the required fields to add this {mode}.
+                    </div>
                 )}
             </div>
 
@@ -176,6 +206,7 @@ function ArgField({
     registry,
     questId,
     onChange,
+    onBlur,
 }: {
     arg: ArgDescriptor;
     value: string;
@@ -183,6 +214,7 @@ function ArgField({
     /** The quest chosen in this same builder, so stage lists the right stages. */
     questId?: string;
     onChange: (value: string) => void;
+    onBlur: () => void;
 }) {
     const label = (
         <span className="builder__arg-label">
@@ -205,6 +237,7 @@ function ArgField({
                     value={value}
                     disabled={!quest}
                     onChange={(e) => onChange(e.target.value)}
+                    onBlur={onBlur}
                 >
                     <option value="">
                         {quest ? '— pick a stage —' : '— pick a quest first —'}
@@ -234,6 +267,7 @@ function ArgField({
                     className="dlg__select"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
+                    onBlur={onBlur}
                 >
                     <option value="">— pick —</option>
                     {ids.map((id) => (
@@ -254,6 +288,7 @@ function ArgField({
                     className="dlg__select"
                     value={value || 'true'}
                     onChange={(e) => onChange(e.target.value)}
+                    onBlur={onBlur}
                 >
                     <option value="true">true</option>
                     <option value="false">false</option>
@@ -273,6 +308,7 @@ function ArgField({
                 placeholder={placeholderFor(arg)}
                 spellCheck={false}
                 onChange={(e) => onChange(e.target.value)}
+                onBlur={onBlur}
             />
         </label>
     );

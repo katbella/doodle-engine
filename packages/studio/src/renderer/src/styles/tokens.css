@@ -55,11 +55,31 @@
 
     --track-label: 0.07em;
 
+    /* Coherent Studio type ramp. The 11px floor keeps secondary chrome
+       readable without competing with the 14–15px narrative surfaces. */
+    --text-xs: 11px;
+    --text-sm: 12.5px;
+    --text-base: 13px;
+    --text-md: 14px;
+    --text-lg: 15px;
+    --text-xl: 16px;
+    --text-2xl: 18px;
+    --text-display: 22px;
+
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
     --space-4: 16px;
     --space-5: 22px;
+
+    /* Floating surfaces share one ordered stacking scale. */
+    --z-dock: 10;
+    --z-menu: 20;
+    --z-popover: 30;
+    --z-modal: 40;
+
+    /* Every floating surface wears the same shadow. */
+    --shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.45);
 
     --radius: 0;
 }

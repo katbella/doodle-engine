@@ -2,7 +2,7 @@
 
 import { act } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import type { MenuHandlers, ThemeState } from '../../../shared/project';
 
 vi.mock('../shell/SourceView', () => ({ SourceView: () => null }));
@@ -12,6 +12,7 @@ import { App } from '../App';
 function installBridge() {
     let menuHandlers: MenuHandlers | undefined;
     const setThemeMenuState = vi.fn((_state: ThemeState) => {});
+    const setZoomFactor = vi.fn((_factor: number) => {});
     const unsubscribe = () => {};
 
     Object.defineProperty(window, 'studio', {
@@ -22,6 +23,7 @@ function installBridge() {
             onInstallLog: vi.fn(() => unsubscribe),
             onPreviewLog: vi.fn(() => unsubscribe),
             setThemeMenuState,
+            setZoomFactor,
             onMenu: vi.fn((handlers: MenuHandlers) => {
                 menuHandlers = handlers;
                 return unsubscribe;
@@ -31,6 +33,7 @@ function installBridge() {
 
     return {
         setThemeMenuState,
+        setZoomFactor,
         menuHandlers: () => menuHandlers,
     };
 }
@@ -98,6 +101,30 @@ describe('Studio appearance preferences', () => {
         );
         expect(document.documentElement.getAttribute('data-accent')).toBe(
             'red'
+        );
+    });
+
+    it('persists Ctrl zoom shortcuts and resets with Ctrl+0', async () => {
+        localStorage.setItem('doodle-studio-zoom', '1.25');
+        const bridge = installBridge();
+        render(<App />);
+
+        await waitFor(() =>
+            expect(bridge.setZoomFactor).toHaveBeenLastCalledWith(1.25)
+        );
+        fireEvent.keyDown(window, { key: '=', ctrlKey: true });
+        await waitFor(() =>
+            expect(bridge.setZoomFactor).toHaveBeenLastCalledWith(1.4)
+        );
+        expect(localStorage.getItem('doodle-studio-zoom')).toBe('1.4');
+
+        fireEvent.keyDown(window, { key: '-', ctrlKey: true });
+        await waitFor(() =>
+            expect(bridge.setZoomFactor).toHaveBeenLastCalledWith(1.25)
+        );
+        fireEvent.keyDown(window, { key: '0', ctrlKey: true });
+        await waitFor(() =>
+            expect(bridge.setZoomFactor).toHaveBeenLastCalledWith(1)
         );
     });
 });

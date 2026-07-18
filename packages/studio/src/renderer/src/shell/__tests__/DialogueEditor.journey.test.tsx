@@ -137,9 +137,9 @@ describe('DialogueEditor author journeys', () => {
         firstView.unmount();
         const writeSingleLine = installBridge(multilineSource);
         renderEditor();
-        const multilineField = await screen.findByPlaceholderText(
-            '@locale.key or plain text'
-        );
+        const multilineField = await screen.findByRole('textbox', {
+            name: 'Line',
+        });
         expect((multilineField as HTMLTextAreaElement).value).toBe(
             'First paragraph.\n\nSecond paragraph.'
         );
@@ -185,12 +185,14 @@ describe('DialogueEditor author journeys', () => {
         const view = renderEditor();
 
         await user.click(await screen.findByRole('button', { name: '+ Node' }));
-        const line = screen.getByPlaceholderText('@locale.key or plain text');
+        const line = screen.getByRole('textbox', { name: 'Line' });
         await user.clear(line);
         await user.type(line, 'A new ending.');
         await user.click(screen.getByRole('button', { name: /Choice/ }));
 
-        const choice = screen.getByPlaceholderText('@choice.key or plain text');
+        const choice = screen.getByRole('textbox', {
+            name: 'Choice 1 text',
+        });
         await user.clear(choice);
         await user.type(choice, 'Finish');
         const card = choice.closest<HTMLElement>('.dlg__card')!;
@@ -263,6 +265,12 @@ describe('DialogueEditor author journeys', () => {
             )
         ).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Delete node' }));
+        expect(
+            screen.getByText(/1 surviving route points here \(1 choice/)
+        ).toBeTruthy();
+        await user.click(
+            screen.getAllByRole('button', { name: 'Delete node' }).at(-1)!
+        );
         expect(screen.queryByRole('button', { name: /second/ })).toBeNull();
         expect(screen.getByDisplayValue('Welcome.')).toBeTruthy();
 

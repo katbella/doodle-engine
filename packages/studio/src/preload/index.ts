@@ -6,7 +6,7 @@
  * these methods, never Node or the filesystem directly.
  */
 
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webFrame } from 'electron';
 import type { StudioApi } from '../shared/project';
 
 const api: StudioApi = {
@@ -17,6 +17,8 @@ const api: StudioApi = {
         ipcRenderer.invoke('project:checkDestination', targetDir, name),
     chooseDirectory: () => ipcRenderer.invoke('project:chooseDir'),
     listRecentProjects: () => ipcRenderer.invoke('project:listRecent'),
+    removeRecentProject: (dir) =>
+        ipcRenderer.invoke('project:removeRecent', dir),
     revalidate: (dir) => ipcRenderer.invoke('project:revalidate', dir),
     readDocument: (dir, relPath) =>
         ipcRenderer.invoke('doc:read', dir, relPath),
@@ -35,6 +37,8 @@ const api: StudioApi = {
     renameDocument: (dir, fromRel, toRel) =>
         ipcRenderer.invoke('doc:rename', dir, fromRel, toRel),
     importAsset: (dir, kind) => ipcRenderer.invoke('asset:import', dir, kind),
+    readAssetDataUrl: (dir, kind, value) =>
+        ipcRenderer.invoke('asset:readDataUrl', dir, kind, value),
     saveRecovery: (dir, relPath, content) =>
         ipcRenderer.invoke('recovery:save', dir, relPath, content),
     readRecovery: (dir, relPath) =>
@@ -78,6 +82,7 @@ const api: StudioApi = {
         return () => ipcRenderer.removeListener('file:changed', listener);
     },
     setThemeMenuState: (state) => ipcRenderer.send('theme:menuState', state),
+    setZoomFactor: (factor) => webFrame.setZoomFactor(factor),
     onMenu: (handlers) => {
         const onNew = () => handlers.onNew();
         const onOpen = () => handlers.onOpen();

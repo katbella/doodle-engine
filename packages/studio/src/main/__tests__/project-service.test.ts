@@ -7,7 +7,8 @@ const loadProject = vi.hoisted(() => vi.fn());
 const validateContent = vi.hoisted(() => vi.fn());
 const createProject = vi.hoisted(() => vi.fn());
 const addRecentProject = vi.hoisted(() => vi.fn(async () => {}));
-const readRecentProjects = vi.hoisted(() => vi.fn());
+const pruneRecentProjects = vi.hoisted(() => vi.fn());
+const removeRecentProject = vi.hoisted(() => vi.fn());
 const readEngineInfo = vi.hoisted(() => vi.fn());
 
 vi.mock('electron', () => ({ dialog: { showOpenDialog } }));
@@ -19,7 +20,8 @@ vi.mock('@doodle-engine/toolkit', () => ({
 }));
 vi.mock('../recent-projects', () => ({
     addRecentProject,
-    readRecentProjects,
+    pruneRecentProjects,
+    removeRecentProject,
 }));
 vi.mock('../engine-info', () => ({ readEngineInfo }));
 
@@ -56,7 +58,7 @@ describe('ProjectService', () => {
             projectPath: 'C:/games/new-story',
         });
         addRecentProject.mockClear();
-        readRecentProjects.mockReset().mockResolvedValue([
+        pruneRecentProjects.mockReset().mockResolvedValue([
             {
                 path: 'C:/games/story',
                 name: 'Story',
@@ -176,7 +178,7 @@ describe('ProjectService', () => {
         await expect(service.listRecent()).resolves.toEqual([
             expect.objectContaining({ name: 'Story' }),
         ]);
-        expect(readRecentProjects).toHaveBeenCalledWith(
+        expect(pruneRecentProjects).toHaveBeenCalledWith(
             'C:/studio/recent.json'
         );
     });

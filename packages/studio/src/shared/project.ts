@@ -187,6 +187,8 @@ export interface StudioApi {
     chooseDirectory: () => Promise<string | null>;
     /** The recent-projects list, most recent first. */
     listRecentProjects: () => Promise<RecentProject[]>;
+    /** Forget one recent project without changing anything in its folder. */
+    removeRecentProject: (projectDir: string) => Promise<RecentProject[]>;
     /** Reload and re-validate the project from disk (the Validate button). */
     revalidate: (projectDir: string) => Promise<OpenProject>;
     /** Read a project file's text and its modified time. */
@@ -223,6 +225,12 @@ export interface StudioApi {
     importAsset: (
         projectDir: string,
         kind: StudioAssetKind
+    ) => Promise<string | null>;
+    /** Read an image asset as a data URL for a Studio thumbnail. */
+    readAssetDataUrl: (
+        projectDir: string,
+        kind: StudioAssetKind,
+        value: string
     ) => Promise<string | null>;
     /** Save an unsaved-edits recovery buffer for a file. */
     saveRecovery: (
@@ -282,6 +290,8 @@ export interface StudioApi {
      */
     onFileChanged: (callback: (relPath: string) => void) => () => void;
     setThemeMenuState: (state: ThemeState) => void;
+    /** Set the renderer zoom factor for accessible UI scaling. */
+    setZoomFactor: (factor: number) => void;
     /** Wire native application-menu actions. Returns an unsubscribe. */
     onMenu: (handlers: MenuHandlers) => () => void;
 }

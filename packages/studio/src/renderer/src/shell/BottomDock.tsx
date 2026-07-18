@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Check, X } from '../lib/icons';
 import type {
     OpenProject,
@@ -6,7 +6,9 @@ import type {
     StudioBuildResult,
 } from '../../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
+import type { Reference } from '@doodle-engine/core';
 import { Playtest } from './Playtest';
+import { ReferenceGroups } from './RightPanel';
 
 export type DockTab =
     | 'problems'
@@ -18,6 +20,7 @@ export type DockTab =
 interface SymbolUsage {
     id: string;
     count: number;
+    references: Reference[];
 }
 
 export function BottomDock({
@@ -38,6 +41,7 @@ export function BottomDock({
     flags,
     variables,
     onRenameFlagVar,
+    onOpenReference,
 }: {
     project: OpenProject;
     activeTab: DockTab;
@@ -56,6 +60,7 @@ export function BottomDock({
     flags: SymbolUsage[];
     variables: SymbolUsage[];
     onRenameFlagVar: (kind: 'flag' | 'variable', id: string) => void;
+    onOpenReference: (file: string) => void;
 }) {
     const problems = project.problems;
 
@@ -102,6 +107,7 @@ export function BottomDock({
                         flags={flags}
                         variables={variables}
                         onRename={onRenameFlagVar}
+                        onOpenReference={onOpenReference}
                     />
                 )}
                 {activeTab === 'build' && (
@@ -155,15 +161,49 @@ function SymbolsView({
     flags,
     variables,
     onRename,
+    onOpenReference,
 }: {
     flags: SymbolUsage[];
     variables: SymbolUsage[];
     onRename: (kind: 'flag' | 'variable', id: string) => void;
+    onOpenReference: (file: string) => void;
 }) {
+    const [selected, setSelected] = useState<{
+        kind: 'flag' | 'variable';
+        id: string;
+    } | null>(null);
     if (flags.length === 0 && variables.length === 0) {
         return (
             <div className="dock__empty">
                 No flags or variables are used yet.
+            </div>
+        );
+    }
+    const selectedUsage = selected
+        ? (selected.kind === 'flag' ? flags : variables).find(
+              (usage) => usage.id === selected.id
+          )
+        : null;
+    if (selected && selectedUsage) {
+        return (
+            <div className="symbol-uses">
+                <div className="symbol-uses__head">
+                    <button
+                        className="symbol-uses__back"
+                        onClick={() => setSelected(null)}
+                    >
+                        ← Flags &amp; vars
+                    </button>
+                    <span className="mono">{selected.id}</span>
+                    <span className="symbol__count">
+                        {selectedUsage.count} use
+                        {selectedUsage.count === 1 ? '' : 's'}
+                    </span>
+                </div>
+                <ReferenceGroups
+                    references={selectedUsage.references}
+                    onOpenFile={onOpenReference}
+                />
             </div>
         );
     }
@@ -176,9 +216,12 @@ function SymbolsView({
                 {list.map((s) => (
                     <div key={s.id} className="symbol">
                         <span className="symbol__id mono">{s.id}</span>
-                        <span className="symbol__count">
+                        <button
+                            className="symbol__count symbol__count--link"
+                            onClick={() => setSelected({ kind, id: s.id })}
+                        >
                             {s.count} use{s.count === 1 ? '' : 's'}
-                        </span>
+                        </button>
                         <button
                             className="symbol__rename"
                             onClick={() => onRename(kind, s.id)}

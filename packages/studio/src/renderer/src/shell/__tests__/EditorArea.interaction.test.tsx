@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OpenProject } from '../../../../shared/project';
 import type { Tab } from '../../types';
@@ -22,6 +22,9 @@ vi.mock('../EntityForm', () => ({
 }));
 vi.mock('../GameConfigForm', () => ({
     GameConfigForm: () => <div>game-config</div>,
+}));
+vi.mock('../LocaleEditor', () => ({
+    LocaleEditor: (props: any) => <div>locale-editor:{props.localeId}</div>,
 }));
 vi.mock('../DetailView', () => ({
     DetailView: (props: any) => <div>detail:{props.tab.section}</div>,
@@ -170,5 +173,34 @@ describe('EditorArea', () => {
         expect(onSetViewMode).toHaveBeenCalledWith('characters:hero', 'view');
         await user.click(screen.getByRole('button', { name: 'Source' }));
         expect(onSetViewMode).toHaveBeenCalledWith('characters:hero', 'source');
+    });
+
+    it('closes tabs with middle-click and offers close-others/all on right-click', async () => {
+        const user = userEvent.setup();
+        const { callbacks } = renderArea({ activeKey: 'characters:hero' });
+        const heroTab = screen.getByText('Hero').closest('.tab')!;
+
+        fireEvent(
+            heroTab,
+            new MouseEvent('auxclick', { bubbles: true, button: 1 })
+        );
+        expect(callbacks.onClose).toHaveBeenCalledWith('characters:hero');
+        callbacks.onClose.mockClear();
+
+        fireEvent.contextMenu(heroTab, { clientX: 40, clientY: 30 });
+        await user.click(screen.getByRole('button', { name: 'Close others' }));
+        expect(callbacks.onClose).toHaveBeenCalledTimes(tabs.length - 1);
+        expect(callbacks.onClose).not.toHaveBeenCalledWith('characters:hero');
+        expect(callbacks.onSelect).toHaveBeenCalledWith('characters:hero');
+
+        callbacks.onClose.mockClear();
+        fireEvent.contextMenu(heroTab, { clientX: 40, clientY: 30 });
+        await user.click(screen.getByRole('button', { name: 'Close all' }));
+        expect(
+            screen.getByText(/1 affected tab has unsaved edits/)
+        ).toBeTruthy();
+        expect(callbacks.onClose).not.toHaveBeenCalled();
+        await user.click(screen.getByRole('button', { name: 'Close tabs' }));
+        expect(callbacks.onClose).toHaveBeenCalledTimes(tabs.length);
     });
 });

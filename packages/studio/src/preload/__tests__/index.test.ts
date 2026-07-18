@@ -6,10 +6,12 @@ const invoke = vi.hoisted(() => vi.fn(async () => 'result'));
 const send = vi.hoisted(() => vi.fn());
 const on = vi.hoisted(() => vi.fn());
 const removeListener = vi.hoisted(() => vi.fn());
+const setZoomFactor = vi.hoisted(() => vi.fn());
 
 vi.mock('electron', () => ({
     contextBridge: { exposeInMainWorld },
     ipcRenderer: { invoke, send, on, removeListener },
+    webFrame: { setZoomFactor },
 }));
 
 let api: StudioApi;
@@ -30,6 +32,7 @@ beforeEach(() => {
         }
     );
     removeListener.mockClear();
+    setZoomFactor.mockClear();
 });
 
 describe('preload bridge', () => {
@@ -72,6 +75,11 @@ describe('preload bridge', () => {
                 ['games', 'story'],
             ],
             [() => api.listRecentProjects(), 'project:listRecent', []],
+            [
+                () => api.removeRecentProject('dir'),
+                'project:removeRecent',
+                ['dir'],
+            ],
             [() => api.revalidate('dir'), 'project:revalidate', ['dir']],
             [
                 () => api.readDocument('dir', 'file'),
@@ -102,6 +110,11 @@ describe('preload bridge', () => {
                 () => api.importAsset('dir', 'portrait'),
                 'asset:import',
                 ['dir', 'portrait'],
+            ],
+            [
+                () => api.readAssetDataUrl('dir', 'map', 'world.png'),
+                'asset:readDataUrl',
+                ['dir', 'map', 'world.png'],
             ],
             [
                 () => api.saveRecovery('dir', 'file', 'text'),
@@ -199,6 +212,8 @@ describe('preload bridge', () => {
             mode: 'light',
             color: 'violet',
         });
+        api.setZoomFactor(1.25);
+        expect(setZoomFactor).toHaveBeenCalledWith(1.25);
 
         const unsubscribe = api.onMenu(handlers);
         listeners['menu:new']();

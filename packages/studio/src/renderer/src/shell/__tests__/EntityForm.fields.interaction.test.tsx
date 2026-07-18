@@ -47,10 +47,15 @@ function installBridge(
     return { readDocument, writeEntity, importAsset };
 }
 
-function editor(section: SectionKey, onDirty = vi.fn(), onModified = vi.fn()) {
+function editor(
+    section: SectionKey,
+    onDirty = vi.fn(),
+    onModified = vi.fn(),
+    formProject: OpenProject = project
+) {
     return render(
         <EntityForm
-            project={project}
+            project={formProject}
             tabKey={`${section}:entry`}
             section={section}
             path={`content/${section}/entry.yaml`}
@@ -61,6 +66,39 @@ function editor(section: SectionKey, onDirty = vi.fn(), onModified = vi.fn()) {
 }
 
 describe('EntityForm field controls', () => {
+    it('resolves localized text and groups every valid item destination', async () => {
+        const itemProject = {
+            ...project,
+            registry: {
+                ...project.registry,
+                characters: { bartender: { id: 'bartender' } },
+                locales: {
+                    en: { 'item.old_coin.name': 'Old Coin' },
+                },
+            },
+        } as unknown as OpenProject;
+        installBridge(`id: old_coin
+name: "@item.old_coin.name"
+description: A keepsake
+location: bartender
+`);
+        const user = userEvent.setup();
+        editor('items', vi.fn(), vi.fn(), itemProject);
+        await screen.findByText('old_coin');
+
+        expect(screen.getByDisplayValue('Old Coin')).toBeTruthy();
+        expect(screen.getByRole('option', { name: 'bartender' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'Inventory' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'Locations' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'Characters' })).toBeTruthy();
+        expect(screen.getByText(/keeps the item out of play/)).toBeTruthy();
+
+        await user.selectOptions(screen.getByRole('combobox'), 'inventory');
+        expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe(
+            'inventory'
+        );
+    });
+
     it('edits localizable, reference, asset, stats, and unknown character fields', async () => {
         const bridge = installBridge(`id: hero
 name: Hero
@@ -74,7 +112,14 @@ extension:
   custom: true
 `);
         const user = userEvent.setup();
-        editor('characters');
+        const localizedProject = {
+            ...project,
+            registry: {
+                ...project.registry,
+                locales: { en: { 'bio.hero': 'A storied hero.' } },
+            },
+        } as unknown as OpenProject;
+        editor('characters', vi.fn(), vi.fn(), localizedProject);
         expect(await screen.findByText('hero')).toBeTruthy();
         expect(screen.getByText('Custom fields')).toBeTruthy();
         expect(screen.getByText(/extension:/)).toBeTruthy();
@@ -90,9 +135,13 @@ extension:
 
         const literal = screen.getAllByRole('button', { name: 'literal' });
         await user.click(literal[1]);
-        expect(screen.getByDisplayValue('bio.hero')).toBeTruthy();
+        expect(screen.getByDisplayValue('A storied hero.')).toBeTruthy();
         await user.click(screen.getAllByRole('button', { name: '@key' })[0]);
-        expect(screen.getByDisplayValue('@Hero')).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: /@bio\.hero/ }));
+        await user.click(
+            screen.getByRole('button', { name: 'Use @bio.hero text' })
+        );
+        expect(screen.getAllByDisplayValue('A storied hero.')).toHaveLength(2);
 
         const selects = screen.getAllByRole('combobox');
         await user.selectOptions(selects[0], 'town');
@@ -189,6 +238,7 @@ stages:
         await user.click(
             screen.getAllByRole('button', { name: 'Remove stage' })[0]
         );
+        await user.click(screen.getByRole('button', { name: 'Delete stage' }));
 
         unmount();
         await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
@@ -225,6 +275,54 @@ locations:
         await user.selectOptions(screen.getByRole('combobox'), 'town');
         fireEvent.change(screen.getByTitle('x'), { target: { value: '15' } });
         fireEvent.change(screen.getByTitle('y'), { target: { value: '25' } });
+
+        const preview = document.querySelector(
+            '.map-preview'
+        ) as HTMLDivElement;
+        vi.spyOn(preview, 'getBoundingClientRect').mockReturnValue({
+            x: 0,
+            y: 0,
+            left: 0,
+            top: 0,
+            right: 200,
+            bottom: 100,
+            width: 200,
+            height: 100,
+            toJSON: () => ({}),
+        });
+        fireEvent.pointerDown(screen.getByTitle('x'));
+        fireEvent.click(preview, { clientX: 100, clientY: 50 });
+        expect((screen.getByTitle('x') as HTMLInputElement).value).toBe('8');
+        expect((screen.getByTitle('y') as HTMLInputElement).value).toBe('14');
+
+        const marker = document.querySelector(
+            '.map-preview__marker'
+        ) as HTMLSpanElement & {
+            setPointerCapture: (pointerId: number) => void;
+            releasePointerCapture: (pointerId: number) => void;
+        };
+        marker.setPointerCapture = vi.fn();
+        marker.releasePointerCapture = vi.fn();
+        fireEvent.pointerDown(marker, {
+            pointerId: 7,
+            clientX: 100,
+            clientY: 50,
+        });
+        fireEvent.pointerMove(marker, {
+            pointerId: 7,
+            clientX: 20,
+            clientY: 20,
+        });
+        // The coordinate rows follow the drag live, like the dot does.
+        expect((screen.getByTitle('x') as HTMLInputElement).value).toBe('1');
+        fireEvent.pointerUp(marker, {
+            pointerId: 7,
+            clientX: 20,
+            clientY: 20,
+        });
+        expect((screen.getByTitle('x') as HTMLInputElement).value).toBe('1');
+        expect((screen.getByTitle('y') as HTMLInputElement).value).toBe('3');
+
         await user.click(screen.getByRole('button', { name: /Add marker/ }));
         expect(screen.getAllByRole('combobox')).toHaveLength(2);
         await user.click(

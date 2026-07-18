@@ -54,6 +54,21 @@ export function LeftRail({
 
     const q = query.trim().toLowerCase();
 
+    // Enter opens the first visible match, so a search never needs the mouse.
+    const openFirstMatch = () => {
+        if (!q) return;
+        for (const section of sections) {
+            const item = section.items.find((i) =>
+                i.label.toLowerCase().includes(q)
+            );
+            if (item) {
+                onOpenItem(section.key, item.id, item.label);
+                setQuery('');
+                return;
+            }
+        }
+    };
+
     return (
         <div className="rail">
             <div className="rail__search">
@@ -63,6 +78,10 @@ export function LeftRail({
                     placeholder="Search project…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') openFirstMatch();
+                        if (e.key === 'Escape') setQuery('');
+                    }}
                 />
             </div>
             <div className="rail__list scroll">
@@ -78,6 +97,47 @@ export function LeftRail({
                     const isCollapsed = !q && collapsed.has(section.key);
 
                     const creatable = section.key !== 'config';
+
+                    if (section.key === 'config') {
+                        const item = items[0];
+                        if (!item) return null;
+                        const key = `${section.key}:${item.id}`;
+                        return (
+                            <div
+                                key={section.key}
+                                className={`rail__item rail__item--config ${
+                                    key === activeKey
+                                        ? 'rail__item--active'
+                                        : ''
+                                }`}
+                            >
+                                <button
+                                    className="rail__item-open"
+                                    onClick={() =>
+                                        onOpenItem(
+                                            section.key,
+                                            item.id,
+                                            item.label
+                                        )
+                                    }
+                                >
+                                    <span className="rail__item-label">
+                                        Game config
+                                    </span>
+                                    {item.status !== 'none' && (
+                                        <span
+                                            className="status__dot"
+                                            style={{
+                                                background:
+                                                    STATUS_COLOR[item.status],
+                                            }}
+                                            title={item.status}
+                                        />
+                                    )}
+                                </button>
+                            </div>
+                        );
+                    }
 
                     return (
                         <div key={section.key}>

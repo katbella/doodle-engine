@@ -61,9 +61,9 @@ describe('CreateItemModal', () => {
         await user.click(screen.getByRole('button', { name: 'Create' }));
         expect(onCreate).toHaveBeenCalledWith('items', 'coin');
         await user.click(screen.getByRole('button', { name: 'Cancel' }));
-        fireEvent.click(container.querySelector('.modal-backdrop')!);
+        fireEvent.click(document.querySelector('.modal-backdrop')!);
         expect(onCancel).toHaveBeenCalledTimes(2);
-        fireEvent.click(container.querySelector('.modal')!);
+        fireEvent.click(document.querySelector('.modal')!);
         expect(onCancel).toHaveBeenCalledTimes(2);
     });
 });
@@ -145,7 +145,7 @@ describe('NewProjectModal', () => {
             ).disabled
         ).toBe(true);
         await user.click(screen.getByRole('button', { name: 'Cancel' }));
-        fireEvent.click(container.querySelector('.modal-backdrop')!);
+        fireEvent.click(document.querySelector('.modal-backdrop')!);
         expect(onCancel).toHaveBeenCalledTimes(2);
     });
 

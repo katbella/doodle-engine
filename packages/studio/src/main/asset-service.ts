@@ -1,5 +1,5 @@
 import { dialog, type FileFilter } from 'electron';
-import { copyFile, mkdir, realpath, stat } from 'fs/promises';
+import { copyFile, mkdir, readFile, realpath, stat } from 'fs/promises';
 import { constants } from 'fs';
 import { basename, extname, join, sep } from 'path';
 import type { StudioAssetKind } from '../shared/project';
@@ -35,6 +35,16 @@ const AUDIO_FILTER: FileFilter = {
 const VIDEO_FILTER: FileFilter = {
     name: 'Video',
     extensions: ['mp4', 'webm', 'ogv', 'mov'],
+};
+
+const IMAGE_MIME: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.avif': 'image/avif',
 };
 
 function filtersFor(kind: StudioAssetKind): FileFilter[] {
@@ -117,6 +127,37 @@ export class AssetService {
                     throw error;
                 }
             }
+        }
+    }
+
+    /** Read a project image for a Studio-only thumbnail without exposing fs.
+     * The value is resolved the way the engine resolves assets: as a path
+     * relative to the project root, with bare filenames falling back to the
+     * kind's conventional directory. */
+    async previewDataUrl(
+        projectDir: string,
+        kind: StudioAssetKind,
+        value: string
+    ): Promise<string | null> {
+        if (!value || !Object.hasOwn(DESTINATIONS, kind)) return null;
+        const destination = DESTINATIONS[kind];
+        const hasPath = value.includes('/') || value.includes('\\');
+        const relative = hasPath ? value : join(destination.directory, value);
+        const mime = IMAGE_MIME[extname(relative).toLowerCase()];
+        if (!mime) return null;
+
+        try {
+            const root = await realpath(projectDir);
+            const target = await realpath(join(root, relative));
+            if (target !== root && !target.startsWith(root + sep)) {
+                return null;
+            }
+            const info = await stat(target);
+            if (!info.isFile() || info.size > 15 * 1024 * 1024) return null;
+            const encoded = (await readFile(target)).toString('base64');
+            return `data:${mime};base64,${encoded}`;
+        } catch {
+            return null;
         }
     }
 

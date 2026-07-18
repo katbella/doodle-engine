@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, X, Plus } from '../lib/icons';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, X, Plus, Pencil } from '../lib/icons';
 import {
     isValidIdentifier,
     serializeCondition,
@@ -15,6 +15,10 @@ import type {
 } from '@doodle-engine/core';
 import { ConditionEffectBuilder } from './ConditionEffectBuilder';
 import { AssetField } from './AssetField';
+import { LocalizedTextField } from './LocalizedTextField';
+import { ConfirmModal } from './ConfirmModal';
+import { OverlayPortal } from './OverlayPortal';
+import { useModalDismiss } from '../lib/useModalDismiss';
 
 /** Editable node id. */
 function NodeIdField({
@@ -63,95 +67,26 @@ function NodeIdField({
     );
 }
 
-/** Anchored popover with a click-away backdrop, for the builder. */
-/**
- * A popover that floats above everything, anchored to the element that opened
- * it. It is rendered in a fixed overlay (not inside the scrolling node editor),
- * so it is never clipped, and it is capped to the viewport height so its own
- * content scrolls when the window is short. It opens below the anchor, or above
- * when there isn't room below.
- */
-function Popover({
-    anchorRef,
+/** The builder in a centered modal, like every other focused editing task. */
+function BuilderModal({
     children,
     onClose,
 }: {
-    anchorRef: React.RefObject<HTMLElement | null>;
     children: React.ReactNode;
     onClose: () => void;
 }) {
-    const panelRef = useRef<HTMLDivElement>(null);
-    const [pos, setPos] = useState<{
-        left: number;
-        top: number;
-        maxHeight: number;
-    } | null>(null);
-
-    useLayoutEffect(() => {
-        const anchor = anchorRef.current;
-        const panel = panelRef.current;
-        if (!anchor || !panel) return;
-
-        const place = () => {
-            const a = anchor.getBoundingClientRect();
-            const margin = 8;
-            const panelHeight = panel.offsetHeight;
-            const below = window.innerHeight - a.bottom - margin;
-            const above = a.top - margin;
-            // Prefer below; flip above only if below is too small and above is roomier.
-            const openAbove = below < panelHeight && above > below;
-            const maxHeight = Math.max(160, openAbove ? above : below);
-            const top = openAbove
-                ? Math.max(
-                      margin,
-                      a.top - Math.min(panelHeight, maxHeight) - margin
-                  )
-                : a.bottom + margin;
-            const left = Math.min(
-                a.left,
-                window.innerWidth - panel.offsetWidth - margin
-            );
-            setPos({ left: Math.max(margin, left), top, maxHeight });
-        };
-
-        place();
-        window.addEventListener('resize', place);
-        const observer =
-            typeof ResizeObserver === 'undefined'
-                ? null
-                : new ResizeObserver(place);
-        observer?.observe(panel);
-        return () => {
-            window.removeEventListener('resize', place);
-            observer?.disconnect();
-        };
-    }, [anchorRef]);
-
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [onClose]);
-
+    useModalDismiss(onClose);
     return (
-        <>
-            <div className="popover-backdrop" onClick={onClose} />
-            <div
-                ref={panelRef}
-                className="popover"
-                style={
-                    pos
-                        ? {
-                              left: pos.left,
-                              top: pos.top,
-                              maxHeight: pos.maxHeight,
-                          }
-                        : { visibility: 'hidden' }
-                }
-            >
-                {children}
+        <OverlayPortal>
+            <div className="modal-backdrop" onClick={onClose}>
+                <div
+                    className="builder-modal"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    {children}
+                </div>
             </div>
-        </>
+        </OverlayPortal>
     );
 }
 
@@ -166,11 +101,9 @@ function SingleConditionField({
     onChange: (condition: Condition) => void;
 }) {
     const [open, setOpen] = useState(false);
-    const anchorRef = useRef<HTMLButtonElement>(null);
     return (
-        <div className="popover-anchor">
+        <div>
             <button
-                ref={anchorRef}
                 className="dlg__chip mono"
                 onClick={() => setOpen(true)}
                 title="Edit condition"
@@ -178,7 +111,7 @@ function SingleConditionField({
                 {serializeCondition(condition)}
             </button>
             {open && (
-                <Popover anchorRef={anchorRef} onClose={() => setOpen(false)}>
+                <BuilderModal onClose={() => setOpen(false)}>
                     <ConditionEffectBuilder
                         mode="condition"
                         registry={registry}
@@ -189,7 +122,7 @@ function SingleConditionField({
                         }}
                         onCancel={() => setOpen(false)}
                     />
-                </Popover>
+                </BuilderModal>
             )}
         </div>
     );
@@ -208,7 +141,8 @@ function BuilderRow({
     return (
         <div className="dlg__row">
             <button className="dlg__chip mono" onClick={onEdit} title="Edit">
-                {label}
+                <span>{label}</span>
+                <Pencil className="dlg__chip-edit" size={11} aria-hidden />
             </button>
             <button className="dlg__x" onClick={onRemove} aria-label="Remove">
                 <X size={15} />
@@ -228,7 +162,6 @@ function EffectList({
 }) {
     // `null` = closed; a number = editing that row; -1 = adding a new one.
     const [open, setOpen] = useState<number | null>(null);
-    const addRef = useRef<HTMLButtonElement>(null);
 
     const commit = (entity: Condition | Effect) => {
         const effect = entity as Effect;
@@ -248,16 +181,12 @@ function EffectList({
                     onRemove={() => onChange(effects.filter((_, j) => j !== i))}
                 />
             ))}
-            <div className="popover-anchor">
-                <button
-                    ref={addRef}
-                    className="dlg__add"
-                    onClick={() => setOpen(-1)}
-                >
+            <div>
+                <button className="dlg__add" onClick={() => setOpen(-1)}>
                     <Plus size={13} /> Add effect
                 </button>
                 {open !== null && (
-                    <Popover anchorRef={addRef} onClose={() => setOpen(null)}>
+                    <BuilderModal onClose={() => setOpen(null)}>
                         <ConditionEffectBuilder
                             mode="effect"
                             registry={registry}
@@ -265,7 +194,7 @@ function EffectList({
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
                         />
-                    </Popover>
+                    </BuilderModal>
                 )}
             </div>
         </div>
@@ -285,7 +214,6 @@ function ConditionList({
     onChange: (conditions: Condition[]) => void;
 }) {
     const [open, setOpen] = useState<number | null>(null);
-    const addRef = useRef<HTMLButtonElement>(null);
 
     const commit = (entity: Condition | Effect) => {
         const condition = entity as Condition;
@@ -307,17 +235,13 @@ function ConditionList({
                     }
                 />
             ))}
-            <div className="popover-anchor">
-                <button
-                    ref={addRef}
-                    className="dlg__add"
-                    onClick={() => setOpen(-1)}
-                >
+            <div>
+                <button className="dlg__add" onClick={() => setOpen(-1)}>
                     <Plus size={13} /> Add{' '}
                     {inRequire ? 'requirement' : 'condition'}
                 </button>
                 {open !== null && (
-                    <Popover anchorRef={addRef} onClose={() => setOpen(null)}>
+                    <BuilderModal onClose={() => setOpen(null)}>
                         <ConditionEffectBuilder
                             mode="condition"
                             registry={registry}
@@ -326,7 +250,7 @@ function ConditionList({
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
                         />
-                    </Popover>
+                    </BuilderModal>
                 )}
             </div>
         </div>
@@ -338,26 +262,98 @@ function TargetSelect({
     nodeIds,
     includeEnd,
     onChange,
+    onCreateNode,
 }: {
     value: string;
     nodeIds: string[];
     includeEnd?: boolean;
     onChange: (value: string) => void;
+    /** Create a node with this id and select it as the target. */
+    onCreateNode?: (id: string) => void;
 }) {
+    const [creating, setCreating] = useState(false);
+    const [draftId, setDraftId] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    const commitCreate = () => {
+        const id = draftId.trim();
+        if (!isValidIdentifier(id)) {
+            setError('Use letters, numbers, and underscores only.');
+            return;
+        }
+        if (nodeIds.includes(id)) {
+            setError('A node with this ID already exists.');
+            return;
+        }
+        onChange(id);
+        onCreateNode?.(id);
+        setCreating(false);
+        setDraftId('');
+        setError(null);
+    };
+
     return (
-        <select
-            className="dlg__select"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-        >
-            <option value="">— none —</option>
-            {includeEnd && <option value="__end__">end dialogue</option>}
-            {nodeIds.map((id) => (
-                <option key={id} value={id}>
-                    {id}
-                </option>
-            ))}
-        </select>
+        <div className="target-select">
+            <select
+                className="dlg__select"
+                value={creating ? '__new__' : value}
+                onChange={(e) => {
+                    if (e.target.value === '__new__') {
+                        setCreating(true);
+                        setDraftId('');
+                        setError(null);
+                        return;
+                    }
+                    setCreating(false);
+                    onChange(e.target.value);
+                }}
+            >
+                <option value="">— none —</option>
+                {includeEnd && <option value="__end__">end dialogue</option>}
+                {nodeIds.map((id) => (
+                    <option key={id} value={id}>
+                        {id}
+                    </option>
+                ))}
+                {onCreateNode && <option value="__new__">＋ New node…</option>}
+            </select>
+            {creating && (
+                <div className="target-select__create">
+                    <input
+                        className={`dlg__input mono ${error ? 'dlg__input--invalid' : ''}`}
+                        value={draftId}
+                        placeholder="new_node_id"
+                        autoFocus
+                        spellCheck={false}
+                        aria-label="New node id"
+                        onChange={(e) => {
+                            setDraftId(e.target.value);
+                            setError(null);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') commitCreate();
+                            if (e.key === 'Escape') {
+                                setCreating(false);
+                                setError(null);
+                            }
+                        }}
+                    />
+                    <button className="btn btn--accent" onClick={commitCreate}>
+                        Create
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={() => {
+                            setCreating(false);
+                            setError(null);
+                        }}
+                    >
+                        Cancel
+                    </button>
+                    {error && <span className="field__error">{error}</span>}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -429,6 +425,7 @@ export function NodeEditor({
     onRename,
     onMakeStart,
     onDelete,
+    onCreateNode,
 }: {
     node: DialogueNode;
     isStart: boolean;
@@ -440,7 +437,14 @@ export function NodeEditor({
     onRename: (oldId: string, newId: string) => void;
     onMakeStart: () => void;
     onDelete: () => void;
+    /** Create a new node (without leaving this one) so a target can point at it. */
+    onCreateNode: (id: string) => void;
 }) {
+    const [deleteTarget, setDeleteTarget] = useState<
+        | { kind: 'choice'; index: number }
+        | { kind: 'branch'; index: number }
+        | null
+    >(null);
     const set = (patch: Partial<DialogueNode>) =>
         onChange({ ...node, ...patch });
 
@@ -454,7 +458,6 @@ export function NodeEditor({
         (choice.effects ?? []).some(
             (e) => e.type === 'goToLocation' || e.type === 'startDialogue'
         );
-
     return (
         <div className="node-editor">
             <div className="node-editor__head">
@@ -495,17 +498,15 @@ export function NodeEditor({
                 </select>
             </label>
 
-            <label className="field">
-                <span className="field__label">Line</span>
-                <textarea
-                    className="dlg__input node-editor__line-input"
-                    value={node.text}
-                    placeholder="@locale.key or plain text"
-                    rows={5}
-                    spellCheck={!node.text.startsWith('@')}
-                    onChange={(e) => set({ text: e.target.value })}
-                />
-            </label>
+            <LocalizedTextField
+                label={<span className="field__label">Line</span>}
+                source={node.text}
+                registry={registry}
+                textKind="prose"
+                placeholder="Write the line…"
+                ariaLabel="Line"
+                onSourceChange={(text) => set({ text })}
+            />
 
             <div className="node-editor__grid">
                 <AssetField
@@ -567,10 +568,9 @@ export function NodeEditor({
                                 className="dlg__x"
                                 aria-label="Remove branch"
                                 onClick={() =>
-                                    set({
-                                        conditionalBranches: branches.filter(
-                                            (_, j) => j !== i
-                                        ),
+                                    setDeleteTarget({
+                                        kind: 'branch',
+                                        index: i,
                                     })
                                 }
                             >
@@ -613,6 +613,7 @@ export function NodeEditor({
                         <div className="dlg__target">
                             <span className="field__label">Goes to</span>
                             <TargetSelect
+                                onCreateNode={onCreateNode}
                                 value={branch.next ?? ''}
                                 nodeIds={nodeIds}
                                 onChange={(v) =>
@@ -705,10 +706,9 @@ export function NodeEditor({
                                         className="dlg__x"
                                         aria-label="Remove choice"
                                         onClick={() =>
-                                            set({
-                                                choices: node.choices.filter(
-                                                    (_, j) => j !== i
-                                                ),
+                                            setDeleteTarget({
+                                                kind: 'choice',
+                                                index: i,
                                             })
                                         }
                                     >
@@ -716,13 +716,17 @@ export function NodeEditor({
                                     </button>
                                 </div>
                             </div>
-                            <input
-                                className="dlg__input"
-                                value={choice.text}
-                                placeholder="@choice.key or plain text"
-                                spellCheck={false}
-                                onChange={(e) =>
-                                    update({ ...choice, text: e.target.value })
+                            <LocalizedTextField
+                                label={
+                                    <span className="field__label">Text</span>
+                                }
+                                source={choice.text}
+                                registry={registry}
+                                textKind="single-line-wrap"
+                                placeholder="Write the choice…"
+                                ariaLabel={`Choice ${i + 1} text`}
+                                onSourceChange={(text) =>
+                                    update({ ...choice, text })
                                 }
                             />
                             <div className="dlg__sub">Requirements</div>
@@ -755,6 +759,7 @@ export function NodeEditor({
                             <div className="dlg__target">
                                 <span className="field__label">Goes to</span>
                                 <TargetSelect
+                                    onCreateNode={onCreateNode}
                                     value={choiceTargetValue(choice)}
                                     nodeIds={nodeIds}
                                     includeEnd
@@ -779,12 +784,50 @@ export function NodeEditor({
                 <div className="dlg__target">
                     <span className="field__label">Next node</span>
                     <TargetSelect
+                        onCreateNode={onCreateNode}
                         value={node.next ?? ''}
                         nodeIds={nodeIds}
                         onChange={(v) => set({ next: v || undefined })}
                     />
                 </div>
             </div>
+            {deleteTarget && (
+                <ConfirmModal
+                    title={
+                        deleteTarget.kind === 'choice'
+                            ? 'Delete this choice?'
+                            : 'Delete this conditional branch?'
+                    }
+                    message={
+                        deleteTarget.kind === 'choice'
+                            ? 'This removes the choice text, requirements, effects, and destination. Studio does not have undo.'
+                            : 'This removes the branch condition, effects, and destination. Studio does not have undo.'
+                    }
+                    confirmLabel={
+                        deleteTarget.kind === 'choice'
+                            ? 'Delete choice'
+                            : 'Delete branch'
+                    }
+                    danger
+                    onConfirm={() => {
+                        if (deleteTarget.kind === 'choice') {
+                            set({
+                                choices: node.choices.filter(
+                                    (_, index) => index !== deleteTarget.index
+                                ),
+                            });
+                        } else {
+                            set({
+                                conditionalBranches: branches.filter(
+                                    (_, index) => index !== deleteTarget.index
+                                ),
+                            });
+                        }
+                        setDeleteTarget(null);
+                    }}
+                    onCancel={() => setDeleteTarget(null)}
+                />
+            )}
         </div>
     );
 }

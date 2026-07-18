@@ -51,7 +51,7 @@ export function buildSections(project: OpenProject): RailSection[] {
             items: listed(
                 'dialogues',
                 dialogueIds,
-                (id) => `${id}.dlg`,
+                (id) => id,
                 (id) =>
                     statusForPath(
                         fileFor('dialogues', id) ??
@@ -91,13 +91,18 @@ export function buildSections(project: OpenProject): RailSection[] {
         },
         {
             key: 'journal',
-            label: 'Journal',
+            label: 'Journal entries',
             items: listed('journal', Object.keys(r.journalEntries)),
         },
         {
             key: 'locales',
             label: 'Locales',
-            items: listed('locales', Object.keys(r.locales), (id) => id, () => 'none'),
+            items: listed(
+                'locales',
+                Object.keys(r.locales),
+                (id) => id,
+                () => 'none'
+            ),
         },
         {
             key: 'config',

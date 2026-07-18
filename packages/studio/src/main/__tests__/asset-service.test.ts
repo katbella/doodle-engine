@@ -92,4 +92,21 @@ describe('AssetService', () => {
             new AssetService().chooseAndImport(project, 'voice')
         ).resolves.toBeNull();
     });
+
+    it('reads a contained map image as a data URL and rejects traversal', async () => {
+        const project = await temporaryDirectory('doodle-assets-project-');
+        const maps = join(project, 'assets', 'images', 'maps');
+        await mkdir(maps, { recursive: true });
+        await writeFile(join(maps, 'world.png'), 'map-bytes');
+        const service = new AssetService();
+
+        await expect(
+            service.previewDataUrl(project, 'map', 'world.png')
+        ).resolves.toBe(
+            `data:image/png;base64,${Buffer.from('map-bytes').toString('base64')}`
+        );
+        await expect(
+            service.previewDataUrl(project, 'map', '../world.png')
+        ).resolves.toBeNull();
+    });
 });

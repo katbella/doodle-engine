@@ -14,9 +14,9 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
         ['Locales', Object.keys(r.locales).length],
     ];
 
-    const installed =
-        project.engine.installed ??
-        (project.engine.depsInstalled ? '—' : 'dependencies not installed');
+    const engineStatus = project.engine.depsInstalled
+        ? (project.engine.installed ?? project.engine.declared ?? 'installed')
+        : 'not installed yet — select Install dependencies';
 
     return (
         <div className="overview">
@@ -29,14 +29,14 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
                 <span className="detail__value">{project.version ?? '—'}</span>
             </div>
             <div className="detail__row">
-                <span className="detail__key">engine (declared)</span>
+                <span className="detail__key">Doodle Engine</span>
+                <span className="detail__value">{engineStatus}</span>
+            </div>
+            <div className="detail__row">
+                <span className="detail__key">Declared version</span>
                 <span className="detail__value">
                     {project.engine.declared ?? '—'}
                 </span>
-            </div>
-            <div className="detail__row">
-                <span className="detail__key">engine (installed)</span>
-                <span className="detail__value">{installed}</span>
             </div>
             <div className="detail__row">
                 <span className="detail__key">location</span>
