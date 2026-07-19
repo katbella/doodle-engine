@@ -98,8 +98,8 @@ describe('DialogueGraphView', () => {
         );
         // A route looping back to an earlier node is a chip, not an edge.
         const back = screen.getByText('Never mind').closest('.graph__row')!;
-        expect(back.querySelector('.graph__chip')?.textContent).toContain(
-            'start'
+        expect(back.querySelector('.graph__chip')?.textContent).toBe(
+            'to start'
         );
 
         // island has no routes out and no route in.

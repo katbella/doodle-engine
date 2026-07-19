@@ -1,0 +1,57 @@
+---
+title: Validate, Preview, and Build
+description: Check game content, preview the finished presentation, and create release files in Studio.
+---
+
+import ThemeScreenshot from '../../../components/ThemeScreenshot.astro';
+
+Studio provides separate tools for checking content, playing the finished presentation, and preparing a release:
+
+- **Validate** checks content structure and references.
+- **Preview** runs the game with the renderer in your project.
+- **Build** repeats the same content checks as Validate, confirms that referenced asset files exist, and then creates the files you will publish.
+
+## Validate content
+
+Select **Validate** in the top bar after a group of edits. The status beside the project name changes to:
+
+- **All valid** when the loaded content passes
+- **Not validated** after files change
+- A problem count when validation finds issues
+
+<ThemeScreenshot src="/images/studio/studio-toolbar.webp" alt="Validate, Build, Preview, and Playtest controls" />
+
+Open **Problems** in the bottom dock for the project-wide list. Select a problem to open its file. The right-side Validation panel shows issues for the active item.
+
+Validation covers YAML and dialogue syntax, IDs, references, start locations, quest stages, localization keys, dialogue routes, conditions, and effects. See [Content Validation](/guides/content-validation/) for details about each check.
+
+## Preview the game
+
+Select **Preview** to start the project’s development server and open the game in your default browser.
+
+While the server is running, the Preview button shows its port number. Select that button to reopen the game in your browser, or select **Stop** to stop the server. Server output appears in the **Dev server** dock.
+
+Use Preview to experience the game as a player will, including its menus, presentation, media, saves, and controls.
+
+## Build for production
+
+Select **Build** to create the files for release in the project’s `dist/` folder.
+
+The **Build log** dock streams progress, shows validation or Vite errors, lists generated files, and reports the final duration. After a successful build, select **Open output folder** to inspect the bundle.
+
+<ThemeScreenshot src="/images/studio/build-output.webp" alt="A completed production build in the Build log" />
+
+The output includes the game application, content, assets, and a service worker. A service worker is a browser file that caches the game after its first visit so it can open offline later.
+
+## Choose the Right Tool
+
+| Goal | Studio tool |
+| --- | --- |
+| Check a dialogue branch or state condition | Playtest |
+| Check content references and schema | Validate |
+| Play the game with its project renderer | Preview |
+| Produce files for deployment | Build |
+
+For help with Studio or a command-line problem, see [Reporting Issues and Feedback](/reference/reporting-issues/).
+
+For browser-side game debugging during Preview, see [Debugging with DevTools](/guides/debugging-with-devtools/). For deployment options, continue to [Hosting & Deployment](/guides/hosting-and-deployment/).

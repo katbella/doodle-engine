@@ -404,7 +404,7 @@ export function DialogueGraphView({
                                                     )}
                                                     {row.back && (
                                                         <span className="graph__chip">
-                                                            ↩ {row.target}
+                                                            to {row.target}
                                                         </span>
                                                     )}
                                                 </div>

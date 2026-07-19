@@ -627,8 +627,8 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             // Choice rows carry their localized text at the edge's source.
             await expect(startNode.locator('.graph__row')).toHaveCount(6);
             await expect(startNode).toContainText('Ask about the docks.');
-            await expect(endNode.locator('.graph__chip')).toContainText(
-                'start'
+            await expect(endNode.locator('.graph__chip')).toHaveText(
+                'to start'
             );
             // Hit-test: the node paints above the edge layer and owns clicks.
             const box = (await endNode.boundingBox())!;
