@@ -5,30 +5,27 @@ description: Add translation keys and another language when your game is ready.
 
 Write your game’s text directly in Studio while building its first version. Add localization when you are ready to support another language.
 
-## Move one field to a key
+## Use a translation key
 
-Open a character, location, or other content item with player-facing text. Select **@key** for the field and enter a descriptive key such as `location.tavern.name`.
+Open a character, location, or other content item with player-facing text. Select **@key**, then choose an existing key or create a descriptive one such as `location.tavern.name`. When you create a key, Studio starts its English translation with the words already in the field.
+
+If an existing key contains different words, choose whether to use its translation or replace it with the current text.
 
 [![A location using localization keys](/images/studio/localized-fields.png)](/images/studio/localized-fields.png)
 
-Under **Locales**, open `en`, select **Source**, and add the same key with its English value:
+[![Choosing an existing translation key or creating a new one](/images/studio/localization-key-picker.png)](/images/studio/localization-key-picker.png)
 
-```yaml
-location.tavern.name: "The Salty Dog"
-```
+Under **Locales**, open `en` to review and edit the English text for each key.
 
 [![Editing the English locale](/images/studio/localization.png)](/images/studio/localization.png)
 
 Convert one field at a time. Text written directly in Studio and fields using translation keys can exist in the same project while you work.
 
+Switching a field to **literal** leaves its locale entries unchanged. To use one of those translations again, select **@key** and choose its key.
+
 ## Add another language
 
-Select the **+** beside Locales and enter the language code, such as `sv`, `fr`, or `es`. Open the new locale in **Source** and add the same keys used by the English locale with their translated values.
-
-```yaml
-# content/locales/sv.yaml
-location.tavern.name: "Den salta hunden"
-```
+Select the **+** beside Locales and enter the language code, such as `sv`, `fr`, or `es`. Open the new locale, add the same keys used in English, and enter their translated text.
 
 The language becomes available in the game and in Studio’s playtester.
 

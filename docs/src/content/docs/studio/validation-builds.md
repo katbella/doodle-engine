@@ -50,8 +50,6 @@ The output includes the game application, content, assets, and a service worker.
 | Play the game with its project renderer | Preview |
 | Produce files for deployment | Build |
 
-## Error log
-
-Studio records application and renderer errors in its log file. Open the **Help** menu and select **Open Error Log** when diagnosing a Studio failure or preparing an issue report.
+For help with Studio or a command-line problem, see [Reporting Issues and Feedback](/reference/reporting-issues/).
 
 For browser-side game debugging during Preview, see [Debugging with DevTools](/guides/debugging-with-devtools/). For deployment options, continue to [Hosting & Deployment](/guides/hosting-and-deployment/).

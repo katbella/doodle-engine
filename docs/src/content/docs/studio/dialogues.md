@@ -34,6 +34,12 @@ Each node can contain:
 
 Press Enter in the Line field to add paragraph breaks without creating another node. The paragraphs remain one dialogue entry, followed by the same choices or Continue action. Studio adds the required quotes in Source mode and removes them again when the entry returns to one line.
 
+## Delete a node
+
+Select **Delete node**. Studio shows the routes that point to the node before you confirm.
+
+[![A dialogue node header with Play from here and Delete node](/images/studio/dialogue-node-header.png)](/images/studio/dialogue-node-header.png)
+
 ## Add choices
 
 Each choice has the words shown to the player and the place the conversation goes next. Choices appear in the listed order; use the up and down controls to rearrange them. Point a choice at another node, or choose **end dialogue** when it should close the conversation.
@@ -75,6 +81,10 @@ Common examples:
 
 See [Effects Reference](/reference/effects/) for every available effect.
 
+For **Play video**, **Play sound**, and **Play music**, select **Choose file…** beside the filename. Studio copies the chosen file into the matching asset folder and fills in its filename.
+
+[![Choosing a sound file in the effect builder](/images/studio/effect-media-file.png)](/images/studio/effect-media-file.png)
+
 ## Use Source mode
 
 Select **Source** to write the dialogue as text or review its `.dlg` file. The editor highlights Doodle’s dialogue syntax. Save the file and select **Validate** to check its syntax and references; problems then appear beside the editor and in the bottom dock.
@@ -83,6 +93,8 @@ The [Writing Dialogues](/guides/writing-dialogues/) guide teaches the language r
 
 ## Test from any node
 
-You can begin a playtest at any node, which is useful when working on a later part of a long conversation. The playtester also lets you prepare the flags, variables, inventory, quest stages, and relationships needed for that scene.
+Select **Play from here** to open Playtest at the current node while keeping the state you have prepared for the scene.
+
+You can also select **Start at node…** in the Playtest tab when you want to search for a node first.
 
 Continue to [Playtesting in Studio](/studio/playtesting/) for the complete process.

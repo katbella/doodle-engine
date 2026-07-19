@@ -7,7 +7,7 @@ The workspace keeps project navigation on the left, editing in the center, conte
 
 ## Project rail
 
-The project rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an existing item to reveal its **Rename** and **Delete** buttons. Renaming also updates known references to that ID; deleting asks for confirmation.
+The project rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an item or reach it with the keyboard to show its **Rename** and **Delete** buttons. Renaming also updates known references to that ID; deleting asks for confirmation.
 
 [![The project rail with the starter content](/images/studio/project-rail.png)](/images/studio/project-rail.png)
 

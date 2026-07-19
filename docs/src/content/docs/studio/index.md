@@ -17,8 +17,6 @@ The Welcome screen provides three starting points:
 - **Open project…** opens an existing Doodle Engine project folder.
 - **Recent Projects** lists the projects you have used before.
 
-The question-mark button in the upper-right corner opens this Studio guide.
-
 ## Make your first game
 
 For your first game, write the English text directly in Studio. You will see the exact words that appear in the game, and you can introduce translation keys later when you need them.
@@ -38,7 +36,7 @@ For your first game, write the English text directly in Studio. You will see the
 
 | Area | Position | Purpose |
 | --- | --- | --- |
-| Top bar | Top | Provides common project and testing actions. |
+| Top bar | Top | Shows project status and provides the command palette, Validate, Build, Preview, and Playtest. |
 | Project rail | Left | Opens and organizes game content. |
 | Editor | Center | Provides visual controls and direct file editing. |
 | References panel | Right | Shows where the selected item is used. |

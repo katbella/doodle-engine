@@ -90,6 +90,10 @@ export default defineConfig({
                         { label: 'Asset Manifest', slug: 'reference/asset-manifest' },
                         { label: 'UI Strings', slug: 'reference/ui-strings' },
                         { label: 'CLI Commands', slug: 'reference/cli-commands' },
+                        {
+                            label: 'Issues & Feedback',
+                            slug: 'reference/reporting-issues',
+                        },
                     ],
                 },
             ],
