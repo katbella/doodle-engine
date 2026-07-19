@@ -426,7 +426,7 @@ describe('Studio main process', () => {
         expect(state.shell.openExternal).toHaveBeenCalledTimes(2);
         helpMenu.submenu[1].click();
         expect(state.shell.openExternal).toHaveBeenCalledWith(
-            'https://github.com/katbella/doodle-engine/issues'
+            'https://doodleengine.dev/reference/reporting-issues/'
         );
         helpMenu.submenu[2].click();
         await vi.waitFor(() =>

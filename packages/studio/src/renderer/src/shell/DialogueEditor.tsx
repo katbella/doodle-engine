@@ -21,6 +21,9 @@ interface DialogueEditorProps {
     tabKey: string;
     path: string;
     dialogueId: string;
+    /** Selected node, held per tab by App so the graph view shares it. */
+    selectedNodeId: string | null;
+    onSelectNode: (nodeId: string | null) => void;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
     onPlayFromNode: (dialogueId: string, nodeId: string) => void;
@@ -42,6 +45,8 @@ function DialogueEditorInner({
     tabKey,
     path,
     dialogueId,
+    selectedNodeId,
+    onSelectNode,
     onDirty,
     onModified,
     onPlayFromNode,
@@ -50,7 +55,6 @@ function DialogueEditorInner({
     const [savedText, setSavedText] = useState('');
     const [mtimeMs, setMtimeMs] = useState(0);
     const [dialogue, setDialogue] = useState<Dialogue | null>(null);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [parseError, setParseError] = useState<string | null>(null);
     const [conflict, setConflict] = useState<string | null>(null);
@@ -77,9 +81,7 @@ function DialogueEditorInner({
                 setSavedText(doc.content);
                 setMtimeMs(doc.mtimeMs);
                 try {
-                    const parsed = parseDialogue(doc.content, dialogueId);
-                    setDialogue(parsed);
-                    setSelectedId(parsed.nodes[0]?.id ?? null);
+                    setDialogue(parseDialogue(doc.content, dialogueId));
                 } catch (e) {
                     setDialogue(null);
                     setParseError(e instanceof Error ? e.message : String(e));
@@ -192,7 +194,7 @@ function DialogueEditorInner({
                 { id, speaker: null, text: '@text', choices: [] },
             ],
         });
-        setSelectedId(id);
+        onSelectNode(id);
     };
 
     // Create a node a target dropdown asked for, and jump to it so the author
@@ -210,7 +212,7 @@ function DialogueEditorInner({
                   }
                 : d
         );
-        setSelectedId(id);
+        onSelectNode(id);
     };
 
     const deleteNode = (id: string) => {
@@ -224,7 +226,7 @@ function DialogueEditorInner({
                     ? (nodes[0]?.id ?? '')
                     : dialogue.startNode,
         });
-        setSelectedId(nodes[0]?.id ?? null);
+        onSelectNode(nodes[0]?.id ?? null);
     };
 
     // The start node is whichever node comes first in the file, so making a node
@@ -261,7 +263,7 @@ function DialogueEditorInner({
             startNode:
                 dialogue.startNode === oldId ? newId : dialogue.startNode,
         });
-        setSelectedId(newId);
+        onSelectNode(newId);
     };
 
     if (loading) {
@@ -286,6 +288,12 @@ function DialogueEditorInner({
         );
     }
 
+    // Selection lives in App per tab; fall back to the first node when it
+    // hasn't been set yet or the node it named is gone.
+    const selectedId =
+        selectedNodeId && dialogue.nodes.some((n) => n.id === selectedNodeId)
+            ? selectedNodeId
+            : (dialogue.nodes[0]?.id ?? null);
     const selected = dialogue.nodes.find((n) => n.id === selectedId) ?? null;
     const displayedText = (source: string) => {
         if (!source.startsWith('@')) return source;
@@ -340,7 +348,7 @@ function DialogueEditorInner({
                         key={node.id}
                         className={`dlg__node ${node.id === selectedId ? 'dlg__node--active' : ''}`}
                         aria-label={node.id}
-                        onClick={() => setSelectedId(node.id)}
+                        onClick={() => onSelectNode(node.id)}
                     >
                         <span className="dlg__node-id">{node.id}</span>
                         {node.id === dialogue.startNode && (

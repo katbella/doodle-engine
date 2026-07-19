@@ -1,18 +1,18 @@
 ---
 title: CLI Commands
-description: Reference for doodle dev, doodle build, and doodle validate.
+description: Reference for the Doodle Engine command-line tools.
 ---
 
-The `@doodle-engine/cli` package provides the commands used by each game project: `doodle dev`, `doodle build`, and `doodle validate`.
+The `@doodle-engine/cli` package provides the commands used by each game project: `npx doodle dev`, `npx doodle build`, and `npx doodle validate`.
 
 New projects provide these npm scripts:
 
-- `npm run dev` runs `doodle dev`
-- `npm run build` runs `doodle build`
-- `npm run validate` runs `doodle validate`
+- `npm run dev` starts the development server
+- `npm run build` creates a production build
+- `npm run validate` checks the game content
 - `npm run preview` runs `vite preview`
 
-## doodle dev
+## npx doodle dev
 
 Start the development server with content hot-reload.
 
@@ -131,7 +131,7 @@ New applications pass `devTools={import.meta.env.DEV}`, which includes `window.d
 
 ---
 
-## doodle build
+## npx doodle build
 
 Build the game for production.
 
@@ -163,7 +163,7 @@ npx vite preview
 
 ---
 
-## doodle validate
+## npx doodle validate
 
 Validate all game content without building or running the dev server.
 

@@ -7,6 +7,7 @@ import { DetailView } from './DetailView';
 import { ProjectOverview } from './ProjectOverview';
 import { SourceView } from './SourceView';
 import { DialogueEditor } from './DialogueEditor';
+import { DialogueGraphView } from './DialogueGraphView';
 import { EntityForm } from './EntityForm';
 import { GameConfigForm } from './GameConfigForm';
 import { LocaleEditor } from './LocaleEditor';
@@ -15,19 +16,21 @@ import { LocaleWriterBoundary, useLocaleWriter } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
 import { AnchoredOverlay, PointOverlay } from './OverlayPortal';
 
-export type ViewMode = 'view' | 'source';
+export type ViewMode = 'view' | 'source' | 'graph';
 
 interface EditorAreaProps {
     project: OpenProject;
     tabs: Tab[];
     activeKey: string | null;
     viewModes: Record<string, ViewMode>;
+    selectedNodes: Record<string, string>;
     dirtyTabs: Set<string>;
     staleFiles: Set<string>;
     reveal: { key: string; message: string; seq: number } | null;
     onSelect: (key: string) => void;
     onClose: (key: string) => void;
     onSetViewMode: (key: string, mode: ViewMode) => void;
+    onSelectNode: (key: string, nodeId: string | null) => void;
     onDirty: (key: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
     onOpenLocale?: (locale: string) => void;
@@ -51,12 +54,14 @@ function EditorAreaContent({
     tabs,
     activeKey,
     viewModes,
+    selectedNodes,
     dirtyTabs,
     staleFiles,
     reveal,
     onSelect,
     onClose,
     onSetViewMode,
+    onSelectNode,
     onDirty,
     onModified,
     onPlayFromNode,
@@ -78,7 +83,14 @@ function EditorAreaContent({
     const localeWriter = useLocaleWriter();
     const active = tabs.find((t) => t.key === activeKey) ?? null;
     const activePath = active ? filePathFor(project, active) : null;
-    const mode: ViewMode = active ? (viewModes[active.key] ?? 'view') : 'view';
+    const storedMode: ViewMode = active
+        ? (viewModes[active.key] ?? 'view')
+        : 'view';
+    // Only dialogues have a graph; anything else falls back to Visual.
+    const mode: ViewMode =
+        storedMode === 'graph' && active?.section !== 'dialogues'
+            ? 'view'
+            : storedMode;
 
     useEffect(() => {
         const node = tabRefs.current.get(activeKey ?? '');
@@ -270,6 +282,16 @@ function EditorAreaContent({
                         >
                             Source
                         </button>
+                        {active.section === 'dialogues' && (
+                            <button
+                                className={`seg__opt ${mode === 'graph' ? 'seg__opt--on' : ''}`}
+                                onClick={() =>
+                                    onSetViewMode(active.key, 'graph')
+                                }
+                            >
+                                Graph
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
@@ -342,7 +364,29 @@ function EditorAreaContent({
                 );
             })}
 
-            {(!active || mode !== 'source' || !activePath) &&
+            {active &&
+                activePath &&
+                mode === 'graph' &&
+                active.section === 'dialogues' && (
+                    <div className="editor__source-body">
+                        <DialogueGraphView
+                            key={active.key}
+                            project={project}
+                            path={activePath}
+                            dialogueId={active.itemId}
+                            selectedNodeId={selectedNodes[active.key] ?? null}
+                            onSelectNode={(nodeId) =>
+                                onSelectNode(active.key, nodeId)
+                            }
+                            onOpenNode={(nodeId) => {
+                                onSelectNode(active.key, nodeId);
+                                onSetViewMode(active.key, 'view');
+                            }}
+                        />
+                    </div>
+                )}
+
+            {(!active || mode === 'view' || !activePath) &&
                 (!active ? (
                     <div className="editor__body scroll">
                         <ProjectOverview project={project} />
@@ -355,6 +399,10 @@ function EditorAreaContent({
                             tabKey={active.key}
                             path={activePath}
                             dialogueId={active.itemId}
+                            selectedNodeId={selectedNodes[active.key] ?? null}
+                            onSelectNode={(nodeId) =>
+                                onSelectNode(active.key, nodeId)
+                            }
                             onDirty={onDirty}
                             onModified={onModified}
                             onPlayFromNode={onPlayFromNode}

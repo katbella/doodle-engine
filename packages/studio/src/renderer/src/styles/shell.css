@@ -2979,3 +2979,165 @@ a.build__dest:hover {
     color: var(--text-faint);
     font-size: var(--text-base);
 }
+
+/* Read-only dialogue graph. The SVG fills the editor body; the camera is a
+   transform on one inner group, so these styles never change mid-gesture. */
+.graph {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: var(--bg-editor);
+    cursor: grab;
+    touch-action: none;
+    /* Panning must never start a text selection sweep. */
+    user-select: none;
+}
+.graph:active {
+    cursor: grabbing;
+}
+.graph__edge {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+}
+.graph__edge--goto {
+    stroke-width: 1.2;
+}
+.graph__edge--branch {
+    stroke-dasharray: 5 4;
+}
+.graph__arrow path {
+    fill: var(--border-strong);
+}
+.graph__node {
+    cursor: pointer;
+}
+.graph__node-box {
+    fill: var(--surface-raised);
+    stroke: var(--border);
+    stroke-width: 1.2;
+    rx: var(--radius);
+}
+.graph__node:hover .graph__node-box {
+    stroke: var(--border-strong);
+}
+.graph__node--start .graph__node-box {
+    stroke: var(--valid);
+}
+.graph__node--unreachable {
+    opacity: 0.45;
+}
+.graph__node--ghost .graph__node-box {
+    stroke: var(--error);
+    stroke-dasharray: 4 3;
+    fill: var(--error-tint);
+}
+/* Selection (and keyboard focus) outranks the start tint. */
+.graph__node:focus-visible {
+    outline: none;
+}
+.graph__node:focus-visible .graph__node-box,
+.graph__node--selected .graph__node-box {
+    stroke: var(--accent);
+    stroke-width: 1.8;
+}
+.graph__node-body {
+    pointer-events: none;
+}
+.graph__node-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    height: 100%;
+    padding: 6px 10px 0;
+    overflow: hidden;
+}
+.graph__node-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.graph__node-open {
+    display: inline-flex;
+    margin-left: auto;
+    padding: 2px;
+    color: var(--text-faint);
+    pointer-events: auto;
+}
+.graph__node-open:hover {
+    color: var(--accent);
+}
+.graph__rows {
+    display: flex;
+    flex-direction: column;
+    margin-top: 3px;
+}
+.graph__row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    /* Must match the layout's ROW_H so edges anchor at their row's center. */
+    height: 24px;
+    min-width: 0;
+    border-top: 1px solid var(--border-faint);
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+}
+.graph__row--branch .graph__row-label,
+.graph__row--goto .graph__row-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+}
+.graph__row-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.graph__chip {
+    flex: none;
+    padding: 0 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    border: 1px solid var(--border-faint);
+    color: var(--text-faint);
+}
+.graph__chip--end {
+    border-color: var(--border);
+    color: var(--text-dim);
+}
+.graph__node-id {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text);
+}
+.graph__badge {
+    flex: none;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    background: var(--surface);
+    border: 1px solid var(--border-faint);
+    color: var(--text-dim);
+}
+.graph__badge--start {
+    background: var(--valid);
+    border-color: var(--valid);
+    color: var(--accent-ink);
+}
+.graph__node-preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+}

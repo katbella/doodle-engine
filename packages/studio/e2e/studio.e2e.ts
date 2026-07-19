@@ -415,10 +415,13 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             for (const height of heights) {
                 expect(Math.abs(height - heights[0])).toBeLessThanOrEqual(1);
             }
-            await window.locator('.asset-list').first().screenshot({
-                path: join(tourDir, '06b-interlude-sound-rows-dark.png'),
-                animations: 'disabled',
-            });
+            await window
+                .locator('.asset-list')
+                .first()
+                .screenshot({
+                    path: join(tourDir, '06b-interlude-sound-rows-dark.png'),
+                    animations: 'disabled',
+                });
         });
 
         await test.step('keep deep editor overlays portaled, visible, and anchored', async () => {
@@ -607,6 +610,57 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '10b-play-from-here-dark.png'),
                 animations: 'disabled',
             });
+        });
+
+        await test.step('tour the dialogue graph and jump back to a node', async () => {
+            await window.getByRole('button', { name: 'Graph' }).click();
+            const startNode = window.locator('[data-node-id="start"]');
+            const endNode = window.locator('[data-node-id="end"]');
+            await expect(startNode).toBeVisible();
+            await expect(endNode).toBeVisible();
+            // Six forward choice edges; end's GOTO back to start is a chip,
+            // not a line.
+            await expect(window.locator('.graph__edge')).toHaveCount(6);
+            await expect(
+                startNode.locator('.graph__badge--start')
+            ).toBeVisible();
+            // Choice rows carry their localized text at the edge's source.
+            await expect(startNode.locator('.graph__row')).toHaveCount(6);
+            await expect(startNode).toContainText('Ask about the docks.');
+            await expect(endNode.locator('.graph__chip')).toContainText(
+                'start'
+            );
+            // Hit-test: the node paints above the edge layer and owns clicks.
+            const box = (await endNode.boundingBox())!;
+            const painted = await window.evaluate(
+                ([x, y]) =>
+                    document
+                        .elementFromPoint(x, y)
+                        ?.closest('[data-node-id]')
+                        ?.getAttribute('data-node-id') ?? null,
+                [box.x + box.width / 2, box.y + box.height / 2]
+            );
+            expect(painted).toBe('end');
+            await window.screenshot({
+                path: join(tourDir, '10d-dialogue-graph-dark.png'),
+                animations: 'disabled',
+            });
+            // Click selects in place; the pencil opens the Visual editor.
+            await endNode.click();
+            await expect(endNode).toHaveClass(/graph__node--selected/);
+            await endNode
+                .getByRole('button', {
+                    name: 'Open node end in the Visual editor',
+                })
+                .click();
+            await expect(window.locator('.node-editor')).toBeVisible();
+            await expect(window.locator('.dlg__node--active')).toContainText(
+                'end'
+            );
+            // Later steps expect the start node selected again.
+            await window
+                .getByRole('button', { name: 'start', exact: true })
+                .click();
         });
 
         await test.step('show the status area on the dock strip', async () => {

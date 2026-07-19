@@ -25,7 +25,7 @@ Include:
 
 - The exact command you ran
 - The complete terminal output
-- The results of `doodle --version` and `node --version`
+- The results of `npx doodle --version` and `node --version`
 
 ## Validation issues
 

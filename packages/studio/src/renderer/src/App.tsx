@@ -142,6 +142,11 @@ export function App() {
         return ZOOM_FACTORS.includes(stored) ? stored : 1;
     });
     const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({});
+    // Selected dialogue node per tab, shared by the Visual editor and the
+    // graph so switching modes (or clicking a graph node) keeps the place.
+    const [selectedNodes, setSelectedNodes] = useState<Record<string, string>>(
+        {}
+    );
     const [dirtyTabs, setDirtyTabs] = useState<Set<string>>(() => new Set());
     const [reveal, setReveal] = useState<{
         key: string;
@@ -278,6 +283,16 @@ export function App() {
             setViewModes((prev) => ({ ...prev, [key]: mode })),
         []
     );
+    const selectNode = useCallback((key: string, nodeId: string | null) => {
+        setSelectedNodes((prev) => {
+            if (nodeId === null) {
+                if (!(key in prev)) return prev;
+                const { [key]: _removed, ...rest } = prev;
+                return rest;
+            }
+            return prev[key] === nodeId ? prev : { ...prev, [key]: nodeId };
+        });
+    }, []);
     const handleDirty = useCallback((key: string, dirty: boolean) => {
         setDirtyTabs((prev) => {
             if (dirty === prev.has(key)) return prev;
@@ -399,6 +414,7 @@ export function App() {
                     setStaleFiles(new Set());
                     setDirtyTabs(new Set());
                     setViewModes({});
+                    setSelectedNodes({});
                     setRecent(await window.studio.listRecentProjects());
                     return true;
                 }
@@ -625,6 +641,11 @@ export function App() {
             return next;
         });
         setViewModes((prev) => {
+            if (!(key in prev)) return prev;
+            const { [key]: _removed, ...rest } = prev;
+            return rest;
+        });
+        setSelectedNodes((prev) => {
             if (!(key in prev)) return prev;
             const { [key]: _removed, ...rest } = prev;
             return rest;
@@ -971,12 +992,14 @@ export function App() {
                     tabs={tabs}
                     activeKey={activeKey}
                     viewModes={viewModes}
+                    selectedNodes={selectedNodes}
                     dirtyTabs={dirtyTabs}
                     staleFiles={staleFiles}
                     reveal={reveal}
                     onSelect={setActiveKey}
                     onClose={closeTab}
                     onSetViewMode={setViewMode}
+                    onSelectNode={selectNode}
                     onDirty={handleDirty}
                     onModified={markModified}
                     onOpenLocale={(locale) =>

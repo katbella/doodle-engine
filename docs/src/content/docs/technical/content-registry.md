@@ -99,4 +99,4 @@ Entities reference each other by ID:
 - `GameConfig.startLocation` references a location ID
 - `GameConfig.startInventory` contains item IDs
 
-`doodle validate` and `doodle build` check these references before release. At runtime, the engine uses fallback behavior where possible: some actions leave state unchanged, and a missing location produces a fallback snapshot.
+`npx doodle validate` and `npx doodle build` check these references before release. At runtime, the engine uses fallback behavior where possible: some actions leave state unchanged, and a missing location produces a fallback snapshot.

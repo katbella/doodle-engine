@@ -10,6 +10,7 @@ import {
     within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import type { OpenProject, StudioApi } from '../../../../shared/project';
 import { DialogueEditor } from '../DialogueEditor';
 
@@ -86,18 +87,27 @@ function installBridge(content = source, readError: Error | null = null) {
     return writeDocument;
 }
 
-function renderEditor() {
-    return render(
+// Selection is held by the parent in the app (shared with the graph view),
+// so the harness holds it the same way.
+function EditorHarness() {
+    const [selected, setSelected] = useState<string | null>(null);
+    return (
         <DialogueEditor
             project={project}
             tabKey="dialogues:greeting"
             path="content/dialogues/greeting.dlg"
             dialogueId="greeting"
+            selectedNodeId={selected}
+            onSelectNode={setSelected}
             onDirty={() => {}}
             onModified={() => {}}
             onPlayFromNode={() => {}}
         />
     );
+}
+
+function renderEditor() {
+    return render(<EditorHarness />);
 }
 
 afterEach(cleanup);

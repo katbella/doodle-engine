@@ -71,6 +71,7 @@ function renderArea(overrides: Record<string, unknown> = {}) {
         onSelect: vi.fn(),
         onClose: vi.fn(),
         onSetViewMode: vi.fn(),
+        onSelectNode: vi.fn(),
         onDirty: vi.fn(),
         onModified: vi.fn(),
         onPlayFromNode: vi.fn(),
@@ -83,6 +84,7 @@ function renderArea(overrides: Record<string, unknown> = {}) {
                 tabs={tabs}
                 activeKey={null}
                 viewModes={{}}
+                selectedNodes={{}}
                 dirtyTabs={new Set(['characters:hero'])}
                 staleFiles={new Set(['content/characters/hero.yaml'])}
                 reveal={null}
@@ -119,6 +121,7 @@ describe('EditorArea', () => {
                 tabs={tabs}
                 activeKey="characters:hero"
                 viewModes={{}}
+                selectedNodes={{}}
                 dirtyTabs={new Set()}
                 staleFiles={new Set()}
                 reveal={null}
@@ -132,6 +135,7 @@ describe('EditorArea', () => {
                 tabs={tabs}
                 activeKey="config:game"
                 viewModes={{}}
+                selectedNodes={{}}
                 dirtyTabs={new Set()}
                 staleFiles={new Set()}
                 reveal={null}
@@ -145,6 +149,7 @@ describe('EditorArea', () => {
                 tabs={tabs}
                 activeKey="maps:missing"
                 viewModes={{}}
+                selectedNodes={{}}
                 dirtyTabs={new Set()}
                 staleFiles={new Set()}
                 reveal={null}
