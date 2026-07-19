@@ -95,6 +95,7 @@ function renderEditor() {
             dialogueId="greeting"
             onDirty={() => {}}
             onModified={() => {}}
+            onPlayFromNode={() => {}}
         />
     );
 }

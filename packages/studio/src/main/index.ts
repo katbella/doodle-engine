@@ -54,6 +54,8 @@ let previewStatus: PreviewStatus | null = null;
 let errorLog: ErrorLog | null = null;
 
 const STUDIO_DOCUMENTATION_URL = 'https://doodleengine.dev/studio/';
+const STUDIO_ISSUES_URL =
+    'https://github.com/katbella/doodle-engine/issues';
 
 function openDocumentation(): Promise<void> {
     return shell.openExternal(STUDIO_DOCUMENTATION_URL);
@@ -151,6 +153,10 @@ async function buildMenu(projects: ProjectService): Promise<void> {
                 {
                     label: 'Documentation',
                     click: () => void openDocumentation(),
+                },
+                {
+                    label: 'Report an Issue…',
+                    click: () => void shell.openExternal(STUDIO_ISSUES_URL),
                 },
                 {
                     label: 'Open Error Log',

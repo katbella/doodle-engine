@@ -47,6 +47,15 @@ const IMAGE_MIME: Record<string, string> = {
     '.avif': 'image/avif',
 };
 
+const AUDIO_MIME: Record<string, string> = {
+    '.mp3': 'audio/mpeg',
+    '.ogg': 'audio/ogg',
+    '.wav': 'audio/wav',
+    '.m4a': 'audio/mp4',
+    '.aac': 'audio/aac',
+    '.flac': 'audio/flac',
+};
+
 function filtersFor(kind: StudioAssetKind): FileFilter[] {
     if (
         kind === 'portrait' ||
@@ -130,10 +139,10 @@ export class AssetService {
         }
     }
 
-    /** Read a project image for a Studio-only thumbnail without exposing fs.
-     * The value is resolved the way the engine resolves assets: as a path
-     * relative to the project root, with bare filenames falling back to the
-     * kind's conventional directory. */
+    /** Read a project image or audio file for a Studio-only preview without
+     * exposing fs. The value is resolved the way the engine resolves assets:
+     * as a path relative to the project root, with bare filenames falling
+     * back to the kind's conventional directory. */
     async previewDataUrl(
         projectDir: string,
         kind: StudioAssetKind,
@@ -143,7 +152,8 @@ export class AssetService {
         const destination = DESTINATIONS[kind];
         const hasPath = value.includes('/') || value.includes('\\');
         const relative = hasPath ? value : join(destination.directory, value);
-        const mime = IMAGE_MIME[extname(relative).toLowerCase()];
+        const extension = extname(relative).toLowerCase();
+        const mime = IMAGE_MIME[extension] ?? AUDIO_MIME[extension];
         if (!mime) return null;
 
         try {

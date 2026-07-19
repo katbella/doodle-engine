@@ -149,7 +149,7 @@
     --warn-tint: rgba(145, 97, 17, 0.13);
     --error: #c0392b;
     --error-tint: rgba(192, 57, 43, 0.12);
-    --danger: #a71f10;
+    --danger: #c8102e;
 }
 
 :root[data-theme='light'][data-accent='red'] {

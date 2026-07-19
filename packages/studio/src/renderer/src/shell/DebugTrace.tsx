@@ -4,7 +4,7 @@
  * live values and pass/fail), effects run, and transitions. Rows are filtered
  * by kind and searched by id.
  */
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
     serializeCondition,
     serializeEffect,
@@ -88,7 +88,9 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
                             >
                                 {row.tag}
                             </span>
-                            <span className="trace__text">{row.text}</span>
+                            <span className="trace__text">
+                                {row.display ?? row.text}
+                            </span>
                             {row.result !== undefined && (
                                 <span
                                     className={`trace__result trace__result--${
@@ -108,7 +110,10 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
 
 interface Row {
     tag: string;
+    /** Plain text, used for search matching (and display when no `display`). */
     text: string;
+    /** Styled variant shown instead of `text` when present. */
+    display?: ReactNode;
     result?: boolean;
 }
 
@@ -125,17 +130,25 @@ function describe(event: TraceEvent): Row {
             const source = serializeCondition(event.condition);
             return {
                 tag: 'CONDITION',
-                text: values ? `${source} → ${values}` : source,
+                text: values ? `${source} = ${values}` : source,
                 result: event.result,
             };
         }
         case 'effect':
             return { tag: 'EFFECT', text: serializeEffect(event.effect) };
-        case 'transition':
+        case 'transition': {
+            const toNode = event.toNode ?? 'end';
             return {
                 tag: 'TRANSITION',
-                text: `${event.fromNode} → ${event.toNode ?? 'end'}`,
+                text: `${event.fromNode} to ${toNode}`,
+                display: (
+                    <>
+                        {event.fromNode}{' '}
+                        <span className="trace__to">to</span> {toNode}
+                    </>
+                ),
             };
+        }
         case 'choiceFiltered':
             return {
                 tag: 'HIDDEN',

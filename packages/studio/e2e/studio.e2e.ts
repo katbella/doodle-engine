@@ -107,6 +107,19 @@ choice.six: Say goodbye.
 choice.six: Säg adjö.
 `
     );
+    await writeFixture('assets/images/banners/opening.png', 'png-bytes');
+    await writeFixture('assets/audio/sfx/wind.ogg', 'ogg-bytes');
+    await writeFixture('assets/audio/sfx/rain.ogg', 'ogg-bytes');
+    await writeFixture(
+        'content/interludes/opening.yaml',
+        `id: opening
+background: opening.png
+sounds:
+  - wind.ogg
+  - rain.ogg
+text: A storm rolls in over the harbor.
+`
+    );
     await writeFixture(
         'content/maps/world.yaml',
         `id: world
@@ -386,6 +399,28 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             });
         });
 
+        await test.step('keep every control in an asset row the same height', async () => {
+            await window
+                .locator('.rail__item-open')
+                .filter({ hasText: 'opening' })
+                .click();
+            const row = window.locator('.asset-list__row').first();
+            await expect(row.locator('input')).toBeVisible();
+            const heights = await row.evaluate((element) =>
+                Array.from(element.children).map(
+                    (child) => child.getBoundingClientRect().height
+                )
+            );
+            expect(heights.length).toBeGreaterThanOrEqual(2);
+            for (const height of heights) {
+                expect(Math.abs(height - heights[0])).toBeLessThanOrEqual(1);
+            }
+            await window.locator('.asset-list').first().screenshot({
+                path: join(tourDir, '06b-interlude-sound-rows-dark.png'),
+                animations: 'disabled',
+            });
+        });
+
         await test.step('keep deep editor overlays portaled, visible, and anchored', async () => {
             await window
                 .locator('.rail__item-open')
@@ -403,7 +438,9 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await lineField.getByRole('button', { name: 'literal' }).click();
             await expect(
                 lineField.locator('.localized-text__unlink-notice')
-            ).toContainText('1 other locale (sv) still translates this key');
+            ).toContainText(
+                'The key and its sv translation stay in the locale files'
+            );
             await window.screenshot({
                 path: join(tourDir, '08-unlinked-key-warning-dark.png'),
                 animations: 'disabled',
@@ -492,6 +529,107 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await builder.getByRole('button', { name: 'Cancel' }).click();
         });
 
+        await test.step('keep the node header aligned and its delete action red', async () => {
+            const head = window.locator('.node-editor__head');
+            // Element crop: header alignment regressions vanish in full-page
+            // shots and jump out in close-ups.
+            await head.screenshot({
+                path: join(tourDir, '07b-node-header-crop-dark.png'),
+                animations: 'disabled',
+            });
+            const badge = head.locator('.dlg__node-badge');
+            const badgeBox = await badge.boundingBox();
+            const idBox = await window
+                .locator('.node-editor__id-field')
+                .boundingBox();
+            expect(badgeBox).not.toBeNull();
+            expect(idBox).not.toBeNull();
+            // The badge centers on the id input's vertical midline.
+            const badgeMid = badgeBox!.y + badgeBox!.height / 2;
+            const idMid = idBox!.y + idBox!.height / 2;
+            expect(Math.abs(badgeMid - idMid)).toBeLessThanOrEqual(2);
+
+            // The delete button keeps its danger color: same class family as
+            // "+ Node", so a stylesheet-order regression turns it accent-blue.
+            const [deleteColor, addColor] = await window.evaluate(() => {
+                const del = document.querySelector('.node-editor__delete');
+                const add = document.querySelector('.dlg__outline .dlg__add');
+                return [
+                    del ? getComputedStyle(del).color : '',
+                    add ? getComputedStyle(add).color : '',
+                ];
+            });
+            expect(deleteColor).not.toBe('');
+            expect(deleteColor).not.toBe(addColor);
+        });
+
+        await test.step('reveal rail actions on keyboard focus and resize the node outline', async () => {
+            const action = window
+                .locator('.rail__item')
+                .filter({ hasText: 'tavern' })
+                .locator('.rail__item-action')
+                .first();
+            await action.focus();
+            expect(
+                await action.evaluate(
+                    (element) => getComputedStyle(element).opacity
+                )
+            ).toBe('1');
+
+            const outline = window.locator('.dlg__outline');
+            const before = (await outline.boundingBox())!.width;
+            const handle = window.locator('.dlg .resize-handle--x');
+            const handleBox = (await handle.boundingBox())!;
+            await window.mouse.move(
+                handleBox.x + handleBox.width / 2,
+                handleBox.y + handleBox.height / 2
+            );
+            await window.mouse.down();
+            await window.mouse.move(
+                handleBox.x + handleBox.width / 2 + 80,
+                handleBox.y + handleBox.height / 2,
+                { steps: 4 }
+            );
+            await window.mouse.up();
+            await expect
+                .poll(async () => (await outline.boundingBox())!.width)
+                .toBeGreaterThan(before + 40);
+        });
+
+        await test.step('jump the playtest session from a node', async () => {
+            await window
+                .getByRole('button', { name: 'Play from here' })
+                .click();
+            const playback = window.locator('.playback__node-value');
+            await expect(playback).toBeVisible();
+            await expect(playback).toContainText('audit / start');
+            await window.screenshot({
+                path: join(tourDir, '10b-play-from-here-dark.png'),
+                animations: 'disabled',
+            });
+        });
+
+        await test.step('show the status area on the dock strip', async () => {
+            const status = window.locator('.dock__status');
+            await expect(
+                status.locator('.dock__status-when').filter({
+                    hasText: 'validated',
+                })
+            ).toBeVisible();
+            await status.screenshot({
+                path: join(tourDir, '10c-dock-status-area-dark.png'),
+                animations: 'disabled',
+            });
+            await expect(
+                status.getByRole('button', {
+                    name: 'Open Doodle Studio documentation',
+                })
+            ).toBeVisible();
+            await expect(
+                status.getByRole('button', { name: 'Switch to light mode' })
+            ).toBeVisible();
+        });
+
         await test.step('show delete confirmation above the editor', async () => {
             await window.getByRole('button', { name: 'Delete node' }).click();
             const confirm = window.locator('.modal').filter({
@@ -519,6 +657,10 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await window
                 .getByRole('button', { name: 'Switch to light mode' })
                 .click();
+            await window.locator('.node-editor__head').screenshot({
+                path: join(tourDir, '12b-node-header-crop-light.png'),
+                animations: 'disabled',
+            });
             const deepChoice = window.locator('.dlg__card').last();
             await deepChoice.scrollIntoViewIfNeeded();
             await deepChoice.locator('.localized-key-chip').click();

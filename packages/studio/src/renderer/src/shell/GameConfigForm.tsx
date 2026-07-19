@@ -231,7 +231,7 @@ export function GameConfigForm({
                                 set('startLocation', e.target.value)
                             }
                         >
-                            <option value="">— none —</option>
+                            <option value="">(none)</option>
                             {locationIds.map((id) => (
                                 <option key={id} value={id}>
                                     {id}

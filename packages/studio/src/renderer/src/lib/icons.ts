@@ -23,4 +23,5 @@ export {
     FileText,
     Hammer,
     CircleHelp,
+    ImageOff,
 } from 'lucide-react';

@@ -152,6 +152,34 @@ export function App() {
     // Files edited since the last validation; their markers are stale until
     // Validate runs again.
     const [staleFiles, setStaleFiles] = useState<Set<string>>(() => new Set());
+    // Every project object comes from a fresh validation (open or revalidate),
+    // so its arrival time is when the shown problems were computed.
+    const [lastValidatedAt, setLastValidatedAt] = useState<Date | null>(null);
+    useEffect(() => {
+        setLastValidatedAt(project ? new Date() : null);
+    }, [project]);
+    // When an editor last wrote this project's content to disk (autosave or
+    // manual). Cleared when a different project opens.
+    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const projectDir = project?.projectDir;
+    useEffect(() => {
+        setLastSavedAt(null);
+    }, [projectDir]);
+    // "Play from here" on a node: opens the playtest tab and jumps the running
+    // session to that node. The seq makes repeat clicks on the same node fire.
+    const [playtestStart, setPlaytestStart] = useState<{
+        dialogueId: string;
+        nodeId: string;
+        seq: number;
+    } | null>(null);
+    const playFromNode = useCallback((dialogueId: string, nodeId: string) => {
+        setPlaytestStart((prev) => ({
+            dialogueId,
+            nodeId,
+            seq: (prev?.seq ?? 0) + 1,
+        }));
+        setDockTab('playtest');
+    }, []);
 
     useEffect(() => {
         const report = (context: string, value: unknown) => {
@@ -424,6 +452,7 @@ export function App() {
     );
 
     const markModified = useCallback((filePath: string) => {
+        setLastSavedAt(new Date());
         setStaleFiles((prev) =>
             prev.has(filePath) ? prev : new Set(prev).add(filePath)
         );
@@ -431,11 +460,14 @@ export function App() {
 
     const revalidate = useCallback(async () => {
         if (!project) return;
-        setValidating(true);
+        // Fast runs skip the busy state entirely: a "Validating…" pill that
+        // exists for two frames reads as a glitch, not feedback.
+        const showBusy = setTimeout(() => setValidating(true), 150);
         try {
             setProject(await window.studio.revalidate(project.projectDir));
             setStaleFiles(new Set());
         } finally {
+            clearTimeout(showBusy);
             setValidating(false);
         }
     }, [project]);
@@ -907,8 +939,6 @@ export function App() {
                     onOpenPreview={() => window.studio.openPreview()}
                     onPlaytest={() => setDockTab('playtest')}
                     onOpenPalette={() => setShowPalette(true)}
-                    theme={theme}
-                    onToggleTheme={toggleTheme}
                 />
                 <EngineBanner
                     engine={project.engine}
@@ -952,6 +982,7 @@ export function App() {
                     onOpenLocale={(locale) =>
                         openItem('locales', locale, locale)
                     }
+                    onPlayFromNode={playFromNode}
                 />
                 <ResizeHandle
                     axis="x"
@@ -989,12 +1020,18 @@ export function App() {
                 onRebuild={runBuild}
                 onOpenOutput={openOutput}
                 preview={preview}
+                previewBusy={previewBusy}
                 previewLog={previewLog}
                 onOpenProblem={openProblem}
                 flags={flags}
                 variables={variables}
                 onRenameFlagVar={(kind, id) => setFlagVarTarget({ kind, id })}
                 onOpenReference={openReferencedFile}
+                lastValidatedAt={lastValidatedAt}
+                lastSavedAt={lastSavedAt}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+                playtestStart={playtestStart}
             />
             {loading && (
                 <div className="overlay">
@@ -1047,7 +1084,7 @@ export function App() {
                     );
                     const impact =
                         n > 0
-                            ? ` ${n} place${n === 1 ? '' : 's'} reference it — those will show as problems until you fix them.`
+                            ? ` ${n} place${n === 1 ? '' : 's'} reference it. Those will show as problems until you fix them.`
                             : ' Nothing else references it.';
                     return (
                         <ConfirmModal

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, X, Plus, Pencil } from '../lib/icons';
+import { ChevronDown, ChevronUp, X, Plus, Pencil, Play } from '../lib/icons';
 import {
     isValidIdentifier,
     serializeCondition,
@@ -94,10 +94,12 @@ function BuilderModal({
 function SingleConditionField({
     condition,
     registry,
+    projectDir,
     onChange,
 }: {
     condition: Condition;
     registry: ContentRegistry;
+    projectDir?: string;
     onChange: (condition: Condition) => void;
 }) {
     const [open, setOpen] = useState(false);
@@ -115,6 +117,7 @@ function SingleConditionField({
                     <ConditionEffectBuilder
                         mode="condition"
                         registry={registry}
+                        projectDir={projectDir}
                         initial={condition}
                         onCommit={(entity) => {
                             onChange(entity as Condition);
@@ -151,13 +154,16 @@ function BuilderRow({
     );
 }
 
-function EffectList({
+export function EffectList({
     effects,
     registry,
+    projectDir,
     onChange,
 }: {
     effects: Effect[];
     registry: ContentRegistry;
+    /** Enables the file picker on media filename arguments. */
+    projectDir?: string;
     onChange: (effects: Effect[]) => void;
 }) {
     // `null` = closed; a number = editing that row; -1 = adding a new one.
@@ -190,6 +196,7 @@ function EffectList({
                         <ConditionEffectBuilder
                             mode="effect"
                             registry={registry}
+                            projectDir={projectDir}
                             initial={open >= 0 ? effects[open] : undefined}
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
@@ -201,16 +208,19 @@ function EffectList({
     );
 }
 
-function ConditionList({
+export function ConditionList({
     conditions,
     registry,
     inRequire = false,
+    projectDir,
     onChange,
 }: {
     conditions: Condition[];
     registry: ContentRegistry;
     /** True inside a choice's Requirements, where `roll` is rejected. */
     inRequire?: boolean;
+    /** Enables the file picker on media filename arguments. */
+    projectDir?: string;
     onChange: (conditions: Condition[]) => void;
 }) {
     const [open, setOpen] = useState<number | null>(null);
@@ -246,6 +256,7 @@ function ConditionList({
                             mode="condition"
                             registry={registry}
                             inRequire={inRequire}
+                            projectDir={projectDir}
                             initial={open >= 0 ? conditions[open] : undefined}
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
@@ -308,7 +319,7 @@ function TargetSelect({
                     onChange(e.target.value);
                 }}
             >
-                <option value="">— none —</option>
+                <option value="">(none)</option>
                 {includeEnd && <option value="__end__">end dialogue</option>}
                 {nodeIds.map((id) => (
                     <option key={id} value={id}>
@@ -426,6 +437,7 @@ export function NodeEditor({
     onMakeStart,
     onDelete,
     onCreateNode,
+    onPlayFromHere,
 }: {
     node: DialogueNode;
     isStart: boolean;
@@ -439,6 +451,8 @@ export function NodeEditor({
     onDelete: () => void;
     /** Create a new node (without leaving this one) so a target can point at it. */
     onCreateNode: (id: string) => void;
+    /** Open the playtest panel with the running session jumped to this node. */
+    onPlayFromHere: () => void;
 }) {
     const [deleteTarget, setDeleteTarget] = useState<
         | { kind: 'choice'; index: number }
@@ -474,6 +488,13 @@ export function NodeEditor({
                         Set as start
                     </button>
                 )}
+                <button
+                    className="dlg__add"
+                    onClick={onPlayFromHere}
+                    title="Open the playtest at this node, keeping its current game state"
+                >
+                    <Play size={13} aria-hidden /> Play from here
+                </button>
                 <button
                     className="dlg__add node-editor__delete"
                     onClick={onDelete}
@@ -532,6 +553,7 @@ export function NodeEditor({
                 <EffectList
                     effects={node.effects ?? []}
                     registry={registry}
+                    projectDir={projectDir}
                     onChange={(effects) =>
                         set({ effects: effects.length ? effects : undefined })
                     }
@@ -580,6 +602,7 @@ export function NodeEditor({
                         <SingleConditionField
                             condition={branch.condition}
                             registry={registry}
+                            projectDir={projectDir}
                             onChange={(condition) => {
                                 const next: ConditionalBranch = {
                                     ...branch,
@@ -595,6 +618,7 @@ export function NodeEditor({
                         <EffectList
                             effects={branch.effects ?? []}
                             registry={registry}
+                            projectDir={projectDir}
                             onChange={(effects) =>
                                 set({
                                     conditionalBranches: branches.map((b, j) =>
@@ -733,6 +757,7 @@ export function NodeEditor({
                             <ConditionList
                                 conditions={choice.conditions ?? []}
                                 registry={registry}
+                                projectDir={projectDir}
                                 inRequire
                                 onChange={(conditions) =>
                                     update({
@@ -747,6 +772,7 @@ export function NodeEditor({
                             <EffectList
                                 effects={choice.effects ?? []}
                                 registry={registry}
+                                projectDir={projectDir}
                                 onChange={(effects) =>
                                     update({
                                         ...choice,
@@ -770,8 +796,8 @@ export function NodeEditor({
                             </div>
                             {routesElsewhere(choice) && (
                                 <div className="dlg__note">
-                                    Routes to a location or starts a dialogue —
-                                    changing the target replaces that. Edit in
+                                    Routes to a location or starts a dialogue.
+                                    Changing the target replaces that. Edit in
                                     Source for full control.
                                 </div>
                             )}
@@ -800,8 +826,8 @@ export function NodeEditor({
                     }
                     message={
                         deleteTarget.kind === 'choice'
-                            ? 'This removes the choice text, requirements, effects, and destination. Studio does not have undo.'
-                            : 'This removes the branch condition, effects, and destination. Studio does not have undo.'
+                            ? 'This removes the choice text, requirements, effects, and destination.'
+                            : 'This removes the branch condition, effects, and destination.'
                     }
                     confirmLabel={
                         deleteTarget.kind === 'choice'

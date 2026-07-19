@@ -9,10 +9,12 @@ import {
     type FieldDescriptor,
     type RefTarget,
 } from '../lib/entity-fields';
-import { AssetField } from './AssetField';
+import { AssetField, AssetListField } from './AssetField';
 import { LocalizedTextField } from './LocalizedTextField';
 import { LocaleWriterBoundary } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
+import { ConditionList, EffectList } from './NodeEditor';
+import type { Condition, Effect } from '@doodle-engine/core';
 
 /**
  * Visual form for a YAML entity (character, location, item, quest, map,
@@ -250,7 +252,14 @@ function EntityFormInner({
 
             {unknownKeys.length > 0 && (
                 <div className="form__unknown">
-                    <div className="form__unknown-head">Custom fields</div>
+                    <div className="form__unknown-head">
+                        Other fields in this file
+                    </div>
+                    <p className="form__unknown-hint">
+                        The engine doesn't define these keys, so Studio has no
+                        field for them. They're kept exactly as written. Edit
+                        them in the Source view.
+                    </p>
                     {unknownKeys.map((key) => (
                         <div key={key} className="form__unknown-row mono">
                             {key}: {formatValue(values[key])}
@@ -288,7 +297,8 @@ function Field({
         </div>
     );
     const control = field.control;
-    const [assetDraft, setAssetDraft] = useState<string | null>(null);
+    const hint =
+        typeof field.hint === 'function' ? field.hint(value) : field.hint;
 
     if (control.kind === 'reference') {
         const ids = idsFor(project, control.target);
@@ -311,7 +321,7 @@ function Field({
                     value={current}
                     onChange={(e) => onChange(e.target.value || undefined)}
                 >
-                    <option value="">— none —</option>
+                    <option value="">(none)</option>
                     {missing && (
                         <option value={current}>
                             {current} (
@@ -346,9 +356,7 @@ function Field({
                         ))
                     )}
                 </select>
-                {field.hint && (
-                    <span className="field__hint">{field.hint}</span>
-                )}
+                {hint && <span className="field__hint">{hint}</span>}
             </label>
         );
     }
@@ -386,9 +394,7 @@ function Field({
                         )
                     }
                 />
-                {field.hint && (
-                    <span className="field__hint">{field.hint}</span>
-                )}
+                {hint && <span className="field__hint">{hint}</span>}
             </label>
         );
     }
@@ -397,7 +403,7 @@ function Field({
         return (
             <LocalizedTextField
                 label={labelContent}
-                hint={field.hint}
+                hint={hint}
                 source={typeof value === 'string' ? value : ''}
                 registry={project.registry}
                 textKind={field.textKind === 'prose' ? 'prose' : 'short'}
@@ -415,49 +421,57 @@ function Field({
         );
     }
 
-    if (control.kind === 'asset' || control.kind === 'assetList') {
-        const text =
-            control.kind === 'assetList'
-                ? Array.isArray(value)
-                    ? value.join(', ')
-                    : ''
-                : typeof value === 'string'
-                  ? value
-                  : '';
+    if (control.kind === 'conditionList' || control.kind === 'effectList') {
+        const list = Array.isArray(value) ? value : [];
+        const commit = (next: unknown[]) =>
+            onChange(next.length ? next : undefined);
+        return (
+            <div className="field">
+                {label}
+                {control.kind === 'conditionList' ? (
+                    <ConditionList
+                        conditions={list as Condition[]}
+                        registry={project.registry}
+                        projectDir={project.projectDir}
+                        onChange={commit}
+                    />
+                ) : (
+                    <EffectList
+                        effects={list as Effect[]}
+                        registry={project.registry}
+                        projectDir={project.projectDir}
+                        onChange={commit}
+                    />
+                )}
+                {hint && <span className="field__hint">{hint}</span>}
+            </div>
+        );
+    }
+
+    if (control.kind === 'assetList') {
+        return (
+            <AssetListField
+                label={label}
+                name={field.label}
+                values={Array.isArray(value) ? (value as string[]) : []}
+                projectDir={project.projectDir}
+                kind={control.category}
+                hint={hint}
+                onChange={(list) => onChange(list.length ? list : undefined)}
+            />
+        );
+    }
+
+    if (control.kind === 'asset') {
         return (
             <AssetField
                 label={label}
                 name={field.label}
-                value={assetDraft ?? text}
+                value={typeof value === 'string' ? value : ''}
                 projectDir={project.projectDir}
                 kind={control.category}
-                placeholder={
-                    control.kind === 'assetList'
-                        ? 'file1.ogg, file2.ogg'
-                        : '(none)'
-                }
-                hint={field.hint}
-                onChange={(raw) => {
-                    if (control.kind === 'assetList') {
-                        setAssetDraft(raw);
-                        const list = raw
-                            .split(',')
-                            .map((entry) => entry.trim())
-                            .filter(Boolean);
-                        onChange(list.length ? list : undefined);
-                    } else {
-                        onChange(raw);
-                    }
-                }}
-                onPick={(selected) => {
-                    if (control.kind === 'assetList') {
-                        const current = Array.isArray(value) ? value : [];
-                        setAssetDraft(null);
-                        onChange([...current, selected]);
-                    } else {
-                        onChange(selected);
-                    }
-                }}
+                hint={hint}
+                onChange={onChange}
             />
         );
     }
@@ -481,7 +495,7 @@ function Field({
                     onChange={(e) => onChange(e.target.value)}
                 />
             )}
-            {field.hint && <span className="field__hint">{field.hint}</span>}
+            {hint && <span className="field__hint">{hint}</span>}
         </label>
     );
 }
@@ -662,7 +676,7 @@ function StageListEditor({
             {deleteIndex !== null && (
                 <ConfirmModal
                     title={`Delete stage “${stages[deleteIndex]?.id ?? ''}”?`}
-                    message="This stage and its authored description will be removed. Studio does not have undo."
+                    message="This stage and its authored description will be removed."
                     confirmLabel="Delete stage"
                     danger
                     onConfirm={() => {
@@ -908,7 +922,7 @@ function MarkerListEditor({
                             value={marker.id}
                             onChange={(e) => set(i, { id: e.target.value })}
                         >
-                            <option value="">— location —</option>
+                            <option value="">(location)</option>
                             {options(marker.id).map((id) => (
                                 <option key={id} value={id}>
                                     {id}

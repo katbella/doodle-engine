@@ -31,6 +31,39 @@ const registry: ContentRegistry = {
 afterEach(cleanup);
 
 describe('ConditionEffectBuilder interactions', () => {
+    it('offers a file picker for media filename arguments', async () => {
+        const importAsset = vi.fn(async () => 'intro.mp4');
+        Object.defineProperty(window, 'studio', {
+            configurable: true,
+            value: { importAsset },
+        });
+        const user = userEvent.setup();
+        render(
+            <ConditionEffectBuilder
+                mode="effect"
+                registry={registry}
+                projectDir="C:/story"
+                onCommit={() => {}}
+                onCancel={() => {}}
+            />
+        );
+
+        await user.click(screen.getByRole('button', { name: 'Play video' }));
+        // A filename argument: no @key/literal placeholder, just a filename.
+        expect(screen.getByPlaceholderText('intro.mp4')).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: 'Choose a file for File' })
+        );
+        expect(importAsset).toHaveBeenCalledWith('C:/story', 'video');
+        await screen.findByDisplayValue('intro.mp4');
+
+        // Non-media text arguments stay plain inputs.
+        await user.click(screen.getByRole('button', { name: 'Notify' }));
+        expect(
+            screen.queryByRole('button', { name: /Choose a file/ })
+        ).toBeNull();
+    });
+
     it('keeps requirements neutral until the author leaves a field', async () => {
         const user = userEvent.setup();
         render(

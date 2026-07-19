@@ -31,6 +31,7 @@ interface EditorAreaProps {
     onDirty: (key: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
     onOpenLocale?: (locale: string) => void;
+    onPlayFromNode: (dialogueId: string, nodeId: string) => void;
 }
 
 export function EditorArea(props: EditorAreaProps) {
@@ -58,6 +59,7 @@ function EditorAreaContent({
     onSetViewMode,
     onDirty,
     onModified,
+    onPlayFromNode,
 }: EditorAreaProps) {
     const stripRef = useRef<HTMLDivElement>(null);
     const overflowButtonRef = useRef<HTMLButtonElement>(null);
@@ -151,7 +153,7 @@ function EditorAreaContent({
                             }}
                             key={tab.key}
                             className={`tab ${tab.key === activeKey ? 'tab--active' : ''}`}
-                            title={`${tab.label} — middle-click to close; right-click for tab actions`}
+                            title={`${tab.label}. Middle-click closes; right-click for tab actions.`}
                             onClick={() => onSelect(tab.key)}
                             onAuxClick={(event) => {
                                 if (event.button === 1) onClose(tab.key);
@@ -355,6 +357,7 @@ function EditorAreaContent({
                             dialogueId={active.itemId}
                             onDirty={onDirty}
                             onModified={onModified}
+                            onPlayFromNode={onPlayFromNode}
                         />
                     </div>
                 ) : active.section === 'config' && activePath ? (

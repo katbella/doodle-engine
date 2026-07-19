@@ -8,7 +8,7 @@
  * touches project files. State edits go through the engine's debug-effect path,
  * so they behave exactly like in-game effects.
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Play, X } from '../lib/icons';
 import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
@@ -20,7 +20,19 @@ import { NameStateModal } from './NameStateModal';
 
 type InnerTab = 'playtest' | 'trace';
 
-export function Playtest({ project }: { project: OpenProject }) {
+export function Playtest({
+    project,
+    startRequest,
+}: {
+    project: OpenProject;
+    /** A "Play from here" jump from the dialogue editor. Each click bumps
+     * `seq`, so re-running the same node works. */
+    startRequest?: {
+        dialogueId: string;
+        nodeId: string;
+        seq: number;
+    } | null;
+}) {
     // One engine session, rebuilt whenever the project's content changes — a new
     // registry or config after a re-validate — so edits reach the playtest
     // instead of it running the content from when the project first opened. On a
@@ -68,6 +80,23 @@ export function Playtest({ project }: { project: OpenProject }) {
 
     // Named test states, persisted per project (survive tab switches/restarts).
     const testStates = useTestStates(project.projectDir);
+
+    // Honor a "Play from here" jump, exactly like picking the node in the
+    // Start-at-node picker: the session keeps its current game state.
+    const handledStartSeq = useRef(0);
+    useEffect(() => {
+        if (!startRequest || startRequest.seq === handledStartSeq.current) {
+            return;
+        }
+        handledStartSeq.current = startRequest.seq;
+        try {
+            session.startAtNode(startRequest.dialogueId, startRequest.nodeId);
+        } catch {
+            // The node may not be in the validated registry yet (e.g. it was
+            // just added and not yet re-validated); leave the session as-is.
+        }
+        refresh();
+    }, [startRequest, session, refresh]);
 
     const act = useCallback(
         (fn: () => void) => {
@@ -297,8 +326,8 @@ function Playback({
                         </div>
                         {!row.visible && row.requirement && (
                             <span className="pchoice__why">
-                                Why hidden: REQUIRE {row.requirement} —{' '}
-                                {row.reason}
+                                Why hidden: REQUIRE {row.requirement} (
+                                {row.reason})
                             </span>
                         )}
                     </div>

@@ -38,12 +38,6 @@
     font-size: var(--text-base);
     letter-spacing: -0.01em;
 }
-.topbar__divider {
-    align-self: stretch;
-    width: 1px;
-    margin: 7px 0;
-    background: var(--border-faint);
-}
 .topbar__palette {
     width: 100%;
     height: 28px;
@@ -355,7 +349,9 @@
     color: var(--text-faint);
     opacity: 0;
 }
-.rail__item:hover .rail__item-action {
+/* Reveal on keyboard focus too, so tab users can reach edit and delete. */
+.rail__item:hover .rail__item-action,
+.rail__item:focus-within .rail__item-action {
     opacity: 1;
 }
 .rail__item-action:hover {
@@ -534,7 +530,9 @@
 .seg__opt {
     padding: 4px var(--space-3);
     font-size: var(--text-sm);
-    color: var(--text-dim);
+    /* The unselected option is a readable choice, not decoration; keep it
+       brighter than --text-dim but still clearly not the active one. */
+    color: color-mix(in srgb, var(--text) 70%, var(--text-dim));
 }
 .seg__opt--on {
     background: var(--accent);
@@ -571,11 +569,13 @@
     min-height: 0;
 }
 
+/* Column sizes come from the inline style (the node outline is resizable);
+   this is the fallback shape: outline, drag handle, editor. */
 .dlg {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 220px auto 1fr;
 }
 .dlg__outline {
     display: flex;
@@ -594,10 +594,6 @@
     letter-spacing: var(--track-label);
     text-transform: uppercase;
     color: var(--text-dim);
-}
-.node-editor__delete {
-    margin-left: auto;
-    color: var(--danger);
 }
 .dlg__node {
     display: flex;
@@ -661,6 +657,17 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+}
+/* The id input is 28px tall; every control beside it matches that height
+   exactly, so the row reads as one toolbar instead of chips of assorted
+   sizes floating next to a bigger input. */
+.node-editor__head .dlg__add,
+.node-editor__head .dlg__node-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 var(--space-3);
+    font-size: var(--text-sm);
 }
 .node-editor__label {
     font-size: var(--text-base);
@@ -752,6 +759,11 @@
 }
 .dlg__add:hover {
     background: var(--surface-hover);
+}
+/* After .dlg__add so the danger color wins the same-specificity tie. */
+.node-editor__delete {
+    margin-left: auto;
+    color: var(--danger);
 }
 .dlg__card {
     display: flex;
@@ -1287,6 +1299,58 @@
     gap: var(--space-1);
     white-space: nowrap;
 }
+.asset-field__thumb {
+    flex: none;
+    align-self: center;
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+}
+.asset-field__thumb--wide {
+    width: 96px;
+}
+.asset-field__thumb--missing {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+}
+.asset-field__play {
+    flex: none;
+    gap: var(--space-1);
+}
+.asset-field__play--on {
+    color: var(--accent);
+}
+.asset-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+/* Stretch, not center: every control in an asset row takes the input's
+   height, so nothing renders as a shorter box beside a taller one. */
+.asset-list__row {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-2);
+    width: 100%;
+}
+.asset-list__row .dlg__x {
+    height: auto;
+    width: 30px;
+}
+.asset-list__row .dlg__input {
+    flex: 1;
+    min-width: 0;
+}
+/* The word "to" between node ids in a transition row: quiet connective,
+   not part of either id. */
+.trace__to {
+    color: var(--text-faint);
+}
 .field__textarea {
     height: auto;
     min-height: 72px;
@@ -1427,10 +1491,6 @@
     background: var(--surface-input);
     border: 1px solid var(--border-faint);
     overflow-wrap: anywhere;
-}
-.seg--small .seg__opt {
-    padding: 2px var(--space-2);
-    font-size: var(--text-xs);
 }
 .form__list {
     display: flex;
@@ -1586,6 +1646,11 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-faint);
+}
+.form__unknown-hint {
+    font-size: var(--text-sm);
+    color: var(--text-dim);
+    max-width: 60ch;
 }
 .form__unknown-row {
     font-size: var(--text-sm);
@@ -1751,6 +1816,45 @@
     display: flex;
     height: 32px;
     border-bottom: 1px solid var(--border-faint);
+}
+/* Ambient utilities live at the strip's right end: timestamps, dev-server
+   indicator, help, theme. Roomy gaps — this is a resting place for the eye,
+   not a control cluster. */
+.dock__status {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+}
+.dock__status-when {
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+.dock__status-server {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+}
+.dock__status-server:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+/* Quiet ghost icons: bordered buttons look like controls demanding a
+   decision; here they are ambient utilities. Hover and focus states keep
+   them discoverable as clickable. */
+.dock__status .btn--icon {
+    border: none;
+    padding: 4px;
+    color: var(--text-faint);
+}
+.dock__status .btn--icon:hover {
+    color: var(--text);
+    background: var(--surface-hover);
 }
 .dock__tab {
     display: flex;

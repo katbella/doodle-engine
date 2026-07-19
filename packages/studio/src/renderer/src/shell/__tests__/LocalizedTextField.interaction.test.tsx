@@ -189,11 +189,12 @@ describe('LocalizedTextField write-through editing', () => {
             '.localized-text__unlink-notice'
         )!;
         expect(notice.textContent).toContain(
-            'Unlinked from @bartender.greeting — @key relinks.'
+            'Now using literal text instead of @bartender.greeting.'
         );
         expect(notice.textContent).toContain(
-            '1 other locale (sv) still translates this key'
+            'The key and its sv translation stay in the locale files'
         );
+        expect(notice.textContent).toContain('Switch back to @key to relink.');
 
         await user.click(screen.getByRole('button', { name: '@key' }));
         expect(screen.getByTestId('source').textContent).toBe(

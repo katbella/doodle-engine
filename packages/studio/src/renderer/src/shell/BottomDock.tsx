@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Check, X } from '../lib/icons';
+import { Check, CircleHelp, Moon, Sun, X } from '../lib/icons';
 import type {
     OpenProject,
     PreviewStatus,
@@ -36,12 +36,18 @@ export function BottomDock({
     onRebuild,
     onOpenOutput,
     preview,
+    previewBusy,
     previewLog,
     onOpenProblem,
     flags,
     variables,
     onRenameFlagVar,
     onOpenReference,
+    lastValidatedAt,
+    lastSavedAt,
+    theme,
+    onToggleTheme,
+    playtestStart,
 }: {
     project: OpenProject;
     activeTab: DockTab;
@@ -55,12 +61,26 @@ export function BottomDock({
     onRebuild: () => void;
     onOpenOutput: () => void;
     preview: PreviewStatus | null;
+    /** True while the dev server is being started or stopped. */
+    previewBusy: boolean;
     previewLog: string[];
     onOpenProblem: (problem: ValidationError) => void;
     flags: SymbolUsage[];
     variables: SymbolUsage[];
     onRenameFlagVar: (kind: 'flag' | 'variable', id: string) => void;
     onOpenReference: (file: string) => void;
+    /** When the shown validation results were computed. */
+    lastValidatedAt: Date | null;
+    /** When an editor last wrote this project's content to disk. */
+    lastSavedAt: Date | null;
+    theme: 'dark' | 'light';
+    onToggleTheme: () => void;
+    /** A "Play from here" request for the playtest session. */
+    playtestStart: {
+        dialogueId: string;
+        nodeId: string;
+        seq: number;
+    } | null;
 }) {
     const problems = project.problems;
 
@@ -94,6 +114,56 @@ export function BottomDock({
                     active={activeTab === 'playtest'}
                     onClick={() => onTabChange('playtest')}
                 />
+                <div className="dock__status">
+                    {lastSavedAt && (
+                        <span className="dock__status-when">
+                            saved {formatWhen(lastSavedAt)}
+                        </span>
+                    )}
+                    {lastValidatedAt && (
+                        <span className="dock__status-when">
+                            validated {formatWhen(lastValidatedAt)}
+                        </span>
+                    )}
+                    {preview && (
+                        <button
+                            className="dock__status-server"
+                            onClick={() => onTabChange('devserver')}
+                            title={`Dev server running at ${preview.url}`}
+                        >
+                            <span className="status__dot status__dot--ok" />:
+                            {preview.port}
+                        </button>
+                    )}
+                    <button
+                        className="btn btn--icon"
+                        onClick={() => void window.studio.openDocumentation()}
+                        aria-label="Open Doodle Studio documentation"
+                        title="Open Doodle Studio documentation"
+                    >
+                        <CircleHelp size={15} />
+                    </button>
+                    <button
+                        className="btn btn--icon"
+                        onClick={onToggleTheme}
+                        aria-label={
+                            theme === 'dark'
+                                ? 'Switch to light mode'
+                                : 'Switch to dark mode'
+                        }
+                        title={
+                            theme === 'dark'
+                                ? 'Switch to light mode'
+                                : 'Switch to dark mode'
+                        }
+                    >
+                        {theme === 'dark' ? (
+                            <Sun size={14} />
+                        ) : (
+                            <Moon size={14} />
+                        )}
+                    </button>
+                </div>
             </div>
             <div className="dock__body scroll">
                 {activeTab === 'problems' && (
@@ -123,12 +193,29 @@ export function BottomDock({
                     />
                 )}
                 {activeTab === 'devserver' && (
-                    <DevServerView preview={preview} log={previewLog} />
+                    <DevServerView
+                        preview={preview}
+                        starting={previewBusy && !preview}
+                        log={previewLog}
+                    />
                 )}
-                {activeTab === 'playtest' && <Playtest project={project} />}
+                {activeTab === 'playtest' && (
+                    <Playtest project={project} startRequest={playtestStart} />
+                )}
             </div>
         </div>
     );
+}
+
+/** Full date + time ("Jul 18, 9:41 AM"): a clock time alone turns ambiguous
+ * when Studio stays open past midnight, and this label is never refreshed. */
+function formatWhen(date: Date): string {
+    return date.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+    });
 }
 
 function ProblemsView({
@@ -391,12 +478,14 @@ function BuildView({
 
 function DevServerView({
     preview,
+    starting,
     log,
 }: {
     preview: PreviewStatus | null;
+    starting: boolean;
     log: string[];
 }) {
-    if (!preview && log.length === 0) {
+    if (!preview && !starting && log.length === 0) {
         return (
             <div className="dock__empty">
                 No dev server running. Click Preview to start it and open the
@@ -406,6 +495,12 @@ function DevServerView({
     }
     return (
         <div className="build">
+            {starting && (
+                <div className="build__head">
+                    <span className="spinner spinner--sm" />
+                    <span>Starting the dev server…</span>
+                </div>
+            )}
             {preview && (
                 <div className="build__head">
                     <span className="status__dot status__dot--ok" />

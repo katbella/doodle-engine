@@ -103,7 +103,7 @@ export function LocalizedTextField({
         value: displayValue,
         placeholder:
             isMissing && locale
-                ? `No ${locale} text yet — type to add it.`
+                ? `No ${locale} text yet. Type to add it.`
                 : placeholder,
         spellCheck: true,
         'aria-label': ariaLabel,
@@ -116,7 +116,7 @@ export function LocalizedTextField({
         <div className="field localized-text">
             <div className="field__labelrow">
                 <span className="field__labelgroup">{label}</span>
-                <div className="seg seg--small">
+                <div className="seg">
                     <button
                         type="button"
                         className={`seg__opt ${isKey ? 'seg__opt--on' : ''}`}
@@ -235,23 +235,20 @@ export function LocalizedTextField({
             {!isKey && rememberedKey && (
                 <div className="localized-text__unlink-notice" role="status">
                     <span>
-                        Unlinked from{' '}
-                        <span className="mono">@{rememberedKey}</span> — @key
-                        relinks.
-                        {unlinkedLocales.length === 1 && (
+                        Now using literal text instead of{' '}
+                        <span className="mono">@{rememberedKey}</span>.
+                        {unlinkedLocales.length > 0 && (
                             <>
                                 {' '}
-                                1 other locale ({unlinkedLocales[0]}) still
-                                translates this key.
+                                The key and its {unlinkedLocales.join(', ')}{' '}
+                                {unlinkedLocales.length === 1
+                                    ? 'translation'
+                                    : 'translations'}{' '}
+                                stay in the locale files but won't be shown
+                                here.
                             </>
-                        )}
-                        {unlinkedLocales.length > 1 && (
-                            <>
-                                {' '}
-                                {unlinkedLocales.length} other locales still
-                                translate this key.
-                            </>
-                        )}
+                        )}{' '}
+                        Switch back to @key to relink.
                     </span>
                     <button
                         type="button"

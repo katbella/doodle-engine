@@ -73,6 +73,7 @@ function renderArea(overrides: Record<string, unknown> = {}) {
         onSetViewMode: vi.fn(),
         onDirty: vi.fn(),
         onModified: vi.fn(),
+        onPlayFromNode: vi.fn(),
     };
     return {
         callbacks,

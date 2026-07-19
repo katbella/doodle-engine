@@ -1,14 +1,5 @@
 import type { OpenProject, PreviewStatus } from '../../../shared/project';
-import {
-    Sun,
-    Moon,
-    Play,
-    Square,
-    Monitor,
-    ExternalLink,
-    Search,
-    CircleHelp,
-} from '../lib/icons';
+import { Play, Square, Monitor, ExternalLink, Search } from '../lib/icons';
 
 export function TopBar({
     project,
@@ -25,8 +16,6 @@ export function TopBar({
     onOpenPreview,
     onPlaytest,
     onOpenPalette,
-    theme,
-    onToggleTheme,
 }: {
     project: OpenProject;
     onValidate: () => void;
@@ -43,8 +32,6 @@ export function TopBar({
     onOpenPreview: () => void;
     onPlaytest: () => void;
     onOpenPalette: () => void;
-    theme: 'dark' | 'light';
-    onToggleTheme: () => void;
 }) {
     const count = project.problems.length;
 
@@ -68,7 +55,7 @@ export function TopBar({
                     className={`status ${status.cls}`}
                     title={
                         stale && !validating
-                            ? 'Changes since the last validation — click Validate'
+                            ? 'Changes since the last validation. Click Validate.'
                             : undefined
                     }
                 >
@@ -92,31 +79,6 @@ export function TopBar({
                 </kbd>
             </button>
             <div className="topbar__actions">
-                <button
-                    className="btn btn--icon"
-                    onClick={() => void window.studio.openDocumentation()}
-                    aria-label="Open Doodle Studio documentation"
-                    title="Open Doodle Studio documentation"
-                >
-                    <CircleHelp size={16} />
-                </button>
-                <button
-                    className="btn btn--icon"
-                    onClick={onToggleTheme}
-                    aria-label={
-                        theme === 'dark'
-                            ? 'Switch to light mode'
-                            : 'Switch to dark mode'
-                    }
-                    title={
-                        theme === 'dark'
-                            ? 'Switch to light mode'
-                            : 'Switch to dark mode'
-                    }
-                >
-                    {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-                </button>
-                <span className="topbar__divider" aria-hidden />
                 <button
                     className={`btn ${stale ? 'btn--accent' : ''}`}
                     onClick={onValidate}

@@ -114,6 +114,6 @@ export function templateForNewItem(
                 '',
             ].join('\n');
         case 'locales':
-            return `# ${id} locale — flat key: value pairs\n`;
+            return `# ${id} locale (flat key: value pairs)\n`;
     }
 }

@@ -226,7 +226,7 @@ export interface StudioApi {
         projectDir: string,
         kind: StudioAssetKind
     ) => Promise<string | null>;
-    /** Read an image asset as a data URL for a Studio thumbnail. */
+    /** Read an image or audio asset as a data URL for a Studio preview. */
     readAssetDataUrl: (
         projectDir: string,
         kind: StudioAssetKind,

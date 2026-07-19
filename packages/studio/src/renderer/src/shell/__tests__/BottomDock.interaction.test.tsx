@@ -59,12 +59,18 @@ function props(activeTab: DockTab, overrides: Record<string, unknown> = {}) {
         onRebuild: vi.fn(),
         onOpenOutput: vi.fn(),
         preview: null,
+        previewBusy: false,
         previewLog: [],
         onOpenProblem: vi.fn(),
         flags: [],
         variables: [],
         onRenameFlagVar: vi.fn(),
         onOpenReference: vi.fn(),
+        lastValidatedAt: null,
+        lastSavedAt: null,
+        theme: 'dark' as const,
+        onToggleTheme: vi.fn(),
+        playtestStart: null,
         ...overrides,
     };
 }
@@ -234,6 +240,52 @@ describe('BottomDock', () => {
         expect(screen.getByText('Build cancelled')).toBeTruthy();
     });
 
+    it('shows utilities and timestamps in the status area', async () => {
+        const openDocumentation = vi.fn(async () => {});
+        Object.defineProperty(window, 'studio', {
+            configurable: true,
+            value: { openDocumentation },
+        });
+        const user = userEvent.setup();
+        const onToggleTheme = vi.fn();
+        const onTabChange = vi.fn();
+        render(
+            <BottomDock
+                {...props('problems', {
+                    onToggleTheme,
+                    onTabChange,
+                    lastValidatedAt: new Date(2026, 6, 18, 9, 41),
+                    lastSavedAt: new Date(2026, 6, 18, 9, 42),
+                    preview: {
+                        url: 'http://localhost:4173',
+                        port: 4173,
+                        projectDir: 'C:/story',
+                    },
+                })}
+            />
+        );
+
+        expect(screen.getByText(/^validated /).textContent).toContain('9:41');
+        expect(screen.getByText(/^saved /).textContent).toContain('9:42');
+
+        await user.click(
+            screen.getByRole('button', {
+                name: 'Open Doodle Studio documentation',
+            })
+        );
+        expect(openDocumentation).toHaveBeenCalledOnce();
+
+        await user.click(
+            screen.getByRole('button', { name: 'Switch to light mode' })
+        );
+        expect(onToggleTheme).toHaveBeenCalledOnce();
+
+        await user.click(
+            screen.getByTitle('Dev server running at http://localhost:4173')
+        );
+        expect(onTabChange).toHaveBeenCalledWith('devserver');
+    });
+
     it('shows dev-server state and opens the real preview boundary', async () => {
         const openPreview = vi.fn(async () => {});
         Object.defineProperty(window, 'studio', {
@@ -243,6 +295,12 @@ describe('BottomDock', () => {
         const user = userEvent.setup();
         const { rerender } = render(<BottomDock {...props('devserver')} />);
         expect(screen.getByText(/No dev server running/)).toBeTruthy();
+
+        rerender(
+            <BottomDock {...props('devserver', { previewBusy: true })} />
+        );
+        expect(screen.getByText('Starting the dev server…')).toBeTruthy();
+        expect(screen.queryByText(/No dev server running/)).toBeNull();
 
         rerender(
             <BottomDock

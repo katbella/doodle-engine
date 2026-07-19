@@ -91,12 +91,16 @@ location: bartender
         expect(screen.getByRole('group', { name: 'Inventory' })).toBeTruthy();
         expect(screen.getByRole('group', { name: 'Locations' })).toBeTruthy();
         expect(screen.getByRole('group', { name: 'Characters' })).toBeTruthy();
-        expect(screen.getByText(/keeps the item out of play/)).toBeTruthy();
+        // The out-of-play hint only shows while no starting location is set.
+        expect(screen.queryByText(/stays out of play/)).toBeNull();
+        await user.selectOptions(screen.getByRole('combobox'), '');
+        expect(screen.getByText(/stays out of play/)).toBeTruthy();
 
         await user.selectOptions(screen.getByRole('combobox'), 'inventory');
         expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe(
             'inventory'
         );
+        expect(screen.queryByText(/stays out of play/)).toBeNull();
     });
 
     it('edits localizable, reference, asset, stats, and unknown character fields', async () => {
@@ -121,7 +125,8 @@ extension:
         } as unknown as OpenProject;
         editor('characters', vi.fn(), vi.fn(), localizedProject);
         expect(await screen.findByText('hero')).toBeTruthy();
-        expect(screen.getByText('Custom fields')).toBeTruthy();
+        expect(screen.getByText('Other fields in this file')).toBeTruthy();
+        expect(screen.getByText(/kept exactly as written/)).toBeTruthy();
         expect(screen.getByText(/extension:/)).toBeTruthy();
         expect(
             screen.getByRole('option', { name: 'missing (missing)' })
@@ -180,15 +185,26 @@ triggerLocation: missing
         const { unmount } = editor('interludes');
         await screen.findByText('opening');
 
-        const sounds = screen.getByPlaceholderText('file1.ogg, file2.ogg');
-        await user.clear(sounds);
-        await user.type(sounds, 'wind.ogg, rain.ogg, ');
+        // One row per sound file; edits target a single entry.
+        const firstSound = screen.getByRole('textbox', {
+            name: 'Layered ambient sounds 1',
+        });
+        expect((firstSound as HTMLInputElement).value).toBe('wind.ogg');
+        await user.clear(firstSound);
+        await user.type(firstSound, 'rain.ogg');
         await user.click(screen.getByRole('checkbox'));
         const speed = screen.getByDisplayValue('30');
         fireEvent.change(speed, { target: { value: '' } });
         fireEvent.change(speed, { target: { value: '45' } });
         await user.selectOptions(screen.getByRole('combobox'), 'town');
         await user.clear(screen.getByDisplayValue('bg.png'));
+        // Trigger conditions and effects are real engine fields with their
+        // own builder-backed list editors, not "other fields in this file".
+        expect(
+            screen.getByRole('button', { name: /Add condition/ })
+        ).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Add effect/ })).toBeTruthy();
+        expect(screen.queryByText('Other fields in this file')).toBeNull();
 
         unmount();
         await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
@@ -197,7 +213,7 @@ triggerLocation: missing
             'content/interludes/entry.yaml',
             expect.arrayContaining([
                 { path: ['background'], value: '' },
-                { path: ['sounds'], value: ['wind.ogg', 'rain.ogg'] },
+                { path: ['sounds'], value: ['rain.ogg'] },
                 { path: ['scroll'], value: false },
                 { path: ['scrollSpeed'], value: 45 },
                 { path: ['triggerLocation'], value: 'town' },

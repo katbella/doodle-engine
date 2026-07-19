@@ -192,7 +192,7 @@ function LocaleEditorInner({ tabKey, localeId, onDirty }: LocaleEditorProps) {
             {deleteKey && (
                 <ConfirmModal
                     title={`Delete locale key “${deleteKey}”?`}
-                    message="This removes the authored translation from this locale file. References to the key will become missing text. Studio does not have undo."
+                    message="This removes the authored translation from this locale file. References to the key will become missing text."
                     confirmLabel="Delete key"
                     danger
                     onConfirm={() => {

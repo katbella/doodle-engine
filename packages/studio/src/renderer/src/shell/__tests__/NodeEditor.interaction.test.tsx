@@ -94,6 +94,7 @@ function Harness({ isStart = false }: { isStart?: boolean }) {
                 onMakeStart={vi.fn()}
                 onDelete={vi.fn()}
                 onCreateNode={vi.fn()}
+                onPlayFromHere={vi.fn()}
             />
             <output data-testid="node-state">{JSON.stringify(node)}</output>
         </>

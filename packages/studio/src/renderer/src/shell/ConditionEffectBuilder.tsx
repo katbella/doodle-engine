@@ -12,6 +12,8 @@ import {
     type EffectDescriptor,
 } from '@doodle-engine/core';
 import type { ContentRegistry } from '@doodle-engine/core';
+import type { StudioAssetKind } from '../../../shared/project';
+import { FolderOpen } from '../lib/icons';
 import {
     type BuilderDraft,
     buildCondition,
@@ -24,6 +26,19 @@ import {
 } from '../lib/builder';
 
 type Descriptor = ConditionDescriptor | EffectDescriptor;
+
+/** Media effect arguments that name an asset file. */
+const MEDIA_ARG_KIND: Record<string, StudioAssetKind> = {
+    'playVideo.file': 'video',
+    'playSound.sound': 'sfx',
+    'playMusic.track': 'music',
+};
+
+const MEDIA_PLACEHOLDER: Partial<Record<StudioAssetKind, string>> = {
+    video: 'intro.mp4',
+    sfx: 'door.ogg',
+    music: 'theme.ogg',
+};
 
 /**
  * The condition/effect builder popover.
@@ -40,6 +55,7 @@ export function ConditionEffectBuilder({
     initial,
     onCommit,
     onCancel,
+    projectDir,
 }: {
     mode: 'condition' | 'effect';
     registry: ContentRegistry;
@@ -47,6 +63,8 @@ export function ConditionEffectBuilder({
     initial?: Condition | Effect;
     onCommit: (entity: Condition | Effect) => void;
     onCancel: () => void;
+    /** Enables the file picker on media filename arguments. */
+    projectDir?: string;
 }) {
     const descriptors: Descriptor[] =
         mode === 'condition' ? CONDITION_DESCRIPTORS : EFFECT_DESCRIPTORS;
@@ -148,6 +166,14 @@ export function ConditionEffectBuilder({
                             value={draft.values[arg.name] ?? ''}
                             registry={registry}
                             questId={draft.values.questId}
+                            projectDir={projectDir}
+                            assetKind={
+                                mode === 'effect'
+                                    ? MEDIA_ARG_KIND[
+                                          `${draft.type}.${arg.name}`
+                                      ]
+                                    : undefined
+                            }
                             onChange={(v) => setValue(arg.name, v)}
                             onBlur={() =>
                                 setTouched((current) =>
@@ -205,6 +231,8 @@ function ArgField({
     value,
     registry,
     questId,
+    projectDir,
+    assetKind,
     onChange,
     onBlur,
 }: {
@@ -213,14 +241,32 @@ function ArgField({
     registry: ContentRegistry;
     /** The quest chosen in this same builder, so stage lists the right stages. */
     questId?: string;
+    projectDir?: string;
+    /** Set when this argument is a media filename; shows a file picker. */
+    assetKind?: StudioAssetKind;
     onChange: (value: string) => void;
     onBlur: () => void;
 }) {
+    const [choosing, setChoosing] = useState(false);
+    const chooseAsset = async () => {
+        if (!projectDir || !assetKind) return;
+        setChoosing(true);
+        try {
+            const selected = await window.studio.importAsset(
+                projectDir,
+                assetKind
+            );
+            if (selected) onChange(selected);
+        } finally {
+            setChoosing(false);
+            onBlur();
+        }
+    };
     const label = (
         <span className="builder__arg-label">
             {arg.label}
             {arg.optional && (
-                <span className="builder__arg-opt"> — optional</span>
+                <span className="builder__arg-opt"> (optional)</span>
             )}
         </span>
     );
@@ -240,7 +286,7 @@ function ArgField({
                     onBlur={onBlur}
                 >
                     <option value="">
-                        {quest ? '— pick a stage —' : '— pick a quest first —'}
+                        {quest ? '(pick a stage)' : '(pick a quest first)'}
                     </option>
                     {stages.map((s) => (
                         <option key={s.id} value={s.id}>
@@ -269,7 +315,7 @@ function ArgField({
                     onChange={(e) => onChange(e.target.value)}
                     onBlur={onBlur}
                 >
-                    <option value="">— pick —</option>
+                    <option value="">(pick)</option>
                     {ids.map((id) => (
                         <option key={id} value={id}>
                             {id}
@@ -293,6 +339,34 @@ function ArgField({
                     <option value="true">true</option>
                     <option value="false">false</option>
                 </select>
+            </label>
+        );
+    }
+
+    if (assetKind && projectDir) {
+        return (
+            <label className="builder__arg">
+                {label}
+                <div className="asset-field">
+                    <input
+                        className="dlg__input mono"
+                        value={value}
+                        placeholder={MEDIA_PLACEHOLDER[assetKind] ?? 'filename'}
+                        spellCheck={false}
+                        onChange={(e) => onChange(e.target.value)}
+                        onBlur={onBlur}
+                    />
+                    <button
+                        className="btn asset-field__choose"
+                        type="button"
+                        disabled={choosing}
+                        aria-label={`Choose a file for ${arg.label}`}
+                        onClick={() => void chooseAsset()}
+                    >
+                        <FolderOpen size={14} aria-hidden />
+                        {choosing ? 'Choosing…' : 'Choose file…'}
+                    </button>
+                </div>
             </label>
         );
     }

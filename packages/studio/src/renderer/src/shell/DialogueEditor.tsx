@@ -7,6 +7,8 @@ import { NodeEditor } from './NodeEditor';
 import { authoredTextPreview } from '../lib/localized-text';
 import { LocaleWriterBoundary, useLocaleWriter } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
+import { ResizeHandle } from './ResizeHandle';
+import { usePersistedSize } from '../lib/usePersistedSize';
 
 /**
  * Visual editor for a .dlg file. It parses the file into a dialogue, edits that
@@ -21,6 +23,7 @@ interface DialogueEditorProps {
     dialogueId: string;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
+    onPlayFromNode: (dialogueId: string, nodeId: string) => void;
 }
 
 export function DialogueEditor(props: DialogueEditorProps) {
@@ -41,6 +44,7 @@ function DialogueEditorInner({
     dialogueId,
     onDirty,
     onModified,
+    onPlayFromNode,
 }: DialogueEditorProps) {
     const [base, setBase] = useState('');
     const [savedText, setSavedText] = useState('');
@@ -52,6 +56,10 @@ function DialogueEditorInner({
     const [conflict, setConflict] = useState<string | null>(null);
     const [missing, setMissing] = useState(false);
     const [deleteNodeId, setDeleteNodeId] = useState<string | null>(null);
+    const [outlineWidth, setOutlineWidth] = usePersistedSize(
+        'doodle-studio-dlg-outline-width',
+        220
+    );
     const localeWriter = useLocaleWriter();
 
     const dir = project.projectDir;
@@ -316,7 +324,10 @@ function DialogueEditorInner({
         routeImpact.gotos + routeImpact.choices + routeImpact.branches;
 
     return (
-        <div className="dlg">
+        <div
+            className="dlg"
+            style={{ gridTemplateColumns: `${outlineWidth}px auto 1fr` }}
+        >
             <div className="dlg__outline scroll">
                 <div className="dlg__outline-head">
                     <span>Nodes</span>
@@ -341,6 +352,14 @@ function DialogueEditorInner({
                     </button>
                 ))}
             </div>
+
+            <ResizeHandle
+                axis="x"
+                size={outlineWidth}
+                min={160}
+                max={420}
+                onResize={setOutlineWidth}
+            />
 
             <div className="dlg__main scroll">
                 {conflict !== null && (
@@ -384,6 +403,9 @@ function DialogueEditorInner({
                         onMakeStart={() => makeStart(selected.id)}
                         onDelete={() => setDeleteNodeId(selected.id)}
                         onCreateNode={createNode}
+                        onPlayFromHere={() =>
+                            onPlayFromNode(dialogueId, selected.id)
+                        }
                     />
                 ) : (
                     <div className="editor__empty">
@@ -413,8 +435,7 @@ function DialogueEditorInner({
                               ' branch' +
                               (routeImpact.branches === 1 ? '' : 'es') +
                               '); deleting will break those routes.'
-                            : 'No surviving routes point here.') +
-                        ' Studio does not have undo.'
+                            : 'No surviving routes point here.')
                     }
                     confirmLabel="Delete node"
                     danger

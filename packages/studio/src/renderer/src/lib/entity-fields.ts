@@ -40,6 +40,10 @@ export type FieldControl =
     | { kind: 'asset'; category: AssetCategory }
     /** The open key/value bag (`stats`). */
     | { kind: 'statsBag' }
+    /** A list of engine conditions, edited with the condition builder. */
+    | { kind: 'conditionList' }
+    /** A list of engine effects, edited with the effect builder. */
+    | { kind: 'effectList' }
     /** A list of asset filenames (interlude `sounds`). */
     | { kind: 'assetList'; category: AssetCategory };
 
@@ -53,8 +57,10 @@ export interface FieldDescriptor {
     textKind?: 'identifier' | 'short' | 'prose';
     /** Required fields are marked inline; missing them is a form error. */
     required?: boolean;
-    /** Short hint shown under the label. */
-    hint?: string;
+    /** Short hint shown under the control. A function receives the field's
+     * current value, so the hint can describe the state the user is in
+     * instead of options they haven't seen yet. */
+    hint?: string | ((value: unknown) => string | undefined);
 }
 
 /** The form for one entity type: an ordered list of fields. `id` is handled
@@ -165,7 +171,10 @@ const item: EntityForm = {
             name: 'location',
             label: 'Starting location',
             control: { kind: 'reference', target: 'locations' },
-            hint: '“— none —” keeps the item out of play until an effect adds it.',
+            hint: (value) =>
+                typeof value === 'string' && value !== ''
+                    ? undefined
+                    : 'This item is not placed anywhere. It stays out of play until an effect adds it.',
         },
         { name: 'stats', label: 'Stats', control: { kind: 'statsBag' } },
     ],
@@ -242,8 +251,9 @@ const interlude: EntityForm = {
         },
         {
             name: 'sounds',
-            label: 'Sounds',
+            label: 'Layered ambient sounds',
             control: { kind: 'assetList', category: 'sfx' },
+            hint: 'Sound effects in interludes all loop, layered under the music.',
         },
         {
             name: 'text',
@@ -255,14 +265,25 @@ const interlude: EntityForm = {
         { name: 'scroll', label: 'Auto-scroll', control: { kind: 'boolean' } },
         {
             name: 'scrollSpeed',
-            label: 'Scroll speed',
+            label: 'Scroll speed (in pixels per second)',
             control: { kind: 'number' },
-            hint: 'Pixels per second',
         },
         {
             name: 'triggerLocation',
             label: 'Trigger at location',
             control: { kind: 'reference', target: 'locations' },
+        },
+        {
+            name: 'triggerConditions',
+            label: 'Trigger conditions',
+            control: { kind: 'conditionList' },
+            hint: 'Every condition must pass for the interlude to trigger.',
+        },
+        {
+            name: 'effects',
+            label: 'Effects',
+            control: { kind: 'effectList' },
+            hint: 'Effects run when the interlude plays. Set a flag to stop the interlude from repeating.',
         },
     ],
 };

@@ -109,4 +109,21 @@ describe('AssetService', () => {
             service.previewDataUrl(project, 'map', '../world.png')
         ).resolves.toBeNull();
     });
+
+    it('reads audio as a data URL for the play buttons', async () => {
+        const project = await temporaryDirectory('doodle-assets-project-');
+        const music = join(project, 'assets', 'audio', 'music');
+        await mkdir(music, { recursive: true });
+        await writeFile(join(music, 'theme.ogg'), 'ogg-bytes');
+        const service = new AssetService();
+
+        await expect(
+            service.previewDataUrl(project, 'music', 'theme.ogg')
+        ).resolves.toBe(
+            `data:audio/ogg;base64,${Buffer.from('ogg-bytes').toString('base64')}`
+        );
+        await expect(
+            service.previewDataUrl(project, 'music', 'missing.ogg')
+        ).resolves.toBeNull();
+    });
 });

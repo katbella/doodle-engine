@@ -45,7 +45,7 @@ export function NameStateModal({
                         <span className="field__hint">
                             {overwrites
                                 ? `Replaces the saved state “${trimmed}”.`
-                                : 'Captures the whole state — flags, variables, inventory, quests, and more — to jump back to later.'}
+                                : 'Captures the whole state (flags, variables, inventory, quests, and more) to jump back to later.'}
                         </span>
                     </label>
                     <div className="modal__actions">

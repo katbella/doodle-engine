@@ -45,7 +45,7 @@ export function RightPanel({
         <aside className="rightpanel scroll">
             <div>
                 <div className="panel__label">
-                    References{activeTab ? ` — ${references.length}` : ''}
+                    References{activeTab ? ` · ${references.length}` : ''}
                 </div>
                 {!activeTab ? (
                     <div className="panel__muted">
@@ -68,7 +68,7 @@ export function RightPanel({
             </div>
             <div>
                 <div className="panel__label">
-                    Validation{activeTab ? ' — this item' : ''}
+                    Validation{activeTab ? ' · this item' : ''}
                 </div>
                 {!activeTab ? (
                     <div className="panel__muted">
@@ -179,7 +179,7 @@ export function ReferenceGroups({
                                     {row.label}
                                     {row.details.length > 0 && (
                                         <span className="reference__details">
-                                            {' — '}
+                                            {' · '}
                                             {row.details.join(', ')}
                                         </span>
                                     )}

@@ -16,7 +16,7 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
 
     const engineStatus = project.engine.depsInstalled
         ? (project.engine.installed ?? project.engine.declared ?? 'installed')
-        : 'not installed yet — select Install dependencies';
+        : 'not installed yet (select Install dependencies)';
 
     return (
         <div className="overview">

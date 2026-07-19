@@ -131,7 +131,7 @@ export function buildCondition(
     if (inRequire && draft.type === 'roll') {
         return {
             ok: false,
-            error: 'roll can’t be used as a requirement — it has a side effect. Use it as an IF branch or an effect instead.',
+            error: 'roll can’t be used as a requirement because it has a side effect. Use it as an IF branch or an effect instead.',
         };
     }
     const descriptor = conditionDescriptor(draft.type as Condition['type']);

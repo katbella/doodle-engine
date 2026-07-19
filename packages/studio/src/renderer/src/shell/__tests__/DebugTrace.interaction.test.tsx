@@ -49,7 +49,9 @@ describe('DebugTrace', () => {
         expect(screen.getByText('start')).toBeTruthy();
         expect(screen.getByText(/hasFlag trusted.*true/i)).toBeTruthy();
         expect(screen.getByText(/SET flag asked/i)).toBeTruthy();
-        expect(screen.getByText(/start → end/)).toBeTruthy();
+        expect(
+            screen.getByText('TRANSITION').parentElement?.textContent
+        ).toContain('start to end');
         expect(screen.getByText(/secret:.*hasFlag trusted/i)).toBeTruthy();
         expect(screen.getByText('Recovered problem')).toBeTruthy();
         expect(screen.getByText('PASS')).toBeTruthy();

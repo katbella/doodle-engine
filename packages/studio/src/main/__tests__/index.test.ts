@@ -425,12 +425,16 @@ describe('Studio main process', () => {
         await state.ipcHandlers.get('help:documentation')?.({});
         expect(state.shell.openExternal).toHaveBeenCalledTimes(2);
         helpMenu.submenu[1].click();
+        expect(state.shell.openExternal).toHaveBeenCalledWith(
+            'https://github.com/katbella/doodle-engine/issues'
+        );
+        helpMenu.submenu[2].click();
         await vi.waitFor(() =>
             expect(state.shell.openPath).toHaveBeenCalledWith(
                 'C:/studio-data/doodle-studio.log'
             )
         );
-        helpMenu.submenu[3].click();
+        helpMenu.submenu[4].click();
         expect(state.webContents.send).toHaveBeenCalledWith(
             'menu:about',
             '0.2.0'
