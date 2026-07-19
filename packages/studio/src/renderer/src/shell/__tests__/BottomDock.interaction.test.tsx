@@ -68,8 +68,6 @@ function props(activeTab: DockTab, overrides: Record<string, unknown> = {}) {
         onOpenReference: vi.fn(),
         lastValidatedAt: null,
         lastSavedAt: null,
-        theme: 'dark' as const,
-        onToggleTheme: vi.fn(),
         playtestStart: null,
         ...overrides,
     };
@@ -247,12 +245,10 @@ describe('BottomDock', () => {
             value: { openDocumentation },
         });
         const user = userEvent.setup();
-        const onToggleTheme = vi.fn();
         const onTabChange = vi.fn();
         render(
             <BottomDock
                 {...props('problems', {
-                    onToggleTheme,
                     onTabChange,
                     lastValidatedAt: new Date(2026, 6, 18, 9, 41),
                     lastSavedAt: new Date(2026, 6, 18, 9, 42),
@@ -274,11 +270,6 @@ describe('BottomDock', () => {
             })
         );
         expect(openDocumentation).toHaveBeenCalledOnce();
-
-        await user.click(
-            screen.getByRole('button', { name: 'Switch to light mode' })
-        );
-        expect(onToggleTheme).toHaveBeenCalledOnce();
 
         await user.click(
             screen.getByTitle('Dev server running at http://localhost:4173')

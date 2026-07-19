@@ -295,8 +295,8 @@ export function SourceView({
             )}
             <div className="source__bar">
                 <span className="source__path mono">
-                    {path}
-                    {dirty ? ' •' : ''}
+                    <span className="source__path-text">{path}</span>
+                    {dirty && <span className="tab__dirty" />}
                 </span>
                 <button
                     className="btn"

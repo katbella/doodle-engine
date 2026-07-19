@@ -326,7 +326,7 @@ function TargetSelect({
                         {id}
                     </option>
                 ))}
-                {onCreateNode && <option value="__new__">＋ New node…</option>}
+                {onCreateNode && <option value="__new__">New node…</option>}
             </select>
             {creating && (
                 <div className="target-select__create">

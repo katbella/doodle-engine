@@ -43,7 +43,7 @@ import { ErrorLog } from './error-log';
 import { AssetService } from './asset-service';
 
 let mainWindow: BrowserWindow | null = null;
-let themeState: ThemeState = { mode: 'dark', color: 'blue' };
+let themeState: ThemeState = { mode: 'dark', color: 'default' };
 
 // A build and a dev-server preview each run in their own process (they execute
 // the project's untrusted Vite config). We hold the current one so it can be

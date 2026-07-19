@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { TriangleAlert, X } from '../lib/icons';
+import { Plus, TriangleAlert, X } from '../lib/icons';
 import { parse as parseYaml } from 'yaml';
 import { isValidIdentifier } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
@@ -285,7 +285,7 @@ export function GameConfigForm({
                                     ]);
                             }}
                         >
-                            <option value="">+ Add item…</option>
+                            <option value="">Add item…</option>
                             {itemIds
                                 .filter((id) => !inventory.includes(id))
                                 .map((id) => (
@@ -327,7 +327,7 @@ export function GameConfigForm({
                 <div className="game-config__state-grid">
                     <KeyValueEditor
                         label="Flags"
-                        addLabel="+ Add flag"
+                        addLabel="Add flag"
                         entries={Object.entries(flags)}
                         renderValue={(key, value) => (
                             <select
@@ -363,7 +363,7 @@ export function GameConfigForm({
 
                     <KeyValueEditor
                         label="Variables"
-                        addLabel="+ Add variable"
+                        addLabel="Add variable"
                         entries={Object.entries(variables)}
                         renderValue={(key, value) => (
                             <input
@@ -581,7 +581,7 @@ function KeyValueEditor({
             <div className="field__labelrow">
                 <span className="field__label">{label}</span>
                 <button className="dlg__add" onClick={onAdd}>
-                    {addLabel}
+                    <Plus size={13} /> {addLabel}
                 </button>
             </div>
             {entries.length === 0 && <span className="field__hint">None.</span>}

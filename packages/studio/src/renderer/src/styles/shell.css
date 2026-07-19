@@ -158,14 +158,14 @@
 }
 .btn--danger {
     background: var(--error);
-    color: #fff;
+    color: var(--error-ink);
     border-color: var(--error);
     font-weight: 600;
 }
 .btn--danger:hover {
     background: var(--error);
     filter: brightness(1.1);
-    color: #fff;
+    color: var(--error-ink);
 }
 
 .body {
@@ -558,11 +558,18 @@
     border-bottom: 1px solid var(--border-faint);
 }
 .source__path {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--text-dim);
+}
+.source__path-text {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: var(--text-sm);
-    color: var(--text-dim);
 }
 .source__monaco {
     flex: 1;
@@ -1346,10 +1353,9 @@
     flex: 1;
     min-width: 0;
 }
-/* The word "to" between node ids in a transition row: quiet connective,
-   not part of either id. */
 .trace__to {
     color: var(--text-faint);
+    vertical-align: -0.125em;
 }
 .field__textarea {
     height: auto;
@@ -2866,18 +2872,47 @@ a.build__dest:hover {
     align-items: baseline;
     gap: var(--space-2);
 }
+.trace__row--node {
+    margin-top: var(--space-2);
+}
 .trace__kind {
-    color: var(--accent);
     flex: none;
 }
+.trace__kind--nodeEnter {
+    color: var(--accent);
+}
 .trace__kind--condition {
-    color: #7aa8e0;
+    color: var(--info);
+}
+.trace__kind--effect {
+    color: var(--text-dim);
+}
+.trace__kind--transition {
+    color: var(--text-faint);
+}
+.trace__kind--choiceFiltered {
+    color: var(--warn);
+}
+.trace__kind--error {
+    color: var(--error);
 }
 .trace__text {
     color: var(--text-dim);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.trace__tok--keyword {
+    color: var(--text-faint);
+}
+.trace__tok--id {
+    color: var(--text);
+}
+.trace__tok--value {
+    color: var(--info);
+}
+.trace__tok--text {
+    color: var(--text-dim);
 }
 .trace__result {
     flex: none;
@@ -2887,7 +2922,7 @@ a.build__dest:hover {
     color: var(--valid);
 }
 .trace__result--fail {
-    color: var(--accent);
+    color: var(--error);
 }
 
 /* Command palette */

@@ -41,14 +41,37 @@ describe('Monaco setup', () => {
         expect(mocks.register).toHaveBeenCalledWith({ id: 'yaml' });
         expect(mocks.languageConfig).toHaveBeenCalledTimes(2);
         expect(mocks.tokens).toHaveBeenCalledTimes(2);
-        expect(mocks.theme).toHaveBeenCalledWith(
+        for (const name of [
             'doodle-dark',
-            expect.objectContaining({ base: 'vs-dark' })
-        );
-        expect(mocks.theme).toHaveBeenCalledWith(
+            'doodle-forest',
+            'doodle-space',
+            'doodle-neon',
+            'doodle-deep-sea',
+            'doodle-terminal',
+            'doodle-storm',
+            'doodle-royal-velvet',
+            'doodle-pumpkin',
+            'doodle-blueprint',
+            'doodle-sepia-noir',
+            'doodle-firelight',
+            'doodle-high-contrast',
+        ]) {
+            expect(mocks.theme).toHaveBeenCalledWith(
+                name,
+                expect.objectContaining({ base: 'vs-dark' })
+            );
+        }
+        for (const name of [
             'doodle-light',
-            expect.objectContaining({ base: 'vs' })
-        );
+            'doodle-parchment',
+            'doodle-sakura',
+            'doodle-glacier',
+        ]) {
+            expect(mocks.theme).toHaveBeenCalledWith(
+                name,
+                expect.objectContaining({ base: 'vs' })
+            );
+        }
         const worker = (
             self as unknown as {
                 MonacoEnvironment: { getWorker: () => unknown };

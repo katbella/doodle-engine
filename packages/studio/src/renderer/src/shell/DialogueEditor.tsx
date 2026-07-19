@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { TriangleAlert } from '../lib/icons';
+import { Plus, TriangleAlert } from '../lib/icons';
 import { parseDialogue, applyDialogueEdits } from '@doodle-engine/core';
 import type { Dialogue, DialogueNode } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
@@ -340,7 +340,7 @@ function DialogueEditorInner({
                 <div className="dlg__outline-head">
                     <span>Nodes</span>
                     <button className="dlg__add" onClick={addNode}>
-                        + Node
+                        <Plus size={13} /> Node
                     </button>
                 </div>
                 {dialogue.nodes.map((node) => (

@@ -85,25 +85,63 @@ function defineThemes(): void {
         { token: 'string', foreground: 'c8d6a0' },
         { token: 'number', foreground: '9fb8d6' },
     ];
-    monaco.editor.defineTheme('doodle-dark', {
+    const darkBackgrounds: Array<[string, string]> = [
+        ['doodle-dark', '#101113'],
+        ['doodle-forest', '#0f1a10'],
+        ['doodle-space', '#0e1019'],
+        ['doodle-neon', '#0e0718'],
+        ['doodle-deep-sea', '#061518'],
+        ['doodle-storm', '#101623'],
+        ['doodle-royal-velvet', '#19080c'],
+        ['doodle-pumpkin', '#161514'],
+        ['doodle-blueprint', '#102540'],
+        ['doodle-sepia-noir', '#191510'],
+        ['doodle-firelight', '#1c110a'],
+        ['doodle-high-contrast', '#000000'],
+    ];
+    for (const [name, background] of darkBackgrounds) {
+        monaco.editor.defineTheme(name, {
+            base: 'vs-dark',
+            inherit: true,
+            rules,
+            colors: { 'editor.background': background },
+        });
+    }
+    monaco.editor.defineTheme('doodle-terminal', {
         base: 'vs-dark',
         inherit: true,
-        rules,
-        colors: { 'editor.background': '#101113' },
-    });
-    monaco.editor.defineTheme('doodle-light', {
-        base: 'vs',
-        inherit: true,
         rules: [
-            { token: 'comment', foreground: '8a8a8a', fontStyle: 'italic' },
-            { token: 'keyword', foreground: 'c0392b' },
-            { token: 'type', foreground: '9a6b1a' },
-            { token: 'key', foreground: 'c0392b' },
-            { token: 'string', foreground: '4c7a1f' },
-            { token: 'number', foreground: '2c5aa0' },
+            { token: 'comment', foreground: '3e6b4d', fontStyle: 'italic' },
+            { token: 'keyword', foreground: '66ff99' },
+            { token: 'type', foreground: 'ffd75e' },
+            { token: 'key', foreground: '66ff99' },
+            { token: 'string', foreground: 'b3f0c2' },
+            { token: 'number', foreground: '8ff0b0' },
         ],
-        colors: { 'editor.background': '#ffffff' },
+        colors: { 'editor.background': '#041008' },
     });
+    const lightRules = [
+        { token: 'comment', foreground: '8a8a8a', fontStyle: 'italic' },
+        { token: 'keyword', foreground: 'c0392b' },
+        { token: 'type', foreground: '9a6b1a' },
+        { token: 'key', foreground: 'c0392b' },
+        { token: 'string', foreground: '4c7a1f' },
+        { token: 'number', foreground: '2c5aa0' },
+    ];
+    const lightBackgrounds: Array<[string, string]> = [
+        ['doodle-light', '#ffffff'],
+        ['doodle-parchment', '#f7f0e3'],
+        ['doodle-sakura', '#fdf6f8'],
+        ['doodle-glacier', '#f5f9fc'],
+    ];
+    for (const [name, background] of lightBackgrounds) {
+        monaco.editor.defineTheme(name, {
+            base: 'vs',
+            inherit: true,
+            rules: lightRules,
+            colors: { 'editor.background': background },
+        });
+    }
 }
 
 /** The Monaco language id for a file path. */

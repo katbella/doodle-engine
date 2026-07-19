@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { THEMES } from '../../shared/project';
 import type {
     NewProjectOptions,
     OpenProject,
@@ -50,8 +51,7 @@ import {
     Play,
     Monitor,
     Square,
-    Sun,
-    Moon,
+    Palette,
     CircleHelp,
 } from './lib/icons';
 
@@ -122,11 +122,12 @@ export function App() {
     const [preview, setPreview] = useState<PreviewStatus | null>(null);
     const [previewBusy, setPreviewBusy] = useState(false);
     const [previewLog, setPreviewLog] = useState<string[]>([]);
-    const [theme, setTheme] = useState<ThemeMode>(() =>
-        localStorage.getItem('doodle-studio-theme') === 'light'
-            ? 'light'
-            : 'dark'
-    );
+    const [theme, setTheme] = useState<ThemeMode>(() => {
+        const saved = localStorage.getItem('doodle-studio-theme');
+        return THEMES.some((t) => t.id === saved)
+            ? (saved as ThemeMode)
+            : 'dark';
+    });
     const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
         const saved = localStorage.getItem('doodle-studio-theme-color');
         return saved === 'red' ||
@@ -135,7 +136,7 @@ export function App() {
             saved === 'pink' ||
             saved === 'gold'
             ? saved
-            : 'blue';
+            : 'default';
     });
     const [zoomFactor, setZoomFactor] = useState(() => {
         const stored = Number(localStorage.getItem('doodle-studio-zoom'));
@@ -305,6 +306,10 @@ export function App() {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute(
+            'data-theme-base',
+            THEMES.find((t) => t.id === theme)?.base ?? 'dark'
+        );
         document.documentElement.setAttribute('data-accent', themeColor);
         localStorage.setItem('doodle-studio-theme', theme);
         localStorage.setItem('doodle-studio-theme-color', themeColor);
@@ -315,11 +320,6 @@ export function App() {
         localStorage.setItem('doodle-studio-zoom', String(zoomFactor));
         window.studio.setZoomFactor?.(zoomFactor);
     }, [zoomFactor]);
-
-    const toggleTheme = useCallback(
-        () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
-        []
-    );
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -788,8 +788,6 @@ export function App() {
                     recent={recent}
                     loading={loading}
                     error={openError}
-                    theme={theme}
-                    onToggleTheme={toggleTheme}
                 />
                 {showNewProject && (
                     <NewProjectModal
@@ -887,17 +885,16 @@ export function App() {
             icon: <CircleHelp size={15} />,
             run: () => void window.studio.openDocumentation(),
         },
-        {
-            id: 'act:theme',
-            label:
-                theme === 'dark'
-                    ? 'Switch to light mode'
-                    : 'Switch to dark mode',
-            group: 'Actions',
-            keywords: 'theme dark light appearance',
-            icon: theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />,
-            run: toggleTheme,
-        },
+        ...THEMES.map(
+            (t): Command => ({
+                id: `act:theme:${t.id}`,
+                label: `Theme: ${t.label}`,
+                group: 'Actions',
+                keywords: 'theme appearance dark light',
+                icon: <Palette size={15} />,
+                run: () => setTheme(t.id),
+            })
+        ),
     ];
     const fileCommands: Command[] = sections.flatMap((section) =>
         section.items.map((item) => ({
@@ -1052,8 +1049,6 @@ export function App() {
                 onOpenReference={openReferencedFile}
                 lastValidatedAt={lastValidatedAt}
                 lastSavedAt={lastSavedAt}
-                theme={theme}
-                onToggleTheme={toggleTheme}
                 playtestStart={playtestStart}
             />
             {loading && (

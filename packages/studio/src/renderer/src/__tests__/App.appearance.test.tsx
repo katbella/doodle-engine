@@ -47,18 +47,18 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('Studio appearance preferences', () => {
-    it('defaults to blue and applies native Themes menu changes', async () => {
+    it('defaults to the theme accent and applies native Themes menu changes', async () => {
         const bridge = installBridge();
         render(<App />);
 
         await waitFor(() =>
             expect(bridge.setThemeMenuState).toHaveBeenLastCalledWith({
                 mode: 'dark',
-                color: 'blue',
+                color: 'default',
             })
         );
         expect(document.documentElement.getAttribute('data-accent')).toBe(
-            'blue'
+            'default'
         );
 
         act(() => bridge.menuHandlers()?.onThemeColor('violet'));
@@ -77,13 +77,48 @@ describe('Studio appearance preferences', () => {
                 'light'
             )
         );
+        expect(document.documentElement.getAttribute('data-theme-base')).toBe(
+            'light'
+        );
         expect(bridge.setThemeMenuState).toHaveBeenLastCalledWith({
             mode: 'light',
             color: 'violet',
         });
+
+        act(() => bridge.menuHandlers()?.onThemeMode('forest'));
+        await waitFor(() =>
+            expect(document.documentElement.getAttribute('data-theme')).toBe(
+                'forest'
+            )
+        );
+        expect(document.documentElement.getAttribute('data-theme-base')).toBe(
+            'dark'
+        );
+        expect(localStorage.getItem('doodle-studio-theme')).toBe('forest');
+        expect(bridge.setThemeMenuState).toHaveBeenLastCalledWith({
+            mode: 'forest',
+            color: 'violet',
+        });
     });
 
-    it('restores Awesome Red and light mode from persisted preferences', async () => {
+    it('falls back to dark when a saved theme no longer exists', async () => {
+        localStorage.setItem('doodle-studio-theme', 'sepia');
+        const bridge = installBridge();
+
+        render(<App />);
+
+        await waitFor(() =>
+            expect(bridge.setThemeMenuState).toHaveBeenCalledWith({
+                mode: 'dark',
+                color: 'default',
+            })
+        );
+        expect(document.documentElement.getAttribute('data-theme')).toBe(
+            'dark'
+        );
+    });
+
+    it('restores the red accent and light mode from persisted preferences', async () => {
         localStorage.setItem('doodle-studio-theme', 'light');
         localStorage.setItem('doodle-studio-theme-color', 'red');
         const bridge = installBridge();

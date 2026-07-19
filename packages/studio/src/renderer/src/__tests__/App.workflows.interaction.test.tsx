@@ -22,7 +22,6 @@ vi.mock('../shell/Welcome', () => ({
             <button onClick={() => props.onOpenRecent('C:/recent')}>
                 Welcome recent
             </button>
-            <button onClick={props.onToggleTheme}>Welcome theme</button>
         </div>
     ),
 }));
@@ -65,7 +64,6 @@ vi.mock('../shell/TopBar', () => ({
             <button onClick={props.onOpenPreview}>Open preview</button>
             <button onClick={props.onPlaytest}>Open playtest</button>
             <button onClick={props.onOpenPalette}>Open palette</button>
-            <button onClick={props.onToggleTheme}>Top theme</button>
         </div>
     ),
 }));
@@ -604,8 +602,8 @@ describe('App workflows', () => {
         ).toBeGreaterThanOrEqual(360);
         await user.click(screen.getByRole('button', { name: 'Open palette' }));
         await user.click(
-            screen.getByRole('button', { name: /Palette Switch to light mode/ })
+            screen.getByRole('button', { name: 'Palette Theme: Neon City' })
         );
-        expect(document.documentElement.dataset.theme).toBe('light');
+        expect(document.documentElement.dataset.theme).toBe('neon');
     });
 });

@@ -195,7 +195,7 @@ describe('DialogueEditor author journeys', () => {
         const user = userEvent.setup();
         const view = renderEditor();
 
-        await user.click(await screen.findByRole('button', { name: '+ Node' }));
+        await user.click(await screen.findByRole('button', { name: 'Node' }));
         const line = screen.getByRole('textbox', { name: 'Line' });
         await user.clear(line);
         await user.type(line, 'A new ending.');
@@ -302,7 +302,7 @@ NODE new_node
         const user = userEvent.setup();
         const view = renderEditor();
 
-        await user.click(await screen.findByRole('button', { name: '+ Node' }));
+        await user.click(await screen.findByRole('button', { name: 'Node' }));
         expect(screen.getByDisplayValue('new_node_2')).toBeTruthy();
         await user.click(screen.getByRole('button', { name: /Choice/ }));
 

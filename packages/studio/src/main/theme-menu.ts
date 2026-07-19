@@ -1,5 +1,6 @@
 import type { MenuItemConstructorOptions } from 'electron';
-import type { ThemeColor, ThemeMode, ThemeState } from '../shared/project';
+import { THEMES } from '../shared/project';
+import type { ThemeColor, ThemeState } from '../shared/project';
 
 export type ThemeMenuSender = (channel: string, value: string) => void;
 
@@ -7,65 +8,63 @@ export function createThemeMenu(
     state: ThemeState,
     send: ThemeMenuSender
 ): MenuItemConstructorOptions {
+    const themeItem = (
+        theme: (typeof THEMES)[number]
+    ): MenuItemConstructorOptions => ({
+        id: `theme-mode-${theme.id}`,
+        label: theme.label,
+        type: 'checkbox',
+        checked: state.mode === theme.id,
+        click: () => send('menu:themeMode', theme.id),
+    });
     return {
         label: 'Themes',
         submenu: [
-            {
-                id: 'theme-mode-dark',
-                label: 'Dark Mode',
-                type: 'checkbox',
-                checked: state.mode === 'dark',
-                click: () => send('menu:themeMode', 'dark'),
-            },
-            {
-                id: 'theme-mode-light',
-                label: 'Light Mode',
-                type: 'checkbox',
-                checked: state.mode === 'light',
-                click: () => send('menu:themeMode', 'light'),
-            },
+            ...THEMES.filter((theme) => theme.base === 'dark').map(themeItem),
+            { type: 'separator' },
+            ...THEMES.filter((theme) => theme.base === 'light').map(themeItem),
             { type: 'separator' },
             {
-                label: 'Colors',
+                label: 'Accent Colors',
                 submenu: [
                     {
-                        id: 'theme-color-blue',
-                        label: 'Default Blue',
+                        id: 'theme-color-default',
+                        label: 'Default',
                         type: 'checkbox',
-                        checked: state.color === 'blue',
-                        click: () => send('menu:themeColor', 'blue'),
+                        checked: state.color === 'default',
+                        click: () => send('menu:themeColor', 'default'),
                     },
                     {
                         id: 'theme-color-red',
-                        label: 'Awesome Red',
+                        label: 'Red',
                         type: 'checkbox',
                         checked: state.color === 'red',
                         click: () => send('menu:themeColor', 'red'),
                     },
                     {
                         id: 'theme-color-violet',
-                        label: 'Very Violet',
+                        label: 'Violet',
                         type: 'checkbox',
                         checked: state.color === 'violet',
                         click: () => send('menu:themeColor', 'violet'),
                     },
                     {
                         id: 'theme-color-green',
-                        label: 'Goodly Green',
+                        label: 'Green',
                         type: 'checkbox',
                         checked: state.color === 'green',
                         click: () => send('menu:themeColor', 'green'),
                     },
                     {
                         id: 'theme-color-pink',
-                        label: 'Primetime Pink',
+                        label: 'Pink',
                         type: 'checkbox',
                         checked: state.color === 'pink',
                         click: () => send('menu:themeColor', 'pink'),
                     },
                     {
                         id: 'theme-color-gold',
-                        label: 'Gold-plated Gold',
+                        label: 'Gold',
                         type: 'checkbox',
                         checked: state.color === 'gold',
                         click: () => send('menu:themeColor', 'gold'),
@@ -80,12 +79,12 @@ export function syncThemeMenuChecks(
     state: ThemeState,
     getItem: (id: string) => { checked: boolean } | undefined
 ): void {
-    for (const mode of ['dark', 'light'] as ThemeMode[]) {
-        const item = getItem(`theme-mode-${mode}`);
-        if (item) item.checked = state.mode === mode;
+    for (const theme of THEMES) {
+        const item = getItem(`theme-mode-${theme.id}`);
+        if (item) item.checked = state.mode === theme.id;
     }
     for (const color of [
-        'blue',
+        'default',
         'red',
         'violet',
         'green',

@@ -88,7 +88,7 @@ export function MonacoEditor({
             height="100%"
             value={value}
             language={language}
-            theme={theme === 'light' ? 'doodle-light' : 'doodle-dark'}
+            theme={`doodle-${theme}`}
             onChange={(v) => onChange(v ?? '')}
             onMount={onMount}
             options={{

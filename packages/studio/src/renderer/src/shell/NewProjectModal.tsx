@@ -156,7 +156,7 @@ export function NewProjectModal({
                                 English text with a locale starter file
                             </option>
                             <option value="localized">
-                                English + Swedish localization example
+                                English and Swedish localization example
                             </option>
                         </select>
                     </label>

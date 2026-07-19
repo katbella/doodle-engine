@@ -151,7 +151,7 @@ extension:
         const selects = screen.getAllByRole('combobox');
         await user.selectOptions(selects[0], 'town');
         await user.selectOptions(selects[1], '');
-        await user.click(screen.getByRole('button', { name: '+ Add stat' }));
+        await user.click(screen.getByRole('button', { name: 'Add stat' }));
         expect(screen.getByDisplayValue('stat')).toBeTruthy();
         const strength = screen.getByDisplayValue('strength');
         await user.clear(strength);

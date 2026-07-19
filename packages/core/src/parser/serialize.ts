@@ -16,6 +16,13 @@ import type {
 } from '../types/entities';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
+import {
+    conditionDescriptor,
+    effectDescriptor,
+    type ArgKind,
+    type ConditionDescriptor,
+    type EffectDescriptor,
+} from './descriptors';
 
 const INDENT = '  ';
 
@@ -31,100 +38,74 @@ function displayText(text: string): string {
     return text;
 }
 
+export interface DlgToken {
+    /** Reserved word, author identifier, scalar value, or display text. */
+    kind: 'keyword' | 'id' | 'value' | 'text';
+    text: string;
+}
+
+function tokenKind(kind: ArgKind): DlgToken['kind'] {
+    if (
+        kind === 'number' ||
+        kind === 'hours' ||
+        kind === 'boolean' ||
+        kind === 'value'
+    ) {
+        return 'value';
+    }
+    if (kind === 'text') return 'text';
+    return 'id';
+}
+
+function descriptorTokens(
+    entity: Condition | Effect,
+    descriptor: ConditionDescriptor | EffectDescriptor
+): DlgToken[] {
+    const tokens: DlgToken[] = descriptor.keyword
+        .split(/\s+/)
+        .map((text) => ({ kind: 'keyword', text }));
+    const values = entity as unknown as Record<string, unknown>;
+
+    for (const arg of descriptor.args) {
+        const value = values[arg.name];
+        if (
+            arg.optional &&
+            (value === undefined || value === null || value === '')
+        ) {
+            continue;
+        }
+        const text = String(value);
+        tokens.push({
+            kind: tokenKind(arg.kind),
+            text: arg.kind === 'text' ? displayText(text) : text,
+        });
+    }
+
+    return tokens;
+}
+
+/** Split a condition's canonical `.dlg` form into semantic tokens. */
+export function conditionTokens(condition: Condition): DlgToken[] {
+    return descriptorTokens(condition, conditionDescriptor(condition.type));
+}
+
+/** Split an effect's canonical `.dlg` form into semantic tokens. */
+export function effectTokens(effect: Effect): DlgToken[] {
+    return descriptorTokens(effect, effectDescriptor(effect.type));
+}
+
 /** Serialize a condition to its `.dlg` form (e.g. `hasFlag metBartender`). */
 export function serializeCondition(condition: Condition): string {
-    switch (condition.type) {
-        case 'hasFlag':
-            return `hasFlag ${condition.flag}`;
-        case 'notFlag':
-            return `notFlag ${condition.flag}`;
-        case 'hasItem':
-            return `hasItem ${condition.itemId}`;
-        case 'variableEquals':
-            return `variableEquals ${condition.variable} ${condition.value}`;
-        case 'variableGreaterThan':
-            return `variableGreaterThan ${condition.variable} ${condition.value}`;
-        case 'variableLessThan':
-            return `variableLessThan ${condition.variable} ${condition.value}`;
-        case 'atLocation':
-            return `atLocation ${condition.locationId}`;
-        case 'questAtStage':
-            return `questAtStage ${condition.questId} ${condition.stageId}`;
-        case 'characterAt':
-            return `characterAt ${condition.characterId} ${condition.locationId}`;
-        case 'characterInParty':
-            return `characterInParty ${condition.characterId}`;
-        case 'relationshipAbove':
-            return `relationshipAbove ${condition.characterId} ${condition.value}`;
-        case 'relationshipBelow':
-            return `relationshipBelow ${condition.characterId} ${condition.value}`;
-        case 'timeIs':
-            return `timeIs ${condition.startHour} ${condition.endHour}`;
-        case 'itemAt':
-            return `itemAt ${condition.itemId} ${condition.locationId}`;
-        case 'roll':
-            return `roll ${condition.min} ${condition.max} ${condition.threshold}`;
-    }
+    return conditionTokens(condition)
+        .map((token) => token.text)
+        .join(' ');
 }
 
 /** Serialize an effect to its `.dlg` form (e.g. `SET flag metBartender`). */
 export function serializeEffect(effect: Effect): string {
-    switch (effect.type) {
-        case 'setFlag':
-            return `SET flag ${effect.flag}`;
-        case 'clearFlag':
-            return `CLEAR flag ${effect.flag}`;
-        case 'setVariable':
-            return `SET variable ${effect.variable} ${effect.value}`;
-        case 'addVariable':
-            return `ADD variable ${effect.variable} ${effect.value}`;
-        case 'addItem':
-            return `ADD item ${effect.itemId}`;
-        case 'removeItem':
-            return `REMOVE item ${effect.itemId}`;
-        case 'moveItem':
-            return `MOVE item ${effect.itemId} ${effect.locationId}`;
-        case 'goToLocation':
-            return `GOTO location ${effect.locationId}`;
-        case 'advanceTime':
-            return `ADVANCE time ${effect.hours}`;
-        case 'setQuestStage':
-            return `SET questStage ${effect.questId} ${effect.stageId}`;
-        case 'addJournalEntry':
-            return `ADD journalEntry ${effect.entryId}`;
-        case 'startDialogue':
-            return `START dialogue ${effect.dialogueId}`;
-        case 'endDialogue':
-            return `END dialogue`;
-        case 'setCharacterLocation':
-            return `SET characterLocation ${effect.characterId} ${effect.locationId}`;
-        case 'addToParty':
-            return `ADD toParty ${effect.characterId}`;
-        case 'removeFromParty':
-            return `REMOVE fromParty ${effect.characterId}`;
-        case 'setRelationship':
-            return `SET relationship ${effect.characterId} ${effect.value}`;
-        case 'addRelationship':
-            return `ADD relationship ${effect.characterId} ${effect.value}`;
-        case 'setCharacterStat':
-            return `SET characterStat ${effect.characterId} ${effect.stat} ${effect.value}`;
-        case 'addCharacterStat':
-            return `ADD characterStat ${effect.characterId} ${effect.stat} ${effect.value}`;
-        case 'setMapEnabled':
-            return `SET mapEnabled ${effect.enabled}`;
-        case 'playMusic':
-            return effect.track ? `MUSIC ${effect.track}` : `MUSIC`;
-        case 'playSound':
-            return `SOUND ${effect.sound}`;
-        case 'notify':
-            return `NOTIFY ${displayText(effect.message)}`;
-        case 'playVideo':
-            return `VIDEO ${effect.file}`;
-        case 'showInterlude':
-            return `INTERLUDE ${effect.interludeId}`;
-        case 'roll':
-            return `ROLL ${effect.variable} ${effect.min} ${effect.max}`;
-    }
+    return effectTokens(effect)
+        .map((token) => token.text)
+        .join(' ');
 }
 
 /**

@@ -152,7 +152,7 @@ describe('GameConfigForm author journeys', () => {
         renderForm();
 
         await user.click(
-            await screen.findByRole('button', { name: '+ Add flag' })
+            await screen.findByRole('button', { name: 'Add flag' })
         );
         const name = screen.getByDisplayValue('newFlag');
         await user.clear(name);
@@ -251,7 +251,7 @@ describe('GameConfigForm author journeys', () => {
         const view = renderForm();
 
         await user.click(
-            await screen.findByRole('button', { name: '+ Add flag' })
+            await screen.findByRole('button', { name: 'Add flag' })
         );
         const newFlag = screen.getByDisplayValue('newFlag');
         await user.clear(newFlag);
@@ -260,9 +260,7 @@ describe('GameConfigForm author journeys', () => {
             screen.getByRole('button', { name: 'Remove introSeen' })
         );
 
-        await user.click(
-            screen.getByRole('button', { name: '+ Add variable' })
-        );
+        await user.click(screen.getByRole('button', { name: 'Add variable' }));
         const newVariable = screen.getByDisplayValue('newVar');
         await user.clear(newVariable);
         await user.type(newVariable, 'heroName');

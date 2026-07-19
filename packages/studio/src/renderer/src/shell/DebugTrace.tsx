@@ -6,10 +6,14 @@
  */
 import { useState, type ReactNode } from 'react';
 import {
+    conditionTokens,
+    effectTokens,
     serializeCondition,
     serializeEffect,
+    type DlgToken,
     type TraceEvent,
 } from '@doodle-engine/core';
+import { ArrowRight } from '../lib/icons';
 
 type KindFilter = 'all' | 'nodeEnter' | 'condition' | 'effect' | 'transition';
 
@@ -82,7 +86,14 @@ export function DebugTrace({ trace }: { trace: readonly TraceEvent[] }) {
                     </div>
                 ) : (
                     rows.map(({ event, row }) => (
-                        <div key={event.seq} className="trace__row">
+                        <div
+                            key={event.seq}
+                            className={`trace__row ${
+                                event.kind === 'nodeEnter'
+                                    ? 'trace__row--node'
+                                    : ''
+                            }`}
+                        >
                             <span
                                 className={`trace__kind trace__kind--${event.kind}`}
                             >
@@ -117,12 +128,32 @@ interface Row {
     result?: boolean;
 }
 
+function TokenList({ tokens }: { tokens: readonly DlgToken[] }) {
+    return tokens.map((token, index) => (
+        <span
+            key={`${index}-${token.kind}`}
+            className={`trace__tok trace__tok--${token.kind}`}
+        >
+            {index > 0 ? ' ' : ''}
+            {token.text}
+        </span>
+    ));
+}
+
 /** Render one trace event as a display row: a kind tag, a description, and an
  * optional pass/fail badge for conditions. */
 function describe(event: TraceEvent): Row {
     switch (event.kind) {
         case 'nodeEnter':
-            return { tag: 'NODE', text: event.nodeId };
+            return {
+                tag: 'NODE',
+                text: event.nodeId,
+                display: (
+                    <span className="trace__tok trace__tok--id">
+                        {event.nodeId}
+                    </span>
+                ),
+            };
         case 'condition': {
             const values = Object.entries(event.resolvedValues)
                 .map(([, v]) => String(v))
@@ -131,11 +162,31 @@ function describe(event: TraceEvent): Row {
             return {
                 tag: 'CONDITION',
                 text: values ? `${source} = ${values}` : source,
+                display: (
+                    <>
+                        <TokenList tokens={conditionTokens(event.condition)} />
+                        {values && (
+                            <>
+                                {' '}
+                                <span className="trace__tok trace__tok--keyword">
+                                    =
+                                </span>{' '}
+                                <span className="trace__tok trace__tok--value">
+                                    {values}
+                                </span>
+                            </>
+                        )}
+                    </>
+                ),
                 result: event.result,
             };
         }
         case 'effect':
-            return { tag: 'EFFECT', text: serializeEffect(event.effect) };
+            return {
+                tag: 'EFFECT',
+                text: serializeEffect(event.effect),
+                display: <TokenList tokens={effectTokens(event.effect)} />,
+            };
         case 'transition': {
             const toNode = event.toNode ?? 'end';
             return {
@@ -143,8 +194,17 @@ function describe(event: TraceEvent): Row {
                 text: `${event.fromNode} to ${toNode}`,
                 display: (
                     <>
-                        {event.fromNode}{' '}
-                        <span className="trace__to">to</span> {toNode}
+                        <span className="trace__tok trace__tok--id">
+                            {event.fromNode}
+                        </span>{' '}
+                        <ArrowRight
+                            className="trace__to"
+                            size={12}
+                            aria-hidden="true"
+                        />{' '}
+                        <span className="trace__tok trace__tok--id">
+                            {toNode}
+                        </span>
                     </>
                 ),
             };
@@ -153,6 +213,19 @@ function describe(event: TraceEvent): Row {
             return {
                 tag: 'HIDDEN',
                 text: `${event.choiceId}: ${serializeCondition(event.failedCondition)}`,
+                display: (
+                    <>
+                        <span className="trace__tok trace__tok--id">
+                            {event.choiceId}
+                        </span>
+                        <span className="trace__tok trace__tok--keyword">
+                            :{' '}
+                        </span>
+                        <TokenList
+                            tokens={conditionTokens(event.failedCondition)}
+                        />
+                    </>
+                ),
                 result: false,
             };
         case 'error':

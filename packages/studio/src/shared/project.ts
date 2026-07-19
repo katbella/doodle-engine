@@ -21,11 +21,41 @@ export type StudioAssetKind =
     | 'shellMusic'
     | 'shellSound';
 
-export type ThemeMode = 'dark' | 'light';
+export const THEMES = [
+    { id: 'dark', label: 'Doodle Dark', base: 'dark' },
+    { id: 'forest', label: 'Into the Woods', base: 'dark' },
+    { id: 'space', label: 'Outer Space', base: 'dark' },
+    { id: 'neon', label: 'Neon City', base: 'dark' },
+    { id: 'deep-sea', label: 'Deep Sea', base: 'dark' },
+    { id: 'terminal', label: 'Terminal', base: 'dark' },
+    { id: 'storm', label: 'Storm', base: 'dark' },
+    { id: 'royal-velvet', label: 'Royal Velvet', base: 'dark' },
+    { id: 'pumpkin', label: 'Pumpkin', base: 'dark' },
+    { id: 'blueprint', label: 'Blueprint', base: 'dark' },
+    { id: 'sepia-noir', label: 'Sepia Noir', base: 'dark' },
+    { id: 'firelight', label: 'Firelight', base: 'dark' },
+    { id: 'high-contrast', label: 'High Contrast', base: 'dark' },
+    { id: 'light', label: 'Doodle Light', base: 'light' },
+    { id: 'parchment', label: 'Parchment', base: 'light' },
+    { id: 'sakura', label: 'Sakura', base: 'light' },
+    { id: 'glacier', label: 'Glacier', base: 'light' },
+] as const satisfies ReadonlyArray<{
+    id: string;
+    label: string;
+    base: 'dark' | 'light';
+}>;
+
+export type ThemeMode = (typeof THEMES)[number]['id'];
 
 export type ScaffoldLocalizationMode = 'literal' | 'localized';
 
-export type ThemeColor = 'blue' | 'red' | 'violet' | 'green' | 'pink' | 'gold';
+export type ThemeColor =
+    | 'default'
+    | 'red'
+    | 'violet'
+    | 'green'
+    | 'pink'
+    | 'gold';
 
 export interface ThemeState {
     mode: ThemeMode;

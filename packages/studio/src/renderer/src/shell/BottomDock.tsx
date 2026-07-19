@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Check, CircleHelp, Moon, Sun, X } from '../lib/icons';
+import { ArrowLeft, Check, CircleHelp, X } from '../lib/icons';
 import type {
     OpenProject,
     PreviewStatus,
@@ -45,8 +45,6 @@ export function BottomDock({
     onOpenReference,
     lastValidatedAt,
     lastSavedAt,
-    theme,
-    onToggleTheme,
     playtestStart,
 }: {
     project: OpenProject;
@@ -73,8 +71,6 @@ export function BottomDock({
     lastValidatedAt: Date | null;
     /** When an editor last wrote this project's content to disk. */
     lastSavedAt: Date | null;
-    theme: 'dark' | 'light';
-    onToggleTheme: () => void;
     /** A "Play from here" request for the playtest session. */
     playtestStart: {
         dialogueId: string;
@@ -142,26 +138,6 @@ export function BottomDock({
                         title="Open Doodle Studio documentation"
                     >
                         <CircleHelp size={15} />
-                    </button>
-                    <button
-                        className="btn btn--icon"
-                        onClick={onToggleTheme}
-                        aria-label={
-                            theme === 'dark'
-                                ? 'Switch to light mode'
-                                : 'Switch to dark mode'
-                        }
-                        title={
-                            theme === 'dark'
-                                ? 'Switch to light mode'
-                                : 'Switch to dark mode'
-                        }
-                    >
-                        {theme === 'dark' ? (
-                            <Sun size={14} />
-                        ) : (
-                            <Moon size={14} />
-                        )}
                     </button>
                 </div>
             </div>
@@ -279,7 +255,7 @@ function SymbolsView({
                         className="symbol-uses__back"
                         onClick={() => setSelected(null)}
                     >
-                        ← Flags &amp; vars
+                        <ArrowLeft size={13} /> Flags &amp; vars
                     </button>
                     <span className="mono">{selected.id}</span>
                     <span className="symbol__count">

@@ -37,8 +37,6 @@ describe('Welcome', () => {
                 ]}
                 loading={false}
                 error={null}
-                theme="dark"
-                onToggleTheme={vi.fn()}
             />
         );
 

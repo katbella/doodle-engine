@@ -27,6 +27,8 @@ describe('renderer hooks', () => {
         expect(screen.getByText('dark')).toBeTruthy();
         document.documentElement.setAttribute('data-theme', 'light');
         await waitFor(() => expect(screen.getByText('light')).toBeTruthy());
+        document.documentElement.setAttribute('data-theme', 'forest');
+        await waitFor(() => expect(screen.getByText('forest')).toBeTruthy());
         document.documentElement.setAttribute('data-theme', 'unknown');
         await waitFor(() => expect(screen.getByText('dark')).toBeTruthy());
         unmount();

@@ -14,7 +14,12 @@ import {
     effectDescriptor,
 } from '../parser/descriptors';
 import { parseCondition, parseEffect } from '../parser';
-import { serializeCondition, serializeEffect } from '../parser/serialize';
+import {
+    conditionTokens,
+    effectTokens,
+    serializeCondition,
+    serializeEffect,
+} from '../parser/serialize';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
 
@@ -123,6 +128,17 @@ describe('condition descriptors', () => {
         }
     });
 
+    it('builds tokens that join to the canonical serialization', () => {
+        for (const descriptor of CONDITION_DESCRIPTORS) {
+            const condition = parseCondition(conditionLine(descriptor));
+            expect(
+                conditionTokens(condition)
+                    .map(({ text }) => text)
+                    .join(' ')
+            ).toBe(serializeCondition(condition));
+        }
+    });
+
     it('lookup throws for an unknown type', () => {
         expect(() => conditionDescriptor('nope' as never)).toThrow();
     });
@@ -142,6 +158,29 @@ describe('effect descriptors', () => {
             expect(parsed.type).toBe(d.type);
             expect(parseEffect(serializeEffect(parsed)).type).toBe(d.type);
         }
+    });
+
+    it('builds tokens that join to the canonical serialization', () => {
+        for (const descriptor of EFFECT_DESCRIPTORS) {
+            const effect = parseEffect(effectLine(descriptor));
+            expect(
+                effectTokens(effect)
+                    .map(({ text }) => text)
+                    .join(' ')
+            ).toBe(serializeEffect(effect));
+        }
+    });
+
+    it('omits empty optional arguments and quotes display text', () => {
+        expect(effectTokens({ type: 'playMusic' })).toEqual([
+            { kind: 'keyword', text: 'MUSIC' },
+        ]);
+        expect(
+            effectTokens({ type: 'notify', message: 'Found #1 "coin"' })
+        ).toEqual([
+            { kind: 'keyword', text: 'NOTIFY' },
+            { kind: 'text', text: '"Found #1 \\"coin\\""' },
+        ]);
     });
 
     it('lookup throws for an unknown type', () => {

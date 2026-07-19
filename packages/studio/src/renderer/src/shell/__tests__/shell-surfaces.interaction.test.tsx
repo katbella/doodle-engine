@@ -10,12 +10,11 @@ import { Welcome } from '../Welcome';
 afterEach(cleanup);
 
 describe('shell surfaces', () => {
-    it('drives welcome actions, recent projects, errors, and theme choices', async () => {
+    it('drives welcome actions, recent projects, and errors', async () => {
         const actions = {
             open: vi.fn(),
             newProject: vi.fn(),
             recent: vi.fn(),
-            theme: vi.fn(),
         };
         const user = userEvent.setup();
         const { rerender } = render(
@@ -33,8 +32,6 @@ describe('shell surfaces', () => {
                 ]}
                 loading={false}
                 error="invalid project"
-                theme="dark"
-                onToggleTheme={actions.theme}
             />
         );
         await user.click(screen.getByRole('button', { name: 'Open project…' }));
@@ -44,13 +41,9 @@ describe('shell surfaces', () => {
                 name: 'Open recent project Story',
             })
         );
-        await user.click(
-            screen.getByRole('button', { name: 'Switch to light mode' })
-        );
         expect(actions.open).toHaveBeenCalledOnce();
         expect(actions.newProject).toHaveBeenCalledOnce();
         expect(actions.recent).toHaveBeenCalledWith('C:/story');
-        expect(actions.theme).toHaveBeenCalledOnce();
         expect(screen.getByText(/invalid project/)).toBeTruthy();
 
         rerender(
@@ -62,15 +55,10 @@ describe('shell surfaces', () => {
                 recent={[]}
                 loading={true}
                 error="hidden"
-                theme="light"
-                onToggleTheme={actions.theme}
             />
         );
         expect(screen.getByText('Reading project…')).toBeTruthy();
         expect(screen.queryByText(/hidden/)).toBeNull();
-        expect(
-            screen.getByRole('button', { name: 'Switch to dark mode' })
-        ).toBeTruthy();
     });
 
     it('shows dependency state and install progress', async () => {

@@ -193,7 +193,10 @@ export {
     serializeNode,
     serializeCondition,
     serializeEffect,
+    conditionTokens,
+    effectTokens,
 } from './parser/serialize';
+export type { DlgToken } from './parser/serialize';
 
 // Visual-editor write-back (splices changed nodes, preserving comments)
 export { applyDialogueEdits } from './parser/edit';

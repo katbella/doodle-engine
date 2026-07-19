@@ -147,7 +147,7 @@ locations:
   END
 
   CHOICE @choice.two
-    SET flag orderedDrink
+    SET flag metBartender
     GOTO end
   END
 
@@ -553,7 +553,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             expect(Math.abs(badgeMid - idMid)).toBeLessThanOrEqual(2);
 
             // The delete button keeps its danger color: same class family as
-            // "+ Node", so a stylesheet-order regression turns it accent-blue.
+            // the add-node button, so stylesheet order cannot make them match.
             const [deleteColor, addColor] = await window.evaluate(() => {
                 const del = document.querySelector('.node-editor__delete');
                 const add = document.querySelector('.dlg__outline .dlg__add');
@@ -610,6 +610,99 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '10b-play-from-here-dark.png'),
                 animations: 'disabled',
             });
+        });
+
+        await test.step('read the semantic trace across contrasting themes', async () => {
+            await window
+                .getByRole('button', { name: 'Order a drink.' })
+                .click();
+            await window.getByRole('button', { name: 'Debug trace' }).click();
+
+            const effectRow = window
+                .locator('.trace__row')
+                .filter({ hasText: 'EFFECT' });
+            await expect(
+                effectRow.locator('.trace__tok--keyword').filter({
+                    hasText: 'SET',
+                })
+            ).toBeVisible();
+            await expect(
+                effectRow.locator('.trace__tok--id').filter({
+                    hasText: 'metBartender',
+                })
+            ).toBeVisible();
+
+            await expect(
+                window.locator('.trace__result--fail').first()
+            ).toHaveText('FAIL');
+
+            const transitionRow = window
+                .locator('.trace__row')
+                .filter({ hasText: 'TRANSITION' });
+            await expect(transitionRow.locator('svg.trace__to')).toBeVisible();
+            await expect(transitionRow).not.toContainText('start to end');
+
+            const search = window.getByRole('textbox', {
+                name: 'Search trace by id',
+            });
+            await search.fill('start to end');
+            await expect(transitionRow).toBeVisible();
+            await search.fill('');
+
+            const setTheme = (theme: string) =>
+                app.evaluate(({ BrowserWindow }, value) => {
+                    BrowserWindow.getAllWindows()[0]?.webContents.send(
+                        'menu:themeMode',
+                        value
+                    );
+                }, theme);
+            const usesThemeToken = (selector: string, token: string) =>
+                window
+                    .locator(selector)
+                    .first()
+                    .evaluate((element, variable) => {
+                        const probe = document.createElement('span');
+                        probe.style.color = `var(${variable})`;
+                        document.body.append(probe);
+                        const matches =
+                            getComputedStyle(element).color ===
+                            getComputedStyle(probe).color;
+                        probe.remove();
+                        return matches;
+                    }, token);
+
+            for (const [theme, label] of [
+                ['dark', 'doodle-dark'],
+                ['parchment', 'parchment'],
+                ['terminal', 'terminal'],
+            ] as const) {
+                await setTheme(theme);
+                await expect
+                    .poll(() =>
+                        window.evaluate(() =>
+                            document.documentElement.getAttribute('data-theme')
+                        )
+                    )
+                    .toBe(theme);
+                await expect
+                    .poll(() =>
+                        usesThemeToken('.trace__tok--keyword', '--text-faint')
+                    )
+                    .toBe(true);
+                await expect
+                    .poll(() => usesThemeToken('.trace__tok--id', '--text'))
+                    .toBe(true);
+                await expect
+                    .poll(() =>
+                        usesThemeToken('.trace__result--fail', '--error')
+                    )
+                    .toBe(true);
+                await window.locator('.trace').screenshot({
+                    path: join(tourDir, `10e-debug-trace-${label}.png`),
+                    animations: 'disabled',
+                });
+            }
+            await setTheme('dark');
         });
 
         await test.step('tour the dialogue graph and jump back to a node', async () => {
@@ -679,9 +772,6 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     name: 'Open Doodle Studio documentation',
                 })
             ).toBeVisible();
-            await expect(
-                status.getByRole('button', { name: 'Switch to light mode' })
-            ).toBeVisible();
         });
 
         await test.step('show delete confirmation above the editor', async () => {
@@ -707,10 +797,87 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await confirm.getByRole('button', { name: 'Cancel' }).click();
         });
 
+        await test.step('tour the bundled themes and their default accents', async () => {
+            const setTheme = (theme: string) =>
+                app.evaluate(({ BrowserWindow }, value) => {
+                    BrowserWindow.getAllWindows()[0]?.webContents.send(
+                        'menu:themeMode',
+                        value
+                    );
+                }, theme);
+            const setAccent = (color: string) =>
+                app.evaluate(({ BrowserWindow }, value) => {
+                    BrowserWindow.getAllWindows()[0]?.webContents.send(
+                        'menu:themeColor',
+                        value
+                    );
+                }, color);
+            const accent = () =>
+                window.evaluate(() =>
+                    getComputedStyle(document.documentElement)
+                        .getPropertyValue('--accent')
+                        .trim()
+                );
+
+            for (const [theme, themeAccent] of [
+                ['forest', '#d9a514'],
+                ['space', '#a855f7'],
+                ['deep-sea', '#2dd4bf'],
+                ['terminal', '#33ff77'],
+                ['storm', '#ffd23f'],
+                ['royal-velvet', '#d9a514'],
+                ['pumpkin', '#e8631c'],
+                ['blueprint', '#eaf4ff'],
+                ['sepia-noir', '#c8a06a'],
+                ['firelight', '#e6552d'],
+                ['high-contrast', '#4da6ff'],
+                ['parchment', '#a4321e'],
+                ['sakura', '#c02677'],
+                ['glacier', '#0b7ea6'],
+                ['neon', '#35e6ff'],
+            ] as const) {
+                await setTheme(theme);
+                await expect
+                    .poll(() =>
+                        window.evaluate(() =>
+                            document.documentElement.getAttribute('data-theme')
+                        )
+                    )
+                    .toBe(theme);
+                await expect.poll(accent).toBe(themeAccent);
+                await window.screenshot({
+                    path: join(tourDir, `14-theme-${theme}.png`),
+                    animations: 'disabled',
+                });
+            }
+
+            // A named accent beats the theme default; Default restores it.
+            await setAccent('red');
+            await expect.poll(accent).toBe('#ec3013');
+            await window.screenshot({
+                path: join(tourDir, '14d-theme-neon-accent-red.png'),
+                animations: 'disabled',
+            });
+            await setAccent('default');
+            await expect.poll(accent).toBe('#35e6ff');
+            await setTheme('dark');
+            await expect.poll(accent).toBe('#0076ff');
+        });
+
         await test.step('repeat the key-picker overlay check in light theme', async () => {
-            await window
-                .getByRole('button', { name: 'Switch to light mode' })
-                .click();
+            await app.evaluate(({ BrowserWindow }) => {
+                BrowserWindow.getAllWindows()[0]?.webContents.send(
+                    'menu:themeMode',
+                    'light'
+                );
+            });
+            await expect
+                .poll(() =>
+                    window.evaluate(() =>
+                        document.documentElement.getAttribute('data-theme')
+                    )
+                )
+                .toBe('light');
             await window.locator('.node-editor__head').screenshot({
                 path: join(tourDir, '12b-node-header-crop-light.png'),
                 animations: 'disabled',

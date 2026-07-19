@@ -529,7 +529,7 @@ function StatsBag({
             <div className="field__labelrow">
                 <span className="field__label">Stats</span>
                 <button type="button" className="dlg__add" onClick={add}>
-                    + Add stat
+                    <Plus size={13} /> Add stat
                 </button>
             </div>
             {entries.map(([key, v]) => (

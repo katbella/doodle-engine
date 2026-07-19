@@ -1,5 +1,5 @@
 import type { RecentProject } from '../../../shared/project';
-import { Sun, Moon, CircleHelp, X } from '../lib/icons';
+import { CircleHelp, X } from '../lib/icons';
 
 export function Welcome({
     onOpen,
@@ -9,8 +9,6 @@ export function Welcome({
     recent,
     loading,
     error,
-    theme,
-    onToggleTheme,
 }: {
     onOpen: () => void;
     onNew: () => void;
@@ -19,8 +17,6 @@ export function Welcome({
     recent: RecentProject[];
     loading: boolean;
     error: string | null;
-    theme: 'dark' | 'light';
-    onToggleTheme: () => void;
 }) {
     return (
         <div className="welcome">
@@ -32,22 +28,6 @@ export function Welcome({
                     title="Open Doodle Studio documentation"
                 >
                     <CircleHelp size={16} />
-                </button>
-                <button
-                    className="btn btn--icon"
-                    onClick={onToggleTheme}
-                    aria-label={
-                        theme === 'dark'
-                            ? 'Switch to light mode'
-                            : 'Switch to dark mode'
-                    }
-                    title={
-                        theme === 'dark'
-                            ? 'Switch to light mode'
-                            : 'Switch to dark mode'
-                    }
-                >
-                    {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
                 </button>
             </div>
             <div className="welcome__mark" aria-hidden="true">
