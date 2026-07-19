@@ -2329,7 +2329,7 @@ a.build__dest:hover {
     min-width: 0;
 }
 .recent__path-dir {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
