@@ -21,6 +21,8 @@ export function NewProjectModal({
     const [targetDir, setTargetDir] = useState('');
     const [useDefaultRenderer, setUseDefaultRenderer] = useState(true);
     const [useStarterStyles, setUseStarterStyles] = useState(true);
+    const [contentMode, setContentMode] =
+        useState<NewProjectOptions['contentMode']>('starter');
     const [localizationMode, setLocalizationMode] =
         useState<NewProjectOptions['localizationMode']>('literal');
     const [destinationError, setDestinationError] = useState<string | null>(
@@ -69,6 +71,7 @@ export function NewProjectModal({
                 targetDir,
                 useDefaultRenderer,
                 useStarterStyles,
+                contentMode,
                 localizationMode,
             });
         } catch (checkError) {
@@ -141,6 +144,27 @@ export function NewProjectModal({
                     </div>
 
                     <label className="field">
+                        <span className="field__label">Starting content</span>
+                        <select
+                            className="field__input"
+                            value={contentMode}
+                            onChange={(event) =>
+                                setContentMode(
+                                    event.target
+                                        .value as NewProjectOptions['contentMode']
+                                )
+                            }
+                        >
+                            <option value="starter">
+                                Playable example story
+                            </option>
+                            <option value="minimal">
+                                Minimal project with one starting location
+                            </option>
+                        </select>
+                    </label>
+
+                    <label className="field">
                         <span className="field__label">Localization</span>
                         <select
                             className="field__input"
@@ -169,7 +193,13 @@ export function NewProjectModal({
                                 setUseDefaultRenderer(e.target.checked)
                             }
                         />
-                        <span>Use the default renderer</span>
+                        <span className="field__check-copy">
+                            <span>Use the default React renderer</span>
+                            <span className="field__hint">
+                                Includes a ready-to-use React interface that can
+                                be customized later.
+                            </span>
+                        </span>
                     </label>
 
                     <label className="field field--check">

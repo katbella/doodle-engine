@@ -37,6 +37,7 @@ my-game/
   src/
     main.tsx          # Entry point
     App.tsx           # Root component
+    project.ts       # Stable identity used to keep saves separate
     index.css         # Styles
   index.html          # HTML shell
   package.json
@@ -108,6 +109,7 @@ The `src/` directory contains the game application. Studio uses this application
 
 - **main.tsx**: mounts the React app
 - **App.tsx**: fetches the content registry (loaded game definitions) and asset manifest (media list), then renders `GameShell` or your custom renderer providers
+- **project.ts**: contains the project’s generated identity. **Keep it unchanged for every release of the same game. If a copied project becomes a different game, give the copy a new ID before releasing it.**
 - **index.css**: styles for the game interface
 
 For custom renderers, replace `GameRenderer` with your own components. The `useGame` React hook gives those components the current game screen and player actions. See [Custom Renderer](/technical/custom-renderer/).

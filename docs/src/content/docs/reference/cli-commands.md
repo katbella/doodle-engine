@@ -12,6 +12,23 @@ New projects provide these npm scripts:
 - `npm run validate` checks the game content
 - `npm run preview` runs `vite preview`
 
+## npx doodle create
+
+Create a game project in the current folder:
+
+```bash
+npx doodle create my-game
+```
+
+The command asks how you want to begin:
+
+- **Playable example story** creates a small connected game you can explore and replace piece by piece.
+- **Minimal project** creates one starting location and leaves the other content sections ready for your work.
+
+You will also choose how the project stores text. Start with English written directly in the content, or include an English and Swedish localization example. Either localization choice works with either starting-content choice.
+
+The **default React renderer** provides a ready-to-use React interface that can be customized later. If you select it, you can also include the starter styles.
+
 ## npx doodle dev
 
 Start the development server with content hot-reload.
@@ -34,18 +51,18 @@ npm run dev
 
 ### Content loading
 
-| Directory     | File Type | How it's loaded                                  |
-| ------------- | --------- | ------------------------------------------------ |
-| `characters/` | `.yaml`   | Parsed as Character entity                       |
-| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                    |
-| `interludes/` | `.yaml`   | Parsed as Interlude entity                       |
-| `items/`      | `.yaml`   | Parsed as Item entity                            |
-| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                    |
+| Directory     | File Type | How it's loaded                                                          |
+| ------------- | --------- | ------------------------------------------------------------------------ |
+| `characters/` | `.yaml`   | Parsed as Character entity                                               |
+| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                                            |
+| `interludes/` | `.yaml`   | Parsed as Interlude entity                                               |
+| `items/`      | `.yaml`   | Parsed as Item entity                                                    |
+| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                                            |
 | `locales/`    | `.yaml`   | Loaded as translation entries, with the filename used as the locale code |
-| `locations/`  | `.yaml`   | Parsed as Location entity                        |
-| `maps/`       | `.yaml`   | Parsed as Map entity                             |
-| `quests/`     | `.yaml`   | Parsed as Quest entity                           |
-| `game.yaml`   | `.yaml`   | Parsed as GameConfig                             |
+| `locations/`  | `.yaml`   | Parsed as Location entity                                                |
+| `maps/`       | `.yaml`   | Parsed as Map entity                                                     |
+| `quests/`     | `.yaml`   | Parsed as Quest entity                                                   |
+| `game.yaml`   | `.yaml`   | Parsed as GameConfig                                                     |
 
 ### /api/content response
 

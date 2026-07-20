@@ -132,6 +132,7 @@ describe('ProjectService', () => {
             targetDir: 'C:/games',
             useDefaultRenderer: true,
             useStarterStyles: false,
+            contentMode: 'minimal',
             localizationMode: 'localized',
         });
 
@@ -141,6 +142,7 @@ describe('ProjectService', () => {
             subtitle: 'A New Story',
             useDefaultRenderer: true,
             useStarterStyles: false,
+            contentMode: 'minimal',
             localizationMode: 'localized',
         });
         expect(loadProject).toHaveBeenCalledWith('C:/games/new-story');

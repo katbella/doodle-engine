@@ -23,7 +23,7 @@ export type StudioAssetKind =
 
 export const THEMES = [
     { id: 'dark', label: 'Doodle Dark', base: 'dark' },
-    { id: 'forest', label: 'Into the Woods', base: 'dark' },
+    { id: 'forest', label: 'Into the Forest', base: 'dark' },
     { id: 'space', label: 'Outer Space', base: 'dark' },
     { id: 'neon', label: 'Neon City', base: 'dark' },
     { id: 'deep-sea', label: 'Deep Sea', base: 'dark' },
@@ -48,6 +48,7 @@ export const THEMES = [
 export type ThemeMode = (typeof THEMES)[number]['id'];
 
 export type ScaffoldLocalizationMode = 'literal' | 'localized';
+export type ScaffoldContentMode = 'starter' | 'minimal';
 
 export type ThemeColor =
     | 'default'
@@ -123,6 +124,8 @@ export interface NewProjectOptions {
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS. */
     useStarterStyles: boolean;
+    /** Begin with the example story or one valid starting location. */
+    contentMode: ScaffoldContentMode;
     /** How starter content stores player-facing text. */
     localizationMode: ScaffoldLocalizationMode;
 }

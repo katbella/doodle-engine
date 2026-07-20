@@ -74,17 +74,19 @@ Built-in full-screen renderer that assembles the location view, dialogue, sideba
 
 ```tsx
 import { GameRenderer } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <GameProvider engine={engine} initialSnapshot={snapshot}>
-    <GameRenderer className="my-game" />
+    <GameRenderer projectId={PROJECT_ID} className="my-game" />
 </GameProvider>;
 ```
 
 ### Props
 
-| Prop        | Type     | Default | Description |
-| ----------- | -------- | ------- | ----------- |
-| `className` | `string` | `''`    | CSS class   |
+| Prop        | Type     | Default  | Description                               |
+| ----------- | -------- | -------- | ----------------------------------------- |
+| `projectId` | `string` | required | Stable ID from the generated `project.ts` |
+| `className` | `string` | `''`     | CSS class                                 |
 
 ### Layout
 
@@ -338,24 +340,25 @@ Save and load game state via localStorage.
 
 ```tsx
 import { SaveLoadPanel } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <SaveLoadPanel
     ui={snapshot.ui}
     onSave={actions.saveGame}
     onLoad={actions.loadGame}
-    storageKey="my-game-save"
+    projectId={PROJECT_ID}
 />;
 ```
 
 ### Props
 
-| Prop         | Type                           | Default                | Description      |
-| ------------ | ------------------------------ | ---------------------- | ---------------- |
-| `ui`         | `Record<string, string>`       | required               | Resolved UI strings |
-| `onSave`     | `() => SaveData`               | required               | Save handler     |
-| `onLoad`     | `(saveData: SaveData) => void` | required               | Load handler     |
-| `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key |
-| `className`  | `string`                       | `''`                   | CSS class        |
+| Prop        | Type                           | Default  | Description                               |
+| ----------- | ------------------------------ | -------- | ----------------------------------------- |
+| `ui`        | `Record<string, string>`       | required | Resolved UI strings                       |
+| `onSave`    | `() => SaveData`               | required | Save handler                              |
+| `onLoad`    | `(saveData: SaveData) => void` | required | Load handler                              |
+| `projectId` | `string`                       | required | Stable ID from the generated `project.ts` |
+| `className` | `string`                       | `''`     | CSS class                                 |
 
 ### Features
 
@@ -440,6 +443,7 @@ Progress screen displayed while game assets load. Used as the default `renderLoa
 import { LoadingScreen } from '@doodle-engine/react'
 
 <GameShell
+  projectId={PROJECT_ID}
   renderLoading={(state) => (
     <LoadingScreen state={state} background="assets/images/loading-bg.jpg" />
   )}
@@ -590,11 +594,13 @@ Game wrapper that manages loading, the splash and title screens, gameplay, the p
 
 ```tsx
 import { GameShell } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     title="My Game"
     subtitle="A text-based adventure"
     availableLocales={[{ code: 'en', label: 'English' }]}
@@ -604,17 +610,17 @@ import { GameShell } from '@doodle-engine/react';
 
 ### Props
 
-| Prop               | Type                                      | Default                | Description                                                     |
-| ------------------ | ----------------------------------------- | ---------------------- | --------------------------------------------------------------- |
+| Prop               | Type                                      | Default           | Description                                                     |
+| ------------------ | ----------------------------------------- | ----------------- | --------------------------------------------------------------- |
 | `registry`         | `ContentRegistry`                         | required               | Content registry from `/api/content`                            |
 | `config`           | `GameConfig`                              | required               | Game config from `/api/content`                                 |
 | `manifest`         | `AssetManifest`                           | required               | Asset manifest from `/api/manifest`                             |
+| `projectId`        | `string`                                  | required          | Stable ID from the generated `project.ts`                       |
 | `assetLoader`      | `AssetLoader`                             | —                      | Custom asset loader (for non-browser environments)              |
 | `title`            | `string`                                  | `'Doodle Engine'`      | Game title text                                                 |
 | `subtitle`         | `string`                                  | —                      | Subtitle text                                                   |
 | `uiSounds`         | `UISoundConfig \| false`                  | —                      | UI sound config, or `false` to disable                          |
 | `audioOptions`     | `AudioManagerOptions`                     | —                      | Crossfade duration and other audio config                       |
-| `storageKey`       | `string`                                  | `'doodle-engine-save'` | localStorage key for saves                                      |
 | `availableLocales` | `{ code: string; label: string }[]`       | —                      | Language options for settings                                   |
 | `className`        | `string`                                  | `''`                   | CSS class                                                       |
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                      | Override the loading screen                                     |

@@ -158,6 +158,7 @@ const uiSounds = useUISounds({
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     uiSounds={{ volume: 0.5 }}
 />
 ```

@@ -39,6 +39,7 @@ vi.mock('../shell/NewProjectModal', () => ({
                         targetDir: 'C:/games',
                         useDefaultRenderer: true,
                         useStarterStyles: true,
+                        contentMode: 'starter',
                         localizationMode: 'literal',
                     })
                 }

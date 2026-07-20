@@ -27,11 +27,12 @@ import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { AssetImage } from './components/AssetImage';
 import { InputProviderBoundary, useInputAction } from './input/InputRouter';
+import { saveStorageKeyForProject } from './saves';
 
 export interface GameRendererProps {
     className?: string;
-    /** localStorage key for the save/load panel (default 'doodle-engine-save'). */
-    storageKey?: string;
+    /** Stable project identity generated once when the project is created. */
+    projectId: string;
 }
 
 type ActivePanel =
@@ -74,10 +75,8 @@ export function GameRenderer(props: GameRendererProps) {
     );
 }
 
-function GameRendererInner({
-    className = '',
-    storageKey = 'doodle-engine-save',
-}: GameRendererProps) {
+function GameRendererInner({ className = '', projectId }: GameRendererProps) {
+    saveStorageKeyForProject(projectId);
     const { snapshot, actions } = useGame();
     const audioSettings = useContext(AudioSettingsContext);
 
@@ -359,7 +358,7 @@ function GameRendererInner({
                             ui={snapshot.ui}
                             onSave={actions.saveGame}
                             onLoad={actions.loadGame}
-                            storageKey={storageKey}
+                            projectId={projectId}
                         />
                         <button
                             className="panel-close"

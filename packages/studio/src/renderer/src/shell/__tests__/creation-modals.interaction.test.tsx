@@ -100,6 +100,12 @@ describe('NewProjectModal', () => {
         expect(screen.getByText('C:/games')).toBeTruthy();
         await user.selectOptions(
             screen.getByRole('combobox', {
+                name: 'Starting content',
+            }),
+            'minimal'
+        );
+        await user.selectOptions(
+            screen.getByRole('combobox', {
                 name: 'Localization',
             }),
             'localized'
@@ -116,8 +122,14 @@ describe('NewProjectModal', () => {
             targetDir: 'C:/games',
             useDefaultRenderer: false,
             useStarterStyles: true,
+            contentMode: 'minimal',
             localizationMode: 'localized',
         });
+        expect(
+            screen.getByText(
+                'Includes a ready-to-use React interface that can be customized later.'
+            )
+        ).toBeTruthy();
     });
 
     it('stays invalid when directory selection is cancelled and dismisses', async () => {

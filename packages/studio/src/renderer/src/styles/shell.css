@@ -2523,6 +2523,11 @@ a.build__dest:hover {
     font-size: var(--text-sm);
     color: var(--text);
 }
+.field__check-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
 
 .overview__counts {
     display: grid;

@@ -35,6 +35,7 @@ export { createProject } from './create-project';
 export type {
     CreateProjectOptions,
     CreateProjectResult,
+    ScaffoldContentMode,
     ScaffoldLocalizationMode,
 } from './create-project';
 

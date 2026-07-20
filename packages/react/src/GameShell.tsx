@@ -41,7 +41,13 @@ import { PauseMenu } from './components/PauseMenu';
 import { SettingsPanel } from './components/SettingsPanel';
 import { VideoPlayer } from './components/VideoPlayer';
 import { InputProvider, useInputAction } from './input/InputRouter';
-import { hasSaves, latestSave, writeSave } from './saves';
+import {
+    hasSaves,
+    latestSave,
+    saveStorageKeyForProject,
+    type SaveStorageKey,
+    writeSave,
+} from './saves';
 
 type Screen = 'splash' | 'title' | 'credits' | 'playing';
 
@@ -64,8 +70,8 @@ export interface GameShellProps {
     uiSounds?: UISoundConfig | false;
     /** Audio manager options (crossfade duration, etc.) */
     audioOptions?: AudioManagerOptions;
-    /** localStorage key for saves */
-    storageKey?: string;
+    /** Stable project identity generated once when the project is created. */
+    projectId: string;
     /** Available languages for settings */
     availableLocales?: { code: string; label: string }[];
     /** CSS class */
@@ -89,12 +95,13 @@ export function GameShell({
     credits,
     uiSounds: uiSoundsConfig,
     audioOptions,
-    storageKey = 'doodle-engine-save',
+    projectId,
     availableLocales,
     className = '',
     renderLoading,
     devTools = false,
 }: GameShellProps) {
+    const storageKey = saveStorageKeyForProject(projectId);
     const shell = config.shell;
     const loadingUi = buildUIStrings(registry.locales['en'] ?? {});
 
@@ -123,6 +130,7 @@ export function GameShell({
                         credits={credits}
                         uiSoundsConfig={uiSoundsConfig}
                         audioOptions={audioOptions}
+                        projectId={projectId}
                         storageKey={storageKey}
                         availableLocales={availableLocales}
                         className={className}
@@ -144,7 +152,8 @@ interface GameShellInnerProps {
     credits?: React.ReactNode;
     uiSoundsConfig?: UISoundConfig | false;
     audioOptions?: AudioManagerOptions;
-    storageKey: string;
+    projectId: string;
+    storageKey: SaveStorageKey;
     availableLocales?: { code: string; label: string }[];
     className: string;
     devTools: boolean;
@@ -169,6 +178,7 @@ function GameShellInner({
     credits,
     uiSoundsConfig,
     audioOptions,
+    projectId,
     storageKey,
     availableLocales,
     className,
@@ -396,6 +406,7 @@ function GameShellInner({
             >
                 <GameShellPlaying
                     audioOptions={audioOptions}
+                    projectId={projectId}
                     storageKey={storageKey}
                     uiSoundControls={
                         uiSoundsConfig !== false ? uiSoundControls : undefined
@@ -432,7 +443,8 @@ import { useGame } from './hooks/useGame';
 
 interface GameShellPlayingProps {
     audioOptions?: AudioManagerOptions;
-    storageKey: string;
+    projectId: string;
+    storageKey: SaveStorageKey;
     uiSoundControls?: UISoundControls;
     showPauseMenu: boolean;
     showSettings: boolean;
@@ -450,6 +462,7 @@ interface GameShellPlayingProps {
 
 function GameShellPlaying({
     audioOptions,
+    projectId,
     storageKey,
     uiSoundControls,
     showPauseMenu,
@@ -517,7 +530,7 @@ function GameShellPlaying({
                 />
             )}
 
-            <GameRenderer storageKey={storageKey} />
+            <GameRenderer projectId={projectId} />
 
             {!showPauseMenu && !showSettings && !pendingVideo && (
                 <button

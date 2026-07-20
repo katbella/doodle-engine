@@ -4,12 +4,14 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { buildUIStrings } from '@doodle-engine/core';
 import type { SaveData } from '@doodle-engine/core';
 import { SaveLoadPanel } from '../components/SaveLoadPanel';
-import { writeSave } from '../saves';
+import { saveStorageKeyForProject, writeSave } from '../saves';
 
 afterEach(cleanup);
 beforeEach(() => localStorage.clear());
 
 const ui = buildUIStrings({});
+const PROJECT_ID = '00000000-0000-4000-8000-000000000001';
+const SAVE_KEY = saveStorageKeyForProject(PROJECT_ID);
 
 function makeSave(day: number): SaveData {
     return {
@@ -45,7 +47,7 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={ui}
                 onSave={() => makeSave(1)}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
         expect(screen.getByText('No saves yet')).toBeTruthy();
@@ -58,7 +60,7 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={ui}
                 onSave={onSave}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
         fireEvent.click(screen.getByText('New Save'));
@@ -66,8 +68,11 @@ describe('SaveLoadPanel real interaction', () => {
         expect(onSave).toHaveBeenCalledOnce();
         expect(screen.queryByText('No saves yet')).toBeNull();
         expect(screen.getByText('Day 3')).toBeTruthy();
+        expect(document.querySelector('.save-slot-info')?.textContent).toMatch(
+            /^Day 3 · /
+        );
 
-        const stored = JSON.parse(localStorage.getItem('test-saves')!);
+        const stored = JSON.parse(localStorage.getItem(SAVE_KEY)!);
         expect(stored).toHaveLength(1);
         expect(stored[0].kind).toBe('manual');
     });
@@ -79,7 +84,7 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={ui}
                 onSave={() => makeSave(5)}
                 onLoad={onLoad}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
         fireEvent.click(screen.getByText('New Save'));
@@ -96,7 +101,7 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={ui}
                 onSave={() => makeSave(7)}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
         fireEvent.click(screen.getByText('New Save'));
@@ -105,7 +110,7 @@ describe('SaveLoadPanel real interaction', () => {
         fireEvent.click(screen.getByText('Delete'));
         expect(screen.queryByText('Day 7')).toBeNull();
         expect(screen.getByText('No saves yet')).toBeTruthy();
-        expect(JSON.parse(localStorage.getItem('test-saves')!)).toEqual([]);
+        expect(JSON.parse(localStorage.getItem(SAVE_KEY)!)).toEqual([]);
     });
 
     it('each New Save click adds another manual slot rather than overwriting', () => {
@@ -115,20 +120,20 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={ui}
                 onSave={() => makeSave(day++)}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
         fireEvent.click(screen.getByText('New Save'));
         fireEvent.click(screen.getByText('New Save'));
 
-        const stored = JSON.parse(localStorage.getItem('test-saves')!);
+        const stored = JSON.parse(localStorage.getItem(SAVE_KEY)!);
         expect(stored).toHaveLength(2);
     });
 
     it('localizes the built-in quick, auto, and day labels', () => {
-        writeSave(localStorage, 'test-saves', makeSave(2), 'quick');
-        writeSave(localStorage, 'test-saves', makeSave(3), 'auto');
-        writeSave(localStorage, 'test-saves', makeSave(4), 'manual');
+        writeSave(localStorage, SAVE_KEY, makeSave(2), 'quick');
+        writeSave(localStorage, SAVE_KEY, makeSave(3), 'auto');
+        writeSave(localStorage, SAVE_KEY, makeSave(4), 'manual');
         render(
             <SaveLoadPanel
                 ui={{
@@ -139,7 +144,7 @@ describe('SaveLoadPanel real interaction', () => {
                 }}
                 onSave={() => makeSave(5)}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
 
@@ -151,7 +156,7 @@ describe('SaveLoadPanel real interaction', () => {
     it('localizes legacy generic labels without replacing named saves', () => {
         const save = makeSave(2);
         localStorage.setItem(
-            'test-saves',
+            SAVE_KEY,
             JSON.stringify([
                 {
                     id: 'legacy',
@@ -175,7 +180,7 @@ describe('SaveLoadPanel real interaction', () => {
                 ui={{ ...ui, 'ui.save': 'Guardar' }}
                 onSave={() => makeSave(3)}
                 onLoad={() => {}}
-                storageKey="test-saves"
+                projectId={PROJECT_ID}
             />
         );
 

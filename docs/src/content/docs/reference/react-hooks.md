@@ -217,6 +217,7 @@ interface UISoundControls {
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     uiSounds={{
         basePath: 'assets/audio/ui',
         volume: 0.5,

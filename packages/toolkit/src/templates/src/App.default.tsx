@@ -6,6 +6,7 @@ import type {
 } from '@doodle-engine/core';
 import { GameShell } from '@doodle-engine/react';
 import { getAvailableLocales } from './locale-options';
+import { PROJECT_ID } from './project';
 
 const GAME_TITLE = __GAME_TITLE_JSON__;
 const GAME_SUBTITLE = __GAME_SUBTITLE_JSON__;
@@ -47,6 +48,7 @@ export function App() {
             manifest={manifest}
             title={GAME_TITLE}
             subtitle={GAME_SUBTITLE || undefined}
+            projectId={PROJECT_ID}
             availableLocales={getAvailableLocales(content.registry.locales)}
             devTools={import.meta.env.DEV}
         />

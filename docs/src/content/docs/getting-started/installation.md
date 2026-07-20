@@ -14,8 +14,8 @@ Doodle Studio is the visual desktop editor and the recommended starting point fo
 1. Download the current Doodle Studio installer from the [Doodle Engine releases](https://github.com/katbella/doodle-engine/releases) page.
 2. Run the installer, then launch **Doodle Studio** from the Start menu or desktop shortcut.
 3. Select **New project…**, name the project and game, and choose where to create it.
-4. Choose **English text with a locale starter file** for a simple first project.
-5. Keep the default renderer and starter styles selected, then select **Create**.
+4. Keep **Playable example story** selected and choose **English text with a locale starter file**.
+5. Keep the default React renderer and starter styles selected, then select **Create**.
 
 The generated game uses Node.js packages for Preview and Build. Install [Node.js 24 or newer](https://nodejs.org/) before using those commands. When Studio displays the dependency banner in a new project, select **Install dependencies**.
 

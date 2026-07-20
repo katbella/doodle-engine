@@ -20,6 +20,7 @@ Enable dev tools in development mode:
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     devTools={import.meta.env.DEV}
 />;
 ```

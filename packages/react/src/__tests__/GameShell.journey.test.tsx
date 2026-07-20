@@ -16,10 +16,13 @@ import type {
     GameConfig,
 } from '@doodle-engine/core';
 import { GameShell } from '../GameShell';
-import { listSaves, writeSave } from '../saves';
+import { listSaves, saveStorageKeyForProject, writeSave } from '../saves';
 
 afterEach(cleanup);
 beforeEach(() => localStorage.clear());
+
+const PROJECT_ID = '00000000-0000-4000-8000-000000000003';
+const SAVE_KEY = saveStorageKeyForProject(PROJECT_ID);
 
 const manifest: AssetManifest = {
     version: 'test',
@@ -128,7 +131,7 @@ async function startGame(registry = makeRegistry()) {
             config={config}
             manifest={manifest}
             title="Test Game"
-            storageKey="journey-saves"
+            projectId={PROJECT_ID}
             uiSounds={false}
         />
     );
@@ -152,7 +155,7 @@ function renderShell({
             config={gameConfig}
             manifest={manifest}
             title="Test Game"
-            storageKey="journey-saves"
+            projectId={PROJECT_ID}
             uiSounds={false}
             availableLocales={availableLocales}
         />
@@ -192,13 +195,9 @@ describe('GameShell player journeys', () => {
         const savedEngine = new Engine(registry);
         savedEngine.newGame(config);
         savedEngine.travelTo('market');
-        writeSave(
-            localStorage,
-            'journey-saves',
-            savedEngine.saveGame(),
-            'manual',
-            { timestamp: '2026-01-01T00:00:00.000Z' }
-        );
+        writeSave(localStorage, SAVE_KEY, savedEngine.saveGame(), 'manual', {
+            timestamp: '2026-01-01T00:00:00.000Z',
+        });
 
         const user = await startGame(registry);
         await user.click(screen.getByRole('button', { name: 'Menu' }));
@@ -272,7 +271,7 @@ describe('GameShell player journeys', () => {
         ).toBeTruthy();
         await waitFor(() =>
             expect(
-                listSaves(localStorage, 'journey-saves').some(
+                listSaves(localStorage, SAVE_KEY).some(
                     (slot) => slot.kind === 'auto'
                 )
             ).toBe(true)
@@ -313,13 +312,9 @@ describe('GameShell player journeys', () => {
         const savedEngine = new Engine(registry);
         savedEngine.newGame(config);
         savedEngine.travelTo('market');
-        writeSave(
-            localStorage,
-            'journey-saves',
-            savedEngine.saveGame(),
-            'quick',
-            { timestamp: '2026-01-02T00:00:00.000Z' }
-        );
+        writeSave(localStorage, SAVE_KEY, savedEngine.saveGame(), 'quick', {
+            timestamp: '2026-01-02T00:00:00.000Z',
+        });
         const user = userEvent.setup();
         renderShell({ registry });
 
@@ -335,7 +330,7 @@ describe('GameShell player journeys', () => {
         await user.click(screen.getByRole('button', { name: 'Menu' }));
         await user.click(screen.getByRole('button', { name: 'Save' }));
         expect(
-            listSaves(localStorage, 'journey-saves').some(
+            listSaves(localStorage, SAVE_KEY).some(
                 (slot) => slot.kind === 'quick'
             )
         ).toBe(true);

@@ -14,6 +14,7 @@ import {
     writeSave,
     loadSave,
     deleteSave,
+    saveStorageKeyForProject,
     type SaveSlot,
 } from '../saves';
 
@@ -22,7 +23,8 @@ export interface SaveLoadPanelProps {
     ui: Record<string, string>;
     onSave: () => SaveData;
     onLoad: (saveData: SaveData) => void;
-    storageKey?: string;
+    /** Stable project identity generated once when the project is created. */
+    projectId: string;
     className?: string;
 }
 
@@ -53,9 +55,10 @@ export function SaveLoadPanel({
     ui,
     onSave,
     onLoad,
-    storageKey = 'doodle-engine-save',
+    projectId,
     className = '',
 }: SaveLoadPanelProps) {
+    const storageKey = saveStorageKeyForProject(projectId);
     const [slots, setSlots] = useState<SaveSlot[]>(() =>
         listSaves(localStorage, storageKey)
     );
@@ -108,9 +111,15 @@ export function SaveLoadPanel({
                                 <span className="save-slot-label">
                                     {displaySlotLabel(slot, ui)}
                                 </span>
-                                <span className="save-slot-time">
-                                    {formatTimestamp(slot.timestamp)}
-                                </span>
+                                {slot.timestamp && (
+                                    <time
+                                        className="save-slot-time"
+                                        dateTime={slot.timestamp}
+                                    >
+                                        {' · '}
+                                        {formatTimestamp(slot.timestamp)}
+                                    </time>
+                                )}
                             </div>
                             <div className="save-slot-actions">
                                 <button

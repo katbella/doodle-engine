@@ -15,14 +15,26 @@ The game shell keeps three kinds of save:
 
 The Save/Load panel lists the quick save and autosave first, followed by manual saves with the newest at the top. **Load** restores the selected save. The title screen’s **Continue** button restores the most recent save of any kind.
 
-All three kinds are stored in the browser’s local storage (`localStorage`) under the key passed to `GameShell`. The default key is `doodle-engine-save`; give each game a different `storageKey` when several games may share the same site.
+All three kinds are stored in the player’s browser. Studio and `doodle create` give every project its own random ID, so one Doodle game cannot list or load another game’s saves by accident.
+
+The generated ID lives in `src/project.ts`.
+
+**Keep `PROJECT_ID` unchanged when you rename, move, rebuild, or release an update to the same game. Changing it separates the game from its existing saves.**
+
+**If you copy a project to make a different game, give the copy a new `PROJECT_ID` before releasing it. Two different games with the same ID can share saves when they are hosted on the same website.**
+
+The project ID prevents accidental save conflicts. It is not a password: code running on the same website can still read or change browser storage. Games hosted on different domains are already kept separate by the browser.
+
+When you add `GameShell` yourself, import that ID:
 
 ```tsx
+import { PROJECT_ID } from './project';
+
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
-    storageKey="harbor-lights-saves"
+    projectId={PROJECT_ID}
 />
 ```
 
@@ -58,6 +70,7 @@ The built-in `GameRenderer` already includes this panel. A custom React renderer
 
 ```tsx
 import { SaveLoadPanel } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <SaveLoadPanel
     ui={snapshot.ui}
@@ -66,21 +79,21 @@ import { SaveLoadPanel } from '@doodle-engine/react';
         const restoredSnapshot = engine.loadGame(saveData);
         updateSnapshot(restoredSnapshot);
     }}
-    storageKey="my-game-save"
+    projectId={PROJECT_ID}
 />;
 ```
 
 ### Props
 
-| Prop         | Type                           | Default                | Description                        |
-| ------------ | ------------------------------ | ---------------------- | ---------------------------------- |
-| `ui`         | `Record<string, string>`       | required               | Resolved UI strings from snapshot  |
-| `onSave`     | `() => SaveData`               | required               | Called when the player clicks Save |
-| `onLoad`     | `(saveData: SaveData) => void` | required               | Called when the player clicks Load |
-| `storageKey` | `string`                       | `'doodle-engine-save'` | Browser storage key               |
-| `className`  | `string`                       | `''`                   | CSS class                          |
+| Prop        | Type                           | Default  | Description                               |
+| ----------- | ------------------------------ | -------- | ----------------------------------------- |
+| `ui`        | `Record<string, string>`       | required | Resolved UI strings from snapshot         |
+| `onSave`    | `() => SaveData`               | required | Called when the player clicks Save        |
+| `onLoad`    | `(saveData: SaveData) => void` | required | Called when the player clicks Load        |
+| `projectId` | `string`                       | required | Stable ID from the generated `project.ts` |
+| `className` | `string`                       | `''`     | CSS class                                 |
 
-The `@doodle-engine/react` package also exports `listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, and `hasSaves` for a custom save interface that still uses browser storage.
+The `@doodle-engine/react` package also exports `listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, and `hasSaves` for a custom save interface. Pass their keys through `saveStorageKeyForProject(PROJECT_ID)`; shared and hand-written keys are rejected.
 
 ## Storing Saves Elsewhere
 

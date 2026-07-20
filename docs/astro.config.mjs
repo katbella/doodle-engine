@@ -36,6 +36,7 @@ export default defineConfig({
                         { label: 'Studio Overview', slug: 'studio' },
                         { label: 'Projects', slug: 'studio/projects' },
                         { label: 'The Workspace', slug: 'studio/workspace' },
+                        { label: 'Themes', slug: 'studio/themes' },
                         { label: 'Dialogue Editing', slug: 'studio/dialogues' },
                         { label: 'Playtesting', slug: 'studio/playtesting' },
                         { label: 'Assets', slug: 'studio/assets' },

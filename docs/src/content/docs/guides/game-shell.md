@@ -9,11 +9,13 @@ description: Using GameShell for splash screens, title menus, pause, settings, a
 
 ```tsx
 import { GameShell } from '@doodle-engine/react';
+import { PROJECT_ID } from '../project';
 
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     title="My Game"
     subtitle="A text-based adventure"
 />;
@@ -78,6 +80,7 @@ The title screen includes a **Credits** button. By default, the credits screen s
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     title="Harbor Lights"
     credits={
         <>
@@ -110,6 +113,7 @@ The settings panel provides:
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     availableLocales={[
         { code: 'en', label: 'English' },
         { code: 'es', label: 'Español' },
@@ -128,6 +132,7 @@ The settings panel provides:
   registry={registry}
   config={config}
   manifest={manifest}
+  projectId={PROJECT_ID}
   uiSounds={{
     basePath: 'assets/audio/ui',
     volume: 0.5,
@@ -144,6 +149,7 @@ The settings panel provides:
   registry={registry}
   config={config}
   manifest={manifest}
+  projectId={PROJECT_ID}
   uiSounds={false}
 />
 ```
@@ -168,18 +174,18 @@ See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding vid
 
 ## Save/Load
 
-`GameShell` saves to browser storage under a configurable key:
+`GameShell` uses the project’s generated ID to keep its saves separate from other Doodle games:
 
 ```tsx
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
-    storageKey="my-game-save"
+    projectId={PROJECT_ID}
 />
 ```
 
-The default storage key is `'doodle-engine-save'`.
+Studio and `doodle create` store this ID in `src/project.ts`. Keep it for every release of the same game. A missing, changed, or malformed ID stops save access instead of falling back to shared storage.
 
 ## Game Audio
 
@@ -190,6 +196,7 @@ Pass audio options to configure the game audio manager:
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     audioOptions={{
         masterVolume: 1.0,
         musicVolume: 0.7,

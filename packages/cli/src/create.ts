@@ -57,6 +57,33 @@ export async function create(projectName: string) {
         process.exit(0);
     }
 
+    const { contentMode } = await prompts({
+        type: 'select',
+        name: 'contentMode',
+        message: 'What should the project start with?',
+        choices: [
+            {
+                title: 'Playable example story',
+                description:
+                    'Connected locations, characters, dialogue, quests, and more',
+                value: 'starter',
+            },
+            {
+                title: 'Minimal project',
+                description: 'One starting location, ready for your content',
+                value: 'minimal',
+            },
+        ],
+        initial: 0,
+    });
+
+    if (contentMode === undefined) {
+        console.log(
+            crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
+        );
+        process.exit(0);
+    }
+
     const { localizationMode } = await prompts({
         type: 'select',
         name: 'localizationMode',
@@ -85,7 +112,8 @@ export async function create(projectName: string) {
     const { useDefaultRenderer } = await prompts({
         type: 'confirm',
         name: 'useDefaultRenderer',
-        message: 'Use default renderer?',
+        message:
+            'Use the default React renderer? (ready to use and customizable)',
         initial: true,
     });
 
@@ -137,6 +165,7 @@ export async function create(projectName: string) {
             subtitle: subtitle.trim(),
             useDefaultRenderer,
             useStarterStyles,
+            contentMode,
             localizationMode,
         }));
     } catch (error) {
@@ -151,23 +180,36 @@ export async function create(projectName: string) {
 
     console.log(crayon.green(`  ${check} Files created`));
     console.log('');
-    console.log(`  ${bone} ${crayon.bold('Starter content written')}`);
+    console.log(
+        `  ${bone} ${crayon.bold(
+            contentMode === 'starter'
+                ? 'Starter story written'
+                : 'Minimal content written'
+        )}`
+    );
     console.log('');
     console.log(crayon.dim('  Content includes:'));
-    console.log(crayon.dim('    2 locations  (tavern, market)'));
-    console.log(crayon.dim('    2 characters (bartender, merchant)'));
-    console.log(crayon.dim('    1 item       (old coin)'));
-    console.log(crayon.dim('    1 map        (town with 2 locations)'));
-    console.log(crayon.dim('    1 quest      (odd jobs, 3 stages)'));
-    console.log(crayon.dim('    3 journal entries'));
-    console.log(
-        crayon.dim('    1 interlude  (chapter one, auto-triggers at tavern)')
-    );
-    console.log(
-        crayon.dim(
-            '    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'
-        )
-    );
+    if (contentMode === 'starter') {
+        console.log(crayon.dim('    2 locations  (tavern, market)'));
+        console.log(crayon.dim('    2 characters (bartender, merchant)'));
+        console.log(crayon.dim('    1 item       (old coin)'));
+        console.log(crayon.dim('    1 map        (town with 2 locations)'));
+        console.log(crayon.dim('    1 quest      (odd jobs, 3 stages)'));
+        console.log(crayon.dim('    3 journal entries'));
+        console.log(
+            crayon.dim(
+                '    1 interlude  (chapter one, auto-triggers at tavern)'
+            )
+        );
+        console.log(
+            crayon.dim(
+                '    5 dialogues  (2 narrator intros, 2 NPC conversations, 1 skill check)'
+            )
+        );
+    } else {
+        console.log(crayon.dim('    1 starting location'));
+        console.log(crayon.dim('    Empty folders for the rest of your story'));
+    }
     console.log(
         crayon.dim(
             localizationMode === 'localized'

@@ -29,6 +29,7 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Story Title' })
             .mockResolvedValueOnce({ subtitle: 'A Story Subtitle' })
+            .mockResolvedValueOnce({ contentMode: 'starter' })
             .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
             .mockResolvedValueOnce({ starterStyles: true });
@@ -41,6 +42,7 @@ describe('create command', () => {
             subtitle: 'A Story Subtitle',
             useDefaultRenderer: true,
             useStarterStyles: true,
+            contentMode: 'starter',
             localizationMode: 'literal',
         });
         expect(console.log).toHaveBeenCalledWith(
@@ -56,18 +58,20 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Custom Story' })
             .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ contentMode: 'minimal' })
             .mockResolvedValueOnce({ localizationMode: 'localized' })
             .mockResolvedValueOnce({ useDefaultRenderer: false });
 
         await create('custom-story');
 
-        expect(prompts).toHaveBeenCalledTimes(4);
+        expect(prompts).toHaveBeenCalledTimes(5);
         expect(createProject).toHaveBeenCalledWith('custom-story', {
             targetDir: 'C:/games',
             title: 'Custom Story',
             subtitle: '',
             useDefaultRenderer: false,
             useStarterStyles: false,
+            contentMode: 'minimal',
             localizationMode: 'localized',
         });
     });
@@ -76,10 +80,19 @@ describe('create command', () => {
         ['title', [{ title: undefined }]],
         ['subtitle', [{ title: 'Cancelled' }, { subtitle: undefined }]],
         [
+            'starting content',
+            [
+                { title: 'Cancelled' },
+                { subtitle: '' },
+                { contentMode: undefined },
+            ],
+        ],
+        [
             'localization',
             [
                 { title: 'Cancelled' },
                 { subtitle: '' },
+                { contentMode: 'starter' },
                 { localizationMode: undefined },
             ],
         ],
@@ -88,6 +101,7 @@ describe('create command', () => {
             [
                 { title: 'Cancelled' },
                 { subtitle: '' },
+                { contentMode: 'starter' },
                 { localizationMode: 'literal' },
                 { useDefaultRenderer: undefined },
             ],
@@ -97,6 +111,7 @@ describe('create command', () => {
             [
                 { title: 'Cancelled' },
                 { subtitle: '' },
+                { contentMode: 'starter' },
                 { localizationMode: 'literal' },
                 { useDefaultRenderer: true },
                 { starterStyles: undefined },
@@ -115,6 +130,7 @@ describe('create command', () => {
         prompts
             .mockResolvedValueOnce({ title: 'Story' })
             .mockResolvedValueOnce({ subtitle: '' })
+            .mockResolvedValueOnce({ contentMode: 'minimal' })
             .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: false });
         createProject.mockRejectedValueOnce(new Error('already exists'));

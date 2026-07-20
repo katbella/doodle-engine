@@ -112,6 +112,7 @@ import {
     useGame,
     useInputAction,
 } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 function KeyboardDialogue() {
     const { snapshot, actions } = useGame();
@@ -224,6 +225,7 @@ function MyLayout() {
                 ui={snapshot.ui}
                 onSave={actions.saveGame}
                 onLoad={actions.loadGame}
+                projectId={PROJECT_ID}
             />
         </div>
     );

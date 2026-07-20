@@ -40,7 +40,7 @@ test.beforeEach(async () => {
     await writeFixture(
         'package.json',
         JSON.stringify({
-            name: 'studio-e2e-story',
+            name: 'the-salty-dog',
             version: '1.0.0',
             dependencies: { '@doodle-engine/core': 'workspace:*' },
         })
@@ -236,7 +236,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 );
             }, fixtureDir);
             await expect(
-                window.getByText('studio-e2e-story').first()
+                window.getByText('the-salty-dog').first()
             ).toBeVisible();
             await window.screenshot({
                 path: join(tourDir, '02-project-overview-dark.png'),
@@ -934,6 +934,92 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             expect(saved).toContain(
                 "# This comment must survive Studio's field edit."
             );
+        });
+
+        await test.step('show a validation problem in both themes', async () => {
+            const auditTab = window
+                .locator('.tab')
+                .filter({ hasText: 'audit' });
+            await expect(auditTab.locator('.tab__dirty')).toHaveCount(0);
+            await auditTab.getByRole('button', { name: 'Close audit' }).click();
+
+            const dialoguePath = join(
+                fixtureDir,
+                'content/dialogues/audit.dlg'
+            );
+            const dialogue = await readFile(dialoguePath, 'utf8');
+            await writeFile(
+                dialoguePath,
+                dialogue.replace(
+                    'REQUIRE hasFlag ready',
+                    'REQUIRE hasItem brass_key'
+                ),
+                'utf8'
+            );
+
+            await window.getByRole('button', { name: 'Validate' }).click();
+            const problemMessage =
+                'Node "start" condition "hasItem" references non-existent item "brass_key"';
+            const problemsTab = window
+                .locator('.dock__tab')
+                .filter({ hasText: 'Problems' });
+            await expect(problemsTab).toContainText('1');
+            await problemsTab.click();
+
+            const problemsDock = window.locator('.dock');
+            await problemsDock
+                .getByRole('button', { name: new RegExp(problemMessage) })
+                .click();
+            await expect(window.locator('.dlg__node--active')).toContainText(
+                'start'
+            );
+            await expect(window.locator('.problem-reveal')).toBeVisible();
+            await expect(
+                problemsDock.getByRole('button', { name: 'Copy problem' })
+            ).toBeVisible();
+
+            const lightPng = join(tourDir, 'validator-problems-light.png');
+            await window.screenshot({
+                path: lightPng,
+                animations: 'disabled',
+            });
+
+            await app.evaluate(({ BrowserWindow }) => {
+                BrowserWindow.getAllWindows()[0]?.webContents.send(
+                    'menu:themeMode',
+                    'dark'
+                );
+            });
+            await expect
+                .poll(() =>
+                    window.evaluate(() =>
+                        document.documentElement.getAttribute('data-theme')
+                    )
+                )
+                .toBe('dark');
+            await problemsDock
+                .getByRole('button', { name: new RegExp(problemMessage) })
+                .click();
+            await expect(window.locator('.problem-reveal')).toBeVisible();
+            const darkPng = join(tourDir, 'validator-problems-dark.png');
+            await window.screenshot({
+                path: darkPng,
+                animations: 'disabled',
+            });
+
+            await app.evaluate(({ BrowserWindow }) => {
+                BrowserWindow.getAllWindows()[0]?.webContents.send(
+                    'menu:themeMode',
+                    'light'
+                );
+            });
+            await expect
+                .poll(() =>
+                    window.evaluate(() =>
+                        document.documentElement.getAttribute('data-theme')
+                    )
+                )
+                .toBe('light');
         });
 
         await test.step('show a long recent path without clipping under remove', async () => {

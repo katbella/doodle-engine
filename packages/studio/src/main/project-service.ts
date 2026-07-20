@@ -55,6 +55,7 @@ export class ProjectService {
             subtitle: options.subtitle,
             useDefaultRenderer: options.useDefaultRenderer,
             useStarterStyles: options.useStarterStyles,
+            contentMode: options.contentMode,
             localizationMode: options.localizationMode,
         });
         return this.openPath(projectPath);

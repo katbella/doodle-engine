@@ -65,6 +65,7 @@ Pass a `renderLoading` prop to `GameShell` for complete control:
     manifest={manifest}
     config={config}
     registry={registry}
+    projectId={PROJECT_ID}
     renderLoading={(state) => (
         <div className="my-loader">
             <p>{Math.round(state.overallProgress * 100)}%</p>
@@ -148,6 +149,7 @@ const localLoader: AssetLoader = {
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     assetLoader={localLoader}
 />
 ```

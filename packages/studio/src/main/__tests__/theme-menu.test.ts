@@ -20,7 +20,7 @@ describe('Themes menu', () => {
         ).toEqual([
             expect.objectContaining({ label: 'Doodle Dark', checked: true }),
             expect.objectContaining({
-                label: 'Into the Woods',
+                label: 'Into the Forest',
                 checked: false,
             }),
             expect.objectContaining({ label: 'Outer Space', checked: false }),

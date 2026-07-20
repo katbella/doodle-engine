@@ -136,5 +136,11 @@ export {
     deleteSave,
     loadSave,
     latestSave,
+    saveStorageKeyForProject,
 } from './saves';
-export type { SaveSlot, SaveStorage, WriteSaveOptions } from './saves';
+export type {
+    SaveSlot,
+    SaveStorage,
+    SaveStorageKey,
+    WriteSaveOptions,
+} from './saves';

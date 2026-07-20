@@ -9,6 +9,7 @@
 
 import { mkdir, readdir, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
+import { randomUUID } from 'crypto';
 import { parse as parseYaml } from 'yaml';
 
 // Vite inlines all template files as strings at build time.
@@ -20,6 +21,7 @@ const TEMPLATES = import.meta.glob('./templates/**/*', {
 }) as Record<string, string>;
 
 export type ScaffoldLocalizationMode = 'literal' | 'localized';
+export type ScaffoldContentMode = 'starter' | 'minimal';
 
 export interface CreateProjectOptions {
     /** Directory to create the new project folder inside (usually the cwd). */
@@ -32,6 +34,8 @@ export interface CreateProjectOptions {
     useDefaultRenderer: boolean;
     /** Include the styled starter CSS (only meaningful with the default renderer). */
     useStarterStyles: boolean;
+    /** Begin with the connected example story or one valid starting location. */
+    contentMode?: ScaffoldContentMode;
     /** Use literal English text or demonstrate localization with English and Swedish. */
     localizationMode?: ScaffoldLocalizationMode;
 }
@@ -80,6 +84,8 @@ export async function createProject(
     const { targetDir, useDefaultRenderer, useStarterStyles } = options;
     const title = options.title?.trim() || projectName;
     const subtitle = options.subtitle?.trim() ?? '';
+    const projectId = randomUUID();
+    const contentMode = options.contentMode ?? 'starter';
     const localizationMode = options.localizationMode ?? 'literal';
     const projectPath = join(targetDir, projectName);
 
@@ -163,6 +169,12 @@ export async function createProject(
         const outPath = resolveOutputPath(key);
         if (outPath === null) continue;
         if (
+            contentMode === 'minimal' &&
+            (outPath.startsWith('content/') || outPath.startsWith('assets/'))
+        ) {
+            continue;
+        }
+        if (
             localizationMode === 'literal' &&
             outPath === 'content/locales/sv.yaml'
         ) {
@@ -189,7 +201,15 @@ export async function createProject(
                 outPath.endsWith('.dlg')
             );
         }
+        output = output.replace(
+            '__PROJECT_ID_JSON__',
+            JSON.stringify(projectId)
+        );
         await writeFile(dest, output);
+    }
+
+    if (contentMode === 'minimal') {
+        await writeMinimalContent(projectPath, localizationMode);
     }
 
     // --- src/App.tsx (pick variant based on renderer choice) ---
@@ -209,6 +229,83 @@ export async function createProject(
     await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
 
     return { projectPath };
+}
+
+async function writeMinimalContent(
+    projectPath: string,
+    localizationMode: ScaffoldLocalizationMode
+): Promise<void> {
+    await writeFile(
+        join(projectPath, 'content', 'game.yaml'),
+        MINIMAL_GAME_CONFIG
+    );
+    await writeFile(
+        join(projectPath, 'content', 'locations', 'start.yaml'),
+        localizationMode === 'localized'
+            ? MINIMAL_LOCALIZED_LOCATION
+            : MINIMAL_LITERAL_LOCATION
+    );
+    await writeFile(
+        join(projectPath, 'content', 'locales', 'en.yaml'),
+        localizationMode === 'localized'
+            ? minimalLocalizedLocale('en')
+            : ENGLISH_LOCALE_STARTER
+    );
+    if (localizationMode === 'localized') {
+        await writeFile(
+            join(projectPath, 'content', 'locales', 'sv.yaml'),
+            minimalLocalizedLocale('sv')
+        );
+    }
+}
+
+const MINIMAL_GAME_CONFIG = `# Game Configuration
+
+startLocation: start
+startTime:
+  day: 1
+  hour: 8
+startFlags: {}
+startVariables: {}
+startInventory: []
+`;
+
+const MINIMAL_LITERAL_LOCATION = `id: start
+name: "Starting Place"
+description: "Your story begins here."
+banner: ""
+music: ""
+ambient: ""
+`;
+
+const MINIMAL_LOCALIZED_LOCATION = `id: start
+name: "@location.start.name"
+description: "@location.start.description"
+banner: ""
+music: ""
+ambient: ""
+`;
+
+function minimalLocalizedLocale(locale: 'en' | 'sv'): string {
+    const source = TEMPLATES[`./templates/content/locales/${locale}.yaml`];
+    const storyMarker = '# Narrator Intros';
+    const markerIndex = source.indexOf(storyMarker);
+    const uiSection = source
+        .slice(0, source.lastIndexOf('# ===================', markerIndex))
+        .trimEnd();
+    const location =
+        locale === 'sv'
+            ? `location.start.name: "Startplats"
+location.start.description: "Din berättelse börjar här."`
+            : `location.start.name: "Starting Place"
+location.start.description: "Your story begins here."`;
+    return `${uiSection}
+
+# ===================
+# Starting Location
+# ===================
+${location}
+`;
 }
 
 const ENGLISH_TRANSLATIONS = parseYaml(
