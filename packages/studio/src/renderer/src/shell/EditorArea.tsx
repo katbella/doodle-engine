@@ -33,7 +33,7 @@ interface EditorAreaProps {
     onSelectNode: (key: string, nodeId: string | null) => void;
     onDirty: (key: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
-    onOpenLocale?: (locale: string) => void;
+    onOpenLocale?: (locale: string, key?: string) => void;
     onPlayFromNode: (dialogueId: string, nodeId: string) => void;
 }
 
@@ -400,6 +400,16 @@ function EditorAreaContent({
                             path={activePath}
                             dialogueId={active.itemId}
                             selectedNodeId={selectedNodes[active.key] ?? null}
+                            revealMessage={
+                                reveal?.key === active.key
+                                    ? reveal.message
+                                    : undefined
+                            }
+                            revealSeq={
+                                reveal?.key === active.key
+                                    ? reveal.seq
+                                    : undefined
+                            }
                             onSelectNode={(nodeId) =>
                                 onSelectNode(active.key, nodeId)
                             }
@@ -427,6 +437,16 @@ function EditorAreaContent({
                             tabKey={active.key}
                             path={activePath}
                             localeId={active.itemId}
+                            revealKey={
+                                reveal?.key === active.key
+                                    ? reveal.message
+                                    : undefined
+                            }
+                            revealSeq={
+                                reveal?.key === active.key
+                                    ? reveal.seq
+                                    : undefined
+                            }
                             onDirty={onDirty}
                             onModified={onModified}
                         />

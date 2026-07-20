@@ -9,6 +9,7 @@ export {
     Monitor,
     ExternalLink,
     Check,
+    Copy,
     Palette,
     Search,
     Plus,

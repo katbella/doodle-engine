@@ -44,7 +44,7 @@ const ENTITY_TYPES = [
 
 /**
  * The fileMap key for an entity: its registry collection plus its id.
- * Example: fileMapKey('locations', 'town') → "locations:town".
+ * Example: fileMapKey('locations', 'town') returns "locations:town".
  */
 export function fileMapKey(collection: string, id: string): string {
     return `${collection}:${id}`;

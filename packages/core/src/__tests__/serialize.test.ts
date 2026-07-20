@@ -28,7 +28,7 @@ describe('serializeDialogue — round-trips the starter dialogues', () => {
         '../../../toolkit/src/templates/content/dialogues'
     );
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.dlg'))) {
-        it(`parse → serialize → parse is stable for ${file}`, () => {
+        it(`parse, serialize, parse is stable for ${file}`, () => {
             roundTrips(readFileSync(join(dir, file), 'utf-8'), file.replace(/\.dlg$/, ''));
         });
     }

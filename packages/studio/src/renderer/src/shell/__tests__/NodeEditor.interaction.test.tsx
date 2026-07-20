@@ -82,6 +82,7 @@ function Harness({ isStart = false }: { isStart?: boolean }) {
         <>
             <NodeEditor
                 node={node}
+                dialogueId="story"
                 isStart={isStart}
                 characters={['hero']}
                 nodeIds={['start', 'end']}
@@ -299,5 +300,42 @@ describe('NodeEditor', () => {
         );
         await user.click(screen.getByRole('button', { name: 'Delete branch' }));
         expect(state().conditionalBranches).toEqual([]);
+        expect(branches.getByText(/Add a branch/)).toBeTruthy();
+    });
+
+    it('adds the first branch and choice from the empty-state hints', async () => {
+        const user = userEvent.setup();
+        const onChange = vi.fn();
+        render(
+            <NodeEditor
+                node={{ id: 'bare', speaker: null, text: '', choices: [] }}
+                dialogueId="story"
+                isStart={false}
+                characters={['hero']}
+                nodeIds={['bare']}
+                registry={registry}
+                projectDir="C:/story"
+                onChange={onChange}
+                onRename={vi.fn()}
+                onMakeStart={vi.fn()}
+                onDelete={vi.fn()}
+                onCreateNode={vi.fn()}
+                onPlayFromHere={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText(/Add a branch/)).toBeTruthy();
+        expect(screen.getByText(/Add a choice/)).toBeTruthy();
+
+        await user.click(screen.getByRole('button', { name: 'Branch' }));
+        expect(onChange.mock.lastCall![0].conditionalBranches).toHaveLength(1);
+        await user.click(screen.getByRole('button', { name: 'Choice' }));
+        expect(onChange.mock.lastCall![0].choices).toEqual([
+            {
+                id: 'bare_choice_0',
+                text: '@story.bare_choice_0',
+                next: 'bare',
+            },
+        ]);
     });
 });

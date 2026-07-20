@@ -145,7 +145,7 @@ function BuilderRow({
         <div className="dlg__row">
             <button className="dlg__chip mono" onClick={onEdit} title="Edit">
                 <span>{label}</span>
-                <Pencil className="dlg__chip-edit" size={11} aria-hidden />
+                <Pencil className="dlg__chip-edit" size={13} aria-hidden />
             </button>
             <button className="dlg__x" onClick={onRemove} aria-label="Remove">
                 <X size={15} />
@@ -427,6 +427,7 @@ function moveChoice(
 
 export function NodeEditor({
     node,
+    dialogueId,
     isStart,
     characters,
     nodeIds,
@@ -440,6 +441,7 @@ export function NodeEditor({
     onPlayFromHere,
 }: {
     node: DialogueNode;
+    dialogueId: string;
     isStart: boolean;
     characters: string[];
     nodeIds: string[];
@@ -472,9 +474,52 @@ export function NodeEditor({
         (choice.effects ?? []).some(
             (e) => e.type === 'goToLocation' || e.type === 'startDialogue'
         );
+    const addBranch = (
+        <button
+            className="dlg__add"
+            onClick={() =>
+                set({
+                    conditionalBranches: [
+                        ...branches,
+                        {
+                            condition: {
+                                type: 'hasFlag',
+                                flag: 'flag',
+                            },
+                        },
+                    ],
+                })
+            }
+        >
+            <Plus size={13} /> Branch
+        </button>
+    );
+    const addChoice = (
+        <button
+            className="dlg__add"
+            onClick={() => {
+                const used = new Set(node.choices.map((c) => c.id));
+                let n = node.choices.length;
+                while (used.has(`${node.id}_choice_${n}`)) n++;
+                const id = `${node.id}_choice_${n}`;
+                set({
+                    choices: [
+                        ...node.choices,
+                        {
+                            id,
+                            text: `@${dialogueId}.${id}`,
+                            next: nodeIds[0] ?? '',
+                        },
+                    ],
+                });
+            }}
+        >
+            <Plus size={13} /> Choice
+        </button>
+    );
     return (
         <div className="node-editor">
-            <div className="node-editor__head">
+            <div className="node-editor__head" data-problem-target="node">
                 <span className="node-editor__label">NODE</span>
                 <NodeIdField
                     id={node.id}
@@ -503,7 +548,7 @@ export function NodeEditor({
                 </button>
             </div>
 
-            <label className="field">
+            <label className="field" data-problem-target="speaker">
                 <span className="field__label">Speaker</span>
                 <select
                     className="dlg__select"
@@ -526,6 +571,7 @@ export function NodeEditor({
                 textKind="prose"
                 placeholder="Write the line…"
                 ariaLabel="Line"
+                revealTarget="line"
                 onSourceChange={(text) => set({ text })}
             />
 
@@ -548,7 +594,7 @@ export function NodeEditor({
                 />
             </div>
 
-            <div className="node-editor__section">
+            <div className="node-editor__section" data-problem-target="effects">
                 <div className="node-editor__section-head">Node effects</div>
                 <EffectList
                     effects={node.effects ?? []}
@@ -560,28 +606,21 @@ export function NodeEditor({
                 />
             </div>
 
-            <div className="node-editor__section">
+            <div
+                className="node-editor__section"
+                data-problem-target="branches"
+            >
                 <div className="node-editor__section-head">
                     Conditional (IF) branches
-                    <button
-                        className="dlg__add"
-                        onClick={() =>
-                            set({
-                                conditionalBranches: [
-                                    ...branches,
-                                    {
-                                        condition: {
-                                            type: 'hasFlag',
-                                            flag: 'flag',
-                                        },
-                                    },
-                                ],
-                            })
-                        }
-                    >
-                        <Plus size={13} /> Branch
-                    </button>
+                    {branches.length > 0 && addBranch}
                 </div>
+                {branches.length === 0 && (
+                    <div className="dlg__empty">
+                        Add a branch to run effects only when a condition
+                        passes.
+                        {addBranch}
+                    </div>
+                )}
                 {branches.map((branch, i) => (
                     <div key={i} className="dlg__card">
                         <div className="dlg__card-head">
@@ -659,27 +698,17 @@ export function NodeEditor({
                 ))}
             </div>
 
-            <div className="node-editor__section">
+            <div className="node-editor__section" data-problem-target="choices">
                 <div className="node-editor__section-head">
                     Choices
-                    <button
-                        className="dlg__add"
-                        onClick={() =>
-                            set({
-                                choices: [
-                                    ...node.choices,
-                                    {
-                                        id: `${node.id}_choice_${node.choices.length}`,
-                                        text: '@choice',
-                                        next: nodeIds[0] ?? '',
-                                    },
-                                ],
-                            })
-                        }
-                    >
-                        <Plus size={13} /> Choice
-                    </button>
+                    {node.choices.length > 0 && addChoice}
                 </div>
+                {node.choices.length === 0 && (
+                    <div className="dlg__empty">
+                        Add a choice to give the player ways to reply.
+                        {addChoice}
+                    </div>
+                )}
                 {node.choices.map((choice, i) => {
                     const update = (next: Choice) =>
                         set({
@@ -688,7 +717,11 @@ export function NodeEditor({
                             ),
                         });
                     return (
-                        <div key={choice.id} className="dlg__card">
+                        <div
+                            key={choice.id}
+                            className="dlg__card"
+                            data-problem-target={`choice:${choice.id}`}
+                        >
                             <div className="dlg__card-head">
                                 <span>CHOICE</span>
                                 <div className="dlg__card-actions">
@@ -806,7 +839,7 @@ export function NodeEditor({
                 })}
             </div>
 
-            <div className="node-editor__section">
+            <div className="node-editor__section" data-problem-target="next">
                 <div className="dlg__target">
                     <span className="field__label">Next node</span>
                     <TargetSelect

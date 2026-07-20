@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentRegistry } from '@doodle-engine/core';
 import { useLocaleWriter } from '../lib/locale-writer';
-import { authoredTextPreview } from '../lib/localized-text';
+import { authoredTextPreview, languageName } from '../lib/localized-text';
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { AnchoredOverlay, OverlayPortal } from './OverlayPortal';
 
@@ -15,6 +15,7 @@ export function LocalizedTextField({
     hint,
     placeholder,
     ariaLabel,
+    revealTarget,
     onSourceChange,
 }: {
     label?: React.ReactNode;
@@ -24,6 +25,8 @@ export function LocalizedTextField({
     hint?: string;
     placeholder?: string;
     ariaLabel?: string;
+    /** Optional scroll destination used when opening a validation problem. */
+    revealTarget?: string;
     onSourceChange: (source: string) => void;
 }) {
     const writer = useLocaleWriter();
@@ -101,10 +104,7 @@ export function LocalizedTextField({
                   : ''
         }`,
         value: displayValue,
-        placeholder:
-            isMissing && locale
-                ? `No ${locale} text yet. Type to add it.`
-                : placeholder,
+        placeholder,
         spellCheck: true,
         'aria-label': ariaLabel,
         onChange: (
@@ -113,7 +113,10 @@ export function LocalizedTextField({
     };
 
     return (
-        <div className="field localized-text">
+        <div
+            className="field localized-text"
+            data-problem-target={revealTarget}
+        >
             <div className="field__labelrow">
                 <span className="field__labelgroup">{label}</span>
                 <div className="seg">
@@ -123,7 +126,7 @@ export function LocalizedTextField({
                         disabled={!locale}
                         title={
                             locale
-                                ? 'Store this text in the authoring locale'
+                                ? 'Store this text in the locale file so it can be translated'
                                 : 'Add a locale before assigning a key'
                         }
                         onClick={() => {
@@ -145,7 +148,7 @@ export function LocalizedTextField({
                         disabled={isMissing}
                         title={
                             isMissing
-                                ? `Add ${locale ?? 'the authoring locale'} text before unlinking this key`
+                                ? `Add ${locale ? languageName(locale) + ' ' : ''}text before unlinking this key`
                                 : undefined
                         }
                         onClick={() => {
@@ -213,11 +216,11 @@ export function LocalizedTextField({
                             <button
                                 type="button"
                                 onClick={() => {
-                                    writer?.openLocale(locale);
+                                    writer?.openLocale(locale, keyName);
                                     setShowKeyMenu(false);
                                 }}
                             >
-                                Open in {locale} locale
+                                Open the {languageName(locale)} locale
                             </button>
                             <button
                                 type="button"
@@ -240,7 +243,10 @@ export function LocalizedTextField({
                         {unlinkedLocales.length > 0 && (
                             <>
                                 {' '}
-                                The key and its {unlinkedLocales.join(', ')}{' '}
+                                The key and its{' '}
+                                {unlinkedLocales
+                                    .map(languageName)
+                                    .join(', ')}{' '}
                                 {unlinkedLocales.length === 1
                                     ? 'translation'
                                     : 'translations'}{' '}
@@ -429,7 +435,7 @@ function LocaleKeyPicker({
                                 autoFocus
                                 spellCheck={false}
                                 aria-label="Search locale keys"
-                                placeholder={`Search ${locale} keys and text…`}
+                                placeholder={`Search ${languageName(locale)} keys and text…`}
                                 onChange={(event) => {
                                     setQuery(event.target.value);
                                     setActive(0);
@@ -456,7 +462,8 @@ function LocaleKeyPicker({
                                             @{key}
                                         </span>
                                         <span className="locale-key-picker__value">
-                                            {value || `No ${locale} text yet`}
+                                            {value ||
+                                                `Empty in ${languageName(locale)}`}
                                         </span>
                                     </button>
                                 ))}

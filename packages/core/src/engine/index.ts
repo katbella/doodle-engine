@@ -960,16 +960,16 @@ export class Engine {
     /**
      * Settle at a node after entering it and applying its effects.
      *
-     * - Node has text → show it, wait for player to call continueDialogue()
-     * - Node has choices (no text) → stay so the player can choose
-     * - Silent (no text, no choices) → auto-advance through the chain until
+     * - Node has text: show it, wait for player to call continueDialogue()
+     * - Node has choices (no text): stay so the player can choose
+     * - Silent (no text, no choices): auto-advance through the chain until
      *   we reach a node with text/choices or the end of the dialogue
      *
      * Handles the case where effects (e.g. endDialogue) may have already
      * nulled dialogueState; restores it when the node has text to display.
      */
     private settleAtNode(dialogueId: string, node: DialogueNode): void {
-        // Node has text → show it, wait for player click
+        // Node has text: show it, wait for player click
         if (node.text) {
             this.state = {
                 ...this.state,
@@ -978,7 +978,7 @@ export class Engine {
             return;
         }
 
-        // Node has choices (no text) → stay, show choices
+        // Node has choices (no text): stay, show choices
         if (node.choices.length > 0) {
             return;
         }
@@ -1029,7 +1029,7 @@ export class Engine {
                 return;
             }
 
-            // Text or choices → show this node and stop
+            // Text or choices: show this node and stop
             if (nextNode.text || nextNode.choices.length > 0) {
                 if (nextNode.text) {
                     // Restore in case effects (e.g. endDialogue) changed dialogueState

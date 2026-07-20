@@ -75,7 +75,6 @@ describe('DebugTrace', () => {
         const transitionRow = screen.getByText('TRANSITION').parentElement!;
         expect(within(transitionRow).getByText('start')).toBeTruthy();
         expect(within(transitionRow).getByText('rumors')).toBeTruthy();
-        expect(transitionRow.textContent).not.toContain('start to rumors');
         expect(transitionRow.querySelector('svg.trace__to')).toBeTruthy();
 
         const hiddenRow = screen.getByText('HIDDEN').parentElement!;

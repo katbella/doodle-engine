@@ -101,6 +101,15 @@ vi.mock('../shell/EditorArea', () => ({
         <div>
             <span>{props.activeKey ?? 'no-active-tab'}</span>
             <span>{props.dirtyTabs.size ? 'dirty-tab' : 'clean-tab'}</span>
+            <span>
+                dialogue-view:
+                {props.viewModes['dialogues:intro'] ?? 'unset'}
+            </span>
+            <span>
+                dialogue-node:
+                {props.selectedNodes['dialogues:intro'] ?? 'unset'}
+            </span>
+            <span>reveal:{props.reveal?.message ?? 'none'}</span>
             <button onClick={() => props.onDirty('characters:hero', true)}>
                 Mark dirty
             </button>
@@ -149,6 +158,18 @@ vi.mock('../shell/BottomDock', () => ({
                 }
             >
                 Open problem
+            </button>
+            <button
+                onClick={() =>
+                    props.onOpenProblem({
+                        file: 'content/dialogues/intro.dlg',
+                        message:
+                            'Node "start" GOTO "missing" points to non-existent node',
+                        severity: 'error',
+                    })
+                }
+            >
+                Open dialogue problem
             </button>
             <button onClick={() => props.onRenameFlagVar('flag', 'met_hero')}>
                 Rename flag
@@ -262,7 +283,23 @@ function makeProject(depsInstalled = true): OpenProject {
             },
             items: {},
             maps: {},
-            dialogues: {},
+            dialogues: {
+                intro: {
+                    id: 'intro',
+                    startNode: 'start',
+                    nodes: [
+                        {
+                            id: 'start',
+                            speaker: null,
+                            text: 'Hello',
+                            effects: [],
+                            conditionalBranches: [],
+                            choices: [],
+                            next: 'missing',
+                        },
+                    ],
+                },
+            },
             quests: {},
             journalEntries: {},
             interludes: {},
@@ -278,6 +315,7 @@ function makeProject(depsInstalled = true): OpenProject {
         files: {
             'characters:hero': 'content/characters/hero.yaml',
             'locations:town': 'content/locations/town.yaml',
+            'dialogues:intro': 'content/dialogues/intro.dlg',
         },
         problems: [],
         engine: {
@@ -554,6 +592,24 @@ describe('App workflows', () => {
             'content/characters/hero.yaml'
         );
         expect(screen.getByText('items:new_item')).toBeTruthy();
+    });
+
+    it('opens dialogue problems at their matching Visual editor control', async () => {
+        installBridge();
+        const user = await openApp();
+
+        await user.click(
+            screen.getByRole('button', { name: 'Open dialogue problem' })
+        );
+
+        expect(screen.getByText('dialogues:intro')).toBeTruthy();
+        expect(screen.getByText('dialogue-view:view')).toBeTruthy();
+        expect(screen.getByText('dialogue-node:start')).toBeTruthy();
+        expect(
+            screen.getByText(
+                'reveal:Node "start" GOTO "missing" points to non-existent node'
+            )
+        ).toBeTruthy();
     });
 
     it('applies entity and flag renames and exposes command-palette actions', async () => {

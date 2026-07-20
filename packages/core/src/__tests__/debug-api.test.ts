@@ -351,7 +351,7 @@ describe('Engine debug tracing', () => {
 
         const { events, sink } = record();
         engine.setTrace(sink);
-        // Advancing off 'rumors' evaluates its IF branch (hasFlag rich → false).
+        // Advancing off 'rumors' evaluates its IF branch (hasFlag rich fails).
         engine.selectChoice('ask_rumors');
         engine.continueDialogue();
 

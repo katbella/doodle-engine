@@ -442,7 +442,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await expect(
                 lineField.locator('.localized-text__unlink-notice')
             ).toContainText(
-                'The key and its sv translation stay in the locale files'
+                'The key and its Swedish translation stay in the locale files'
             );
             await window.screenshot({
                 path: join(tourDir, '08-unlinked-key-warning-dark.png'),

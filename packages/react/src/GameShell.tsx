@@ -1,7 +1,7 @@
 /**
  * GameShell - Complete game wrapper with splash, title, menus
  *
- * Manages the game lifecycle: loading → splash → title → playing
+ * Manages the game lifecycle: loading, then splash, then title, then playing
  * Includes pause menu, settings, and video playback.
  * Wraps AssetProvider + GameProvider + GameRenderer with full shell chrome.
  */

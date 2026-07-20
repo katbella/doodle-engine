@@ -302,8 +302,8 @@ function evaluateRelationshipBelow(
  * Handles ranges that wrap around midnight.
  *
  * Examples:
- * - timeIs 20 6   → 8 PM to 6 AM (night time)
- * - timeIs 9 17   → 9 AM to 5 PM (day time)
+ * - timeIs 20 6   means 8 PM to 6 AM (night time)
+ * - timeIs 9 17   means 9 AM to 5 PM (day time)
  *
  * @param startHour - Start hour (0-23, inclusive)
  * @param endHour - End hour (0-23, exclusive)

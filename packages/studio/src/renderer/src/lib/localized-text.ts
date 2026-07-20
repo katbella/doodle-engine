@@ -6,6 +6,19 @@ export interface AuthoredTextPreview {
     missing: boolean;
 }
 
+/** Display name for a locale code, like "English" for "en"; the code itself
+ * when it isn't a valid language tag. */
+export function languageName(locale: string): string {
+    try {
+        return (
+            new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ??
+            locale
+        );
+    } catch {
+        return locale;
+    }
+}
+
 /** Resolve an authored @key using English when present, else the first locale. */
 export function authoredTextPreview(
     source: string,

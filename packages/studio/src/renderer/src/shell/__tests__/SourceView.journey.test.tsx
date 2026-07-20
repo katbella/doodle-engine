@@ -343,6 +343,15 @@ NODE second
                         file: 'content/dialogues/test.dlg',
                         message: 'Unknown effect keyword: HURRDURR',
                     },
+                    {
+                        file: 'content/dialogues/test.dlg',
+                        message:
+                            'Localization key "value" not found in any locale file',
+                    },
+                    {
+                        file: 'content/dialogues/test.dlg',
+                        message: 'Nothing here says where this lives',
+                    },
                 ],
             },
             path: 'content/dialogues/test.dlg',
@@ -357,6 +366,11 @@ NODE second
             markers: [
                 { line: 6, message: 'Node "second" has a problem' },
                 { line: 7, message: 'Unknown effect keyword: HURRDURR' },
+                {
+                    line: 7,
+                    message:
+                        'Localization key "value" not found in any locale file',
+                },
             ],
             revealLine: 7,
             revealSeq: 3,

@@ -656,7 +656,7 @@
 .node-editor {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-5);
     width: 100%;
     max-width: 1080px;
 }
@@ -706,6 +706,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: var(--space-2);
     padding-bottom: var(--space-1);
     border-bottom: 1px solid var(--border-faint);
     font-size: var(--text-sm);
@@ -758,8 +759,8 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-    padding: 4px var(--space-2);
-    font-size: var(--text-xs);
+    padding: 6px var(--space-3);
+    font-size: var(--text-sm);
     font-weight: var(--fw-medium);
     color: var(--accent);
     border: 1px solid var(--border);
@@ -775,11 +776,18 @@
 .dlg__card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-3);
+    gap: var(--space-3);
+    padding: var(--space-4);
     background: var(--surface-raised);
     border: 1px solid var(--border-faint);
     border-left: 2px solid var(--border);
+}
+.dlg__empty {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-faint);
 }
 .dlg__card-head {
     display: flex;
@@ -812,6 +820,7 @@
     cursor: default;
 }
 .dlg__sub {
+    margin-top: var(--space-2);
     font-size: var(--text-sm);
     color: var(--text-faint);
 }
@@ -819,6 +828,9 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+}
+.dlg__card .dlg__target {
+    margin-top: var(--space-2);
 }
 .dlg__note {
     font-size: var(--text-xs);
@@ -848,7 +860,8 @@
     color: var(--text-faint);
     vertical-align: -1px;
 }
-.dlg__chip:hover .dlg__chip-edit {
+.dlg__chip:hover .dlg__chip-edit,
+.dlg__chip:focus-visible .dlg__chip-edit {
     color: var(--accent);
 }
 /* Condition/effect builder ------------------------------------------------- */
@@ -1222,10 +1235,6 @@
 .game-config .game-config__add-select {
     width: auto;
     min-width: 150px;
-}
-.game-config .dlg__add {
-    padding: 5px var(--space-2);
-    font-size: var(--text-sm);
 }
 .game-config__state-grid .dlg__row {
     display: grid;
@@ -1895,17 +1904,83 @@
 .problem {
     display: flex;
     gap: var(--space-2);
-    padding: 6px 0;
     font-size: var(--text-sm);
     border-bottom: 1px solid var(--border-faint);
+}
+.problem--row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 26px;
+    gap: var(--space-1);
+    align-items: center;
+}
+.problem__open {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+    padding: 6px var(--space-2);
+    overflow: hidden;
+    text-align: left;
+    cursor: pointer;
+}
+.problem__open:hover {
+    background: var(--overlay-hover);
+}
+.problem__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    color: var(--accent);
+}
+.problem__copy:hover,
+.problem__copy:focus-visible {
+    color: var(--accent-hover);
+    background: var(--accent-tint);
+}
+.problem__copy--copied {
+    color: var(--valid);
+    background: var(--valid-tint);
 }
 .problem__file {
     font-family: var(--font-mono);
     color: var(--text-dim);
-    flex: none;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .problem__msg {
+    flex: 1;
+    min-width: 0;
     color: var(--error);
+    overflow-wrap: anywhere;
+}
+.problem-reveal {
+    outline: 1px solid transparent;
+    outline-offset: 2px;
+    animation: problem-reveal 2.2s ease-out both;
+}
+@keyframes problem-reveal {
+    0%,
+    55% {
+        outline-color: var(--accent);
+        box-shadow: inset 0 0 0 100vmax var(--accent-tint);
+    }
+    100% {
+        outline-color: transparent;
+        box-shadow: inset 0 0 0 100vmax transparent;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .problem-reveal {
+        outline-color: var(--accent);
+        box-shadow: inset 0 0 0 100vmax var(--accent-tint);
+        animation: none !important;
+    }
 }
 .orphan__msg {
     color: var(--text-dim);
@@ -1965,11 +2040,6 @@
 }
 .symbol__rename:hover {
     color: var(--accent);
-}
-.problem--button {
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
 }
 .reference {
     display: flex;
@@ -2038,10 +2108,6 @@
     font-size: var(--text-xs);
     color: var(--text-faint);
 }
-.problem--button:hover {
-    background: var(--overlay-hover);
-}
-
 .welcome {
     grid-row: 1 / -1;
     height: 100%;

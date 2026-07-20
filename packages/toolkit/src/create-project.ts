@@ -60,7 +60,7 @@ function resolveOutputPath(key: string): string | null {
     // _root/ files go to the project root
     if (rel.startsWith('_root/')) {
         const filename = rel.slice('_root/'.length);
-        // _gitignore → .gitignore  (leading _ becomes .)
+        // _gitignore is written as .gitignore (leading _ becomes .)
         return filename.startsWith('_') ? '.' + filename.slice(1) : filename;
     }
 

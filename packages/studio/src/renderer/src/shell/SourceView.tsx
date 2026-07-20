@@ -4,7 +4,7 @@ import { parseDialogueCst } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { MonacoEditor, type EditorMarker } from './MonacoEditor';
 import { languageForPath } from '../lib/monaco-setup';
-import { lineInMessage } from '../lib/paths';
+import { lineInMessage, quotedTokenInMessage } from '../lib/paths';
 
 const norm = (s: string) => s.replace(/\\/g, '/');
 
@@ -18,7 +18,8 @@ function findCodeLine(content: string, token: string): number {
     return 0;
 }
 
-/** Best-effort line number for a problem message in the given file. */
+/** Best-effort line number for a problem message in the given file, or 0 when
+ * the message gives nothing to locate (no marker is better than a wrong one). */
 function lineForMessage(
     path: string,
     content: string,
@@ -34,9 +35,16 @@ function lineForMessage(
                 const node = cst.nodes.find((n) => n.id === nodeMatch[1]);
                 if (node) return node.headerLine + 1;
             } catch {
-                // fall through to the token search
+                // fall through to the token searches
             }
         }
+    }
+    const quoted = quotedTokenInMessage(message);
+    if (quoted) {
+        const line = findCodeLine(content, quoted);
+        if (line) return line;
+    }
+    if (path.endsWith('.dlg')) {
         // Messages like "Unknown effect keyword: hurrdurr" end with the
         // offending token; find the line it appears on.
         const token = message.split(':').pop()?.trim().split(/\s+/)[0];
@@ -45,7 +53,7 @@ function lineForMessage(
             if (line) return line;
         }
     }
-    return 1;
+    return 0;
 }
 
 export function SourceView({
@@ -204,7 +212,8 @@ export function SourceView({
                       .map((p) => ({
                           line: lineForMessage(path, saved, p.message),
                           message: p.message,
-                      })),
+                      }))
+                      .filter((marker) => marker.line > 0),
         [stale, project.problems, path, saved]
     );
 

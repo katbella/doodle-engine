@@ -192,7 +192,7 @@ describe('LocalizedTextField write-through editing', () => {
             'Now using literal text instead of @bartender.greeting.'
         );
         expect(notice.textContent).toContain(
-            'The key and its sv translation stay in the locale files'
+            'The key and its Swedish translation stay in the locale files'
         );
         expect(notice.textContent).toContain('Switch back to @key to relink.');
 

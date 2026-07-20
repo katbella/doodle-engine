@@ -2,7 +2,7 @@
  * AssetProvider: context and loading orchestration for the asset system.
  *
  * Manages the two-tier loading flow:
- *   loading-shell → loading-game → complete
+ *   loading-shell, then loading-game, then complete
  *
  * Children don't render until shell and game assets are loaded.
  * Use renderLoading to provide a loading screen during the process.

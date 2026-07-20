@@ -130,4 +130,41 @@ describe('LocaleEditor', () => {
             ])
         );
     });
+
+    it('jumps to a revealed key by filtering to it', async () => {
+        Object.defineProperty(window, 'studio', {
+            configurable: true,
+            value: {
+                readDocument: vi.fn(async () => ({
+                    content: 'bartender.greeting: Hello\nui.map: Map\n',
+                    mtimeMs: 1,
+                })),
+                writeEntity: vi.fn(),
+            },
+        });
+        render(
+            <LocaleEditor
+                project={
+                    {
+                        projectDir: 'C:/story',
+                        registry: { locales: { en: {} } },
+                    } as unknown as OpenProject
+                }
+                tabKey="locales:en"
+                path="content/locales/en.yaml"
+                localeId="en"
+                revealKey="ui.map"
+                revealSeq={1}
+                onDirty={vi.fn()}
+                onModified={vi.fn()}
+            />
+        );
+
+        const filter = await screen.findByRole('textbox', {
+            name: 'Filter locale keys and text',
+        });
+        expect((filter as HTMLInputElement).value).toBe('ui.map');
+        expect(screen.getByText('ui.map')).toBeTruthy();
+        expect(screen.queryByText('bartender.greeting')).toBeNull();
+    });
 });

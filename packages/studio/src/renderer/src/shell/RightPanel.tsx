@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { OpenProject } from '../../../shared/project';
 import type { Tab } from '../types';
 import type {
@@ -5,7 +6,31 @@ import type {
     ReferenceIndex,
     SymbolType,
 } from '@doodle-engine/core';
+import type { ValidationError } from '@doodle-engine/toolkit';
+import { Check, Copy } from '../lib/icons';
 import { filePathFor } from '../lib/paths';
+
+/** Copies "file: message" so a problem can be pasted into a chat or an issue. */
+export function CopyProblemButton({ problem }: { problem: ValidationError }) {
+    const [copied, setCopied] = useState(false);
+    return (
+        <button
+            className={`problem__copy ${copied ? 'problem__copy--copied' : ''}`}
+            aria-label={copied ? 'Problem copied' : 'Copy problem'}
+            aria-live="polite"
+            title={copied ? 'Copied' : 'Copy problem'}
+            onClick={() => {
+                void navigator.clipboard?.writeText(
+                    `${problem.file}: ${problem.message}`
+                );
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1500);
+            }}
+        >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+        </button>
+    );
+}
 
 /** The reference-index symbol type for each section, where one exists. */
 const SECTION_SYMBOL: Partial<Record<Tab['section'], SymbolType>> = {
@@ -23,12 +48,15 @@ export function RightPanel({
     activeTab,
     referenceIndex,
     onOpenFile,
+    onOpenProblem,
 }: {
     project: OpenProject;
     activeTab: Tab | null;
     referenceIndex: ReferenceIndex | null;
     /** Open a file by its project-relative path. */
     onOpenFile: (file: string) => void;
+    /** Jump to where a validation problem lives, like the Problems dock. */
+    onOpenProblem: (problem: ValidationError) => void;
 }) {
     const file = activeTab ? filePathFor(project, activeTab) : undefined;
     const itemProblems = file
@@ -81,10 +109,16 @@ export function RightPanel({
                     </span>
                 ) : (
                     itemProblems.map((problem, i) => (
-                        <div key={i} className="problem">
-                            <span className="problem__msg">
-                                {problem.message}
-                            </span>
+                        <div key={i} className="problem problem--row">
+                            <button
+                                className="problem__open"
+                                onClick={() => onOpenProblem(problem)}
+                            >
+                                <span className="problem__msg">
+                                    {problem.message}
+                                </span>
+                            </button>
+                            <CopyProblemButton problem={problem} />
                         </div>
                     ))
                 )}

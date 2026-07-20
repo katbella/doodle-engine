@@ -13,6 +13,9 @@ interface LocaleEditorProps {
     tabKey: string;
     path: string;
     localeId: string;
+    /** A key to jump to: the filter is set to it so its row is in view. */
+    revealKey?: string;
+    revealSeq?: number;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
 }
@@ -29,10 +32,16 @@ export function LocaleEditor(props: LocaleEditorProps) {
     );
 }
 
-function LocaleEditorInner({ tabKey, localeId, onDirty }: LocaleEditorProps) {
+function LocaleEditorInner({
+    tabKey,
+    localeId,
+    revealKey,
+    revealSeq,
+    onDirty,
+}: LocaleEditorProps) {
     const writer = useLocaleWriter();
     const file = writer?.files[localeId];
-    const [filter, setFilter] = useState('');
+    const [filter, setFilter] = useState(revealKey ?? '');
     const [adding, setAdding] = useState(false);
     const [newKey, setNewKey] = useState('');
     const [addError, setAddError] = useState<string | null>(null);
@@ -41,6 +50,9 @@ function LocaleEditorInner({ tabKey, localeId, onDirty }: LocaleEditorProps) {
     const reload = writer?.reload;
 
     useEffect(() => onDirty(tabKey, dirty), [dirty, onDirty, tabKey]);
+    useEffect(() => {
+        if (revealSeq !== undefined && revealKey) setFilter(revealKey);
+    }, [revealKey, revealSeq]);
     useEffect(() => {
         void reload?.(localeId);
     }, [localeId, reload]);

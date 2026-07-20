@@ -33,7 +33,7 @@ interface Token {
 
 /**
  * Leading keywords that start an effect line. Used so that keyword detection
- * takes precedence over the generic "line contains ':' → speaker line" rule.
+ * takes precedence over the generic "line contains ':' means speaker line" rule.
  * GOTO is intentionally excluded: it is routing, handled separately by node and
  * choice parsing. NOTIFY is included so a NOTIFY whose text contains ':' is
  * still parsed as an effect rather than mistaken for a speaker line.
@@ -664,7 +664,7 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
         }
 
         // Structural and effect keywords are checked before the generic
-        // "line contains ':' → speaker line" rule, so a CHOICE/IF/GOTO/PORTRAIT
+        // "line contains ':' means speaker line" rule, so a CHOICE/IF/GOTO/PORTRAIT
         // or effect line whose text contains ':' is not mistaken for a speaker.
         if (current.line.startsWith('VOICE ')) {
             voice = current.line.substring(6).trim();

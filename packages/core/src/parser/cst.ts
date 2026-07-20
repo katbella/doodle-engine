@@ -8,13 +8,13 @@
  * author's comments or reshuffle their formatting. So this module holds the
  * file exactly as it was written.
  *
- *   - parseDialogueCst(source, id) → a tree that holds every line of the file
- *     (code, comment, and blank) with its position, plus enough structure
+ *   - parseDialogueCst(source, id) returns a tree that holds every line of the
+ *     file (code, comment, and blank) with its position, plus enough structure
  *     (directives, nodes, choice/IF blocks) to jump around and edit one piece.
- *   - printDialogueCst(cst, edits) → the file text back. With no edits it returns
- *     the original bytes unchanged; with edits it drops the new text into the
- *     given positions and leaves every other byte untouched.
- *   - cstToDialogue(cst, edits) → the Dialogue object. It gets there by printing
+ *   - printDialogueCst(cst, edits) returns the file text back. With no edits it
+ *     returns the original bytes unchanged; with edits it drops the new text
+ *     into the given positions and leaves every other byte untouched.
+ *   - cstToDialogue(cst, edits) returns the Dialogue object. It gets there by printing
  *     the tree back to text and handing that to the runtime parseDialogue, so a
  *     file's meaning is decided in one place only and this tree can never drift
  *     from what the engine actually does.

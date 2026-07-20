@@ -13,7 +13,7 @@ import type { ValidationError } from '@doodle-engine/toolkit';
 import { ReferenceIndex, type SymbolType } from '@doodle-engine/core';
 import type { SectionKey, Tab } from './types';
 import { buildSections } from './lib/sections';
-import { locateFile, sectionFileKey } from './lib/paths';
+import { dialogueProblemTarget, locateFile, sectionFileKey } from './lib/paths';
 import {
     pathForNewItem,
     templateForNewItem,
@@ -612,6 +612,22 @@ export function App() {
             if (!loc) return;
             openItem(loc.section, loc.itemId, loc.itemId);
             const key = `${loc.section}:${loc.itemId}`;
+            if (loc.section === 'dialogues') {
+                const target = dialogueProblemTarget(
+                    problem.message,
+                    project?.registry.dialogues[loc.itemId]
+                );
+                if (target) {
+                    setViewMode(key, 'view');
+                    selectNode(key, target.nodeId);
+                    setReveal((prev) => ({
+                        key,
+                        message: problem.message,
+                        seq: (prev?.seq ?? 0) + 1,
+                    }));
+                    return;
+                }
+            }
             setViewMode(key, 'source');
             setReveal((prev) => ({
                 key,
@@ -619,7 +635,7 @@ export function App() {
                 seq: (prev?.seq ?? 0) + 1,
             }));
         },
-        [openItem, setViewMode]
+        [openItem, project, selectNode, setViewMode]
     );
 
     const closeTab = useCallback((key: string) => {
@@ -999,9 +1015,16 @@ export function App() {
                     onSelectNode={selectNode}
                     onDirty={handleDirty}
                     onModified={markModified}
-                    onOpenLocale={(locale) =>
-                        openItem('locales', locale, locale)
-                    }
+                    onOpenLocale={(locale, key) => {
+                        openItem('locales', locale, locale);
+                        if (key) {
+                            setReveal((prev) => ({
+                                key: `locales:${locale}`,
+                                message: key,
+                                seq: (prev?.seq ?? 0) + 1,
+                            }));
+                        }
+                    }}
                     onPlayFromNode={playFromNode}
                 />
                 <ResizeHandle
@@ -1017,6 +1040,7 @@ export function App() {
                     activeTab={activeTab}
                     referenceIndex={referenceIndex}
                     onOpenFile={openReferencedFile}
+                    onOpenProblem={openProblem}
                 />
             </div>
             <ResizeHandle

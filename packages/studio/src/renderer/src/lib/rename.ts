@@ -62,7 +62,7 @@ export interface RenamePlan {
 }
 
 /** True when an arg of this kind holds the id being renamed. Entity renames
- * match by reference target (characterId → characters); flag/variable renames
+ * match by reference target (characterId maps to characters); flag/variable renames
  * match the kind directly (flag, variable). */
 type ArgMatcher = (kind: string) => boolean;
 

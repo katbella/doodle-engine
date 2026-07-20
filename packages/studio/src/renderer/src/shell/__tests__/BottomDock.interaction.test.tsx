@@ -83,6 +83,7 @@ describe('BottomDock', () => {
             severity: 'error' as const,
         };
         const user = userEvent.setup();
+        const writeText = vi.spyOn(navigator.clipboard, 'writeText');
         render(
             <BottomDock
                 {...props('problems', {
@@ -99,6 +100,13 @@ describe('BottomDock', () => {
             screen.getByRole('button', { name: /Missing start location/ })
         );
         expect(onOpenProblem).toHaveBeenCalledWith(problem);
+        await user.click(screen.getByRole('button', { name: 'Copy problem' }));
+        expect(writeText).toHaveBeenCalledWith(
+            'content/game.yaml: Missing start location'
+        );
+        expect(
+            screen.getByRole('button', { name: 'Problem copied' })
+        ).toBeTruthy();
     });
 
     it('shows empty and populated symbol states and renames both kinds', async () => {
@@ -287,9 +295,7 @@ describe('BottomDock', () => {
         const { rerender } = render(<BottomDock {...props('devserver')} />);
         expect(screen.getByText(/No dev server running/)).toBeTruthy();
 
-        rerender(
-            <BottomDock {...props('devserver', { previewBusy: true })} />
-        );
+        rerender(<BottomDock {...props('devserver', { previewBusy: true })} />);
         expect(screen.getByText('Starting the dev server…')).toBeTruthy();
         expect(screen.queryByText(/No dev server running/)).toBeNull();
 

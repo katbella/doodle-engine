@@ -29,7 +29,7 @@ interface LocaleWriterValue {
     deleteValue: (locale: string, key: string) => void;
     flush: (locale: string, force?: boolean) => Promise<void>;
     reload: (locale: string) => Promise<void>;
-    openLocale: (locale: string) => void;
+    openLocale: (locale: string, key?: string) => void;
 }
 
 const LocaleWriterContext = createContext<LocaleWriterValue | null>(null);
@@ -140,7 +140,7 @@ export function LocaleWriterProvider({
 }: {
     project: OpenProject;
     onModified: (filePath: string) => void;
-    onOpenLocale?: (locale: string) => void;
+    onOpenLocale?: (locale: string, key?: string) => void;
     children: React.ReactNode;
 }) {
     const [files, setFiles] = useState<Record<string, LocaleFileState>>(() =>
@@ -436,7 +436,7 @@ export function LocaleWriterProvider({
             deleteValue,
             flush,
             reload,
-            openLocale: (locale) => onOpenLocale?.(locale),
+            openLocale: (locale, key) => onOpenLocale?.(locale, key),
         }),
         [
             deleteValue,
@@ -464,7 +464,7 @@ export function LocaleWriterBoundary({
 }: {
     project: OpenProject;
     onModified: (filePath: string) => void;
-    onOpenLocale?: (locale: string) => void;
+    onOpenLocale?: (locale: string, key?: string) => void;
     children: React.ReactNode;
 }) {
     const existing = useContext(LocaleWriterContext);

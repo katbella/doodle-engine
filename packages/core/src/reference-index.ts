@@ -40,7 +40,7 @@ export interface Reference {
     where: string;
 }
 
-/** The reference-kind → registry collection map, plus flags/variables. */
+/** Map from reference kind to registry collection, plus flags/variables. */
 const KIND_TO_TYPE: Record<string, SymbolType> = {
     itemId: 'items',
     characterId: 'characters',
@@ -58,9 +58,9 @@ function key(type: SymbolType, id: string): string {
 }
 
 export class ReferenceIndex {
-    /** symbol key → its usages. */
+    /** Usages by symbol key. */
     private readonly refs = new Map<string, Reference[]>();
-    /** symbol key → true, for every defined symbol (to find orphans). */
+    /** True for every defined symbol key (to find orphans). */
     private readonly defined = new Map<string, SymbolType>();
 
     /**

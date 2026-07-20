@@ -1,3 +1,5 @@
+import { serializeNode } from '@doodle-engine/core';
+import type { Dialogue } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { SectionKey, Tab } from '../types';
 
@@ -101,4 +103,132 @@ export function locateFile(
 export function lineInMessage(message: string): number {
     const match = message.match(/line (\d+)/i);
     return match ? parseInt(match[1], 10) : 0;
+}
+
+/** The first double-quoted token in a problem message, or null. */
+export function quotedTokenInMessage(message: string): string | null {
+    const match = message.match(/"([^"]+)"/);
+    return match ? match[1] : null;
+}
+
+export type DialogueProblemArea =
+    | 'node'
+    | 'speaker'
+    | 'line'
+    | 'effects'
+    | 'branches'
+    | 'choices'
+    | 'next'
+    | `choice:${string}`;
+
+export interface DialogueProblemTarget {
+    nodeId: string;
+    area: DialogueProblemArea;
+}
+
+function findProblemNode(
+    message: string,
+    dialogue: Dialogue | undefined
+): Dialogue['nodes'][number] | null {
+    if (!dialogue) return null;
+    const named = message.match(/Node "([^"]+)"/i);
+    if (named) {
+        return dialogue.nodes.find((node) => node.id === named[1]) ?? null;
+    }
+    const token = quotedTokenInMessage(message);
+    if (!token) return null;
+    return (
+        dialogue.nodes.find((node) => serializeNode(node).includes(token)) ??
+        null
+    );
+}
+
+/**
+ * The closest visual-editor destination described by a dialogue problem.
+ * Messages that identify only a node land at its header; more specific known
+ * forms land at the matching field or section.
+ */
+export function dialogueProblemTarget(
+    message: string,
+    dialogue: Dialogue | undefined
+): DialogueProblemTarget | null {
+    const node = findProblemNode(message, dialogue);
+    if (!node) return null;
+
+    const choiceMatch = message.match(/choice(?: ID)? "([^"]+)"/i);
+    if (
+        choiceMatch &&
+        node.choices.some((choice) => choice.id === choiceMatch[1])
+    ) {
+        return { nodeId: node.id, area: `choice:${choiceMatch[1]}` };
+    }
+
+    const token = quotedTokenInMessage(message);
+    if (token?.startsWith('@')) {
+        if (node.text === token) return { nodeId: node.id, area: 'line' };
+        const choice = node.choices.find((item) => item.text === token);
+        if (choice) return { nodeId: node.id, area: `choice:${choice.id}` };
+    }
+
+    if (/\bspeaker\b/i.test(message)) {
+        return { nodeId: node.id, area: 'speaker' };
+    }
+    if (/\bIF block\b/i.test(message)) {
+        return { nodeId: node.id, area: 'branches' };
+    }
+
+    const typed = message.match(/\b(condition|effect) "([^"]+)"/i);
+    if (typed) {
+        const [, kind, type] = typed;
+        const areas = new Set<DialogueProblemArea>();
+        if (
+            kind.toLowerCase() === 'effect' &&
+            (node.effects ?? []).some((effect) => effect.type === type)
+        ) {
+            areas.add('effects');
+        }
+        for (const branch of node.conditionalBranches ?? []) {
+            if (
+                (kind.toLowerCase() === 'condition' &&
+                    branch.condition.type === type) ||
+                (kind.toLowerCase() === 'effect' &&
+                    (branch.effects ?? []).some(
+                        (effect) => effect.type === type
+                    ))
+            ) {
+                areas.add('branches');
+            }
+        }
+        for (const choice of node.choices) {
+            const matches =
+                kind.toLowerCase() === 'condition'
+                    ? (choice.conditions ?? []).some(
+                          (condition) => condition.type === type
+                      )
+                    : (choice.effects ?? []).some(
+                          (effect) => effect.type === type
+                      );
+            if (matches) areas.add(`choice:${choice.id}`);
+        }
+        if (areas.size === 1) {
+            return { nodeId: node.id, area: [...areas][0] };
+        }
+    }
+
+    if (/\bGOTO\b/i.test(message)) {
+        return { nodeId: node.id, area: 'next' };
+    }
+    return { nodeId: node.id, area: 'node' };
+}
+
+/**
+ * The dialogue node a validation problem points at, or null. Uses the node
+ * named in the message when there is one; otherwise finds the node whose
+ * serialized source contains the message's quoted token.
+ */
+export function problemNodeId(
+    message: string,
+    dialogue: Dialogue | undefined
+): string | null {
+    return findProblemNode(message, dialogue)?.id ?? null;
 }

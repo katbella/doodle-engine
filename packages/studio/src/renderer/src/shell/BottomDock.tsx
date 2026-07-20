@@ -8,7 +8,7 @@ import type {
 import type { ValidationError } from '@doodle-engine/toolkit';
 import type { Reference } from '@doodle-engine/core';
 import { Playtest } from './Playtest';
-import { ReferenceGroups } from './RightPanel';
+import { CopyProblemButton, ReferenceGroups } from './RightPanel';
 
 export type DockTab =
     | 'problems'
@@ -207,14 +207,16 @@ function ProblemsView({
     return (
         <>
             {problems.map((problem, i) => (
-                <button
-                    key={i}
-                    className="problem problem--button"
-                    onClick={() => onOpenProblem(problem)}
-                >
-                    <span className="problem__file">{problem.file}</span>
-                    <span className="problem__msg">{problem.message}</span>
-                </button>
+                <div key={i} className="problem problem--row">
+                    <button
+                        className="problem__open"
+                        onClick={() => onOpenProblem(problem)}
+                    >
+                        <span className="problem__file">{problem.file}</span>
+                        <span className="problem__msg">{problem.message}</span>
+                    </button>
+                    <CopyProblemButton problem={problem} />
+                </div>
             ))}
         </>
     );

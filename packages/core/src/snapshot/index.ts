@@ -3,7 +3,7 @@
  *
  * Builds a snapshot from the current game state and content registry.
  * A snapshot is everything the renderer needs to display the current moment:
- * - All localization resolved (@keys → text)
+ * - All localization resolved (@keys become text)
  * - All conditions evaluated (only visible choices included)
  * - All entity data enriched with full information
  *

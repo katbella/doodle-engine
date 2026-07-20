@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import type { Dialogue } from '@doodle-engine/core';
 import type { OpenProject } from '../../../../shared/project';
 import {
+    dialogueProblemTarget,
     filePathFor,
     lineInMessage,
     locateFile,
+    problemNodeId,
+    quotedTokenInMessage,
     sectionFileKey,
 } from '../paths';
 
@@ -102,5 +106,92 @@ describe('renderer file paths', () => {
         expect(lineInMessage('Invalid value at line 42, column 3')).toBe(42);
         expect(lineInMessage('LINE 7 is malformed')).toBe(7);
         expect(lineInMessage('No location available')).toBe(0);
+    });
+
+    it('extracts the quoted token from a problem message', () => {
+        expect(
+            quotedTokenInMessage(
+                'Localization key "@intro.greet" not found in any locale file'
+            )
+        ).toBe('@intro.greet');
+        expect(quotedTokenInMessage('No quotes here')).toBeNull();
+    });
+
+    it('finds the node a problem points at, by name or quoted token', () => {
+        const dialogue = {
+            id: 'intro',
+            startNode: 'start',
+            nodes: [
+                {
+                    id: 'start',
+                    speaker: null,
+                    text: 'Hello.',
+                    effects: [{ type: 'setFlag', flag: 'metHero' }],
+                    conditionalBranches: [
+                        {
+                            condition: { type: 'hasFlag', flag: 'ready' },
+                            next: 'end',
+                        },
+                    ],
+                    choices: [
+                        {
+                            id: 'greet',
+                            text: '@intro.greet',
+                            conditions: [{ type: 'hasItem', itemId: 'coin' }],
+                            next: 'end',
+                        },
+                    ],
+                },
+                { id: 'end', speaker: null, text: '@intro.end', choices: [] },
+            ],
+        } as unknown as Dialogue;
+
+        expect(problemNodeId('Node "end" has no way out', dialogue)).toBe(
+            'end'
+        );
+        expect(
+            problemNodeId(
+                'Localization key "@intro.greet" not found in any locale file',
+                dialogue
+            )
+        ).toBe('start');
+        expect(problemNodeId('Nothing to find here', dialogue)).toBeNull();
+        expect(
+            problemNodeId('Node "end" has no way out', undefined)
+        ).toBeNull();
+
+        expect(
+            dialogueProblemTarget(
+                'Node "start" GOTO "missing" points to non-existent node',
+                dialogue
+            )
+        ).toEqual({ nodeId: 'start', area: 'next' });
+        expect(
+            dialogueProblemTarget(
+                'Node "start" IF block GOTO "missing" points to non-existent node',
+                dialogue
+            )
+        ).toEqual({ nodeId: 'start', area: 'branches' });
+        expect(
+            dialogueProblemTarget(
+                'Node "start" choice "greet" GOTO "missing" points to non-existent node',
+                dialogue
+            )
+        ).toEqual({ nodeId: 'start', area: 'choice:greet' });
+        expect(
+            dialogueProblemTarget(
+                'Localization key "@intro.greet" not found in any locale file',
+                dialogue
+            )
+        ).toEqual({ nodeId: 'start', area: 'choice:greet' });
+        expect(
+            dialogueProblemTarget(
+                'Node "start" effect "setFlag" missing required "flag" argument',
+                dialogue
+            )
+        ).toEqual({ nodeId: 'start', area: 'effects' });
+        expect(
+            dialogueProblemTarget('Node "end" has no way out', dialogue)
+        ).toEqual({ nodeId: 'end', area: 'node' });
     });
 });

@@ -40,7 +40,7 @@ const CATEGORY_PREFIX: Record<AssetCategory, string> = {
  * Resolve a bare filename or path to an asset URL path.
  *
  * - Bare filenames are resolved using the category convention:
- *   `resolveAssetPath('tavern.png', 'banner')` → `assets/images/banners/tavern.png`
+ *   `resolveAssetPath('tavern.png', 'banner')` returns `assets/images/banners/tavern.png`
  * - Paths starting with `assets/` are kept as written.
  * - Paths starting with `/`, `http(s)://`, `data:`, or `blob:` are returned unchanged.
  * - Empty or undefined values return an empty string.

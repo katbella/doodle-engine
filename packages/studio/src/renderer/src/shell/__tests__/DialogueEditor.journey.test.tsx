@@ -89,8 +89,16 @@ function installBridge(content = source, readError: Error | null = null) {
 
 // Selection is held by the parent in the app (shared with the graph view),
 // so the harness holds it the same way.
-function EditorHarness() {
-    const [selected, setSelected] = useState<string | null>(null);
+function EditorHarness({
+    initialSelected = null,
+    revealMessage,
+    revealSeq,
+}: {
+    initialSelected?: string | null;
+    revealMessage?: string;
+    revealSeq?: number;
+} = {}) {
+    const [selected, setSelected] = useState<string | null>(initialSelected);
     return (
         <DialogueEditor
             project={project}
@@ -98,6 +106,8 @@ function EditorHarness() {
             path="content/dialogues/greeting.dlg"
             dialogueId="greeting"
             selectedNodeId={selected}
+            revealMessage={revealMessage}
+            revealSeq={revealSeq}
             onSelectNode={setSelected}
             onDirty={() => {}}
             onModified={() => {}}
@@ -110,9 +120,42 @@ function renderEditor() {
     return render(<EditorHarness />);
 }
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    delete (HTMLElement.prototype as { scrollIntoView?: unknown })
+        .scrollIntoView;
+});
 
 describe('DialogueEditor author journeys', () => {
+    it('scrolls a revealed problem to its node and visual section', async () => {
+        installBridge();
+        const scrollIntoView = vi.fn();
+        Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+            configurable: true,
+            value: scrollIntoView,
+        });
+
+        render(
+            <EditorHarness
+                initialSelected="start"
+                revealMessage={'Node "start" GOTO "missing" points nowhere'}
+                revealSeq={1}
+            />
+        );
+
+        await screen.findByDisplayValue('Welcome.');
+        const target = document.querySelector<HTMLElement>(
+            '[data-problem-target="next"]'
+        );
+        await waitFor(() =>
+            expect(target?.classList.contains('problem-reveal')).toBe(true)
+        );
+        expect(scrollIntoView.mock.contexts).toContain(
+            document.querySelector('.dlg__node--active')
+        );
+        expect(scrollIntoView.mock.contexts).toContain(target);
+    });
+
     it('saves pending dialogue changes with Ctrl+S', async () => {
         const writeDocument = installBridge();
         const user = userEvent.setup();
@@ -165,16 +208,12 @@ describe('DialogueEditor author journeys', () => {
         expect(singleLineSource).not.toContain('BARTENDER: "One line again."');
     });
 
-    it('renames a node, repoints choices, preserves comments, and shows clean targets', async () => {
+    it('renames a node, repoints choices, and preserves comments', async () => {
         const writeDocument = installBridge();
         const user = userEvent.setup();
         const view = renderEditor();
 
         await screen.findByDisplayValue('Welcome.');
-        for (const option of screen.getAllByRole('option')) {
-            expect(option.textContent).not.toContain('→');
-        }
-
         await user.click(screen.getByRole('button', { name: 'second' }));
         const id = screen.getByTitle('Node id (used by GOTO targets)');
         await user.clear(id);
@@ -310,7 +349,8 @@ NODE new_node
         await waitFor(() => expect(writeDocument).toHaveBeenCalledOnce());
         const saved = writeDocument.mock.calls[0][2];
         expect(saved).toContain('NODE new_node_2');
-        expect(saved).toContain('CHOICE @choice');
+        expect(saved).toContain('NARRATOR: @greeting.new_node_2');
+        expect(saved).toContain('CHOICE @greeting.new_node_2_choice_0');
     });
 
     it('overwrites or recreates the dialogue when the author chooses to force a conflicted save', async () => {

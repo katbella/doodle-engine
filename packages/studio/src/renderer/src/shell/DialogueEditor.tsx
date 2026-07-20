@@ -9,6 +9,7 @@ import { LocaleWriterBoundary, useLocaleWriter } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
 import { ResizeHandle } from './ResizeHandle';
 import { usePersistedSize } from '../lib/usePersistedSize';
+import { dialogueProblemTarget } from '../lib/paths';
 
 /**
  * Visual editor for a .dlg file. It parses the file into a dialogue, edits that
@@ -23,6 +24,9 @@ interface DialogueEditorProps {
     dialogueId: string;
     /** Selected node, held per tab by App so the graph view shares it. */
     selectedNodeId: string | null;
+    /** Validation problem to reveal in the selected node, when one maps here. */
+    revealMessage?: string;
+    revealSeq?: number;
     onSelectNode: (nodeId: string | null) => void;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
@@ -46,6 +50,8 @@ function DialogueEditorInner({
     path,
     dialogueId,
     selectedNodeId,
+    revealMessage,
+    revealSeq,
     onSelectNode,
     onDirty,
     onModified,
@@ -65,6 +71,9 @@ function DialogueEditorInner({
         220
     );
     const localeWriter = useLocaleWriter();
+    const mainRef = useRef<HTMLDivElement>(null);
+    const outlineNodeRefs = useRef(new Map<string, HTMLButtonElement>());
+    const handledRevealRef = useRef<number | undefined>(undefined);
 
     const dir = project.projectDir;
 
@@ -101,13 +110,13 @@ function DialogueEditorInner({
     const currentText = useMemo(() => {
         if (!dialogue) return savedText;
         // A bare CHOICE line isn't valid .dlg, so an empty label is written as
-        // the "@choice" placeholder for validation to flag.
+        // a per-choice placeholder key for validation to flag.
         const forSave: Dialogue = {
             ...dialogue,
             nodes: dialogue.nodes.map((n) => ({
                 ...n,
                 choices: n.choices.map((c) =>
-                    c.text.trim() ? c : { ...c, text: '@choice' }
+                    c.text.trim() ? c : { ...c, text: `@${dialogueId}.${c.id}` }
                 ),
             })),
         };
@@ -146,6 +155,50 @@ function DialogueEditorInner({
         const t = setTimeout(() => void save(), 1000);
         return () => clearTimeout(t);
     }, [currentText, dirty, conflict, missing]);
+
+    useEffect(() => {
+        if (
+            !dialogue ||
+            !revealMessage ||
+            revealSeq === undefined ||
+            handledRevealRef.current === revealSeq
+        ) {
+            return;
+        }
+        const target = dialogueProblemTarget(revealMessage, dialogue);
+        if (!target || selectedNodeId !== target.nodeId) return;
+
+        let highlighted: HTMLElement | null = null;
+        let clearHighlight: number | undefined;
+        const revealTimer = window.setTimeout(() => {
+            outlineNodeRefs.current
+                .get(target.nodeId)
+                ?.scrollIntoView?.({ block: 'nearest' });
+            highlighted =
+                Array.from(
+                    mainRef.current?.querySelectorAll<HTMLElement>(
+                        '[data-problem-target]'
+                    ) ?? []
+                ).find(
+                    (element) => element.dataset.problemTarget === target.area
+                ) ?? null;
+            highlighted?.scrollIntoView?.({ block: 'center' });
+            highlighted?.classList.add('problem-reveal');
+            handledRevealRef.current = revealSeq;
+            clearHighlight = window.setTimeout(
+                () => highlighted?.classList.remove('problem-reveal'),
+                2200
+            );
+        }, 0);
+
+        return () => {
+            window.clearTimeout(revealTimer);
+            if (clearHighlight !== undefined) {
+                window.clearTimeout(clearHighlight);
+            }
+            highlighted?.classList.remove('problem-reveal');
+        };
+    }, [dialogue, revealMessage, revealSeq, selectedNodeId]);
 
     // Save any pending edit when this editor goes away (closing the tab,
     // switching views, or opening another project), so a quick edit followed
@@ -191,7 +244,12 @@ function DialogueEditorInner({
             ...dialogue,
             nodes: [
                 ...dialogue.nodes,
-                { id, speaker: null, text: '@text', choices: [] },
+                {
+                    id,
+                    speaker: null,
+                    text: `@${dialogueId}.${id}`,
+                    choices: [],
+                },
             ],
         });
         onSelectNode(id);
@@ -346,6 +404,13 @@ function DialogueEditorInner({
                 {dialogue.nodes.map((node) => (
                     <button
                         key={node.id}
+                        ref={(element) => {
+                            if (element) {
+                                outlineNodeRefs.current.set(node.id, element);
+                            } else {
+                                outlineNodeRefs.current.delete(node.id);
+                            }
+                        }}
                         className={`dlg__node ${node.id === selectedId ? 'dlg__node--active' : ''}`}
                         aria-label={node.id}
                         onClick={() => onSelectNode(node.id)}
@@ -369,7 +434,7 @@ function DialogueEditorInner({
                 onResize={setOutlineWidth}
             />
 
-            <div className="dlg__main scroll">
+            <div ref={mainRef} className="dlg__main scroll">
                 {conflict !== null && (
                     <div className="banner">
                         <TriangleAlert
@@ -401,6 +466,7 @@ function DialogueEditorInner({
                 {selected ? (
                     <NodeEditor
                         node={selected}
+                        dialogueId={dialogueId}
                         isStart={selected.id === dialogue.startNode}
                         characters={Object.keys(project.registry.characters)}
                         nodeIds={dialogue.nodes.map((n) => n.id)}
