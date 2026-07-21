@@ -10,6 +10,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { ResizeHandle } from './ResizeHandle';
 import { usePersistedSize } from '../lib/usePersistedSize';
 import { dialogueProblemTarget } from '../lib/paths';
+import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
 
 /**
  * Visual editor for a .dlg file. It parses the file into a dialogue, edits that
@@ -31,6 +32,7 @@ interface DialogueEditorProps {
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
     onPlayFromNode: (dialogueId: string, nodeId: string) => void;
+    nameCatalog?: NameCatalog;
 }
 
 export function DialogueEditor(props: DialogueEditorProps) {
@@ -56,6 +58,7 @@ function DialogueEditorInner({
     onDirty,
     onModified,
     onPlayFromNode,
+    nameCatalog = EMPTY_NAME_CATALOG,
 }: DialogueEditorProps) {
     const [base, setBase] = useState('');
     const [savedText, setSavedText] = useState('');
@@ -472,6 +475,7 @@ function DialogueEditorInner({
                         nodeIds={dialogue.nodes.map((n) => n.id)}
                         registry={project.registry}
                         projectDir={project.projectDir}
+                        nameCatalog={nameCatalog}
                         onChange={updateNode}
                         onRename={renameNode}
                         onMakeStart={() => makeStart(selected.id)}

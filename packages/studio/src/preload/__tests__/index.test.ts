@@ -84,6 +84,22 @@ describe('preload bridge', () => {
             ],
             [() => api.revalidate('dir'), 'project:revalidate', ['dir']],
             [
+                () => api.readFlagVarNotes('dir'),
+                'metadata:readFlagVarNotes',
+                ['dir'],
+            ],
+            [
+                () => api.updateFlagVarNote('dir', 'flag', 'ready', 'Ready.'),
+                'metadata:updateFlagVarNote',
+                ['dir', 'flag', 'ready', 'Ready.'],
+            ],
+            [
+                () =>
+                    api.moveFlagVarNote('dir', 'variable', 'oldScore', 'score'),
+                'metadata:moveFlagVarNote',
+                ['dir', 'variable', 'oldScore', 'score'],
+            ],
+            [
                 () => api.readDocument('dir', 'file'),
                 'doc:read',
                 ['dir', 'file'],

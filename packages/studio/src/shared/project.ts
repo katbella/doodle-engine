@@ -178,6 +178,19 @@ export interface DocumentContent {
     mtimeMs: number;
 }
 
+/** Optional project annotations for flags and variables used by Studio. */
+export interface FlagVarNotes {
+    flags: Record<string, string>;
+    variables: Record<string, string>;
+}
+
+export type FlagVarNoteKind = 'flag' | 'variable';
+
+/** Whether optional notes metadata is safe to edit. */
+export type FlagVarNotesReadResult =
+    | { status: 'available'; notes: FlagVarNotes }
+    | { status: 'unavailable'; message: string };
+
 /** Result of a save attempt. */
 export interface WriteResult {
     /** True when the file was written. */
@@ -224,6 +237,22 @@ export interface StudioApi {
     removeRecentProject: (projectDir: string) => Promise<RecentProject[]>;
     /** Reload and re-validate the project from disk (the Validate button). */
     revalidate: (projectDir: string) => Promise<OpenProject>;
+    /** Read optional flag and variable notes from project metadata. */
+    readFlagVarNotes: (projectDir: string) => Promise<FlagVarNotesReadResult>;
+    /** Re-read notes, change one entry, and return the authoritative result. */
+    updateFlagVarNote: (
+        projectDir: string,
+        kind: FlagVarNoteKind,
+        id: string,
+        note: string
+    ) => Promise<FlagVarNotes>;
+    /** Re-read notes, move one entry, and return the authoritative result. */
+    moveFlagVarNote: (
+        projectDir: string,
+        kind: FlagVarNoteKind,
+        from: string,
+        to: string
+    ) => Promise<FlagVarNotes>;
     /** Read a project file's text and its modified time. */
     readDocument: (
         projectDir: string,

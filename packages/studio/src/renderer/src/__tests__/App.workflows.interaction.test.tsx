@@ -111,6 +111,14 @@ vi.mock('../shell/EditorArea', () => ({
                 {props.selectedNodes['dialogues:intro'] ?? 'unset'}
             </span>
             <span>reveal:{props.reveal?.message ?? 'none'}</span>
+            <span>notes-error:{props.flagVarPage.notesError ?? 'none'}</span>
+            <span>
+                notes-ready:
+                {props.flagVarPage.notes.flags.met_hero ?? 'none'}
+            </span>
+            {props.nameCatalog.flags.map((flag: { id: string }) => (
+                <span key={flag.id}>catalog-flag:{flag.id}</span>
+            ))}
             <button onClick={() => props.onDirty('characters:hero', true)}>
                 Mark dirty
             </button>
@@ -126,6 +134,22 @@ vi.mock('../shell/EditorArea', () => ({
             </button>
             <button onClick={() => props.onClose('characters:hero')}>
                 Close hero tab
+            </button>
+            <button
+                onClick={() => props.flagVarPage.onRename('flag', 'met_hero')}
+            >
+                Rename flag
+            </button>
+            <button
+                onClick={() =>
+                    props.flagVarPage.onNoteChange(
+                        'flag',
+                        'met_hero',
+                        'Edited note.'
+                    )
+                }
+            >
+                Edit flag note
             </button>
         </div>
     ),
@@ -172,15 +196,10 @@ vi.mock('../shell/BottomDock', () => ({
             >
                 Open dialogue problem
             </button>
-            <button onClick={() => props.onRenameFlagVar('flag', 'met_hero')}>
-                Rename flag
-            </button>
             <button onClick={props.onCancelBuild}>Cancel build</button>
             <button onClick={props.onRebuild}>Rebuild</button>
             <button onClick={props.onOpenOutput}>Open output</button>
-            <button onClick={() => props.onTabChange('symbols')}>
-                Symbols tab
-            </button>
+            <button onClick={props.onOpenSymbols}>Flags page</button>
         </div>
     ),
 }));
@@ -370,6 +389,14 @@ function installBridge(
         openPreview: vi.fn(async () => {}),
         openPath: vi.fn(async () => {}),
         reportError: vi.fn(),
+        updateFlagVarNote: vi.fn(async () => ({
+            flags: {},
+            variables: {},
+        })),
+        moveFlagVarNote: vi.fn(async () => ({
+            flags: {},
+            variables: {},
+        })),
         readDocument: vi.fn(async () => ({ content: '', mtimeMs: 1 })),
         writeDocument: vi.fn(async () => ({
             ok: true,
@@ -617,6 +644,12 @@ describe('App workflows', () => {
         const { bridge } = installBridge();
         const user = await openApp();
 
+        await user.click(screen.getByRole('button', { name: 'Open palette' }));
+        await user.click(
+            screen.getByRole('button', { name: 'Palette met_hero' })
+        );
+        expect(screen.getByText('flags-vars:all')).toBeTruthy();
+
         await user.click(screen.getByRole('button', { name: 'Rename hero' }));
         await user.click(screen.getByRole('button', { name: 'Submit rename' }));
         await waitFor(() =>
@@ -662,5 +695,146 @@ describe('App workflows', () => {
             screen.getByRole('button', { name: 'Palette Theme: Neon City' })
         );
         expect(document.documentElement.dataset.theme).toBe('neon');
+    });
+
+    it('moves a flag note when the flag is renamed', async () => {
+        const moveFlagVarNote = vi.fn<StudioApi['moveFlagVarNote']>(
+            async () => ({
+                flags: { met_friend: 'The player met the hero.' },
+                variables: {},
+            })
+        );
+        const readFlagVarNotes = vi.fn<StudioApi['readFlagVarNotes']>(
+            async () => ({
+                status: 'available',
+                notes: {
+                    flags: { met_hero: 'The player met the hero.' },
+                    variables: {},
+                },
+            })
+        );
+        installBridge({
+            readFlagVarNotes,
+            moveFlagVarNote,
+        });
+        const user = await openApp();
+        await waitFor(() => expect(readFlagVarNotes).toHaveBeenCalled());
+
+        await user.click(screen.getByRole('button', { name: 'Rename flag' }));
+        await user.click(
+            screen.getByRole('button', { name: 'Submit flag rename' })
+        );
+
+        await waitFor(() =>
+            expect(moveFlagVarNote).toHaveBeenCalledWith(
+                'C:/story',
+                'flag',
+                'met_hero',
+                'met_friend'
+            )
+        );
+    });
+
+    it('does not overwrite notes after their metadata fails to parse', async () => {
+        const updateFlagVarNote = vi.fn<StudioApi['updateFlagVarNote']>(
+            async () => ({ flags: {}, variables: {} })
+        );
+        installBridge({
+            readFlagVarNotes: vi.fn(async () => ({
+                status: 'unavailable' as const,
+                message: 'Malformed notes YAML',
+            })),
+            updateFlagVarNote,
+        });
+        const user = await openApp();
+
+        await screen.findByText('notes-error:Malformed notes YAML');
+        await user.click(
+            screen.getByRole('button', { name: 'Edit flag note' })
+        );
+
+        expect(updateFlagVarNote).not.toHaveBeenCalled();
+    });
+
+    it('refreshes hand-edited notes during project revalidation', async () => {
+        const readFlagVarNotes = vi
+            .fn<StudioApi['readFlagVarNotes']>()
+            .mockResolvedValueOnce({
+                status: 'available',
+                notes: {
+                    flags: { met_hero: 'Original note.' },
+                    variables: {},
+                },
+            })
+            .mockResolvedValueOnce({
+                status: 'available',
+                notes: {
+                    flags: { met_hero: 'Hand-edited note.' },
+                    variables: {},
+                },
+            });
+        installBridge({ readFlagVarNotes });
+        const user = await openApp();
+
+        await screen.findByText('notes-ready:Original note.');
+        await user.click(screen.getByRole('button', { name: 'Validate' }));
+
+        await screen.findByText('notes-ready:Hand-edited note.');
+        expect(readFlagVarNotes).toHaveBeenCalledTimes(2);
+    });
+
+    it('refreshes notes when the notes file changes on disk', async () => {
+        let fileChanged: ((relPath: string) => void) | undefined;
+        const readFlagVarNotes = vi
+            .fn<StudioApi['readFlagVarNotes']>()
+            .mockResolvedValueOnce({
+                status: 'available',
+                notes: {
+                    flags: { met_hero: 'Original note.' },
+                    variables: {},
+                },
+            })
+            .mockResolvedValueOnce({
+                status: 'available',
+                notes: {
+                    flags: { met_hero: 'Hand-edited note.' },
+                    variables: {},
+                },
+            });
+        installBridge({
+            readFlagVarNotes,
+            onFileChanged: vi.fn(
+                (callback: (relPath: string) => void): (() => void) => {
+                    fileChanged = callback;
+                    return () => {};
+                }
+            ),
+        });
+        await openApp();
+
+        await screen.findByText('notes-ready:Original note.');
+        act(() => fileChanged?.('content\\dialogues\\hero.dlg'));
+        expect(readFlagVarNotes).toHaveBeenCalledTimes(1);
+
+        act(() => fileChanged?.('metadata\\flags-and-vars.yaml'));
+        await screen.findByText('notes-ready:Hand-edited note.');
+        expect(readFlagVarNotes).toHaveBeenCalledTimes(2);
+    });
+
+    it('refreshes the flag catalog after an editor saves a new flag', async () => {
+        const refreshed = makeProject();
+        refreshed.config.startFlags = {
+            ...refreshed.config.startFlags,
+            freshFlag: true,
+        };
+        const revalidate = vi.fn(async () => refreshed);
+        installBridge({ revalidate });
+        const user = await openApp();
+
+        expect(screen.getByText('catalog-flag:met_hero')).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Mark modified' }));
+
+        await screen.findByText('catalog-flag:freshFlag');
+        expect(revalidate).toHaveBeenCalledWith('C:/story');
     });
 });

@@ -8,9 +8,14 @@ import type {
     StudioBuildResult,
     ThemeColor,
     ThemeMode,
+    FlagVarNotes,
 } from '../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
-import { ReferenceIndex, type SymbolType } from '@doodle-engine/core';
+import {
+    ReferenceIndex,
+    type Reference,
+    type SymbolType,
+} from '@doodle-engine/core';
 import type { SectionKey, Tab } from './types';
 import { buildSections } from './lib/sections';
 import { dialogueProblemTarget, locateFile, sectionFileKey } from './lib/paths';
@@ -43,6 +48,15 @@ import { ResizeHandle } from './shell/ResizeHandle';
 import { CommandPalette, type Command } from './shell/CommandPalette';
 import { usePersistedSize } from './lib/usePersistedSize';
 import {
+    EMPTY_FLAG_VAR_NOTES,
+    attachFlagVarNotes,
+    buildFlagVarSummaries,
+    buildStatSummaries,
+    type FlagVarKind,
+    type NameCatalog,
+} from './lib/flag-vars';
+import type { FlagVarSelection } from './shell/FlagsVariablesPage';
+import {
     FolderOpen,
     FilePlus,
     FileText,
@@ -69,7 +83,6 @@ const SECTION_SYMBOL: Partial<Record<CreatableSection, SymbolType>> = {
 
 const DOCK_DEFAULT_HEIGHTS: Record<DockTab, number> = {
     problems: 112,
-    symbols: 220,
     build: 260,
     devserver: 260,
     playtest: Math.min(600, Math.max(360, Math.round(innerHeight * 0.48))),
@@ -86,6 +99,8 @@ function displayError(error: unknown): string {
 
 export function App() {
     const [project, setProject] = useState<OpenProject | null>(null);
+    const [referenceProject, setReferenceProject] =
+        useState<OpenProject | null>(null);
     const [tabs, setTabs] = useState<Tab[]>([]);
     const [activeKey, setActiveKey] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -108,6 +123,13 @@ export function App() {
         kind: 'flag' | 'variable';
         id: string;
     } | null>(null);
+    const [flagVarSelection, setFlagVarSelection] =
+        useState<FlagVarSelection | null>(null);
+    const [flagVarNotes, setFlagVarNotes] =
+        useState<FlagVarNotes>(EMPTY_FLAG_VAR_NOTES);
+    const [flagVarNotesError, setFlagVarNotesError] = useState<string | null>(
+        null
+    );
     const [dockTab, setDockTab] = useState<DockTab>('problems');
     const [showPalette, setShowPalette] = useState(false);
     const [building, setBuilding] = useState(false);
@@ -168,9 +190,73 @@ export function App() {
     // manual). Cleared when a different project opens.
     const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
     const projectDir = project?.projectDir;
+    const currentDirRef = useRef<string | null>(null);
+    const notesWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
+    const referenceRefreshTimerRef = useRef<ReturnType<
+        typeof setTimeout
+    > | null>(null);
+    const referenceRefreshSequenceRef = useRef(0);
     useEffect(() => {
         setLastSavedAt(null);
     }, [projectDir]);
+    useEffect(() => {
+        currentDirRef.current = projectDir ?? null;
+    }, [projectDir]);
+    useEffect(() => {
+        setReferenceProject(project);
+    }, [project]);
+    const refreshFlagVarNotes = useCallback(async (dir: string) => {
+        if (!window.studio.readFlagVarNotes) return;
+        try {
+            const result = await window.studio.readFlagVarNotes(dir);
+            if (currentDirRef.current !== dir) return;
+            if (result.status === 'available') {
+                setFlagVarNotes(result.notes);
+                setFlagVarNotesError(null);
+            } else {
+                setFlagVarNotes(EMPTY_FLAG_VAR_NOTES);
+                setFlagVarNotesError(result.message);
+            }
+        } catch (error) {
+            const message = displayError(error);
+            if (currentDirRef.current === dir) {
+                setFlagVarNotes(EMPTY_FLAG_VAR_NOTES);
+                setFlagVarNotesError(message);
+            }
+            window.studio.reportError?.({
+                context: 'metadata:readFlagVarNotes',
+                message,
+            });
+        }
+    }, []);
+    const reloadProject = useCallback(
+        async (dir: string) => {
+            const [fresh] = await Promise.all([
+                window.studio.revalidate(dir),
+                refreshFlagVarNotes(dir),
+            ]);
+            return fresh;
+        },
+        [refreshFlagVarNotes]
+    );
+    useEffect(() => {
+        setFlagVarNotes(EMPTY_FLAG_VAR_NOTES);
+        setFlagVarNotesError(null);
+        if (projectDir) void refreshFlagVarNotes(projectDir);
+    }, [projectDir, refreshFlagVarNotes]);
+    // Hand edits to the notes file made outside Studio show up live, the same
+    // way external edits to content files do.
+    useEffect(() => {
+        if (!projectDir || typeof window.studio.onFileChanged !== 'function')
+            return;
+        return window.studio.onFileChanged((relPath) => {
+            if (
+                relPath.replace(/\\/g, '/') === 'metadata/flags-and-vars.yaml'
+            ) {
+                void refreshFlagVarNotes(projectDir);
+            }
+        });
+    }, [projectDir, refreshFlagVarNotes]);
     // "Play from here" on a node: opens the playtest tab and jumps the running
     // session to that node. The seq makes repeat clicks on the same node fire.
     const [playtestStart, setPlaytestStart] = useState<{
@@ -215,11 +301,6 @@ export function App() {
     // The folder of the project on screen right now. Long-running work
     // (builds, installs) checks this when it finishes, so results from one
     // project never land in another that was opened in the meantime.
-    const currentDirRef = useRef<string | null>(null);
-    useEffect(() => {
-        currentDirRef.current = project?.projectDir ?? null;
-    }, [project]);
-
     const [railWidth, setRailWidth] = usePersistedSize(
         'doodle-studio-rail-w',
         236
@@ -256,16 +337,34 @@ export function App() {
         [dockTab]
     );
 
+    const referenceSource = referenceProject ?? project;
     const referenceIndex = useMemo(
         () =>
-            project
+            referenceSource
                 ? new ReferenceIndex(
-                      project.registry,
-                      new Map(Object.entries(project.files)),
-                      project.config
+                      referenceSource.registry,
+                      new Map(Object.entries(referenceSource.files)),
+                      referenceSource.config
                   )
                 : null,
-        [project]
+        [referenceSource]
+    );
+    const baseFlagVarSummaries = useMemo(
+        () => buildFlagVarSummaries(referenceIndex),
+        [referenceIndex]
+    );
+    const namedFlagVars = useMemo(
+        () => attachFlagVarNotes(baseFlagVarSummaries, flagVarNotes),
+        [baseFlagVarSummaries, flagVarNotes]
+    );
+    const statSummaries = useMemo(
+        () =>
+            referenceSource ? buildStatSummaries(referenceSource.registry) : [],
+        [referenceSource]
+    );
+    const nameCatalog = useMemo<NameCatalog>(
+        () => ({ ...namedFlagVars, stats: statSummaries }),
+        [namedFlagVars, statSummaries]
     );
 
     // How many places reference this content item (0 if the index isn't ready
@@ -403,6 +502,7 @@ export function App() {
                 const opened = await run();
                 if (opened) {
                     setProject(opened);
+                    setReferenceProject(opened);
                     setTabs([]);
                     setActiveKey(null);
                     setBuildResult(null);
@@ -415,6 +515,9 @@ export function App() {
                     setDirtyTabs(new Set());
                     setViewModes({});
                     setSelectedNodes({});
+                    setFlagVarSelection(null);
+                    setFlagVarNotes(EMPTY_FLAG_VAR_NOTES);
+                    setFlagVarNotesError(null);
                     setRecent(await window.studio.listRecentProjects());
                     return true;
                 }
@@ -467,26 +570,67 @@ export function App() {
         [openProject, openRecent, openNewProjectModal]
     );
 
-    const markModified = useCallback((filePath: string) => {
-        setLastSavedAt(new Date());
-        setStaleFiles((prev) =>
-            prev.has(filePath) ? prev : new Set(prev).add(filePath)
-        );
+    const scheduleReferenceRefresh = useCallback(() => {
+        const dir = currentDirRef.current;
+        if (!dir) return;
+        if (referenceRefreshTimerRef.current) {
+            clearTimeout(referenceRefreshTimerRef.current);
+        }
+        const sequence = ++referenceRefreshSequenceRef.current;
+        referenceRefreshTimerRef.current = setTimeout(() => {
+            referenceRefreshTimerRef.current = null;
+            void window.studio
+                .revalidate(dir)
+                .then((fresh) => {
+                    if (
+                        currentDirRef.current === dir &&
+                        referenceRefreshSequenceRef.current === sequence
+                    ) {
+                        setReferenceProject(fresh);
+                    }
+                })
+                .catch((error) =>
+                    window.studio.reportError?.({
+                        context: 'symbols:refreshAfterSave',
+                        message: displayError(error),
+                    })
+                );
+        }, 120);
     }, []);
+    useEffect(
+        () => () => {
+            referenceRefreshSequenceRef.current++;
+            if (referenceRefreshTimerRef.current) {
+                clearTimeout(referenceRefreshTimerRef.current);
+            }
+        },
+        []
+    );
+    const markModified = useCallback(
+        (filePath: string) => {
+            setLastSavedAt(new Date());
+            setStaleFiles((prev) =>
+                prev.has(filePath) ? prev : new Set(prev).add(filePath)
+            );
+            scheduleReferenceRefresh();
+        },
+        [scheduleReferenceRefresh]
+    );
 
     const revalidate = useCallback(async () => {
         if (!project) return;
+        const dir = project.projectDir;
         // Fast runs skip the busy state entirely: a "Validating…" pill that
         // exists for two frames reads as a glitch, not feedback.
         const showBusy = setTimeout(() => setValidating(true), 150);
         try {
-            setProject(await window.studio.revalidate(project.projectDir));
+            setProject(await reloadProject(dir));
             setStaleFiles(new Set());
         } finally {
             clearTimeout(showBusy);
             setValidating(false);
         }
-    }, [project]);
+    }, [project, reloadProject]);
 
     const runBuild = useCallback(async () => {
         if (!project || building) return;
@@ -523,12 +667,12 @@ export function App() {
             // open project; otherwise the finished install changes nothing
             // on screen.
             if (result.ok && currentDirRef.current === dir) {
-                setProject(await window.studio.revalidate(dir));
+                setProject(await reloadProject(dir));
             }
         } finally {
             setInstalling(false);
         }
-    }, [project, installing]);
+    }, [project, installing, reloadProject]);
 
     const startPreview = useCallback(async () => {
         if (!project || previewBusy) return;
@@ -563,6 +707,60 @@ export function App() {
             setActiveKey(key);
         },
         []
+    );
+    const openFlagsVariables = useCallback(
+        (selection?: FlagVarSelection) => {
+            if (selection) setFlagVarSelection(selection);
+            openItem('flags-vars', 'all', 'Flags & variables');
+        },
+        [openItem]
+    );
+
+    const queueFlagVarNoteOperation = useCallback(
+        async (
+            context: string,
+            operation: (dir: string) => Promise<FlagVarNotes>
+        ) => {
+            if (flagVarNotesError || !project) return;
+            const dir = project.projectDir;
+            notesWriteQueueRef.current = notesWriteQueueRef.current
+                .catch(() => {})
+                .then(async () => {
+                    const notes = await operation(dir);
+                    if (currentDirRef.current === dir) {
+                        setFlagVarNotes(notes);
+                        setFlagVarNotesError(null);
+                        setLastSavedAt(new Date());
+                    }
+                });
+            try {
+                await notesWriteQueueRef.current;
+            } catch (error) {
+                const message = displayError(error);
+                if (currentDirRef.current === dir) {
+                    setFlagVarNotesError(message);
+                }
+                window.studio.reportError?.({
+                    context,
+                    message,
+                });
+            }
+        },
+        [flagVarNotesError, project]
+    );
+    const updateFlagVarNote = useCallback(
+        (kind: FlagVarKind, id: string, note: string) =>
+            queueFlagVarNoteOperation('metadata:updateFlagVarNote', (dir) =>
+                window.studio.updateFlagVarNote(dir, kind, id, note)
+            ),
+        [queueFlagVarNoteOperation]
+    );
+    const moveFlagVarNote = useCallback(
+        (kind: FlagVarKind, from: string, to: string) =>
+            queueFlagVarNoteOperation('metadata:moveFlagVarNote', (dir) =>
+                window.studio.moveFlagVarNote(dir, kind, from, to)
+            ),
+        [queueFlagVarNoteOperation]
     );
 
     const existingIds = useCallback(
@@ -600,10 +798,10 @@ export function App() {
             );
             if (!result.ok) return;
             // Reload so the new file shows in the rail, then open it.
-            setProject(await window.studio.revalidate(project.projectDir));
+            setProject(await reloadProject(project.projectDir));
             openItem(section, id, id);
         },
-        [project, openItem]
+        [project, openItem, reloadProject]
     );
 
     const openProblem = useCallback(
@@ -678,9 +876,9 @@ export function App() {
                 pathForNewItem(section, id);
             await window.studio.deleteDocument(project.projectDir, relPath);
             closeTab(`${section}:${id}`);
-            setProject(await window.studio.revalidate(project.projectDir));
+            setProject(await reloadProject(project.projectDir));
         },
-        [project, closeTab]
+        [project, closeTab, reloadProject]
     );
 
     // Apply a rename plan's reference edits. Every dialogue is rewritten from
@@ -742,7 +940,7 @@ export function App() {
             // Re-read the project first so the plan reflects the files as
             // they are now, including everything saved since the last
             // validation.
-            const fresh = await window.studio.revalidate(dir);
+            const fresh = await reloadProject(dir);
             setProject(fresh);
             const plan = planRename(
                 fresh.registry,
@@ -768,17 +966,17 @@ export function App() {
             await window.studio.renameDocument(dir, oldPath, newPath);
 
             closeTab(`${section}:${oldId}`);
-            setProject(await window.studio.revalidate(dir));
+            setProject(await reloadProject(dir));
             openItem(section, newId, newId);
         },
-        [project, closeTab, openItem, applyRenamePlan]
+        [project, closeTab, openItem, applyRenamePlan, reloadProject]
     );
 
     const renameFlagVariable = useCallback(
-        async (kind: 'flag' | 'variable', oldId: string, newId: string) => {
+        async (kind: FlagVarKind, oldId: string, newId: string) => {
             if (!project || oldId === newId) return;
             const dir = project.projectDir;
-            const fresh = await window.studio.revalidate(dir);
+            const fresh = await reloadProject(dir);
             setProject(fresh);
             const plan = planFlagVariableRename(
                 fresh.registry,
@@ -788,9 +986,15 @@ export function App() {
                 fresh.config
             );
             await applyRenamePlan(dir, fresh, plan, { kind }, oldId, newId);
-            setProject(await window.studio.revalidate(dir));
+            await moveFlagVarNote(kind, oldId, newId);
+            setProject(await reloadProject(dir));
+            setFlagVarSelection((selection) =>
+                selection?.kind === kind && selection.id === oldId
+                    ? { kind, id: newId }
+                    : selection
+            );
         },
-        [project, applyRenamePlan]
+        [project, applyRenamePlan, moveFlagVarNote, reloadProject]
     );
 
     if (!project) {
@@ -923,27 +1127,39 @@ export function App() {
             run: () => openItem(section.key, item.id, item.label),
         }))
     );
-    const paletteCommands = [...actionCommands, ...fileCommands];
+    const symbolCommands: Command[] = [
+        ...nameCatalog.flags,
+        ...nameCatalog.variables,
+    ].map((summary) => ({
+        id: `symbol:${summary.kind}:${summary.id}`,
+        label: summary.id,
+        group: 'Flags & variables',
+        keywords: `${summary.kind} ${summary.note}`,
+        hint: summary.kind,
+        run: () => openFlagsVariables({ kind: summary.kind, id: summary.id }),
+    }));
+    const paletteCommands = [
+        ...actionCommands,
+        ...fileCommands,
+        ...symbolCommands,
+    ];
 
-    // Every flag and variable key used anywhere, with its usage count.
-    const flags = referenceIndex
-        ? referenceIndex.allSymbols('flags').map((id) => ({
-              id,
-              count: referenceIndex.count('flags', id),
-              references: referenceIndex.find('flags', id),
-          }))
-        : [];
-    const variables = referenceIndex
-        ? referenceIndex.allSymbols('variables').map((id) => ({
-              id,
-              count: referenceIndex.count('variables', id),
-              references: referenceIndex.find('variables', id),
-          }))
-        : [];
     const openReferencedFile = (file: string) => {
         const loc = locateFile(file);
         if (!loc) return;
         openItem(loc.section, loc.itemId, loc.itemId);
+    };
+    const openFlagVarReference = (reference: Reference) => {
+        if (!reference.file) return;
+        const loc = locateFile(reference.file);
+        if (!loc) return;
+        openItem(loc.section, loc.itemId, loc.itemId);
+        const node = reference.where.match(/ node "([^"]+)"/i)?.[1];
+        if (loc.section === 'dialogues' && node) {
+            const key = `dialogues:${loc.itemId}`;
+            selectNode(key, node);
+            setViewMode(key, 'view');
+        }
     };
 
     return (
@@ -1026,6 +1242,22 @@ export function App() {
                         }
                     }}
                     onPlayFromNode={playFromNode}
+                    onOpenFlagVar={(kind, id) =>
+                        openFlagsVariables({ kind, id })
+                    }
+                    nameCatalog={nameCatalog}
+                    flagVarPage={{
+                        notes: flagVarNotes,
+                        notesError: flagVarNotesError,
+                        selected: flagVarSelection,
+                        onSelect: setFlagVarSelection,
+                        onRename: (kind, id) => setFlagVarTarget({ kind, id }),
+                        onNoteChange: (kind, id, note) =>
+                            void updateFlagVarNote(kind, id, note),
+                        onNoteMove: (kind, from, to) =>
+                            void moveFlagVarNote(kind, from, to),
+                        onOpenReference: openFlagVarReference,
+                    }}
                 />
                 <ResizeHandle
                     axis="x"
@@ -1037,7 +1269,9 @@ export function App() {
                 />
                 <RightPanel
                     project={project}
-                    activeTab={activeTab}
+                    activeTab={
+                        activeTab?.section === 'flags-vars' ? null : activeTab
+                    }
                     referenceIndex={referenceIndex}
                     onOpenFile={openReferencedFile}
                     onOpenProblem={openProblem}
@@ -1067,10 +1301,10 @@ export function App() {
                 previewBusy={previewBusy}
                 previewLog={previewLog}
                 onOpenProblem={openProblem}
-                flags={flags}
-                variables={variables}
-                onRenameFlagVar={(kind, id) => setFlagVarTarget({ kind, id })}
-                onOpenReference={openReferencedFile}
+                symbolCount={
+                    nameCatalog.flags.length + nameCatalog.variables.length
+                }
+                onOpenSymbols={() => openFlagsVariables()}
                 lastValidatedAt={lastValidatedAt}
                 lastSavedAt={lastSavedAt}
                 playtestStart={playtestStart}

@@ -1,7 +1,7 @@
 import type { SectionKey } from '../types';
 
 /** Content types the user can create a new item for. */
-export type CreatableSection = Exclude<SectionKey, 'config'>;
+export type CreatableSection = Exclude<SectionKey, 'config' | 'flags-vars'>;
 
 export const CREATABLE_SECTIONS: {
     key: CreatableSection;
@@ -99,12 +99,7 @@ export function templateForNewItem(
                 '',
             ].join('\n');
         case 'interludes':
-            return [
-                `id: ${id}`,
-                `background: ""`,
-                `text: ""`,
-                '',
-            ].join('\n');
+            return [`id: ${id}`, `background: ""`, `text: ""`, ''].join('\n');
         case 'journal':
             return [
                 `id: ${id}`,

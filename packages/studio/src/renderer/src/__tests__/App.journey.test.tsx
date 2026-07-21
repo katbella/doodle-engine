@@ -94,6 +94,24 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('Studio author journeys', () => {
+    it('opens the full flags and variables page from the dock strip', async () => {
+        installBridge();
+        const user = userEvent.setup();
+        render(<App />);
+
+        await user.click(
+            await screen.findByRole('button', { name: 'Open project…' })
+        );
+        await user.click(screen.getByRole('button', { name: /Flags & vars/ }));
+
+        expect(
+            screen.getByRole('heading', { name: 'Flags & variables' })
+        ).toBeTruthy();
+        expect(
+            screen.getByText('No flags or variables are used yet.')
+        ).toBeTruthy();
+    });
+
     it('opens a project, edits an entity, and saves it when navigating to another file', async () => {
         const { writeEntity } = installBridge();
         const user = userEvent.setup();

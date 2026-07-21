@@ -8,7 +8,8 @@ export type SectionKey =
     | 'interludes'
     | 'journal'
     | 'locales'
-    | 'config';
+    | 'config'
+    | 'flags-vars';
 
 export type ItemStatus = 'valid' | 'warn' | 'error' | 'none';
 

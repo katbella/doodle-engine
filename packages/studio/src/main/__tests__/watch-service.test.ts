@@ -32,7 +32,10 @@ describe('WatchService', () => {
         await service.watch('C:/games/story', onFileChanged, () => false);
 
         expect(watch).toHaveBeenCalledWith(
-            expect.stringMatching(/games[\\/]story[\\/]content$/),
+            [
+                expect.stringMatching(/games[\\/]story[\\/]content$/),
+                expect.stringMatching(/games[\\/]story[\\/]metadata$/),
+            ],
             expect.objectContaining({
                 ignoreInitial: true,
                 persistent: true,
@@ -41,10 +44,12 @@ describe('WatchService', () => {
         callbacks.change('C:/games/story/content/game.yaml');
         callbacks.add('C:/games/story/content/items/coin.yaml');
         callbacks.unlink('C:/games/story/content/old.yaml');
+        callbacks.change('C:/games/story/metadata/flags-and-vars.yaml');
         expect(onFileChanged.mock.calls.map(([path]) => path)).toEqual([
             'content\\game.yaml',
             'content\\items\\coin.yaml',
             'content\\old.yaml',
+            'metadata\\flags-and-vars.yaml',
         ]);
     });
 

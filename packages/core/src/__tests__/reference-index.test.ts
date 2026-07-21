@@ -120,6 +120,62 @@ describe('ReferenceIndex.find', () => {
 
     it('finds a flag written by an effect', () => {
         expect(build().count('flags', 'greeted')).toBeGreaterThan(0);
+        expect(build().find('flags', 'greeted')[0].access).toBe('set');
+    });
+
+    it('classifies flag and variable checks, effects, and starting values', () => {
+        const index = new ReferenceIndex(
+            registry({
+                dialogues: {
+                    state: {
+                        id: 'state',
+                        startNode: 'start',
+                        nodes: [
+                            {
+                                id: 'start',
+                                speaker: null,
+                                text: 'State.',
+                                conditions: [
+                                    { type: 'hasFlag', flag: 'ready' },
+                                    {
+                                        type: 'variableEquals',
+                                        variable: 'score',
+                                        value: 2,
+                                    },
+                                ],
+                                effects: [
+                                    { type: 'setFlag', flag: 'ready' },
+                                    {
+                                        type: 'setVariable',
+                                        variable: 'score',
+                                        value: 3,
+                                    },
+                                ],
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            }),
+            new Map(),
+            {
+                startLocation: '',
+                startTime: { day: 1, hour: 8 },
+                startFlags: { introduced: true },
+                startVariables: { chapter: 1 },
+                startInventory: [],
+            }
+        );
+
+        expect(index.find('flags', 'ready').map((ref) => ref.access)).toEqual([
+            'check',
+            'set',
+        ]);
+        expect(
+            index.find('variables', 'score').map((ref) => ref.access)
+        ).toEqual(['check', 'set']);
+        expect(index.find('flags', 'introduced')[0].access).toBe('set');
+        expect(index.find('variables', 'chapter')[0].access).toBe('set');
     });
 
     it('records the file each reference lives in', () => {

@@ -5,6 +5,8 @@ import { isValidIdentifier } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { YamlEdit } from '../../../shared/project';
 import { AssetField } from './AssetField';
+import { NameAwareField } from './NameAwareField';
+import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
 
 /**
  * Form for game.yaml: starting state and shell media. Saves through writeEntity,
@@ -16,12 +18,14 @@ export function GameConfigForm({
     path,
     onDirty,
     onModified,
+    nameCatalog = EMPTY_NAME_CATALOG,
 }: {
     project: OpenProject;
     tabKey: string;
     path: string;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
+    nameCatalog?: NameCatalog;
 }) {
     const dir = project.projectDir;
 
@@ -328,6 +332,8 @@ export function GameConfigForm({
                     <KeyValueEditor
                         label="Flags"
                         addLabel="Add flag"
+                        kind="flag"
+                        catalog={nameCatalog}
                         entries={Object.entries(flags)}
                         renderValue={(key, value) => (
                             <select
@@ -364,6 +370,8 @@ export function GameConfigForm({
                     <KeyValueEditor
                         label="Variables"
                         addLabel="Add variable"
+                        kind="variable"
+                        catalog={nameCatalog}
                         entries={Object.entries(variables)}
                         renderValue={(key, value) => (
                             <input
@@ -562,6 +570,8 @@ export function GameConfigForm({
 function KeyValueEditor({
     label,
     addLabel,
+    kind,
+    catalog,
     entries,
     renderValue,
     onRename,
@@ -570,6 +580,8 @@ function KeyValueEditor({
 }: {
     label: string;
     addLabel: string;
+    kind: 'flag' | 'variable';
+    catalog: NameCatalog;
     entries: [string, unknown][];
     renderValue: (key: string, value: unknown) => React.ReactNode;
     onRename: (oldKey: string, newKey: string) => void;
@@ -588,12 +600,14 @@ function KeyValueEditor({
             {entries.map(([key, value], index) => (
                 <div key={index} className="dlg__row">
                     <div className="node-editor__id-field">
-                        <input
-                            className={`dlg__input mono ${isValidIdentifier(key) ? '' : 'dlg__input--invalid'}`}
+                        <NameAwareField
+                            kind={kind}
                             value={key}
-                            spellCheck={false}
-                            aria-invalid={!isValidIdentifier(key)}
-                            onChange={(e) => onRename(key, e.target.value)}
+                            catalog={catalog}
+                            ariaLabel={`${kind === 'flag' ? 'Flag' : 'Variable'} name`}
+                            invalid={!isValidIdentifier(key)}
+                            showContext={false}
+                            onChange={(value) => onRename(key, value)}
                         />
                         {!isValidIdentifier(key) && (
                             <span className="field__error">

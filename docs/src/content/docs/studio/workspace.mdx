@@ -11,7 +11,10 @@ The workspace keeps project navigation on the left, editing in the center, conte
 
 The project rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an item or reach it with the keyboard to show its **Rename** and **Delete** buttons. Renaming also updates known references to that ID; deleting asks for confirmation.
 
-<ThemeScreenshot src="/images/studio/project-rail.webp" alt="The project rail with the starter content" />
+<ThemeScreenshot
+    src="/images/studio/project-rail.webp"
+    alt="The project rail with the starter content"
+/>
 
 ## Visual editor
 
@@ -19,7 +22,10 @@ The visual editor provides the fields and controls for the selected type of game
 
 Enter the words the player should see directly into text fields.
 
-<ThemeScreenshot src="/images/studio/location-editor.webp" alt="A location open in the visual editor" />
+<ThemeScreenshot
+    src="/images/studio/location-editor.webp"
+    alt="A location open in the visual editor"
+/>
 
 Studio autosaves visual edits after you stop typing. A dot in the tab means the latest edit has not been saved yet. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately.
 
@@ -29,7 +35,10 @@ Dialogue tabs also include **Graph**, a read-only map of how the conversation mo
 
 Select **Source** to edit the game file directly. This view is helpful after you are comfortable with Doodle’s YAML and dialogue syntax or when you want to adapt an example from a guide.
 
-<ThemeScreenshot src="/images/studio/source-editor.webp" alt="A location file open in Source mode" />
+<ThemeScreenshot
+    src="/images/studio/source-editor.webp"
+    alt="A location file open in Source mode"
+/>
 
 Studio preserves unsaved source text if the app closes unexpectedly. If a source file changes outside Studio while it has unsaved edits, choose **Reload** to use the file from disk or **Overwrite** to keep the version in Studio. Visual editors also refuse to overwrite an external change until you confirm it.
 
@@ -42,11 +51,14 @@ The right panel helps you understand how the selected item connects to the rest 
 
 The **Problems** tab in the bottom dock lists issues across the project. Selecting a problem opens the relevant content.
 
-<ThemeScreenshot src="/images/studio/references-panel.webp" alt="References and validation for the selected location" />
+<ThemeScreenshot
+    src="/images/studio/references-panel.webp"
+    alt="References and validation for the selected location"
+/>
 
 ## Flags and variables
 
-The **Flags & vars** dock lists the flags and variables used throughout dialogue, along with the number of references to each one. Use **Rename** to update a flag or variable everywhere Studio recognizes it.
+Select **Flags & vars** in the bottom bar to open the project-wide page for these names. Search and group names, review where they are set and checked, add notes, find likely mistakes, and rename known uses. See [Flags & Variables](/studio/flags-and-variables/) for the complete workflow.
 
 ## Make the workspace your own
 

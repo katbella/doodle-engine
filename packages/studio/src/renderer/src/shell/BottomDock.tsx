@@ -1,27 +1,15 @@
-import { useState, type ReactNode } from 'react';
-import { ArrowLeft, Check, CircleHelp, X } from '../lib/icons';
+import { type ReactNode } from 'react';
+import { Check, CircleHelp, X } from '../lib/icons';
 import type {
     OpenProject,
     PreviewStatus,
     StudioBuildResult,
 } from '../../../shared/project';
 import type { ValidationError } from '@doodle-engine/toolkit';
-import type { Reference } from '@doodle-engine/core';
 import { Playtest } from './Playtest';
-import { CopyProblemButton, ReferenceGroups } from './RightPanel';
+import { CopyProblemButton } from './RightPanel';
 
-export type DockTab =
-    | 'problems'
-    | 'symbols'
-    | 'build'
-    | 'devserver'
-    | 'playtest';
-
-interface SymbolUsage {
-    id: string;
-    count: number;
-    references: Reference[];
-}
+export type DockTab = 'problems' | 'build' | 'devserver' | 'playtest';
 
 export function BottomDock({
     project,
@@ -39,10 +27,8 @@ export function BottomDock({
     previewBusy,
     previewLog,
     onOpenProblem,
-    flags,
-    variables,
-    onRenameFlagVar,
-    onOpenReference,
+    symbolCount,
+    onOpenSymbols,
     lastValidatedAt,
     lastSavedAt,
     playtestStart,
@@ -63,10 +49,8 @@ export function BottomDock({
     previewBusy: boolean;
     previewLog: string[];
     onOpenProblem: (problem: ValidationError) => void;
-    flags: SymbolUsage[];
-    variables: SymbolUsage[];
-    onRenameFlagVar: (kind: 'flag' | 'variable', id: string) => void;
-    onOpenReference: (file: string) => void;
+    symbolCount: number;
+    onOpenSymbols: () => void;
     /** When the shown validation results were computed. */
     lastValidatedAt: Date | null;
     /** When an editor last wrote this project's content to disk. */
@@ -89,12 +73,10 @@ export function BottomDock({
                     active={activeTab === 'problems'}
                     onClick={() => onTabChange('problems')}
                 />
-                <DockTabButton
-                    label="Flags & vars"
-                    count={flags.length + variables.length}
-                    active={activeTab === 'symbols'}
-                    onClick={() => onTabChange('symbols')}
-                />
+                <button className="dock__tab" onClick={onOpenSymbols}>
+                    Flags &amp; vars
+                    <span className="dock__count">{symbolCount}</span>
+                </button>
                 <DockTabButton
                     label="Build log"
                     active={activeTab === 'build'}
@@ -146,14 +128,6 @@ export function BottomDock({
                     <ProblemsView
                         problems={problems}
                         onOpenProblem={onOpenProblem}
-                    />
-                )}
-                {activeTab === 'symbols' && (
-                    <SymbolsView
-                        flags={flags}
-                        variables={variables}
-                        onRename={onRenameFlagVar}
-                        onOpenReference={onOpenReference}
                     />
                 )}
                 {activeTab === 'build' && (
@@ -218,89 +192,6 @@ function ProblemsView({
                     <CopyProblemButton problem={problem} />
                 </div>
             ))}
-        </>
-    );
-}
-
-function SymbolsView({
-    flags,
-    variables,
-    onRename,
-    onOpenReference,
-}: {
-    flags: SymbolUsage[];
-    variables: SymbolUsage[];
-    onRename: (kind: 'flag' | 'variable', id: string) => void;
-    onOpenReference: (file: string) => void;
-}) {
-    const [selected, setSelected] = useState<{
-        kind: 'flag' | 'variable';
-        id: string;
-    } | null>(null);
-    if (flags.length === 0 && variables.length === 0) {
-        return (
-            <div className="dock__empty">
-                No flags or variables are used yet.
-            </div>
-        );
-    }
-    const selectedUsage = selected
-        ? (selected.kind === 'flag' ? flags : variables).find(
-              (usage) => usage.id === selected.id
-          )
-        : null;
-    if (selected && selectedUsage) {
-        return (
-            <div className="symbol-uses">
-                <div className="symbol-uses__head">
-                    <button
-                        className="symbol-uses__back"
-                        onClick={() => setSelected(null)}
-                    >
-                        <ArrowLeft size={13} /> Flags &amp; vars
-                    </button>
-                    <span className="mono">{selected.id}</span>
-                    <span className="symbol__count">
-                        {selectedUsage.count} use
-                        {selectedUsage.count === 1 ? '' : 's'}
-                    </span>
-                </div>
-                <ReferenceGroups
-                    references={selectedUsage.references}
-                    onOpenFile={onOpenReference}
-                />
-            </div>
-        );
-    }
-    const group = (kind: 'flag' | 'variable', list: SymbolUsage[]) =>
-        list.length === 0 ? null : (
-            <div className="symbols__group">
-                <div className="symbols__head">
-                    {kind === 'flag' ? 'Flags' : 'Variables'}
-                </div>
-                {list.map((s) => (
-                    <div key={s.id} className="symbol">
-                        <span className="symbol__id mono">{s.id}</span>
-                        <button
-                            className="symbol__count symbol__count--link"
-                            onClick={() => setSelected({ kind, id: s.id })}
-                        >
-                            {s.count} use{s.count === 1 ? '' : 's'}
-                        </button>
-                        <button
-                            className="symbol__rename"
-                            onClick={() => onRename(kind, s.id)}
-                        >
-                            Rename
-                        </button>
-                    </div>
-                ))}
-            </div>
-        );
-    return (
-        <>
-            {group('flag', flags)}
-            {group('variable', variables)}
         </>
     );
 }

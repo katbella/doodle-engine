@@ -1,9 +1,5 @@
 import { useRef, useState } from 'react';
-import type {
-    CSSProperties,
-    KeyboardEvent,
-    PointerEvent,
-} from 'react';
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import type { ContentRegistry, Dialogue } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { SectionKey, Tab } from '../types';
@@ -66,6 +62,7 @@ const SINGULAR: Record<SectionKey, string> = {
     journal: 'journal entry',
     locales: 'locale',
     config: 'game config',
+    'flags-vars': 'flags and variables',
 };
 
 function pickEntity(

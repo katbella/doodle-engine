@@ -5,7 +5,7 @@ interface Props {
 }
 
 const { src, alt } = Astro.props;
-const lightSrc = src.replace(/\.webp$/, '-light.webp');
+const lightSrc = src.replace(/(\.[^./]+)$/, '-light$1');
 ---
 
 <p class="theme-screenshot">

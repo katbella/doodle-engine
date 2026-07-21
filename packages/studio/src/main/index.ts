@@ -31,6 +31,7 @@ import { detectPackageManager } from './package-manager';
 import type { YamlEdit } from '@doodle-engine/toolkit';
 import type {
     InstallResult,
+    FlagVarNoteKind,
     NewProjectOptions,
     OpenProject,
     PreviewStatus,
@@ -41,6 +42,7 @@ import type {
 import { createThemeMenu, syncThemeMenuChecks } from './theme-menu';
 import { ErrorLog } from './error-log';
 import { AssetService } from './asset-service';
+import { FlagVarNotesService } from './flag-var-notes-service';
 
 let mainWindow: BrowserWindow | null = null;
 let themeState: ThemeState = { mode: 'dark', color: 'default' };
@@ -543,6 +545,30 @@ app.whenReady().then(() => {
 
     const documents = new DocumentService(markSelfWrite);
     const assets = new AssetService(markSelfWrite);
+    const flagVarNotes = new FlagVarNotesService(documents);
+    handle('metadata:readFlagVarNotes', (_event, dir: string) =>
+        flagVarNotes.read(dir)
+    );
+    handle(
+        'metadata:updateFlagVarNote',
+        (
+            _event,
+            dir: string,
+            kind: FlagVarNoteKind,
+            id: string,
+            note: string
+        ) => flagVarNotes.update(dir, kind, id, note)
+    );
+    handle(
+        'metadata:moveFlagVarNote',
+        (
+            _event,
+            dir: string,
+            kind: FlagVarNoteKind,
+            from: string,
+            to: string
+        ) => flagVarNotes.move(dir, kind, from, to)
+    );
     handle('doc:read', (_event, dir: string, relPath: string) =>
         documents.read(dir, relPath)
     );

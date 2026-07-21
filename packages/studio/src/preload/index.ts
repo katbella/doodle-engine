@@ -20,6 +20,12 @@ const api: StudioApi = {
     removeRecentProject: (dir) =>
         ipcRenderer.invoke('project:removeRecent', dir),
     revalidate: (dir) => ipcRenderer.invoke('project:revalidate', dir),
+    readFlagVarNotes: (dir) =>
+        ipcRenderer.invoke('metadata:readFlagVarNotes', dir),
+    updateFlagVarNote: (dir, kind, id, note) =>
+        ipcRenderer.invoke('metadata:updateFlagVarNote', dir, kind, id, note),
+    moveFlagVarNote: (dir, kind, from, to) =>
+        ipcRenderer.invoke('metadata:moveFlagVarNote', dir, kind, from, to),
     readDocument: (dir, relPath) =>
         ipcRenderer.invoke('doc:read', dir, relPath),
     writeDocument: (dir, relPath, content, expectedMtimeMs) =>

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { OpenProject } from '../../../shared/project';
+import type { FlagVarNotes } from '../../../shared/project';
+import type { Reference } from '@doodle-engine/core';
 import { ChevronDown, TriangleAlert, X } from '../lib/icons';
 import type { Tab } from '../types';
 import { filePathFor } from '../lib/paths';
@@ -15,6 +17,19 @@ import { ENTITY_FORMS } from '../lib/entity-fields';
 import { LocaleWriterBoundary, useLocaleWriter } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
 import { AnchoredOverlay, PointOverlay } from './OverlayPortal';
+import {
+    EMPTY_NAME_CATALOG,
+    type FlagVarKind,
+    type NameCatalog,
+} from '../lib/flag-vars';
+import {
+    FlagsVariablesPage,
+    type FlagVarSelection,
+} from './FlagsVariablesPage';
+import {
+    FlagVarNavigationProvider,
+    type OpenFlagVar,
+} from './FlagVarNavigation';
 
 export type ViewMode = 'view' | 'source' | 'graph';
 
@@ -35,17 +50,31 @@ interface EditorAreaProps {
     onModified: (filePath: string) => void;
     onOpenLocale?: (locale: string, key?: string) => void;
     onPlayFromNode: (dialogueId: string, nodeId: string) => void;
+    onOpenFlagVar?: OpenFlagVar;
+    nameCatalog?: NameCatalog;
+    flagVarPage?: {
+        notes: FlagVarNotes;
+        notesError: string | null;
+        selected: FlagVarSelection | null;
+        onSelect: (selection: FlagVarSelection) => void;
+        onRename: (kind: FlagVarKind, id: string) => void;
+        onNoteChange: (kind: FlagVarKind, id: string, note: string) => void;
+        onNoteMove: (kind: FlagVarKind, from: string, to: string) => void;
+        onOpenReference: (reference: Reference) => void;
+    };
 }
 
 export function EditorArea(props: EditorAreaProps) {
     return (
-        <LocaleWriterBoundary
-            project={props.project}
-            onModified={props.onModified}
-            onOpenLocale={props.onOpenLocale}
-        >
-            <EditorAreaContent {...props} />
-        </LocaleWriterBoundary>
+        <FlagVarNavigationProvider onOpen={props.onOpenFlagVar}>
+            <LocaleWriterBoundary
+                project={props.project}
+                onModified={props.onModified}
+                onOpenLocale={props.onOpenLocale}
+            >
+                <EditorAreaContent {...props} />
+            </LocaleWriterBoundary>
+        </FlagVarNavigationProvider>
     );
 }
 
@@ -65,6 +94,8 @@ function EditorAreaContent({
     onDirty,
     onModified,
     onPlayFromNode,
+    nameCatalog = EMPTY_NAME_CATALOG,
+    flagVarPage,
 }: EditorAreaProps) {
     const stripRef = useRef<HTMLDivElement>(null);
     const overflowButtonRef = useRef<HTMLButtonElement>(null);
@@ -416,6 +447,7 @@ function EditorAreaContent({
                             onDirty={onDirty}
                             onModified={onModified}
                             onPlayFromNode={onPlayFromNode}
+                            nameCatalog={nameCatalog}
                         />
                     </div>
                 ) : active.section === 'config' && activePath ? (
@@ -427,6 +459,21 @@ function EditorAreaContent({
                             path={activePath}
                             onDirty={onDirty}
                             onModified={onModified}
+                            nameCatalog={nameCatalog}
+                        />
+                    </div>
+                ) : active.section === 'flags-vars' && flagVarPage ? (
+                    <div className="editor__source-body">
+                        <FlagsVariablesPage
+                            catalog={nameCatalog}
+                            notes={flagVarPage.notes}
+                            notesError={flagVarPage.notesError}
+                            selected={flagVarPage.selected}
+                            onSelect={flagVarPage.onSelect}
+                            onRename={flagVarPage.onRename}
+                            onNoteChange={flagVarPage.onNoteChange}
+                            onNoteMove={flagVarPage.onNoteMove}
+                            onOpenReference={flagVarPage.onOpenReference}
                         />
                     </div>
                 ) : active.section === 'locales' && activePath ? (

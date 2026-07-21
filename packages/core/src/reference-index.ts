@@ -38,6 +38,8 @@ export interface Reference {
     file: string | null;
     /** Human-readable description of the usage site. */
     where: string;
+    /** How a flag or variable is used. Omitted for other symbol types. */
+    access?: 'set' | 'check';
 }
 
 /** Map from reference kind to registry collection, plus flags/variables. */
@@ -226,11 +228,13 @@ export class ReferenceIndex {
                 this.add('flags', flag, {
                     file,
                     where: 'game config start flags',
+                    access: 'set',
                 });
             for (const variable of Object.keys(config.startVariables ?? {}))
                 this.add('variables', variable, {
                     file,
                     where: 'game config start variables',
+                    access: 'set',
                 });
         }
     }
@@ -277,7 +281,8 @@ export class ReferenceIndex {
         entity: Condition | Effect,
         args: { name: string; kind: string }[],
         file: string | null,
-        where: string
+        where: string,
+        access: 'set' | 'check'
     ) {
         const record = entity as unknown as Record<string, unknown>;
         for (const arg of args) {
@@ -289,7 +294,13 @@ export class ReferenceIndex {
             if (!type) continue;
             const value = record[arg.name];
             if (typeof value === 'string' && value)
-                this.add(type, value, { file, where });
+                this.add(type, value, {
+                    file,
+                    where,
+                    ...(type === 'flags' || type === 'variables'
+                        ? { access }
+                        : {}),
+                });
         }
     }
 
@@ -302,7 +313,8 @@ export class ReferenceIndex {
             condition,
             conditionDescriptor(condition.type).args,
             file,
-            where
+            where,
+            'check'
         );
     }
 
@@ -311,7 +323,8 @@ export class ReferenceIndex {
             effect,
             effectDescriptor(effect.type).args,
             file,
-            where
+            where,
+            'set'
         );
     }
 }

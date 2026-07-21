@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, X, Plus, Pencil, Play } from '../lib/icons';
 import {
+    conditionDescriptor,
+    effectDescriptor,
     isValidIdentifier,
     serializeCondition,
     serializeEffect,
@@ -19,6 +21,47 @@ import { LocalizedTextField } from './LocalizedTextField';
 import { ConfirmModal } from './ConfirmModal';
 import { OverlayPortal } from './OverlayPortal';
 import { useModalDismiss } from '../lib/useModalDismiss';
+import {
+    EMPTY_NAME_CATALOG,
+    catalogFor,
+    usageSummary,
+    type NameCatalog,
+} from '../lib/flag-vars';
+
+function stateNameTooltip(
+    mode: 'condition' | 'effect',
+    entity: Condition | Effect,
+    catalog: NameCatalog
+): string {
+    const descriptor =
+        mode === 'condition'
+            ? conditionDescriptor((entity as Condition).type)
+            : effectDescriptor((entity as Effect).type);
+    const record = entity as unknown as Record<string, unknown>;
+    const details = descriptor.args.flatMap((arg) => {
+        if (
+            arg.kind !== 'flag' &&
+            arg.kind !== 'variable' &&
+            arg.kind !== 'stat'
+        ) {
+            return [];
+        }
+        const id = record[arg.name];
+        if (typeof id !== 'string') return [];
+        const summary = catalogFor(catalog, arg.kind).find(
+            (item) => item.id === id
+        );
+        if (!summary) return [];
+        return [
+            `${id}. ${usageSummary(summary)}${summary.note ? `. ${summary.note}` : ''}`,
+        ];
+    });
+    return details.length > 0
+        ? details.join(' ')
+        : mode === 'condition'
+          ? 'Edit condition'
+          : 'Edit';
+}
 
 /** Editable node id. */
 function NodeIdField({
@@ -95,11 +138,13 @@ function SingleConditionField({
     condition,
     registry,
     projectDir,
+    nameCatalog,
     onChange,
 }: {
     condition: Condition;
     registry: ContentRegistry;
     projectDir?: string;
+    nameCatalog: NameCatalog;
     onChange: (condition: Condition) => void;
 }) {
     const [open, setOpen] = useState(false);
@@ -108,7 +153,7 @@ function SingleConditionField({
             <button
                 className="dlg__chip mono"
                 onClick={() => setOpen(true)}
-                title="Edit condition"
+                title={stateNameTooltip('condition', condition, nameCatalog)}
             >
                 {serializeCondition(condition)}
             </button>
@@ -118,6 +163,7 @@ function SingleConditionField({
                         mode="condition"
                         registry={registry}
                         projectDir={projectDir}
+                        nameCatalog={nameCatalog}
                         initial={condition}
                         onCommit={(entity) => {
                             onChange(entity as Condition);
@@ -134,16 +180,18 @@ function SingleConditionField({
 /** A read-only condition/effect chip that opens the builder when clicked. */
 function BuilderRow({
     label,
+    title,
     onEdit,
     onRemove,
 }: {
     label: string;
+    title: string;
     onEdit: () => void;
     onRemove: () => void;
 }) {
     return (
         <div className="dlg__row">
-            <button className="dlg__chip mono" onClick={onEdit} title="Edit">
+            <button className="dlg__chip mono" onClick={onEdit} title={title}>
                 <span>{label}</span>
                 <Pencil className="dlg__chip-edit" size={13} aria-hidden />
             </button>
@@ -158,12 +206,14 @@ export function EffectList({
     effects,
     registry,
     projectDir,
+    nameCatalog = EMPTY_NAME_CATALOG,
     onChange,
 }: {
     effects: Effect[];
     registry: ContentRegistry;
     /** Enables the file picker on media filename arguments. */
     projectDir?: string;
+    nameCatalog?: NameCatalog;
     onChange: (effects: Effect[]) => void;
 }) {
     // `null` = closed; a number = editing that row; -1 = adding a new one.
@@ -183,6 +233,7 @@ export function EffectList({
                 <BuilderRow
                     key={i}
                     label={serializeEffect(effect)}
+                    title={stateNameTooltip('effect', effect, nameCatalog)}
                     onEdit={() => setOpen(i)}
                     onRemove={() => onChange(effects.filter((_, j) => j !== i))}
                 />
@@ -197,6 +248,7 @@ export function EffectList({
                             mode="effect"
                             registry={registry}
                             projectDir={projectDir}
+                            nameCatalog={nameCatalog}
                             initial={open >= 0 ? effects[open] : undefined}
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
@@ -213,6 +265,7 @@ export function ConditionList({
     registry,
     inRequire = false,
     projectDir,
+    nameCatalog = EMPTY_NAME_CATALOG,
     onChange,
 }: {
     conditions: Condition[];
@@ -221,6 +274,7 @@ export function ConditionList({
     inRequire?: boolean;
     /** Enables the file picker on media filename arguments. */
     projectDir?: string;
+    nameCatalog?: NameCatalog;
     onChange: (conditions: Condition[]) => void;
 }) {
     const [open, setOpen] = useState<number | null>(null);
@@ -239,6 +293,11 @@ export function ConditionList({
                 <BuilderRow
                     key={i}
                     label={serializeCondition(condition)}
+                    title={stateNameTooltip(
+                        'condition',
+                        condition,
+                        nameCatalog
+                    )}
                     onEdit={() => setOpen(i)}
                     onRemove={() =>
                         onChange(conditions.filter((_, j) => j !== i))
@@ -257,6 +316,7 @@ export function ConditionList({
                             registry={registry}
                             inRequire={inRequire}
                             projectDir={projectDir}
+                            nameCatalog={nameCatalog}
                             initial={open >= 0 ? conditions[open] : undefined}
                             onCommit={commit}
                             onCancel={() => setOpen(null)}
@@ -433,6 +493,7 @@ export function NodeEditor({
     nodeIds,
     registry,
     projectDir,
+    nameCatalog = EMPTY_NAME_CATALOG,
     onChange,
     onRename,
     onMakeStart,
@@ -447,6 +508,7 @@ export function NodeEditor({
     nodeIds: string[];
     registry: ContentRegistry;
     projectDir: string;
+    nameCatalog?: NameCatalog;
     onChange: (node: DialogueNode) => void;
     onRename: (oldId: string, newId: string) => void;
     onMakeStart: () => void;
@@ -600,6 +662,7 @@ export function NodeEditor({
                     effects={node.effects ?? []}
                     registry={registry}
                     projectDir={projectDir}
+                    nameCatalog={nameCatalog}
                     onChange={(effects) =>
                         set({ effects: effects.length ? effects : undefined })
                     }
@@ -642,6 +705,7 @@ export function NodeEditor({
                             condition={branch.condition}
                             registry={registry}
                             projectDir={projectDir}
+                            nameCatalog={nameCatalog}
                             onChange={(condition) => {
                                 const next: ConditionalBranch = {
                                     ...branch,
@@ -658,6 +722,7 @@ export function NodeEditor({
                             effects={branch.effects ?? []}
                             registry={registry}
                             projectDir={projectDir}
+                            nameCatalog={nameCatalog}
                             onChange={(effects) =>
                                 set({
                                     conditionalBranches: branches.map((b, j) =>
@@ -791,6 +856,7 @@ export function NodeEditor({
                                 conditions={choice.conditions ?? []}
                                 registry={registry}
                                 projectDir={projectDir}
+                                nameCatalog={nameCatalog}
                                 inRequire
                                 onChange={(conditions) =>
                                     update({
@@ -806,6 +872,7 @@ export function NodeEditor({
                                 effects={choice.effects ?? []}
                                 registry={registry}
                                 projectDir={projectDir}
+                                nameCatalog={nameCatalog}
                                 onChange={(effects) =>
                                     update({
                                         ...choice,

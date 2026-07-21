@@ -7,7 +7,10 @@ import ThemeScreenshot from '../../../components/ThemeScreenshot.astro';
 
 The dialogue editor provides two ways to write a conversation: edit one node at a time in **Visual**, or work directly with the dialogue text in **Source**. **Graph** provides a read-only map of the paths between nodes.
 
-<ThemeScreenshot src="/images/studio/dialogue-editor.webp" alt="Editing a dialogue in Doodle Studio" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-editor.webp"
+    alt="Editing a dialogue in Doodle Studio"
+/>
 
 ## Create a dialogue
 
@@ -30,9 +33,15 @@ Each node can contain:
 - Conditions and effects
 - The next node or dialogue ending
 
-<ThemeScreenshot src="/images/studio/dialogue-nodes.webp" alt="The node list and selected starting node" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-nodes.webp"
+    alt="The node list and selected starting node"
+/>
 
-<ThemeScreenshot src="/images/studio/dialogue-node-fields.webp" alt="Speaker, line, voice, and portrait controls for a node" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-node-fields.webp"
+    alt="Speaker, line, voice, and portrait controls for a node"
+/>
 
 Press Enter in the Line field to add paragraph breaks without creating another node. The paragraphs remain one dialogue entry, followed by the same choices or Continue action. Studio adds the required quotes in Source mode and removes them again when the entry returns to one line.
 
@@ -40,13 +49,19 @@ Press Enter in the Line field to add paragraph breaks without creating another n
 
 Select **Delete node**. Studio shows the routes that point to the node before you confirm.
 
-<ThemeScreenshot src="/images/studio/dialogue-node-header.webp" alt="A dialogue node header with Play from here and Delete node" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-node-header.webp"
+    alt="A dialogue node header with Play from here and Delete node"
+/>
 
 ## Add choices
 
 Each choice has the words shown to the player and the place the conversation goes next. Choices appear in the listed order; use the up and down controls to rearrange them. Point a choice at another node, or choose **end dialogue** when it should close the conversation.
 
-<ThemeScreenshot src="/images/studio/dialogue-choice.webp" alt="Editing a dialogue choice and its route" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-choice.webp"
+    alt="Editing a dialogue choice and its route"
+/>
 
 When a node has a final line and no choices, the player sees **End Dialogue** instead of **Continue**.
 
@@ -54,7 +69,10 @@ When a node has a final line and no choices, the player sees **End Dialogue** in
 
 Select **Graph** to see the whole conversation as connected cards. Graph is for following paths and opening nodes; use Visual or Source to write and change the conversation. Each card shows the node ID, a preview of its line, and the choices or routes leading onward. The starting node has a **start** label, and a node where the conversation finishes has an **end** label.
 
-<ThemeScreenshot src="/images/studio/dialogue-graph.webp" alt="The graph view showing the paths through a dialogue" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-graph.webp"
+    alt="The graph view showing the paths through a dialogue"
+/>
 
 Solid lines show choices and other direct routes to later nodes. Dashed lines show conditional **IF** routes, which the conversation follows when their conditions are met. An **END** label marks a route that finishes the conversation. A label such as **to start** names the earlier node where the conversation continues.
 
@@ -64,7 +82,12 @@ Select a card to keep that node selected as you move between Graph and Visual. S
 
 Conditions decide whether a choice, trigger, or branch is available. Open the condition builder, search for a condition, and fill in its arguments.
 
-<ThemeScreenshot src="/images/studio/condition-builder.webp" alt="Adding a requirement with the condition builder" />
+Flag, variable, and stat fields suggest names already used in the project. An existing flag or variable also shows its use summary and note. If Studio labels the text as a **new flag** or **new variable** when you meant to reuse one, check the spelling before adding the condition. See [Flags & Variables](/studio/flags-and-variables/) to review and document names across the project.
+
+<ThemeScreenshot
+    src="/images/studio/condition-builder.png"
+    alt="Adding a requirement with the condition builder"
+/>
 
 Common examples:
 
@@ -79,6 +102,8 @@ See [Conditions Reference](/reference/conditions/) for the behavior of every con
 ## Add effects
 
 Effects change game state when a node or choice runs. The effect builder has the same search and argument controls as the condition builder.
+
+The same name suggestions appear when an effect sets a flag or changes a variable.
 
 Common examples:
 
@@ -95,13 +120,19 @@ See [Effects Reference](/reference/effects/) for every available effect.
 
 For **Play video**, **Play sound**, and **Play music**, select **Choose file…** beside the filename. Studio copies the chosen file into the matching asset folder and fills in its filename.
 
-<ThemeScreenshot src="/images/studio/effect-media-file.webp" alt="Choosing a sound file in the effect builder" />
+<ThemeScreenshot
+    src="/images/studio/effect-media-file.webp"
+    alt="Choosing a sound file in the effect builder"
+/>
 
 ## Use Source mode
 
 Select **Source** to write the dialogue as text or review its `.dlg` file. The editor highlights Doodle’s dialogue syntax. Save the file and select **Validate** to check its syntax and references; problems then appear beside the editor and in the bottom dock.
 
-<ThemeScreenshot src="/images/studio/dialogue-source.webp" alt="A dialogue open in Source mode" />
+<ThemeScreenshot
+    src="/images/studio/dialogue-source.webp"
+    alt="A dialogue open in Source mode"
+/>
 
 Start with [Writing Dialogues](/guides/writing-dialogues/) to learn how to write nodes, choices, conditions, and routes in a `.dlg` file. Use [DSL Syntax](/reference/dsl-syntax/) when you need to look up a keyword or example.
 

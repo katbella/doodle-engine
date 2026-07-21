@@ -34,6 +34,8 @@ my-game/
       ui/             # Renderer UI sounds
       voice/          # Dialogue voice lines
     video/            # Cutscene video files
+  metadata/           # Optional Studio notes
+    flags-and-vars.yaml
   src/
     main.tsx          # Entry point
     App.tsx           # Root component
@@ -48,17 +50,17 @@ my-game/
 
 All game content lives in `content/`. The engine loads each type from its corresponding directory:
 
-| Directory     | File Type | Contains                         |
-| ------------- | --------- | -------------------------------- |
-| `characters/` | `.yaml`   | Character definitions            |
-| `dialogues/`  | `.dlg`    | Dialogue scripts                 |
-| `interludes/` | `.yaml`   | Interlude definitions            |
-| `items/`      | `.yaml`   | Item definitions                 |
-| `journal/`    | `.yaml`   | Journal entries                  |
-| `locales/`    | `.yaml`   | Translation strings              |
-| `locations/`  | `.yaml`   | Location definitions             |
-| `maps/`       | `.yaml`   | Map definitions                  |
-| `quests/`     | `.yaml`   | Quest definitions                |
+| Directory     | File Type | Contains              |
+| ------------- | --------- | --------------------- |
+| `characters/` | `.yaml`   | Character definitions |
+| `dialogues/`  | `.dlg`    | Dialogue scripts      |
+| `interludes/` | `.yaml`   | Interlude definitions |
+| `items/`      | `.yaml`   | Item definitions      |
+| `journal/`    | `.yaml`   | Journal entries       |
+| `locales/`    | `.yaml`   | Translation strings   |
+| `locations/`  | `.yaml`   | Location definitions  |
+| `maps/`       | `.yaml`   | Map definitions       |
+| `quests/`     | `.yaml`   | Quest definitions     |
 
 ### game.yaml
 
@@ -102,6 +104,12 @@ The `assets/` directory contains the images, audio, and video used by the game. 
 - **video/**: video files played by dialogue `VIDEO` effects or custom renderer code
 
 Content files usually use bare filenames. The engine uses the field to find the correct folder, such as `banner: tavern.png` in `assets/images/banners/`. Shell config in `game.yaml` uses project-relative paths beginning with `assets/`.
+
+## Metadata Directory
+
+Studio creates the optional `metadata/` directory when you add notes for flags or variables. `flags-and-vars.yaml` stores those explanations with the project so they can be shared and versioned with the game.
+
+Metadata describes the project but is not game content. The engine does not load this directory, and deleting a note does not remove or change its flag or variable. See [Flags & Variables](/studio/flags-and-variables/) for editing and reviewing these notes in Studio.
 
 ## Source Directory
 

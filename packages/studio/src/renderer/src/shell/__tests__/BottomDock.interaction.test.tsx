@@ -62,10 +62,8 @@ function props(activeTab: DockTab, overrides: Record<string, unknown> = {}) {
         previewBusy: false,
         previewLog: [],
         onOpenProblem: vi.fn(),
-        flags: [],
-        variables: [],
-        onRenameFlagVar: vi.fn(),
-        onOpenReference: vi.fn(),
+        symbolCount: 0,
+        onOpenSymbols: vi.fn(),
         lastValidatedAt: null,
         lastSavedAt: null,
         playtestStart: null,
@@ -84,18 +82,21 @@ describe('BottomDock', () => {
         };
         const user = userEvent.setup();
         const writeText = vi.spyOn(navigator.clipboard, 'writeText');
+        const onOpenSymbols = vi.fn();
         render(
             <BottomDock
                 {...props('problems', {
                     project: project([problem]),
                     onTabChange,
                     onOpenProblem,
+                    onOpenSymbols,
+                    symbolCount: 214,
                 })}
             />
         );
-
         await user.click(screen.getByRole('button', { name: /Flags & vars/ }));
-        expect(onTabChange).toHaveBeenCalledWith('symbols');
+        expect(onOpenSymbols).toHaveBeenCalledOnce();
+        expect(screen.getByText('214')).toBeTruthy();
         await user.click(
             screen.getByRole('button', { name: /Missing start location/ })
         );
@@ -107,52 +108,6 @@ describe('BottomDock', () => {
         expect(
             screen.getByRole('button', { name: 'Problem copied' })
         ).toBeTruthy();
-    });
-
-    it('shows empty and populated symbol states and renames both kinds', async () => {
-        const user = userEvent.setup();
-        const { rerender } = render(<BottomDock {...props('symbols')} />);
-        expect(
-            screen.getByText('No flags or variables are used yet.')
-        ).toBeTruthy();
-
-        const onRenameFlagVar = vi.fn();
-        const onOpenReference = vi.fn();
-        rerender(
-            <BottomDock
-                {...props('symbols', {
-                    flags: [
-                        {
-                            id: 'met_hero',
-                            count: 1,
-                            references: [
-                                {
-                                    file: 'content/dialogues/intro.dlg',
-                                    where: 'dialogue "intro" node "start"',
-                                },
-                            ],
-                        },
-                    ],
-                    variables: [{ id: 'gold', count: 2, references: [] }],
-                    onRenameFlagVar,
-                    onOpenReference,
-                })}
-            />
-        );
-        expect(screen.getByText('1 use')).toBeTruthy();
-        expect(screen.getByText('2 uses')).toBeTruthy();
-        const rename = screen.getAllByRole('button', { name: 'Rename' });
-        await user.click(rename[0]);
-        await user.click(rename[1]);
-        expect(onRenameFlagVar).toHaveBeenNthCalledWith(1, 'flag', 'met_hero');
-        expect(onRenameFlagVar).toHaveBeenNthCalledWith(2, 'variable', 'gold');
-
-        await user.click(screen.getByRole('button', { name: '1 use' }));
-        expect(screen.getByText('node “start”')).toBeTruthy();
-        await user.click(screen.getByTitle('content/dialogues/intro.dlg'));
-        expect(onOpenReference).toHaveBeenCalledWith(
-            'content/dialogues/intro.dlg'
-        );
     });
 
     it('shows idle, installing, active, successful, failed, and cancelled builds', async () => {

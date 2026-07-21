@@ -14,6 +14,8 @@ import {
 import type { ContentRegistry } from '@doodle-engine/core';
 import type { StudioAssetKind } from '../../../shared/project';
 import { FolderOpen } from '../lib/icons';
+import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
+import { NameAwareField } from './NameAwareField';
 import {
     type BuilderDraft,
     buildCondition,
@@ -56,6 +58,7 @@ export function ConditionEffectBuilder({
     onCommit,
     onCancel,
     projectDir,
+    nameCatalog = EMPTY_NAME_CATALOG,
 }: {
     mode: 'condition' | 'effect';
     registry: ContentRegistry;
@@ -65,6 +68,8 @@ export function ConditionEffectBuilder({
     onCancel: () => void;
     /** Enables the file picker on media filename arguments. */
     projectDir?: string;
+    /** Project-wide flag, variable, and stat names for safe reuse. */
+    nameCatalog?: NameCatalog;
 }) {
     const descriptors: Descriptor[] =
         mode === 'condition' ? CONDITION_DESCRIPTORS : EFFECT_DESCRIPTORS;
@@ -167,6 +172,7 @@ export function ConditionEffectBuilder({
                             registry={registry}
                             questId={draft.values.questId}
                             projectDir={projectDir}
+                            nameCatalog={nameCatalog}
                             assetKind={
                                 mode === 'effect'
                                     ? MEDIA_ARG_KIND[
@@ -233,6 +239,7 @@ function ArgField({
     questId,
     projectDir,
     assetKind,
+    nameCatalog,
     onChange,
     onBlur,
 }: {
@@ -244,6 +251,7 @@ function ArgField({
     projectDir?: string;
     /** Set when this argument is a media filename; shows a file picker. */
     assetKind?: StudioAssetKind;
+    nameCatalog: NameCatalog;
     onChange: (value: string) => void;
     onBlur: () => void;
 }) {
@@ -270,6 +278,23 @@ function ArgField({
             )}
         </span>
     );
+
+    if (arg.kind === 'flag' || arg.kind === 'variable' || arg.kind === 'stat') {
+        return (
+            <div className="builder__arg">
+                {label}
+                <NameAwareField
+                    kind={arg.kind}
+                    value={value}
+                    catalog={nameCatalog}
+                    placeholder={placeholderFor(arg)}
+                    ariaLabel={arg.label}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                />
+            </div>
+        );
+    }
 
     // Stage depends on the quest picked just before it.
     if (arg.kind === 'stageId') {
