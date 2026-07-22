@@ -21,11 +21,14 @@ The manifest separates files into two groups:
 The screen order is:
 
 1. Loading screen while shell and game media load
-2. Optional splash screen
-3. Title screen
-4. Gameplay after the player starts or continues a game
+2. **Start game** button on the completed loading screen
+3. Optional splash screen
+4. Title screen
+5. Gameplay after the player starts or continues a game
 
 The default loading screen is rendered with CSS, so it can appear before any media finishes loading. A background configured for the loading screen is included in the shell group.
+
+When loading finishes, the player selects **Start game** to continue. Use `GameShell`'s `renderLoading` prop to provide custom loading content, or `LoadingScreen`'s `renderProgress` prop to replace the default progress display.
 
 ## Configuring Shell Assets
 

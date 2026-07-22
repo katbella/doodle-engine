@@ -83,10 +83,11 @@ import { PROJECT_ID } from './project';
 
 ### Props
 
-| Prop        | Type     | Default  | Description                               |
-| ----------- | -------- | -------- | ----------------------------------------- |
-| `projectId` | `string` | required | Stable ID from the generated `project.ts` |
-| `className` | `string` | `''`     | CSS class                                 |
+| Prop            | Type         | Default     | Description                                         |
+| --------------- | ------------ | ----------- | --------------------------------------------------- |
+| `projectId`     | `string`     | required    | Stable ID from the generated `project.ts`           |
+| `className`     | `string`     | `''`        | CSS class                                           |
+| `onButtonClick` | `() => void` | `undefined` | Called when an enabled game-interface button clicks |
 
 ### Layout
 
@@ -458,6 +459,8 @@ import { LoadingScreen } from '@doodle-engine/react'
 | `state`          | `AssetLoadingState`                              | required | Loading state from `AssetProvider`                     |
 | `background`     | `string`                                         | —        | Background image URL (from `shell.loading.background`) |
 | `renderProgress` | `(progress: number, phase: string) => ReactNode` | —        | Custom progress bar renderer                           |
+| `onStart`        | `() => void`                                     | —        | Show and handle the button when loading is complete    |
+| `startLabel`     | `string`                                         | `Start game` | Completed-loading button label                     |
 | `className`      | `string`                                         | `''`     | CSS class                                              |
 
 Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, `.loading-screen-phase`, `.loading-screen-percent`, `.loading-screen-bar-track`, and `.loading-screen-bar-fill` in your CSS.

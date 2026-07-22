@@ -57,7 +57,7 @@ The CLI scans these sources to build the manifest:
 **Shell assets (tier 1)**: read from `config.shell` in `game.yaml`:
 
 - `shell.splash.logo`, `shell.splash.background`, `shell.splash.sound`
-- `shell.loading.background`, `shell.loading.music`
+- `shell.loading.background`
 - `shell.title.logo`, `shell.title.background`, `shell.title.music`
 - `shell.uiSounds.*`
 

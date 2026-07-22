@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import type { ShellConfig } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
+import { screenBackgroundStyle } from './screenBackground';
 
 export interface SplashScreenProps {
     /** Shell splash config (from game.yaml) */
@@ -16,6 +17,8 @@ export interface SplashScreenProps {
     onComplete: () => void;
     /** Resolved UI strings from snapshot.ui; English defaults when absent. */
     ui?: Record<string, string>;
+    /** Playback volume from 0 to 1 (default: 0.8) */
+    volume?: number;
     /** CSS class */
     className?: string;
 }
@@ -24,6 +27,7 @@ export function SplashScreen({
     shell,
     onComplete,
     ui,
+    volume = 0.8,
     className = '',
 }: SplashScreenProps) {
     const displayDuration = shell?.duration ?? 2000;
@@ -41,10 +45,12 @@ export function SplashScreen({
     useEffect(() => {
         if (sound) {
             const audio = new Audio(sound);
-            audio.volume = 0.8;
+            audio.volume = volume;
             audioRef.current = audio;
             audio.play().catch(() => {
-                // Autoplay may be blocked. Fail silently.
+                console.warn(
+                    'Splash sound playback was blocked by the browser.'
+                );
             });
         }
         return () => {
@@ -53,11 +59,9 @@ export function SplashScreen({
                 audioRef.current = null;
             }
         };
-    }, [sound]);
+    }, [sound, volume]);
 
-    const bgStyle = background
-        ? { backgroundImage: `url(${background})` }
-        : undefined;
+    const bgStyle = screenBackgroundStyle(background);
 
     return (
         <div

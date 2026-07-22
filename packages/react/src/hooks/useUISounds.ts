@@ -54,6 +54,7 @@ const DEFAULT_SOUNDS = {
 
 export function resolveSoundPath(basePath: string, file: string): string {
     if (
+        file.startsWith('assets/') ||
         file.startsWith('/') ||
         file.startsWith('http://') ||
         file.startsWith('https://') ||

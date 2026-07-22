@@ -16,6 +16,12 @@ describe('resolveSoundPath', () => {
     });
 
     it('leaves absolute and externally hosted paths unchanged', () => {
+        expect(
+            resolveSoundPath(
+                'assets/audio/ui',
+                'assets/audio/ui/custom click.mp3'
+            )
+        ).toBe('assets/audio/ui/custom click.mp3');
         expect(resolveSoundPath('/assets/audio/ui', '/sounds/click.ogg')).toBe(
             '/sounds/click.ogg'
         );

@@ -49,6 +49,7 @@ const UI_DEFAULTS: Record<string, string> = {
     'ui.save': 'Save',
     'ui.load': 'Load',
     'ui.new_game': 'New Game',
+    'ui.start_game': 'Start game',
     'ui.resume': 'Resume',
     'ui.no_companions': 'No companions',
     'ui.narrator': 'Narrator',

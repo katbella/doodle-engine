@@ -104,6 +104,7 @@ export function GameShell({
     const storageKey = saveStorageKeyForProject(projectId);
     const shell = config.shell;
     const loadingUi = buildUIStrings(registry.locales['en'] ?? {});
+    const [gameStarted, setGameStarted] = useState(false);
 
     return (
         <AudioSettingsProvider defaults={audioOptions}>
@@ -111,16 +112,33 @@ export function GameShell({
                 <AssetProvider
                     manifest={manifest}
                     loader={assetLoader}
-                    renderLoading={(state) => {
-                        if (renderLoading) return renderLoading(state);
-                        return (
+                    readyToContinue={gameStarted}
+                    renderLoading={(state) =>
+                        renderLoading ? (
+                            <>
+                                {renderLoading(state)}
+                                {state.phase === 'complete' && (
+                                    <div className="loading-start-overlay">
+                                        <button
+                                            className="title-button loading-screen-start"
+                                            type="button"
+                                            onClick={() => setGameStarted(true)}
+                                        >
+                                            {loadingUi['ui.start_game']}
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
                             <LoadingScreen
                                 state={state}
                                 background={shell?.loading?.background}
                                 ui={loadingUi}
+                                startLabel={loadingUi['ui.start_game']}
+                                onStart={() => setGameStarted(true)}
                             />
-                        );
-                    }}
+                        )
+                    }
                 >
                     <GameShellInner
                         registry={registry}
@@ -289,7 +307,9 @@ function GameShellInner({
         audio.loop = true;
         audio.volume = audioSettings.masterVolume * audioSettings.musicVolume;
         titleMusicRef.current = audio;
-        audio.play().catch(() => {});
+        audio.play().catch((error) => {
+            console.warn('Title music playback failed:', error);
+        });
         return () => {
             audio.pause();
             audio.src = '';
@@ -332,13 +352,37 @@ function GameShellInner({
         registry.locales[selectedLocale] ?? registry.locales['en'] ?? {}
     );
 
+    const handleUIHover = useCallback(
+        (event: React.PointerEvent<HTMLDivElement>) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const button = target.closest('button');
+            if (!button || button.disabled) return;
+            const previousTarget = event.relatedTarget;
+            if (
+                previousTarget instanceof Node &&
+                button.contains(previousTarget)
+            ) {
+                return;
+            }
+            uiSoundControls.playHover();
+        },
+        [uiSoundControls]
+    );
+
     // Splash screen
     if (screen === 'splash') {
         return (
-            <div className={`game-shell ${className}`}>
+            <div
+                className={`game-shell ${className}`}
+                onPointerOver={handleUIHover}
+            >
                 <SplashScreen
                     shell={shell?.splash}
                     ui={titleUi}
+                    volume={
+                        audioSettings.masterVolume * audioSettings.soundVolume
+                    }
                     onComplete={() => setScreen('title')}
                 />
             </div>
@@ -348,7 +392,10 @@ function GameShellInner({
     // Title screen
     if (screen === 'title') {
         return (
-            <div className={`game-shell ${className}`}>
+            <div
+                className={`game-shell ${className}`}
+                onPointerOver={handleUIHover}
+            >
                 {showSettings ? (
                     <SettingsPanel
                         ui={titleUi}
@@ -382,7 +429,10 @@ function GameShellInner({
 
     if (screen === 'credits') {
         return (
-            <div className={`game-shell ${className}`}>
+            <div
+                className={`game-shell ${className}`}
+                onPointerOver={handleUIHover}
+            >
                 <CreditsScreen
                     ui={titleUi}
                     title={title}
@@ -398,7 +448,10 @@ function GameShellInner({
     if (!gameState) return null;
 
     return (
-        <div className={`game-shell ${className}`}>
+        <div
+            className={`game-shell ${className}`}
+            onPointerOver={handleUIHover}
+        >
             <GameProvider
                 engine={gameState.engine}
                 initialSnapshot={gameState.snapshot}
@@ -530,7 +583,10 @@ function GameShellPlaying({
                 />
             )}
 
-            <GameRenderer projectId={projectId} />
+            <GameRenderer
+                projectId={projectId}
+                onButtonClick={uiSoundControls?.playClick}
+            />
 
             {!showPauseMenu && !showSettings && !pendingVideo && (
                 <button

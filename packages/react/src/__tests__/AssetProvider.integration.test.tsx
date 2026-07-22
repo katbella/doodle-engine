@@ -126,6 +126,47 @@ describe('AssetProvider', () => {
         await waitFor(() => expect(screen.getByText('Ready')).toBeTruthy());
     });
 
+    it('can hold the completed loading UI until the shell continues', async () => {
+        const loader = makeLoader(vi.fn(async () => {}));
+        const view = render(
+            <AssetProvider
+                manifest={{
+                    version: 'fast',
+                    shell: [],
+                    game: [],
+                    shellSize: 0,
+                    totalSize: 0,
+                }}
+                loader={loader}
+                readyToContinue={false}
+                renderLoading={(state) => <p>Loading: {state.phase}</p>}
+            >
+                <p>Fast game ready</p>
+            </AssetProvider>
+        );
+
+        expect(await screen.findByText('Loading: complete')).toBeTruthy();
+        expect(screen.queryByText('Fast game ready')).toBeNull();
+
+        view.rerender(
+            <AssetProvider
+                manifest={{
+                    version: 'fast',
+                    shell: [],
+                    game: [],
+                    shellSize: 0,
+                    totalSize: 0,
+                }}
+                loader={loader}
+                readyToContinue
+                renderLoading={(state) => <p>Loading: {state.phase}</p>}
+            >
+                <p>Fast game ready</p>
+            </AssetProvider>
+        );
+        expect(await screen.findByText('Fast game ready')).toBeTruthy();
+    });
+
     it('distinguishes optional access from required access', () => {
         function OptionalConsumer() {
             return <p>{useOptionalAssetContext() ? 'present' : 'absent'}</p>;

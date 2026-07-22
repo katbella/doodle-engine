@@ -487,16 +487,6 @@ export function GameConfigForm({
                                 setShellField('loading', 'background', value)
                             }
                         />
-                        <AssetField
-                            label="Music"
-                            name="Loading music"
-                            value={shellValue('loading', 'music')}
-                            projectDir={dir}
-                            kind="shellMusic"
-                            onChange={(value) =>
-                                setShellField('loading', 'music', value)
-                            }
-                        />
                     </div>
                 </div>
 
@@ -639,7 +629,6 @@ const SHELL_FIELDS = [
     ['splash', 'sound'],
     ['splash', 'duration'],
     ['loading', 'background'],
-    ['loading', 'music'],
     ['title', 'logo'],
     ['title', 'background'],
     ['title', 'music'],

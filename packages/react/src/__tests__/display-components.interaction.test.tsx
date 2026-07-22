@@ -12,7 +12,9 @@ import userEvent from '@testing-library/user-event';
 import { GameTime } from '../components/GameTime';
 import { NotificationArea } from '../components/NotificationArea';
 import { SettingsPanel } from '../components/SettingsPanel';
+import { LoadingScreen } from '../components/LoadingScreen';
 import { SplashScreen } from '../components/SplashScreen';
+import { TitleScreen } from '../components/TitleScreen';
 import { VideoPlayer } from '../components/VideoPlayer';
 
 afterEach(() => {
@@ -21,6 +23,84 @@ afterEach(() => {
 });
 
 describe('display component behavior', () => {
+    it('offers the start action only after loading completes', async () => {
+        const onStart = vi.fn();
+        const user = userEvent.setup();
+        const state = {
+            phase: 'loading-game' as const,
+            bytesLoaded: 1,
+            bytesTotal: 2,
+            assetsLoaded: 1,
+            assetsTotal: 2,
+            progress: 0.5,
+            overallProgress: 0.5,
+            currentAsset: null,
+            error: null,
+        };
+        const view = render(<LoadingScreen state={state} onStart={onStart} />);
+        expect(screen.queryByRole('button', { name: 'Start game' })).toBeNull();
+
+        view.rerender(
+            <LoadingScreen
+                state={{
+                    ...state,
+                    phase: 'complete',
+                    progress: 1,
+                    overallProgress: 1,
+                }}
+                onStart={onStart}
+            />
+        );
+        await user.click(screen.getByRole('button', { name: 'Start game' }));
+        expect(onStart).toHaveBeenCalledOnce();
+    });
+
+    it('supports spaces in shell background asset paths', () => {
+        const path = 'assets/images/ui/painted room.jpg';
+        const loadingState = {
+            phase: 'loading-shell' as const,
+            bytesLoaded: 0,
+            bytesTotal: 1,
+            assetsLoaded: 0,
+            assetsTotal: 1,
+            progress: 0,
+            overallProgress: 0,
+            currentAsset: path,
+            error: null,
+        };
+        const { container } = render(
+            <>
+                <LoadingScreen state={loadingState} background={path} />
+                <SplashScreen
+                    shell={{ background: path, duration: 60_000 }}
+                    onComplete={() => {}}
+                />
+                <TitleScreen
+                    ui={{
+                        'ui.new_game': 'New Game',
+                        'ui.settings': 'Settings',
+                    }}
+                    shell={{ background: path }}
+                    hasSaveData={false}
+                    onNewGame={() => {}}
+                    onContinue={() => {}}
+                    onSettings={() => {}}
+                />
+            </>
+        );
+
+        for (const className of [
+            '.loading-screen',
+            '.splash-screen',
+            '.title-screen',
+        ]) {
+            expect(
+                container.querySelector<HTMLElement>(className)?.style
+                    .backgroundImage
+            ).toBe(`url("${path}")`);
+        }
+    });
+
     it('formats numeric, short, localized, and every narrative time period', () => {
         const { rerender } = render(<GameTime time={{ day: 2, hour: 4 }} />);
         expect(screen.getByText('Day 2, 04:00')).toBeTruthy();

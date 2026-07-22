@@ -51,7 +51,6 @@ export function extractAssetPaths(
 
         if (loading) {
             addShell(loading.background);
-            addShell(loading.music);
         }
 
         if (title) {

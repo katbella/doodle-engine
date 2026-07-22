@@ -675,6 +675,7 @@ describe('Snapshot Builder', () => {
             expect(snapshot.ui['ui.save']).toBe('Save');
             expect(snapshot.ui['ui.load']).toBe('Load');
             expect(snapshot.ui['ui.new_game']).toBe('New Game');
+            expect(snapshot.ui['ui.start_game']).toBe('Start game');
             expect(snapshot.ui['ui.resume']).toBe('Resume');
             expect(snapshot.ui['ui.no_companions']).toBe('No companions');
             expect(snapshot.ui['ui.narrator']).toBe('Narrator');

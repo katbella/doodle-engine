@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     cleanup,
     render,
@@ -135,19 +135,28 @@ async function startGame(registry = makeRegistry()) {
             uiSounds={false}
         />
     );
+    await user.click(await screen.findByRole('button', { name: 'Start game' }));
     await user.click(await screen.findByRole('button', { name: 'New Game' }));
     await screen.findByRole('heading', { name: 'Tavern' });
     return user;
+}
+
+async function continueFromLoading(
+    user: ReturnType<typeof userEvent.setup>
+): Promise<void> {
+    await user.click(await screen.findByRole('button', { name: 'Start game' }));
 }
 
 function renderShell({
     registry = makeRegistry(),
     gameConfig = config,
     availableLocales,
+    enableUISounds = false,
 }: {
     registry?: ContentRegistry;
     gameConfig?: GameConfig;
     availableLocales?: { code: string; label: string }[];
+    enableUISounds?: boolean;
 } = {}) {
     render(
         <GameShell
@@ -156,7 +165,7 @@ function renderShell({
             manifest={manifest}
             title="Test Game"
             projectId={PROJECT_ID}
-            uiSounds={false}
+            uiSounds={enableUISounds ? undefined : false}
             availableLocales={availableLocales}
         />
     );
@@ -166,6 +175,7 @@ describe('GameShell player journeys', () => {
     it('opens credits from the title screen and returns', async () => {
         const user = userEvent.setup();
         renderShell();
+        await continueFromLoading(user);
 
         await user.click(
             await screen.findByRole('button', { name: 'Credits' })
@@ -295,6 +305,7 @@ describe('GameShell player journeys', () => {
                 { code: 'es', label: 'Español' },
             ],
         });
+        await continueFromLoading(user);
 
         await user.click(
             await screen.findByRole('button', { name: 'Settings' })
@@ -317,6 +328,7 @@ describe('GameShell player journeys', () => {
         });
         const user = userEvent.setup();
         renderShell({ registry });
+        await continueFromLoading(user);
 
         await user.click(await screen.findByRole('button', { name: 'Resume' }));
         expect(
@@ -368,6 +380,7 @@ describe('GameShell player journeys', () => {
                 },
             },
         });
+        await continueFromLoading(user);
 
         await user.click(
             await screen.findByRole('button', {
@@ -379,6 +392,139 @@ describe('GameShell player journeys', () => {
         ).toBeTruthy();
     });
 
+    it('uses the completed loading screen as the startup audio gesture', async () => {
+        const user = userEvent.setup();
+        renderShell({
+            gameConfig: {
+                ...config,
+                shell: {
+                    splash: {
+                        sound: 'assets/audio/ui/caper sting.mp3',
+                        duration: 60_000,
+                    },
+                },
+            },
+        });
+
+        expect(
+            await screen.findByRole('button', { name: 'Start game' })
+        ).toBeTruthy();
+        expect(
+            screen.queryByRole('button', { name: 'Skip splash screen' })
+        ).toBeNull();
+
+        await user.click(screen.getByRole('button', { name: 'Start game' }));
+        expect(
+            await screen.findByRole('button', { name: 'Skip splash screen' })
+        ).toBeTruthy();
+        expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    });
+
+    it('plays Studio-imported interface sounds from their full asset paths', async () => {
+        const user = userEvent.setup();
+        const play = vi.mocked(HTMLMediaElement.prototype.play);
+        const originalPlay = play.getMockImplementation();
+        const playedSources: string[] = [];
+        play.mockImplementation(function (this: HTMLMediaElement) {
+            playedSources.push(decodeURI(this.src));
+            return Promise.resolve();
+        });
+        renderShell({
+            enableUISounds: true,
+            gameConfig: {
+                ...config,
+                shell: {
+                    uiSounds: {
+                        hover: 'assets/audio/ui/menu hover.mp3',
+                        menuOpen: 'assets/audio/ui/menu open.mp3',
+                    },
+                },
+            },
+        });
+
+        await continueFromLoading(user);
+        await user.click(
+            await screen.findByRole('button', { name: 'Settings' })
+        );
+
+        expect(playedSources).toEqual(
+            expect.arrayContaining([
+                expect.stringContaining('/assets/audio/ui/menu hover.mp3'),
+                expect.stringContaining('/assets/audio/ui/menu open.mp3'),
+            ])
+        );
+        expect(playedSources.join(' ')).not.toContain(
+            'assets/audio/ui/assets/audio/ui'
+        );
+        if (originalPlay) play.mockImplementation(originalPlay);
+    });
+
+    it('plays the configured click sound for buttons inside the game renderer', async () => {
+        const user = userEvent.setup();
+        const play = vi.mocked(HTMLMediaElement.prototype.play);
+        const originalPlay = play.getMockImplementation();
+        const playedSources: string[] = [];
+        play.mockImplementation(function (this: HTMLMediaElement) {
+            playedSources.push(decodeURI(this.src));
+            return Promise.resolve();
+        });
+        renderShell({
+            enableUISounds: true,
+            gameConfig: {
+                ...config,
+                shell: {
+                    uiSounds: {
+                        click: 'assets/audio/ui/game click.mp3',
+                    },
+                },
+            },
+        });
+
+        await continueFromLoading(user);
+        await user.click(
+            await screen.findByRole('button', { name: 'New Game' })
+        );
+        playedSources.length = 0;
+
+        await user.click(screen.getByRole('button', { name: 'Inventory' }));
+
+        expect(
+            playedSources.filter((source) =>
+                source.endsWith('/assets/audio/ui/game click.mp3')
+            )
+        ).toHaveLength(1);
+        if (originalPlay) play.mockImplementation(originalPlay);
+    });
+
+    it('plays title music from its full shell asset path after startup', async () => {
+        const user = userEvent.setup();
+        let playedSrc = '';
+        vi.mocked(HTMLMediaElement.prototype.play).mockImplementationOnce(
+            function (this: HTMLMediaElement) {
+                playedSrc = this.src;
+                return Promise.resolve();
+            }
+        );
+        renderShell({
+            gameConfig: {
+                ...config,
+                shell: {
+                    title: {
+                        music: 'assets/audio/music/caper title.mp3',
+                    },
+                },
+            },
+        });
+
+        await continueFromLoading(user);
+        expect(
+            await screen.findByRole('button', { name: 'New Game' })
+        ).toBeTruthy();
+        expect(decodeURI(playedSrc)).toContain(
+            '/assets/audio/music/caper title.mp3'
+        );
+    });
+
     it('shows public resources and opens the in-game audio settings panel', async () => {
         const user = userEvent.setup();
         renderShell({
@@ -387,6 +533,7 @@ describe('GameShell player journeys', () => {
                 startVariables: { gold: 5, _internal: 9 },
             },
         });
+        await continueFromLoading(user);
         await user.click(
             await screen.findByRole('button', { name: 'New Game' })
         );

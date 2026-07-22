@@ -39,6 +39,22 @@
 
 /* ── Loading Screen ──────────────────────────────────────────────── */
 
+.loading-start-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.loading-screen-start {
+    width: min(280px, 80vw);
+    min-height: 58px;
+    background: color-mix(in srgb, var(--doodle-bg-primary) 72%, transparent);
+    backdrop-filter: blur(6px);
+}
+
 .loading-screen {
     position: fixed;
     inset: 0;

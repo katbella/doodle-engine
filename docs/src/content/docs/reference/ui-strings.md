@@ -21,6 +21,7 @@ Placeholders in curly braces are replaced while the game runs. Keep the same pla
 | `ui.save` | Save |
 | `ui.load` | Load |
 | `ui.new_game` | New Game |
+| `ui.start_game` | Start game |
 | `ui.resume` | Resume |
 | `ui.no_companions` | No companions |
 | `ui.narrator` | Narrator |

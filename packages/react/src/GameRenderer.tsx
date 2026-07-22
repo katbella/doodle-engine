@@ -33,6 +33,8 @@ export interface GameRendererProps {
     className?: string;
     /** Stable project identity generated once when the project is created. */
     projectId: string;
+    /** Called once when an enabled button in the game interface is clicked. */
+    onButtonClick?: () => void;
 }
 
 type ActivePanel =
@@ -75,7 +77,11 @@ export function GameRenderer(props: GameRendererProps) {
     );
 }
 
-function GameRendererInner({ className = '', projectId }: GameRendererProps) {
+function GameRendererInner({
+    className = '',
+    projectId,
+    onButtonClick,
+}: GameRendererProps) {
     saveStorageKeyForProject(projectId);
     const { snapshot, actions } = useGame();
     const audioSettings = useContext(AudioSettingsContext);
@@ -100,7 +106,16 @@ function GameRendererInner({ className = '', projectId }: GameRendererProps) {
     );
 
     return (
-        <div className={`game-renderer ${className}`}>
+        <div
+            className={`game-renderer ${className}`}
+            onClickCapture={(event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const button = target.closest('button');
+                if (!button || button.disabled) return;
+                onButtonClick?.();
+            }}
+        >
             {snapshot.pendingInterlude && (
                 <Interlude
                     interlude={snapshot.pendingInterlude}
