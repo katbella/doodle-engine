@@ -563,6 +563,18 @@ export class Engine {
     }
 
     /**
+     * Get a deep copy of the loaded content registry.
+     *
+     * Changes to the returned object do not affect the content used by the
+     * running engine.
+     *
+     * @returns A deep clone of the current ContentRegistry
+     */
+    getRegistry(): ContentRegistry {
+        return structuredClone(this.registry);
+    }
+
+    /**
      * Attach or detach a debug-trace sink.
      *
      * While a sink is attached, the engine reports its decisions (nodes

@@ -273,9 +273,11 @@ doodle.setQuestStage("questId", "stage")
 doodle.addItem("itemId")
 doodle.removeItem("itemId")
 doodle.inspect()                        // Print current state summary
-doodle.inspectState()                   // Return raw game state object
-doodle.inspectRegistry()                // Return content registry object
+doodle.inspectState()                   // View current progress and game state
+doodle.inspectRegistry()                // View all loaded game content
 ```
+
+The inspection commands return copies, so exploring their results does not change the running game.
 
 `window.doodle` is only available after a game has started (after clicking New Game or Continue), because `GameProvider` must be mounted first.
 

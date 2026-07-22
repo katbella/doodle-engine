@@ -140,9 +140,11 @@ doodle.removeItem('old_coin');
 
 // Inspection
 doodle.inspect(); // Show current state and available commands
-doodle.inspectState(); // Return full game state object
-doodle.inspectRegistry(); // Return content registry object
+doodle.inspectState(); // View current progress and game state
+doodle.inspectRegistry(); // View all loaded game content
 ```
+
+The inspection commands return copies, so exploring their results does not change the running game.
 
 New applications pass `devTools={import.meta.env.DEV}`, which includes `window.doodle` during development and omits it from production builds.
 

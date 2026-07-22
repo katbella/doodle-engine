@@ -4,10 +4,7 @@ import type { ContentRegistry, Dialogue } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import type { SectionKey, Tab } from '../types';
 
-/**
- * Read-only view of the selected item. This is the browse surface for now; the
- * dialogue and form editors replace these views in later steps.
- */
+/** Read-only fallback for content without a dedicated editor. */
 export function DetailView({
     project,
     tab,

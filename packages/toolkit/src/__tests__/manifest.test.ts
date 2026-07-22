@@ -5,7 +5,7 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { afterEach, describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { generateAssetManifest } from '../manifest';
 import { generateServiceWorker } from '../service-worker';
 import type {
@@ -57,8 +57,88 @@ describe('generateServiceWorker', () => {
     it('generates valid JavaScript', () => {
         const manifest = makeManifest();
         const source = generateServiceWorker(manifest);
-        expect(typeof source).toBe('string');
-        expect(source.length).toBeGreaterThan(0);
+        expect(() => new Function(source)).not.toThrow();
+    });
+
+    it('runs install, activate, and cached fetch behavior', async () => {
+        const source = generateServiceWorker(makeManifest(), ['index.html']);
+        const handlers = new Map<string, (event: unknown) => void>();
+        const added: string[] = [];
+        const cache = {
+            add: vi.fn(async (url: string) => {
+                added.push(url);
+            }),
+            put: vi.fn(async () => {}),
+        };
+        const cachedResponse = new Response('cached asset');
+        const caches = {
+            open: vi.fn(async () => cache),
+            keys: vi.fn(async () => [
+                'doodle-engine-old',
+                'doodle-engine-test-1',
+                'unrelated-cache',
+            ]),
+            delete: vi.fn(async () => true),
+            match: vi.fn(async () => cachedResponse),
+        };
+        const skipWaiting = vi.fn(async () => {});
+        const claim = vi.fn(async () => {});
+        const worker = {
+            location: new URL(
+                'https://example.test/games/demo/service-worker.js'
+            ),
+            skipWaiting,
+            clients: { claim },
+            addEventListener(type: string, handler: (event: unknown) => void) {
+                handlers.set(type, handler);
+            },
+        };
+        const fetch = vi.fn(async () => new Response('network'));
+
+        new Function('self', 'caches', 'fetch', 'Response', source)(
+            worker,
+            caches,
+            fetch,
+            Response
+        );
+
+        let installWork: Promise<unknown> | undefined;
+        handlers.get('install')!({
+            waitUntil(work: Promise<unknown>) {
+                installWork = work;
+            },
+        });
+        await installWork;
+        expect(added).toContain('/games/demo/index.html');
+        expect(added).toContain('/games/demo/api/content');
+        expect(added).toContain('/games/demo/assets/images/logo.png');
+        expect(skipWaiting).toHaveBeenCalledOnce();
+
+        let activateWork: Promise<unknown> | undefined;
+        handlers.get('activate')!({
+            waitUntil(work: Promise<unknown>) {
+                activateWork = work;
+            },
+        });
+        await activateWork;
+        expect(caches.delete).toHaveBeenCalledOnce();
+        expect(caches.delete).toHaveBeenCalledWith('doodle-engine-old');
+        expect(claim).toHaveBeenCalledOnce();
+
+        const request = new Request(
+            'https://example.test/games/demo/assets/images/logo.png'
+        );
+        let fetchWork: Promise<Response> | undefined;
+        handlers.get('fetch')!({
+            request,
+            respondWith(work: Promise<Response>) {
+                fetchWork = work;
+            },
+        });
+        const response = await fetchWork;
+        expect(await response!.text()).toBe('cached asset');
+        expect(caches.match).toHaveBeenCalledWith(request);
+        expect(fetch).not.toHaveBeenCalled();
     });
 
     it('includes all asset paths in the precache list', () => {

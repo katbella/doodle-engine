@@ -69,19 +69,24 @@ function Harness({
     onRename,
     onOpenReference,
     notesError = null,
+    summaries = base,
+    initialNotes = {
+        flags: { metGude: 'Stale guide note.' },
+        variables: { gold: 'Current coins.' },
+    },
 }: {
     onRename: (kind: FlagVarKind, id: string) => void;
     onOpenReference: (reference: Reference) => void;
     notesError?: string | null;
+    summaries?: BaseFlagVarSummary[];
+    initialNotes?: FlagVarNotes;
 }) {
-    const [notes, setNotes] = useState<FlagVarNotes>({
-        flags: {
-            metGude: 'Stale guide note.',
-        },
-        variables: { gold: 'Current coins.' },
-    });
+    const [notes, setNotes] = useState<FlagVarNotes>(initialNotes);
     const [selected, setSelected] = useState<FlagVarSelection | null>(null);
-    const named = useMemo(() => attachFlagVarNotes(base, notes), [notes]);
+    const named = useMemo(
+        () => attachFlagVarNotes(summaries, notes),
+        [notes, summaries]
+    );
     const catalog: NameCatalog = { ...named, stats: [] };
     const updateNote = (kind: FlagVarKind, id: string, note: string) => {
         const section = kind === 'flag' ? 'flags' : 'variables';
@@ -241,5 +246,62 @@ describe('FlagsVariablesPage', () => {
                 .getByRole('button', { name: /quest_intro_done/ })
                 .getAttribute('aria-current')
         ).toBe('true');
+    });
+
+    it('collapses prefix groups and distinguishes no matches from an empty project', async () => {
+        const user = userEvent.setup();
+        const view = render(
+            <Harness onRename={vi.fn()} onOpenReference={vi.fn()} />
+        );
+        const list = screen.getByRole('region', { name: 'Project names' });
+
+        await user.click(within(list).getByRole('button', { name: /quest1/ }));
+        expect(within(list).queryByText('quest_intro_done')).toBeNull();
+        await user.click(within(list).getByRole('button', { name: /quest1/ }));
+        expect(within(list).getByText('quest_intro_done')).toBeTruthy();
+
+        await user.selectOptions(
+            screen.getByRole('combobox', { name: 'Sort flags and variables' }),
+            'uses'
+        );
+        expect(
+            (
+                screen.getByRole('combobox', {
+                    name: 'Sort flags and variables',
+                }) as HTMLSelectElement
+            ).value
+        ).toBe('uses');
+
+        await user.type(
+            screen.getByRole('textbox', {
+                name: 'Search flags and variables',
+            }),
+            'not-present'
+        );
+        expect(screen.getByText('No names match this search.')).toBeTruthy();
+
+        view.unmount();
+        render(
+            <Harness
+                summaries={[]}
+                initialNotes={{ flags: {}, variables: {} }}
+                onRename={vi.fn()}
+                onOpenReference={vi.fn()}
+            />
+        );
+        expect(
+            screen.getByText('No flags or variables are used yet.')
+        ).toBeTruthy();
+    });
+
+    it('deletes an unowned note when notes metadata is writable', async () => {
+        const user = userEvent.setup();
+        render(<Harness onRename={vi.fn()} onOpenReference={vi.fn()} />);
+
+        await user.click(screen.getByText('Notes with no owner'));
+        await user.click(
+            screen.getByRole('button', { name: 'Delete note for metGude' })
+        );
+        expect(screen.queryByText('metGude')).toBeNull();
     });
 });

@@ -5,8 +5,7 @@
  * own Node process. Like the build, a dev server loads the project's Vite config
  * and source, so it stays out of the main process. The worker reports the URL
  * the server is listening on; Studio opens that URL in the user's default
- * browser. Studio's own live renderer preview is a later effort, so for now the
- * project's game runs where it always has: a normal browser tab.
+ * browser, where the project's normal renderer runs.
  *
  * Message in:   { type: 'start', projectDir, port? } | { type: 'stop' }
  * Messages out: { type: 'ready', url } | { type: 'log', line }

@@ -1,8 +1,7 @@
 /**
  * The playtest panel: runs the real engine over the loaded project and shows
  * its truth — the current node, every choice (available or hidden with the
- * reason), an editable state inspector, a debug trace, and a placeholder frame
- * for the project's own renderer.
+ * reason), an editable state inspector, and a debug trace.
  *
  * The engine runs in-process from the loaded registry and config; nothing here
  * touches project files. State edits go through the engine's debug-effect path,

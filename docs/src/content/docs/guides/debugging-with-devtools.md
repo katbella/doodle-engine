@@ -22,7 +22,7 @@ Enable dev tools in development mode:
     manifest={manifest}
     projectId={PROJECT_ID}
     devTools={import.meta.env.DEV}
-/>;
+/>
 ```
 
 If you are building a React renderer without `GameProvider`, call `enableDevTools` yourself:
@@ -169,16 +169,18 @@ View the current game state and content registry.
 // Show current state summary and command list
 doodle.inspect();
 
-// Return full game state object (flags, variables, inventory, etc.)
+// View current progress and game state
 const state = doodle.inspectState();
 console.log(state.flags);
 console.log(state.inventory);
 
-// Return content registry (all loaded entities)
+// View all loaded game content
 const registry = doodle.inspectRegistry();
 console.log(registry.dialogues);
 console.log(registry.characters);
 ```
+
+Both commands return copies, so exploring their results does not change the running game.
 
 **Use case**: Debug state issues, verify that content loaded, or inspect the engine's current data.
 
@@ -254,7 +256,7 @@ console.log(state.inventory);
 
 - The dev tools API is designed for debugging and can change when engine internals change.
 - Enable it in **development mode** (`npm run dev`) with `import.meta.env.DEV` or another environment guard.
-- Dev tools commands change state directly. For example, `doodle.addItem()` adds an item without running effects or evaluating conditions.
+- Commands that change flags, variables, quests, or inventory use the engine's effect system. `teleport()` and `triggerDialogue()` are testing shortcuts: they let you reach a location or dialogue without playing through its normal prerequisites.
 
 ## Release builds
 
@@ -267,4 +269,4 @@ New React projects include this check. Use the same pattern in custom renderers.
 - Use `doodle.inspect()` as your starting point. It shows the current game state and lists all available commands.
 - Combine commands to set up complex scenarios: set multiple flags, add items, then trigger dialogue.
 - Save console commands in a text file or browser snippet for scenarios you test repeatedly.
-- Use `inspectState()` and `inspectRegistry()` to understand how the engine represents your content internally.
+- Use `inspectState()` to explore current progress and `inspectRegistry()` to explore loaded game content.

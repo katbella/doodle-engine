@@ -1,8 +1,7 @@
 /**
- * Modal for naming a saved test state. Used instead of window.prompt (a native
- * dialog, which leaves Electron's focus in a broken state). Pre-fills any
- * existing name so re-saving over it is one keystroke, and warns when the name
- * would overwrite another saved state.
+ * Names a saved test state with application-controlled focus and keyboard
+ * handling. Existing names are prefilled and duplicate names show an overwrite
+ * warning.
  */
 import { useState } from 'react';
 import { useModalDismiss } from '../lib/useModalDismiss';

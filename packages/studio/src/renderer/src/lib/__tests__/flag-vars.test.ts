@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import type { ReferenceIndex } from '@doodle-engine/core';
+import type { ContentRegistry, ReferenceIndex } from '@doodle-engine/core';
 import {
     attachFlagVarNotes,
     buildFlagVarSummaries,
+    buildStatSummaries,
+    catalogFor,
     closestExistingName,
     nearIdenticalNames,
     prefixForName,
+    usageSummary,
     type NameCatalog,
 } from '../flag-vars';
 
@@ -52,6 +55,109 @@ describe('flag and variable summaries', () => {
         });
         expect(attached.flags[0].note).toBe('The player can continue.');
         expect(attached.variables[0].note).toBe('');
+    });
+
+    it('handles a missing index and counts stats throughout loaded content', () => {
+        expect(buildFlagVarSummaries(null)).toEqual([]);
+        const registry = {
+            characters: { hero: { id: 'hero', stats: { health: 10 } } },
+            items: { sword: { id: 'sword', stats: { damage: 3 } } },
+            dialogues: {
+                intro: {
+                    id: 'intro',
+                    nodes: [
+                        {
+                            id: 'start',
+                            choices: [
+                                {
+                                    id: 'rest',
+                                    text: 'Rest',
+                                    effects: [
+                                        {
+                                            type: 'setCharacterStat',
+                                            characterId: 'hero',
+                                            stat: 'health',
+                                            value: 10,
+                                        },
+                                    ],
+                                },
+                            ],
+                            effects: [
+                                {
+                                    type: 'addCharacterStat',
+                                    characterId: 'hero',
+                                    stat: 'health',
+                                    value: 1,
+                                },
+                            ],
+                            conditionalBranches: [
+                                {
+                                    condition: {
+                                        type: 'hasFlag',
+                                        flag: 'rested',
+                                    },
+                                    effects: [
+                                        {
+                                            type: 'setCharacterStat',
+                                            characterId: 'hero',
+                                            stat: 'stamina',
+                                            value: 5,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+            interludes: {
+                rest: {
+                    id: 'rest',
+                    effects: [
+                        {
+                            type: 'addCharacterStat',
+                            characterId: 'hero',
+                            stat: 'stamina',
+                            value: 1,
+                        },
+                    ],
+                },
+            },
+        } as unknown as ContentRegistry;
+
+        expect(
+            buildStatSummaries(registry).map(({ id, count }) => ({ id, count }))
+        ).toEqual([
+            { id: 'damage', count: 1 },
+            { id: 'health', count: 3 },
+            { id: 'stamina', count: 2 },
+        ]);
+    });
+
+    it('selects each catalog section and describes flag and stat usage', () => {
+        const attached = attachFlagVarNotes(buildFlagVarSummaries(index), {
+            flags: {},
+            variables: {},
+        });
+        const stat = {
+            kind: 'stat' as const,
+            id: 'health',
+            count: 1,
+            setCount: 0,
+            checkCount: 0,
+            references: [],
+            note: '',
+        };
+        const catalog: NameCatalog = { ...attached, stats: [stat] };
+
+        expect(catalogFor(catalog, 'flag')).toBe(catalog.flags);
+        expect(catalogFor(catalog, 'variable')).toBe(catalog.variables);
+        expect(catalogFor(catalog, 'stat')).toBe(catalog.stats);
+        expect(usageSummary(catalog.flags[0])).toBe(
+            'Set in 1 place, checked in 2'
+        );
+        expect(usageSummary(stat)).toBe('1 use');
+        expect(usageSummary({ ...stat, count: 2 })).toBe('2 uses');
     });
 });
 

@@ -1,49 +1,103 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Engine } from '../engine';
+import { Engine } from '../engine';
 import { enableDevTools } from '../devtools';
+import { parseDialogue } from '../parser';
+import type { ContentRegistry } from '../types/registry';
+import type { GameConfig } from '../types/entities';
+
+function createRegistry(): ContentRegistry {
+    return {
+        locations: {
+            tavern: {
+                id: 'tavern',
+                name: 'Tavern',
+                description: 'A cozy tavern',
+                banner: '',
+                music: '',
+                ambient: '',
+            },
+            keep: {
+                id: 'keep',
+                name: 'The Keep',
+                description: 'A distant keep',
+                banner: '',
+                music: '',
+                ambient: '',
+            },
+        },
+        characters: {
+            ally: {
+                id: 'ally',
+                name: 'Ally',
+                biography: '',
+                portrait: '',
+                location: 'tavern',
+                dialogue: '',
+                stats: {},
+            },
+            vendor: {
+                id: 'vendor',
+                name: 'Vendor',
+                biography: '',
+                portrait: '',
+                location: 'tavern',
+                dialogue: '',
+                stats: {},
+            },
+        },
+        items: {
+            coin: {
+                id: 'coin',
+                name: 'Old Coin',
+                description: '',
+                icon: '',
+                image: '',
+                location: 'tavern',
+                stats: {},
+            },
+        },
+        maps: {},
+        dialogues: {
+            greeting: parseDialogue(
+                [
+                    'NODE start',
+                    '  NARRATOR: Hello.',
+                    '  CHOICE Bye',
+                    '    END dialogue',
+                    '  END',
+                ].join('\n'),
+                'greeting'
+            ),
+            unavailable: {
+                id: 'unavailable',
+                startNode: 'missing',
+                nodes: [],
+            },
+        },
+        quests: {},
+        journalEntries: {},
+        interludes: {},
+        locales: {},
+    };
+}
+
+const config: GameConfig = {
+    startLocation: 'tavern',
+    startTime: { day: 2, hour: 9 },
+    startFlags: {},
+    startVariables: { gold: 5 },
+    startInventory: [],
+};
 
 describe('browser dev tools', () => {
-    const state = {
-        currentLocation: 'tavern',
-        currentTime: { day: 2, hour: 9 },
-        flags: {} as Record<string, boolean>,
-        variables: { gold: 5 } as Record<string, number | string>,
-        inventory: [] as string[],
-        questProgress: {} as Record<string, string>,
-        characterState: {
-            ally: { inParty: true, location: 'tavern' },
-            vendor: { inParty: false, location: 'market' },
-        },
-        itemLocations: {} as Record<string, string>,
-    };
-    const registry = {
-        dialogues: { greeting: { id: 'greeting' } },
-    };
-    const enterDialogue = vi.fn(() => true);
-    const getSnapshot = vi.fn(() => ({
-        location: { name: 'Tavern' },
-        time: state.currentTime,
-        inventory: state.inventory.map((id) => ({ id, name: id })),
-    }));
-    const engine = {
-        state,
-        registry,
-        enterDialogue,
-        getSnapshot,
-    } as unknown as Engine;
+    let engine: Engine;
     const onUpdate = vi.fn();
 
     beforeEach(() => {
-        state.currentLocation = 'tavern';
-        state.flags = {};
-        state.variables = { gold: 5 };
-        state.inventory = [];
-        state.questProgress = {};
-        state.characterState.ally = { inParty: true, location: 'tavern' };
-        state.characterState.vendor = { inParty: false, location: 'market' };
-        state.itemLocations = {};
-        enterDialogue.mockReset().mockReturnValue(true);
-        getSnapshot.mockClear();
+        engine = new Engine(createRegistry());
+        engine.newGame(config);
+        engine.applyDebugEffect({ type: 'addToParty', characterId: 'ally' });
+
         onUpdate.mockClear();
         vi.stubGlobal('window', {});
         vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -56,21 +110,21 @@ describe('browser dev tools', () => {
         vi.unstubAllGlobals();
     });
 
-    it('mutates flags, variables, quests, and locations and reports updates', () => {
+    it('changes state through the Engine debug API and reports updates', () => {
         const doodle = window.doodle!;
 
         doodle.setFlag('trusted');
-        expect(state.flags.trusted).toBe(true);
+        expect(engine.getState().flags.trusted).toBe(true);
         doodle.clearFlag('trusted');
-        expect(state.flags.trusted).toBeUndefined();
+        expect(engine.getState().flags.trusted).toBe(false);
         doodle.setVariable('gold', 12);
         expect(doodle.getVariable('gold')).toBe(12);
         doodle.setQuestStage('odd_jobs', 'started');
-        expect(state.questProgress.odd_jobs).toBe('started');
+        expect(engine.getState().questProgress.odd_jobs).toBe('started');
         doodle.teleport('keep');
-        expect(state.currentLocation).toBe('keep');
-        expect(state.characterState.ally.location).toBe('keep');
-        expect(state.characterState.vendor.location).toBe('market');
+        expect(engine.getState().currentLocation).toBe('keep');
+        expect(engine.getState().characterState.ally.location).toBe('keep');
+        expect(engine.getState().characterState.vendor.location).toBe('tavern');
         expect(onUpdate).toHaveBeenCalledTimes(5);
     });
 
@@ -79,12 +133,12 @@ describe('browser dev tools', () => {
 
         doodle.addItem('coin');
         doodle.addItem('coin');
-        expect(state.inventory).toEqual(['coin']);
-        expect(state.itemLocations.coin).toBe('inventory');
+        expect(engine.getState().inventory).toEqual(['coin']);
+        expect(engine.getState().itemLocations.coin).toBe('inventory');
         doodle.removeItem('coin');
         doodle.removeItem('coin');
-        expect(state.inventory).toEqual([]);
-        expect(state.itemLocations.coin).toBeUndefined();
+        expect(engine.getState().inventory).toEqual([]);
+        expect(engine.getState().itemLocations.coin).toBeUndefined();
         expect(onUpdate).toHaveBeenCalledTimes(2);
     });
 
@@ -95,25 +149,34 @@ describe('browser dev tools', () => {
         expect(console.error).toHaveBeenCalledWith(
             '🐾 Dialogue not found: missing'
         );
-        enterDialogue.mockReturnValueOnce(false);
-        doodle.triggerDialogue('greeting');
+
+        doodle.triggerDialogue('unavailable');
         expect(console.error).toHaveBeenCalledWith(
-            '🐾 Could not start dialogue: greeting'
+            '🐾 Could not start dialogue: unavailable'
         );
+
         doodle.triggerDialogue('greeting');
-        expect(enterDialogue).toHaveBeenCalledWith('greeting');
+        expect(engine.getState().dialogueState).toEqual({
+            dialogueId: 'greeting',
+            nodeId: 'start',
+        });
         expect(onUpdate).toHaveBeenCalledOnce();
     });
 
-    it('exposes state, registry, and a readable inspection summary', () => {
+    it('returns copies for inspection and prints a readable summary', () => {
         const doodle = window.doodle!;
 
-        expect(doodle.inspectState()).toBe(state);
-        expect(doodle.inspectRegistry()).toBe(registry);
+        const state = doodle.inspectState();
+        state.flags.changedOutsideEngine = true;
+        expect(engine.getState().flags.changedOutsideEngine).toBeUndefined();
+
+        const registry = doodle.inspectRegistry();
+        registry.locations.tavern.name = 'Changed outside Engine';
+        expect(engine.getRegistry().locations.tavern.name).toBe('Tavern');
+
         doodle.addItem('coin');
         doodle.inspect();
-        expect(getSnapshot).toHaveBeenCalledOnce();
         expect(console.log).toHaveBeenCalledWith('Current Location:', 'Tavern');
-        expect(console.log).toHaveBeenCalledWith('Inventory:', ['coin']);
+        expect(console.log).toHaveBeenCalledWith('Inventory:', ['Old Coin']);
     });
 });

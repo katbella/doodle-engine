@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OpenProject, StudioApi } from '../../../../shared/project';
 import { LocaleWriterProvider } from '../../lib/locale-writer';
@@ -242,5 +248,138 @@ describe('LocalizedTextField write-through editing', () => {
                 value: 'A newly written greeting',
             },
         ]);
+    });
+
+    it('copies, opens, and changes an assigned locale key', async () => {
+        installBridge();
+        const user = userEvent.setup();
+        const writeText = vi.fn(async () => {});
+        Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText },
+        });
+        const onOpenLocale = vi.fn();
+        render(
+            <LocaleWriterProvider
+                project={project}
+                onModified={vi.fn()}
+                onOpenLocale={onOpenLocale}
+            >
+                <LocalizedTextField
+                    source="@bartender.greeting"
+                    registry={project.registry}
+                    onSourceChange={vi.fn()}
+                />
+            </LocaleWriterProvider>
+        );
+
+        const chip = screen.getByRole('button', {
+            name: '@bartender.greeting · en',
+        });
+        await user.click(chip);
+        await user.click(screen.getByRole('button', { name: 'Copy key' }));
+        expect(writeText).toHaveBeenCalledWith('@bartender.greeting');
+
+        await user.click(chip);
+        await user.click(
+            screen.getByRole('button', { name: 'Open the English locale' })
+        );
+        expect(onOpenLocale).toHaveBeenCalledWith('en', 'bartender.greeting');
+
+        await user.click(chip);
+        await user.click(screen.getByRole('button', { name: 'Change key…' }));
+        expect(screen.getByRole('dialog')).toBeTruthy();
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(screen.queryByRole('dialog')).toBeNull();
+
+        await user.click(chip);
+        fireEvent.pointerDown(document.body);
+        expect(screen.queryByRole('button', { name: 'Copy key' })).toBeNull();
+    });
+
+    it('supports keyboard selection and validation in the key picker', async () => {
+        installBridge();
+        const onSourceChange = vi.fn();
+        const user = userEvent.setup();
+        render(
+            <LocaleWriterProvider project={project} onModified={vi.fn()}>
+                <LocalizedTextField
+                    source="First line"
+                    registry={project.registry}
+                    onSourceChange={onSourceChange}
+                />
+            </LocaleWriterProvider>
+        );
+
+        await user.click(screen.getByRole('button', { name: '@key' }));
+        const search = screen.getByRole('textbox', {
+            name: 'Search locale keys',
+        });
+        fireEvent.keyDown(search, { key: 'ArrowDown' });
+        fireEvent.keyDown(search, { key: 'ArrowUp' });
+        fireEvent.keyDown(search, { key: 'ArrowDown' });
+        fireEvent.keyDown(search, { key: 'Enter' });
+        expect(onSourceChange).toHaveBeenCalledWith('@story.first');
+
+        await user.click(screen.getByRole('button', { name: '@key' }));
+        const nextSearch = screen.getByRole('textbox', {
+            name: 'Search locale keys',
+        });
+        await user.type(nextSearch, 'bad key!');
+        expect(
+            screen.getByText(
+                'Use letters, numbers, dots, dashes, or underscores.'
+            )
+        ).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    });
+
+    it('keeps single-line choices on one line and explains blocked Enter keys', async () => {
+        installBridge();
+        const onSourceChange = vi.fn();
+        render(
+            <LocaleWriterProvider project={project} onModified={vi.fn()}>
+                <LocalizedTextField
+                    source="Choice text"
+                    registry={project.registry}
+                    textKind="single-line-wrap"
+                    ariaLabel="Choice"
+                    hint="Shown on the choice button"
+                    onSourceChange={onSourceChange}
+                />
+            </LocaleWriterProvider>
+        );
+
+        const choice = screen.getByRole('textbox', { name: 'Choice' });
+        fireEvent.keyDown(choice, { key: 'Enter' });
+        expect(screen.getByRole('status').textContent).toBe(
+            'A choice is a single line.'
+        );
+        fireEvent.change(choice, { target: { value: 'First\nSecond' } });
+        expect(onSourceChange).toHaveBeenCalledWith('First Second');
+        expect(screen.getByText('Shown on the choice button')).toBeTruthy();
+    });
+
+    it('leaves key assignment disabled until a locale exists', () => {
+        installBridge();
+        const registry = { ...project.registry, locales: {} };
+        render(
+            <LocaleWriterProvider
+                project={{ ...project, registry } as OpenProject}
+                onModified={vi.fn()}
+            >
+                <LocalizedTextField
+                    source="Literal text"
+                    registry={registry}
+                    onSourceChange={vi.fn()}
+                />
+            </LocaleWriterProvider>
+        );
+
+        const keyButton = screen.getByRole('button', { name: '@key' });
+        expect((keyButton as HTMLButtonElement).disabled).toBe(true);
+        expect(keyButton.getAttribute('title')).toBe(
+            'Add a locale before assigning a key'
+        );
     });
 });

@@ -309,8 +309,7 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
 
 /**
  * Start the project's dev server in a separate process and open it in the
- * default browser. Studio doesn't embed the running game (that's a later
- * effort); it runs where it always has, in a normal browser tab.
+ * default browser.
  */
 function startPreview(projectDir: string): Promise<PreviewStatus | null> {
     if (previewProc) {

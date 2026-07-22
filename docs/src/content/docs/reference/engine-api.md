@@ -170,6 +170,32 @@ Get the current snapshot without making any changes. Useful for initial renderin
 const snapshot = engine.getSnapshot();
 ```
 
+### getState
+
+```typescript
+getState(): GameState
+```
+
+Get a complete copy of current game progress, including flags, variables, inventory, quests, and character state. Editing the returned value does not change the running game.
+
+```typescript
+const state = engine.getState();
+console.log(state.flags);
+```
+
+### getRegistry
+
+```typescript
+getRegistry(): ContentRegistry
+```
+
+Get a complete copy of the content loaded by the engine. Editing the returned value does not change the content used by the running game.
+
+```typescript
+const content = engine.getRegistry();
+console.log(content.dialogues);
+```
+
 ### dismissInterlude
 
 ```typescript
@@ -181,6 +207,34 @@ Clear the current pending interlude after the renderer has shown it.
 ```typescript
 const snapshot = engine.dismissInterlude();
 ```
+
+## Debug and editor methods
+
+These methods support playtest tools, state inspectors, and other development-only workflows.
+
+### applyDebugEffect
+
+```typescript
+applyDebugEffect(effect: Effect): Snapshot
+```
+
+Apply one effect to the current play session and return the updated snapshot. The effect uses the same processing as an effect written in game content.
+
+### teleport
+
+```typescript
+teleport(locationId: string): Snapshot
+```
+
+Jump to any location for testing. Party members move with the player. The jump does not add travel time or run location triggers.
+
+### startDialogueAt
+
+```typescript
+startDialogueAt(dialogueId: string, nodeId: string): Snapshot
+```
+
+Start a dialogue at a chosen node for testing. The node's effects run normally, and a silent node advances normally. If the dialogue or node is missing, the game remains at its current state.
 
 ## Data Flow
 

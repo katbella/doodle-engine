@@ -11,6 +11,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ContentRegistry, DialogueNode } from '@doodle-engine/core';
+import type { NameCatalog } from '../../lib/flag-vars';
 
 vi.mock('../ConditionEffectBuilder', () => ({
     ConditionEffectBuilder: (props: any) => (
@@ -76,7 +77,17 @@ const initialNode: DialogueNode = {
     next: 'end',
 };
 
-function Harness({ isStart = false }: { isStart?: boolean }) {
+function Harness({
+    isStart = false,
+    nameCatalog,
+    onCreateNode = vi.fn(),
+    onPlayFromHere = vi.fn(),
+}: {
+    isStart?: boolean;
+    nameCatalog?: NameCatalog;
+    onCreateNode?: (id: string) => void;
+    onPlayFromHere?: () => void;
+}) {
     const [node, setNode] = useState(initialNode);
     return (
         <>
@@ -88,14 +99,15 @@ function Harness({ isStart = false }: { isStart?: boolean }) {
                 nodeIds={['start', 'end']}
                 registry={registry}
                 projectDir="C:/story"
+                nameCatalog={nameCatalog}
                 onChange={setNode}
                 onRename={(oldId, newId) =>
                     setNode((value) => ({ ...value, id: `${oldId}->${newId}` }))
                 }
                 onMakeStart={vi.fn()}
                 onDelete={vi.fn()}
-                onCreateNode={vi.fn()}
-                onPlayFromHere={vi.fn()}
+                onCreateNode={onCreateNode}
+                onPlayFromHere={onPlayFromHere}
             />
             <output data-testid="node-state">{JSON.stringify(node)}</output>
         </>
@@ -337,5 +349,120 @@ describe('NodeEditor', () => {
                 next: 'bare',
             },
         ]);
+    });
+
+    it('creates a new node while assigning a target and validates its id', async () => {
+        const onCreateNode = vi.fn();
+        const user = userEvent.setup();
+        const { container } = render(<Harness onCreateNode={onCreateNode} />);
+        const sections = container.querySelectorAll('.node-editor__section');
+        const target = within(sections[3] as HTMLElement);
+
+        await user.selectOptions(target.getByRole('combobox'), '__new__');
+        const id = target.getByRole('textbox', { name: 'New node id' });
+        await user.type(id, 'bad id');
+        await user.click(target.getByRole('button', { name: 'Create' }));
+        expect(
+            target.getByText('Use letters, numbers, and underscores only.')
+        ).toBeTruthy();
+
+        await user.clear(id);
+        await user.type(id, 'end');
+        await user.click(target.getByRole('button', { name: 'Create' }));
+        expect(
+            target.getByText('A node with this ID already exists.')
+        ).toBeTruthy();
+
+        await user.clear(id);
+        await user.type(id, 'new_destination{enter}');
+        expect(state().next).toBe('new_destination');
+        expect(onCreateNode).toHaveBeenCalledWith('new_destination');
+
+        await user.selectOptions(target.getByRole('combobox'), '__new__');
+        fireEvent.keyDown(
+            target.getByRole('textbox', { name: 'New node id' }),
+            { key: 'Escape' }
+        );
+        expect(
+            target.queryByRole('textbox', { name: 'New node id' })
+        ).toBeNull();
+    });
+
+    it('edits requirements and effects within branches and choices', async () => {
+        const user = userEvent.setup();
+        const { container } = render(<Harness />);
+        const sections = container.querySelectorAll('.node-editor__section');
+        const branches = within(sections[1] as HTMLElement);
+        const choices = within(sections[2] as HTMLElement);
+
+        await user.click(choices.getByTitle('Edit condition'));
+        await user.click(
+            screen.getByRole('button', { name: 'Commit builder' })
+        );
+        expect(state().choices[0].conditions).toEqual([
+            { type: 'hasFlag', flag: 'committed' },
+        ]);
+        await user.click(
+            choices.getByRole('button', { name: /Add requirement/ })
+        );
+        await user.click(
+            screen.getByRole('button', { name: 'Commit builder' })
+        );
+        expect(state().choices[0].conditions).toHaveLength(2);
+        await user.click(choices.getAllByRole('button', { name: 'Remove' })[0]);
+        expect(state().choices[0].conditions).toHaveLength(1);
+
+        await user.click(choices.getByTitle('Edit'));
+        await user.click(
+            screen.getByRole('button', { name: 'Commit builder' })
+        );
+        expect(state().choices[0].effects).toEqual([
+            { type: 'setFlag', flag: 'committed' },
+        ]);
+        expect(screen.queryByText(/Routes to a location/)).toBeNull();
+
+        await user.click(branches.getByTitle('Edit'));
+        await user.click(
+            screen.getByRole('button', { name: 'Commit builder' })
+        );
+        expect(state().conditionalBranches?.[0].effects).toEqual([
+            { type: 'setFlag', flag: 'committed' },
+        ]);
+    });
+
+    it('shows state-name context and starts playtesting from the node', async () => {
+        const onPlayFromHere = vi.fn();
+        const nameCatalog: NameCatalog = {
+            flags: [
+                {
+                    kind: 'flag',
+                    id: 'visited',
+                    count: 3,
+                    setCount: 1,
+                    checkCount: 2,
+                    references: [],
+                    note: 'The opening scene has run.',
+                },
+            ],
+            variables: [],
+            stats: [],
+        };
+        const user = userEvent.setup();
+        render(
+            <Harness
+                nameCatalog={nameCatalog}
+                onPlayFromHere={onPlayFromHere}
+            />
+        );
+
+        expect(
+            screen.getByTitle(
+                'visited. Set in 1 place, checked in 2. The opening scene has run.'
+            )
+        ).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: 'Play from here' })
+        );
+        expect(onPlayFromHere).toHaveBeenCalledOnce();
     });
 });

@@ -155,6 +155,42 @@ describe('buildProject success', () => {
 
         expect(logs).toContain('Generating asset manifest...');
     }, 60_000);
+
+    it('builds a scaffolded project with the custom renderer', async () => {
+        const targetDir = await makeRepoTempDir();
+        const { projectPath } = await createProject('custom-game', {
+            targetDir,
+            title: 'Custom Game',
+            useDefaultRenderer: false,
+            useStarterStyles: false,
+            localizationMode: 'literal',
+        });
+
+        const appSource = await readFile(
+            join(projectPath, 'src', 'App.tsx'),
+            'utf-8'
+        );
+        expect(appSource).toContain('function GameUI');
+        expect(appSource).not.toContain('<GameShell');
+
+        const result = await buildProject({
+            projectDir: projectPath,
+            engineSourceRoot: join(packageRoot, '..', '..'),
+        });
+
+        expect(result.ok, result.errors.map((e) => e.message).join('; ')).toBe(
+            true
+        );
+        await expect(
+            access(join(result.outDir, 'index.html'))
+        ).resolves.toBeUndefined();
+        await expect(
+            access(join(result.outDir, 'api', 'content'))
+        ).resolves.toBeUndefined();
+        await expect(
+            access(join(result.outDir, 'sw.js'))
+        ).resolves.toBeUndefined();
+    }, 60_000);
 });
 
 describe('copyProjectAssets', () => {

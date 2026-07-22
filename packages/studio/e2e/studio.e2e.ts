@@ -250,8 +250,8 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 name: 'Command palette',
             });
             await expect(palette).toBeVisible();
-            // Fixed-height rows in overflowing flex columns must never be
-            // compressed by a long list (this bug shipped three times).
+            // The search control keeps its fixed height when the results list
+            // overflows.
             const searchHeight = await window
                 .locator('.palette__search')
                 .evaluate((el) => el.getBoundingClientRect().height);

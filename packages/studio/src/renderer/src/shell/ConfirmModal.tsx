@@ -1,8 +1,7 @@
 import { useModalDismiss } from '../lib/useModalDismiss';
 import { OverlayPortal } from './OverlayPortal';
 
-/** A simple confirm/cancel modal, used in place of window.confirm (which, as a
- * native dialog, leaves Electron's focus in a broken state for later modals). */
+/** Application-level confirmation with consistent focus and keyboard handling. */
 export function ConfirmModal({
     title,
     message,
@@ -14,8 +13,6 @@ export function ConfirmModal({
     title: string;
     message: string;
     confirmLabel: string;
-    /** Style the confirm button as destructive and warn that the action is
-     * permanent. Callers should not repeat the no-undo warning themselves. */
     danger?: boolean;
     onConfirm: () => void;
     onCancel: () => void;
