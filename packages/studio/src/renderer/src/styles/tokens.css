@@ -710,7 +710,18 @@ button {
     background: transparent;
 }
 
-/* Monaco draws and colors its own scrollbars; don't fight it. */
+/* Monaco draws custom slider elements instead of native scrollbars. Keep
+   their track, thumb, hover, and active states in the Studio theme system. */
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+    background: var(--scrollbar-thumb);
+    border-radius: 6px;
+}
+
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider:hover,
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider.active {
+    background: var(--scrollbar-thumb-hover);
+}
+
 .monaco-editor ::-webkit-scrollbar-thumb {
     background: initial;
 }

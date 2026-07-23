@@ -388,6 +388,7 @@ function EditorAreaContent({
                             revealSeq={
                                 reveal?.key === tab.key ? reveal.seq : undefined
                             }
+                            nameCatalog={nameCatalog}
                             onDirty={onDirty}
                             onModified={onModified}
                         />

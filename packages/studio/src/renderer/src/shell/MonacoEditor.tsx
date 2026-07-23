@@ -1,9 +1,19 @@
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { useEffect, useRef } from 'react';
-import { setupMonaco } from '../lib/monaco-setup';
+import { setDlgCompletionContext, setupMonaco } from '../lib/monaco-setup';
+import type { DlgCompletionContext } from '../lib/dlg-language';
 import { useThemeName } from '../lib/useThemeName';
 
 setupMonaco();
+
+const SUGGEST_PREFERRED_HEIGHT = 260;
+const SUGGEST_MIN_SPACE_ABOVE = 150;
+
+interface SuggestDirectionController {
+    dispose(): void;
+    forceRenderingAbove(): void;
+    stopForceRenderingAbove(): void;
+}
 
 function cssToken(name: string, fallback: string): string {
     if (typeof document === 'undefined') return fallback;
@@ -24,6 +34,7 @@ export function MonacoEditor({
     markers,
     revealLine,
     revealSeq,
+    completionContext,
     onChange,
     onSave,
 }: {
@@ -32,6 +43,7 @@ export function MonacoEditor({
     markers?: EditorMarker[];
     revealLine?: number;
     revealSeq?: number;
+    completionContext?: DlgCompletionContext;
     onChange: (value: string) => void;
     onSave: () => void;
 }) {
@@ -42,6 +54,9 @@ export function MonacoEditor({
 
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
+    const editorDisposablesRef = useRef<Array<{ dispose(): void }>>([]);
+    const completionContextRef = useRef(completionContext);
+    completionContextRef.current = completionContext;
 
     const applyMarkers = () => {
         const editor = editorRef.current;
@@ -68,6 +83,23 @@ export function MonacoEditor({
 
     useEffect(applyMarkers, [markers]);
 
+    useEffect(
+        () => () => {
+            for (const disposable of editorDisposablesRef.current) {
+                disposable.dispose();
+            }
+            editorDisposablesRef.current = [];
+        },
+        []
+    );
+
+    useEffect(() => {
+        const model = editorRef.current?.getModel();
+        if (!model) return;
+        setDlgCompletionContext(model, completionContext);
+        return () => setDlgCompletionContext(model, undefined);
+    }, [completionContext]);
+
     const reveal = () => {
         const editor = editorRef.current;
         if (!editor || !revealLine || revealLine < 1) return;
@@ -83,10 +115,54 @@ export function MonacoEditor({
     const onMount: OnMount = (editor, monacoApi) => {
         editorRef.current = editor;
         monacoRef.current = monacoApi;
+        const model = editor.getModel();
+        if (model) {
+            setDlgCompletionContext(model, completionContextRef.current);
+        }
         editor.addCommand(
             monacoApi.KeyMod.CtrlCmd | monacoApi.KeyCode.KeyS,
             () => saveRef.current()
         );
+
+        const updateSuggestDirection = () => {
+            const position = editor.getPosition();
+            if (!position) return;
+            const cursor = editor.getScrolledVisiblePosition(position);
+            if (!cursor) return;
+
+            const editorHeight = editor.getLayoutInfo().height;
+            const spaceAbove = cursor.top;
+            const spaceBelow = Math.max(
+                0,
+                editorHeight - cursor.top - cursor.height
+            );
+            const preferredHeight = Math.min(
+                SUGGEST_PREFERRED_HEIGHT,
+                editorHeight * 0.45
+            );
+            const controller =
+                editor.getContribution<SuggestDirectionController>(
+                    'editor.contrib.suggestController'
+                );
+            if (!controller) return;
+
+            if (
+                spaceBelow < preferredHeight &&
+                spaceAbove >= SUGGEST_MIN_SPACE_ABOVE &&
+                spaceAbove > spaceBelow
+            ) {
+                controller.forceRenderingAbove();
+            } else {
+                controller.stopForceRenderingAbove();
+            }
+        };
+        editorDisposablesRef.current = [
+            editor.onDidChangeCursorPosition(updateSuggestDirection),
+            editor.onDidScrollChange(updateSuggestDirection),
+            editor.onDidLayoutChange(updateSuggestDirection),
+        ];
+        updateSuggestDirection();
+
         applyMarkers();
         reveal();
     };
@@ -112,6 +188,21 @@ export function MonacoEditor({
                 tabSize: 2,
                 renderWhitespace: 'selection',
                 wordWrap: 'off',
+                scrollbar: {
+                    verticalScrollbarSize: 10,
+                    horizontalScrollbarSize: 10,
+                    verticalSliderSize: 10,
+                    horizontalSliderSize: 10,
+                    useShadows: false,
+                },
+                quickSuggestions: {
+                    other: true,
+                    comments: false,
+                    strings: false,
+                },
+                quickSuggestionsDelay: 50,
+                suggestOnTriggerCharacters: true,
+                wordBasedSuggestions: 'off',
             }}
         />
     );

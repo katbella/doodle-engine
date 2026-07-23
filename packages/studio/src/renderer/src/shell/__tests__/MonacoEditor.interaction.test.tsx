@@ -6,7 +6,12 @@ import userEvent from '@testing-library/user-event';
 
 const harness = vi.hoisted(() => ({ props: null as any }));
 
-vi.mock('../../lib/monaco-setup', () => ({ setupMonaco: vi.fn() }));
+const monacoSetup = vi.hoisted(() => ({
+    setupMonaco: vi.fn(),
+    setDlgCompletionContext: vi.fn(),
+}));
+
+vi.mock('../../lib/monaco-setup', () => monacoSetup);
 
 vi.mock('@monaco-editor/react', async () => {
     const React = await import('react');
@@ -35,6 +40,10 @@ afterEach(cleanup);
 describe('MonacoEditor', () => {
     it('mounts commands, clamps markers, reveals lines, changes text, and follows theme', async () => {
         const command = vi.fn();
+        const forceRenderingAbove = vi.fn();
+        const stopForceRenderingAbove = vi.fn();
+        let cursorTop = 260;
+        let cursorListener = () => {};
         const model = {
             getLineCount: () => 3,
             getLineMaxColumn: (line: number) => line + 4,
@@ -47,6 +56,24 @@ describe('MonacoEditor', () => {
             revealLineInCenter: vi.fn(),
             setPosition: vi.fn(),
             focus: vi.fn(),
+            getPosition: () => ({ lineNumber: 2, column: 1 }),
+            getScrolledVisiblePosition: () => ({
+                top: cursorTop,
+                left: 0,
+                height: 18,
+            }),
+            getLayoutInfo: () => ({ height: 300 }),
+            getContribution: () => ({
+                dispose: vi.fn(),
+                forceRenderingAbove,
+                stopForceRenderingAbove,
+            }),
+            onDidChangeCursorPosition: vi.fn((listener: () => void) => {
+                cursorListener = listener;
+                return { dispose: vi.fn() };
+            }),
+            onDidScrollChange: vi.fn(() => ({ dispose: vi.fn() })),
+            onDidLayoutChange: vi.fn(() => ({ dispose: vi.fn() })),
         };
         const monaco = {
             MarkerSeverity: { Error: 8 },
@@ -90,6 +117,10 @@ describe('MonacoEditor', () => {
             lineNumber: 2,
             column: 1,
         });
+        expect(forceRenderingAbove).toHaveBeenCalledOnce();
+        cursorTop = 20;
+        cursorListener();
+        expect(stopForceRenderingAbove).toHaveBeenCalledOnce();
 
         rerender(
             <MonacoEditor
@@ -115,12 +146,35 @@ describe('MonacoEditor', () => {
             ).toBeTruthy()
         );
         expect(harness.props.options.minimap.enabled).toBe(false);
+        expect(harness.props.options.scrollbar).toEqual({
+            verticalScrollbarSize: 10,
+            horizontalScrollbarSize: 10,
+            verticalSliderSize: 10,
+            horizontalSliderSize: 10,
+            useShadows: false,
+        });
+        expect(harness.props.options.quickSuggestions).toEqual({
+            other: true,
+            comments: false,
+            strings: false,
+        });
+        expect(harness.props.options.suggestOnTriggerCharacters).toBe(true);
+        expect(harness.props.options.wordBasedSuggestions).toBe('off');
+        expect(harness.props.options.suggest).toBeUndefined();
+        expect(monacoSetup.setDlgCompletionContext).toHaveBeenCalledWith(
+            model,
+            undefined
+        );
     });
 
     it('does nothing when the editor has no model', async () => {
         (globalThis as any).__editor = {
             getModel: () => null,
             addCommand: vi.fn(),
+            getPosition: () => null,
+            onDidChangeCursorPosition: vi.fn(() => ({ dispose: vi.fn() })),
+            onDidScrollChange: vi.fn(() => ({ dispose: vi.fn() })),
+            onDidLayoutChange: vi.fn(() => ({ dispose: vi.fn() })),
         };
         (globalThis as any).__monaco = {
             MarkerSeverity: { Error: 8 },

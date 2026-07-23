@@ -4,6 +4,8 @@ import { parseDialogueCst } from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { MonacoEditor, type EditorMarker } from './MonacoEditor';
 import { languageForPath } from '../lib/monaco-setup';
+import type { NameCatalog } from '../lib/flag-vars';
+import { EMPTY_NAME_CATALOG } from '../lib/flag-vars';
 import { lineInMessage, quotedTokenInMessage } from '../lib/paths';
 
 const norm = (s: string) => s.replace(/\\/g, '/');
@@ -63,6 +65,7 @@ export function SourceView({
     stale,
     revealMessage,
     revealSeq,
+    nameCatalog = EMPTY_NAME_CATALOG,
     onDirty,
     onModified,
 }: {
@@ -72,6 +75,7 @@ export function SourceView({
     stale: boolean;
     revealMessage?: string;
     revealSeq?: number;
+    nameCatalog?: NameCatalog;
     onDirty: (tabKey: string, dirty: boolean) => void;
     onModified: (filePath: string) => void;
 }) {
@@ -220,6 +224,23 @@ export function SourceView({
     const revealLine = revealMessage
         ? lineForMessage(path, saved, revealMessage)
         : undefined;
+    const language = languageForPath(path);
+    const completionContext = useMemo(() => {
+        if (language !== 'doodle-dlg') return undefined;
+        let nodeIds: string[] = [];
+        try {
+            nodeIds = parseDialogueCst(content, 'completion').nodes.map(
+                (node) => node.id
+            );
+        } catch {
+            // Completion remains useful while an in-progress edit is invalid.
+        }
+        return {
+            nameCatalog,
+            registry: project.registry,
+            nodeIds,
+        };
+    }, [content, language, nameCatalog, project.registry]);
 
     if (loading) {
         return (
@@ -318,7 +339,8 @@ export function SourceView({
             <div className="source__monaco">
                 <MonacoEditor
                     value={content}
-                    language={languageForPath(path)}
+                    language={language}
+                    completionContext={completionContext}
                     markers={markers}
                     revealLine={revealLine}
                     revealSeq={revealSeq}

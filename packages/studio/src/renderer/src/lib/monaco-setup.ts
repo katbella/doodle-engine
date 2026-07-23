@@ -1,8 +1,38 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import 'monaco-editor/esm/vs/base/browser/ui/codicons/codiconStyles.js';
+import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hoverContribution.js';
+import 'monaco-editor/esm/vs/editor/contrib/suggest/browser/suggestController.js';
 import { loader } from '@monaco-editor/react';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import {
+    dlgCompletions,
+    dlgHover,
+    tokenizeDlgLine,
+    type DlgCompletionContext,
+} from './dlg-language';
 
 let ready = false;
+const completionContexts = new WeakMap<object, DlgCompletionContext>();
+
+class DlgTokenState implements monaco.languages.IState {
+    clone(): monaco.languages.IState {
+        return this;
+    }
+
+    equals(other: monaco.languages.IState): boolean {
+        return other instanceof DlgTokenState;
+    }
+}
+
+const DLG_TOKEN_STATE = new DlgTokenState();
+
+export function setDlgCompletionContext(
+    model: monaco.editor.ITextModel,
+    context: DlgCompletionContext | undefined
+): void {
+    if (context) completionContexts.set(model, context);
+    else completionContexts.delete(model);
+}
 
 /**
  * Configure Monaco once: use locally bundled workers (never a CDN, so the app
@@ -32,25 +62,59 @@ function registerDlg(): void {
     monaco.languages.setLanguageConfiguration('doodle-dlg', {
         comments: { lineComment: '#' },
     });
-    monaco.languages.setMonarchTokensProvider('doodle-dlg', {
-        keywords: [
-            'NODE', 'CHOICE', 'IF', 'END', 'GOTO', 'TRIGGER', 'REQUIRE',
-            'VOICE', 'PORTRAIT', 'NARRATOR', 'SET', 'CLEAR', 'ADD', 'REMOVE',
-            'MOVE', 'ADVANCE', 'START', 'MUSIC', 'SOUND', 'VIDEO', 'INTERLUDE',
-            'NOTIFY', 'ROLL',
-        ],
-        tokenizer: {
-            root: [
-                [/#.*$/, 'comment'],
-                [/@[\w.]+/, 'type'],
-                [/"[^"]*"/, 'string'],
-                [
-                    /[A-Z_]+/,
-                    { cases: { '@keywords': 'keyword', '@default': 'identifier' } },
-                ],
-                [/-?\d+/, 'number'],
-                [/:/, 'delimiter'],
-            ],
+    monaco.languages.setTokensProvider('doodle-dlg', {
+        getInitialState: () => DLG_TOKEN_STATE,
+        tokenize: (line) => ({
+            tokens: tokenizeDlgLine(line),
+            endState: DLG_TOKEN_STATE,
+        }),
+    });
+    monaco.languages.registerCompletionItemProvider('doodle-dlg', {
+        triggerCharacters: [' '],
+        provideCompletionItems(model, position) {
+            const line = model.getLineContent(position.lineNumber);
+            const suggestions = dlgCompletions(
+                line,
+                position.column,
+                completionContexts.get(model)
+            ).map((item) => ({
+                label: {
+                    label: item.label,
+                    description: item.detail,
+                },
+                insertText: item.insertText,
+                kind:
+                    item.kind === 'keyword'
+                        ? monaco.languages.CompletionItemKind.Keyword
+                        : item.kind === 'reference'
+                          ? monaco.languages.CompletionItemKind.Reference
+                          : monaco.languages.CompletionItemKind.Value,
+                range: {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: item.replaceStartColumn,
+                    endColumn: position.column,
+                },
+            }));
+            return { suggestions };
+        },
+    });
+    monaco.languages.registerHoverProvider('doodle-dlg', {
+        provideHover(model, position) {
+            const help = dlgHover(
+                model.getLineContent(position.lineNumber),
+                position.column
+            );
+            if (!help) return null;
+            return {
+                contents: [{ value: help.documentation }],
+                range: {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: help.startColumn,
+                    endColumn: help.endColumn,
+                },
+            };
         },
     });
 }
@@ -82,8 +146,15 @@ function defineThemes(): void {
         { token: 'keyword', foreground: 'ff9783' },
         { token: 'type', foreground: 'd9a441' },
         { token: 'key', foreground: 'ff9783' },
-        { token: 'string', foreground: 'c8d6a0' },
+        { token: 'string', foreground: 'd7d3ca' },
         { token: 'number', foreground: '9fb8d6' },
+        { token: 'condition', foreground: 'f19ac1' },
+        { token: 'effectTarget', foreground: 'c4b5fd' },
+        { token: 'reference', foreground: '86c7f3' },
+        { token: 'flag', foreground: 'e6c07b' },
+        { token: 'variable', foreground: 'e6c07b' },
+        { token: 'stat', foreground: 'e6c07b' },
+        { token: 'literal', foreground: '7fcf64' },
     ];
     const darkBackgrounds: Array<[string, string]> = [
         ['doodle-dark', '#101113'],
@@ -115,8 +186,15 @@ function defineThemes(): void {
             { token: 'keyword', foreground: '66ff99' },
             { token: 'type', foreground: 'ffd75e' },
             { token: 'key', foreground: '66ff99' },
-            { token: 'string', foreground: 'b3f0c2' },
+            { token: 'string', foreground: 'd9eadc' },
             { token: 'number', foreground: '8ff0b0' },
+            { token: 'condition', foreground: 'ffd75e' },
+            { token: 'effectTarget', foreground: 'c4b5fd' },
+            { token: 'reference', foreground: '7dd3fc' },
+            { token: 'flag', foreground: 'a7f3d0' },
+            { token: 'variable', foreground: 'a7f3d0' },
+            { token: 'stat', foreground: 'a7f3d0' },
+            { token: 'literal', foreground: 'f0a868' },
         ],
         colors: { 'editor.background': '#041008' },
     });
@@ -125,8 +203,15 @@ function defineThemes(): void {
         { token: 'keyword', foreground: 'c0392b' },
         { token: 'type', foreground: '9a6b1a' },
         { token: 'key', foreground: 'c0392b' },
-        { token: 'string', foreground: '4c7a1f' },
+        { token: 'string', foreground: '374151' },
         { token: 'number', foreground: '2c5aa0' },
+        { token: 'condition', foreground: 'a21caf' },
+        { token: 'effectTarget', foreground: '5b3d99' },
+        { token: 'reference', foreground: '2563eb' },
+        { token: 'flag', foreground: '9a3412' },
+        { token: 'variable', foreground: '9a3412' },
+        { token: 'stat', foreground: '9a3412' },
+        { token: 'literal', foreground: '287a35' },
     ];
     const lightBackgrounds: Array<[string, string]> = [
         ['doodle-light', '#ffffff'],
