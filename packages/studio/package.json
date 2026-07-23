@@ -1,6 +1,7 @@
 {
     "name": "@doodle-engine/studio",
     "version": "0.2.0",
+    "private": true,
     "author": "Kat Bella",
     "license": "MIT",
     "main": "./out/main/index.js",
