@@ -43,8 +43,13 @@ import { createThemeMenu, syncThemeMenuChecks } from './theme-menu';
 import { ErrorLog } from './error-log';
 import { AssetService } from './asset-service';
 import { FlagVarNotesService } from './flag-var-notes-service';
+import { StudioUpdater } from './studio-updater';
+import { createGithubReleasesLoader } from './studio-release';
+
+const STUDIO_RELEASE_REPO = 'katbella/doodle-engine';
 
 let mainWindow: BrowserWindow | null = null;
+let updater: StudioUpdater | null = null;
 let themeState: ThemeState = { mode: 'dark', color: 'default' };
 
 // A build and a dev-server preview each run in their own process (they execute
@@ -174,6 +179,10 @@ async function buildMenu(projects: ProjectService): Promise<void> {
                     },
                 },
                 { type: 'separator' },
+                {
+                    label: 'Check for Updates…',
+                    click: () => void updater?.checkForUpdates(true),
+                },
                 {
                     label: 'About…',
                     click: () => send('menu:about', app.getVersion()),
@@ -412,6 +421,15 @@ app.whenReady().then(() => {
     errorLog = new ErrorLog(join(app.getPath('logs'), 'doodle-studio.log'));
     void errorLog.initialize().catch((error) => console.error(error));
 
+    updater = new StudioUpdater({
+        currentVersion: app.getVersion(),
+        platform: process.platform,
+        loadReleases: createGithubReleasesLoader(STUDIO_RELEASE_REPO),
+        openExternal: (url) => shell.openExternal(url),
+        onState: (state) => sendToRenderer('update:state', state),
+        onError: (context, error) => void recordError(context, error),
+    });
+
     const handle = <Args extends unknown[], Result>(
         channel: string,
         listener: (
@@ -541,6 +559,9 @@ app.whenReady().then(() => {
         await shell.openPath(targetPath);
     });
     handle('help:documentation', () => openDocumentation());
+    handle('update:getState', () => updater?.getState());
+    handle('update:check', () => updater?.checkForUpdates(true));
+    handle('update:openDownload', () => updater?.openDownload());
 
     const documents = new DocumentService(markSelfWrite);
     const assets = new AssetService(markSelfWrite);
@@ -625,6 +646,9 @@ app.whenReady().then(() => {
 
     createWindow();
     void buildMenu(projects);
+
+    // Development versions have no corresponding release to check.
+    if (app.isPackaged) void updater?.checkForUpdates(false);
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();

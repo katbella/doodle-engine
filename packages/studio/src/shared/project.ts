@@ -206,6 +206,28 @@ export interface WriteResult {
     content?: string;
 }
 
+export type StudioUpdatePlatform = 'windows' | 'mac' | 'other';
+
+/** Manual results are shown; automatic checks stay quiet unless an update exists. */
+export type StudioUpdateState =
+    | { status: 'idle'; currentVersion: string }
+    | { status: 'checking'; currentVersion: string; manual: boolean }
+    | { status: 'current'; currentVersion: string; manual: boolean }
+    | {
+          status: 'available';
+          currentVersion: string;
+          manual: boolean;
+          version: string;
+          releaseNotes: string | null;
+          platform: StudioUpdatePlatform;
+      }
+    | {
+          status: 'error';
+          currentVersion: string;
+          manual: boolean;
+          message: string;
+      };
+
 /** Handlers the renderer registers for native application-menu actions. */
 export interface MenuHandlers {
     onNew: () => void;
@@ -354,6 +376,12 @@ export interface StudioApi {
     setThemeMenuState: (state: ThemeState) => void;
     /** Set the renderer zoom factor for accessible UI scaling. */
     setZoomFactor: (factor: number) => void;
+    getStudioUpdateState: () => Promise<StudioUpdateState>;
+    checkForStudioUpdates: () => Promise<void>;
+    openStudioUpdateDownload: () => Promise<void>;
+    onStudioUpdateState: (
+        callback: (state: StudioUpdateState) => void
+    ) => () => void;
     /** Wire native application-menu actions. Returns an unsubscribe. */
     onMenu: (handlers: MenuHandlers) => () => void;
 }

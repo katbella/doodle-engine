@@ -1,0 +1,121 @@
+name: Package Studio
+
+on:
+  workflow_call:
+    inputs:
+      studio_version:
+        description: Existing @doodle-engine/studio version to package
+        required: true
+        type: string
+      platform:
+        description: Platform installer to build
+        required: false
+        default: both
+        type: string
+  workflow_dispatch:
+    inputs:
+      studio_version:
+        description: Existing @doodle-engine/studio version to package
+        required: true
+        type: string
+      platform:
+        description: Platform installer to build
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - windows
+          - mac
+
+permissions:
+  contents: write
+
+jobs:
+  select-platforms:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Select packaging jobs
+        id: matrix
+        shell: bash
+        run: |
+          case "${{ inputs.platform }}" in
+            windows)
+              matrix='{"include":[{"platform":"windows","os":"windows-latest","script":"package:win"}]}'
+              ;;
+            mac)
+              matrix='{"include":[{"platform":"mac","os":"macos-latest","script":"package:mac"}]}'
+              ;;
+            both)
+              matrix='{"include":[{"platform":"windows","os":"windows-latest","script":"package:win"},{"platform":"mac","os":"macos-latest","script":"package:mac"}]}'
+              ;;
+            *)
+              echo "Unknown platform: ${{ inputs.platform }}"
+              exit 1
+              ;;
+          esac
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  package:
+    needs: select-platforms
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.select-platforms.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/@doodle-engine/studio@${{ inputs.studio_version }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck Studio
+        run: yarn workspace @doodle-engine/studio typecheck
+
+      - name: Test Studio
+        run: yarn workspace @doodle-engine/studio test
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Verify Studio version matches the tag
+        shell: bash
+        run: |
+          expected="${{ inputs.studio_version }}"
+          actual="$(node -p "require('./packages/studio/package.json').version")"
+          if [ "$expected" != "$actual" ]; then
+            echo "Studio version mismatch: tag $expected, package.json $actual"
+            exit 1
+          fi
+
+      - name: Package Studio installer
+        run: yarn workspace @doodle-engine/studio ${{ matrix.script }}
+
+      - name: Upload installer to the Studio release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="@doodle-engine/studio@${{ inputs.studio_version }}"
+          shopt -s nullglob
+          files=(
+            packages/studio/release/*.exe
+            packages/studio/release/*.blockmap
+            packages/studio/release/*.dmg
+            packages/studio/release/latest*.yml
+          )
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No installer artifacts found in packages/studio/release."
+            exit 1
+          fi
+          gh release upload "$tag" "${files[@]}" --clobber

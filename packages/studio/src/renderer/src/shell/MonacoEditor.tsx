@@ -5,6 +5,14 @@ import { useThemeName } from '../lib/useThemeName';
 
 setupMonaco();
 
+function cssToken(name: string, fallback: string): string {
+    if (typeof document === 'undefined') return fallback;
+    const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+    return value || fallback;
+}
+
 export interface EditorMarker {
     line: number;
     message: string;
@@ -93,9 +101,12 @@ export function MonacoEditor({
             onMount={onMount}
             options={{
                 minimap: { enabled: false },
-                fontFamily:
-                    "'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace",
-                fontSize: 13,
+                fontFamily: cssToken(
+                    '--font-mono',
+                    "ui-monospace, 'Consolas', monospace"
+                ),
+                fontSize:
+                    Number.parseFloat(cssToken('--text-base', '13')) || 13,
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
                 tabSize: 2,

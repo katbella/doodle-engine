@@ -65,6 +65,10 @@ export default defineConfig({
                             label: 'Validate, Preview, and Build',
                             slug: 'studio/validation-builds',
                         },
+                        {
+                            label: 'Updating Studio',
+                            slug: 'studio/updates',
+                        },
                     ],
                 },
                 {

@@ -62,8 +62,6 @@ function props(activeTab: DockTab, overrides: Record<string, unknown> = {}) {
         previewBusy: false,
         previewLog: [],
         onOpenProblem: vi.fn(),
-        symbolCount: 0,
-        onOpenSymbols: vi.fn(),
         lastValidatedAt: null,
         lastSavedAt: null,
         playtestStart: null,
@@ -82,21 +80,15 @@ describe('BottomDock', () => {
         };
         const user = userEvent.setup();
         const writeText = vi.spyOn(navigator.clipboard, 'writeText');
-        const onOpenSymbols = vi.fn();
         render(
             <BottomDock
                 {...props('problems', {
                     project: project([problem]),
                     onTabChange,
                     onOpenProblem,
-                    onOpenSymbols,
-                    symbolCount: 214,
                 })}
             />
         );
-        await user.click(screen.getByRole('button', { name: /Flags & vars/ }));
-        expect(onOpenSymbols).toHaveBeenCalledOnce();
-        expect(screen.getByText('214')).toBeTruthy();
         await user.click(
             screen.getByRole('button', { name: /Missing start location/ })
         );

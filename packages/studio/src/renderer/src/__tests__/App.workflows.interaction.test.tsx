@@ -10,7 +10,11 @@ import {
     waitFor,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { OpenProject, StudioApi } from '../../../shared/project';
+import type {
+    OpenProject,
+    StudioApi,
+    StudioUpdateState,
+} from '../../../shared/project';
 
 vi.mock('../shell/Welcome', () => ({
     Welcome: (props: any) => (
@@ -65,6 +69,7 @@ vi.mock('../shell/TopBar', () => ({
             <button onClick={props.onOpenPreview}>Open preview</button>
             <button onClick={props.onPlaytest}>Open playtest</button>
             <button onClick={props.onOpenPalette}>Open palette</button>
+            <button onClick={props.onOpenSymbols}>Flags page</button>
         </div>
     ),
 }));
@@ -199,7 +204,6 @@ vi.mock('../shell/BottomDock', () => ({
             <button onClick={props.onCancelBuild}>Cancel build</button>
             <button onClick={props.onRebuild}>Rebuild</button>
             <button onClick={props.onOpenOutput}>Open output</button>
-            <button onClick={props.onOpenSymbols}>Flags page</button>
         </div>
     ),
 }));
@@ -503,6 +507,74 @@ describe('App workflows', () => {
             screen.getByRole('dialog', { name: 'Doodle Studio' })
         ).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Close' }));
+    });
+
+    it('shows the update dialog on the Welcome screen and opens the download', async () => {
+        const available: StudioUpdateState = {
+            status: 'available',
+            currentVersion: '0.2.0',
+            manual: false,
+            version: '0.3.0',
+            releaseNotes: null,
+            platform: 'windows',
+        };
+        const openStudioUpdateDownload = vi.fn(async () => {});
+        installBridge({
+            getStudioUpdateState: vi.fn(async () => available),
+            onStudioUpdateState: vi.fn(() => () => {}),
+            openStudioUpdateDownload,
+            checkForStudioUpdates: vi.fn(async () => {}),
+        });
+        const user = userEvent.setup();
+        render(<App />);
+
+        expect(
+            await screen.findByText(
+                'Version 0.3.0 is available. You have 0.2.0.'
+            )
+        ).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Download' }));
+        expect(openStudioUpdateDownload).toHaveBeenCalled();
+
+        await user.click(screen.getByRole('button', { name: 'Close' }));
+        expect(
+            screen.queryByText('Version 0.3.0 is available. You have 0.2.0.')
+        ).toBeNull();
+    });
+
+    it('shows an update reported while a project is open', async () => {
+        let publish!: (state: StudioUpdateState) => void;
+        installBridge({
+            getStudioUpdateState: vi.fn<StudioApi['getStudioUpdateState']>(
+                async () => ({
+                    status: 'idle',
+                    currentVersion: '0.2.0',
+                })
+            ),
+            onStudioUpdateState: vi.fn((callback) => {
+                publish = callback;
+                return () => {};
+            }),
+            openStudioUpdateDownload: vi.fn(async () => {}),
+            checkForStudioUpdates: vi.fn(async () => {}),
+        });
+        await openApp();
+
+        act(() =>
+            publish({
+                status: 'available',
+                currentVersion: '0.2.0',
+                manual: false,
+                version: '0.3.0',
+                releaseNotes: null,
+                platform: 'mac',
+            })
+        );
+
+        expect(
+            screen.getByText('Version 0.3.0 is available. You have 0.2.0.')
+        ).toBeTruthy();
+        expect(screen.getByText(/Applications folder/i)).toBeTruthy();
     });
 
     it('keeps project creation open and displays creation failures', async () => {

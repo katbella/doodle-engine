@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync, rmSync } from 'fs';
+import { appendFileSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 
 function run(command, options = {}) {
@@ -64,56 +64,92 @@ async function createGitHubRelease(tag) {
     );
 }
 
-const workspaceLines = run(
-    'yarn workspaces list --recursive --no-private --json'
-)
-    .trim()
-    .split(/\r?\n/)
-    .filter(Boolean);
+async function publishPublicPackages() {
+    const workspaceLines = run(
+        'yarn workspaces list --recursive --no-private --json'
+    )
+        .trim()
+        .split(/\r?\n/)
+        .filter(Boolean);
 
-const workspaces = workspaceLines.map((line) => JSON.parse(line));
-const tagsForRelease = [];
+    const workspaces = workspaceLines.map((line) => JSON.parse(line));
+    const tagsForRelease = [];
 
-runInherit('git fetch --tags --force');
+    runInherit('git fetch --tags --force');
 
-for (const workspace of workspaces) {
-    const dir = workspace.location;
-    const manifestPath = join(dir, 'package.json');
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-    const tag = `${manifest.name}@${manifest.version}`;
-    const tarballName = 'package.tgz';
+    for (const workspace of workspaces) {
+        const dir = workspace.location;
+        const manifestPath = join(dir, 'package.json');
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+        const tag = `${manifest.name}@${manifest.version}`;
+        const tarballName = 'package.tgz';
 
-    runInherit(`yarn pack -o ${tarballName}`, { cwd: dir });
+        runInherit(`yarn pack -o ${tarballName}`, { cwd: dir });
 
-    try {
-        const packedManifest = run(
-            `tar -xOf ${tarballName} package/package.json`,
-            {
-                cwd: dir,
-            }
-        );
-
-        if (packedManifest.includes('"workspace:')) {
-            throw new Error(
-                `${manifest.name}: packed manifest still contains workspace:`
+        try {
+            const packedManifest = run(
+                `tar -xOf ${tarballName} package/package.json`,
+                {
+                    cwd: dir,
+                }
             );
+
+            if (packedManifest.includes('"workspace:')) {
+                throw new Error(
+                    `${manifest.name}: packed manifest still contains workspace:`
+                );
+            }
+
+            runInherit(
+                'yarn npm publish --access public --tolerate-republish',
+                { cwd: dir }
+            );
+        } finally {
+            rmSync(join(dir, tarballName), { force: true });
         }
 
-        runInherit('yarn npm publish --access public --tolerate-republish', {
-            cwd: dir,
-        });
-    } finally {
-        rmSync(join(dir, tarballName), { force: true });
+        if (!tagExists(tag)) {
+            runInherit(`git tag "${tag}"`);
+            runInherit(`git push origin "${tag}"`);
+        }
+
+        tagsForRelease.push(tag);
     }
 
+    for (const tag of tagsForRelease) {
+        await createGitHubRelease(tag);
+    }
+}
+
+async function publishStudioRelease() {
+    const manifest = JSON.parse(
+        readFileSync(join('packages', 'studio', 'package.json'), 'utf8')
+    );
+    const expectedVersion = process.env.STUDIO_RELEASE_VERSION;
+    if (expectedVersion && manifest.version !== expectedVersion) {
+        throw new Error(
+            `Studio version mismatch: expected ${expectedVersion}, found ${manifest.version}`
+        );
+    }
+
+    const tag = `${manifest.name}@${manifest.version}`;
+    runInherit('git fetch --tags --force');
     if (!tagExists(tag)) {
         runInherit(`git tag "${tag}"`);
         runInherit(`git push origin "${tag}"`);
     }
+    await createGitHubRelease(tag);
 
-    tagsForRelease.push(tag);
+    if (process.env.GITHUB_OUTPUT) {
+        appendFileSync(
+            process.env.GITHUB_OUTPUT,
+            `studio_tagged=${manifest.version}\n`
+        );
+    }
 }
 
-for (const tag of tagsForRelease) {
-    await createGitHubRelease(tag);
+if (process.argv.includes('--studio-only')) {
+    await publishStudioRelease();
+} else {
+    await publishPublicPackages();
 }

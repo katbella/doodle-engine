@@ -34,6 +34,7 @@ import {
 import { Welcome } from './shell/Welcome';
 import { NewProjectModal } from './shell/NewProjectModal';
 import { AboutModal } from './shell/AboutModal';
+import { StudioUpdateModal } from './shell/StudioUpdateModal';
 import { CreateItemModal } from './shell/CreateItemModal';
 import { RenameModal } from './shell/RenameModal';
 import { ConfirmModal } from './shell/ConfirmModal';
@@ -47,6 +48,7 @@ import { BottomDock, type DockTab } from './shell/BottomDock';
 import { ResizeHandle } from './shell/ResizeHandle';
 import { CommandPalette, type Command } from './shell/CommandPalette';
 import { usePersistedSize } from './lib/usePersistedSize';
+import { useStudioUpdater } from './lib/useStudioUpdater';
 import {
     EMPTY_FLAG_VAR_NOTES,
     attachFlagVarNotes,
@@ -67,6 +69,7 @@ import {
     Square,
     Palette,
     CircleHelp,
+    Download,
 } from './lib/icons';
 
 /** The reference-index symbol type for each content section, where one exists.
@@ -189,6 +192,7 @@ export function App() {
     // When an editor last wrote this project's content to disk (autosave or
     // manual). Cleared when a different project opens.
     const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const updater = useStudioUpdater();
     const projectDir = project?.projectDir;
     const currentDirRef = useRef<string | null>(null);
     const notesWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -1023,6 +1027,14 @@ export function App() {
                         onClose={() => setAboutVersion(null)}
                     />
                 )}
+                {updater.open && updater.state && (
+                    <StudioUpdateModal
+                        state={updater.state}
+                        onDownload={updater.openDownload}
+                        onCheck={updater.check}
+                        onClose={updater.close}
+                    />
+                )}
             </div>
         );
     }
@@ -1104,6 +1116,14 @@ export function App() {
             keywords: 'help guide studio manual',
             icon: <CircleHelp size={15} />,
             run: () => void window.studio.openDocumentation(),
+        },
+        {
+            id: 'act:check-updates',
+            label: 'Check for updates',
+            group: 'Actions',
+            keywords: 'update version upgrade studio',
+            icon: <Download size={15} />,
+            run: updater.check,
         },
         ...THEMES.map(
             (t): Command => ({
@@ -1189,6 +1209,10 @@ export function App() {
                     onOpenPreview={() => window.studio.openPreview()}
                     onPlaytest={() => setDockTab('playtest')}
                     onOpenPalette={() => setShowPalette(true)}
+                    symbolCount={
+                        nameCatalog.flags.length + nameCatalog.variables.length
+                    }
+                    onOpenSymbols={() => openFlagsVariables()}
                 />
                 <EngineBanner
                     engine={project.engine}
@@ -1301,10 +1325,6 @@ export function App() {
                 previewBusy={previewBusy}
                 previewLog={previewLog}
                 onOpenProblem={openProblem}
-                symbolCount={
-                    nameCatalog.flags.length + nameCatalog.variables.length
-                }
-                onOpenSymbols={() => openFlagsVariables()}
                 lastValidatedAt={lastValidatedAt}
                 lastSavedAt={lastSavedAt}
                 playtestStart={playtestStart}
@@ -1327,6 +1347,14 @@ export function App() {
                 <AboutModal
                     version={aboutVersion}
                     onClose={() => setAboutVersion(null)}
+                />
+            )}
+            {updater.open && updater.state && (
+                <StudioUpdateModal
+                    state={updater.state}
+                    onDownload={updater.openDownload}
+                    onCheck={updater.check}
+                    onClose={updater.close}
                 />
             )}
             {newItemSection && (

@@ -18,8 +18,10 @@
         "test:e2e": "electron-vite build && yarn test:e2e:run",
         "test:e2e:run": "playwright test",
         "test:visual-tour": "electron-vite build && playwright test studio.e2e.ts",
-        "package": "electron-vite build && electron-builder --win",
-        "package:dir": "electron-vite build && electron-builder --win --dir"
+        "package:win": "electron-vite build && electron-builder --win",
+        "package:win:dir": "electron-vite build && electron-builder --win --dir",
+        "package:mac": "electron-vite build && electron-builder --mac",
+        "package:mac:dir": "electron-vite build && electron-builder --mac --dir"
     },
     "devDependencies": {
         "@doodle-engine/core": "workspace:*",
@@ -52,7 +54,7 @@
         "yaml": "^2.8.3"
     },
     "build": {
-        "appId": "com.katbella.doodle-studio",
+        "appId": "com.doodle-engine.studio",
         "productName": "Doodle Studio",
         "electronVersion": "33.4.11",
         "directories": {
@@ -77,7 +79,21 @@
             "perMachine": false,
             "allowToChangeInstallationDirectory": true,
             "createDesktopShortcut": true,
-            "shortcutName": "Doodle Studio"
+            "shortcutName": "Doodle Studio",
+            "artifactName": "doodle-studio-${version}-setup.${ext}"
+        },
+        "mac": {
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": [
+                        "universal"
+                    ]
+                }
+            ],
+            "icon": "build/icon.png",
+            "identity": null,
+            "artifactName": "doodle-studio-${version}-${arch}.${ext}"
         }
     },
     "engines": {

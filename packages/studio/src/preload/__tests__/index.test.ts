@@ -166,6 +166,9 @@ describe('preload bridge', () => {
             [() => api.stopPreview(), 'preview:stop', []],
             [() => api.openPath('target'), 'shell:openPath', ['target']],
             [() => api.openDocumentation(), 'help:documentation', []],
+            [() => api.getStudioUpdateState(), 'update:getState', []],
+            [() => api.checkForStudioUpdates(), 'update:check', []],
+            [() => api.openStudioUpdateDownload(), 'update:openDownload', []],
         ];
 
         for (const [call, channel, args] of calls) {
@@ -209,6 +212,21 @@ describe('preload bridge', () => {
                 listeners[channel]
             );
         }
+    });
+
+    it('forwards update-state changes and removes the exact listener', () => {
+        const onState = vi.fn();
+        const unsubscribe = api.onStudioUpdateState(onState);
+
+        const update = { status: 'current', currentVersion: '0.2.0' };
+        listeners['update:state']({}, update);
+        expect(onState).toHaveBeenCalledWith(update);
+
+        unsubscribe();
+        expect(removeListener).toHaveBeenCalledWith(
+            'update:state',
+            listeners['update:state']
+        );
     });
 
     it('forwards theme state and every native menu action', () => {

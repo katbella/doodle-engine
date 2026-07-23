@@ -7,7 +7,7 @@
  */
 
 import { contextBridge, ipcRenderer, webFrame } from 'electron';
-import type { StudioApi } from '../shared/project';
+import type { StudioApi, StudioUpdateState } from '../shared/project';
 
 const api: StudioApi = {
     openProject: () => ipcRenderer.invoke('project:open'),
@@ -89,6 +89,15 @@ const api: StudioApi = {
     },
     setThemeMenuState: (state) => ipcRenderer.send('theme:menuState', state),
     setZoomFactor: (factor) => webFrame.setZoomFactor(factor),
+    getStudioUpdateState: () => ipcRenderer.invoke('update:getState'),
+    checkForStudioUpdates: () => ipcRenderer.invoke('update:check'),
+    openStudioUpdateDownload: () => ipcRenderer.invoke('update:openDownload'),
+    onStudioUpdateState: (callback) => {
+        const listener = (_event: unknown, state: StudioUpdateState) =>
+            callback(state);
+        ipcRenderer.on('update:state', listener);
+        return () => ipcRenderer.removeListener('update:state', listener);
+    },
     onMenu: (handlers) => {
         const onNew = () => handlers.onNew();
         const onOpen = () => handlers.onOpen();

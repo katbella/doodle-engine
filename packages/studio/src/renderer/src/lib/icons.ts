@@ -25,4 +25,6 @@ export {
     Hammer,
     CircleHelp,
     ImageOff,
+    Download,
+    Flag,
 } from 'lucide-react';

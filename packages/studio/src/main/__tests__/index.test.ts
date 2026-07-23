@@ -104,6 +104,14 @@ const state = vi.hoisted(() => {
     const ErrorLog = vi.fn(function () {
         return errorLog;
     });
+    const studioUpdater = {
+        getState: vi.fn((): any => ({
+            status: 'idle',
+            currentVersion: '0.2.0',
+        })),
+        checkForUpdates: vi.fn(async () => {}),
+        openDownload: vi.fn(async () => {}),
+    };
     const shell = {
         openExternal: vi.fn(),
         openPath: vi.fn(),
@@ -188,6 +196,9 @@ const state = vi.hoisted(() => {
             ErrorLog,
             errorLog.initialize,
             errorLog.write,
+            studioUpdater.getState,
+            studioUpdater.checkForUpdates,
+            studioUpdater.openDownload,
             shell.openExternal,
             shell.openPath,
             showOpenDialog,
@@ -230,6 +241,12 @@ const state = vi.hoisted(() => {
         createThemeMenu.mockReturnValue({ label: 'Themes' });
         errorLog.initialize.mockResolvedValue(undefined);
         errorLog.write.mockResolvedValue(undefined);
+        studioUpdater.getState.mockReturnValue({
+            status: 'idle',
+            currentVersion: '0.2.0',
+        });
+        studioUpdater.checkForUpdates.mockResolvedValue(undefined);
+        studioUpdater.openDownload.mockResolvedValue(undefined);
         app.whenReady.mockImplementation(() => ({
             then: (listener: Listener) => {
                 state.ready = listener;
@@ -277,6 +294,7 @@ const state = vi.hoisted(() => {
         createThemeMenu,
         ErrorLog,
         errorLog,
+        studioUpdater,
         shell,
         showOpenDialog,
         app,
@@ -287,6 +305,7 @@ const state = vi.hoisted(() => {
         ready: undefined as Listener | undefined,
         menuTemplate: undefined as any[] | undefined,
         lastWindowOptions: undefined as unknown,
+        updaterOnState: undefined as Listener | undefined,
     };
 });
 
@@ -342,6 +361,12 @@ vi.mock('../theme-menu', () => ({
     syncThemeMenuChecks: state.syncThemeMenuChecks,
 }));
 vi.mock('../error-log', () => ({ ErrorLog: state.ErrorLog }));
+vi.mock('../studio-updater', () => ({
+    StudioUpdater: vi.fn(function (options: any) {
+        state.updaterOnState = options.onState;
+        return state.studioUpdater;
+    }),
+}));
 
 async function boot(): Promise<void> {
     await import('../index');
@@ -435,6 +460,8 @@ describe('Studio main process', () => {
             )
         );
         helpMenu.submenu[4].click();
+        expect(state.studioUpdater.checkForUpdates).toHaveBeenCalledWith(true);
+        helpMenu.submenu[5].click();
         expect(state.webContents.send).toHaveBeenCalledWith(
             'menu:about',
             '0.2.0'
@@ -540,6 +567,47 @@ describe('Studio main process', () => {
         state.appListeners.get('window-all-closed')?.();
         expect(state.app.quit).toHaveBeenCalled();
         state.appListeners.get('before-quit')?.();
+    });
+
+    it('wires the self-update check to IPC, the renderer, and startup', async () => {
+        state.studioUpdater.getState.mockReturnValue({
+            status: 'available',
+            currentVersion: '0.2.0',
+            manual: false,
+            version: '0.3.0',
+            releaseNotes: null,
+            platform: 'windows',
+        });
+        await boot();
+
+        expect(state.studioUpdater.checkForUpdates).toHaveBeenCalledWith(false);
+
+        await expect(
+            state.ipcHandlers.get('update:getState')?.({})
+        ).resolves.toMatchObject({
+            status: 'available',
+            version: '0.3.0',
+        });
+        await state.ipcHandlers.get('update:check')?.({});
+        expect(state.studioUpdater.checkForUpdates).toHaveBeenCalledWith(true);
+        await state.ipcHandlers.get('update:openDownload')?.({});
+        expect(state.studioUpdater.openDownload).toHaveBeenCalled();
+
+        const nextState = {
+            status: 'downloading',
+            currentVersion: '0.2.0',
+        };
+        state.updaterOnState?.(nextState);
+        expect(state.webContents.send).toHaveBeenCalledWith(
+            'update:state',
+            nextState
+        );
+    });
+
+    it('skips the automatic startup update check for a development build', async () => {
+        state.app.isPackaged = false;
+        await boot();
+        expect(state.studioUpdater.checkForUpdates).not.toHaveBeenCalled();
     });
 
     it('logs rejected handlers and renderer errors', async () => {

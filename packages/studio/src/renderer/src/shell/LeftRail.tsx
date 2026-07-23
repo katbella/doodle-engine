@@ -8,6 +8,7 @@ import {
     Pencil,
     X,
     Search,
+    TriangleAlert,
 } from '../lib/icons';
 
 const STATUS_COLOR: Record<ItemStatus, string> = {
@@ -16,6 +17,26 @@ const STATUS_COLOR: Record<ItemStatus, string> = {
     error: 'var(--error)',
     none: 'transparent',
 };
+
+function StatusMark({ status }: { status: ItemStatus }) {
+    if (status === 'none') return null;
+    return (
+        <span className="rail__status" title={status}>
+            {status === 'error' ? (
+                <TriangleAlert
+                    size={13}
+                    style={{ color: STATUS_COLOR.error }}
+                    aria-hidden
+                />
+            ) : (
+                <span
+                    className="status__dot"
+                    style={{ background: STATUS_COLOR[status] }}
+                />
+            )}
+        </span>
+    );
+}
 
 export function LeftRail({
     sections,
@@ -124,16 +145,7 @@ export function LeftRail({
                                     <span className="rail__item-label">
                                         Game config
                                     </span>
-                                    {item.status !== 'none' && (
-                                        <span
-                                            className="status__dot"
-                                            style={{
-                                                background:
-                                                    STATUS_COLOR[item.status],
-                                            }}
-                                            title={item.status}
-                                        />
-                                    )}
+                                    <StatusMark status={item.status} />
                                 </button>
                             </div>
                         );
@@ -201,18 +213,9 @@ export function LeftRail({
                                                 <span className="rail__item-label">
                                                     {item.label}
                                                 </span>
-                                                {item.status !== 'none' && (
-                                                    <span
-                                                        className="status__dot"
-                                                        style={{
-                                                            background:
-                                                                STATUS_COLOR[
-                                                                    item.status
-                                                                ],
-                                                        }}
-                                                        title={item.status}
-                                                    />
-                                                )}
+                                                <StatusMark
+                                                    status={item.status}
+                                                />
                                             </button>
                                             {creatable && (
                                                 <>

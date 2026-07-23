@@ -27,8 +27,6 @@ export function BottomDock({
     previewBusy,
     previewLog,
     onOpenProblem,
-    symbolCount,
-    onOpenSymbols,
     lastValidatedAt,
     lastSavedAt,
     playtestStart,
@@ -49,8 +47,6 @@ export function BottomDock({
     previewBusy: boolean;
     previewLog: string[];
     onOpenProblem: (problem: ValidationError) => void;
-    symbolCount: number;
-    onOpenSymbols: () => void;
     /** When the shown validation results were computed. */
     lastValidatedAt: Date | null;
     /** When an editor last wrote this project's content to disk. */
@@ -73,10 +69,6 @@ export function BottomDock({
                     active={activeTab === 'problems'}
                     onClick={() => onTabChange('problems')}
                 />
-                <button className="dock__tab" onClick={onOpenSymbols}>
-                    Flags &amp; vars
-                    <span className="dock__count">{symbolCount}</span>
-                </button>
                 <DockTabButton
                     label="Build log"
                     active={activeTab === 'build'}

@@ -1,5 +1,5 @@
 import type { OpenProject, PreviewStatus } from '../../../shared/project';
-import { Play, Square, Monitor, ExternalLink, Search } from '../lib/icons';
+import { Play, Square, Monitor, ExternalLink, Search, Flag } from '../lib/icons';
 
 export function TopBar({
     project,
@@ -16,6 +16,8 @@ export function TopBar({
     onOpenPreview,
     onPlaytest,
     onOpenPalette,
+    symbolCount,
+    onOpenSymbols,
 }: {
     project: OpenProject;
     onValidate: () => void;
@@ -32,6 +34,8 @@ export function TopBar({
     onOpenPreview: () => void;
     onPlaytest: () => void;
     onOpenPalette: () => void;
+    symbolCount: number;
+    onOpenSymbols: () => void;
 }) {
     const count = project.problems.length;
 
@@ -67,17 +71,28 @@ export function TopBar({
                     {status.label}
                 </span>
             </div>
-            <button
-                className="topbar__palette"
-                onClick={onOpenPalette}
-                title="Open the command palette"
-            >
-                <Search size={13} aria-hidden />
-                <span>Command palette</span>
-                <kbd>
-                    {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
-                </kbd>
-            </button>
+            <div className="topbar__nav">
+                <button
+                    className="topbar__palette"
+                    onClick={onOpenPalette}
+                    title="Open the command palette"
+                >
+                    <Search size={13} aria-hidden />
+                    <span>Command palette</span>
+                    <kbd>
+                        {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
+                    </kbd>
+                </button>
+                <button
+                    className="btn topbar__flags"
+                    onClick={onOpenSymbols}
+                    title="Open flags and variables"
+                >
+                    <Flag size={13} aria-hidden />
+                    <span>Flags &amp; vars</span>
+                    <span className="topbar__flags-count">{symbolCount}</span>
+                </button>
+            </div>
             <div className="topbar__actions">
                 <button
                     className={`btn ${stale ? 'btn--accent' : ''}`}

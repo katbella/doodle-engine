@@ -29,6 +29,8 @@ function renderBar(overrides: Record<string, unknown> = {}) {
         onOpenPreview: vi.fn(),
         onPlaytest: vi.fn(),
         onOpenPalette: vi.fn(),
+        symbolCount: 0,
+        onOpenSymbols: vi.fn(),
         ...overrides,
     };
     render(<TopBar {...props} />);
@@ -62,5 +64,16 @@ describe('TopBar', () => {
         ).toBe(true);
         await user.click(validate);
         expect(onValidate).toHaveBeenCalledOnce();
+    });
+
+    it('opens flags and variables from the palette-grouped nav, with a count', async () => {
+        const user = userEvent.setup();
+        const { onOpenSymbols } = renderBar({ symbolCount: 214 });
+
+        expect(screen.getByText('214')).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: /Flags & vars/ })
+        );
+        expect(onOpenSymbols).toHaveBeenCalledOnce();
     });
 });
