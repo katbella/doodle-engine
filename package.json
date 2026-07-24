@@ -12,7 +12,7 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "yarn workspaces foreach -At run build",
+        "build": "yarn workspaces foreach -At --topological-dev run build",
         "dev": "yarn workspaces foreach -Ap run dev",
         "studio": "yarn workspace @doodle-engine/studio dev",
         "test": "yarn workspaces foreach -A run test && yarn test:release",

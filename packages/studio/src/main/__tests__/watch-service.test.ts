@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { join } from 'node:path';
 
 const watch = vi.hoisted(() => vi.fn());
 vi.mock('chokidar', () => ({ watch }));
@@ -46,10 +47,10 @@ describe('WatchService', () => {
         callbacks.unlink('C:/games/story/content/old.yaml');
         callbacks.change('C:/games/story/metadata/flags-and-vars.yaml');
         expect(onFileChanged.mock.calls.map(([path]) => path)).toEqual([
-            'content\\game.yaml',
-            'content\\items\\coin.yaml',
-            'content\\old.yaml',
-            'metadata\\flags-and-vars.yaml',
+            join('content', 'game.yaml'),
+            join('content', 'items', 'coin.yaml'),
+            join('content', 'old.yaml'),
+            join('metadata', 'flags-and-vars.yaml'),
         ]);
     });
 

@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -33,8 +33,36 @@ jobs:
       - name: Test with coverage
         run: yarn test:coverage
 
+  studio-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Build packages
         run: yarn build
 
       - name: Studio end-to-end
         run: xvfb-run --auto-servernum yarn workspace @doodle-engine/studio test:e2e:run
+
+  verify:
+    if: always()
+    needs: [checks, studio-e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm all CI jobs passed
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          STUDIO_E2E_RESULT: ${{ needs.studio-e2e.result }}
+        run: |
+          test "$CHECKS_RESULT" = "success"
+          test "$STUDIO_E2E_RESULT" = "success"
