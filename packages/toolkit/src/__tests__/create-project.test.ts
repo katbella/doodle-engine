@@ -8,6 +8,7 @@ import { createProject } from '../create-project';
 import { loadProject } from '../load-project';
 import { validateContent } from '../validate';
 import { getAvailableLocales } from '../templates/src/locale-options';
+import { DOODLE_VERSION } from '../version';
 
 const tempDirs: string[] = [];
 
@@ -65,9 +66,15 @@ describe('createProject language setup', () => {
         const packageJson = JSON.parse(
             await readFile(join(first.projectPath, 'package.json'), 'utf-8')
         );
-        expect(packageJson.dependencies['@doodle-engine/core']).toBe('0.2.1');
-        expect(packageJson.dependencies['@doodle-engine/react']).toBe('0.2.1');
-        expect(packageJson.devDependencies['@doodle-engine/cli']).toBe('0.2.1');
+        expect(packageJson.dependencies['@doodle-engine/core']).toBe(
+            DOODLE_VERSION
+        );
+        expect(packageJson.dependencies['@doodle-engine/react']).toBe(
+            DOODLE_VERSION
+        );
+        expect(packageJson.devDependencies['@doodle-engine/cli']).toBe(
+            DOODLE_VERSION
+        );
     });
 
     it('creates literal English content and a commented blank locale file by default', async () => {
