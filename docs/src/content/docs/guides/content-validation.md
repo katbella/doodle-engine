@@ -366,7 +366,7 @@ jobs:
 
 `npm run validate` returns exit code 1 when it finds errors, which tells the CI service that the check failed.
 
-## Best Practices
+## Validation Checklist
 
 1. **Fix errors while the change is fresh**: Resolve errors when they appear in `npm run dev`.
 

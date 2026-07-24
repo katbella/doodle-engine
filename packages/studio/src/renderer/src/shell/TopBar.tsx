@@ -1,5 +1,13 @@
 import type { OpenProject, PreviewStatus } from '../../../shared/project';
-import { Play, Square, Monitor, ExternalLink, Search, Flag } from '../lib/icons';
+import {
+    Play,
+    Square,
+    Monitor,
+    ExternalLink,
+    Search,
+    Flag,
+} from '../lib/icons';
+import { Tooltip } from './Tooltip';
 
 export function TopBar({
     project,
@@ -38,6 +46,12 @@ export function TopBar({
     onOpenSymbols: () => void;
 }) {
     const count = project.problems.length;
+    const buildShortcut = navigator.platform.startsWith('Mac')
+        ? '⌘⇧B'
+        : 'Ctrl Shift B';
+    const paletteShortcut = navigator.platform.startsWith('Mac')
+        ? '⌘K'
+        : 'Ctrl K';
 
     const status = validating
         ? { cls: 'status--info', label: 'Validating…', spin: true }
@@ -55,14 +69,7 @@ export function TopBar({
         <header className="topbar">
             <div className="topbar__project">
                 <span className="topbar__name">{project.name}</span>
-                <span
-                    className={`status ${status.cls}`}
-                    title={
-                        stale && !validating
-                            ? 'Changes since the last validation. Click Validate.'
-                            : undefined
-                    }
-                >
+                <span className={`status ${status.cls}`}>
                     {status.spin ? (
                         <span className="spinner spinner--sm" />
                     ) : (
@@ -72,91 +79,117 @@ export function TopBar({
                 </span>
             </div>
             <div className="topbar__nav">
-                <button
-                    className="topbar__palette"
-                    onClick={onOpenPalette}
-                    title="Open the command palette"
+                <Tooltip
+                    label="Open the command palette"
+                    shortcut={paletteShortcut}
                 >
-                    <Search size={13} aria-hidden />
-                    <span>Command palette</span>
-                    <kbd>
-                        {navigator.platform.startsWith('Mac') ? '⌘K' : 'Ctrl K'}
-                    </kbd>
-                </button>
-                <button
-                    className="btn topbar__flags"
-                    onClick={onOpenSymbols}
-                    title="Open flags and variables"
-                >
-                    <Flag size={13} aria-hidden />
-                    <span>Flags &amp; vars</span>
-                    <span className="topbar__flags-count">{symbolCount}</span>
-                </button>
+                    <button className="topbar__palette" onClick={onOpenPalette}>
+                        <Search size={13} aria-hidden />
+                        <span>Command palette</span>
+                        <kbd>{paletteShortcut}</kbd>
+                    </button>
+                </Tooltip>
+                <Tooltip label="Review project flags and variables">
+                    <button
+                        className="btn topbar__flags"
+                        onClick={onOpenSymbols}
+                    >
+                        <Flag size={13} aria-hidden />
+                        <span>Flags &amp; vars</span>
+                        <span className="topbar__flags-count">
+                            {symbolCount}
+                        </span>
+                    </button>
+                </Tooltip>
             </div>
             <div className="topbar__actions">
-                <button
-                    className={`btn ${stale ? 'btn--accent' : ''}`}
-                    onClick={onValidate}
-                    disabled={validating}
-                >
-                    {validating ? 'Validating…' : 'Validate'}
-                </button>
-                <button
-                    className="btn"
-                    onClick={onBuild}
-                    disabled={building || !canBuild}
-                    title={
-                        canBuild
-                            ? undefined
-                            : "Install the project's dependencies first"
+                <Tooltip
+                    label={
+                        validating
+                            ? 'Project validation is running'
+                            : stale
+                              ? 'Validate changes made since the last check'
+                              : 'Validate project content'
                     }
+                    shortcut="F7"
                 >
-                    {building ? 'Building…' : 'Build'}
-                </button>
-                {preview ? (
-                    <>
-                        <button
-                            className="btn"
-                            onClick={onOpenPreview}
-                            title={`Open ${preview.url} in your browser`}
-                        >
-                            <ExternalLink size={14} /> Preview :{preview.port}
-                        </button>
-                        <button
-                            className="btn"
-                            onClick={onStopPreview}
-                            disabled={previewBusy}
-                        >
-                            <Square size={14} /> Stop
-                        </button>
-                    </>
-                ) : (
+                    <button
+                        className={`btn ${stale ? 'btn--accent' : ''}`}
+                        onClick={onValidate}
+                        disabled={validating}
+                    >
+                        {validating ? 'Validating…' : 'Validate'}
+                    </button>
+                </Tooltip>
+                <Tooltip
+                    label={
+                        canBuild
+                            ? 'Create a production build'
+                            : "Install the project's dependencies before building"
+                    }
+                    shortcut={buildShortcut}
+                >
                     <button
                         className="btn"
-                        onClick={onStartPreview}
-                        disabled={previewBusy || !canBuild}
-                        title={
-                            canBuild
-                                ? 'Start the dev server and open the game in your browser'
-                                : "Install the project's dependencies first"
-                        }
+                        onClick={onBuild}
+                        disabled={building || !canBuild}
                     >
-                        {previewBusy ? (
-                            'Starting…'
-                        ) : (
-                            <>
-                                <Monitor size={14} /> Preview
-                            </>
-                        )}
+                        {building ? 'Building…' : 'Build'}
                     </button>
+                </Tooltip>
+                {preview ? (
+                    <>
+                        <Tooltip
+                            label={`Open ${preview.url} in your browser`}
+                            shortcut="F6"
+                        >
+                            <button className="btn" onClick={onOpenPreview}>
+                                <ExternalLink size={14} /> Preview :
+                                {preview.port}
+                            </button>
+                        </Tooltip>
+                        <Tooltip
+                            label="Stop the preview server"
+                            shortcut="Shift F6"
+                        >
+                            <button
+                                className="btn"
+                                onClick={onStopPreview}
+                                disabled={previewBusy}
+                            >
+                                <Square size={14} /> Stop
+                            </button>
+                        </Tooltip>
+                    </>
+                ) : (
+                    <Tooltip
+                        label={
+                            canBuild
+                                ? 'Start the preview server and open the game'
+                                : "Install the project's dependencies before previewing"
+                        }
+                        shortcut="F6"
+                    >
+                        <button
+                            className="btn"
+                            onClick={onStartPreview}
+                            disabled={previewBusy || !canBuild}
+                        >
+                            {previewBusy ? (
+                                'Starting…'
+                            ) : (
+                                <>
+                                    <Monitor size={14} /> Preview
+                                </>
+                            )}
+                        </button>
+                    </Tooltip>
                 )}
-                <button
-                    className="btn btn--accent"
-                    onClick={onPlaytest}
-                    title="Run the game in the playtest panel"
-                >
-                    <Play size={14} /> Playtest
-                </button>
+                <Tooltip label="Open the in-Studio playtest" shortcut="F5">
+                    <button className="btn btn--accent" onClick={onPlaytest}>
+                        <Play size={14} /> Playtest
+                    </button>
+                </Tooltip>
             </div>
         </header>
     );

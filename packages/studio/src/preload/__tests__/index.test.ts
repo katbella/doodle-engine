@@ -234,6 +234,11 @@ describe('preload bridge', () => {
             onNew: vi.fn(),
             onOpen: vi.fn(),
             onOpenRecent: vi.fn(),
+            onValidate: vi.fn(),
+            onBuild: vi.fn(),
+            onPreview: vi.fn(),
+            onStopPreview: vi.fn(),
+            onPlaytest: vi.fn(),
             onAbout: vi.fn(),
             onThemeMode: vi.fn(),
             onThemeColor: vi.fn(),
@@ -255,17 +260,27 @@ describe('preload bridge', () => {
         listeners['menu:new']();
         listeners['menu:open']();
         listeners['menu:openRecent']({}, 'C:/games/story');
+        listeners['menu:validate']();
+        listeners['menu:build']();
+        listeners['menu:preview']();
+        listeners['menu:stopPreview']();
+        listeners['menu:playtest']();
         listeners['menu:about']({}, '0.2.0');
         listeners['menu:themeMode']({}, 'dark');
         listeners['menu:themeColor']({}, 'red');
         expect(handlers.onNew).toHaveBeenCalledOnce();
         expect(handlers.onOpen).toHaveBeenCalledOnce();
         expect(handlers.onOpenRecent).toHaveBeenCalledWith('C:/games/story');
+        expect(handlers.onValidate).toHaveBeenCalledOnce();
+        expect(handlers.onBuild).toHaveBeenCalledOnce();
+        expect(handlers.onPreview).toHaveBeenCalledOnce();
+        expect(handlers.onStopPreview).toHaveBeenCalledOnce();
+        expect(handlers.onPlaytest).toHaveBeenCalledOnce();
         expect(handlers.onAbout).toHaveBeenCalledWith('0.2.0');
         expect(handlers.onThemeMode).toHaveBeenCalledWith('dark');
         expect(handlers.onThemeColor).toHaveBeenCalledWith('red');
 
         unsubscribe();
-        expect(removeListener).toHaveBeenCalledTimes(6);
+        expect(removeListener).toHaveBeenCalledTimes(11);
     });
 });

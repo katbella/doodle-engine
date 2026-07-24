@@ -28,6 +28,12 @@ type ListEntry =
     | { type: 'group'; prefix: string; count: number }
     | { type: 'name'; summary: NameSummary };
 
+type HealthCategory =
+    | 'checked-only'
+    | 'set-only'
+    | 'near-identical'
+    | 'orphaned-notes';
+
 const ROW_HEIGHT = 42;
 const OVERSCAN = 6;
 
@@ -312,7 +318,6 @@ export function FlagsVariablesPage({
                                                     selected.id ===
                                                         entry.summary.id
                                                 }
-                                                title={entry.summary.id}
                                                 onClick={() =>
                                                     onSelect({
                                                         kind: entry.summary
@@ -386,6 +391,25 @@ function HealthShelf({
             .filter((id) => !owners.has(id))
             .map((id) => ({ kind, id }));
     });
+    const counts: Record<HealthCategory, number> = {
+        'checked-only': checkedOnly.length,
+        'set-only': setOnly.length,
+        'near-identical': pairs.length,
+        'orphaned-notes': stale.length,
+    };
+    const [selectedCategory, setSelectedCategory] =
+        useState<HealthCategory>('checked-only');
+    const firstCategoryWithIssues = (
+        Object.keys(counts) as HealthCategory[]
+    ).find((category) => counts[category] > 0);
+    const activeCategory =
+        counts[selectedCategory] > 0
+            ? selectedCategory
+            : (firstCategoryWithIssues ?? null);
+    const totalFindings = Object.values(counts).reduce(
+        (total, count) => total + count,
+        0
+    );
 
     const issueButton = (summary: NameSummary) => (
         <button
@@ -398,112 +422,184 @@ function HealthShelf({
         </button>
     );
 
+    const categories: Array<{
+        id: HealthCategory;
+        title: string;
+        description: string;
+    }> = [
+        {
+            id: 'checked-only',
+            title: 'Checked, never set',
+            description: 'Tested in conditions but never assigned.',
+        },
+        {
+            id: 'set-only',
+            title: 'Set, never checked',
+            description: 'Assigned but never used by a condition.',
+        },
+        {
+            id: 'near-identical',
+            title: 'Possible name collisions',
+            description: 'Names that differ by only a few characters.',
+        },
+        {
+            id: 'orphaned-notes',
+            title: 'Orphaned notes',
+            description: 'Notes that no longer match a project name.',
+        },
+    ];
+    const activeIssues =
+        activeCategory === 'checked-only'
+            ? checkedOnly.map(issueButton)
+            : activeCategory === 'set-only'
+              ? setOnly.map(issueButton)
+              : activeCategory === 'near-identical'
+                ? pairs.map((pair) => (
+                      <div
+                          key={`${pair.kind}:${pair.first}:${pair.second}`}
+                          className="health-shelf__pair"
+                      >
+                          <button
+                              className="mono"
+                              onClick={() =>
+                                  onSelect({
+                                      kind: pair.kind,
+                                      id: pair.first,
+                                  })
+                              }
+                          >
+                              {pair.first}
+                          </button>
+                          <button
+                              className="mono"
+                              onClick={() =>
+                                  onSelect({
+                                      kind: pair.kind,
+                                      id: pair.second,
+                                  })
+                              }
+                          >
+                              {pair.second}
+                          </button>
+                      </div>
+                  ))
+                : activeCategory === 'orphaned-notes'
+                  ? stale.map(({ kind, id }) => {
+                        const possibleOwner = closestExistingName(
+                            kind,
+                            id,
+                            catalog
+                        );
+                        const section = noteSection(kind);
+                        const closest =
+                            possibleOwner && !notes[section][possibleOwner]
+                                ? possibleOwner
+                                : null;
+                        return (
+                            <div
+                                key={`${kind}:${id}`}
+                                className="health-shelf__stale"
+                            >
+                                <span className="mono">{id}</span>
+                                {closest && (
+                                    <button
+                                        className="btn"
+                                        disabled={notesReadOnly}
+                                        aria-label={`Move note to ${closest}`}
+                                        onClick={() =>
+                                            onNoteMove(kind, id, closest)
+                                        }
+                                    >
+                                        Move to {closest}
+                                    </button>
+                                )}
+                                <button
+                                    className="btn btn--icon"
+                                    disabled={notesReadOnly}
+                                    aria-label={`Delete note for ${id}`}
+                                    onClick={() => onNoteChange(kind, id, '')}
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        );
+                    })
+                  : null;
+
     return (
         <section className="health-shelf" aria-label="Name health">
-            <HealthGroup
-                title="Checked but never set"
-                count={checkedOnly.length}
-            >
-                {checkedOnly.map(issueButton)}
-            </HealthGroup>
-            <HealthGroup title="Set but never checked" count={setOnly.length}>
-                {setOnly.map(issueButton)}
-            </HealthGroup>
-            <HealthGroup title="Near-identical names" count={pairs.length}>
-                {pairs.map((pair) => (
-                    <div
-                        key={`${pair.kind}:${pair.first}:${pair.second}`}
-                        className="health-shelf__pair"
-                    >
-                        <button
-                            className="mono"
-                            onClick={() =>
-                                onSelect({ kind: pair.kind, id: pair.first })
-                            }
-                        >
-                            {pair.first}
-                        </button>
-                        <button
-                            className="mono"
-                            onClick={() =>
-                                onSelect({ kind: pair.kind, id: pair.second })
-                            }
-                        >
-                            {pair.second}
-                        </button>
-                    </div>
-                ))}
-            </HealthGroup>
-            <HealthGroup title="Notes with no owner" count={stale.length}>
-                {stale.map(({ kind, id }) => {
-                    const possibleOwner = closestExistingName(
-                        kind,
-                        id,
-                        catalog
-                    );
-                    const section = noteSection(kind);
-                    const closest =
-                        possibleOwner && !notes[section][possibleOwner]
-                            ? possibleOwner
-                            : null;
-                    return (
-                        <div
-                            key={`${kind}:${id}`}
-                            className="health-shelf__stale"
-                        >
-                            <span className="mono">{id}</span>
-                            {closest && (
-                                <button
-                                    className="btn"
-                                    disabled={notesReadOnly}
-                                    title={`Move note to ${closest}`}
-                                    onClick={() =>
-                                        onNoteMove(kind, id, closest)
-                                    }
-                                >
-                                    Move to {closest}
-                                </button>
-                            )}
-                            <button
-                                className="btn btn--icon"
-                                disabled={notesReadOnly}
-                                aria-label={`Delete note for ${id}`}
-                                title={`Delete note for ${id}`}
-                                onClick={() => onNoteChange(kind, id, '')}
+            <div className="health-shelf__heading">
+                <h2>Name health</h2>
+                <span
+                    className={
+                        totalFindings > 0
+                            ? 'health-shelf__total health-shelf__total--issues'
+                            : 'health-shelf__total'
+                    }
+                >
+                    {totalFindings > 0
+                        ? `${totalFindings} finding${totalFindings === 1 ? '' : 's'}`
+                        : 'All clear'}
+                </span>
+            </div>
+            <div className="health-shelf__summary">
+                {categories.map((category) => {
+                    const count = counts[category.id];
+                    if (count === 0) {
+                        return (
+                            <div
+                                key={category.id}
+                                className="health-shelf__check health-shelf__check--empty"
                             >
-                                <Trash2 size={14} />
-                            </button>
-                        </div>
+                                <span className="health-shelf__check-copy">
+                                    <strong id={`name-health-${category.id}`}>
+                                        {category.title}
+                                    </strong>
+                                    <span>{category.description}</span>
+                                </span>
+                                <span className="health-shelf__status">
+                                    No issues
+                                </span>
+                            </div>
+                        );
+                    }
+                    const expanded = activeCategory === category.id;
+                    return (
+                        <button
+                            key={category.id}
+                            className={`health-shelf__check ${expanded ? 'health-shelf__check--active' : ''}`}
+                            aria-expanded={expanded}
+                            aria-controls="name-health-details"
+                            onClick={() => setSelectedCategory(category.id)}
+                        >
+                            <span className="health-shelf__check-copy">
+                                <strong id={`name-health-${category.id}`}>
+                                    {category.title}
+                                </strong>
+                                <span>{category.description}</span>
+                            </span>
+                            <span className="health-shelf__status health-shelf__status--issues">
+                                {count} {count === 1 ? 'finding' : 'findings'}
+                            </span>
+                        </button>
                     );
                 })}
-            </HealthGroup>
-        </section>
-    );
-}
-
-function HealthGroup({
-    title,
-    count,
-    children,
-}: {
-    title: string;
-    count: number;
-    children: React.ReactNode;
-}) {
-    return (
-        <details className="health-shelf__group">
-            <summary>
-                <span>{title}</span>
-                <span>{count}</span>
-            </summary>
-            <div className="health-shelf__issues">
-                {count === 0 ? (
-                    <span className="health-shelf__clear">None found.</span>
-                ) : (
-                    children
-                )}
             </div>
-        </details>
+            {activeCategory && (
+                <div
+                    id="name-health-details"
+                    className="health-shelf__tray"
+                    role="region"
+                    aria-labelledby={`name-health-${activeCategory}`}
+                >
+                    <div className="health-shelf__tray-heading">
+                        <h3>Findings</h3>
+                        <span>{counts[activeCategory]} total</span>
+                    </div>
+                    <div className="health-shelf__issues">{activeIssues}</div>
+                </div>
+            )}
+        </section>
     );
 }
 
@@ -561,11 +657,7 @@ function SymbolDetail({
             </div>
 
             {notesError ? (
-                <div
-                    className="flag-var-detail__note-unavailable"
-                    role="alert"
-                    title={notesError}
-                >
+                <div className="flag-var-detail__note-unavailable" role="alert">
                     <TriangleAlert size={16} aria-hidden />
                     <span>
                         Notes could not be read. Fix or delete

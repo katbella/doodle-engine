@@ -33,14 +33,20 @@ Dialogue tabs also include **Graph**, a read-only map of how the conversation mo
 
 ## Source editor
 
-Select **Source** to edit the game file directly. This view is helpful after you are comfortable with Doodle’s YAML and dialogue syntax or when you want to adapt an example from a guide.
+Select **Source** to edit the active game file directly. Source uses the same file as Visual, so you can move between the two views instead of maintaining a separate copy. Doodle dialogue files and YAML each have syntax highlighting suited to their structure.
 
 <ThemeScreenshot
     src="/images/studio/source-editor.webp"
     alt="A location file open in Source mode"
 />
 
-Studio preserves unsaved source text if the app closes unexpectedly. If a source file changes outside Studio while it has unsaved edits, choose **Reload** to use the file from disk or **Overwrite** to keep the version in Studio. Visual editors also refuse to overwrite an external change until you confirm it.
+Source edits save shortly after you stop typing. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately. Studio keeps each open Source editor mounted when you switch tabs, preserving its undo history and avoiding a reload when you return.
+
+After validation, problems that Studio can locate appear as markers on the relevant source lines. Select a source problem in the right panel or bottom dock to open its file and move the cursor to the affected line. Once changed source is saved, markers from the previous validation are hidden; select **Validate** again to check the new text.
+
+Studio also keeps a recovery copy while source text is unsaved. If the app closes unexpectedly, the file offers **Restore** and **Discard** the next time it opens. If the file changes outside Studio while it has unsaved edits, choose **Reload** to use the file from disk or **Overwrite** to keep the version in Studio. A file deleted outside Studio can be recreated from the editor.
+
+Dialogue files add project-aware suggestions and command help. See [Dialogue IntelliSense](/studio/dialogues/#dialogue-intellisense) for the commands and values Source can complete.
 
 ## References and validation
 

@@ -3,6 +3,8 @@ import {
     test,
     _electron as electron,
     type ElectronApplication,
+    type Locator,
+    type Page,
 } from '@playwright/test';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -12,6 +14,10 @@ const workspaceDir = resolve(studioDir, '../..');
 const fixturePrefix = join(workspaceDir, '.build-test-e2e-');
 const profilePrefix = join(workspaceDir, '.build-test-studio-profile-');
 const tourDir = join(workspaceDir, '.build-test-studio-tour');
+const docsScreenshotDir = join(workspaceDir, 'docs/public/images/studio');
+const publishDocsScreenshots =
+    process.env.DOODLE_PUBLISH_DOCS_SCREENSHOTS === '1';
+const preservedLocationComment = '# The tavern is busiest after sunset.';
 
 let fixtureDir = '';
 let profileDir = '';
@@ -32,11 +38,86 @@ async function quitApp(app: ElectronApplication): Promise<void> {
     await exited;
 }
 
+async function setStudioTheme(
+    app: ElectronApplication,
+    window: Page,
+    theme: string
+): Promise<void> {
+    await app.evaluate(({ BrowserWindow }, value) => {
+        BrowserWindow.getAllWindows()[0]?.webContents.send(
+            'menu:themeMode',
+            value
+        );
+    }, theme);
+    await expect
+        .poll(() =>
+            window.evaluate(() =>
+                document.documentElement.getAttribute('data-theme')
+            )
+        )
+        .toBe(theme);
+    await window.evaluate(() => document.fonts.ready);
+}
+
+async function writeWebpScreenshot(
+    window: Page,
+    target: Page | Locator,
+    filename: string,
+    maxHeight?: number
+): Promise<void> {
+    if (!publishDocsScreenshots) return;
+    const png = await target.screenshot({ animations: 'disabled' });
+    const encoded = await window.evaluate(
+        async ({ base64, cropHeight }) => {
+            const image = new Image();
+            image.src = `data:image/png;base64,${base64}`;
+            await image.decode();
+            const canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = Math.min(
+                image.naturalHeight,
+                cropHeight ?? image.naturalHeight
+            );
+            const context = canvas.getContext('2d');
+            if (!context) throw new Error('Could not create screenshot canvas');
+            context.drawImage(image, 0, 0);
+            return canvas.toDataURL('image/webp', 0.86).split(',')[1];
+        },
+        { base64: png.toString('base64'), cropHeight: maxHeight }
+    );
+    await mkdir(docsScreenshotDir, { recursive: true });
+    await writeFile(
+        join(docsScreenshotDir, filename),
+        Buffer.from(encoded, 'base64')
+    );
+}
+
+async function publishThemePair(
+    app: ElectronApplication,
+    window: Page,
+    target: Page | Locator,
+    basename: string,
+    maxHeight?: number
+): Promise<void> {
+    if (!publishDocsScreenshots) return;
+    await setStudioTheme(app, window, 'dark');
+    await writeWebpScreenshot(window, target, `${basename}.webp`, maxHeight);
+    await setStudioTheme(app, window, 'light');
+    await writeWebpScreenshot(
+        window,
+        target,
+        `${basename}-light.webp`,
+        maxHeight
+    );
+    await setStudioTheme(app, window, 'dark');
+}
+
 test.beforeEach(async () => {
     await rm(tourDir, { recursive: true, force: true });
     await mkdir(tourDir, { recursive: true });
     fixtureDir = await mkdtemp(fixturePrefix);
     profileDir = await mkdtemp(profilePrefix);
+    await mkdir(join(fixtureDir, 'node_modules'), { recursive: true });
     await writeFixture(
         'package.json',
         JSON.stringify({
@@ -44,6 +125,10 @@ test.beforeEach(async () => {
             version: '1.0.0',
             dependencies: { '@doodle-engine/core': 'workspace:*' },
         })
+    );
+    await writeFixture(
+        'index.html',
+        '<!doctype html><html><body><main>Doodle Studio fixture</main></body></html>'
     );
     await writeFixture(
         'content/game.yaml',
@@ -58,7 +143,7 @@ startInventory: []
     );
     await writeFixture(
         'content/locations/tavern.yaml',
-        `# This comment must survive Studio's field edit.
+        `${preservedLocationComment}
 id: tavern
 name: Tavern
 description: Warm and busy.
@@ -184,6 +269,7 @@ test.afterEach(async () => {
 });
 
 test('opens, edits, and saves through Electron, preload, IPC, and the filesystem', async () => {
+    test.setTimeout(publishDocsScreenshots ? 180_000 : 30_000);
     const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...launchEnv } =
         process.env;
     const app = await test.step('launch Studio', () =>
@@ -225,8 +311,23 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     path: join(tourDir, '01-welcome-dark.png'),
                     animations: 'disabled',
                 });
+                await publishThemePair(
+                    app,
+                    firstWindow,
+                    firstWindow.locator('.welcome'),
+                    'welcome'
+                );
                 return firstWindow;
             });
+
+        await test.step('capture the new-project form', async () => {
+            if (!publishDocsScreenshots) return;
+            await window.getByRole('button', { name: 'New project…' }).click();
+            const modal = window.locator('.modal');
+            await expect(modal).toBeVisible();
+            await publishThemePair(app, window, modal, 'new-project');
+            await modal.getByRole('button', { name: 'Cancel' }).click();
+        });
 
         await test.step('open the fixture through the menu event', async () => {
             await app.evaluate(({ BrowserWindow }, projectPath) => {
@@ -242,10 +343,25 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '02-project-overview-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(app, window, window, 'workspace');
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.topbar'),
+                'studio-toolbar'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.rail'),
+                'project-rail'
+            );
         });
 
         await test.step('keep app-level modals above the page', async () => {
-            await window.getByText('Command palette').click();
+            await window
+                .getByRole('button', { name: /Command palette/ })
+                .click();
             const palette = window.getByRole('dialog', {
                 name: 'Command palette',
             });
@@ -323,6 +439,32 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '04-location-editor-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.editor'),
+                'location-editor'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.rightpanel'),
+                'references-panel'
+            );
+            if (publishDocsScreenshots) {
+                await window.getByRole('button', { name: 'Source' }).click();
+                await expect(
+                    window.locator('.editor__source-body .monaco-editor')
+                ).toBeVisible();
+                await publishThemePair(
+                    app,
+                    window,
+                    window.locator('.editor'),
+                    'source-editor'
+                );
+                await window.getByRole('button', { name: 'Visual' }).click();
+                await expect(name).toBeVisible();
+            }
             await name.fill('Renamed Tavern');
             await window
                 .locator('.rail__item-open')
@@ -397,6 +539,26 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '06-character-key-chips-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.editor'),
+                'localized-fields'
+            );
+        });
+
+        await test.step('capture the localization editor', async () => {
+            if (!publishDocsScreenshots) return;
+            await window
+                .getByRole('button', { name: 'en', exact: true })
+                .click();
+            await expect(window.locator('.locale-editor')).toBeVisible();
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.editor'),
+                'localization'
+            );
         });
 
         await test.step('keep every control in an asset row the same height', async () => {
@@ -422,6 +584,26 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     path: join(tourDir, '06b-interlude-sound-rows-dark.png'),
                     animations: 'disabled',
                 });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.asset-list').first(),
+                'asset-fields'
+            );
+        });
+
+        await test.step('capture flags and variables', async () => {
+            if (!publishDocsScreenshots) return;
+            await window.getByRole('button', { name: /Flags & vars/ }).click();
+            await expect(
+                window.getByRole('heading', { name: 'Flags & variables' })
+            ).toBeVisible();
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.flag-vars-page'),
+                'flags-variables'
+            );
         });
 
         await test.step('keep deep editor overlays portaled, visible, and anchored', async () => {
@@ -434,6 +616,37 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '07-dialogue-editor-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                window,
+                'studio-dialogue-workspace'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.editor'),
+                'dialogue-editor'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.dlg__outline'),
+                'dialogue-nodes'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.node-editor__head'),
+                'dialogue-node-header'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.dlg__main'),
+                'dialogue-node-fields',
+                452
+            );
 
             const lineField = window
                 .getByRole('textbox', { name: 'Line' })
@@ -488,9 +701,34 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '09-key-picker-choice-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                picker,
+                'localization-key-picker'
+            );
             await picker.getByRole('button', { name: 'Cancel' }).click();
 
             await deepChoice.scrollIntoViewIfNeeded();
+            await publishThemePair(app, window, deepChoice, 'dialogue-choice');
+            if (publishDocsScreenshots) {
+                const firstChoice = window.locator('.dlg__card').first();
+                await firstChoice
+                    .getByRole('button', { name: /Add requirement/ })
+                    .click();
+                const conditionBuilder = window.locator('.builder-modal');
+                await expect(conditionBuilder).toBeVisible();
+                await publishThemePair(
+                    app,
+                    window,
+                    conditionBuilder,
+                    'condition-builder'
+                );
+                await conditionBuilder
+                    .getByRole('button', { name: 'Cancel' })
+                    .click();
+                await deepChoice.scrollIntoViewIfNeeded();
+            }
             const builderTrigger = deepChoice.getByRole('button', {
                 name: /Add effect/,
             });
@@ -529,6 +767,17 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '10-builder-deep-choice-dark.png'),
                 animations: 'disabled',
             });
+            if (publishDocsScreenshots) {
+                await builder
+                    .getByRole('button', { name: 'Play sound' })
+                    .click();
+                await publishThemePair(
+                    app,
+                    window,
+                    builder,
+                    'effect-media-file'
+                );
+            }
             await builder.getByRole('button', { name: 'Cancel' }).click();
         });
 
@@ -610,6 +859,59 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '10b-play-from-here-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.playtest__toolbar'),
+                'playtest-toolbar'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.playtest__body'),
+                'playtest-choices'
+            );
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.inspector'),
+                'playtest-state'
+            );
+            if (publishDocsScreenshots) {
+                await window
+                    .getByRole('button', { name: 'Save test state' })
+                    .click();
+                const saveStateModal = window
+                    .locator('.modal')
+                    .filter({ hasText: 'Save test state' });
+                await expect(saveStateModal).toBeVisible();
+                await publishThemePair(
+                    app,
+                    window,
+                    saveStateModal,
+                    'save-test-state'
+                );
+                await saveStateModal
+                    .getByRole('button', { name: 'Cancel' })
+                    .click();
+
+                await window
+                    .getByRole('button', { name: 'Start at node…' })
+                    .click();
+                const startNodeModal = window
+                    .locator('.modal')
+                    .filter({ hasText: 'Start at node' });
+                await expect(startNodeModal).toBeVisible();
+                await publishThemePair(
+                    app,
+                    window,
+                    startNodeModal,
+                    'start-node-picker'
+                );
+                await startNodeModal
+                    .getByRole('button', { name: 'Cancel' })
+                    .click();
+            }
         });
 
         await test.step('read the semantic trace across contrasting themes', async () => {
@@ -648,6 +950,12 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await search.fill('start to end');
             await expect(transitionRow).toBeVisible();
             await search.fill('');
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.trace'),
+                'debug-trace'
+            );
 
             const setTheme = (theme: string) =>
                 app.evaluate(({ BrowserWindow }, value) => {
@@ -738,6 +1046,12 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: join(tourDir, '10d-dialogue-graph-dark.png'),
                 animations: 'disabled',
             });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.editor'),
+                'dialogue-graph'
+            );
             // Click selects in place; the pencil opens the Visual editor.
             await endNode.click();
             await expect(endNode).toHaveClass(/graph__node--selected/);
@@ -754,6 +1068,41 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await window
                 .getByRole('button', { name: 'start', exact: true })
                 .click();
+            if (publishDocsScreenshots) {
+                await window.getByRole('button', { name: 'Source' }).click();
+                await expect(
+                    window.locator('.editor__source-body .monaco-editor')
+                ).toBeVisible();
+                await publishThemePair(
+                    app,
+                    window,
+                    window.locator('.editor'),
+                    'dialogue-source'
+                );
+                const requirementLine = window
+                    .locator('.editor__source-body .view-line')
+                    .filter({ hasText: 'REQUIRE hasFlag ready' });
+                await requirementLine.click();
+                await window.keyboard.press('End');
+                await window.keyboard.press('Control+ArrowLeft');
+                await window.keyboard.press('Control+Space');
+                const suggestions = window.locator(
+                    '.editor__source-body .suggest-widget.visible'
+                );
+                await expect(suggestions).toBeVisible();
+                await expect(suggestions).toContainText('askedDocks');
+                await expect(suggestions).toContainText('metBartender');
+                await publishThemePair(
+                    app,
+                    window,
+                    window.locator('.source__monaco'),
+                    'dialogue-intellisense',
+                    600
+                );
+                await window.keyboard.press('Escape');
+                await window.getByRole('button', { name: 'Visual' }).click();
+                await expect(window.locator('.node-editor')).toBeVisible();
+            }
         });
 
         await test.step('show the status area on the dock strip', async () => {
@@ -797,6 +1146,33 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await confirm.getByRole('button', { name: 'Cancel' }).click();
         });
 
+        await test.step('capture a completed production build', async () => {
+            if (!publishDocsScreenshots) return;
+            await window
+                .getByRole('button', { name: 'Build', exact: true })
+                .click();
+            await expect(window.getByText(/Build complete in/)).toBeVisible({
+                timeout: 30_000,
+            });
+            await window.locator('.build__dest').evaluate((element) => {
+                element.textContent = 'dist';
+            });
+            await publishThemePair(
+                app,
+                window,
+                window.locator('.dock__body'),
+                'build-output'
+            );
+            await window
+                .locator('.dock__tab')
+                .filter({ hasText: 'Problems' })
+                .click();
+            await window.mouse.move(700, 350);
+            await expect(window.locator('.tooltip__bubble--open')).toHaveCount(
+                0
+            );
+        });
+
         await test.step('tour the bundled themes and their default accents', async () => {
             const setTheme = (theme: string) =>
                 app.evaluate(({ BrowserWindow }, value) => {
@@ -820,6 +1196,8 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 );
 
             for (const [theme, themeAccent] of [
+                ['dark', '#0076ff'],
+                ['light', '#006ae5'],
                 ['forest', '#d9a514'],
                 ['space', '#a855f7'],
                 ['deep-sea', '#2dd4bf'],
@@ -849,6 +1227,11 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     path: join(tourDir, `14-theme-${theme}.png`),
                     animations: 'disabled',
                 });
+                await writeWebpScreenshot(
+                    window,
+                    window,
+                    `theme-${theme}.webp`
+                );
             }
 
             // A named accent beats the theme default; Default restores it.
@@ -862,6 +1245,53 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await expect.poll(accent).toBe('#35e6ff');
             await setTheme('dark');
             await expect.poll(accent).toBe('#0076ff');
+        });
+
+        await test.step('show the Studio update results', async () => {
+            if (!publishDocsScreenshots) return;
+            const sendUpdateState = (state: Record<string, unknown>) =>
+                app.evaluate(({ BrowserWindow }, value) => {
+                    BrowserWindow.getAllWindows()[0]?.webContents.send(
+                        'update:state',
+                        value
+                    );
+                }, state);
+
+            await sendUpdateState({
+                status: 'available',
+                currentVersion: '0.2.0',
+                manual: false,
+                version: '0.3.0',
+                releaseNotes:
+                    'Adds dialogue Source suggestions and clearer validation results.',
+                platform: 'windows',
+            });
+            const updateModal = window.getByRole('dialog');
+            await expect(updateModal).toContainText('Update available');
+            await expect(updateModal).toContainText('Version 0.3.0');
+            await publishThemePair(
+                app,
+                window,
+                updateModal,
+                'studio-update-available'
+            );
+            await updateModal.getByRole('button', { name: 'Close' }).click();
+
+            await sendUpdateState({
+                status: 'current',
+                currentVersion: '0.3.0',
+                manual: true,
+            });
+            await expect(updateModal).toContainText(
+                'Doodle Studio is up to date'
+            );
+            await publishThemePair(
+                app,
+                window,
+                updateModal,
+                'studio-update-current'
+            );
+            await updateModal.getByRole('button', { name: 'Close' }).click();
         });
 
         await test.step('repeat the key-picker overlay check in light theme', async () => {
@@ -931,9 +1361,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 join(fixtureDir, 'content/locations/tavern.yaml'),
                 'utf8'
             );
-            expect(saved).toContain(
-                "# This comment must survive Studio's field edit."
-            );
+            expect(saved).toContain(preservedLocationComment);
         });
 
         await test.step('show a validation problem in both themes', async () => {
@@ -1006,6 +1434,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 path: darkPng,
                 animations: 'disabled',
             });
+            await publishThemePair(app, window, window, 'validation-problems');
 
             await app.evaluate(({ BrowserWindow }) => {
                 BrowserWindow.getAllWindows()[0]?.webContents.send(

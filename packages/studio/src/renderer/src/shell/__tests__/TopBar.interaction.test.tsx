@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OpenProject } from '../../../../shared/project';
 import { TopBar } from '../TopBar';
@@ -33,8 +33,8 @@ function renderBar(overrides: Record<string, unknown> = {}) {
         onOpenSymbols: vi.fn(),
         ...overrides,
     };
-    render(<TopBar {...props} />);
-    return props;
+    const view = render(<TopBar {...props} />);
+    return { ...props, ...view };
 }
 
 describe('TopBar', () => {
@@ -71,9 +71,22 @@ describe('TopBar', () => {
         const { onOpenSymbols } = renderBar({ symbolCount: 214 });
 
         expect(screen.getByText('214')).toBeTruthy();
-        await user.click(
-            screen.getByRole('button', { name: /Flags & vars/ })
-        );
+        await user.click(screen.getByRole('button', { name: /Flags & vars/ }));
         expect(onOpenSymbols).toHaveBeenCalledOnce();
+    });
+
+    it('describes every major control with accessible tooltips instead of title attributes', () => {
+        const { container } = renderBar();
+
+        expect(container.querySelectorAll('[title]')).toHaveLength(0);
+        const validate = screen.getByRole('button', { name: 'Validate' });
+        fireEvent.focus(validate);
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip.textContent).toContain('Validate project content');
+        expect(tooltip.textContent).toContain('F7');
+        expect(validate.getAttribute('aria-describedby')).toBe(tooltip.id);
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(tooltip.getAttribute('aria-hidden')).toBe('true');
     });
 });

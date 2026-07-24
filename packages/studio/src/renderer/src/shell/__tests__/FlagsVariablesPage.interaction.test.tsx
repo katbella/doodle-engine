@@ -132,22 +132,37 @@ describe('FlagsVariablesPage', () => {
             <Harness onRename={onRename} onOpenReference={onOpenReference} />
         );
 
-        expect(screen.getByText('Checked but never set')).toBeTruthy();
-        expect(screen.getByText('Set but never checked')).toBeTruthy();
-        expect(screen.getByText('Near-identical names')).toBeTruthy();
-        expect(screen.getByText('Notes with no owner')).toBeTruthy();
+        const health = screen.getByRole('region', { name: 'Name health' });
         expect(
-            screen
-                .getByRole('region', { name: 'Name health' })
-                .querySelectorAll('details[open]')
-        ).toHaveLength(0);
+            within(health)
+                .getByRole('button', {
+                    name: /Checked, never set/,
+                })
+                .getAttribute('aria-expanded')
+        ).toBe('true');
+        expect(
+            within(health).getByRole('button', {
+                name: /Set, never checked/,
+            })
+        ).toBeTruthy();
+        expect(
+            within(health).getByRole('button', {
+                name: /Possible name collisions/,
+            })
+        ).toBeTruthy();
+        expect(
+            within(health).getByRole('button', { name: /Orphaned notes/ })
+        ).toBeTruthy();
+        expect(within(health).getByText('4 findings')).toBeTruthy();
         expect(
             screen.queryByText('Select a flag or variable to inspect it.')
         ).toBeNull();
 
-        await user.click(screen.getByText('Notes with no owner'));
         await user.click(
-            screen.getByRole('button', { name: 'Move to metGuide' })
+            within(health).getByRole('button', { name: /Orphaned notes/ })
+        );
+        await user.click(
+            screen.getByRole('button', { name: 'Move note to metGuide' })
         );
         expect(screen.queryByText('metGude')).toBeNull();
 
@@ -201,10 +216,12 @@ describe('FlagsVariablesPage', () => {
             />
         );
 
-        await user.click(screen.getByText('Notes with no owner'));
+        await user.click(
+            screen.getByRole('button', { name: /Orphaned notes/ })
+        );
         expect(
             screen
-                .getByRole('button', { name: 'Move to metGuide' })
+                .getByRole('button', { name: 'Move note to metGuide' })
                 .hasAttribute('disabled')
         ).toBe(true);
         expect(
@@ -233,7 +250,9 @@ describe('FlagsVariablesPage', () => {
 
         await user.type(search, 'gold');
         expect(within(list).queryByText('quest_intro_done')).toBeNull();
-        await user.click(screen.getByText('Set but never checked'));
+        await user.click(
+            screen.getByRole('button', { name: /Set, never checked/ })
+        );
         await user.click(
             within(
                 screen.getByRole('region', { name: 'Name health' })
@@ -292,13 +311,16 @@ describe('FlagsVariablesPage', () => {
         expect(
             screen.getByText('No flags or variables are used yet.')
         ).toBeTruthy();
+        expect(screen.getAllByText('No issues')).toHaveLength(4);
     });
 
     it('deletes an unowned note when notes metadata is writable', async () => {
         const user = userEvent.setup();
         render(<Harness onRename={vi.fn()} onOpenReference={vi.fn()} />);
 
-        await user.click(screen.getByText('Notes with no owner'));
+        await user.click(
+            screen.getByRole('button', { name: /Orphaned notes/ })
+        );
         await user.click(
             screen.getByRole('button', { name: 'Delete note for metGude' })
         );

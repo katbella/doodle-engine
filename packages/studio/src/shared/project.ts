@@ -233,6 +233,11 @@ export interface MenuHandlers {
     onNew: () => void;
     onOpen: () => void;
     onOpenRecent: (path: string) => void;
+    onValidate: () => void;
+    onBuild: () => void;
+    onPreview: () => void;
+    onStopPreview: () => void;
+    onPlaytest: () => void;
     onAbout: (version: string) => void;
     onThemeMode: (mode: ThemeMode) => void;
     onThemeColor: (color: ThemeColor) => void;

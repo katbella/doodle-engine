@@ -474,6 +474,28 @@ describe('App workflows', () => {
         ).toBeTruthy();
     });
 
+    it('runs project actions from native shortcut menu events', async () => {
+        const { bridge, callbacks } = installBridge();
+        await openApp();
+
+        act(() => callbacks.menu?.onPlaytest());
+        expect(screen.getByText('dock:playtest')).toBeTruthy();
+
+        act(() => callbacks.menu?.onValidate());
+        await waitFor(() => expect(bridge.revalidate).toHaveBeenCalled());
+
+        act(() => callbacks.menu?.onBuild());
+        await waitFor(() => expect(bridge.build).toHaveBeenCalled());
+        expect(screen.getByText('dock:build')).toBeTruthy();
+
+        act(() => callbacks.menu?.onPreview());
+        await waitFor(() => expect(bridge.startPreview).toHaveBeenCalled());
+        expect(screen.getByText('dock:devserver')).toBeTruthy();
+
+        act(() => callbacks.menu?.onStopPreview());
+        await waitFor(() => expect(bridge.stopPreview).toHaveBeenCalled());
+    });
+
     it('handles failed opens, recent projects, project creation, and menu events', async () => {
         const openProject = vi
             .fn<StudioApi['openProject']>()
@@ -528,18 +550,18 @@ describe('App workflows', () => {
         const user = userEvent.setup();
         render(<App />);
 
-        expect(
-            await screen.findByText(
-                'Version 0.3.0 is available. You have 0.2.0.'
-            )
-        ).toBeTruthy();
+    expect(
+      await screen.findByRole('dialog', { name: 'Update available' })
+    ).toBeTruthy();
+    expect(screen.getByText('Version 0.3.0')).toBeTruthy();
+    expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Download' }));
         expect(openStudioUpdateDownload).toHaveBeenCalled();
 
         await user.click(screen.getByRole('button', { name: 'Close' }));
-        expect(
-            screen.queryByText('Version 0.3.0 is available. You have 0.2.0.')
-        ).toBeNull();
+    expect(
+      screen.queryByRole('dialog', { name: 'Update available' })
+    ).toBeNull();
     });
 
     it('shows an update reported while a project is open', async () => {
@@ -571,9 +593,11 @@ describe('App workflows', () => {
             })
         );
 
-        expect(
-            screen.getByText('Version 0.3.0 is available. You have 0.2.0.')
-        ).toBeTruthy();
+    expect(
+      screen.getByRole('dialog', { name: 'Update available' })
+    ).toBeTruthy();
+    expect(screen.getByText('Version 0.3.0')).toBeTruthy();
+    expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
         expect(screen.getByText(/Applications folder/i)).toBeTruthy();
     });
 

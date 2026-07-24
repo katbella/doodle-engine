@@ -66,6 +66,7 @@ import {
     Check,
     Play,
     Monitor,
+    ExternalLink,
     Square,
     Palette,
     CircleHelp,
@@ -561,19 +562,6 @@ export function App() {
         setShowNewProject(true);
     }, []);
 
-    useEffect(
-        () =>
-            window.studio.onMenu({
-                onNew: openNewProjectModal,
-                onOpen: () => openProject(),
-                onOpenRecent: (path) => openRecent(path),
-                onAbout: setAboutVersion,
-                onThemeMode: setTheme,
-                onThemeColor: setThemeColor,
-            }),
-        [openProject, openRecent, openNewProjectModal]
-    );
-
     const scheduleReferenceRefresh = useCallback(() => {
         const dir = currentDirRef.current;
         if (!dir) return;
@@ -699,6 +687,36 @@ export function App() {
             setPreviewBusy(false);
         }
     }, []);
+
+    useEffect(
+        () =>
+            window.studio.onMenu({
+                onNew: openNewProjectModal,
+                onOpen: () => void openProject(),
+                onOpenRecent: (path) => void openRecent(path),
+                onValidate: () => void revalidate(),
+                onBuild: () => void runBuild(),
+                onPreview: () => {
+                    if (preview) void window.studio.openPreview();
+                    else void startPreview();
+                },
+                onStopPreview: () => void stopPreview(),
+                onPlaytest: () => setDockTab('playtest'),
+                onAbout: setAboutVersion,
+                onThemeMode: setTheme,
+                onThemeColor: setThemeColor,
+            }),
+        [
+            openNewProjectModal,
+            openProject,
+            openRecent,
+            preview,
+            revalidate,
+            runBuild,
+            startPreview,
+            stopPreview,
+        ]
+    );
 
     const openItem = useCallback(
         (section: SectionKey, itemId: string, label: string) => {
@@ -1043,6 +1061,9 @@ export function App() {
     const activeTab = tabs.find((t) => t.key === activeKey) ?? null;
 
     const canBuild = project.engine.depsInstalled;
+    const buildShortcut = navigator.platform.startsWith('Mac')
+        ? '⌘⇧B'
+        : 'Ctrl Shift B';
     const actionCommands: Command[] = [
         {
             id: 'act:open',
@@ -1063,6 +1084,7 @@ export function App() {
             label: 'Validate',
             group: 'Actions',
             keywords: 'problems check errors',
+            hint: 'F7',
             icon: <Check size={15} />,
             run: () => revalidate(),
         },
@@ -1073,6 +1095,7 @@ export function App() {
                       label: 'Build',
                       group: 'Actions',
                       keywords: 'production dist',
+                      hint: buildShortcut,
                       icon: <Hammer size={15} />,
                       run: () => runBuild(),
                   },
@@ -1083,16 +1106,27 @@ export function App() {
             label: 'Playtest',
             group: 'Actions',
             keywords: 'run play test engine',
+            hint: 'F5',
             icon: <Play size={15} />,
             run: () => setDockTab('playtest'),
         },
         ...(preview
             ? [
                   {
+                      id: 'act:open-preview',
+                      label: 'Open preview',
+                      group: 'Actions',
+                      keywords: 'dev server browser',
+                      hint: 'F6',
+                      icon: <ExternalLink size={15} />,
+                      run: () => void window.studio.openPreview(),
+                  },
+                  {
                       id: 'act:stop-preview',
                       label: 'Stop preview',
                       group: 'Actions',
                       keywords: 'dev server',
+                      hint: 'Shift F6',
                       icon: <Square size={15} />,
                       run: () => stopPreview(),
                   },
@@ -1104,6 +1138,7 @@ export function App() {
                         label: 'Start preview',
                         group: 'Actions',
                         keywords: 'dev server browser',
+                        hint: 'F6',
                         icon: <Monitor size={15} />,
                         run: () => startPreview(),
                     },

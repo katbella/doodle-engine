@@ -440,6 +440,22 @@ describe('Studio main process', () => {
             'menu:openRecent',
             'C:/games/story'
         );
+        const runMenu = state.menuTemplate?.find(
+            (item) => item.label === 'Run'
+        );
+        expect(
+            runMenu.submenu.map((item: any) => item.accelerator).filter(Boolean)
+        ).toEqual(['F5', 'F6', 'Shift+F6', 'F7', 'CmdOrCtrl+Shift+B']);
+        for (const item of runMenu.submenu) item.click?.();
+        for (const channel of [
+            'menu:playtest',
+            'menu:preview',
+            'menu:stopPreview',
+            'menu:validate',
+            'menu:build',
+        ]) {
+            expect(state.webContents.send).toHaveBeenCalledWith(channel);
+        }
         const helpMenu = state.menuTemplate?.find(
             (item) => item.label === 'Help'
         );

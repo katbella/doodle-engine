@@ -103,6 +103,11 @@ const api: StudioApi = {
         const onOpen = () => handlers.onOpen();
         const onOpenRecent = (_event: unknown, path: string) =>
             handlers.onOpenRecent(path);
+        const onValidate = () => handlers.onValidate();
+        const onBuild = () => handlers.onBuild();
+        const onPreview = () => handlers.onPreview();
+        const onStopPreview = () => handlers.onStopPreview();
+        const onPlaytest = () => handlers.onPlaytest();
         const onAbout = (_event: unknown, version: string) =>
             handlers.onAbout(version);
         const onThemeMode = (
@@ -116,6 +121,11 @@ const api: StudioApi = {
         ipcRenderer.on('menu:new', onNew);
         ipcRenderer.on('menu:open', onOpen);
         ipcRenderer.on('menu:openRecent', onOpenRecent);
+        ipcRenderer.on('menu:validate', onValidate);
+        ipcRenderer.on('menu:build', onBuild);
+        ipcRenderer.on('menu:preview', onPreview);
+        ipcRenderer.on('menu:stopPreview', onStopPreview);
+        ipcRenderer.on('menu:playtest', onPlaytest);
         ipcRenderer.on('menu:about', onAbout);
         ipcRenderer.on('menu:themeMode', onThemeMode);
         ipcRenderer.on('menu:themeColor', onThemeColor);
@@ -123,6 +133,11 @@ const api: StudioApi = {
             ipcRenderer.removeListener('menu:new', onNew);
             ipcRenderer.removeListener('menu:open', onOpen);
             ipcRenderer.removeListener('menu:openRecent', onOpenRecent);
+            ipcRenderer.removeListener('menu:validate', onValidate);
+            ipcRenderer.removeListener('menu:build', onBuild);
+            ipcRenderer.removeListener('menu:preview', onPreview);
+            ipcRenderer.removeListener('menu:stopPreview', onStopPreview);
+            ipcRenderer.removeListener('menu:playtest', onPlaytest);
             ipcRenderer.removeListener('menu:about', onAbout);
             ipcRenderer.removeListener('menu:themeMode', onThemeMode);
             ipcRenderer.removeListener('menu:themeColor', onThemeColor);

@@ -153,6 +153,37 @@ async function buildMenu(projects: ProjectService): Promise<void> {
         },
         { role: 'editMenu' },
         { role: 'viewMenu' },
+        {
+            label: 'Run',
+            submenu: [
+                {
+                    label: 'Playtest',
+                    accelerator: 'F5',
+                    click: () => send('menu:playtest'),
+                },
+                {
+                    label: 'Preview',
+                    accelerator: 'F6',
+                    click: () => send('menu:preview'),
+                },
+                {
+                    label: 'Stop Preview',
+                    accelerator: 'Shift+F6',
+                    click: () => send('menu:stopPreview'),
+                },
+                {
+                    label: 'Validate',
+                    accelerator: 'F7',
+                    click: () => send('menu:validate'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Build',
+                    accelerator: 'CmdOrCtrl+Shift+B',
+                    click: () => send('menu:build'),
+                },
+            ],
+        },
         createThemeMenu(themeState, send),
         {
             label: 'Help',

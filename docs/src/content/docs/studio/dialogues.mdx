@@ -85,7 +85,7 @@ Conditions decide whether a choice, trigger, or branch is available. Open the co
 Flag, variable, and stat fields suggest names already used in the project. An existing flag or variable also shows its use summary and note. If Studio labels the text as a **new flag** or **new variable** when you meant to reuse one, check the spelling before adding the condition. See [Flags & Variables](/studio/flags-and-variables/) to review and document names across the project.
 
 <ThemeScreenshot
-    src="/images/studio/condition-builder.png"
+    src="/images/studio/condition-builder.webp"
     alt="Adding a requirement with the condition builder"
 />
 
@@ -127,12 +127,34 @@ For **Play video**, **Play sound**, and **Play music**, select **Choose file…*
 
 ## Use Source mode
 
-Select **Source** to write the dialogue as text or review its `.dlg` file. The editor highlights Doodle’s dialogue syntax. Save the file and select **Validate** to check its syntax and references; problems then appear beside the editor and in the bottom dock.
+Select **Source** to write the dialogue as text or review its `.dlg` file. The editor gives commands, conditions, effects, references, literals, and localization keys distinct colors, making the structure easier to scan. Source and Visual edit the same file; save valid text and either view can pick up where the other left off.
 
 <ThemeScreenshot
     src="/images/studio/dialogue-source.webp"
     alt="A dialogue open in Source mode"
 />
+
+### Dialogue IntelliSense
+
+Suggestions appear as you type. Press `Ctrl+Space` to open them again, use the arrow keys to move through the list, and press Enter or Tab to accept an item.
+
+The list follows the cursor instead of showing every possible word:
+
+- On a new command line, it offers node and routing commands, effects, and complete `REQUIRE` or `IF` condition names.
+- After `REQUIRE` or `IF`, it offers condition names such as `hasFlag` and `questAtStage`.
+- Inside a command, it offers values of the required kind from the current project: flags, variables, stats, characters, items, locations, quests, journal entries, dialogues, and interludes.
+- After a quest ID, it offers that quest’s stages. After `GOTO`, it offers node IDs from the open dialogue and the special `location` route. Boolean arguments offer `true` and `false`.
+
+This context is rebuilt from the text in the editor, so a newly added node can appear in `GOTO` suggestions before the file is saved. Suggestions remain available while a partly written dialogue is temporarily invalid. They stay out of comments and spoken text, where project IDs would only be noise.
+
+<ThemeScreenshot
+    src="/images/studio/dialogue-intellisense.webp"
+    alt="Project flag names suggested for a hasFlag condition in the dialogue Source editor"
+/>
+
+Hover over a dialogue keyword or condition name to see its syntax and argument names without leaving the editor. For example, hovering over `questAtStage` shows the required quest and stage arguments.
+
+Save the file and select **Validate** to check syntax and references. Problems appear on the matching source lines, in the right panel, and in the bottom dock. Selecting a problem returns to its line when Studio can locate it.
 
 Start with [Writing Dialogues](/guides/writing-dialogues/) to learn how to write nodes, choices, conditions, and routes in a `.dlg` file. Use [DSL Syntax](/reference/dsl-syntax/) when you need to look up a keyword or example.
 

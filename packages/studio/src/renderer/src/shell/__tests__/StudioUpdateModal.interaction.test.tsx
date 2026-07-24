@@ -36,7 +36,9 @@ describe('StudioUpdateModal', () => {
             currentVersion: '0.2.0',
             manual: true,
         });
-        expect(screen.getByText('Checking for updates…')).toBeTruthy();
+        expect(
+            screen.getByText('Looking for a newer Studio release…')
+        ).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Download' })).toBeNull();
     });
 
@@ -46,7 +48,7 @@ describe('StudioUpdateModal', () => {
             currentVersion: '0.2.0',
             manual: true,
         });
-        expect(screen.getByText('Doodle Studio is up to date.')).toBeTruthy();
+        expect(screen.getByText('Doodle Studio is up to date')).toBeTruthy();
         expect(screen.getByText('Version 0.2.0')).toBeTruthy();
     });
 
@@ -59,9 +61,9 @@ describe('StudioUpdateModal', () => {
             releaseNotes: null,
             platform: 'windows',
         });
-        expect(
-            screen.getByText('Version 0.3.0 is available. You have 0.2.0.')
-        ).toBeTruthy();
+        expect(screen.getByText('Update available')).toBeTruthy();
+        expect(screen.getByText('Version 0.3.0')).toBeTruthy();
+        expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
         expect(screen.getByText(/run the installer/i)).toBeTruthy();
     });
 
@@ -83,10 +85,13 @@ describe('StudioUpdateModal', () => {
             currentVersion: '0.2.0',
             manual: false,
             version: '0.3.0',
-            releaseNotes: 'What changed',
+            releaseNotes:
+                "## What's Changed\n- **Source editor:** Add project-aware suggestions by @kat in https://github.test/1",
             platform: 'windows',
         });
-        expect(screen.getByText('What changed')).toBeTruthy();
+        expect(
+            screen.getByText('Source editor: Add project-aware suggestions')
+        ).toBeTruthy();
         fireEvent.click(screen.getByText('Download'));
         expect(onDownload).toHaveBeenCalledOnce();
     });
