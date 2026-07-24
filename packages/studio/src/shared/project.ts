@@ -74,6 +74,12 @@ export interface EngineInfo {
     declared: string | null;
     /** Version actually installed in the project's node_modules, if present. */
     installed: string | null;
+    /** Engine version shipped with this copy of Studio. */
+    current: string;
+    /** True when every registry-backed Doodle package can be moved forward. */
+    updateAvailable: boolean;
+    /** True when installed Doodle packages do not all use the same version. */
+    versionMismatch: boolean;
     /** True when the project's dependencies appear to be installed. */
     depsInstalled: boolean;
     /** The package manager the project uses, inferred from its lockfile. */
@@ -351,6 +357,8 @@ export interface StudioApi {
      * streams through onInstallLog; the promise resolves when it finishes.
      */
     installDependencies: (projectDir: string) => Promise<InstallResult>;
+    /** Update every declared Doodle package to Studio's engine version. */
+    updateEnginePackages: (projectDir: string) => Promise<InstallResult>;
     /** Subscribe to streamed dependency-install output. Returns an unsubscribe. */
     onInstallLog: (callback: (dir: string, line: string) => void) => () => void;
     /**

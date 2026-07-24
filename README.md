@@ -9,8 +9,12 @@
 <p align="center">
   <a href="https://github.com/katbella/doodle-engine/actions/workflows/ci.yml"><img src="https://github.com/katbella/doodle-engine/actions/workflows/ci.yml/badge.svg?event=pull_request" alt="CI status"></a>
   <a href="https://www.npmjs.com/package/@doodle-engine/core"><img src="https://img.shields.io/npm/v/%40doodle-engine%2Fcore?label=engine" alt="Doodle Engine npm version"></a>
-  <a href="https://github.com/katbella/doodle-engine/releases"><img src="https://img.shields.io/github/v/release/katbella/doodle-engine?filter=%40doodle-engine%2Fstudio%40*&amp;label=studio" alt="Latest Doodle Studio release"></a>
+  <a href="https://github.com/katbella/doodle-engine/releases/latest"><img src="https://img.shields.io/github/v/release/katbella/doodle-engine?filter=%40doodle-engine%2Fstudio%40*&amp;label=studio" alt="Latest Doodle Studio release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/katbella/doodle-engine" alt="MIT License"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/katbella/doodle-engine/releases/latest"><strong>Download Doodle Studio for Windows or macOS</strong></a>
 </p>
 
 ---
@@ -31,13 +35,13 @@ The engine provides structured systems for dialogue, quests, inventory, characte
 
 [![Editing branching dialogue in Doodle Studio](docs/public/images/studio/studio-dialogue-workspace.webp)](https://doodleengine.dev/studio/)
 
-Read the [Doodle Studio setup guide](https://doodleengine.dev/getting-started/installation/#doodle-studio-setup) or download Doodle Studio for Windows or macOS from [GitHub Releases](https://github.com/katbella/doodle-engine/releases).
+Read the [Doodle Studio setup guide](https://doodleengine.dev/getting-started/installation/#doodle-studio-setup) or [download the latest Doodle Studio release](https://github.com/katbella/doodle-engine/releases/latest) for Windows or macOS.
 
 ---
 
 ## Building a Game
 
-Doodle Studio and the project files work together. You can create and edit story content in Studio without programming as well as open the dialogue and YAML files directly. In the files, you change the game's React components and CSS to adjust what players see.
+Doodle Studio and the project files work together. You can create and edit story content in Studio without programming as well as open and edit the dialogue and game data (YAML) files directly.
 
 - Write branching dialogue with speakers, choices, conditions, and effects
 - Create locations, characters, items, quests, maps, and journal entries
@@ -50,6 +54,12 @@ Doodle Studio and the project files work together. You can create and edit story
 - Check for broken references and content errors
 - Create a production build when the game is ready to publish
 
+## Doodle Studio Features
+- Work in the visual editor or switch to the source mode and take advantage of IntelliSense and highlighting.
+- Designed to be user-friendly and accessible for all developers, whether they are a writer, designer, or programmer.
+- Choose from several themes to customize the appearance of Doodle Studio, including light, dark, and high-contrast options.
+- Resizable panels allow you to adjust the layout of your workspace to suit your workflow and preferences.
+
 ---
 
 ## Rendering and Platforms
@@ -57,6 +67,7 @@ Doodle Studio and the project files work together. You can create and edit story
 The Doodle Engine core has no dependency on a UI framework. While Doodle includes a complete React renderer, a project can use any renderer that connects to the engine.
 
 Games using the included renderer run in a web browser. They can be hosted on the web or wrapped for desktop and mobile.
+You can change the game's built-in React components and CSS to adjust what players see. Or create a UI entirely from scratch using your own components and styles.
 
 For more, see [Customizing Doodle Engine](https://doodleengine.dev/guides/customizing-doodle-engine/).
 
@@ -122,4 +133,4 @@ Report bugs and request features in the [issue tracker](https://github.com/katbe
 
 Doodle Engine is licensed under the [MIT License](LICENSE).
 
-Copyright &copy; Kat Bella.
+Copyright &copy; 2026 Kat Bella.

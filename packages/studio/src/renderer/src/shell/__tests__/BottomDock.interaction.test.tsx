@@ -39,6 +39,9 @@ function project(problems: OpenProject['problems'] = []): OpenProject {
         engine: {
             declared: 'workspace:*',
             installed: '0.1.3',
+            current: '0.2.1',
+            updateAvailable: false,
+            versionMismatch: false,
             depsInstalled: true,
             packageManager: 'yarn',
         },

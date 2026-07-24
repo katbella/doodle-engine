@@ -67,6 +67,9 @@ describe('shell surfaces', () => {
         const engine = {
             declared: 'workspace:*',
             installed: null,
+            current: '0.2.1',
+            updateAvailable: false,
+            versionMismatch: false,
             depsInstalled: false,
             packageManager: 'yarn' as const,
         };

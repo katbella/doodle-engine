@@ -11,7 +11,7 @@ Install Doodle Studio to create a game project. Every new project also includes 
 
 Doodle Studio is the visual desktop editor and the recommended starting point for a first game.
 
-1. Download the current Doodle Studio installer from the [Doodle Engine releases](https://github.com/katbella/doodle-engine/releases) page.
+1. Download the current installer from the [latest Doodle Studio release](https://github.com/katbella/doodle-engine/releases/latest).
 2. Run the installer, then launch **Doodle Studio** from the Start menu or desktop shortcut.
 3. Select **New project…**, name the project and game, and choose where to create it.
 4. Keep **Playable example story** selected and choose **English text with a locale starter file**.

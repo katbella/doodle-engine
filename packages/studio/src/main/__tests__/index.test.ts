@@ -93,6 +93,7 @@ const state = vi.hoisted(() => {
     };
     const watch = vi.fn();
     const readEngineInfo = vi.fn();
+    const pinDoodlePackages = vi.fn();
     const detectPackageManager = vi.fn();
     const syncThemeMenuChecks = vi.fn();
     const createThemeMenu = vi.fn(() => ({ label: 'Themes' }));
@@ -190,6 +191,7 @@ const state = vi.hoisted(() => {
             recovery.clear,
             watch,
             readEngineInfo,
+            pinDoodlePackages,
             detectPackageManager,
             syncThemeMenuChecks,
             createThemeMenu,
@@ -235,6 +237,11 @@ const state = vi.hoisted(() => {
         projects.reload.mockResolvedValue(null);
         watch.mockResolvedValue(undefined);
         readEngineInfo.mockResolvedValue({ depsInstalled: true });
+        pinDoodlePackages.mockResolvedValue([
+            '@doodle-engine/core',
+            '@doodle-engine/react',
+            '@doodle-engine/cli',
+        ]);
         detectPackageManager.mockResolvedValue('yarn');
         shell.openPath.mockResolvedValue('');
         showOpenDialog.mockResolvedValue({ canceled: true, filePaths: [] });
@@ -289,6 +296,7 @@ const state = vi.hoisted(() => {
         recovery,
         watch,
         readEngineInfo,
+        pinDoodlePackages,
         detectPackageManager,
         syncThemeMenuChecks,
         createThemeMenu,
@@ -353,6 +361,9 @@ vi.mock('../watch-service', () => ({
     }),
 }));
 vi.mock('../engine-info', () => ({ readEngineInfo: state.readEngineInfo }));
+vi.mock('../engine-update', () => ({
+    pinDoodlePackages: state.pinDoodlePackages,
+}));
 vi.mock('../package-manager', () => ({
     detectPackageManager: state.detectPackageManager,
 }));
@@ -428,6 +439,21 @@ describe('Studio main process', () => {
         expect(state.browserWindow.loadFile).toHaveBeenCalledWith(
             expect.stringContaining('renderer')
         );
+        const viewMenu = state.menuTemplate?.find(
+            (item) => item.label === 'View'
+        );
+        expect(viewMenu.submenu.map((item: any) => item.role)).toEqual([
+            'resetZoom',
+            'zoomIn',
+            'zoomOut',
+            undefined,
+            'togglefullscreen',
+        ]);
+        expect(
+            viewMenu.submenu.some(
+                (item: any) => item.role === 'toggleDevTools'
+            )
+        ).toBe(false);
 
         const fileMenu = state.menuTemplate?.find(
             (item) => item.label === 'File'
@@ -481,7 +507,7 @@ describe('Studio main process', () => {
         helpMenu.submenu[5].click();
         expect(state.webContents.send).toHaveBeenCalledWith(
             'menu:about',
-            '0.2.0'
+            '0.2.1'
         );
 
         await expect(
@@ -634,6 +660,9 @@ describe('Studio main process', () => {
                 webPreferences: expect.objectContaining({ devTools: true }),
             })
         );
+        expect(
+            state.menuTemplate?.some((item) => item.role === 'viewMenu')
+        ).toBe(true);
     });
 
     it('logs rejected handlers and renderer errors', async () => {
@@ -786,6 +815,21 @@ describe('Studio main process', () => {
         state.spawned[1].emit('error', new Error('not found'));
         await expect(failedInstall).resolves.toEqual({
             ok: false,
+            packageManager: 'yarn',
+        });
+
+        const update = state.ipcHandlers.get('project:updateEngine')?.(
+            {},
+            'C:/games/story'
+        );
+        await vi.waitFor(() => expect(state.spawned).toHaveLength(3));
+        expect(state.pinDoodlePackages).toHaveBeenCalledWith(
+            'C:/games/story',
+            '0.2.1'
+        );
+        state.spawned[2].emit('close', 0);
+        await expect(update).resolves.toEqual({
+            ok: true,
             packageManager: 'yarn',
         });
 

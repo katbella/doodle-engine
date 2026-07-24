@@ -42,6 +42,9 @@ interface EditorAreaProps {
     dirtyTabs: Set<string>;
     staleFiles: Set<string>;
     reveal: { key: string; message: string; seq: number } | null;
+    updatingEngine?: boolean;
+    engineUpdateError?: string | null;
+    onUpdateEngine?: () => void;
     onSelect: (key: string) => void;
     onClose: (key: string) => void;
     onSetViewMode: (key: string, mode: ViewMode) => void;
@@ -87,6 +90,9 @@ function EditorAreaContent({
     dirtyTabs,
     staleFiles,
     reveal,
+    updatingEngine = false,
+    engineUpdateError = null,
+    onUpdateEngine,
     onSelect,
     onClose,
     onSetViewMode,
@@ -421,7 +427,12 @@ function EditorAreaContent({
             {(!active || mode === 'view' || !activePath) &&
                 (!active ? (
                     <div className="editor__body scroll">
-                        <ProjectOverview project={project} />
+                        <ProjectOverview
+                            project={project}
+                            updatingEngine={updatingEngine}
+                            engineUpdateError={engineUpdateError}
+                            onUpdateEngine={onUpdateEngine}
+                        />
                     </div>
                 ) : active.section === 'dialogues' && activePath ? (
                     <div className="editor__source-body">

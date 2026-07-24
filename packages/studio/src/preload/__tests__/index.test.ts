@@ -161,6 +161,11 @@ describe('preload bridge', () => {
                 'project:installDeps',
                 ['dir'],
             ],
+            [
+                () => api.updateEnginePackages('dir'),
+                'project:updateEngine',
+                ['dir'],
+            ],
             [() => api.startPreview('dir'), 'preview:start', ['dir']],
             [() => api.openPreview(), 'preview:open', []],
             [() => api.stopPreview(), 'preview:stop', []],

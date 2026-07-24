@@ -1,8 +1,19 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(
+    readFileSync(
+        fileURLToPath(new URL('./package.json', import.meta.url)),
+        'utf-8'
+    )
+);
 
 export default defineConfig({
+    define: {
+        __DOODLE_VERSION__: JSON.stringify(pkg.version),
+    },
     plugins: [react()],
     resolve: {
         alias: {

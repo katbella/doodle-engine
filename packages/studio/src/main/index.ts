@@ -27,6 +27,7 @@ import { DocumentService } from './document-service';
 import { RecoveryService } from './recovery-service';
 import { WatchService } from './watch-service';
 import { readEngineInfo } from './engine-info';
+import { pinDoodlePackages } from './engine-update';
 import { detectPackageManager } from './package-manager';
 import type { YamlEdit } from '@doodle-engine/toolkit';
 import type {
@@ -45,6 +46,7 @@ import { AssetService } from './asset-service';
 import { FlagVarNotesService } from './flag-var-notes-service';
 import { StudioUpdater } from './studio-updater';
 import { createGithubReleasesLoader } from './studio-release';
+import { STUDIO_VERSION } from './version';
 
 const STUDIO_RELEASE_REPO = 'katbella/doodle-engine';
 
@@ -153,7 +155,18 @@ async function buildMenu(projects: ProjectService): Promise<void> {
             ],
         },
         { role: 'editMenu' },
-        { role: 'viewMenu' },
+        app.isPackaged
+            ? {
+                  label: 'View',
+                  submenu: [
+                      { role: 'resetZoom' },
+                      { role: 'zoomIn' },
+                      { role: 'zoomOut' },
+                      { type: 'separator' },
+                      { role: 'togglefullscreen' },
+                  ],
+              }
+            : { role: 'viewMenu' },
         {
             label: 'Run',
             submenu: [
@@ -217,7 +230,7 @@ async function buildMenu(projects: ProjectService): Promise<void> {
                 },
                 {
                     label: 'About…',
-                    click: () => send('menu:about', app.getVersion()),
+                    click: () => send('menu:about', STUDIO_VERSION),
                 },
             ],
         },
@@ -348,6 +361,32 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
     });
 }
 
+async function updateEnginePackages(
+    projectDir: string,
+    version: string
+): Promise<InstallResult> {
+    const packageManager = await detectPackageManager(projectDir);
+    let packages: string[];
+    try {
+        packages = await pinDoodlePackages(projectDir, version);
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : String(error);
+        sendToRenderer(
+            'install:log',
+            projectDir,
+            `Could not update Doodle Engine: ${message}`
+        );
+        return { ok: false, packageManager };
+    }
+    sendToRenderer(
+        'install:log',
+        projectDir,
+        `Updating ${packages.join(', ')} to ${version}…`
+    );
+    return installDependencies(projectDir);
+}
+
 /**
  * Start the project's dev server in a separate process and open it in the
  * default browser.
@@ -454,7 +493,7 @@ app.whenReady().then(() => {
     void errorLog.initialize().catch((error) => console.error(error));
 
     updater = new StudioUpdater({
-        currentVersion: app.getVersion(),
+        currentVersion: STUDIO_VERSION,
         platform: process.platform,
         loadReleases: createGithubReleasesLoader(STUDIO_RELEASE_REPO),
         openExternal: (url) => shell.openExternal(url),
@@ -480,7 +519,8 @@ app.whenReady().then(() => {
     };
 
     const projects = new ProjectService(
-        join(app.getPath('userData'), 'recent-projects.json')
+        join(app.getPath('userData'), 'recent-projects.json'),
+        STUDIO_VERSION
     );
 
     // Track Studio's own writes so the watcher can ignore them (an autosave
@@ -555,7 +595,7 @@ app.whenReady().then(() => {
         async (_event, dir: string): Promise<StudioBuildResult> => {
             // Refuse early with a readable message rather than letting Vite fail
             // with a raw module-resolution error when deps aren't installed.
-            const info = await readEngineInfo(dir);
+            const info = await readEngineInfo(dir, STUDIO_VERSION);
             if (!info.depsInstalled) {
                 const line =
                     "This project's dependencies aren't installed. Install them, then build.";
@@ -581,6 +621,9 @@ app.whenReady().then(() => {
     );
     handle('project:installDeps', (_event, dir: string) =>
         installDependencies(dir)
+    );
+    handle('project:updateEngine', (_event, dir: string) =>
+        updateEnginePackages(dir, STUDIO_VERSION)
     );
     handle('preview:start', (_event, dir: string) => startPreview(dir));
     handle('preview:open', () => {

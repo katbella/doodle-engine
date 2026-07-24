@@ -119,6 +119,9 @@ vi.mock('../shell/EditorArea', () => ({
             <span>reveal:{props.reveal?.message ?? 'none'}</span>
             <span>notes-error:{props.flagVarPage.notesError ?? 'none'}</span>
             <span>
+                engine-update-error:{props.engineUpdateError ?? 'none'}
+            </span>
+            <span>
                 notes-ready:
                 {props.flagVarPage.notes.flags.met_hero ?? 'none'}
             </span>
@@ -140,6 +143,9 @@ vi.mock('../shell/EditorArea', () => ({
             </button>
             <button onClick={() => props.onClose('characters:hero')}>
                 Close hero tab
+            </button>
+            <button onClick={props.onUpdateEngine}>
+                Update project engine
             </button>
             <button
                 onClick={() => props.flagVarPage.onRename('flag', 'met_hero')}
@@ -346,6 +352,9 @@ function makeProject(depsInstalled = true): OpenProject {
         engine: {
             declared: 'workspace:*',
             installed: depsInstalled ? '0.1.3' : null,
+            current: '0.2.1',
+            updateAvailable: depsInstalled,
+            versionMismatch: false,
             depsInstalled,
             packageManager: 'yarn',
         },
@@ -385,6 +394,7 @@ function installBridge(
         })),
         cancelBuild: vi.fn(),
         installDependencies: vi.fn(async () => ({ ok: true, code: 0 })),
+        updateEnginePackages: vi.fn(async () => ({ ok: true, code: 0 })),
         packageManager: vi.fn(async () => 'yarn'),
         startPreview: vi.fn(async () => ({
             projectDir: 'C:/story',
@@ -648,6 +658,12 @@ describe('App workflows', () => {
                     .getByRole('button', { name: 'Build' })
                     .hasAttribute('disabled')
             ).toBe(false)
+        );
+        await user.click(
+            screen.getByRole('button', { name: 'Update project engine' })
+        );
+        await waitFor(() =>
+            expect(bridge.updateEnginePackages).toHaveBeenCalledWith('C:/story')
         );
 
         act(() => {

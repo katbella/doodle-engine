@@ -61,6 +61,13 @@ describe('createProject language setup', () => {
         expect(firstId).not.toBe(secondId);
         expect(firstApp).toContain("import { PROJECT_ID } from './project'");
         expect(firstApp).toContain('projectId={PROJECT_ID}');
+
+        const packageJson = JSON.parse(
+            await readFile(join(first.projectPath, 'package.json'), 'utf-8')
+        );
+        expect(packageJson.dependencies['@doodle-engine/core']).toBe('0.2.1');
+        expect(packageJson.dependencies['@doodle-engine/react']).toBe('0.2.1');
+        expect(packageJson.devDependencies['@doodle-engine/cli']).toBe('0.2.1');
     });
 
     it('creates literal English content and a commented blank locale file by default', async () => {
