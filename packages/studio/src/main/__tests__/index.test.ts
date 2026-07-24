@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { STUDIO_VERSION } from '../version';
 
 type Listener = (...args: any[]) => any;
 
@@ -507,7 +508,7 @@ describe('Studio main process', () => {
         helpMenu.submenu[5].click();
         expect(state.webContents.send).toHaveBeenCalledWith(
             'menu:about',
-            '0.2.1'
+            STUDIO_VERSION
         );
 
         await expect(
@@ -825,7 +826,7 @@ describe('Studio main process', () => {
         await vi.waitFor(() => expect(state.spawned).toHaveLength(3));
         expect(state.pinDoodlePackages).toHaveBeenCalledWith(
             'C:/games/story',
-            '0.2.1'
+            STUDIO_VERSION
         );
         state.spawned[2].emit('close', 0);
         await expect(update).resolves.toEqual({
