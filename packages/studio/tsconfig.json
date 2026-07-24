@@ -9,7 +9,11 @@
         "lib": ["ES2023", "DOM", "DOM.Iterable"],
         "types": ["node", "electron-vite/node"],
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true
+        "allowImportingTsExtensions": true,
+        "paths": {
+            "@doodle-engine/core": ["../core/src/index.ts"],
+            "@doodle-engine/toolkit": ["../toolkit/src/index.ts"]
+        }
     },
     "include": ["src", "electron.vite.config.ts"]
 }
