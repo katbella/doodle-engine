@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import '@fontsource-variable/archivo';
 import '@fontsource/monaspace-neon';
+import '@fontsource/monaspace-neon/600.css';
 import './styles/tokens.css';
 import './styles/shell.css';
 
