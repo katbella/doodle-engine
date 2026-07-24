@@ -28,7 +28,7 @@ vi.mock('../engine-info', () => ({ readEngineInfo }));
 import { ProjectService } from '../project-service';
 
 describe('ProjectService', () => {
-    const service = new ProjectService('C:/studio/recent.json');
+    const service = new ProjectService('C:/studio/recent.json', '0.2.1');
 
     beforeEach(() => {
         showOpenDialog.mockReset().mockResolvedValue({
@@ -113,7 +113,10 @@ describe('ProjectService', () => {
                 name: 'story-game',
             })
         );
-        expect(readEngineInfo).toHaveBeenCalledWith('C:/games/story');
+        expect(readEngineInfo).toHaveBeenCalledWith(
+            'C:/games/story',
+            '0.2.1'
+        );
     });
 
     it('falls back to the folder name when package metadata is unavailable', async () => {

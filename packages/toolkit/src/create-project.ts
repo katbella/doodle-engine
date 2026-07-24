@@ -11,6 +11,7 @@ import { mkdir, readdir, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { randomUUID } from 'crypto';
 import { parse as parseYaml } from 'yaml';
+import { DOODLE_VERSION } from './version';
 
 // Vite inlines all template files as strings at build time.
 // Keys are relative paths like './templates/content/game.yaml'.
@@ -144,13 +145,13 @@ export async function createProject(
             preview: 'vite preview',
         },
         dependencies: {
-            '@doodle-engine/core': 'latest',
-            '@doodle-engine/react': 'latest',
+            '@doodle-engine/core': DOODLE_VERSION,
+            '@doodle-engine/react': DOODLE_VERSION,
             react: '^19.0.0',
             'react-dom': '^19.0.0',
         },
         devDependencies: {
-            '@doodle-engine/cli': 'latest',
+            '@doodle-engine/cli': DOODLE_VERSION,
             '@types/react': '^19.0.0',
             '@types/react-dom': '^19.0.0',
             '@vitejs/plugin-react': '^4.3.0',

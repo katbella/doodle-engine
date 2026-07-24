@@ -25,9 +25,12 @@ describe('readEngineInfo', () => {
             }),
         });
         try {
-            const info = await readEngineInfo(dir);
+            const info = await readEngineInfo(dir, '0.2.1');
             expect(info.declared).toBe('^0.2.0');
             expect(info.installed).toBe('0.2.0');
+            expect(info.current).toBe('0.2.1');
+            expect(info.updateAvailable).toBe(true);
+            expect(info.versionMismatch).toBe(false);
             expect(info.depsInstalled).toBe(true);
             // No lockfile in the fixture, so the default package manager.
             expect(info.packageManager).toBe('npm');
@@ -43,10 +46,52 @@ describe('readEngineInfo', () => {
             }),
         });
         try {
-            const info = await readEngineInfo(dir);
+            const info = await readEngineInfo(dir, '0.2.1');
             expect(info.declared).toBe('latest');
             expect(info.installed).toBe(null);
             expect(info.depsInstalled).toBe(false);
+            expect(info.updateAvailable).toBe(false);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('reports mismatched Doodle package versions', async () => {
+        const dir = await makeProject({
+            'package.json': JSON.stringify({
+                dependencies: {
+                    '@doodle-engine/core': '0.2.0',
+                    '@doodle-engine/react': '0.1.3',
+                },
+            }),
+            'node_modules/@doodle-engine/core/package.json': JSON.stringify({
+                version: '0.2.0',
+            }),
+            'node_modules/@doodle-engine/react/package.json': JSON.stringify({
+                version: '0.1.3',
+            }),
+        });
+        try {
+            const info = await readEngineInfo(dir, '0.2.1');
+            expect(info.versionMismatch).toBe(true);
+            expect(info.updateAvailable).toBe(true);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('does not replace workspace package references', async () => {
+        const dir = await makeProject({
+            'package.json': JSON.stringify({
+                dependencies: { '@doodle-engine/core': 'workspace:*' },
+            }),
+            'node_modules/@doodle-engine/core/package.json': JSON.stringify({
+                version: '0.1.3',
+            }),
+        });
+        try {
+            const info = await readEngineInfo(dir, '0.2.1');
+            expect(info.updateAvailable).toBe(false);
         } finally {
             await rm(dir, { recursive: true, force: true });
         }

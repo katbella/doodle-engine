@@ -1,6 +1,11 @@
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
+
+const pkg = JSON.parse(
+    readFileSync(resolve(__dirname, 'package.json'), 'utf-8')
+);
 
 /**
  * Electron build config for Doodle Studio.
@@ -18,6 +23,9 @@ import react from '@vitejs/plugin-react';
  */
 export default defineConfig({
     main: {
+        define: {
+            __DOODLE_VERSION__: JSON.stringify(pkg.version),
+        },
         plugins: [externalizeDepsPlugin()],
         build: {
             rollupOptions: {

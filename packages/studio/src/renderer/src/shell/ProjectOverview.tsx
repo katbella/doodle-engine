@@ -1,7 +1,17 @@
 import type { OpenProject } from '../../../shared/project';
 import { ExternalLink } from '../lib/icons';
 
-export function ProjectOverview({ project }: { project: OpenProject }) {
+export function ProjectOverview({
+    project,
+    updatingEngine = false,
+    engineUpdateError = null,
+    onUpdateEngine,
+}: {
+    project: OpenProject;
+    updatingEngine?: boolean;
+    engineUpdateError?: string | null;
+    onUpdateEngine?: () => void;
+}) {
     const r = project.registry;
     const contentGroups: Array<{
         label: string;
@@ -47,6 +57,17 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
     const engineState = project.engine.depsInstalled
         ? `${engineVersion} · Dependencies installed`
         : `${engineVersion} · Install required`;
+    const engineUpdateCopy = engineUpdateError
+        ? engineUpdateError
+        : project.engine.versionMismatch
+          ? `Package versions do not match${
+                project.engine.updateAvailable
+                    ? `. Update them together to ${project.engine.current}.`
+                    : '.'
+            }`
+          : project.engine.updateAvailable
+            ? `${project.engine.current} is available.`
+            : null;
     const startTime = `Day ${project.config.startTime.day} · ${String(
         project.config.startTime.hour
     ).padStart(2, '0')}:00`;
@@ -90,7 +111,41 @@ export function ProjectOverview({ project }: { project: OpenProject }) {
                 </div>
                 <div className="overview__row">
                     <dt>Doodle Engine</dt>
-                    <dd>{engineState}</dd>
+                    <dd className="overview__engine">
+                        <span>{engineState}</span>
+                        {engineUpdateCopy && (
+                            <span
+                                className={`overview__engine-update${
+                                    engineUpdateError
+                                        ? ' overview__engine-update--error'
+                                        : ''
+                                }`}
+                                role="status"
+                                aria-live="polite"
+                            >
+                                <span>{engineUpdateCopy}</span>
+                                {project.engine.updateAvailable &&
+                                    onUpdateEngine && (
+                                        <button
+                                            className="btn overview__engine-action"
+                                            onClick={onUpdateEngine}
+                                            disabled={updatingEngine}
+                                        >
+                                            {updatingEngine ? (
+                                                <>
+                                                    <span className="spinner spinner--sm" />
+                                                    Updating…
+                                                </>
+                                            ) : engineUpdateError ? (
+                                                'Try again'
+                                            ) : (
+                                                'Update project'
+                                            )}
+                                        </button>
+                                    )}
+                            </span>
+                        )}
+                    </dd>
                 </div>
                 <div className="overview__row">
                     <dt>Validation</dt>

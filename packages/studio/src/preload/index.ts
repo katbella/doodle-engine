@@ -63,6 +63,8 @@ const api: StudioApi = {
         ipcRenderer.invoke('project:packageManager', dir),
     installDependencies: (dir) =>
         ipcRenderer.invoke('project:installDeps', dir),
+    updateEnginePackages: (dir) =>
+        ipcRenderer.invoke('project:updateEngine', dir),
     onInstallLog: (callback) => {
         const listener = (_event: unknown, dir: string, line: string) =>
             callback(dir, line);

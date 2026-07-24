@@ -1,7 +1,16 @@
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const pkg = JSON.parse(
+    readFileSync(resolve(__dirname, 'package.json'), 'utf-8')
+);
 
 export default defineConfig({
+    define: {
+        __DOODLE_VERSION__: JSON.stringify(pkg.version),
+    },
     resolve: {
         alias: {
             '@doodle-engine/core': fileURLToPath(

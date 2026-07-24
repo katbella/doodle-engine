@@ -24,7 +24,10 @@ import type {
  * automatically on file changes.
  */
 export class ProjectService {
-    constructor(private readonly recentFile: string) {}
+    constructor(
+        private readonly recentFile: string,
+        private readonly currentEngineVersion: string
+    ) {}
 
     async chooseDirectory(title = 'Choose folder'): Promise<string | null> {
         const result = await dialog.showOpenDialog({
@@ -135,7 +138,10 @@ export class ProjectService {
             config,
             files: Object.fromEntries(fileMap),
             problems,
-            engine: await readEngineInfo(projectDir),
+            engine: await readEngineInfo(
+                projectDir,
+                this.currentEngineVersion
+            ),
         };
     }
 

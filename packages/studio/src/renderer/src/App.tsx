@@ -144,6 +144,9 @@ export function App() {
     // final result lands.
     const [buildLog, setBuildLog] = useState<string[]>([]);
     const [installing, setInstalling] = useState(false);
+    const [engineUpdateError, setEngineUpdateError] = useState<string | null>(
+        null
+    );
     const [installLog, setInstallLog] = useState<string[]>([]);
     const [preview, setPreview] = useState<PreviewStatus | null>(null);
     const [previewBusy, setPreviewBusy] = useState(false);
@@ -203,6 +206,7 @@ export function App() {
     const referenceRefreshSequenceRef = useRef(0);
     useEffect(() => {
         setLastSavedAt(null);
+        setEngineUpdateError(null);
     }, [projectDir]);
     useEffect(() => {
         currentDirRef.current = projectDir ?? null;
@@ -660,6 +664,33 @@ export function App() {
             // on screen.
             if (result.ok && currentDirRef.current === dir) {
                 setProject(await reloadProject(dir));
+            }
+        } finally {
+            setInstalling(false);
+        }
+    }, [project, installing, reloadProject]);
+
+    const updateEngine = useCallback(async () => {
+        if (!project || installing) return;
+        const dir = project.projectDir;
+        setInstalling(true);
+        setEngineUpdateError(null);
+        setInstallLog([]);
+        setDockTab('build');
+        try {
+            const result = await window.studio.updateEnginePackages(dir);
+            if (result.ok && currentDirRef.current === dir) {
+                setProject(await reloadProject(dir));
+            } else if (currentDirRef.current === dir) {
+                setEngineUpdateError(
+                    'The update failed. Check Build output, then try again.'
+                );
+            }
+        } catch {
+            if (currentDirRef.current === dir) {
+                setEngineUpdateError(
+                    'The update could not start. Check Build output, then try again.'
+                );
             }
         } finally {
             setInstalling(false);
@@ -1285,6 +1316,9 @@ export function App() {
                     dirtyTabs={dirtyTabs}
                     staleFiles={staleFiles}
                     reveal={reveal}
+                    updatingEngine={installing}
+                    engineUpdateError={engineUpdateError}
+                    onUpdateEngine={updateEngine}
                     onSelect={setActiveKey}
                     onClose={closeTab}
                     onSetViewMode={setViewMode}

@@ -3410,6 +3410,28 @@ a.build__dest:hover {
     font-size: var(--text-sm);
     text-align: left;
 }
+.overview__engine {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+.overview__engine-update {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text-dim);
+    font-family: var(--font-ui);
+    line-height: var(--leading-body);
+}
+.overview__engine-update--error {
+    color: var(--error);
+}
+.overview__engine-action {
+    flex: none;
+    padding: 4px var(--space-2);
+    color: var(--text);
+}
 .overview__rows--compact {
     border-bottom-color: var(--border-faint);
 }

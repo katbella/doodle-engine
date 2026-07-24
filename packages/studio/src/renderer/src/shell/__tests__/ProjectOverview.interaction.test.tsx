@@ -35,6 +35,9 @@ const project = {
     engine: {
         declared: '^0.2.0',
         installed: '0.2.0-rc.1',
+        current: '0.2.1',
+        updateAvailable: true,
+        versionMismatch: false,
         depsInstalled: true,
         packageManager: 'yarn',
     },
@@ -99,5 +102,62 @@ describe('ProjectOverview', () => {
         );
 
         expect(screen.getByText('1 file')).toBeTruthy();
+    });
+
+    it('offers a plain project update action and reports mismatched packages', async () => {
+        const onUpdateEngine = vi.fn();
+        const user = userEvent.setup();
+        const { rerender } = render(
+            <ProjectOverview
+                project={project}
+                onUpdateEngine={onUpdateEngine}
+            />
+        );
+
+        expect(screen.getByText('0.2.1 is available.')).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: 'Update project' })
+        );
+        expect(onUpdateEngine).toHaveBeenCalledOnce();
+
+        rerender(
+            <ProjectOverview
+                project={
+                    {
+                        ...project,
+                        engine: {
+                            ...project.engine,
+                            versionMismatch: true,
+                        },
+                    } as OpenProject
+                }
+                updatingEngine
+                onUpdateEngine={onUpdateEngine}
+            />
+        );
+        expect(
+            screen.getByText(
+                'Package versions do not match. Update them together to 0.2.1.'
+            )
+        ).toBeTruthy();
+        expect(
+            (
+                screen.getByRole('button', {
+                    name: /Updating/,
+                }) as HTMLButtonElement
+            ).disabled
+        ).toBe(true);
+
+        rerender(
+            <ProjectOverview
+                project={project}
+                engineUpdateError="The update failed. Check Build output, then try again."
+                onUpdateEngine={onUpdateEngine}
+            />
+        );
+        expect(screen.getByText(/The update failed/)).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: 'Try again' })
+        ).toBeTruthy();
     });
 });
