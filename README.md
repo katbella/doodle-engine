@@ -1,58 +1,64 @@
+<p align="center">
+  <img src="packages/studio/build/icon.png" alt="Doodle Engine icon" width="120" height="120">
+</p>
+
 <h1 align="center">Doodle Engine</h1>
 
-<p align="center">A dialogue-driven engine for RPGs and narrative adventure games.</p>
+<p align="center">A game engine for text adventure games, narrative adventures, and RPGs.</p>
+
+<p align="center">
+  <a href="https://github.com/katbella/doodle-engine/actions/workflows/ci.yml"><img src="https://github.com/katbella/doodle-engine/actions/workflows/ci.yml/badge.svg?event=pull_request" alt="CI status"></a>
+  <a href="https://www.npmjs.com/package/@doodle-engine/core"><img src="https://img.shields.io/npm/v/%40doodle-engine%2Fcore?label=engine" alt="Doodle Engine npm version"></a>
+  <a href="https://github.com/katbella/doodle-engine/releases"><img src="https://img.shields.io/github/v/release/katbella/doodle-engine?filter=%40doodle-engine%2Fstudio%40*&amp;label=studio" alt="Latest Doodle Studio release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/katbella/doodle-engine" alt="MIT License"></a>
+</p>
 
 ---
 
 ## About
 
-Doodle Engine is an engine for building text-driven RPGs and adventure games. It focuses on dialogue, narrative flow, and world state rather than movement, combat, or pathfinding.
+Doodle Engine is a game engine for text adventure games, narrative adventures, and RPGs. It focuses on dialogue, narrative flow, and world state rather than movement, combat, or pathfinding.
 
-It is inspired by how the Infinity Engine (the engine powering Baldur’s Gate I and II, Icewind Dale, and Planescape: Torment) handled dialogue and scripting, but it is not tied to any specific ruleset or genre. The goal is to give writers and programmers a flexible foundation for story-heavy games.
+It is inspired by how the late-1990s and early-2000s Infinity Engine games (including _Baldur's Gate_, _Baldur's Gate II_, _Icewind Dale_, and _Planescape: Torment_) handled dialogue and scripting, but it is not tied to any specific ruleset or genre. The goal is to give writers and programmers a flexible foundation for story-heavy games.
 
 The engine provides structured systems for dialogue, quests, inventory, characters, relationships, locations, journal entries, save/load, audio, video cutscenes, and localization.
 
 ---
 
-## For Writers
+## Doodle Studio
 
-Games are written in plain text and YAML. No programming is required to build story content.
+[Doodle Studio](https://doodleengine.dev/studio/) lets you create, edit, validate, and playtest Doodle Engine projects. It works directly with the same dialogue and YAML files used by the engine and CLI, and includes a [source editor](https://doodleengine.dev/studio/workspace/) when you want to work with the files directly.
 
-- Dialogue written in a readable script format with speakers, choices, branching, conditions, and effects
-- World data in YAML: locations, characters, items, quests, and journal entries
-- Conditions based on flags, variables, items, quest stages, relationships, and time of day
-- Dice rolls for skill checks and random outcomes
-- Narrative interludes for chapter screens, dream sequences, and story moments
-- Localization using translation keys and locale files
-- Hot reload while writing
-- Validation that catches missing references and structural errors before you play
+[![Editing branching dialogue in Doodle Studio](docs/public/images/studio/studio-dialogue-workspace.webp)](https://doodleengine.dev/studio/)
 
-The focus is on letting writers iterate quickly.
+Read the [Doodle Studio setup guide](https://doodleengine.dev/getting-started/installation/#doodle-studio-setup) or download Doodle Studio for Windows or macOS from [GitHub Releases](https://github.com/katbella/doodle-engine/releases).
 
 ---
 
-## For Developers
+## Building a Game
 
-The engine is written in TypeScript and built around a predictable state model.
+Doodle Studio and the project files work together. You can create and edit story content in Studio without programming. You can also open the dialogue and YAML files directly, and change the game's React components and CSS to adjust what players see.
 
-- Framework-agnostic core with no UI dependencies
-- One-way data flow where actions produce snapshots and renderers display them
-- React renderer with components for dialogue, choices, inventory, journal, map, and characters, plus a complete game shell
-- Asset preloading so images and audio are ready before they appear
-- Audio support for music, sound effects, and voice lines
-- Video cutscene playback
-- Dev tools exposed on `window.doodle` for testing and debugging
-- CLI for project scaffolding, development, builds, and validation
-
-The architecture is meant to stay understandable as projects grow.
+- Write branching dialogue with speakers, choices, conditions, and effects
+- Create locations, characters, items, quests, maps, and journal entries
+- Make choices and outcomes respond to inventory, quests, relationships, past decisions, and time of day
+- Use dice rolls for skill checks and random outcomes
+- Create narrative interludes for chapter screens, dream sequences, and story moments
+- Localize your game by adding translation keys and language files
+- Add images, music, sound effects, voice lines, and video
+- See changes while the game is running
+- Check for broken references and content errors
+- Create a production build when the game is ready to publish
 
 ---
 
-## Customization
+## Rendering and Platforms
 
-The core engine does not assume a renderer or UI framework. You can build your own renderer or replace parts of the provided one.
+The Doodle Engine core has no dependency on a UI framework. Doodle includes a complete React renderer. A project can use any renderer that connects to the engine.
 
-For deeper customization guidance, see the documentation site.
+Games using the included renderer run in a web browser. They can be hosted on the web or wrapped for desktop and mobile. Other renderers can present the same game state and handle player input in their own environment.
+
+For more, see [Customizing Doodle Engine](https://doodleengine.dev/guides/customizing-doodle-engine/).
 
 ---
 
@@ -75,16 +81,45 @@ npm run dev
 | `@doodle-engine/react`   | React components and hooks                                       |
 | `@doodle-engine/toolkit` | Project loading, validation, dev server, builds, and scaffolding |
 | `@doodle-engine/cli`     | The `doodle` command line over the toolkit                       |
-| `@doodle-engine/studio`  | Doodle Studio, a desktop editor for game projects (not published) |
+| `@doodle-engine/studio`  | Doodle Studio, distributed through GitHub Releases               |
 
 ---
 
 ## Documentation
 
-https://doodleengine.dev/
+Start with the [Doodle Studio walkthrough](https://doodleengine.dev/studio/) or [make your first game](https://doodleengine.dev/getting-started/your-first-game/). The complete documentation is at [doodleengine.dev](https://doodleengine.dev/).
+
+---
+
+## Development
+
+Doodle Engine requires Node.js 24 or newer and uses Yarn 4.
+
+```bash
+corepack enable
+yarn install --immutable
+yarn build
+yarn test
+```
+
+Run Doodle Studio in development mode with:
+
+```bash
+yarn studio
+```
+
+---
+
+## Issues
+
+If you run into a problem, start with [Reporting Issues and Feedback](https://doodleengine.dev/reference/reporting-issues/). It includes troubleshooting steps and explains what information to include in a report.
+
+Report bugs and request features in the [issue tracker](https://github.com/katbella/doodle-engine/issues).
 
 ---
 
 ## License
 
-MIT
+Doodle Engine is licensed under the [MIT License](LICENSE).
+
+Copyright &copy; Kat Bella.

@@ -255,6 +255,187 @@ describe('PlaytestSession', () => {
         expect(session.version).toBeGreaterThan(v0);
     });
 
+    it('exposes the current speaker line and runs choice and locale actions', () => {
+        const session = new PlaytestSession(registry(), config());
+        expect(session.speakerLine()).toBeNull();
+
+        session.startAtNode('bartender', 'rumors');
+        expect(session.speakerLine()).toEqual({
+            text: 'Heard the captain has been paying the miller.',
+        });
+
+        const beforeChoice = session.version;
+        session.selectChoice('interesting');
+        expect(session.version).toBe(beforeChoice + 1);
+        expect(session.speakerLine()?.text).toBe('Anything else?');
+
+        const beforeLocale = session.version;
+        session.setLocale('en');
+        expect(session.version).toBe(beforeLocale + 1);
+    });
+
+    it('continues a linear node and can clear the resulting trace', () => {
+        const content = registry();
+        content.dialogues.bartender.nodes.push({
+            id: 'linear',
+            speaker: 'bartender',
+            text: 'One more thing.',
+            choices: [],
+            effects: [],
+            next: 'start',
+        });
+        const session = new PlaytestSession(content, config());
+
+        session.startAtNode('bartender', 'linear');
+        expect(session.speakerLine()?.text).toBe('One more thing.');
+        const beforeContinue = session.version;
+        session.continue();
+        expect(session.version).toBe(beforeContinue + 1);
+        expect(session.speakerLine()?.text).toBe('Anything else?');
+        session.continue();
+        expect(session.inDialogue()).toBe(false);
+        expect(session.getTrace().length).toBeGreaterThan(0);
+
+        const beforeClear = session.version;
+        session.clearTrace();
+        expect(session.getTrace()).toHaveLength(0);
+        expect(session.version).toBe(beforeClear + 1);
+    });
+
+    it('explains each hidden world-state requirement in writer-facing terms', () => {
+        const content = registry();
+        content.dialogues.bartender.nodes[0].choices.push(
+            {
+                id: 'flag',
+                text: 'Flag',
+                conditions: [{ type: 'hasFlag', flag: 'introduced' }],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'not-flag',
+                text: 'Not flag',
+                conditions: [{ type: 'notFlag', flag: 'doorLocked' }],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'item',
+                text: 'Item',
+                conditions: [{ type: 'hasItem', itemId: 'missing_key' }],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'location',
+                text: 'Location',
+                conditions: [{ type: 'atLocation', locationId: 'market' }],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'character-location',
+                text: 'Character location',
+                conditions: [
+                    {
+                        type: 'characterAt',
+                        characterId: 'bartender',
+                        locationId: 'market',
+                    },
+                ],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'party',
+                text: 'Party',
+                conditions: [
+                    {
+                        type: 'characterInParty',
+                        characterId: 'bartender',
+                    },
+                ],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'relationship-above',
+                text: 'Relationship above',
+                conditions: [
+                    {
+                        type: 'relationshipAbove',
+                        characterId: 'bartender',
+                        value: 1,
+                    },
+                ],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'relationship-below',
+                text: 'Relationship below',
+                conditions: [
+                    {
+                        type: 'relationshipBelow',
+                        characterId: 'bartender',
+                        value: -1,
+                    },
+                ],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'time',
+                text: 'Time',
+                conditions: [{ type: 'timeIs', startHour: 20, endHour: 23 }],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'item-location',
+                text: 'Item location',
+                conditions: [
+                    {
+                        type: 'itemAt',
+                        itemId: 'old_coin',
+                        locationId: 'market',
+                    },
+                ],
+                effects: [],
+                next: 'start',
+            },
+            {
+                id: 'roll',
+                text: 'Roll',
+                conditions: [{ type: 'roll', min: 1, max: 1, threshold: 2 }],
+                effects: [],
+                next: 'start',
+            }
+        );
+        const start = config();
+        start.startFlags.doorLocked = true;
+        const session = new PlaytestSession(content, start);
+
+        session.startAtNode('bartender', 'rumors');
+        const reasons = Object.fromEntries(
+            session.choiceRows().map((row) => [row.id, row.reason])
+        );
+
+        expect(reasons).toMatchObject({
+            flag: 'flag introduced is not set',
+            'not-flag': 'flag doorLocked is set',
+            item: 'missing_key not in inventory',
+            location: 'at tavern',
+            'character-location': 'bartender is at tavern',
+            party: 'bartender not in party',
+            'relationship-above': 'relationship is 0',
+            'relationship-below': 'relationship is 0',
+            time: 'hour is 8',
+            'item-location': 'old_coin is at inventory',
+            roll: 'roll did not meet the threshold',
+        });
+    });
+
     describe('reloadSession', () => {
         it('reflects edited content while keeping the tester at the same node', () => {
             const session = new PlaytestSession(registry(), config(), '/p');

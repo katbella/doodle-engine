@@ -17,6 +17,19 @@ vi.mock('../SourceView', () => ({
 vi.mock('../DialogueEditor', () => ({
     DialogueEditor: (props: any) => <div>dialogue:{props.dialogueId}</div>,
 }));
+vi.mock('../DialogueGraphView', () => ({
+    DialogueGraphView: (props: any) => (
+        <div>
+            graph:{props.dialogueId}
+            <button onClick={() => props.onSelectNode('middle')}>
+                Select graph node
+            </button>
+            <button onClick={() => props.onOpenNode('ending')}>
+                Open graph node
+            </button>
+        </div>
+    ),
+}));
 vi.mock('../EntityForm', () => ({
     EntityForm: (props: any) => <div>entity:{props.section}</div>,
 }));
@@ -179,6 +192,35 @@ describe('EditorArea', () => {
         expect(onSetViewMode).toHaveBeenCalledWith('characters:hero', 'view');
         await user.click(screen.getByRole('button', { name: 'Source' }));
         expect(onSetViewMode).toHaveBeenCalledWith('characters:hero', 'source');
+    });
+
+    it('selects and opens dialogue nodes from graph mode', async () => {
+        const user = userEvent.setup();
+        const { callbacks } = renderArea({
+            activeKey: 'dialogues:intro',
+            viewModes: { 'dialogues:intro': 'graph' },
+        });
+
+        expect(screen.getByText(/graph:intro/)).toBeTruthy();
+        await user.click(
+            screen.getByRole('button', { name: 'Select graph node' })
+        );
+        expect(callbacks.onSelectNode).toHaveBeenCalledWith(
+            'dialogues:intro',
+            'middle'
+        );
+
+        await user.click(
+            screen.getByRole('button', { name: 'Open graph node' })
+        );
+        expect(callbacks.onSelectNode).toHaveBeenLastCalledWith(
+            'dialogues:intro',
+            'ending'
+        );
+        expect(callbacks.onSetViewMode).toHaveBeenCalledWith(
+            'dialogues:intro',
+            'view'
+        );
     });
 
     it('closes tabs with middle-click and offers close-others/all on right-click', async () => {

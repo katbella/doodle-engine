@@ -43,6 +43,8 @@ jobs:
         run: |
           before="${{ github.event.before }}"
           if ! git cat-file -e "${before}:packages/studio/package.json" 2>/dev/null; then
+            current="$(node -p "require('./packages/studio/package.json').version")"
+            echo "version=$current" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           previous="$(git show "${before}:packages/studio/package.json" | node -e "let data=''; process.stdin.on('data', chunk => data += chunk); process.stdin.on('end', () => process.stdout.write(JSON.parse(data).version))")"

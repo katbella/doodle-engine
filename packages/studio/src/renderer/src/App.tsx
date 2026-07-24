@@ -1259,6 +1259,7 @@ export function App() {
                 <LeftRail
                     sections={sections}
                     activeKey={activeKey}
+                    onOpenOverview={() => setActiveKey(null)}
                     onOpenItem={openItem}
                     onNewItem={(section) => setNewItemSection(section)}
                     onDeleteItem={(section, id, label) =>

@@ -84,6 +84,7 @@ vi.mock('../shell/EngineBanner', () => ({
 vi.mock('../shell/LeftRail', () => ({
     LeftRail: (props: any) => (
         <div>
+            <button onClick={props.onOpenOverview}>Show overview</button>
             <button
                 onClick={() => props.onOpenItem('characters', 'hero', 'Hero')}
             >
@@ -528,6 +529,10 @@ describe('App workflows', () => {
         expect(
             screen.getByRole('dialog', { name: 'Doodle Studio' })
         ).toBeTruthy();
+        expect(screen.getByText('Version 0.2.0')).toBeTruthy();
+        expect(
+            screen.getByText(`© ${new Date().getFullYear()} Kat Bella`)
+        ).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Close' }));
     });
 
@@ -550,18 +555,18 @@ describe('App workflows', () => {
         const user = userEvent.setup();
         render(<App />);
 
-    expect(
-      await screen.findByRole('dialog', { name: 'Update available' })
-    ).toBeTruthy();
-    expect(screen.getByText('Version 0.3.0')).toBeTruthy();
-    expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
+        expect(
+            await screen.findByRole('dialog', { name: 'Update available' })
+        ).toBeTruthy();
+        expect(screen.getByText('Version 0.3.0')).toBeTruthy();
+        expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Download' }));
         expect(openStudioUpdateDownload).toHaveBeenCalled();
 
         await user.click(screen.getByRole('button', { name: 'Close' }));
-    expect(
-      screen.queryByRole('dialog', { name: 'Update available' })
-    ).toBeNull();
+        expect(
+            screen.queryByRole('dialog', { name: 'Update available' })
+        ).toBeNull();
     });
 
     it('shows an update reported while a project is open', async () => {
@@ -593,11 +598,11 @@ describe('App workflows', () => {
             })
         );
 
-    expect(
-      screen.getByRole('dialog', { name: 'Update available' })
-    ).toBeTruthy();
-    expect(screen.getByText('Version 0.3.0')).toBeTruthy();
-    expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
+        expect(
+            screen.getByRole('dialog', { name: 'Update available' })
+        ).toBeTruthy();
+        expect(screen.getByText('Version 0.3.0')).toBeTruthy();
+        expect(screen.getByText('Installed: 0.2.0')).toBeTruthy();
         expect(screen.getByText(/Applications folder/i)).toBeTruthy();
     });
 
@@ -683,6 +688,9 @@ describe('App workflows', () => {
 
         await user.click(screen.getByRole('button', { name: 'Open hero' }));
         expect(screen.getByText('characters:hero')).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Show overview' }));
+        expect(screen.getByText('no-active-tab')).toBeTruthy();
+        await user.click(screen.getByRole('button', { name: 'Open hero' }));
         await user.click(screen.getByRole('button', { name: 'Mark dirty' }));
         expect(screen.getByText('dirty-tab')).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Mark modified' }));

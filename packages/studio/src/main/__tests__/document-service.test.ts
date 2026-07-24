@@ -1,12 +1,48 @@
-import { describe, it, expect } from 'vitest';
-import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { describe, it, expect, vi } from 'vitest';
+import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { DocumentService } from '../document-service';
+import { DocumentService, renameWithRetry } from '../document-service';
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('DocumentService', () => {
+    it('retries transient Windows rename failures with bounded backoff', async () => {
+        const transient = Object.assign(new Error('file is briefly locked'), {
+            code: 'EPERM',
+        });
+        const rename = vi
+            .fn()
+            .mockRejectedValueOnce(transient)
+            .mockRejectedValueOnce(transient)
+            .mockResolvedValue(undefined);
+        const delays: number[] = [];
+
+        await renameWithRetry(
+            'temp.yaml',
+            'target.yaml',
+            rename,
+            async (ms) => {
+                delays.push(ms);
+            }
+        );
+
+        expect(rename).toHaveBeenCalledTimes(3);
+        expect(delays).toEqual([10, 25]);
+    });
+
+    it('does not retry non-transient rename failures', async () => {
+        const failure = Object.assign(new Error('invalid path'), {
+            code: 'EINVAL',
+        });
+        const rename = vi.fn().mockRejectedValue(failure);
+
+        await expect(
+            renameWithRetry('temp.yaml', 'target.yaml', rename)
+        ).rejects.toBe(failure);
+        expect(rename).toHaveBeenCalledOnce();
+    });
+
     it('reads a file, writes it atomically, and reads the new content back', async () => {
         const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
         try {
@@ -74,6 +110,60 @@ describe('DocumentService', () => {
         }
     });
 
+    it('renames a file and notifies the write hook for both paths', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const writes: string[] = [];
+            const svc = new DocumentService((path) => writes.push(path));
+            await writeFile(join(dir, 'old.txt'), 'keep me');
+
+            await svc.renameFile(dir, 'old.txt', 'new.txt');
+
+            expect(await readFile(join(dir, 'new.txt'), 'utf-8')).toBe(
+                'keep me'
+            );
+            await expect(
+                readFile(join(dir, 'old.txt'), 'utf-8')
+            ).rejects.toThrow();
+            expect(writes).toEqual([
+                join(dir, 'old.txt'),
+                join(dir, 'new.txt'),
+            ]);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it('writes YAML field edits without losing comments or unrelated keys', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        try {
+            const file = join(dir, 'character.yaml');
+            await writeFile(
+                file,
+                '# shopkeeper\nid: merchant\nname: Old Name\ncustom: keep\n'
+            );
+            const writes: string[] = [];
+            const svc = new DocumentService((path) => writes.push(path));
+            const original = await svc.read(dir, 'character.yaml');
+
+            const result = await svc.writeEntityFields(
+                dir,
+                'character.yaml',
+                [{ path: ['name'], value: 'New Name' }],
+                original.mtimeMs
+            );
+
+            expect(result.ok).toBe(true);
+            const saved = await readFile(file, 'utf-8');
+            expect(saved).toContain('# shopkeeper');
+            expect(saved).toContain('name: New Name');
+            expect(saved).toContain('custom: keep');
+            expect(writes).toEqual([file]);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
     it('refuses to delete a path that escapes the project', async () => {
         const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
         try {
@@ -115,7 +205,11 @@ describe('DocumentService external deletes and links', () => {
             const { mkdir, symlink } = await import('node:fs/promises');
             await writeFile(join(outside, 'linked.yaml'), 'id: linked\n');
             await mkdir(join(dir, 'content'), { recursive: true });
-            await symlink(outside, join(dir, 'content', 'locations'), 'junction');
+            await symlink(
+                outside,
+                join(dir, 'content', 'locations'),
+                'junction'
+            );
 
             const svc = new DocumentService();
             await expect(

@@ -11,6 +11,43 @@ import { join, resolve, dirname, basename, sep } from 'path';
 import { applyYamlEdits, type YamlEdit } from '@doodle-engine/toolkit';
 import type { DocumentContent, WriteResult } from '../shared/project';
 
+type RenameOperation = (from: string, to: string) => Promise<void>;
+type WaitOperation = (delayMs: number) => Promise<void>;
+
+const RENAME_RETRY_DELAYS_MS = [10, 25, 50, 100, 200];
+const RETRYABLE_RENAME_CODES = new Set(['EACCES', 'EBUSY', 'EPERM']);
+
+const wait: WaitOperation = (delayMs) =>
+    new Promise((resolveWait) => setTimeout(resolveWait, delayMs));
+
+/**
+ * Windows can briefly hold a destination file while an editor, indexer, or
+ * antivirus scanner inspects it. Retry only those transient rename errors;
+ * all other filesystem failures still surface immediately.
+ */
+export async function renameWithRetry(
+    from: string,
+    to: string,
+    renameFile: RenameOperation = rename,
+    waitForRetry: WaitOperation = wait
+): Promise<void> {
+    for (let attempt = 0; ; attempt++) {
+        try {
+            await renameFile(from, to);
+            return;
+        } catch (error) {
+            const code = (error as NodeJS.ErrnoException).code;
+            const delayMs = RENAME_RETRY_DELAYS_MS[attempt];
+            if (
+                !RETRYABLE_RENAME_CODES.has(code ?? '') ||
+                delayMs === undefined
+            )
+                throw error;
+            await waitForRetry(delayMs);
+        }
+    }
+}
+
 /**
  * Reads and writes individual project files for the editor.
  *
@@ -102,9 +139,14 @@ export class DocumentService {
             `.${basename(abs)}.tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`
         );
         await mkdir(dirname(abs), { recursive: true });
-        await writeFile(temp, content, 'utf-8');
-        this.onWrite?.(abs);
-        await rename(temp, abs);
+        try {
+            await writeFile(temp, content, 'utf-8');
+            this.onWrite?.(abs);
+            await renameWithRetry(temp, abs);
+        } catch (error) {
+            await unlink(temp).catch(() => undefined);
+            throw error;
+        }
 
         const info = await stat(abs);
         return { ok: true, conflict: false, mtimeMs: info.mtimeMs };
@@ -127,7 +169,7 @@ export class DocumentService {
         const to = await this.resolveInProject(projectDir, toRel);
         this.onWrite?.(from);
         this.onWrite?.(to);
-        await rename(from, to);
+        await renameWithRetry(from, to);
     }
 
     /**

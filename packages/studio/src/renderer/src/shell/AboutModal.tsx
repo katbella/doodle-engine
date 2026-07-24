@@ -8,6 +8,7 @@ export function AboutModal({
     version: string;
     onClose: () => void;
 }) {
+    const currentYear = new Date().getFullYear();
     useModalDismiss(onClose);
     return (
         <OverlayPortal>
@@ -26,6 +27,9 @@ export function AboutModal({
                     <p className="modal__message">
                         A visual editor and playtesting environment for Doodle
                         Engine games.
+                    </p>
+                    <p className="about__copyright">
+                        &copy; {currentYear} Kat Bella
                     </p>
                     <div className="modal__actions">
                         <button className="btn btn--accent" onClick={onClose}>

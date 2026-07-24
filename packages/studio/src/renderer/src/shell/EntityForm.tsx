@@ -62,6 +62,7 @@ function EntityFormInner({
     const [mtimeMs, setMtimeMs] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [conflict, setConflict] = useState(false);
     const [missing, setMissing] = useState(false);
 
@@ -69,6 +70,7 @@ function EntityFormInner({
         let alive = true;
         setLoading(true);
         setError(null);
+        setSaveError(null);
         setConflict(false);
         (async () => {
             try {
@@ -112,21 +114,28 @@ function EntityFormInner({
 
     const save = async (force = false) => {
         if (edits.length === 0) return;
-        const result = await window.studio.writeEntity(
-            dir,
-            path,
-            edits,
-            force ? undefined : mtimeMs
-        );
-        if (result.conflict) {
-            if (result.missing) setMissing(true);
-            else setConflict(true);
-            setMtimeMs(result.mtimeMs);
-        } else if (result.ok) {
-            setSaved(values);
-            setMtimeMs(result.mtimeMs);
-            setConflict(false);
-            onModified(path);
+        setSaveError(null);
+        try {
+            const result = await window.studio.writeEntity(
+                dir,
+                path,
+                edits,
+                force ? undefined : mtimeMs
+            );
+            if (result.conflict) {
+                if (result.missing) setMissing(true);
+                else setConflict(true);
+                setMtimeMs(result.mtimeMs);
+            } else if (result.ok) {
+                setSaved(values);
+                setMtimeMs(result.mtimeMs);
+                setConflict(false);
+                onModified(path);
+            }
+        } catch (reason) {
+            setSaveError(
+                reason instanceof Error ? reason.message : String(reason)
+            );
         }
     };
 
@@ -206,6 +215,22 @@ function EntityFormInner({
                         This file was deleted outside Studio. Close the tab, or
                         recreate the item from the sidebar.
                     </span>
+                </div>
+            )}
+            {saveError && (
+                <div className="banner" title={saveError}>
+                    <TriangleAlert
+                        className="banner__icon"
+                        size={15}
+                        aria-hidden
+                    />
+                    <span>
+                        Studio couldn’t save this file. Your edits are still
+                        here.
+                    </span>
+                    <button className="btn" onClick={() => void save()}>
+                        Retry
+                    </button>
                 </div>
             )}
 

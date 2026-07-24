@@ -199,4 +199,35 @@ describe('EntityForm author journeys', () => {
         ).toBeTruthy();
         expect((name as HTMLInputElement).value).toBe('My Town');
     });
+
+    it('keeps edits available and offers a retry when an autosave fails', async () => {
+        const writeEntity = vi
+            .fn<StudioApi['writeEntity']>()
+            .mockRejectedValueOnce(new Error('EPERM: file is locked'))
+            .mockResolvedValueOnce({
+                ok: true,
+                conflict: false,
+                mtimeMs: 11,
+            });
+        installBridge(writeEntity);
+        renderEditor();
+
+        const user = userEvent.setup();
+        const name = await screen.findByDisplayValue('Old Town');
+        await user.clear(name);
+        await user.type(name, 'My Town');
+
+        expect(
+            await screen.findByText(/couldn’t save this file/i, undefined, {
+                timeout: 2000,
+            })
+        ).toBeTruthy();
+        expect((name as HTMLInputElement).value).toBe('My Town');
+
+        await user.click(screen.getByRole('button', { name: 'Retry' }));
+        await waitFor(() => expect(writeEntity).toHaveBeenCalledTimes(2));
+        await waitFor(() =>
+            expect(screen.queryByText(/couldn’t save this file/i)).toBeNull()
+        );
+    });
 });

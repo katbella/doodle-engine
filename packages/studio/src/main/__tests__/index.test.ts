@@ -419,6 +419,7 @@ describe('Studio main process', () => {
                 width: 1440,
                 webPreferences: expect.objectContaining({
                     contextIsolation: true,
+                    devTools: false,
                     nodeIntegration: false,
                 }),
             })
@@ -624,6 +625,11 @@ describe('Studio main process', () => {
         state.app.isPackaged = false;
         await boot();
         expect(state.studioUpdater.checkForUpdates).not.toHaveBeenCalled();
+        expect(state.BrowserWindow).toHaveBeenCalledWith(
+            expect.objectContaining({
+                webPreferences: expect.objectContaining({ devTools: true }),
+            })
+        );
     });
 
     it('logs rejected handlers and renderer errors', async () => {

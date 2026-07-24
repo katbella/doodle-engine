@@ -9,6 +9,7 @@ import {
     X,
     Search,
     TriangleAlert,
+    House,
 } from '../lib/icons';
 
 const STATUS_COLOR: Record<ItemStatus, string> = {
@@ -41,6 +42,7 @@ function StatusMark({ status }: { status: ItemStatus }) {
 export function LeftRail({
     sections,
     activeKey,
+    onOpenOverview,
     onOpenItem,
     onNewItem,
     onDeleteItem,
@@ -48,6 +50,7 @@ export function LeftRail({
 }: {
     sections: RailSection[];
     activeKey: string | null;
+    onOpenOverview: () => void;
     onOpenItem: (section: SectionKey, itemId: string, label: string) => void;
     onNewItem: (section: CreatableSection) => void;
     onDeleteItem: (
@@ -92,6 +95,19 @@ export function LeftRail({
 
     return (
         <div className="rail">
+            <button
+                className={`rail__overview ${
+                    activeKey === null ? 'rail__overview--active' : ''
+                }`}
+                aria-current={activeKey === null ? 'page' : undefined}
+                onClick={() => {
+                    setQuery('');
+                    onOpenOverview();
+                }}
+            >
+                <House size={15} aria-hidden />
+                <span>Overview</span>
+            </button>
             <div className="rail__search">
                 <Search className="rail__search-icon" size={14} aria-hidden />
                 <input

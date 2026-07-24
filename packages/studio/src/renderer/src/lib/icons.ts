@@ -27,4 +27,5 @@ export {
     ImageOff,
     Download,
     Flag,
+    House,
 } from 'lucide-react';
