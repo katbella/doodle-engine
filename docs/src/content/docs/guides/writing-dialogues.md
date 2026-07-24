@@ -3,25 +3,38 @@ title: Writing Dialogues
 description: How to write branching dialogue scripts with the .dlg DSL.
 ---
 
-Dialogues are written in `.dlg` files using a simple DSL (domain-specific language): a small, purpose-built scripting format designed specifically for writing branching conversations. The DSL uses plain keywords like `NODE`, `CHOICE`, `GOTO`, and `SET` to describe dialogue flow, so no prior knowledge of programming is required. Place dialogue files in `content/dialogues/`.
+Dialogues are written in `.dlg` files using a DSL (domain-specific language), a small scripting format made for branching conversations. Keywords such as `NODE`, `CHOICE`, `GOTO`, and `SET` describe how the conversation flows. Place dialogue files in `content/dialogues/`.
 
-## Quick Start (No Localization Needed)
+## Write Text Directly
 
-You can write dialogue text directly (no locale files required). There are three forms:
+Write dialogue and choice text as ordinary sentences:
 
+```text
+BARTENDER: Hello there.
+CHOICE Ask about the locked room.
 ```
-BARTENDER: Hello there             # plain text, fine for simple lines
-BARTENDER: "Room #3, second door"  # quote text containing a # so it isn't read as a comment
-BARTENDER: @bartender.greeting     # localization key for multi-language support
+
+Most punctuation can be used directly. Put quotation marks around text containing `#` because an unquoted `#` begins a comment:
+
+```text
+BARTENDER: "Room #3, second door."
 ```
 
-Use plain text for most things. Colons and most punctuation are fine unquoted. Add quotes only when your text contains a `#`, which would otherwise start a comment. Use `@keys` only when you need multiple languages.
+To keep a paragraph break inside one dialogue entry, wrap the entry in quotation marks and continue it on the following lines:
 
-Quotes and `@keys` are for what characters say: speaker lines, `NARRATOR`, `CHOICE`, and `NOTIFY`. Write flag names, values, and IDs as plain single words. For multi-word display text, use a locale string.
+```text
+BARTENDER: "I've been having a good time.
 
-Here's a complete example using plain and quoted text:
-
+It's been 84 years."
 ```
+
+The full entry appears before the player continues or chooses a response. Single-line dialogue does not need quotation marks.
+
+Speaker lines, narrator lines, choices, and notifications all accept plain text. IDs and effect arguments use letters, numbers, and underscores, as in `bartender`, `heardRumors`, and `odd_jobs`. See [Localization](/guides/localization/) when you are ready to replace displayed text with `@keys` for another language.
+
+Here is a complete example using plain text:
+
+```text
 NODE start
   BARTENDER: Well, well. A new face. What brings you to the Salty Dog?
 
@@ -37,7 +50,6 @@ NODE start
 
 NODE rumors
   BARTENDER: Word is the merchant at the market square is looking for help. Pays well, too.
-  # Player sees this text and clicks Continue, then engine goes to farewell
   GOTO farewell
 
 NODE farewell
@@ -45,62 +57,72 @@ NODE farewell
   END dialogue
 ```
 
-See [Localization](/guides/localization/) when you're ready to support multiple languages.
-
 ## Basic Structure
 
-A dialogue is a graph of **nodes**. Each node has a speaker, text, and optional choices:
+A dialogue is a graph: a set of connected **nodes**. A node can show one character or narrator line, offer choices for the player, apply effects, and route to another node:
 
-```
+```text
 NODE start
-  BARTENDER: @bartender.greeting
+  BARTENDER: Welcome to the Salty Dog.
 
-  CHOICE @bartender.choice.ask_news
+  CHOICE Ask about the town.
     GOTO news
   END
 
-  CHOICE @bartender.choice.goodbye
+  CHOICE Say goodbye.
     GOTO farewell
   END
 
 NODE news
-  BARTENDER: @bartender.news
+  BARTENDER: The merchant in the square is looking for help.
   GOTO farewell
 
 NODE farewell
-  BARTENDER: @bartender.farewell
+  BARTENDER: Safe travels.
   END dialogue
 ```
 
-### Key rules:
+### Key Rules
 
 - The first `NODE` is the start node
 - `SPEAKER:` lines set who's talking (matched to character ID, case-insensitive)
 - Each node has **one** speaker line; to let another character speak, route to another node
+- A quoted speaker line can span several lines while remaining one dialogue entry
 - `NARRATOR:` lines have no speaker and are used for descriptions
 - `GOTO` routes to another node
 - `END dialogue` closes the conversation
 - `END` (without `dialogue`) closes a CHOICE or IF block
-- A node with text but no choices shows a **Continue** button. The player must click to advance.
+- A node with text but no choices shows a **Continue** button, or **End Dialogue** when advancing will close the conversation.
 - A node with no text and no choices is a **silent processing node** that auto-advances instantly
 
-## Choices with Effects
+## Conditions on Choices
 
-Choices can trigger effects that modify game state:
+Add `REQUIRE` inside a choice when it should only be available under certain conditions:
 
-```
-CHOICE @bartender.choice.buy_drink
+```text
+CHOICE Buy a drink for five gold.
   REQUIRE variableGreaterThan gold 4
+  GOTO buy_drink
+END
+```
+
+The player sees this choice when `gold` is greater than 4. See [Conditions](/reference/conditions/) for every available check.
+
+## Effects on Choices
+
+Effects change game state after the player selects a choice:
+
+```text
+CHOICE Buy a drink for five gold.
   ADD variable gold -5
   ADD variable _drinksBought 1
   ADD relationship bartender 1
-  NOTIFY @notification.bought_drink
+  NOTIFY You bought a drink.
   GOTO after_drink
 END
 ```
 
-- `REQUIRE` only shows this choice if the condition passes
-- Multiple effects run in order when the choice is selected
+The effects run from top to bottom before the conversation moves to `after_drink`. Conditions and effects can be used together in the same choice.
 
 To show narration when a choice is picked, route it to a node with `GOTO` and put the line in that node.
 
@@ -108,7 +130,7 @@ To show narration when a choice is picked, route it to a node with `GOTO` and pu
 
 Use `IF` blocks for automatic branching based on conditions. Everything inside the first passing `IF` block runs:
 
-```
+```text
 NODE check_quest
   IF questAtStage odd_jobs started
     SET flag mentionedOddJobs
@@ -126,30 +148,30 @@ If the condition passes, that IF block's effects run and its `GOTO` target is us
 
 Dialogues can auto-trigger when the player enters a location:
 
-```
+```text
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
 NODE start
-  NARRATOR: @narrator.tavern_intro
+  NARRATOR: The tavern falls quiet as you enter.
   SET flag seenTavernIntro
 
-  CHOICE @narrator.choice.look_around
+  CHOICE Look around.
     END dialogue
   END
 ```
 
-- `TRIGGER <locationId>` fires when the player enters this location
+- `TRIGGER <locationId>` runs when the player enters this location
 - `REQUIRE` at the top level sets conditions that must pass for the trigger
-- Use `notFlag` to ensure one-time intros only play once
+- Pair `notFlag` with a matching `SET flag` effect for an intro that plays once
 
 ## Voice and Portrait Overrides
 
-```
+```text
 NODE emotional_scene
   VOICE bartender_sad.ogg
   PORTRAIT bartender_sad.png
-  BARTENDER: @bartender.sad_dialogue
+  BARTENDER: I thought we had more time.
 ```
 
 - `VOICE` sets an audio file to play for this node
@@ -159,10 +181,10 @@ NODE emotional_scene
 
 Lines starting with `#` are comments:
 
-```
+```text
 # This node handles the quest reward
 NODE quest_complete
-  MERCHANT: @merchant.quest_complete
+  MERCHANT: You made it back. Here is the payment I promised.
   SET questStage odd_jobs complete
   ADD variable gold 50
 ```
@@ -173,69 +195,69 @@ Comments can appear anywhere. If a `#` appears inside quotes, it's preserved as 
 
 You can chain dialogues using the `START dialogue` effect:
 
-```
-CHOICE @bartender.choice.talk_to_merchant
+```text
+CHOICE Ask to speak with the merchant.
   START dialogue merchant_intro
 END
 ```
 
 ## Complete Example
 
-Triggered intro and character conversation live in separate files. The triggered file auto-plays when the player enters the location. The character file plays when the player clicks the character.
+Triggered introductions and character conversations live in separate files. The triggered file begins when the player enters its location. The character conversation begins when the player selects that character in the game interface.
 
 `content/dialogues/tavern_intro.dlg`:
 
-```
+```text
 # Plays automatically the first time the player enters the tavern
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
 NODE start
-  NARRATOR: @narrator.tavern_intro
+  NARRATOR: The tavern falls quiet as you enter.
   SET flag seenTavernIntro
 
-  CHOICE @narrator.choice.look_around
+  CHOICE Look around.
     END dialogue
   END
 ```
 
 `content/dialogues/bartender_greeting.dlg`:
 
-```
-# Plays when the player clicks the bartender character
+```text
+# Begins when the player selects the bartender in the game interface
 NODE start
-  BARTENDER: @bartender.greeting
+  BARTENDER: Welcome to the Salty Dog. What can I get you?
 
-  CHOICE @bartender.choice.ask_rumors
+  CHOICE Ask about rumors.
     REQUIRE notFlag heardRumors
     SET flag heardRumors
     ADD relationship bartender 1
     GOTO rumors
   END
 
-  CHOICE @bartender.choice.buy_drink
+  CHOICE Buy a drink for five gold.
     REQUIRE variableGreaterThan gold 4
     ADD variable gold -5
-    NOTIFY @notification.bought_drink
+    NOTIFY You bought a drink.
     GOTO after_drink
   END
 
-  CHOICE @bartender.choice.goodbye
+  CHOICE Say goodbye.
     GOTO farewell
   END
 
 NODE rumors
-  BARTENDER: @bartender.rumors
+  BARTENDER: They say an old coin washed up by the docks.
   ADD item old_coin
-  NOTIFY @notification.found_coin
+  NOTIFY Old coin added to inventory.
   GOTO start
 
 NODE after_drink
-  BARTENDER: @bartender.after_drink
+  BARTENDER: There you are. Best ale on the coast.
   GOTO start
 
 NODE farewell
-  BARTENDER: @bartender.farewell
+  BARTENDER: Safe travels.
   END dialogue
 ```
 

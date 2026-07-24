@@ -26,18 +26,25 @@ import { Interlude } from './components/Interlude';
 import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { AssetImage } from './components/AssetImage';
-import {
-    InputProviderBoundary,
-    useInputAction,
-} from './input/InputRouter';
+import { InputProviderBoundary, useInputAction } from './input/InputRouter';
+import { saveStorageKeyForProject } from './saves';
 
 export interface GameRendererProps {
     className?: string;
-    /** localStorage key for the save/load panel (default 'doodle-engine-save'). */
-    storageKey?: string;
+    /** Stable project identity generated once when the project is created. */
+    projectId: string;
+    /** Called once when an enabled button in the game interface is clicked. */
+    onButtonClick?: () => void;
 }
 
-type ActivePanel = 'inventory' | 'journal' | 'notes' | 'map' | 'saveload' | 'settings' | null;
+type ActivePanel =
+    | 'inventory'
+    | 'journal'
+    | 'notes'
+    | 'map'
+    | 'saveload'
+    | 'settings'
+    | null;
 
 function BottomBarButton({
     label,
@@ -72,8 +79,10 @@ export function GameRenderer(props: GameRendererProps) {
 
 function GameRendererInner({
     className = '',
-    storageKey = 'doodle-engine-save',
+    projectId,
+    onButtonClick,
 }: GameRendererProps) {
+    saveStorageKeyForProject(projectId);
     const { snapshot, actions } = useGame();
     const audioSettings = useContext(AudioSettingsContext);
 
@@ -97,7 +106,16 @@ function GameRendererInner({
     );
 
     return (
-        <div className={`game-renderer ${className}`}>
+        <div
+            className={`game-renderer ${className}`}
+            onClickCapture={(event) => {
+                const target = event.target;
+                if (!(target instanceof Element)) return;
+                const button = target.closest('button');
+                if (!button || button.disabled) return;
+                onButtonClick?.();
+            }}
+        >
             {snapshot.pendingInterlude && (
                 <Interlude
                     interlude={snapshot.pendingInterlude}
@@ -109,7 +127,10 @@ function GameRendererInner({
 
             <div className="game-layout">
                 <main className="game-main">
-                    <LocationView location={snapshot.location} />
+                    <LocationView
+                        ui={snapshot.ui}
+                        location={snapshot.location}
+                    />
 
                     {snapshot.dialogue ? (
                         <div className="dialogue-container">
@@ -118,11 +139,18 @@ function GameRendererInner({
                                 choices={snapshot.choices}
                                 onSelectChoice={actions.selectChoice}
                                 onContinue={actions.continueDialogue}
-                                continueLabel={snapshot.ui['ui.continue']}
+                                continueLabel={
+                                    snapshot.dialogue.continueEndsDialogue
+                                        ? (snapshot.ui['ui.end_dialogue'] ??
+                                          'End Dialogue')
+                                        : (snapshot.ui['ui.continue'] ??
+                                          'Continue')
+                                }
                             />
                         </div>
                     ) : (
                         <CharacterList
+                            ui={snapshot.ui}
                             characters={snapshot.charactersHere}
                             onTalkTo={actions.talkTo}
                         />
@@ -130,12 +158,18 @@ function GameRendererInner({
                 </main>
 
                 <aside className="game-sidebar">
-                    <GameTime time={snapshot.time} format="narrative" />
+                    <GameTime
+                        ui={snapshot.ui}
+                        time={snapshot.time}
+                        format="narrative"
+                    />
 
                     <div className="party-panel">
-                        <h2>Party</h2>
+                        <h2>{snapshot.ui['ui.party']}</h2>
                         {snapshot.party.length === 0 ? (
-                            <p className="party-empty">{snapshot.ui['ui.no_companions']}</p>
+                            <p className="party-empty">
+                                {snapshot.ui['ui.no_companions']}
+                            </p>
                         ) : (
                             <div className="party-portraits">
                                 {snapshot.party.map((member) => (
@@ -163,7 +197,7 @@ function GameRendererInner({
 
                     {visibleVariables.length > 0 && (
                         <div className="resources-panel">
-                            <h2>Resources</h2>
+                            <h2>{snapshot.ui['ui.resources']}</h2>
                             <ul className="resources-list">
                                 {visibleVariables.map(([key, value]) => (
                                     <li key={key} className="resource-entry">
@@ -206,9 +240,7 @@ function GameRendererInner({
                     label={snapshot.ui['ui.notes']}
                     icon="notes"
                     onClick={() =>
-                        setActivePanel(
-                            activePanel === 'notes' ? null : 'notes'
-                        )
+                        setActivePanel(activePanel === 'notes' ? null : 'notes')
                     }
                     active={activePanel === 'notes'}
                 />
@@ -217,9 +249,7 @@ function GameRendererInner({
                         label={snapshot.ui['ui.map']}
                         icon="map"
                         onClick={() =>
-                            setActivePanel(
-                                activePanel === 'map' ? null : 'map'
-                            )
+                            setActivePanel(activePanel === 'map' ? null : 'map')
                         }
                         active={activePanel === 'map'}
                     />
@@ -253,16 +283,16 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <Inventory items={snapshot.inventory} />
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
+                        <Inventory
+                            ui={snapshot.ui}
+                            items={snapshot.inventory}
+                        />
                         <button
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -272,11 +302,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <Journal
+                            ui={snapshot.ui}
                             quests={snapshot.quests}
                             entries={snapshot.journal}
                         />
@@ -284,7 +312,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -294,11 +322,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <PlayerNotes
+                            ui={snapshot.ui}
                             notes={snapshot.playerNotes}
                             onWrite={actions.writeNote}
                             onDelete={actions.deleteNote}
@@ -307,7 +333,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -317,11 +343,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <MapView
+                            ui={snapshot.ui}
                             map={snapshot.map}
                             currentLocation={snapshot.location.id}
                             currentTime={snapshot.time}
@@ -334,7 +358,7 @@ function GameRendererInner({
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -344,21 +368,18 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <SaveLoadPanel
                             ui={snapshot.ui}
                             onSave={actions.saveGame}
                             onLoad={actions.loadGame}
-                            storageKey={storageKey}
+                            projectId={projectId}
                         />
                         <button
                             className="panel-close"
                             onClick={() => setActivePanel(null)}
                         >
-                            Close
+                            {snapshot.ui['ui.close']}
                         </button>
                     </div>
                 </div>
@@ -368,11 +389,9 @@ function GameRendererInner({
                     className="panel-overlay"
                     onClick={() => setActivePanel(null)}
                 >
-                    <div
-                        className="panel"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="panel" onClick={(e) => e.stopPropagation()}>
                         <SettingsPanel
+                            ui={snapshot.ui}
                             audio={audioSettings}
                             onLocaleChange={actions.setLocale}
                             currentLocale={snapshot.currentLocale}

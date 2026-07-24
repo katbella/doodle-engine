@@ -1,0 +1,79 @@
+---
+title: Updating Studio
+description: How to check for and install a new version of Doodle Studio.
+---
+
+import ThemeScreenshot from '../../../components/ThemeScreenshot.astro';
+
+Doodle Studio checks its published releases, but it does not download or install
+anything in the background.
+
+## The startup check
+
+Studio checks once when it starts. No dialog appears when the installed version
+is current or the release service cannot be reached. A dialog opens only when a
+newer installer is available for the current operating system.
+
+The dialog shows the installed and available versions, brief release notes when
+the release includes them, and the installation method for Windows or macOS.
+
+<ThemeScreenshot
+    src="/images/studio/studio-update-available.webp"
+    alt="Doodle Studio showing an available update, release notes, and Download button"
+/>
+
+**Download** opens the matching installer in your browser. Studio remains open
+and does not run the installer.
+
+## Run a manual check
+
+Use either route:
+
+- Open the **Help** menu and select **Check for Updates…**.
+- Open the command palette with `Ctrl+K` on Windows or `Cmd+K` on macOS, then
+  select **Check for updates**.
+
+A manual check always reports its result. If Studio is current, the dialog
+shows the installed version.
+
+<ThemeScreenshot
+    src="/images/studio/studio-update-current.webp"
+    alt="Doodle Studio confirming that the installed version is current"
+/>
+
+If the check fails, the dialog includes the error returned by the release
+service. Select **Try Again** after checking the network connection.
+
+## Install the update
+
+After the download finishes:
+
+- On Windows, run the `.exe` installer. It replaces the installed Studio
+  application.
+- On macOS, open the `.dmg` and drag Doodle Studio into the Applications folder.
+  Confirm the replacement when Finder asks.
+
+Open Studio after installation. To verify the version, open the **Help** menu
+and select **About Doodle Studio**.
+
+## Security prompts
+
+Current Studio installers are not code-signed, so Windows or macOS may block the
+first launch. Continue only when the installer came from Studio's **Download**
+button or the
+[Doodle Engine releases page](https://github.com/katbella/doodle-engine/releases).
+
+- On Windows, Microsoft Defender SmartScreen may identify the installer as an
+  unrecognized app. Review the filename and source before choosing to run it.
+- On macOS, try to open Studio once, then open **System Settings**. Select
+  **Privacy & Security**, scroll to **Security**, and select **Open Anyway** for
+  Doodle Studio. Apple makes this option available for about an hour after the
+  blocked launch.
+
+The operating system may ask again after a later Studio update.
+
+## What the installer changes
+
+The installer replaces the Studio application. It does not edit project content
+or change the `@doodle-engine/core` version declared by a project. Engine
+dependency updates remain a separate project task.

@@ -11,15 +11,15 @@ Create `content/quests/odd_jobs.yaml`:
 
 ```yaml
 id: odd_jobs
-name: '@quest.odd_jobs.name'
-description: '@quest.odd_jobs.description'
+name: Odd Jobs
+description: Help the merchants around the harbor.
 stages:
     - id: started
-      description: '@quest.odd_jobs.stage.started'
+      description: Marcus mentioned work at the market.
     - id: talked_to_merchant
-      description: '@quest.odd_jobs.stage.talked_to_merchant'
+      description: Elena needs someone to watch a delivery.
     - id: complete
-      description: '@quest.odd_jobs.stage.complete'
+      description: The delivery arrived safely.
 ```
 
 Each stage has an `id` and a `description` shown in the player's journal.
@@ -28,11 +28,11 @@ Each stage has an `id` and a `description` shown in the player's journal.
 
 Use `SET questStage` in a dialogue to start or advance a quest:
 
-```
-CHOICE @merchant.choice.accept_quest
+```text
+CHOICE Accept the job.
   SET questStage odd_jobs started
   ADD journalEntry odd_jobs_accepted
-  NOTIFY @notification.quest_started
+  NOTIFY New quest: Odd Jobs
   GOTO quest_details
 END
 ```
@@ -41,30 +41,30 @@ END
 
 Check the current stage with `questAtStage` and advance with `SET questStage`:
 
-```
+```text
 NODE check_progress
   IF questAtStage odd_jobs started
     GOTO quest_update
   END
 
 NODE quest_update
-  MERCHANT: @merchant.quest_update
+  MERCHANT: The shipment should reach the docks by nightfall.
   SET questStage odd_jobs talked_to_merchant
-  NOTIFY @notification.quest_updated
+  NOTIFY Quest updated: Odd Jobs
 ```
 
 ## Completing a Quest
 
-```
+```text
 NODE quest_complete
-  MERCHANT: @merchant.quest_complete
+  MERCHANT: The delivery arrived safely. Here is your payment.
   SET questStage odd_jobs complete
   ADD variable gold 50
   ADD variable reputation 10
   ADD relationship merchant 3
-  NOTIFY @notification.quest_complete
+  NOTIFY Quest complete: Odd Jobs
 
-  CHOICE @merchant.choice.glad_to_help
+  CHOICE Glad I could help.
     GOTO farewell
   END
 ```
@@ -73,8 +73,8 @@ NODE quest_complete
 
 Show different dialogue options based on quest state:
 
-```
-CHOICE @bartender.choice.ask_about_merchant
+```text
+CHOICE Ask about the merchant.
   REQUIRE questAtStage odd_jobs started
   GOTO merchant_info
 END
@@ -82,8 +82,8 @@ END
 
 Or hide content after quest completion:
 
-```
-CHOICE @merchant.choice.need_help
+```text
+CHOICE Ask whether Elena needs help.
   REQUIRE notFlag questComplete
   GOTO offer_quest
 END
@@ -96,16 +96,6 @@ Active quests appear in the Journal component. Each quest shows:
 - Quest name and description
 - Current stage description
 
-Quests are considered "active" when they have any stage set in `questProgress`. There's no built-in "completed" filtering, so if you want to hide completed quests, use a stage name like `complete` and handle it in a custom renderer.
+The Journal shows any quest that has a stage in `questProgress`. Use a stage ID such as `complete` for the final stage. A custom renderer can use that ID to separate or hide completed quests.
 
-## Locale Strings
-
-```yaml
-quest.odd_jobs.name: 'Odd Jobs'
-quest.odd_jobs.description: 'Help the local merchants with various tasks.'
-quest.odd_jobs.stage.started: 'The merchant mentioned needing help with deliveries.'
-quest.odd_jobs.stage.talked_to_merchant: "Agreed to handle the merchant's deliveries."
-quest.odd_jobs.stage.complete: 'All deliveries completed successfully.'
-notification.quest_started: 'New Quest: Odd Jobs'
-notification.quest_complete: 'Quest Complete: Odd Jobs (+50 gold, +10 reputation)'
-```
+See [Localization](/guides/localization/) when the quest text needs to support another language.

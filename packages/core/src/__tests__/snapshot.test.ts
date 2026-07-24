@@ -294,7 +294,9 @@ describe('Snapshot Builder', () => {
             // pixel should appear in party, not in charactersHere
             expect(snapshot.party).toHaveLength(1);
             expect(snapshot.party[0].id).toBe('pixel_the_dog');
-            expect(snapshot.charactersHere.find((c) => c.id === 'pixel_the_dog')).toBeUndefined();
+            expect(
+                snapshot.charactersHere.find((c) => c.id === 'pixel_the_dog')
+            ).toBeUndefined();
         });
 
         it('should include inventory items', () => {
@@ -385,8 +387,10 @@ describe('Snapshot Builder', () => {
             const registry = createTestRegistry();
             const snapshot = buildSnapshot(state, registry);
 
-            expect(snapshot.music).toBe('/assets/audio/music/tavern_theme.ogg');
-            expect(snapshot.ambient).toBe('/assets/audio/sfx/tavern_ambience.ogg');
+            expect(snapshot.music).toBe('assets/audio/music/tavern_theme.ogg');
+            expect(snapshot.ambient).toBe(
+                'assets/audio/sfx/tavern_ambience.ogg'
+            );
         });
 
         it('should resolve notification localization', () => {
@@ -402,7 +406,7 @@ describe('Snapshot Builder', () => {
             const registry = createTestRegistry();
             const snapshot = buildSnapshot(state, registry);
 
-            expect(snapshot.pendingVideo).toBe('/assets/video/intro.mp4');
+            expect(snapshot.pendingVideo).toBe('assets/video/intro.mp4');
         });
 
         it('should have null pendingVideo by default', () => {
@@ -430,6 +434,25 @@ describe('Snapshot Builder', () => {
             expect(snapshot.dialogue?.speaker).toBe('bartender');
             expect(snapshot.dialogue?.speakerName).toBe('Marcus');
             expect(snapshot.dialogue?.text).toBe('Welcome stranger');
+        });
+
+        it('preserves paragraph breaks from localization', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'bartender_greeting',
+                    nodeId: 'intro',
+                },
+            };
+            const registry = createTestRegistry();
+            registry.locales.en['bartender.greeting'] =
+                'First paragraph.\n\nSecond paragraph.';
+
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.dialogue?.text).toBe(
+                'First paragraph.\n\nSecond paragraph.'
+            );
         });
 
         it('should filter choices by conditions', () => {
@@ -652,10 +675,12 @@ describe('Snapshot Builder', () => {
             expect(snapshot.ui['ui.save']).toBe('Save');
             expect(snapshot.ui['ui.load']).toBe('Load');
             expect(snapshot.ui['ui.new_game']).toBe('New Game');
+            expect(snapshot.ui['ui.start_game']).toBe('Start game');
             expect(snapshot.ui['ui.resume']).toBe('Resume');
             expect(snapshot.ui['ui.no_companions']).toBe('No companions');
             expect(snapshot.ui['ui.narrator']).toBe('Narrator');
             expect(snapshot.ui['ui.continue']).toBe('Continue');
+            expect(snapshot.ui['ui.end_dialogue']).toBe('End Dialogue');
         });
 
         it('should override defaults with locale-defined ui.* keys', () => {

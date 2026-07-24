@@ -3,14 +3,16 @@ title: Characters & Party
 description: How to create characters, manage relationships, and build a party.
 ---
 
+Characters give the player people to meet, speak with, build relationships with, and invite into the party. Each character begins at an assigned location and can move as the story changes.
+
 ## Defining a Character
 
 Create `content/characters/bartender.yaml`:
 
 ```yaml
 id: bartender
-name: '@character.bartender.name'
-biography: '@character.bartender.bio'
+name: Marcus the Bartender
+biography: A gruff man with kind eyes who has heard every story twice.
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
@@ -20,7 +22,7 @@ stats: {}
 | Field       | Description                                                      |
 | ----------- | ---------------------------------------------------------------- |
 | `id`        | Unique identifier, used in dialogue speaker lines and effects    |
-| `name`      | Display name (supports `@key` localization)                      |
+| `name`      | Display name                                                      |
 | `biography` | Character background text                                        |
 | `portrait`  | Portrait image                                                   |
 | `location`  | Starting location ID                                             |
@@ -29,16 +31,16 @@ stats: {}
 
 ## Characters at Location vs Party
 
-The snapshot separates characters into two groups:
+The engine sends the renderer a snapshot, a current view of the game data to display. It separates characters into two groups:
 
-- **`charactersHere`**: NPCs at the player's current location (not in party). Shown in the main view as clickable characters.
+- **`charactersHere`**: NPCs at the player's current location who are not in the party. The interface can present them as buttons, portraits, names, or another selectable form.
 - **`party`**: Characters traveling with the player. Shown in the sidebar.
 
 A character in the party does **not** appear in `charactersHere`, even if their location matches.
 
 ## Talking to Characters
 
-When a player clicks a character in `charactersHere`, the engine calls `talkTo(characterId)`. This starts the character's assigned dialogue (the `dialogue` field in their YAML).
+When a player selects a character in the interface, the renderer calls `talkTo(characterId)`. This starts the character's assigned dialogue from the `dialogue` field in their YAML.
 
 ```tsx
 // In a custom renderer
@@ -50,7 +52,7 @@ actions.talkTo('bartender');
 
 Each character tracks a `relationship` value (starts at 0). Modify it with effects:
 
-```
+```text
 # Set to an absolute value
 SET relationship bartender 5
 
@@ -61,25 +63,25 @@ ADD relationship bartender -2
 
 Check relationships in conditions:
 
-```
-CHOICE @bartender.choice.secret_info
+```text
+CHOICE Ask what Marcus is hiding.
   REQUIRE relationshipAbove bartender 5
   GOTO secret
 END
 
-CHOICE @bartender.choice.hostile
+CHOICE Demand an answer.
   REQUIRE relationshipBelow bartender 0
   GOTO hostile_response
 END
 ```
 
-`relationshipAbove` and `relationshipBelow` are exclusive (strict greater/less than).
+`relationshipAbove` and `relationshipBelow` use strict comparisons, so the threshold itself does not pass the condition.
 
 ## Party Management
 
 Add or remove characters from the party with effects:
 
-```
+```text
 # Add to party
 ADD toParty merchant
 
@@ -89,8 +91,8 @@ REMOVE fromParty merchant
 
 Check party membership in conditions:
 
-```
-CHOICE @merchant.choice.party_talk
+```text
+CHOICE Ask how the journey is going.
   REQUIRE characterInParty merchant
   GOTO party_dialogue
 END
@@ -102,14 +104,14 @@ When a character joins the party, they travel with the player to every location.
 
 Move NPCs between locations:
 
-```
+```text
 SET characterLocation merchant market
 ```
 
 Check where a character is:
 
-```
-CHOICE @ask_about_merchant
+```text
+CHOICE Ask where the merchant went.
   REQUIRE characterAt merchant market
   GOTO merchant_info
 END
@@ -119,7 +121,7 @@ END
 
 Characters have a `stats` object for game-specific data:
 
-```
+```text
 # Set a stat
 SET characterStat elisa level 5
 
@@ -127,4 +129,4 @@ SET characterStat elisa level 5
 ADD characterStat elisa health -10
 ```
 
-Stats appear in the snapshot's `SnapshotCharacter.stats` and can be displayed in a custom renderer.
+Character stats are available to the renderer as `SnapshotCharacter.stats`. See [Custom Renderer](/technical/custom-renderer/) for using snapshot data in your own interface.

@@ -4,6 +4,7 @@
 
 import type { AssetLoadingState } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
+import { screenBackgroundStyle } from './screenBackground';
 
 export interface LoadingScreenProps {
     /** Asset loading state (from AssetProvider) */
@@ -12,22 +13,31 @@ export interface LoadingScreenProps {
     background?: string;
     /** Custom progress bar renderer */
     renderProgress?: (progress: number, phase: string) => React.ReactNode;
+    /** Resolved UI strings; English defaults when absent. */
+    ui?: Record<string, string>;
+    /** Continue from the completed loading screen */
+    onStart?: () => void;
+    /** Label for the post-load continue button */
+    startLabel?: string;
     /** CSS class */
     className?: string;
 }
 
-function phaseLabel(phase: AssetLoadingState['phase']): string {
+function phaseLabel(
+    phase: AssetLoadingState['phase'],
+    ui?: Record<string, string>
+): string {
     switch (phase) {
         case 'loading-shell':
-            return 'Loading...';
+            return ui?.['ui.loading'] ?? 'Loading...';
         case 'loading-game':
-            return 'Loading game assets...';
+            return ui?.['ui.loading_game_assets'] ?? 'Loading game assets...';
         case 'complete':
-            return 'Ready!';
+            return ui?.['ui.ready'] ?? 'Ready!';
         case 'error':
-            return 'Error loading assets';
+            return ui?.['ui.error_loading_assets'] ?? 'Error loading assets';
         default:
-            return 'Loading...';
+            return ui?.['ui.loading'] ?? 'Loading...';
     }
 }
 
@@ -35,20 +45,23 @@ export function LoadingScreen({
     state,
     background,
     renderProgress,
+    ui,
+    onStart,
+    startLabel = 'Start game',
     className = '',
 }: LoadingScreenProps) {
     const backgroundUrl = useAssetUrl(background);
-    const bgStyle = backgroundUrl
-        ? { backgroundImage: `url(${backgroundUrl})` }
-        : undefined;
+    const bgStyle = screenBackgroundStyle(backgroundUrl);
 
     const percent = Math.round(state.overallProgress * 100);
-    const label = phaseLabel(state.phase);
+    const label = phaseLabel(state.phase, ui);
 
     return (
         <div className={`loading-screen ${className}`} style={bgStyle}>
             <div className="loading-screen-content">
-                <div className="loading-screen-spinner" />
+                {state.phase !== 'complete' && (
+                    <div className="loading-screen-spinner" />
+                )}
 
                 <div className="loading-screen-progress-wrap">
                     <div className="loading-screen-row">
@@ -86,6 +99,16 @@ export function LoadingScreen({
                     >
                         {state.error}
                     </p>
+                )}
+
+                {state.phase === 'complete' && onStart && (
+                    <button
+                        className="title-button loading-screen-start"
+                        type="button"
+                        onClick={onStart}
+                    >
+                        {startLabel}
+                    </button>
                 )}
             </div>
         </div>

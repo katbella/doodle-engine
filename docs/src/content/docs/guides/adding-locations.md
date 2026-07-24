@@ -11,21 +11,21 @@ Create `content/locations/tavern.yaml`:
 
 ```yaml
 id: tavern
-name: '@location.tavern.name'
-description: '@location.tavern.description'
+name: The Salty Dog
+description: A warm tavern overlooking the harbor.
 banner: tavern.png
 music: tavern_ambience.ogg
-ambient: ''
+ambient: fireplace.ogg
 ```
 
 | Field         | Description                                                       |
 | ------------- | ----------------------------------------------------------------- |
 | `id`          | Unique identifier, used in dialogue effects and map references    |
-| `name`        | Display name (use `@key` for localization)                        |
+| `name`        | Display name                                                      |
 | `description` | Text shown when the player is at this location                    |
-| `banner`      | Image displayed at the top of the location view                   |
-| `music`       | Background music track used by GameShell or `useAudioManager`     |
-| `ambient`     | Ambient sound loop used by GameShell or `useAudioManager`         |
+| `banner`      | Image associated with the location                                |
+| `music`       | Background music track                                             |
+| `ambient`     | Ambient sound loop                                                 |
 
 ## Creating a Map
 
@@ -33,7 +33,7 @@ Maps connect locations and let players travel between them. Create `content/maps
 
 ```yaml
 id: town
-name: '@map.town.name'
+name: Harbor Town
 image: town_map.png
 scale: 100
 locations:
@@ -63,7 +63,7 @@ The `scale` field controls travel time. It represents **pixels per hour** of tra
 
 To calculate your scale: divide your map's width in pixels by how many hours you want it to take to cross the entire map.
 
-**Example**: A 500px wide map where crossing takes 5 hours → `scale: 100`
+**Example**: For a 500-pixel-wide map that takes 5 hours to cross, use `scale: 100`.
 
 **Formula**: `travel time = distance in pixels / scale`
 
@@ -73,21 +73,21 @@ Minimum travel time is always 1 hour, regardless of scale.
 
 Use triggered dialogues to narrate a location's first visit:
 
-```
+```text
 # content/dialogues/tavern_intro.dlg
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
 NODE start
-  NARRATOR: @narrator.tavern_intro
+  NARRATOR: The tavern falls quiet as you enter.
   SET flag seenTavernIntro
 
-  CHOICE @narrator.choice.look_around
+  CHOICE Look around.
     END dialogue
   END
 ```
 
-The `TRIGGER` keyword auto-starts this dialogue when the player enters the tavern. The `REQUIRE notFlag` ensures it only fires once.
+The `TRIGGER` keyword starts this dialogue when the player enters the tavern. The `REQUIRE notFlag` condition limits it to the first visit.
 
 ## Travel Effects
 
@@ -100,19 +100,19 @@ When a player travels with the map:
 
 You can also move the player from dialogue:
 
-```
-CHOICE @npc.choice.follow_me
+```text
+CHOICE Follow her to the market.
   GOTO location market
 END
 ```
 
-`GOTO location` changes the current location and ends the dialogue. It does not calculate map travel time or run location triggers. Use it for scripted movement, scene changes, or jumps where you control the surrounding effects yourself.
+`GOTO location` changes the current location and ends the dialogue. Use it for scripted movement and scene changes. Map travel also calculates travel time and runs location triggers.
 
 ## Enabling/Disabling the Map
 
 The map can be toggled with the `SET mapEnabled` effect:
 
-```
+```text
 # Disable map during a dialogue sequence
 SET mapEnabled false
 
@@ -126,8 +126,8 @@ The player starts with the map enabled by default.
 
 Characters can be moved to different locations:
 
-```
+```text
 SET characterLocation merchant market
 ```
 
-Only characters at the player's current location appear in the `charactersHere` list.
+This assigns the `merchant` character to the `market` location. If the merchant was previously at the tavern, the merchant will disappear from the tavern and become available at the market. Only characters assigned to the player's current location appear in the `charactersHere` list.

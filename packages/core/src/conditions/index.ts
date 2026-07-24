@@ -302,8 +302,8 @@ function evaluateRelationshipBelow(
  * Handles ranges that wrap around midnight.
  *
  * Examples:
- * - timeIs 20 6   → 8 PM to 6 AM (night time)
- * - timeIs 9 17   → 9 AM to 5 PM (day time)
+ * - timeIs 20 6   means 8 PM to 6 AM (night time)
+ * - timeIs 9 17   means 9 AM to 5 PM (day time)
  *
  * @param startHour - Start hour (0-23, inclusive)
  * @param endHour - End hour (0-23, exclusive)
@@ -347,4 +347,77 @@ function evaluateItemAt(
 function evaluateRoll(min: number, max: number, threshold: number): boolean {
     const result = Math.floor(Math.random() * (max - min + 1)) + min;
     return result >= threshold;
+}
+
+/**
+ * Describe the state values a condition reads, for debug tracing.
+ *
+ * Pure and read-only: it explains *why* a condition would pass or fail by
+ * reporting the actual values the evaluator looks at (the state side; the
+ * condition's own arguments are already on the condition object). This is
+ * called only when a trace sink is attached, so it never affects normal
+ * runtime behavior or performance.
+ *
+ * @param condition - The condition to describe
+ * @param state - Current game state
+ * @returns A record of the state values relevant to this condition
+ */
+export function describeConditionValues(
+    condition: Condition,
+    state: GameState
+): Record<string, unknown> {
+    switch (condition.type) {
+        case 'hasFlag':
+        case 'notFlag':
+            return { flag: state.flags[condition.flag] ?? false };
+
+        case 'hasItem':
+            return { inInventory: state.inventory.includes(condition.itemId) };
+
+        case 'variableEquals':
+        case 'variableGreaterThan':
+        case 'variableLessThan':
+            return { variable: state.variables[condition.variable] };
+
+        case 'atLocation':
+            return { currentLocation: state.currentLocation };
+
+        case 'questAtStage':
+            return { questStage: state.questProgress[condition.questId] };
+
+        case 'characterAt':
+            return {
+                characterLocation:
+                    state.characterState[condition.characterId]?.location,
+            };
+
+        case 'characterInParty':
+            return {
+                inParty:
+                    state.characterState[condition.characterId]?.inParty ??
+                    false,
+            };
+
+        case 'relationshipAbove':
+        case 'relationshipBelow':
+            return {
+                relationship:
+                    state.characterState[condition.characterId]?.relationship,
+            };
+
+        case 'timeIs':
+            return { hour: state.currentTime.hour };
+
+        case 'itemAt':
+            return { itemLocation: state.itemLocations[condition.itemId] };
+
+        case 'roll':
+            // A roll reads no state; its result is random each evaluation.
+            return {};
+
+        default: {
+            const _exhaustive: never = condition;
+            return {};
+        }
+    }
 }

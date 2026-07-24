@@ -45,8 +45,45 @@ export interface WriteSaveOptions {
 }
 
 const KIND_ORDER: Record<SaveKind, number> = { quick: 0, auto: 1, manual: 2 };
+const LEGACY_SHARED_KEY = 'doodle-engine-save';
+const PROJECT_ID_PATTERN =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SAVE_STORAGE_KEY_PATTERN =
+    /^doodle-engine-save:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function readSlots(storage: SaveStorage, key: string): SaveSlot[] {
+declare const saveStorageKeyBrand: unique symbol;
+/** A validated save namespace derived from one stable project ID. */
+export type SaveStorageKey = string & {
+    readonly [saveStorageKeyBrand]: true;
+};
+
+/**
+ * Reject missing and shared keys before they can reach browser storage.
+ * Low-level TypeScript callers also receive this requirement through the
+ * branded SaveStorageKey type.
+ */
+export function assertSaveStorageKey(
+    key: unknown
+): asserts key is SaveStorageKey {
+    if (typeof key !== 'string' || !SAVE_STORAGE_KEY_PATTERN.test(key)) {
+        throw new Error(
+            'Save helpers require a key created by saveStorageKeyForProject(projectId). Shared or hand-written keys are not accepted.'
+        );
+    }
+}
+
+/** Build the private save namespace for one generated project identity. */
+export function saveStorageKeyForProject(projectId: unknown): SaveStorageKey {
+    if (typeof projectId !== 'string' || !PROJECT_ID_PATTERN.test(projectId)) {
+        throw new Error(
+            'Doodle save components require the stable project ID created with the project. It must be a UUID and must not change between releases.'
+        );
+    }
+    return `${LEGACY_SHARED_KEY}:${projectId}` as SaveStorageKey;
+}
+
+function readSlots(storage: SaveStorage, key: SaveStorageKey): SaveSlot[] {
+    assertSaveStorageKey(key);
     const raw = storage.getItem(key);
     if (!raw) return [];
     try {
@@ -79,9 +116,10 @@ function readSlots(storage: SaveStorage, key: string): SaveSlot[] {
 
 function writeSlots(
     storage: SaveStorage,
-    key: string,
+    key: SaveStorageKey,
     slots: SaveSlot[]
 ): void {
+    assertSaveStorageKey(key);
     storage.setItem(key, JSON.stringify(slots));
 }
 
@@ -96,17 +134,21 @@ function defaultLabel(save: SaveData, kind: SaveKind): string {
  * All saves, ordered for display: quick first, then autosave, then manual
  * saves newest first.
  */
-export function listSaves(storage: SaveStorage, key: string): SaveSlot[] {
+export function listSaves(
+    storage: SaveStorage,
+    key: SaveStorageKey
+): SaveSlot[] {
     return readSlots(storage, key)
         .slice()
         .sort((a, b) => {
-            if (a.kind !== b.kind) return KIND_ORDER[a.kind] - KIND_ORDER[b.kind];
+            if (a.kind !== b.kind)
+                return KIND_ORDER[a.kind] - KIND_ORDER[b.kind];
             return a.timestamp < b.timestamp ? 1 : -1;
         });
 }
 
 /** True if there is at least one save. */
-export function hasSaves(storage: SaveStorage, key: string): boolean {
+export function hasSaves(storage: SaveStorage, key: SaveStorageKey): boolean {
     return readSlots(storage, key).length > 0;
 }
 
@@ -118,7 +160,7 @@ export function hasSaves(storage: SaveStorage, key: string): boolean {
  */
 export function writeSave(
     storage: SaveStorage,
-    key: string,
+    key: SaveStorageKey,
     save: SaveData,
     kind: SaveKind = 'manual',
     options: WriteSaveOptions = {}
@@ -144,7 +186,7 @@ export function writeSave(
 /** Remove a save slot by id. */
 export function deleteSave(
     storage: SaveStorage,
-    key: string,
+    key: SaveStorageKey,
     id: string
 ): void {
     writeSlots(
@@ -157,7 +199,7 @@ export function deleteSave(
 /** Get one save's data by id, or null if it is gone. */
 export function loadSave(
     storage: SaveStorage,
-    key: string,
+    key: SaveStorageKey,
     id: string
 ): SaveData | null {
     const slot = readSlots(storage, key).find((s) => s.id === id);
@@ -167,7 +209,7 @@ export function loadSave(
 /** The most recent save by time (any kind), or null if there are none. */
 export function latestSave(
     storage: SaveStorage,
-    key: string
+    key: SaveStorageKey
 ): SaveData | null {
     const slots = readSlots(storage, key);
     if (slots.length === 0) return null;

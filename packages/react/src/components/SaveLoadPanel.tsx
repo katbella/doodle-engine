@@ -14,6 +14,7 @@ import {
     writeSave,
     loadSave,
     deleteSave,
+    saveStorageKeyForProject,
     type SaveSlot,
 } from '../saves';
 
@@ -22,7 +23,8 @@ export interface SaveLoadPanelProps {
     ui: Record<string, string>;
     onSave: () => SaveData;
     onLoad: (saveData: SaveData) => void;
-    storageKey?: string;
+    /** Stable project identity generated once when the project is created. */
+    projectId: string;
     className?: string;
 }
 
@@ -32,13 +34,31 @@ function formatTimestamp(timestamp: string): string {
     return isNaN(date.getTime()) ? timestamp : date.toLocaleString();
 }
 
+function displaySlotLabel(slot: SaveSlot, ui: Record<string, string>): string {
+    if (slot.kind === 'quick' && slot.label === 'Quick Save') {
+        return ui['ui.quick_save'] ?? slot.label;
+    }
+    if (slot.kind === 'auto' && slot.label === 'Autosave') {
+        return ui['ui.autosave'] ?? slot.label;
+    }
+    const day = slot.save.state?.currentTime?.day;
+    if (slot.kind === 'manual' && slot.label === `Day ${day}`) {
+        return (ui['ui.day'] ?? 'Day {day}').replace('{day}', String(day));
+    }
+    if (slot.kind === 'manual' && slot.label === 'Save') {
+        return ui['ui.save'] ?? slot.label;
+    }
+    return slot.label;
+}
+
 export function SaveLoadPanel({
     ui,
     onSave,
     onLoad,
-    storageKey = 'doodle-engine-save',
+    projectId,
     className = '',
 }: SaveLoadPanelProps) {
+    const storageKey = saveStorageKeyForProject(projectId);
     const [slots, setSlots] = useState<SaveSlot[]>(() =>
         listSaves(localStorage, storageKey)
     );
@@ -54,14 +74,14 @@ export function SaveLoadPanel({
     const handleNewSave = () => {
         writeSave(localStorage, storageKey, onSave(), 'manual');
         refresh();
-        flash('Saved!');
+        flash(ui['ui.saved'] ?? 'Saved!');
     };
 
     const handleLoad = (id: string) => {
         const data = loadSave(localStorage, storageKey, id);
         if (data) {
             onLoad(data);
-            flash('Loaded!');
+            flash(ui['ui.loaded'] ?? 'Loaded!');
         }
     };
 
@@ -73,11 +93,13 @@ export function SaveLoadPanel({
     return (
         <div className={`save-load-panel ${className}`}>
             <button className="save-button" onClick={handleNewSave}>
-                New Save
+                {ui['ui.new_save'] ?? 'New Save'}
             </button>
 
             {slots.length === 0 ? (
-                <p className="save-load-empty">No saves yet</p>
+                <p className="save-load-empty">
+                    {ui['ui.no_saves'] ?? 'No saves yet'}
+                </p>
             ) : (
                 <ul className="save-slot-list">
                     {slots.map((slot) => (
@@ -87,11 +109,17 @@ export function SaveLoadPanel({
                         >
                             <div className="save-slot-info">
                                 <span className="save-slot-label">
-                                    {slot.label}
+                                    {displaySlotLabel(slot, ui)}
                                 </span>
-                                <span className="save-slot-time">
-                                    {formatTimestamp(slot.timestamp)}
-                                </span>
+                                {slot.timestamp && (
+                                    <time
+                                        className="save-slot-time"
+                                        dateTime={slot.timestamp}
+                                    >
+                                        {' · '}
+                                        {formatTimestamp(slot.timestamp)}
+                                    </time>
+                                )}
                             </div>
                             <div className="save-slot-actions">
                                 <button
@@ -105,7 +133,7 @@ export function SaveLoadPanel({
                                         className="delete-button"
                                         onClick={() => handleDelete(slot.id)}
                                     >
-                                        Delete
+                                        {ui['ui.delete'] ?? 'Delete'}
                                     </button>
                                 )}
                             </div>

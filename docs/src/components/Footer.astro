@@ -2,7 +2,7 @@
 import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
 
 const creatorUrl = 'https://katbella.com';
-const issuesUrl = 'https://github.com/katbella/doodle-engine/issues';
+const reportingUrl = '/reference/reporting-issues/';
 const starlightUrl = 'https://starlight.astro.build';
 ---
 
@@ -12,9 +12,7 @@ const starlightUrl = 'https://starlight.astro.build';
         Created by Kat Bella
     </a>
     <span aria-hidden="true">&bull;</span>
-    <a href={issuesUrl} target="_blank" rel="noopener noreferrer">
-        Having issues? Report them on GitHub!
-    </a>
+    <a href={reportingUrl}>Having issues? Get help or report a problem</a>
     <span aria-hidden="true">&bull;</span>
     <a href={starlightUrl} target="_blank" rel="noopener noreferrer">
         Docs built with Starlight

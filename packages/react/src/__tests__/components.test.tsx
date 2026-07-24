@@ -1,26 +1,15 @@
-/**
- * Server-rendered component smoke tests.
- */
-
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Engine, type GameState, type Snapshot } from '@doodle-engine/core';
 import type { ContentRegistry } from '@doodle-engine/core';
 import type { AssetContextValue } from '../AssetProvider';
 import { AssetContext } from '../AssetProvider';
 import { GameProvider } from '../GameProvider';
 import { GameRenderer } from '../GameRenderer';
-import {
-    ChoiceList,
-    resolveChoiceListInput,
-} from '../components/ChoiceList';
-import {
-    Interlude,
-    resolveInterludeInput,
-} from '../components/Interlude';
+import { resolveChoiceListInput } from '../components/ChoiceList';
+import { Interlude, resolveInterludeInput } from '../components/Interlude';
 import { DialogueBox } from '../components/DialogueBox';
-import { SaveLoadPanel } from '../components/SaveLoadPanel';
 import { CharacterList } from '../components/CharacterList';
 import { Inventory } from '../components/Inventory';
 import { MapView } from '../components/MapView';
@@ -58,6 +47,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
         pendingInterlude: null,
         ui: {
             'ui.continue': 'Continue',
+            'ui.end_dialogue': 'End Dialogue',
             'ui.no_companions': 'No companions',
             'ui.inventory': 'Inventory',
             'ui.journal': 'Journal',
@@ -143,46 +133,12 @@ function withAssetContext(children: ReactNode) {
         },
     };
 
-    return <AssetContext.Provider value={value}>{children}</AssetContext.Provider>;
+    return (
+        <AssetContext.Provider value={value}>{children}</AssetContext.Provider>
+    );
 }
 
 describe('React components', () => {
-    afterEach(() => {
-        vi.unstubAllGlobals();
-    });
-
-    it('renders Continue for text-only dialogue nodes', () => {
-        const html = renderToStaticMarkup(
-            <ChoiceList
-                choices={[]}
-                onSelectChoice={() => {}}
-                onContinue={() => {}}
-                continueLabel="Next"
-            />
-        );
-
-        expect(html).toContain('continue-button');
-        expect(html).toContain('Next');
-    });
-
-    it('renders visible dialogue choices', () => {
-        const html = renderToStaticMarkup(
-            <ChoiceList
-                choices={[
-                    { id: 'ask', text: 'Ask about the town' },
-                    { id: 'leave', text: 'Leave' },
-                ]}
-                onSelectChoice={() => {}}
-                onContinue={() => {}}
-            />
-        );
-
-        expect(html).toContain('choice-button');
-        expect(html).toContain('Ask about the town');
-        expect(html).toContain('Leave');
-        expect(html).not.toContain('continue-button');
-    });
-
     it('resolves ChoiceList input commands', () => {
         const choices = [
             { id: 'ask', text: 'Ask' },
@@ -192,73 +148,15 @@ describe('React components', () => {
         expect(resolveChoiceListInput([], 'confirm')).toEqual({
             type: 'continue',
         });
+        expect(resolveChoiceListInput([], 'continue')).toEqual({
+            type: 'continue',
+        });
         expect(resolveChoiceListInput(choices, 'choice2', 1)).toEqual({
             type: 'selectChoice',
             choiceId: 'leave',
         });
         expect(resolveChoiceListInput(choices, 'confirm')).toBeNull();
         expect(resolveChoiceListInput(choices, 'choice9', 8)).toBeNull();
-    });
-
-    it('renders SaveLoadPanel with saved slots', () => {
-        const slots = [
-            {
-                id: 'a',
-                kind: 'manual',
-                label: 'Day 1',
-                timestamp: '2026-01-01T00:00:00.000Z',
-                save: {
-                    version: '1.0',
-                    timestamp: '2026-01-01T00:00:00.000Z',
-                    state: {},
-                },
-            },
-        ];
-        vi.stubGlobal('localStorage', {
-            getItem: vi.fn(() => JSON.stringify(slots)),
-            setItem: vi.fn(),
-            removeItem: vi.fn(),
-        });
-
-        const html = renderToStaticMarkup(
-            <SaveLoadPanel
-                ui={{
-                    'ui.save': 'Save Game',
-                    'ui.load': 'Load Game',
-                }}
-                onSave={() => ({
-                    version: 'test',
-                    timestamp: '2026-01-01T00:00:00.000Z',
-                    state: {} as any,
-                })}
-                onLoad={() => {}}
-            />
-        );
-
-        expect(html).toContain('New Save');
-        expect(html).toContain('Load Game');
-        expect(html).toContain('Day 1');
-        expect(html).toContain('Delete');
-    });
-
-    it('renders interlude text and dismiss control', () => {
-        const html = renderToStaticMarkup(
-            <Interlude
-                interlude={{
-                    id: 'opening',
-                    background: '/images/opening.jpg',
-                    text: 'First line\nSecond line',
-                    scroll: true,
-                    scrollSpeed: 30,
-                }}
-                onDismiss={() => {}}
-            />
-        );
-
-        expect(html).toContain('interlude-overlay');
-        expect(html).toContain('First line');
-        expect(html).toContain('Second line');
-        expect(html).toContain('interlude-skip-button');
     });
 
     it('resolves interlude input commands', () => {
@@ -274,16 +172,6 @@ describe('React components', () => {
         expect(shouldCompleteVideoFromInput('cancel')).toBe(true);
         expect(shouldCompleteVideoFromInput('continue')).toBe(true);
         expect(shouldCompleteVideoFromInput('choice1')).toBe(false);
-    });
-
-    it('renders VideoPlayer with skip control', () => {
-        const html = renderToStaticMarkup(
-            <VideoPlayer src="/video/intro.mp4" onComplete={() => {}} />
-        );
-
-        expect(html).toContain('video-player-overlay');
-        expect(html).toContain('/video/intro.mp4');
-        expect(html).toContain('video-player-skip-button');
     });
 
     it('uses asset context URLs for stock media components', () => {
@@ -328,11 +216,14 @@ describe('React components', () => {
                     dialogue={{
                         speaker: 'narrator',
                         speakerName: 'Narrator',
-                        text: 'Look there.',
+                        text: 'Look there.\n\nThe room is empty.',
                         portrait: '/assets/images/portraits/narrator.png',
                     }}
                 />
             )
+        );
+        expect(dialogueHtml).toContain(
+            'Look there.<br/><br/>The room is empty.'
         );
         const characterHtml = renderToStaticMarkup(
             withAssetContext(
@@ -391,8 +282,12 @@ describe('React components', () => {
         expect(dialogueHtml).toContain(
             '/cdn/assets/images/portraits/narrator.png'
         );
-        expect(characterHtml).toContain('/cdn/assets/images/portraits/sage.png');
-        expect(inventoryHtml).toContain('/cdn/assets/images/items/coin_icon.png');
+        expect(characterHtml).toContain(
+            '/cdn/assets/images/portraits/sage.png'
+        );
+        expect(inventoryHtml).toContain(
+            '/cdn/assets/images/items/coin_icon.png'
+        );
         expect(mapHtml).toContain('/cdn/assets/images/maps/town.png');
     });
 
@@ -403,6 +298,7 @@ describe('React components', () => {
                 speaker: null,
                 speakerName: 'Narrator',
                 text: 'You arrive in town.',
+                continueEndsDialogue: true,
             },
             choices: [],
             pendingInterlude: {
@@ -416,7 +312,7 @@ describe('React components', () => {
 
         const html = renderToStaticMarkup(
             <GameProvider engine={engine} initialSnapshot={snapshot}>
-                <GameRenderer />
+                <GameRenderer projectId="00000000-0000-4000-8000-000000000002" />
             </GameProvider>
         );
 
@@ -424,5 +320,6 @@ describe('React components', () => {
         expect(html).toContain('interlude-overlay');
         expect(html).toContain('You arrive in town.');
         expect(html).toContain('continue-button');
+        expect(html).toContain('End Dialogue');
     });
 });

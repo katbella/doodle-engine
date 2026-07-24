@@ -2,7 +2,7 @@
  * AssetProvider: context and loading orchestration for the asset system.
  *
  * Manages the two-tier loading flow:
- *   loading-shell → loading-game → complete
+ *   loading-shell, then loading-game, then complete
  *
  * Children don't render until shell and game assets are loaded.
  * Use renderLoading to provide a loading screen during the process.
@@ -52,7 +52,7 @@ export function useOptionalAssetContext(): AssetContextValue | null {
 }
 
 export interface AssetProviderProps {
-    /** Asset manifest (from /api/manifest or bundled) */
+    /** Asset manifest (from api/manifest or bundled) */
     manifest: AssetManifest;
     /** Children to render once shell and game assets are loaded */
     children: ReactNode;
@@ -62,6 +62,8 @@ export interface AssetProviderProps {
     onStateChange?: (state: AssetLoadingState) => void;
     /** Render prop for loading screen, receives state for progress display */
     renderLoading?: (state: AssetLoadingState) => ReactNode;
+    /** Allow children to replace a completed loading screen (default: true) */
+    readyToContinue?: boolean;
 }
 
 const IDLE_STATE: AssetLoadingState = {
@@ -82,6 +84,7 @@ export function AssetProvider({
     loader: loaderProp,
     onStateChange,
     renderLoading,
+    readyToContinue = true,
 }: AssetProviderProps) {
     const loaderRef = useRef<AssetLoader>(
         loaderProp ?? createAssetLoader(manifest.version)
@@ -219,7 +222,6 @@ export function AssetProvider({
                     return next;
                 });
 
-                setAllDone(true);
                 setState({
                     phase: 'complete',
                     bytesLoaded: manifest.totalSize,
@@ -231,6 +233,8 @@ export function AssetProvider({
                     currentAsset: null,
                     error: null,
                 });
+
+                setAllDone(true);
             } catch (err) {
                 if (cancelled) return;
                 setState({
@@ -276,8 +280,9 @@ export function AssetProvider({
         loader,
     };
 
-    // Show loading screen until all required assets are done
-    if (!allDone) {
+    // A shell may keep the completed loading screen mounted until the player
+    // explicitly continues, which also provides a browser audio gesture.
+    if (!allDone || !readyToContinue) {
         const loadingNode = renderLoading ? renderLoading(state) : null;
         return (
             <AssetContext.Provider value={ctx}>

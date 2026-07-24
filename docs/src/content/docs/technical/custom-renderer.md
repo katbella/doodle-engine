@@ -1,13 +1,13 @@
 ---
 title: Custom Renderer
-description: How to build a custom UI instead of using the default GameRenderer.
+description: Build a game interface with Doodle's React APIs or another UI framework.
 ---
 
-The default `GameRenderer` provides a complete UI out of the box, but you can build your own using the `useGame` hook and individual components.
+The built-in `GameRenderer` assembles Doodle's standard interface. A custom renderer can arrange the React components differently or present engine state through an interface of its own.
 
 ## Using useGame
 
-The `useGame` hook provides the current snapshot and all action methods:
+The `useGame` hook provides the current snapshot, which contains the data for the current game screen, and the methods for player actions:
 
 ```tsx
 import { useGame } from '@doodle-engine/react';
@@ -56,7 +56,7 @@ function MyCustomGame() {
 }
 ```
 
-Wrap it with `AssetProvider` and `GameProvider`. While content and the asset manifest are loading, render a placeholder:
+Wrap it with `AssetProvider` and `GameProvider`. The asset manifest is the list of media files needed by the game. Render a placeholder while the content and assets load:
 
 ```tsx
 import { Engine, type AssetManifest, type Snapshot } from '@doodle-engine/core';
@@ -112,6 +112,7 @@ import {
     useGame,
     useInputAction,
 } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 function KeyboardDialogue() {
     const { snapshot, actions } = useGame();
@@ -169,7 +170,7 @@ actions.dismissInterlude()               // Clear a pending interlude
 
 ## Mixing Individual Components
 
-You can use the pre-built components with your own layout:
+You can arrange the built-in components in your own layout:
 
 ```tsx
 import {
@@ -224,6 +225,7 @@ function MyLayout() {
                 ui={snapshot.ui}
                 onSave={actions.saveGame}
                 onLoad={actions.loadGame}
+                projectId={PROJECT_ID}
             />
         </div>
     );
@@ -260,7 +262,7 @@ snapshot.ui; // Resolved UI strings (e.g. snapshot.ui['ui.continue'])
 
 When `devTools={import.meta.env.DEV}` is set on `GameProvider` or `GameShell`, a `window.doodle` object is available in your browser's DevTools console while developing. Type `doodle.inspect()` to see all available commands:
 
-```
+```text
 doodle.setFlag("flagName")              // Set a flag
 doodle.clearFlag("flagName")            // Clear a flag
 doodle.setVariable("gold", 100)         // Set a variable
@@ -271,15 +273,17 @@ doodle.setQuestStage("questId", "stage")
 doodle.addItem("itemId")
 doodle.removeItem("itemId")
 doodle.inspect()                        // Print current state summary
-doodle.inspectState()                   // Return raw game state object
-doodle.inspectRegistry()                // Return content registry object
+doodle.inspectState()                   // View current progress and game state
+doodle.inspectRegistry()                // View all loaded game content
 ```
+
+The inspection commands return copies, so exploring their results does not change the running game.
 
 `window.doodle` is only available after a game has started (after clicking New Game or Continue), because `GameProvider` must be mounted first.
 
 ## Building Without React
 
-The core engine is framework-agnostic. Use it with any UI:
+The core engine has no React dependency and can be used with another UI framework:
 
 ```typescript
 import { Engine } from '@doodle-engine/core';

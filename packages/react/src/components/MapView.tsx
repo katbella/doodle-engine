@@ -13,6 +13,8 @@ export interface MapViewProps {
     currentTime?: { day: number; hour: number };
     onTravelTo: (locationId: string) => void;
     confirmTravel?: boolean;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
@@ -46,8 +48,10 @@ export function MapView({
     currentTime,
     onTravelTo,
     confirmTravel = true,
+    ui,
     className = '',
 }: MapViewProps) {
+    const t = (key: string, fallback: string) => ui?.[key] ?? fallback;
     const [pendingTravel, setPendingTravel] = useState<{
         locationId: string;
         locationName: string;
@@ -141,18 +145,39 @@ export function MapView({
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h3 className="travel-confirm-title">
-                            Travel to {pendingTravel.locationName}?
+                            {t('ui.travel_to', 'Travel to {destination}?').replace(
+                                '{destination}',
+                                pendingTravel.locationName
+                            )}
                         </h3>
                         <p className="travel-confirm-time">
-                            The journey will take {pendingTravel.hours}{' '}
-                            {pendingTravel.hours === 1 ? 'hour' : 'hours'}.
+                            {pendingTravel.hours === 1
+                                ? t(
+                                      'ui.travel_time_one',
+                                      'The journey will take 1 hour.'
+                                  )
+                                : t(
+                                      'ui.travel_time',
+                                      'The journey will take {hours} hours.'
+                                  ).replace(
+                                      '{hours}',
+                                      String(pendingTravel.hours)
+                                  )}
                             {pendingTravel.arrival && (
                                 <>
                                     <br />
                                     <span className="travel-confirm-arrival">
-                                        Arrive: Day{' '}
-                                        {pendingTravel.arrival.day},{' '}
-                                        {formatHour(pendingTravel.arrival.hour)}
+                                        {t('ui.arrive', 'Arrive: Day {day}, {time}')
+                                            .replace(
+                                                '{day}',
+                                                String(pendingTravel.arrival.day)
+                                            )
+                                            .replace(
+                                                '{time}',
+                                                formatHour(
+                                                    pendingTravel.arrival.hour
+                                                )
+                                            )}
                                     </span>
                                 </>
                             )}
@@ -162,7 +187,7 @@ export function MapView({
                                 className="travel-confirm-cancel"
                                 onClick={() => setPendingTravel(null)}
                             >
-                                Cancel
+                                {t('ui.cancel', 'Cancel')}
                             </button>
                             <button
                                 className="travel-confirm-go"
@@ -171,7 +196,7 @@ export function MapView({
                                     setPendingTravel(null);
                                 }}
                             >
-                                Travel
+                                {t('ui.travel', 'Travel')}
                             </button>
                         </div>
                     </div>

@@ -9,10 +9,18 @@ export interface PlayerNotesProps {
     notes: PlayerNote[];
     onWrite: (title: string, text: string) => void;
     onDelete: (noteId: string) => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
-export function PlayerNotes({ notes, onWrite, onDelete, className = '' }: PlayerNotesProps) {
+export function PlayerNotes({
+    notes,
+    onWrite,
+    onDelete,
+    ui,
+    className = '',
+}: PlayerNotesProps) {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
 
@@ -26,44 +34,48 @@ export function PlayerNotes({ notes, onWrite, onDelete, className = '' }: Player
 
     return (
         <div className={`player-notes ${className}`}>
-            <h2>Notes</h2>
+            <h2>{ui?.['ui.notes'] ?? 'Notes'}</h2>
 
             <form className="player-notes-form" onSubmit={handleSubmit}>
                 <input
                     className="player-notes-title-input"
                     type="text"
-                    placeholder="Title"
+                    placeholder={ui?.['ui.note_title'] ?? 'Title'}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
                 <textarea
                     className="player-notes-text-input"
-                    placeholder="Write a note..."
+                    placeholder={ui?.['ui.note_text'] ?? 'Write a note...'}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     rows={3}
                 />
                 <button className="player-notes-add-button" type="submit">
-                    Add Note
+                    {ui?.['ui.add_note'] ?? 'Add Note'}
                 </button>
             </form>
 
             {notes.length === 0 ? (
-                <p className="player-notes-empty">No notes yet</p>
+                <p className="player-notes-empty">
+                    {ui?.['ui.no_notes'] ?? 'No notes yet'}
+                </p>
             ) : (
                 <ul className="player-notes-list">
                     {notes.map((note) => (
                         <li key={note.id} className="player-note">
                             {note.title && (
-                                <div className="player-note-title">{note.title}</div>
+                                <div className="player-note-title">
+                                    {note.title}
+                                </div>
                             )}
                             <div className="player-note-text">{note.text}</div>
                             <button
                                 className="player-note-delete"
                                 onClick={() => onDelete(note.id)}
-                                aria-label="Delete note"
+                                aria-label={ui?.['ui.delete'] ?? 'Delete'}
                             >
-                                Delete
+                                {ui?.['ui.delete'] ?? 'Delete'}
                             </button>
                         </li>
                     ))}

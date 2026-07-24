@@ -2,7 +2,15 @@
     "$schema": "https://unpkg.com/@changesets/config@3.1.2/schema.json",
     "changelog": "@changesets/cli/changelog",
     "commit": false,
-    "fixed": [],
+    "fixed": [
+        [
+            "@doodle-engine/core",
+            "@doodle-engine/react",
+            "@doodle-engine/toolkit",
+            "@doodle-engine/cli",
+            "@doodle-engine/studio"
+        ]
+    ],
     "linked": [],
     "access": "public",
     "baseBranch": "main",

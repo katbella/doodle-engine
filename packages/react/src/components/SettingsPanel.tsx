@@ -28,6 +28,8 @@ export interface SettingsPanelProps {
     onLocaleChange?: (locale: string) => void;
     /** Go back / close settings */
     onBack: () => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     /** CSS class */
     className?: string;
 }
@@ -39,37 +41,40 @@ export function SettingsPanel({
     currentLocale,
     onLocaleChange,
     onBack,
+    ui,
     className = '',
 }: SettingsPanelProps) {
     return (
         <div className={`settings-panel ${className}`}>
-            <h2 className="settings-title">Settings</h2>
+            <h2 className="settings-title">
+                {ui?.['ui.settings'] ?? 'Settings'}
+            </h2>
 
             <div className="settings-section">
-                <h3>Audio</h3>
+                <h3>{ui?.['ui.audio'] ?? 'Audio'}</h3>
                 <VolumeSlider
-                    label="Master"
+                    label={ui?.['ui.volume_master'] ?? 'Master'}
                     value={audio.masterVolume}
                     onChange={audio.setMasterVolume}
                 />
                 <VolumeSlider
-                    label="Music"
+                    label={ui?.['ui.volume_music'] ?? 'Music'}
                     value={audio.musicVolume}
                     onChange={audio.setMusicVolume}
                 />
                 <VolumeSlider
-                    label="Sound Effects"
+                    label={ui?.['ui.volume_sound'] ?? 'Sound Effects'}
                     value={audio.soundVolume}
                     onChange={audio.setSoundVolume}
                 />
                 <VolumeSlider
-                    label="Voice"
+                    label={ui?.['ui.volume_voice'] ?? 'Voice'}
                     value={audio.voiceVolume}
                     onChange={audio.setVoiceVolume}
                 />
                 {uiSoundControls && (
                     <VolumeSlider
-                        label="UI Sounds"
+                        label={ui?.['ui.volume_ui'] ?? 'UI Sounds'}
                         value={uiSoundControls.volume}
                         onChange={uiSoundControls.setVolume}
                     />
@@ -80,7 +85,7 @@ export function SettingsPanel({
                 availableLocales.length > 1 &&
                 onLocaleChange && (
                     <div className="settings-section">
-                        <h3>Language</h3>
+                        <h3>{ui?.['ui.language'] ?? 'Language'}</h3>
                         <select
                             className="settings-locale-select"
                             value={currentLocale}
@@ -96,7 +101,7 @@ export function SettingsPanel({
                 )}
 
             <button className="settings-back-button" onClick={onBack}>
-                Back
+                {ui?.['ui.back'] ?? 'Back'}
             </button>
         </div>
     );

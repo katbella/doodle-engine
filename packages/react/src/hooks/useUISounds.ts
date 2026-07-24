@@ -54,6 +54,7 @@ const DEFAULT_SOUNDS = {
 
 export function resolveSoundPath(basePath: string, file: string): string {
     if (
+        file.startsWith('assets/') ||
         file.startsWith('/') ||
         file.startsWith('http://') ||
         file.startsWith('https://') ||
@@ -68,7 +69,7 @@ export function resolveSoundPath(basePath: string, file: string): string {
 export function useUISounds(config: UISoundConfig = {}): UISoundControls {
     const {
         enabled: initialEnabled = true,
-        basePath = '/assets/audio/ui',
+        basePath = 'assets/audio/ui',
         volume: initialVolume = 0.5,
         sounds = {},
     } = config;

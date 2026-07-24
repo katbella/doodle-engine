@@ -5,7 +5,13 @@
  * Framework-agnostic - manages game state, evaluates conditions, processes effects, builds snapshots.
  */
 
-export const VERSION = '0.0.1';
+// Filled in from package.json at build time (see vite.config.ts), so the
+// constant always matches the published package version.
+declare const __DOODLE_VERSION__: string;
+export const VERSION: string =
+    typeof __DOODLE_VERSION__ === 'string' ? __DOODLE_VERSION__ : '0.0.0-dev';
+
+export { isValidIdentifier } from './identifiers';
 
 // Content Entities
 export type {
@@ -128,24 +134,94 @@ export type { SaveData } from './types/save';
 export type { ContentRegistry, LocaleData } from './types/registry';
 
 // Condition Evaluators
-export { evaluateCondition, evaluateConditions } from './conditions';
+export {
+    evaluateCondition,
+    evaluateConditions,
+    describeConditionValues,
+} from './conditions';
 
 // Effect Processors
 export { applyEffect, applyEffects } from './effects';
 
 // Localization
-export { resolveText, createResolver } from './localization';
+export { resolveText } from './localization';
 
 // Snapshot Builder
 export { buildSnapshot, buildUIStrings } from './snapshot';
 
 // Engine
 export { Engine, createInitialState } from './engine';
+export type { ChoiceVisibility } from './engine';
+
+// Debug trace (for tooling: playtest, state inspector, debug trace)
+export type {
+    TraceSink,
+    TraceEvent,
+    NodeEnterEvent,
+    ConditionEvent,
+    ConditionContext,
+    EffectEvent,
+    StateDelta,
+    TransitionEvent,
+    ChoiceFilteredEvent,
+    TraceErrorEvent,
+} from './types/trace';
 
 // Parser
 export { parseDialogue, parseCondition, parseEffect } from './parser';
+
+// Lossless concrete-syntax layer (for editors: round-trip safe, position-aware)
+export {
+    parseDialogueCst,
+    printDialogueCst,
+    cstToDialogue,
+} from './parser/cst';
+export type {
+    DialogueCst,
+    CstLine,
+    CstNode,
+    CstChoice,
+    CstIf,
+    CstDirective,
+    CstEdit,
+    Span,
+} from './parser/cst';
+
+// Serializer (dialogue entities -> .dlg source, for the visual editor)
+export {
+    serializeDialogue,
+    serializeNode,
+    serializeCondition,
+    serializeEffect,
+    conditionTokens,
+    effectTokens,
+} from './parser/serialize';
+export type { DlgToken } from './parser/serialize';
+
+// Visual-editor write-back (splices changed nodes, preserving comments)
+export { applyDialogueEdits } from './parser/edit';
+
+// Condition/effect descriptors (single source of truth for builder UIs)
+export {
+    CONDITION_DESCRIPTORS,
+    EFFECT_DESCRIPTORS,
+    REFERENCE_KIND_TARGET,
+    conditionDescriptor,
+    effectDescriptor,
+} from './parser/descriptors';
+export type {
+    ArgKind,
+    ArgDescriptor,
+    DescriptorGroup,
+    ConditionDescriptor,
+    EffectDescriptor,
+} from './parser/descriptors';
 
 // Dev Tools (framework-agnostic debugging API)
 export type { DevTools } from './devtools';
 
 export { enableDevTools } from './devtools';
+
+// Reference index (maps ids to usages; find-references, orphans, safe rename)
+export { ReferenceIndex } from './reference-index';
+export type { SymbolType, Reference } from './reference-index';

@@ -14,6 +14,8 @@ import { useOptionalAssetContext } from '../AssetProvider';
 export interface InterludeProps {
     interlude: SnapshotInterlude;
     onDismiss: () => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
 }
 
 export type InterludeInputResult =
@@ -42,7 +44,7 @@ export function resolveInterludeInput(
     return null;
 }
 
-export function Interlude({ interlude, onDismiss }: InterludeProps) {
+export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
     const textRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const animRef = useRef<number | null>(null);
@@ -52,7 +54,7 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
     const assetContext = useOptionalAssetContext();
     const getAssetUrl = useCallback(
         (path: string | undefined) =>
-            path ? assetContext?.getAssetUrl(path) ?? path : '',
+            path ? (assetContext?.getAssetUrl(path) ?? path) : '',
         [assetContext]
     );
 
@@ -70,7 +72,10 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
         audio.loop = true;
         audio.volume = masterVol * musicVol;
         audio.play().catch(() => {});
-        return () => { audio.pause(); audio.src = ''; };
+        return () => {
+            audio.pause();
+            audio.src = '';
+        };
     }, [interlude.music, masterVol, musicVol, getAssetUrl]);
 
     // Voice narration: plays once
@@ -79,7 +84,10 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
         const audio = new Audio(getAssetUrl(interlude.voice));
         audio.volume = masterVol * voiceVol;
         audio.play().catch(() => {});
-        return () => { audio.pause(); audio.src = ''; };
+        return () => {
+            audio.pause();
+            audio.src = '';
+        };
     }, [interlude.voice, masterVol, voiceVol, getAssetUrl]);
 
     // Ambient sounds: each loops independently
@@ -92,7 +100,12 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
             audio.play().catch(() => {});
             return audio;
         });
-        return () => { audios.forEach((a) => { a.pause(); a.src = ''; }); };
+        return () => {
+            audios.forEach((a) => {
+                a.pause();
+                a.src = '';
+            });
+        };
     }, [interlude.sounds, masterVol, soundVol, getAssetUrl]);
 
     // Auto-scroll: refs update the DOM directly to avoid per-frame React re-renders
@@ -112,10 +125,12 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
             const textEl = textRef.current;
             const containerEl = containerRef.current;
             if (textEl && containerEl) {
-                const maxScroll = textEl.scrollHeight - containerEl.clientHeight;
+                const maxScroll =
+                    textEl.scrollHeight - containerEl.clientHeight;
                 if (scrollOffsetRef.current < maxScroll) {
                     scrollOffsetRef.current = Math.min(
-                        scrollOffsetRef.current + interlude.scrollSpeed * elapsed,
+                        scrollOffsetRef.current +
+                            interlude.scrollSpeed * elapsed,
                         maxScroll
                     );
                     containerEl.scrollTop = scrollOffsetRef.current;
@@ -140,16 +155,17 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         manualPausedRef.current = true;
-        scrollOffsetRef.current = Math.max(0, scrollOffsetRef.current + e.deltaY);
-        if (containerRef.current) containerRef.current.scrollTop = scrollOffsetRef.current;
+        scrollOffsetRef.current = Math.max(
+            0,
+            scrollOffsetRef.current + e.deltaY
+        );
+        if (containerRef.current)
+            containerRef.current.scrollTop = scrollOffsetRef.current;
     }, []);
 
     const scrollBy = useCallback((delta: number) => {
         manualPausedRef.current = true;
-        scrollOffsetRef.current = Math.max(
-            0,
-            scrollOffsetRef.current + delta
-        );
+        scrollOffsetRef.current = Math.max(0, scrollOffsetRef.current + delta);
         if (containerRef.current) {
             containerRef.current.scrollTop = scrollOffsetRef.current;
         }
@@ -177,7 +193,9 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
     return (
         <div
             className="interlude-overlay"
-            style={{ backgroundImage: `url(${getAssetUrl(interlude.background)})` }}
+            style={{
+                backgroundImage: `url(${getAssetUrl(interlude.background)})`,
+            }}
             onClick={onDismiss}
         >
             {interlude.banner && (
@@ -202,8 +220,14 @@ export function Interlude({ interlude, onDismiss }: InterludeProps) {
                 </div>
             </div>
 
-            <button className="interlude-skip-button" onClick={onDismiss}>
-                Skip &raquo;
+            <button
+                className="interlude-skip-button"
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onDismiss();
+                }}
+            >
+                {ui?.['ui.skip'] ?? 'Skip'} &raquo;
             </button>
         </div>
     );

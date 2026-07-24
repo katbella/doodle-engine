@@ -3,7 +3,7 @@
  *
  * Builds a snapshot from the current game state and content registry.
  * A snapshot is everything the renderer needs to display the current moment:
- * - All localization resolved (@keys → text)
+ * - All localization resolved (@keys become text)
  * - All conditions evaluated (only visible choices included)
  * - All entity data enriched with full information
  *
@@ -12,6 +12,7 @@
 
 import type { ContentRegistry, LocaleData } from '../types/registry';
 import type { GameState } from '../types/state';
+import type { Dialogue, DialogueNode } from '../types/entities';
 import type {
     Snapshot,
     SnapshotLocation,
@@ -33,37 +34,80 @@ import { resolveAssetPath } from '../assets/paths';
 // UI String Defaults
 // =============================================================================
 
-const UI_KEYS = [
-    'ui.continue',
-    'ui.inventory',
-    'ui.journal',
-    'ui.map',
-    'ui.save_load',
-    'ui.settings',
-    'ui.save',
-    'ui.load',
-    'ui.new_game',
-    'ui.resume',
-    'ui.no_companions',
-    'ui.narrator',
-    'ui.notes',
-] as const;
-
+// Every label the built-in renderer shows. Locale files override any of
+// these with a matching ui.* key; the English text is the default.
 const UI_DEFAULTS: Record<string, string> = {
     'ui.continue': 'Continue',
+    'ui.end_dialogue': 'End Dialogue',
     'ui.inventory': 'Inventory',
     'ui.journal': 'Journal',
     'ui.map': 'Map',
     'ui.save_load': 'Save/Load',
     'ui.settings': 'Settings',
+    'ui.credits': 'Credits',
+    'ui.made_with_doodle_engine': 'Made with Doodle Engine',
     'ui.save': 'Save',
     'ui.load': 'Load',
     'ui.new_game': 'New Game',
+    'ui.start_game': 'Start game',
     'ui.resume': 'Resume',
     'ui.no_companions': 'No companions',
     'ui.narrator': 'Narrator',
     'ui.notes': 'Notes',
+    'ui.characters': 'Characters',
+    'ui.party': 'Party',
+    'ui.resources': 'Resources',
+    'ui.no_items': 'No items',
+    'ui.location_banner': 'Location Banner',
+    'ui.close': 'Close',
+    'ui.paused': 'Paused',
+    'ui.quit_to_title': 'Quit to Title',
+    'ui.active_quests': 'Active Quests',
+    'ui.entries': 'Entries',
+    'ui.no_entries': 'No entries yet',
+    'ui.audio': 'Audio',
+    'ui.language': 'Language',
+    'ui.volume_master': 'Master',
+    'ui.volume_music': 'Music',
+    'ui.volume_sound': 'Sound Effects',
+    'ui.volume_voice': 'Voice',
+    'ui.volume_ui': 'UI Sounds',
+    'ui.back': 'Back',
+    'ui.saved': 'Saved!',
+    'ui.loaded': 'Loaded!',
+    'ui.new_save': 'New Save',
+    'ui.quick_save': 'Quick Save',
+    'ui.autosave': 'Autosave',
+    'ui.no_saves': 'No saves yet',
+    'ui.delete': 'Delete',
+    'ui.skip': 'Skip',
+    'ui.skip_splash': 'Skip splash screen',
+    'ui.menu': 'Menu',
+    'ui.add_note': 'Add Note',
+    'ui.note_title': 'Title',
+    'ui.note_text': 'Write a note...',
+    'ui.no_notes': 'No notes yet',
+    'ui.loading': 'Loading...',
+    'ui.loading_game_assets': 'Loading game assets...',
+    'ui.ready': 'Ready!',
+    'ui.error_loading_assets': 'Error loading assets',
+    'ui.travel_to': 'Travel to {destination}?',
+    'ui.travel_time_one': 'The journey will take 1 hour.',
+    'ui.travel_time': 'The journey will take {hours} hours.',
+    'ui.arrive': 'Arrive: Day {day}, {time}',
+    'ui.travel': 'Travel',
+    'ui.cancel': 'Cancel',
+    'ui.day': 'Day {day}',
+    'ui.time_dawn': 'Dawn',
+    'ui.time_morning': 'Morning',
+    'ui.time_midday': 'Midday',
+    'ui.time_afternoon': 'Afternoon',
+    'ui.time_evening': 'Evening',
+    'ui.time_dusk': 'Dusk',
+    'ui.time_night': 'Night',
 };
+
+const UI_KEYS = Object.keys(UI_DEFAULTS);
 
 /**
  * Build the resolved UI strings record from locale data.
@@ -145,7 +189,10 @@ export function buildSnapshot(
 
     // Get music and ambient from current location, respecting any playMusic override
     const locationData = registry.locations[state.currentLocation];
-    const music = resolveAssetPath(state.musicOverride ?? locationData?.music, 'music');
+    const music = resolveAssetPath(
+        state.musicOverride ?? locationData?.music,
+        'music'
+    );
     const ambient = resolveAssetPath(locationData?.ambient, 'ambient');
 
     // Resolve notification localization keys
@@ -253,7 +300,10 @@ function buildCharactersHereSnapshot(
     for (const [characterId, characterState] of Object.entries(
         state.characterState
     )) {
-        if (characterState.location === state.currentLocation && !characterState.inParty) {
+        if (
+            characterState.location === state.currentLocation &&
+            !characterState.inParty
+        ) {
             const character = registry.characters[characterId];
             if (character) {
                 charactersHere.push({
@@ -345,6 +395,7 @@ function buildDialogueSnapshot(
             'portrait'
         ),
         voice: resolveAssetPath(node.voice, 'voice'),
+        continueEndsDialogue: willContinueEndDialogue(node, dialogue, state),
     };
 
     // Build choices - only include those whose conditions pass
@@ -363,6 +414,37 @@ function buildDialogueSnapshot(
         }));
 
     return { dialogue: dialogueSnapshot, choices };
+}
+
+function willContinueEndDialogue(
+    node: DialogueNode,
+    dialogue: Dialogue,
+    state: GameState
+): boolean {
+    if (
+        node.choices.some(
+            (choice) =>
+                !choice.conditions?.length ||
+                evaluateConditions(choice.conditions, state)
+        )
+    ) {
+        return false;
+    }
+
+    const branch = node.conditionalBranches?.find((candidate) =>
+        evaluateConditions([candidate.condition], state)
+    );
+    const effects = branch?.effects ?? [];
+    let dialogueEffect: 'start' | 'end' | null = null;
+    for (const effect of effects) {
+        if (effect.type === 'startDialogue') dialogueEffect = 'start';
+        if (effect.type === 'endDialogue') dialogueEffect = 'end';
+    }
+    if (dialogueEffect === 'start') return false;
+    if (dialogueEffect === 'end') return true;
+
+    const next = branch?.next ?? node.next;
+    return !next || !dialogue.nodes.some((candidate) => candidate.id === next);
 }
 
 /**
@@ -483,9 +565,8 @@ function buildMapSnapshot(
     registry: ContentRegistry,
     resolve: (text: string) => string
 ): SnapshotMap | null {
-    const map = Object.values(registry.maps).find(
-        (candidate) =>
-            candidate.locations.some((loc) => loc.id === state.currentLocation)
+    const map = Object.values(registry.maps).find((candidate) =>
+        candidate.locations.some((loc) => loc.id === state.currentLocation)
     );
     if (!map) return null;
 

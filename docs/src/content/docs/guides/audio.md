@@ -3,7 +3,7 @@ title: Audio
 description: How to add music, ambient sounds, voice lines, and sound effects.
 ---
 
-Doodle Engine snapshots include music, ambient sound, voice lines, and one-shot sound effects. GameShell plays them for you. Custom renderers can use `useAudioManager`.
+Doodle Engine supports location music, ambient sound, voice lines, and sound effects. `GameShell` handles playback. Custom React renderers can use `useAudioManager`.
 
 ## Setting Up Audio
 
@@ -14,8 +14,8 @@ Each location has `music` and `ambient` fields:
 ```yaml
 # content/locations/tavern.yaml
 id: tavern
-name: '@location.tavern.name'
-description: '@location.tavern.description'
+name: The Salty Dog
+description: A warm tavern overlooking the harbor.
 banner: tavern.png
 music: tavern_ambience.ogg
 ambient: fire_crackling.ogg
@@ -27,17 +27,17 @@ With GameShell or `useAudioManager`, music crossfades when `snapshot.music` chan
 
 Add voice to dialogue nodes:
 
-```
+```text
 NODE emotional_scene
   VOICE bartender_sad.ogg
-  BARTENDER: @bartender.sad_line
+  BARTENDER: I thought we had more time.
 ```
 
 ### Sound Effects
 
 Play one-shot sounds from dialogue effects:
 
-```
+```text
 SOUND door_slam.ogg
 ```
 
@@ -45,21 +45,21 @@ SOUND door_slam.ogg
 
 Override the current music track from within dialogue:
 
-```
+```text
 MUSIC tension_theme.ogg
 ```
 
 The override clears when the player travels to a new location and the destination's location music resumes. To reset immediately to the current location's music, pass an empty string:
 
-```
+```text
 MUSIC
 ```
 
 ## useAudioManager Hook
 
-The `useAudioManager` hook manages all audio playback automatically based on the snapshot. Volume values are reactive: pass current values each render and the hook applies them to the audio elements.
+The `useAudioManager` hook watches the current snapshot, which is the engine's description of the current game screen, and updates audio playback to match it. Pass the current volume values each time the renderer runs so changes take effect immediately.
 
-The hook does not own volume state. Use `AudioSettingsContext` (or your own state) as the single source of truth for volumes.
+Store volume settings in `AudioSettingsContext` or your own application state, then pass them to the hook.
 
 ```tsx
 import { useAudioManager, useAudioSettings } from '@doodle-engine/react';
@@ -78,7 +78,7 @@ function MyGame() {
 }
 ```
 
-If you're using `GameShell`, audio management is built in. You don't need to call `useAudioManager` yourself.
+`GameShell` calls `useAudioManager` for you.
 
 ### Options
 
@@ -107,13 +107,13 @@ The hook reacts to snapshot changes:
 - **Voice**: When `snapshot.dialogue?.voice` changes, plays the voice file
 - **Sounds**: Plays all entries in `snapshot.pendingSounds` (cleared after each snapshot)
 
-Sound effects and pending sounds are transient. They appear in one snapshot and are automatically cleared.
+Sound effects appear in one snapshot and clear after playback begins.
 
 ## File Organization
 
 Place audio files in the matching `assets/audio/` subdirectory:
 
-```
+```text
 assets/
   audio/
     music/
@@ -126,17 +126,17 @@ assets/
       bartender_greeting.ogg
 ```
 
-The engine resolves bare filenames to full paths at snapshot time. A `music` field set to `tavern_ambience.ogg` becomes `/assets/audio/music/tavern_ambience.ogg` in the snapshot. See [Assets & Media](/guides/assets-and-media/) for the full convention table.
+Write only the filename in game content. Doodle knows that a location’s `music` field refers to `assets/audio/music/`, while `ambient` refers to `assets/audio/sfx/`. See [Assets & Media](/guides/assets-and-media/) for every media field and folder.
 
 ## UI Sounds
 
-UI sounds (button clicks, menu open/close) are handled by a separate `useUISounds` hook. These are renderer chrome sounds, not game content audio.
+The separate `useUISounds` hook handles interface sounds such as button clicks and menus opening or closing.
 
 ```tsx
 import { useUISounds } from '@doodle-engine/react'
 
 const uiSounds = useUISounds({
-  basePath: '/assets/audio/ui',
+  basePath: 'assets/audio/ui',
   volume: 0.5,
   sounds: {
     click: 'click.ogg',
@@ -151,13 +151,14 @@ const uiSounds = useUISounds({
 </button>
 ```
 
-If you're using `GameShell`, UI sounds are built in. Configure them via the `uiSounds` prop:
+`GameShell` handles UI sounds. Configure them with the `uiSounds` prop:
 
 ```tsx
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     uiSounds={{ volume: 0.5 }}
 />
 ```
@@ -166,7 +167,7 @@ If you're using `GameShell`, UI sounds are built in. Configure them via the `uiS
 
 Place UI sound files separately from game audio:
 
-```
+```text
 assets/
   audio/
     ui/

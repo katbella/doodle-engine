@@ -3,30 +3,32 @@ title: Asset Loading
 description: How the asset loading system works, and how to configure shell assets.
 ---
 
-Doodle Engine uses an asset loading system to prepare media before gameplay renders. GameShell and AssetProvider load shell assets first, then game assets from the manifest. Custom renderers can also prefetch specific assets later.
+Doodle loads every media file listed in the asset manifest before the game shell appears. The asset manifest is the generated list of images, audio, and video referenced by the project.
 
-This page is primarily useful for developers building custom renderers or modifying loading behavior. Content authors usually do not need to interact with the asset loader directly.
+This page explains startup loading for developers changing `GameShell` or building a custom renderer. For adding media to game content, see [Assets & Media](/guides/assets-and-media/).
 
 ## How It Works
 
-Assets are organized into tiers based on when they need to be available during startup and gameplay:
+The manifest separates files into two groups:
 
-| Tier               | When loaded               | What it contains                                                                                     |
-| ------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Tier 0**         | Bundled in JS             | CSS loading UI                                                                                       |
-| **Tier 1 (shell)** | During the first loading phase | Splash, loading, title, and UI sound assets                                                     |
-| **Tier 2 (game)**  | During the loading screen | All gameplay assets referenced by the manifest, including portraits, banners, music, and other media |
+| Group | Includes |
+| --- | --- |
+| **Shell assets** | Splash, loading, and title images; title music; splash and interface sounds |
+| **Game assets** | Location and interlude art, portraits, item and map images, game music and sound, voice, and video |
 
-### The Loading Flow
+`AssetProvider` loads the shell group first and the game group second. Its loading screen remains visible during both groups. The provider renders the game only after both groups finish, so the optional splash screen, title screen, and gameplay all begin with their referenced media available.
 
-```
-1. LOADING  → download shell assets (tier 1), then game assets (tier 2) with progress
-2. SPLASH   → studio logo (already loaded)
-3. TITLE    → title screen with music (already loaded)
-4. PLAYING  → game (game assets ready)
-```
+The screen order is:
 
-The loading screen uses CSS-only defaults, so it can render immediately with zero external assets. If you configure a loading background, that file is part of the shell asset tier.
+1. Loading screen while shell and game media load
+2. **Start game** button on the completed loading screen
+3. Optional splash screen
+4. Title screen
+5. Gameplay after the player starts or continues a game
+
+The default loading screen is rendered with CSS, so it can appear before any media finishes loading. A background configured for the loading screen is included in the shell group.
+
+When loading finishes, the player selects **Start game** to continue. Use `GameShell`'s `renderLoading` prop to provide custom loading content, or `LoadingScreen`'s `renderProgress` prop to replace the default progress display.
 
 ## Configuring Shell Assets
 
@@ -35,27 +37,27 @@ Add a `shell:` section to your `content/game.yaml`:
 ```yaml
 shell:
     splash:
-        logo: /assets/images/studio-logo.png
-        background: /assets/images/splash-bg.jpg
-        sound: /assets/audio/sfx/splash-sting.ogg
+        logo: assets/images/studio-logo.png
+        background: assets/images/splash-bg.jpg
+        sound: assets/audio/sfx/splash-sting.ogg
         duration: 2000
 
     loading:
-        background: /assets/images/loading-bg.jpg
+        background: assets/images/loading-bg.jpg
 
     title:
-        logo: /assets/images/game-logo.png
-        background: /assets/images/title-bg.jpg
-        music: /assets/audio/music/title-theme.ogg
+        logo: assets/images/game-logo.png
+        background: assets/images/title-bg.jpg
+        music: assets/audio/music/title-theme.ogg
 
     uiSounds:
-        click: /assets/audio/ui/click.ogg
-        hover: /assets/audio/ui/hover.ogg
-        menuOpen: /assets/audio/ui/menu_open.ogg
-        menuClose: /assets/audio/ui/menu_close.ogg
+        click: assets/audio/ui/click.ogg
+        hover: assets/audio/ui/hover.ogg
+        menuOpen: assets/audio/ui/menu_open.ogg
+        menuClose: assets/audio/ui/menu_close.ogg
 ```
 
-All fields are optional. Screens render with built-in defaults when assets are not provided. Backgrounds fall back to styled gradients and logos fall back to text. If you reference a local asset under `/assets/`, that file must exist.
+All fields are optional. Screens use their built-in presentation when an image or sound is omitted. Use project-relative paths beginning with `assets/`; the build checks that each referenced local file exists.
 
 ## Customizing the Loading Screen
 
@@ -66,6 +68,7 @@ Pass a `renderLoading` prop to `GameShell` for complete control:
     manifest={manifest}
     config={config}
     registry={registry}
+    projectId={PROJECT_ID}
     renderLoading={(state) => (
         <div className="my-loader">
             <p>{Math.round(state.overallProgress * 100)}%</p>
@@ -91,12 +94,12 @@ The `state` object includes:
 }
 ```
 
-## Using Assets in Custom Renderers
+## Loading Assets for a Custom Renderer
 
-When building a custom renderer (not using `GameShell`), wrap your app in `AssetProvider`:
+Wrap a custom renderer in `AssetProvider` to use the same startup loading. Its children render after every manifest entry is ready:
 
 ```tsx
-import { AssetProvider, useAsset } from '@doodle-engine/react';
+import { AssetProvider } from '@doodle-engine/react';
 
 function App() {
     return (
@@ -108,63 +111,50 @@ function App() {
         </AssetProvider>
     );
 }
-
-function LocationBanner({ src }: { src: string }) {
-    const { url, isReady } = useAsset(src);
-    return <img src={url} style={{ opacity: isReady ? 1 : 0 }} />;
-}
-```
-
-## Prefetching
-
-Prefetch assets for upcoming screens to ensure smooth transitions:
-
-```tsx
-import { usePrefetch } from '@doodle-engine/react';
-
-function TavernScene({ registry }) {
-    usePrefetch([
-        registry.locations.market.banner,
-        registry.locations.market.music,
-    ]);
-}
 ```
 
 ## Service Worker
 
-In production, `npm run build` generates a service worker (`dist/sw.js`) that precaches all manifest assets. Assets are cached on the first visit and typically load from cache on subsequent visits.
+For a release build, `npm run build` generates `dist/sw.js`. This service worker is a browser script that caches the application, content, and media for offline use after the player’s first visit.
 
 The service worker:
 
-- Precaches all assets during install
-- Serves assets from cache (cache-first strategy)
-- Cleans old caches when a new build is deployed
-- Does not intercept API calls (`/api/*`)
+- Caches the application files, `/api/content`, `/api/manifest`, and local manifest media
+- Uses the network first for page navigation and content, with the cache available offline
+- Uses cached copies of bundles and media when available
+- Removes caches from older builds
 
-Service workers are only registered in production. Development uses the same loading flow but without caching.
+The service worker is registered only by release builds. During development, `AssetProvider` still performs the same two-group startup load. The browser may retain those requests in its normal cache.
 
-## Non-Browser Environments
+## Custom Asset Loaders
 
-For desktop wrappers or file:// contexts where assets are already local, provide a custom loader:
+Doodle’s default loader uses browser `fetch` and the browser Cache API. Web builds and desktop or mobile wrappers that display the web build through a local server can use it unchanged.
+
+Pass a custom `AssetLoader` when the application runs in a host that retrieves or caches media differently, or when a test needs to replace network loading. The loader must provide methods for loading one or many paths, reporting availability, returning a usable URL, and clearing its cache:
 
 ```tsx
-import type { AssetLoader } from '@doodle-engine/core'
+import type { AssetLoader } from '@doodle-engine/core';
 
 const localLoader: AssetLoader = {
-  isAvailable: async () => true,
-  load: async () => {},
-  loadMany: async (paths, onProgress) => {
-    paths.forEach((p, i) => onProgress?.(i + 1, paths.length, p))
-  },
-  getUrl: (path) => path,
-  prefetch: () => {},
-  clear: async () => {},
-}
+    isAvailable: async () => true,
+    load: async () => {},
+    loadMany: async (paths, onProgress) => {
+        paths.forEach((path, index) =>
+            onProgress?.(index + 1, paths.length, path)
+        );
+    },
+    getUrl: (path) => path,
+    prefetch: () => {},
+    clear: async () => {},
+};
 
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     assetLoader={localLoader}
 />
 ```
+
+The `prefetch` method remains part of the loader interface for custom loading strategies. The default `AssetProvider` already loads the complete manifest before rendering the game, so normal Doodle projects do not need to call it.

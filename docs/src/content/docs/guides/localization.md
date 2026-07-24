@@ -3,11 +3,13 @@ title: Localization
 description: How to localize your game with the @key system.
 ---
 
-Doodle Engine uses a simple `@key` system for localization. All player-visible text should use localization keys so your game can be translated.
+Doodle Engine can display text directly or look it up through a localization key. Write text directly while working in one language. When you are ready to translate the game, use `@key` references to connect player-facing text to locale files.
+
+For visual editing, see [Localization in Studio](/studio/localization/). This guide explains the files and renderer APIs behind it.
 
 ## Locale Files
 
-Create flat key-value YAML files in `content/locales/`:
+Create a YAML file for each language in `content/locales/`. Each entry pairs a localization key with the text for that language:
 
 ```yaml
 # content/locales/en.yaml
@@ -25,7 +27,18 @@ character.bartender.name: 'Greta'
 bartender.greeting: '¡Bienvenido! ¿Qué puedo hacer por ti?'
 ```
 
-Locale files are loaded by filename: `en.yaml` becomes locale `"en"`, `es.yaml` becomes `"es"`.
+The filename sets the locale code: `en.yaml` becomes `"en"`, and `es.yaml` becomes `"es"`.
+
+For a translation with paragraph breaks, use YAML's `|` marker. It keeps the line breaks in the indented text that follows:
+
+```yaml
+bartender.memory: |
+    I've been having a good time.
+
+    It's been 84 years.
+```
+
+Dialogue using `@bartender.memory` displays those paragraphs as one entry.
 
 ## Using @keys
 
@@ -40,7 +53,7 @@ description: '@location.tavern.description'
 
 And in `.dlg` dialogue files:
 
-```
+```text
 NODE start
   BARTENDER: @bartender.greeting
 
@@ -51,11 +64,11 @@ NODE start
 
 ## How Resolution Works
 
-At snapshot build time, the engine resolves all `@key` references:
+When the engine prepares text for the renderer, it resolves each `@key` reference:
 
 1. Looks up the key in the current locale's data
 2. If found, returns the translated string
-3. If not found, returns the `@key` as-is (useful for spotting missing translations)
+3. If the key is missing, displays the `@key` so you can identify the missing translation
 
 The resolution function:
 
@@ -63,7 +76,7 @@ The resolution function:
 import { resolveText } from '@doodle-engine/core';
 
 const text = resolveText('@bartender.greeting', localeData);
-// → "Welcome! What can I do for you?"
+// "Welcome! What can I do for you?"
 ```
 
 ## Changing Language at Runtime
@@ -75,13 +88,13 @@ const { actions } = useGame();
 actions.setLocale('es');
 ```
 
-There is no DSL effect for changing language. Do it from your renderer or shell by calling `actions.setLocale()` or `engine.setLocale()`.
+Change the language from your renderer or shell by calling `actions.setLocale()` or `engine.setLocale()`.
 
 ## Naming Convention
 
 Use a consistent key naming scheme:
 
-```
+```text
 # Locations
 location.<id>.name
 location.<id>.description
@@ -110,55 +123,21 @@ notification.<event_name>
 narrator.<context>
 ```
 
-## UI Strings
+## Translate the Built-in Interface
 
-The renderer's interface labels (buttons, sidebar tabs, panel headers) are localized through the same locale files as all other text. Define `ui.*` keys in your locale YAML to override the English defaults.
-
-If you don't define a `ui.*` key, the English default is used automatically. You only need to add these keys for non-English locales or if you want to customize the wording.
-
-| Key | Default |
-|-----|---------|
-| `ui.continue` | Continue |
-| `ui.inventory` | Inventory |
-| `ui.journal` | Journal |
-| `ui.notes` | Notes |
-| `ui.map` | Map |
-| `ui.save_load` | Save/Load |
-| `ui.settings` | Settings |
-| `ui.save` | Save |
-| `ui.load` | Load |
-| `ui.new_game` | New Game |
-| `ui.resume` | Resume |
-| `ui.no_companions` | No companions |
-| `ui.narrator` | Narrator |
-
-Example Spanish locale file:
+Buttons, menus, panel headings, credits, and other text in the built-in renderer use `ui.*` keys. Add the keys you want to translate to each locale file:
 
 ```yaml
 # content/locales/es.yaml
 ui.continue: Continuar
-ui.inventory: Inventario
-ui.journal: Diario
-ui.notes: Notas
-ui.map: Mapa
-ui.save_load: Guardar/Cargar
+ui.end_dialogue: Terminar diálogo
 ui.settings: Configuración
-ui.save: Guardar
-ui.load: Cargar
 ui.new_game: Nuevo juego
-ui.resume: Continuar partida
-ui.no_companions: Sin compañeros
-ui.narrator: Narrador
+ui.credits: Créditos
+ui.made_with_doodle_engine: Hecho con Doodle Engine
+ui.back: Volver
 ```
 
-## Notification Strings
+The renderer uses its English default for a `ui.*` key omitted from a locale. Some keys contain placeholders such as `{day}`, `{hours}`, or `{destination}`. Keep those placeholders in the translated text so the renderer can insert the current value.
 
-Notification effects use `@key` too:
-
-```
-NOTIFY @notification.quest_started
-```
-
-```yaml
-notification.quest_started: 'New Quest: Odd Jobs'
-```
+See [UI Strings](/reference/ui-strings/) for the complete list of keys and English defaults. See [Notifications](/guides/notifications/) for displaying short messages from dialogue effects.

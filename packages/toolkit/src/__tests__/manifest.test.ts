@@ -1,0 +1,297 @@
+/**
+ * Tests for CLI manifest generation and service worker output.
+ */
+
+import { mkdtemp, mkdir, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { generateAssetManifest } from '../manifest';
+import { generateServiceWorker } from '../service-worker';
+import type {
+    AssetManifest,
+    ContentRegistry,
+    GameConfig,
+} from '@doodle-engine/core';
+
+// ── generateServiceWorker ─────────────────────────────────────────────────────
+
+function makeManifest(overrides?: Partial<AssetManifest>): AssetManifest {
+    return {
+        version: 'test-1',
+        shell: [
+            {
+                path: 'assets/images/logo.png',
+                type: 'image',
+                size: 1024,
+                tier: 1,
+            },
+            {
+                path: 'assets/audio/splash.ogg',
+                type: 'audio',
+                size: 2048,
+                tier: 1,
+            },
+        ],
+        game: [
+            {
+                path: 'assets/images/tavern.jpg',
+                type: 'image',
+                size: 40000,
+                tier: 2,
+            },
+            {
+                path: 'assets/audio/music.ogg',
+                type: 'audio',
+                size: 300000,
+                tier: 2,
+            },
+        ],
+        shellSize: 3072,
+        totalSize: 343072,
+        ...overrides,
+    };
+}
+
+describe('generateServiceWorker', () => {
+    it('generates valid JavaScript', () => {
+        const manifest = makeManifest();
+        const source = generateServiceWorker(manifest);
+        expect(() => new Function(source)).not.toThrow();
+    });
+
+    it('runs install, activate, and cached fetch behavior', async () => {
+        const source = generateServiceWorker(makeManifest(), ['index.html']);
+        const handlers = new Map<string, (event: unknown) => void>();
+        const added: string[] = [];
+        const cache = {
+            add: vi.fn(async (url: string) => {
+                added.push(url);
+            }),
+            put: vi.fn(async () => {}),
+        };
+        const cachedResponse = new Response('cached asset');
+        const caches = {
+            open: vi.fn(async () => cache),
+            keys: vi.fn(async () => [
+                'doodle-engine-old',
+                'doodle-engine-test-1',
+                'unrelated-cache',
+            ]),
+            delete: vi.fn(async () => true),
+            match: vi.fn(async () => cachedResponse),
+        };
+        const skipWaiting = vi.fn(async () => {});
+        const claim = vi.fn(async () => {});
+        const worker = {
+            location: new URL(
+                'https://example.test/games/demo/service-worker.js'
+            ),
+            skipWaiting,
+            clients: { claim },
+            addEventListener(type: string, handler: (event: unknown) => void) {
+                handlers.set(type, handler);
+            },
+        };
+        const fetch = vi.fn(async () => new Response('network'));
+
+        new Function('self', 'caches', 'fetch', 'Response', source)(
+            worker,
+            caches,
+            fetch,
+            Response
+        );
+
+        let installWork: Promise<unknown> | undefined;
+        handlers.get('install')!({
+            waitUntil(work: Promise<unknown>) {
+                installWork = work;
+            },
+        });
+        await installWork;
+        expect(added).toContain('/games/demo/index.html');
+        expect(added).toContain('/games/demo/api/content');
+        expect(added).toContain('/games/demo/assets/images/logo.png');
+        expect(skipWaiting).toHaveBeenCalledOnce();
+
+        let activateWork: Promise<unknown> | undefined;
+        handlers.get('activate')!({
+            waitUntil(work: Promise<unknown>) {
+                activateWork = work;
+            },
+        });
+        await activateWork;
+        expect(caches.delete).toHaveBeenCalledOnce();
+        expect(caches.delete).toHaveBeenCalledWith('doodle-engine-old');
+        expect(claim).toHaveBeenCalledOnce();
+
+        const request = new Request(
+            'https://example.test/games/demo/assets/images/logo.png'
+        );
+        let fetchWork: Promise<Response> | undefined;
+        handlers.get('fetch')!({
+            request,
+            respondWith(work: Promise<Response>) {
+                fetchWork = work;
+            },
+        });
+        const response = await fetchWork;
+        expect(await response!.text()).toBe('cached asset');
+        expect(caches.match).toHaveBeenCalledWith(request);
+        expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('includes all asset paths in the precache list', () => {
+        const manifest = makeManifest();
+        const source = generateServiceWorker(manifest);
+        expect(source).toContain('assets/images/logo.png');
+        expect(source).toContain('assets/audio/splash.ogg');
+        expect(source).toContain('assets/images/tavern.jpg');
+        expect(source).toContain('assets/audio/music.ogg');
+    });
+
+    it('includes the cache name with the manifest version', () => {
+        const manifest = makeManifest();
+        const source = generateServiceWorker(manifest);
+        expect(source).toContain('test-1');
+    });
+
+    it('includes install, activate, and fetch event listeners', () => {
+        const source = generateServiceWorker(makeManifest());
+        expect(source).toContain("addEventListener('install'");
+        expect(source).toContain("addEventListener('activate'");
+        expect(source).toContain("addEventListener('fetch'");
+    });
+
+    it('caches the app shell and content endpoints for offline play', () => {
+        const source = generateServiceWorker(makeManifest(), [
+            'index.html',
+            'assets/index-abc123.js',
+            'assets/index-abc123.css',
+        ]);
+        expect(source).toContain('index.html');
+        expect(source).toContain('assets/index-abc123.js');
+        expect(source).toContain('api/content');
+        expect(source).toContain('api/manifest');
+    });
+
+    it('resolves cached paths against its own location', () => {
+        const source = generateServiceWorker(makeManifest(), ['index.html']);
+        expect(source).toContain('new URL(path, self.location)');
+    });
+
+    it('works with empty manifests', () => {
+        const manifest = makeManifest({
+            shell: [],
+            game: [],
+            shellSize: 0,
+            totalSize: 0,
+        });
+        const source = generateServiceWorker(manifest);
+        // Even with no media, the content endpoints are still cached.
+        expect(source).toContain('api/content');
+    });
+
+    it('generates different cache names for different versions', () => {
+        const v1 = generateServiceWorker(makeManifest({ version: 'v1' }));
+        const v2 = generateServiceWorker(makeManifest({ version: 'v2' }));
+        expect(v1).not.toEqual(v2);
+        expect(v1).toContain('v1');
+        expect(v2).toContain('v2');
+    });
+});
+
+// ── generateAssetManifest ────────────────────────────────────────────────────
+
+const tempDirs: string[] = [];
+
+async function makeTempProject() {
+    const root = await mkdtemp(join(tmpdir(), 'doodle-manifest-'));
+    tempDirs.push(root);
+    return root;
+}
+
+afterEach(async () => {
+    while (tempDirs.length > 0) {
+        const dir = tempDirs.pop()!;
+        await rm(dir, { recursive: true, force: true });
+    }
+});
+
+function makeRegistry(): ContentRegistry {
+    return {
+        locations: {
+            tavern: {
+                id: 'tavern',
+                name: 'Tavern',
+                description: '',
+                banner: 'tavern.png',
+                music: '',
+                ambient: '',
+            },
+        },
+        characters: {},
+        items: {},
+        maps: {},
+        dialogues: {},
+        quests: {},
+        journalEntries: {},
+        interludes: {},
+        locales: {},
+    };
+}
+
+function makeConfig(): GameConfig {
+    return {
+        startLocation: 'tavern',
+        startTime: { day: 1, hour: 8 },
+        startFlags: {},
+        startVariables: {},
+        startInventory: [],
+    };
+}
+
+describe('generateAssetManifest', () => {
+    it('records byte sizes for local referenced assets', async () => {
+        const root = await makeTempProject();
+        await mkdir(join(root, 'assets', 'images', 'banners'), {
+            recursive: true,
+        });
+        await writeFile(
+            join(root, 'assets', 'images', 'banners', 'tavern.png'),
+            '12345'
+        );
+
+        const manifest = await generateAssetManifest(
+            join(root, 'assets'),
+            root,
+            makeRegistry(),
+            makeConfig(),
+            'test'
+        );
+
+        expect(manifest.game).toContainEqual({
+            path: 'assets/images/banners/tavern.png',
+            type: 'image',
+            size: 5,
+            tier: 2,
+        });
+        expect(manifest.totalSize).toBe(5);
+    });
+
+    it('fails when a local referenced asset is missing', async () => {
+        const root = await makeTempProject();
+
+        await expect(
+            generateAssetManifest(
+                join(root, 'assets'),
+                root,
+                makeRegistry(),
+                makeConfig(),
+                'test'
+            )
+        ).rejects.toThrow(
+            'Referenced asset not found: assets/images/banners/tavern.png'
+        );
+    });
+});

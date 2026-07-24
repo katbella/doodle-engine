@@ -5,12 +5,14 @@ description: The underscore prefix convention for hidden variables.
 
 ## Visible vs Hidden Variables
 
-Game variables are exposed in the snapshot's `variables` field and can be displayed to the player. The default `GameRenderer` shows them in a "Resources" panel in the sidebar.
+The engine's snapshot describes the current game screen and includes a `variables` field. The default `GameRenderer` displays selected variables in the sidebar's **Resources** panel.
 
 To control which variables are visible, Doodle Engine uses a naming convention:
 
 - **Visible variables**: normal names like `gold`, `reputation`
 - **Hidden variables**: underscore-prefixed names like `_drinksBought`, `_timesVisited`
+
+Variable names may contain letters, numbers, and underscores. Validation reports spaces, dashes, and other punctuation as errors.
 
 ## The Underscore Convention
 
@@ -29,7 +31,7 @@ startVariables:
 
 ### In Dialogue Effects
 
-```
+```text
 # Both work the same way in effects
 ADD variable gold -5
 ADD variable _drinksBought 1
@@ -37,7 +39,7 @@ ADD variable _drinksBought 1
 
 ### In Conditions
 
-```
+```text
 # Both work the same way in conditions
 REQUIRE variableGreaterThan gold 4
 REQUIRE variableGreaterThan _drinksBought 3
@@ -53,7 +55,7 @@ const visibleVariables = Object.entries(snapshot.variables).filter(
 );
 ```
 
-This is a renderer-level convention, not an engine-level one. The core engine treats all variables the same. If you build a custom renderer, you can choose to show or hide any variables you want.
+The default renderer applies the underscore convention when choosing what to display. The core engine keeps every variable, and a custom renderer can choose its own display rules.
 
 ## When to Use Hidden Variables
 

@@ -84,6 +84,8 @@ export interface SnapshotDialogue {
     portrait?: string;
     /** Voice audio filename (optional) */
     voice?: string;
+    /** True when advancing this text-only node will close the conversation. */
+    continueEndsDialogue?: boolean;
 }
 
 /**

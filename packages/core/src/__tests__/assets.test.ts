@@ -43,9 +43,22 @@ describe('getAssetType', () => {
 });
 
 describe('resolveAssetPath', () => {
-    it('normalizes assets-prefixed paths to absolute asset URLs', () => {
+    it('resolves bare filenames to relative asset paths', () => {
+        expect(resolveAssetPath('foo.png', 'banner')).toBe(
+            'assets/images/banners/foo.png'
+        );
+    });
+
+    it('keeps assets-prefixed paths as written', () => {
         expect(resolveAssetPath('assets/images/foo.png', 'banner')).toBe(
-            '/assets/images/foo.png'
+            'assets/images/foo.png'
+        );
+    });
+
+    it('leaves explicit absolute paths and URLs alone', () => {
+        expect(resolveAssetPath('/cdn/foo.png', 'banner')).toBe('/cdn/foo.png');
+        expect(resolveAssetPath('https://example.com/foo.png', 'banner')).toBe(
+            'https://example.com/foo.png'
         );
     });
 });
@@ -259,9 +272,19 @@ describe('extractAssetPaths', () => {
 
     it('extracts media referenced by dialogue effects', () => {
         const { game } = extractAssetPaths(makeRegistry(), makeConfig());
-        expect(game).toContain('/assets/audio/music/node-theme.ogg');
-        expect(game).toContain('/assets/audio/sfx/storm.ogg');
-        expect(game).toContain('/assets/video/intro.mp4');
+        expect(game).toContain('assets/audio/music/node-theme.ogg');
+        expect(game).toContain('assets/audio/sfx/storm.ogg');
+        expect(game).toContain('assets/video/intro.mp4');
+    });
+
+    it('keeps generated project asset paths relative', () => {
+        const registry = makeRegistry();
+        registry.locations.tavern.banner = 'tavern.jpg';
+
+        const { game } = extractAssetPaths(registry, makeConfig());
+
+        expect(game).toContain('assets/images/banners/tavern.jpg');
+        expect(game).not.toContain('/assets/images/banners/tavern.jpg');
     });
 
     it('extracts interlude assets into game tier', () => {

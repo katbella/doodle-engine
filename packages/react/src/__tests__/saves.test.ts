@@ -11,6 +11,7 @@ import {
     deleteSave,
     loadSave,
     latestSave,
+    saveStorageKeyForProject,
     type SaveStorage,
 } from '../saves';
 
@@ -35,7 +36,9 @@ function makeSave(day: number, timestamp: string): SaveData {
     };
 }
 
-const KEY = 'saves';
+const FIRST_PROJECT_ID = '00000000-0000-4000-8000-000000000004';
+const SECOND_PROJECT_ID = '00000000-0000-4000-8000-000000000005';
+const KEY = saveStorageKeyForProject(FIRST_PROJECT_ID);
 
 describe('save slots', () => {
     it('starts empty', () => {
@@ -56,6 +59,46 @@ describe('save slots', () => {
         expect(hasSaves(storage, KEY)).toBe(true);
     });
 
+    it('keeps games with different storage keys isolated', () => {
+        const storage = makeStorage();
+        const secondKey = saveStorageKeyForProject(SECOND_PROJECT_ID);
+        writeSave(storage, KEY, makeSave(1, '2026-01-01'), 'manual', {
+            id: 'first',
+        });
+
+        expect(listSaves(storage, KEY).map((slot) => slot.id)).toEqual([
+            'first',
+        ]);
+        expect(listSaves(storage, secondKey)).toEqual([]);
+    });
+
+    it('rejects missing, shared, and hand-written storage keys', () => {
+        const storage = makeStorage();
+        for (const key of [
+            undefined,
+            '',
+            'doodle-engine-save',
+            'doodle-engine-save:first-game',
+        ]) {
+            expect(() => listSaves(storage, key as never)).toThrowError(
+                /saveStorageKeyForProject/
+            );
+        }
+    });
+
+    it('rejects missing or malformed project identities', () => {
+        for (const projectId of [
+            undefined,
+            '',
+            'first-game',
+            '00000000-0000-1000-8000-000000000004',
+        ]) {
+            expect(() => saveStorageKeyForProject(projectId)).toThrowError(
+                /stable project ID/
+            );
+        }
+    });
+
     it('keeps multiple manual saves, newest first', () => {
         const storage = makeStorage();
         writeSave(storage, KEY, makeSave(1, '2026-01-01'), 'manual', {
@@ -73,7 +116,9 @@ describe('save slots', () => {
         writeSave(storage, KEY, makeSave(1, 't1'), 'quick', { id: 'q1' });
         writeSave(storage, KEY, makeSave(2, 't2'), 'quick', { id: 'q2' });
 
-        const quicks = listSaves(storage, KEY).filter((s) => s.kind === 'quick');
+        const quicks = listSaves(storage, KEY).filter(
+            (s) => s.kind === 'quick'
+        );
         expect(quicks).toHaveLength(1);
         expect(quicks[0].id).toBe('q2');
         expect(quicks[0].label).toBe('Quick Save');

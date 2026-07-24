@@ -20,7 +20,11 @@ export {
 export type { AssetContextValue, AssetProviderProps } from './AssetProvider';
 
 // Audio Settings (persistent volume state)
-export { AudioSettingsProvider, AudioSettingsContext, useAudioSettings } from './AudioSettingsContext';
+export {
+    AudioSettingsProvider,
+    AudioSettingsContext,
+    useAudioSettings,
+} from './AudioSettingsContext';
 export type { AudioSettings } from './AudioSettingsContext';
 
 // Hooks
@@ -106,6 +110,8 @@ export type { SplashScreenProps } from './components/SplashScreen';
 
 export { TitleScreen } from './components/TitleScreen';
 export type { TitleScreenProps } from './components/TitleScreen';
+export { CreditsScreen } from './components/CreditsScreen';
+export type { CreditsScreenProps } from './components/CreditsScreen';
 
 export { AssetImage } from './components/AssetImage';
 export type { AssetImageProps } from './components/AssetImage';
@@ -114,7 +120,10 @@ export { PauseMenu } from './components/PauseMenu';
 export type { PauseMenuProps } from './components/PauseMenu';
 
 export { SettingsPanel } from './components/SettingsPanel';
-export type { SettingsPanelProps, SettingsPanelAudio } from './components/SettingsPanel';
+export type {
+    SettingsPanelProps,
+    SettingsPanelAudio,
+} from './components/SettingsPanel';
 
 export { GameTime } from './components/GameTime';
 export type { GameTimeProps, TimeFormat } from './components/GameTime';
@@ -127,5 +136,11 @@ export {
     deleteSave,
     loadSave,
     latestSave,
+    saveStorageKeyForProject,
 } from './saves';
-export type { SaveSlot, SaveStorage, WriteSaveOptions } from './saves';
+export type {
+    SaveSlot,
+    SaveStorage,
+    SaveStorageKey,
+    WriteSaveOptions,
+} from './saves';

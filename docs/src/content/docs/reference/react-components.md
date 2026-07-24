@@ -3,7 +3,7 @@ title: React Components
 description: Reference for all React components and their props.
 ---
 
-All components are exported from `@doodle-engine/react`.
+All components are exported from `@doodle-engine/react`. A prop is a setting passed to a React component.
 
 ## GameProvider
 
@@ -50,9 +50,9 @@ Access via `useGame()` hook.
 
 ## InputProvider
 
-Renderer-level input command provider. It owns keyboard events and dispatches
-commands to registered handlers by priority. `GameShell` includes this provider
-automatically. `GameRenderer` creates a provider boundary when used standalone.
+`InputProvider` listens for keyboard input and sends commands to registered
+handlers in priority order. `GameShell` includes it automatically. A standalone
+`GameRenderer` also creates one for its child components.
 
 ```tsx
 import { InputProvider } from '@doodle-engine/react';
@@ -64,26 +64,30 @@ import { InputProvider } from '@doodle-engine/react';
 </InputProvider>;
 ```
 
-Use `useInputAction()` to register command handlers. Higher priority handlers
-receive commands first; returning `true` consumes the command.
+Use `useInputAction()` to register command handlers. Higher-priority handlers
+receive commands first. Returning `true` consumes the command, which stops it
+from reaching lower-priority handlers.
 
 ## GameRenderer
 
-Batteries-included full-screen renderer. Provides a complete game UI with all components pre-wired.
+Built-in full-screen renderer that assembles the location view, dialogue, sidebar, and game panels.
 
 ```tsx
 import { GameRenderer } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <GameProvider engine={engine} initialSnapshot={snapshot}>
-    <GameRenderer className="my-game" />
+    <GameRenderer projectId={PROJECT_ID} className="my-game" />
 </GameProvider>;
 ```
 
 ### Props
 
-| Prop        | Type     | Default | Description |
-| ----------- | -------- | ------- | ----------- |
-| `className` | `string` | `''`    | CSS class   |
+| Prop            | Type         | Default     | Description                                         |
+| --------------- | ------------ | ----------- | --------------------------------------------------- |
+| `projectId`     | `string`     | required    | Stable ID from the generated `project.ts`           |
+| `className`     | `string`     | `''`        | CSS class                                           |
+| `onButtonClick` | `() => void` | `undefined` | Called when an enabled game-interface button clicks |
 
 ### Layout
 
@@ -242,7 +246,7 @@ When `confirmTravel` is `true` and the player clicks a location, a dialog shows 
 
 ## Inventory
 
-Displays the player's items in a grid with click-to-inspect modal.
+Displays the player's items in a grid. Selecting an item opens its details.
 
 ```tsx
 import { Inventory } from '@doodle-engine/react';
@@ -337,24 +341,25 @@ Save and load game state via localStorage.
 
 ```tsx
 import { SaveLoadPanel } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <SaveLoadPanel
     ui={snapshot.ui}
     onSave={actions.saveGame}
     onLoad={actions.loadGame}
-    storageKey="my-game-save"
+    projectId={PROJECT_ID}
 />;
 ```
 
 ### Props
 
-| Prop         | Type                           | Default                | Description      |
-| ------------ | ------------------------------ | ---------------------- | ---------------- |
-| `ui`         | `Record<string, string>`       | required               | Resolved UI strings |
-| `onSave`     | `() => SaveData`               | required               | Save handler     |
-| `onLoad`     | `(saveData: SaveData) => void` | required               | Load handler     |
-| `storageKey` | `string`                       | `'doodle-engine-save'` | localStorage key |
-| `className`  | `string`                       | `''`                   | CSS class        |
+| Prop        | Type                           | Default  | Description                               |
+| ----------- | ------------------------------ | -------- | ----------------------------------------- |
+| `ui`        | `Record<string, string>`       | required | Resolved UI strings                       |
+| `onSave`    | `() => SaveData`               | required | Save handler                              |
+| `onLoad`    | `(saveData: SaveData) => void` | required | Load handler                              |
+| `projectId` | `string`                       | required | Stable ID from the generated `project.ts` |
+| `className` | `string`                       | `''`     | CSS class                                 |
 
 ### Features
 
@@ -364,7 +369,7 @@ import { SaveLoadPanel } from '@doodle-engine/react';
 
 ## Interlude
 
-Full-screen narrative text scene (chapter card, dream sequence, etc.). Displays a background image with auto-scrolling text. Handled automatically by `GameRenderer` and `GameShell`. Use this only when building a custom renderer.
+Full-screen narrative scene with a background image and scrolling text. `GameRenderer` and `GameShell` display interludes automatically; custom renderers can use this component directly.
 
 ```tsx
 import { Interlude } from '@doodle-engine/react';
@@ -407,7 +412,7 @@ import { VideoPlayer } from '@doodle-engine/react';
 
 ## AssetImage
 
-Image component that integrates with the asset preloading system. Shows a placeholder while the asset loads from the preload cache, then fades in. For custom renderers that need smooth image display without flash.
+Image component for the asset-loading system. It shows a placeholder while the image loads from the cache, then fades in.
 
 ```tsx
 import { AssetImage } from '@doodle-engine/react';
@@ -439,8 +444,9 @@ Progress screen displayed while game assets load. Used as the default `renderLoa
 import { LoadingScreen } from '@doodle-engine/react'
 
 <GameShell
+  projectId={PROJECT_ID}
   renderLoading={(state) => (
-    <LoadingScreen state={state} background="/assets/images/loading-bg.jpg" />
+    <LoadingScreen state={state} background="assets/images/loading-bg.jpg" />
   )}
   ...
 />
@@ -453,6 +459,8 @@ import { LoadingScreen } from '@doodle-engine/react'
 | `state`          | `AssetLoadingState`                              | required | Loading state from `AssetProvider`                     |
 | `background`     | `string`                                         | —        | Background image URL (from `shell.loading.background`) |
 | `renderProgress` | `(progress: number, phase: string) => ReactNode` | —        | Custom progress bar renderer                           |
+| `onStart`        | `() => void`                                     | —        | Show and handle the button when loading is complete    |
+| `startLabel`     | `string`                                         | `Start game` | Completed-loading button label                     |
 | `className`      | `string`                                         | `''`     | CSS class                                              |
 
 Style it by targeting `.loading-screen`, `.loading-screen-content`, `.loading-screen-spinner`, `.loading-screen-phase`, `.loading-screen-percent`, `.loading-screen-bar-track`, and `.loading-screen-bar-fill` in your CSS.
@@ -585,15 +593,17 @@ const audioSettings = useAudioSettings();
 
 ## GameShell
 
-Complete game wrapper that manages the full lifecycle: splash screen → title screen → gameplay, with pause menu, settings, and video playback built in.
+Game wrapper that manages loading, the splash and title screens, gameplay, the pause menu, settings, and video playback.
 
 ```tsx
 import { GameShell } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 <GameShell
     registry={registry}
     config={config}
     manifest={manifest}
+    projectId={PROJECT_ID}
     title="My Game"
     subtitle="A text-based adventure"
     availableLocales={[{ code: 'en', label: 'English' }]}
@@ -603,17 +613,17 @@ import { GameShell } from '@doodle-engine/react';
 
 ### Props
 
-| Prop               | Type                                      | Default                | Description                                                     |
-| ------------------ | ----------------------------------------- | ---------------------- | --------------------------------------------------------------- |
+| Prop               | Type                                      | Default           | Description                                                     |
+| ------------------ | ----------------------------------------- | ----------------- | --------------------------------------------------------------- |
 | `registry`         | `ContentRegistry`                         | required               | Content registry from `/api/content`                            |
 | `config`           | `GameConfig`                              | required               | Game config from `/api/content`                                 |
 | `manifest`         | `AssetManifest`                           | required               | Asset manifest from `/api/manifest`                             |
+| `projectId`        | `string`                                  | required          | Stable ID from the generated `project.ts`                       |
 | `assetLoader`      | `AssetLoader`                             | —                      | Custom asset loader (for non-browser environments)              |
 | `title`            | `string`                                  | `'Doodle Engine'`      | Game title text                                                 |
 | `subtitle`         | `string`                                  | —                      | Subtitle text                                                   |
 | `uiSounds`         | `UISoundConfig \| false`                  | —                      | UI sound config, or `false` to disable                          |
 | `audioOptions`     | `AudioManagerOptions`                     | —                      | Crossfade duration and other audio config                       |
-| `storageKey`       | `string`                                  | `'doodle-engine-save'` | localStorage key for saves                                      |
 | `availableLocales` | `{ code: string; label: string }[]`       | —                      | Language options for settings                                   |
 | `className`        | `string`                                  | `''`                   | CSS class                                                       |
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                      | Override the loading screen                                     |

@@ -11,7 +11,7 @@ Multiple conditions on the same element use AND logic: all must pass.
 
 Check if a flag is set to true.
 
-```
+```text
 REQUIRE hasFlag metBartender
 ```
 
@@ -23,7 +23,7 @@ REQUIRE hasFlag metBartender
 
 Check if a flag is not set (false or undefined).
 
-```
+```text
 REQUIRE notFlag doorLocked
 ```
 
@@ -35,7 +35,7 @@ REQUIRE notFlag doorLocked
 
 Check if an item is in the player's inventory.
 
-```
+```text
 REQUIRE hasItem rusty_key
 ```
 
@@ -47,7 +47,7 @@ REQUIRE hasItem rusty_key
 
 Check if a variable equals a specific value.
 
-```
+```text
 REQUIRE variableEquals gold 100
 REQUIRE variableEquals playerName "Aria"
 ```
@@ -61,7 +61,7 @@ REQUIRE variableEquals playerName "Aria"
 
 Check if a numeric variable is greater than a value (strict).
 
-```
+```text
 REQUIRE variableGreaterThan gold 4
 ```
 
@@ -74,7 +74,7 @@ REQUIRE variableGreaterThan gold 4
 
 Check if a numeric variable is less than a value (strict).
 
-```
+```text
 REQUIRE variableLessThan reputation 0
 ```
 
@@ -87,7 +87,7 @@ REQUIRE variableLessThan reputation 0
 
 Check if the player is at a specific location.
 
-```
+```text
 REQUIRE atLocation tavern
 ```
 
@@ -99,7 +99,7 @@ REQUIRE atLocation tavern
 
 Check if a quest is at a specific stage.
 
-```
+```text
 REQUIRE questAtStage odd_jobs started
 ```
 
@@ -114,7 +114,7 @@ A quest that hasn't been started has no stage, so `questAtStage` will return fal
 
 Check if a character is at a specific location.
 
-```
+```text
 REQUIRE characterAt merchant market
 ```
 
@@ -127,7 +127,7 @@ REQUIRE characterAt merchant market
 
 Check if a character is in the player's party.
 
-```
+```text
 REQUIRE characterInParty elisa
 ```
 
@@ -139,7 +139,7 @@ REQUIRE characterInParty elisa
 
 Check if relationship with a character is above a value (strict greater than).
 
-```
+```text
 REQUIRE relationshipAbove bartender 5
 ```
 
@@ -152,7 +152,7 @@ REQUIRE relationshipAbove bartender 5
 
 Check if relationship with a character is below a value (strict less than).
 
-```
+```text
 REQUIRE relationshipBelow bartender 0
 ```
 
@@ -165,7 +165,7 @@ REQUIRE relationshipBelow bartender 0
 
 Check if current time is within a range (24-hour format). Handles wrap-around (e.g., 20 to 6 means 8 PM to 6 AM).
 
-```
+```text
 REQUIRE timeIs 20 6
 ```
 
@@ -176,9 +176,11 @@ REQUIRE timeIs 20 6
 
 ## itemAt
 
-Check if an item is at a specific location.
+Check whether an item is at a specific location. `REMOVE item` clears the
+item's location, so `itemAt` returns false for every location, including
+`inventory`.
 
-```
+```text
 REQUIRE itemAt sword armory
 ```
 
@@ -189,9 +191,9 @@ REQUIRE itemAt sword armory
 
 ## roll
 
-Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. The roll is not stored anywhere. Use the `ROLL` effect if you need the value.
+Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. This condition returns only true or false. The `ROLL` effect stores the result in a variable.
 
-```
+```text
 IF roll 1 20 15
   GOTO lucky_find
 END
@@ -215,7 +217,7 @@ For a hidden check with no displayed result, the `roll` condition works well in 
 
 ### On choices (shown only when condition passes):
 
-```
+```text
 CHOICE @buy_drink
   REQUIRE variableGreaterThan gold 4
   GOTO drink
@@ -224,7 +226,7 @@ END
 
 ### On conditional branches:
 
-```
+```text
 IF questAtStage odd_jobs started
   SET flag sawQuestUpdate
   GOTO quest_update
@@ -235,14 +237,14 @@ Effects inside an `IF` block run only if that IF condition passes. If multiple I
 
 ### On triggered dialogues (top-level):
 
-```
+```text
 TRIGGER tavern
 REQUIRE notFlag seenIntro
 ```
 
 ### Multiple conditions (AND logic):
 
-```
+```text
 CHOICE @secret_option
   REQUIRE hasFlag metBartender
   REQUIRE relationshipAbove bartender 5

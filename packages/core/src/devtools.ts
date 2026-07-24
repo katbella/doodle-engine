@@ -7,6 +7,8 @@
  */
 
 import type { Engine } from './engine';
+import type { ContentRegistry } from './types/registry';
+import type { GameState } from './types/state';
 
 export interface DevTools {
     // Flag manipulation
@@ -32,8 +34,8 @@ export interface DevTools {
 
     // Inspection
     inspect: () => void;
-    inspectState: () => any;
-    inspectRegistry: () => any;
+    inspectState: () => GameState;
+    inspectRegistry: () => ContentRegistry;
 }
 
 declare global {
@@ -65,33 +67,29 @@ declare global {
  * enableDevTools(engine, () => render(engine.getSnapshot()))
  */
 export function enableDevTools(engine: Engine, onUpdate: () => void) {
-    // Get internal state by casting engine to any
-    // This is a dev-only hack to access private fields
-    const engineInternal = engine as any;
-
     window.doodle = {
         // Flag manipulation
         setFlag(flag: string) {
-            engineInternal.state.flags[flag] = true;
+            engine.applyDebugEffect({ type: 'setFlag', flag });
             onUpdate();
             console.log(`🐾 Flag set: ${flag}`);
         },
 
         clearFlag(flag: string) {
-            delete engineInternal.state.flags[flag];
+            engine.applyDebugEffect({ type: 'clearFlag', flag });
             onUpdate();
             console.log(`🐾 Flag cleared: ${flag}`);
         },
 
         // Variable manipulation
         setVariable(variable: string, value: number | string) {
-            engineInternal.state.variables[variable] = value;
+            engine.applyDebugEffect({ type: 'setVariable', variable, value });
             onUpdate();
             console.log(`🐾 Variable set: ${variable} = ${value}`);
         },
 
         getVariable(variable: string) {
-            const value = engineInternal.state.variables[variable];
+            const value = engine.getState().variables[variable];
             console.log(`🐾 Variable: ${variable} = ${value}`);
             return value;
         },
@@ -100,14 +98,7 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
         // place, not just spots on the current map. Party members come along,
         // matching the goToLocation effect.
         teleport(locationId: string) {
-            engineInternal.state.currentLocation = locationId;
-            for (const charState of Object.values(
-                engineInternal.state.characterState
-            ) as any[]) {
-                if (charState.inParty) {
-                    charState.location = locationId;
-                }
-            }
+            engine.teleport(locationId);
             onUpdate();
             console.log(`🐾 Teleported to: ${locationId}`);
         },
@@ -115,33 +106,39 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
         // Dialogue control. Starts the dialogue the same way the engine does,
         // so start-node effects run and a silent first node auto-advances.
         triggerDialogue(dialogueId: string) {
-            const dialogue = engineInternal.registry.dialogues[dialogueId];
+            const dialogue = engine.getRegistry().dialogues[dialogueId];
             if (!dialogue) {
                 console.error(`🐾 Dialogue not found: ${dialogueId}`);
                 return;
             }
 
-            if (!engineInternal.enterDialogue(dialogueId)) {
+            if (
+                !dialogue.nodes.some((node) => node.id === dialogue.startNode)
+            ) {
                 console.error(`🐾 Could not start dialogue: ${dialogueId}`);
                 return;
             }
 
+            engine.startDialogueAt(dialogueId, dialogue.startNode);
             onUpdate();
             console.log(`🐾 Triggered dialogue: ${dialogueId}`);
         },
 
         // Quest control
         setQuestStage(questId: string, stageId: string) {
-            engineInternal.state.questProgress[questId] = stageId;
+            engine.applyDebugEffect({
+                type: 'setQuestStage',
+                questId,
+                stageId,
+            });
             onUpdate();
             console.log(`🐾 Quest stage set: ${questId} -> ${stageId}`);
         },
 
         // Inventory control
         addItem(itemId: string) {
-            if (!engineInternal.state.inventory.includes(itemId)) {
-                engineInternal.state.inventory.push(itemId);
-                engineInternal.state.itemLocations[itemId] = 'inventory';
+            if (!engine.getState().inventory.includes(itemId)) {
+                engine.applyDebugEffect({ type: 'addItem', itemId });
                 onUpdate();
                 console.log(`🐾 Item added: ${itemId}`);
             } else {
@@ -150,10 +147,8 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
         },
 
         removeItem(itemId: string) {
-            const index = engineInternal.state.inventory.indexOf(itemId);
-            if (index !== -1) {
-                engineInternal.state.inventory.splice(index, 1);
-                delete engineInternal.state.itemLocations[itemId];
+            if (engine.getState().inventory.includes(itemId)) {
+                engine.applyDebugEffect({ type: 'removeItem', itemId });
                 onUpdate();
                 console.log(`🐾 Item removed: ${itemId}`);
             } else {
@@ -164,6 +159,7 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
         // Inspection
         inspect() {
             const snapshot = engine.getSnapshot();
+            const state = engine.getState();
             console.log('🐾 DOODLE ENGINE INSPECTOR 🐾');
             console.log('');
             console.log('Current Location:', snapshot.location.name);
@@ -171,13 +167,13 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
                 'Current Time:',
                 `Day ${snapshot.time.day}, Hour ${snapshot.time.hour}`
             );
-            console.log('Flags:', Object.keys(engineInternal.state.flags));
-            console.log('Variables:', engineInternal.state.variables);
+            console.log('Flags:', Object.keys(state.flags));
+            console.log('Variables:', state.variables);
             console.log(
                 'Inventory:',
-                snapshot.inventory.map((i: any) => i.name)
+                snapshot.inventory.map((item) => item.name)
             );
-            console.log('Quest Progress:', engineInternal.state.questProgress);
+            console.log('Quest Progress:', state.questProgress);
             console.log('');
             console.log('Available commands:');
             console.log('  doodle.setFlag(flag)');
@@ -196,13 +192,15 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
         },
 
         inspectState() {
-            console.log('🐾 GAME STATE:', engineInternal.state);
-            return engineInternal.state;
+            const state = engine.getState();
+            console.log('🐾 GAME STATE:', state);
+            return state;
         },
 
         inspectRegistry() {
-            console.log('🐾 CONTENT REGISTRY:', engineInternal.registry);
-            return engineInternal.registry;
+            const registry = engine.getRegistry();
+            console.log('🐾 CONTENT REGISTRY:', registry);
+            return registry;
         },
     };
 

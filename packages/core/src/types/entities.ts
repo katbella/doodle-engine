@@ -249,8 +249,6 @@ export interface ShellConfig {
     loading?: {
         /** Background image path */
         background?: string;
-        /** Music to play during loading (optional) */
-        music?: string;
     };
     title?: {
         /** Game logo image path */

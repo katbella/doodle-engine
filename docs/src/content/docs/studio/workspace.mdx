@@ -1,0 +1,71 @@
+---
+title: The Studio Workspace
+description: Navigate the project rail, editor views, references, and bottom dock.
+---
+
+import ThemeScreenshot from '../../../components/ThemeScreenshot.astro';
+
+The workspace keeps project navigation on the left, editing in the center, context on the right, and project-wide tools in the bottom dock.
+
+## Project rail
+
+The project rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an item or reach it with the keyboard to show its **Rename** and **Delete** buttons. Renaming also updates known references to that ID; deleting asks for confirmation.
+
+<ThemeScreenshot
+    src="/images/studio/project-rail.webp"
+    alt="The project rail with the starter content"
+/>
+
+## Visual editor
+
+The visual editor provides the fields and controls for the selected type of game content.
+
+Enter the words the player should see directly into text fields.
+
+<ThemeScreenshot
+    src="/images/studio/location-editor.webp"
+    alt="A location open in the visual editor"
+/>
+
+Studio autosaves visual edits after you stop typing. A dot in the tab means the latest edit has not been saved yet. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately.
+
+Dialogue tabs also include **Graph**, a read-only map of how the conversation moves from one node to another. Use it to follow branches and open a node in Visual, then use Visual or Source to make changes. The [dialogue editing guide](/studio/dialogues/#follow-the-conversation-in-graph) explains each part of the graph.
+
+## Source editor
+
+Select **Source** to edit the active game file directly. Source uses the same file as Visual, so you can move between the two views instead of maintaining a separate copy. Doodle dialogue files and YAML each have syntax highlighting suited to their structure.
+
+<ThemeScreenshot
+    src="/images/studio/source-editor.webp"
+    alt="A location file open in Source mode"
+/>
+
+Source edits save shortly after you stop typing. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately. Studio keeps each open Source editor mounted when you switch tabs, preserving its undo history and avoiding a reload when you return.
+
+After validation, problems that Studio can locate appear as markers on the relevant source lines. Select a source problem in the right panel or bottom dock to open its file and move the cursor to the affected line. Once changed source is saved, markers from the previous validation are hidden; select **Validate** again to check the new text.
+
+Studio also keeps a recovery copy while source text is unsaved. If the app closes unexpectedly, the file offers **Restore** and **Discard** the next time it opens. If the file changes outside Studio while it has unsaved edits, choose **Reload** to use the file from disk or **Overwrite** to keep the version in Studio. A file deleted outside Studio can be recreated from the editor.
+
+Dialogue files add project-aware suggestions and command help. See [Dialogue IntelliSense](/studio/dialogues/#dialogue-intellisense) for the commands and values Source can complete.
+
+## References and validation
+
+The right panel helps you understand how the selected item connects to the rest of the game:
+
+- **References** lists every known place where that ID is used. Select a reference to open its file.
+- **Validation** lists problems for the active file.
+
+The **Problems** tab in the bottom dock lists issues across the project. Selecting a problem opens the relevant content.
+
+<ThemeScreenshot
+    src="/images/studio/references-panel.webp"
+    alt="References and validation for the selected location"
+/>
+
+## Flags and variables
+
+Select **Flags & vars** in the bottom bar to open the project-wide page for these names. Search and group names, review where they are set and checked, add notes, find likely mistakes, and rename known uses. See [Flags & Variables](/studio/flags-and-variables/) for the complete workflow.
+
+## Make the workspace your own
+
+Open **Themes** in the application menu to choose the colors you want to work with. Each theme has its own default accent, and you can also choose another accent color. See the [Studio themes gallery](/studio/themes/) to compare them.

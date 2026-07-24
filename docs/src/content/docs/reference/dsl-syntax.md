@@ -3,7 +3,7 @@ title: DSL Syntax
 description: Complete reference for the .dlg dialogue file format.
 ---
 
-Dialogue files use the `.dlg` extension and contain a simple DSL (domain-specific language) for writing branching conversations. Unlike a general-purpose programming language, the dialogue DSL is a small set of keywords designed specifically for defining conversation nodes, choices, conditions, and effects.
+Dialogue files use the `.dlg` extension and a DSL (domain-specific language), a small scripting format for branching conversations. Its keywords define nodes, choices, conditions, and effects.
 
 ## File Structure
 
@@ -13,7 +13,7 @@ A `.dlg` file consists of:
 2. Optional top-level `REQUIRE` conditions (for triggered dialogues)
 3. One or more `NODE` blocks
 
-```
+```text
 TRIGGER tavern
 REQUIRE notFlag seenIntro
 
@@ -32,7 +32,7 @@ NODE start
 
 Defines a dialogue node, which is a single point in the conversation.
 
-```
+```text
 NODE greeting
   BARTENDER: @bartender.hello
 ```
@@ -43,7 +43,7 @@ The first `NODE` in the file is the start node (used as the dialogue's `startNod
 
 Closes a `CHOICE` or `IF` block:
 
-```
+```text
 CHOICE @option
   GOTO next
 END
@@ -51,7 +51,7 @@ END
 
 When used as `END dialogue`, it's an effect that closes the conversation:
 
-```
+```text
 CHOICE @goodbye
   END dialogue
 END
@@ -61,7 +61,7 @@ END
 
 Routes to another node (within a choice or as auto-advance):
 
-```
+```text
 CHOICE @option
   GOTO next_node
 END
@@ -69,17 +69,17 @@ END
 
 Or to a location (ends dialogue and moves player):
 
-```
+```text
 GOTO location market
 ```
 
-`GOTO location` is scripted movement. It does not calculate map travel time or check location triggers. Use map travel through `travelTo()` for normal player travel.
+`GOTO location` handles scripted movement by ending the dialogue and changing the current location. Map travel through `travelTo()` also calculates travel time and checks location triggers.
 
 ### TRIGGER
 
 Declares that this dialogue auto-starts when the player enters a location:
 
-```
+```text
 TRIGGER tavern
 ```
 
@@ -89,7 +89,7 @@ Must be at the top of the file, before any `NODE`.
 
 Condition that must pass. At the top level (for triggered dialogues) or inside choice blocks:
 
-```
+```text
 # Top-level: controls when the trigger fires
 TRIGGER tavern
 REQUIRE notFlag seenIntro
@@ -105,7 +105,7 @@ END
 
 ### Speaker Line
 
-```
+```text
 BARTENDER: @bartender.greeting
 ```
 
@@ -117,17 +117,17 @@ Each node has one speaker line. To let a different character speak, route to ano
 
 Narration with no speaker:
 
-```
+```text
 NARRATOR: @narrator.description
 ```
 
-In the snapshot, the speaker is `null` and `speakerName` is `"Narrator"`.
+In the snapshot, which contains the data sent to the renderer, the speaker is `null` and `speakerName` is `"Narrator"`.
 
 ### VOICE
 
 Optional voice audio file for the current node:
 
-```
+```text
 VOICE bartender_greeting.ogg
 ```
 
@@ -135,13 +135,13 @@ VOICE bartender_greeting.ogg
 
 Optional portrait override (e.g., different expression):
 
-```
+```text
 PORTRAIT bartender_angry.png
 ```
 
 ## Choice Blocks
 
-```
+```text
 CHOICE @choice_text
   REQUIRE condition        # Optional, multiple allowed
   effect1                  # Optional effects
@@ -160,7 +160,7 @@ A choice holds button text, conditions, effects, and a route. To show narration 
 
 A choice terminates the dialogue (no GOTO needed) when it contains `END dialogue` or `GOTO location`:
 
-```
+```text
 # Terminal choice: ends the dialogue
 CHOICE "Look around."
   END dialogue
@@ -174,7 +174,7 @@ END
 
 ## Conditional Blocks (IF)
 
-```
+```text
 IF condition
   GOTO target_node
 END
@@ -182,7 +182,7 @@ END
 
 or with effects:
 
-```
+```text
 IF hasFlag metBartender
   SET flag returningCustomer
   GOTO returning_greeting
@@ -191,7 +191,7 @@ END
 
 or with effects that fall through to the node's regular `GOTO`:
 
-```
+```text
 IF hasFlag metBartender
   ADD relationship bartender 1
 END
@@ -211,7 +211,7 @@ GOTO greeting
 
 **Example:**
 
-```
+```text
 NODE check_reputation
   BARTENDER: @bartender.sizing_you_up
 
@@ -236,7 +236,7 @@ How the engine handles nodes with no `CHOICE` blocks depends on whether the node
 
 The engine shows the text and **waits for the player to click Continue**. Only after the player clicks does the engine advance via `GOTO` or `IF` blocks.
 
-```
+```text
 NODE intro
   BARTENDER: @bartender.welcome
   GOTO main_menu
@@ -250,7 +250,7 @@ Text-only nodes are the natural way to present narration, character monologues, 
 
 A node with **no speaker line and no text** is a **silent processing node**. The engine processes it instantly, applying effects and evaluating `IF` blocks, then advances to the next node without waiting for the player.
 
-```
+```text
 # Roll the dice and branch. The player never sees this node as a prompt.
 NODE skill_check
   ROLL result 1 20
@@ -281,18 +281,18 @@ NODE failure
 
 ### Summary
 
-| Node type | Has text? | Has choices? | Player sees |
-|-----------|-----------|--------------|-------------|
-| Text-only | Yes | No | Text + Continue button |
-| Choice node | Yes or no | Yes | Text + choice buttons |
-| Silent processing | No | No | Auto-advances instantly |
+| Node type         | Has text? | Has choices? | Player sees             |
+| ----------------- | --------- | ------------ | ----------------------- |
+| Text-only         | Yes       | No           | Text + Continue button  |
+| Choice node       | Yes or no | Yes          | Text + choice buttons   |
+| Silent processing | No        | No           | Auto-advances instantly |
 
 ### IF vs CHOICE REQUIRE
 
 **IF blocks** (author-controlled branching):
 
 - Invisible to the player
-- First passing condition wins
+- The first matching branch runs
 - Effects inside the passing IF block run before its `GOTO`
 - Used for conditional story flow based on game state
 
@@ -300,9 +300,9 @@ NODE failure
 
 - All passing choices are shown to the player
 - Player selects which one to take
-- Used for gating options behind requirements (e.g., "needs 50 gold")
+- Used for showing options only when their requirements pass (for example, "needs 50 gold")
 
-```
+```text
 # IF: player never sees the branching
 NODE greeting
   BARTENDER: @bartender.hello
@@ -336,7 +336,7 @@ NODE offer
 
 Effects modify game state. See [Effects Reference](/reference/effects/) for the full list.
 
-```
+```text
 SET flag metBartender
 CLEAR flag doorLocked
 SET variable gold 100
@@ -371,7 +371,7 @@ Dialogue text can be written in three forms:
 
 **Plain text**: Just write the words. Works for most lines, including text that contains colons.
 
-```
+```text
 BARTENDER: Hello there, traveller!
 CHOICE What's the news?
 NARRATOR: The sign reads: closed until dawn.
@@ -379,18 +379,36 @@ NARRATOR: The sign reads: closed until dawn.
 
 **Quoted text**: Wrap in double quotes when the text contains a `#` (otherwise everything from the `#` onward is treated as a comment). Quotes are stripped before display.
 
-```
+```text
 BARTENDER: "Room #3 is down the hall."
 ```
 
+Inside quoted text, write `\"` for a double quote and `\\` for a backslash. This is how a line can contain both quotes and a `#`:
+
+```text
+NARRATOR: "He said \"room #3\" and walked off."
+```
+
+The player sees: He said "room #3" and walked off. Doodle Studio writes these escapes for you when you type quotes in the visual editor.
+
+Quoted speaker and narrator text can also span several lines:
+
+```text
+NARRATOR: "The road was empty.
+
+By morning, the snow had covered our tracks."
+```
+
+The line breaks are part of the displayed text, but the passage remains one dialogue entry. Use plain text without quotes for ordinary single-line dialogue.
+
 **Localization keys** (prefixed with `@`): Reference a key from a locale file. Required for multi-language support.
 
-```
+```text
 BARTENDER: @bartender.greeting
 CHOICE @bartender.choice.ask_news
 ```
 
-The `@key` is resolved at snapshot build time against the current locale's data. If the key isn't found, the raw `@key` string is displayed.
+When the engine prepares the snapshot, it looks up the `@key` in the current locale. A missing key appears as the raw `@key` string.
 
 For single-language games, plain or quoted text is simpler. Add `@keys` later when you need multiple languages.
 
@@ -400,7 +418,7 @@ For single-language games, plain or quoted text is simpler. Add `@keys` later wh
 
 Lines starting with `#` are ignored:
 
-```
+```text
 # This is a comment
 NODE start
   BARTENDER: @bartender.greeting  # Inline comments work too
@@ -414,7 +432,7 @@ Triggered intro and character conversation live in separate files.
 
 `content/dialogues/tavern_intro.dlg`:
 
-```
+```text
 # Plays automatically the first time the player enters the tavern
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
@@ -430,7 +448,7 @@ NODE start
 
 `content/dialogues/bartender_greeting.dlg`:
 
-```
+```text
 # Plays when the player clicks the bartender character
 NODE start
   BARTENDER: @bartender.greeting

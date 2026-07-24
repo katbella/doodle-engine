@@ -1,6 +1,10 @@
 node_modules
 dist
+out
+release
+coverage
 *.log
+.build-test-*
 .DS_Store
 design-docs/
 docs/.astro/

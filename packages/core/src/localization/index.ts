@@ -50,24 +50,3 @@ export function resolveText(
     return resolved;
 }
 
-/**
- * Create a localization resolver function bound to a specific locale and variables.
- * Useful for passing to functions that need to resolve multiple strings.
- *
- * @param localeData - Locale dictionary for the current language
- * @param variables - Optional game variables for {varName} substitution
- * @returns Function that resolves text using the provided locale data and variables
- *
- * @example
- * ```ts
- * const resolve = createResolver(localeData, variables)
- * const name = resolve("@character.bartender.name")
- * const roll = resolve("You rolled a {bluffRoll}.")
- * ```
- */
-export function createResolver(
-    localeData: LocaleData,
-    variables?: Record<string, number | string>
-): (text: string) => string {
-    return (text: string) => resolveText(text, localeData, variables);
-}

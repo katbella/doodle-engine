@@ -25,7 +25,14 @@ export function DialogueBox({ dialogue, className = '' }: DialogueBoxProps) {
 
             <div className="dialogue-content">
                 <div className="dialogue-speaker">{dialogue.speakerName}</div>
-                <div className="dialogue-text">{dialogue.text}</div>
+                <div className="dialogue-text">
+                    {dialogue.text.split('\n').map((line, index) => (
+                        <React.Fragment key={index}>
+                            {index > 0 && <br />}
+                            {line}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
         </div>
     );

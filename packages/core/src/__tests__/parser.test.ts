@@ -418,6 +418,43 @@ SET flag visited
         expect(node.text).toBe('Welcome to the tavern!');
     });
 
+    it('parses paragraph breaks as one speaker entry', () => {
+        const dsl = [
+            'NODE intro',
+            '  BARTENDER: "I have been having a good time.',
+            '  ',
+            '  It has been 84 years."',
+            '  END dialogue',
+        ].join('\n');
+
+        const dialogue = parseDialogue(dsl, 'test');
+
+        expect(dialogue.nodes).toHaveLength(1);
+        expect(dialogue.nodes[0].text).toBe(
+            'I have been having a good time.\n\nIt has been 84 years.'
+        );
+        expect(dialogue.nodes[0].effects).toEqual([{ type: 'endDialogue' }]);
+    });
+
+    it('keeps hashes and escaped quotes inside multiline dialogue', () => {
+        const dsl = [
+            'NODE intro',
+            '  NARRATOR: "Room #3 was quiet.',
+            '  Then she said \\"hello\\"." # author note',
+        ].join('\n');
+
+        expect(parseDialogue(dsl, 'test').nodes[0].text).toBe(
+            'Room #3 was quiet.\nThen she said "hello".'
+        );
+    });
+
+    it('reports unterminated multiline dialogue', () => {
+        const dsl = 'NODE intro\n  NARRATOR: "Still speaking\n';
+        expect(() => parseDialogue(dsl, 'test')).toThrow(
+            'Unterminated quoted text starting at line 2'
+        );
+    });
+
     it('should handle comments', () => {
         const dsl = `
 # This is a comment
@@ -608,9 +645,7 @@ END
         expect(node.conditionalBranches).toEqual([
             {
                 condition: { type: 'hasFlag', flag: 'metBartender' },
-                effects: [
-                    { type: 'setFlag', flag: 'returningCustomer' },
-                ],
+                effects: [{ type: 'setFlag', flag: 'returningCustomer' }],
                 next: 'returning',
             },
         ]);
@@ -699,7 +734,7 @@ END dialogue
 });
 
 describe('parseDialogue - complex example', () => {
-    it('should parse a complex dialogue from the design doc', () => {
+    it('should parse a complex dialogue with all features', () => {
         const dsl = `
 TRIGGER tavern
 REQUIRE notFlag visited_tavern
@@ -920,8 +955,8 @@ describe('parseEffect / parseCondition - quotes and arity', () => {
     });
 
     it('rejects multi-word condition values', () => {
-        expect(() => parseCondition('variableEquals name Sir Reginald')).toThrow(
-            /single value/
-        );
+        expect(() =>
+            parseCondition('variableEquals name Sir Reginald')
+        ).toThrow(/single value/);
     });
 });

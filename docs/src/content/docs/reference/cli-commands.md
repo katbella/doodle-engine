@@ -1,80 +1,35 @@
 ---
 title: CLI Commands
-description: Reference for doodle create, doodle dev, doodle build, and doodle validate.
+description: Reference for the Doodle Engine command-line tools.
 ---
 
-The `@doodle-engine/cli` package provides four commands: `doodle create`, `doodle dev`, `doodle build`, and `doodle validate`.
+The `@doodle-engine/cli` package provides the commands used by each game project: `npx doodle dev`, `npx doodle build`, and `npx doodle validate`.
 
-In a scaffolded project, these are wired up as npm scripts:
+New projects provide these npm scripts:
 
-- `npm run dev` runs `doodle dev`
-- `npm run build` runs `doodle build`
-- `npm run validate` runs `doodle validate`
+- `npm run dev` starts the development server
+- `npm run build` creates a production build
+- `npm run validate` checks the game content
 - `npm run preview` runs `vite preview`
 
-## doodle create
+## npx doodle create
 
-Scaffold a new game project.
-
-```bash
-npx @doodle-engine/cli create <project-name>
-```
-
-### Prompts
-
-1. **Use default renderer?** Yes uses `GameShell` for a complete out-of-the-box UI. No sets up a skeleton `App.tsx` with `GameProvider`, `InputProvider`, `useGame`, and `useInputAction` for building a custom renderer.
-
-The default scaffold handles shell UI, input routing, interludes, videos, save/load, settings, and asset loading through `GameShell`. The custom scaffold shows the minimum renderer responsibilities directly: render snapshots, call engine actions, route keyboard commands, and handle pending interludes/videos.
-
-### What it creates
-
-```
-<project-name>/
-  content/
-    characters/bartender.yaml, merchant.yaml
-    dialogues/tavern_intro.dlg, market_intro.dlg,
-              bartender_greeting.dlg, merchant_intro.dlg,
-              bluff_check.dlg
-    interludes/chapter_one.yaml
-    items/old_coin.yaml
-    journal/tavern_discovery.yaml, odd_jobs_accepted.yaml,
-            market_square.yaml
-    locales/en.yaml
-    locations/tavern.yaml, market.yaml
-    maps/town.yaml
-    quests/odd_jobs.yaml
-    game.yaml
-  assets/
-    images/
-      banners/
-      items/
-      maps/
-      portraits/
-    audio/
-      music/
-      sfx/
-      voice/
-  src/
-    main.tsx
-    App.tsx
-    index.css
-  index.html
-  package.json
-  tsconfig.json
-  .gitignore
-```
-
-### Post-install
+Create a game project in the current folder:
 
 ```bash
-cd <project-name>
-npm install
-npm run dev
+npx doodle create my-game
 ```
 
----
+The command asks how you want to begin:
 
-## doodle dev
+- **Playable example story** creates a small connected game you can explore and replace piece by piece.
+- **Minimal project** creates one starting location and leaves the other content sections ready for your work.
+
+You will also choose how the project stores text. Start with English written directly in the content, or include an English and Swedish localization example. Either localization choice works with either starting-content choice.
+
+The **default React renderer** provides a ready-to-use React interface that can be customized later. If you select it, you can also include the starter styles.
+
+## npx doodle dev
 
 Start the development server with content hot-reload.
 
@@ -88,26 +43,26 @@ npm run dev
 2. Loads all content from `content/` directory
 3. Parses `.yaml` files as entities and `.dlg` files as dialogues
 4. Serves content via the `/api/content` endpoint as JSON
-5. **Generates asset manifest on-the-fly** and serves it at `/api/manifest`
+5. Generates the asset manifest for each request and serves it at `/api/manifest`
 6. Watches `content/**/*` for changes using chokidar
 7. **Validates content on every file change** and prints errors to the terminal
 8. Triggers full page reload when content files change
-9. Serves the app in development mode. Scaffolded apps pass `devTools={import.meta.env.DEV}`, which exposes `window.doodle` while the game is running.
+9. Serves the app in development mode. Generated apps pass `devTools={import.meta.env.DEV}`, which exposes `window.doodle` while the game is running.
 
 ### Content loading
 
-| Directory     | File Type | How it's loaded                                  |
-| ------------- | --------- | ------------------------------------------------ |
-| `characters/` | `.yaml`   | Parsed as Character entity                       |
-| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                    |
-| `interludes/` | `.yaml`   | Parsed as Interlude entity                       |
-| `items/`      | `.yaml`   | Parsed as Item entity                            |
-| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                    |
-| `locales/`    | `.yaml`   | Loaded as flat key-value dict, keyed by filename |
-| `locations/`  | `.yaml`   | Parsed as Location entity                        |
-| `maps/`       | `.yaml`   | Parsed as Map entity                             |
-| `quests/`     | `.yaml`   | Parsed as Quest entity                           |
-| `game.yaml`   | `.yaml`   | Parsed as GameConfig                             |
+| Directory     | File Type | How it's loaded                                                          |
+| ------------- | --------- | ------------------------------------------------------------------------ |
+| `characters/` | `.yaml`   | Parsed as Character entity                                               |
+| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                                            |
+| `interludes/` | `.yaml`   | Parsed as Interlude entity                                               |
+| `items/`      | `.yaml`   | Parsed as Item entity                                                    |
+| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                                            |
+| `locales/`    | `.yaml`   | Loaded as translation entries, with the filename used as the locale code |
+| `locations/`  | `.yaml`   | Parsed as Location entity                                                |
+| `maps/`       | `.yaml`   | Parsed as Map entity                                                     |
+| `quests/`     | `.yaml`   | Parsed as Quest entity                                                   |
+| `game.yaml`   | `.yaml`   | Parsed as GameConfig                                                     |
 
 ### /api/content response
 
@@ -141,11 +96,11 @@ When content files change, the dev server automatically validates:
 - **Character references**: Characters' dialogue IDs point to existing dialogues
 - **Localization keys**: All `@key` references exist in locale files
 
-Validation errors are printed to the terminal but **do not stop the dev server**. You can continue working while fixing errors.
+Validation errors appear in the terminal while the development server continues running.
 
 Example validation output:
 
-```
+```text
 ✗ Found 2 validation errors:
 
 content/dialogues/bartender_greeting.dlg
@@ -185,15 +140,17 @@ doodle.removeItem('old_coin');
 
 // Inspection
 doodle.inspect(); // Show current state and available commands
-doodle.inspectState(); // Return full game state object
-doodle.inspectRegistry(); // Return content registry object
+doodle.inspectState(); // View current progress and game state
+doodle.inspectRegistry(); // View all loaded game content
 ```
 
-Scaffolded apps pass `devTools={import.meta.env.DEV}`, so `window.doodle` is not enabled in production builds.
+The inspection commands return copies, so exploring their results does not change the running game.
+
+New applications pass `devTools={import.meta.env.DEV}`, which includes `window.doodle` during development and omits it from production builds.
 
 ---
 
-## doodle build
+## npx doodle build
 
 Build the game for production.
 
@@ -204,16 +161,16 @@ npm run build
 ### What it does
 
 1. **Validates all content first** and fails if errors are found
-2. Generates the asset manifest and fails if referenced local assets under `/assets/` are missing
-3. Runs a Vite production build
+2. Generates the asset manifest and fails if referenced local assets under `assets/` are missing
+3. Runs a Vite production build with relative URLs, so the output works at a domain root or hosted under a folder
 4. Outputs to `dist/` directory
 5. Copies project assets to `dist/assets/`
-6. Builds with Vite production settings. Scaffolded apps do not enable `window.doodle` in production.
+6. Builds with Vite production settings. Generated applications omit `window.doodle` from production builds.
 7. **Writes `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
-8. **Generates `dist/sw.js`**, a service worker that precaches all assets for offline play
+8. **Generates `dist/sw.js`**, a service worker that caches the app, the content, and the assets, so the game keeps working offline after the first visit
 9. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
 
-If validation errors are found, the build will exit with code 1 and display the errors. Fix all validation errors before deploying to production.
+Validation errors stop the build and return exit code 1. The terminal displays each error to fix before building again.
 
 ### Preview
 
@@ -225,7 +182,7 @@ npx vite preview
 
 ---
 
-## doodle validate
+## npx doodle validate
 
 Validate all game content without building or running the dev server.
 
@@ -287,7 +244,7 @@ npm run validate
 
 ### Example output
 
-```
+```text
 🐾 Validating Doodle Engine content...
 
 ✓ No validation errors
@@ -295,7 +252,7 @@ npm run validate
 
 Or with errors:
 
-```
+```text
 🐾 Validating Doodle Engine content...
 
 ✗ Found 3 validation errors:
@@ -315,5 +272,5 @@ content/characters/merchant.yaml
 ### When to use
 
 - **Before committing**: Validate content changes before pushing to version control
-- **CI/CD pipelines**: Add `npm run validate` to your CI workflow to catch content errors early
+- **Continuous integration (CI)**: Add `npm run validate` to an automated check for pushed changes
 - **Manual testing**: Run validation without starting the full dev server

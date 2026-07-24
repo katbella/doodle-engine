@@ -1,0 +1,60 @@
+---
+title: Projects in Studio
+description: Create, open, and manage Doodle Studio projects.
+---
+
+import ThemeScreenshot from '../../../components/ThemeScreenshot.astro';
+
+Each Doodle Studio project contains one game, including its content, assets, interface, and build settings.
+
+## Create a project
+
+Select **New project…** on the Welcome screen, or open the **File** menu and select **New Project…**.
+
+<ThemeScreenshot
+    src="/images/studio/new-project.webp"
+    alt="The New Project window in Doodle Studio"
+/>
+
+| Field                  | What it controls                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Name                   | Folder name and npm package name.                                                                          |
+| Game title             | Player-facing title in the browser tab and default React renderer.                                         |
+| Subtitle               | Optional line beneath the title in the default React renderer.                                             |
+| Location               | Parent folder where Studio creates the project folder.                                                     |
+| Starting content       | Begin with the playable example story or one starting location.                                            |
+| Localization           | Start with English written directly in the editor, or include an English and Swedish localization example. |
+| Default React renderer | Includes a ready-to-use React interface that can be customized later.                                      |
+| Starter styles         | Includes the styled interface for the default React renderer.                                              |
+
+## Choose the starting content
+
+Choose **Playable example story** to begin with a small connected game. Explore it to see how locations, characters, dialogue, quests, journal entries, maps, and an interlude work together. Replace the examples as you build your own story.
+
+Choose **Minimal project with one starting location** when you are ready to begin with your own ideas. The project opens with one valid location and empty sections for the rest of your content.
+
+## Write the text directly
+
+The starting content and localization choices work together in any combination.
+
+Choose **English text with a locale starter file** for your first project. Character names, descriptions, dialogue lines, and choices appear directly in Studio exactly as the player will read them.
+
+The English locale starter remains available for later. When your game needs another language, follow [Add localization](/studio/localization/) to move text into translation keys one section at a time.
+
+Choose **English + Swedish localization example** when you specifically want to study an already-localized project.
+
+## Open a project
+
+Select **Open project…**, then choose the project root: the folder containing `package.json`, `content/`, and `src/`.
+
+The project opens in the Studio workspace.
+
+## Install project dependencies
+
+A new project needs its Node.js packages before Preview and Build can run. When Studio displays the dependency banner, select **Install dependencies** and wait for it to finish.
+
+## Reopen recent work
+
+The Welcome screen lists projects you opened recently. Select one to continue working on it.
+
+You can also open the **File** menu and select **Open Recent**.

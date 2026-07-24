@@ -408,7 +408,7 @@ describe('Engine', () => {
             const config = createTestConfig();
             engine.newGame(config);
             engine.talkTo('bartender');
-            engine.selectChoice('choice_hello'); // → 'Nice to meet you' shown
+            engine.selectChoice('choice_hello'); // shows 'Nice to meet you'
 
             // Player clicks Continue: endDialogue already fired, no next, dialogue ends
             const snapshot = engine.continueDialogue();
@@ -457,8 +457,8 @@ describe('Engine', () => {
             const config = createTestConfig();
             engine.newGame(config);
             engine.talkTo('bartender');
-            engine.selectChoice('choice_bluff'); // → bluff_check start node
-            engine.selectChoice('attempt'); // → bluff_check success node
+            engine.selectChoice('choice_bluff'); // enters bluff_check start node
+            engine.selectChoice('attempt'); // enters bluff_check success node
             const snapshot = engine.selectChoice('thanks'); // endDialogue
 
             expect(snapshot.dialogue).toBeNull();

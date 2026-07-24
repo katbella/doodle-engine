@@ -7,10 +7,16 @@ import { AssetImage } from './AssetImage';
 
 export interface LocationViewProps {
     location: SnapshotLocation;
+    /** Resolved UI strings; English defaults when absent. */
+    ui?: Record<string, string>;
     className?: string;
 }
 
-export function LocationView({ location, className = '' }: LocationViewProps) {
+export function LocationView({
+    location,
+    ui,
+    className = '',
+}: LocationViewProps) {
     return (
         <div className={`location-view ${className}`}>
             <div className="location-banner">
@@ -18,7 +24,7 @@ export function LocationView({ location, className = '' }: LocationViewProps) {
                     <AssetImage src={location.banner} alt={location.name} />
                 ) : (
                     <div className="location-banner-placeholder">
-                        Location Banner
+                        {ui?.['ui.location_banner'] ?? 'Location Banner'}
                     </div>
                 )}
             </div>

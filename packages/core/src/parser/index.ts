@@ -20,6 +20,7 @@ import type {
 } from '../types/entities';
 import type { Condition } from '../types/conditions';
 import type { Effect } from '../types/effects';
+import { findUnescapedQuote, splitComment } from './comment';
 
 /**
  * Token represents a line of DSL code with metadata
@@ -32,7 +33,7 @@ interface Token {
 
 /**
  * Leading keywords that start an effect line. Used so that keyword detection
- * takes precedence over the generic "line contains ':' → speaker line" rule.
+ * takes precedence over the generic "line contains ':' means speaker line" rule.
  * GOTO is intentionally excluded: it is routing, handled separately by node and
  * choice parsing. NOTIFY is included so a NOTIFY whose text contains ':' is
  * still parsed as an effect rather than mistaken for a speaker line.
@@ -69,57 +70,78 @@ function isEffectLine(line: string): boolean {
  * - Tracks indentation for nested structures
  */
 function tokenize(input: string): Token[] {
-    return input
-        .split('\n')
-        .map((line, index) => ({
-            original: line,
-            lineNumber: index + 1,
-        }))
-        .map(({ original, lineNumber }) => {
-            // Remove comments (but preserve # inside quotes)
-            let withoutComment = original;
-            const hashIndex = original.indexOf('#');
-            if (hashIndex === -1) {
-                // No # at all, keep as-is
-                withoutComment = original;
-            } else {
-                const quoteMatch = original.match(/"[^"]*"/);
-                if (quoteMatch) {
-                    const quoteStart = original.indexOf(quoteMatch[0]);
-                    const quoteEnd = quoteStart + quoteMatch[0].length;
-                    if (hashIndex < quoteStart) {
-                        // # is before the quote, so it's a comment
-                        withoutComment = original.substring(0, hashIndex);
-                    } else if (
-                        hashIndex >= quoteStart &&
-                        hashIndex < quoteEnd
-                    ) {
-                        // # is inside quotes. Preserve it and strip any # after the quote.
-                        withoutComment =
-                            original.substring(0, quoteEnd) +
-                            original.substring(quoteEnd).split('#')[0];
-                    } else {
-                        // # is after the quote, so strip from there
-                        withoutComment = original.substring(0, hashIndex);
-                    }
-                } else {
-                    withoutComment = original.substring(0, hashIndex);
+    const physicalLines = input.replace(/\r\n?/g, '\n').split('\n');
+    const tokens: Token[] = [];
+
+    for (let i = 0; i < physicalLines.length; i++) {
+        const original = physicalLines[i];
+        const lineNumber = i + 1;
+        const { code: withoutComment } = splitComment(original);
+        const indent =
+            withoutComment.length - withoutComment.trimStart().length;
+        let line = withoutComment.trim();
+        if (line.length === 0) continue;
+
+        const openingQuote = findUnescapedQuote(line);
+        if (
+            openingQuote !== -1 &&
+            findUnescapedQuote(line, openingQuote + 1) === -1
+        ) {
+            const parts = [line];
+            let closed = false;
+
+            while (++i < physicalLines.length) {
+                const continuation = stripIndent(physicalLines[i], indent);
+                const closingQuote = findUnescapedQuote(continuation);
+                if (closingQuote === -1) {
+                    parts.push(continuation);
+                    continue;
                 }
+
+                const afterQuote = continuation
+                    .substring(closingQuote + 1)
+                    .trim();
+                if (afterQuote !== '' && !afterQuote.startsWith('#')) {
+                    throw new Error(
+                        `Unexpected text after closing quote at line ${i + 1}: ${afterQuote}`
+                    );
+                }
+                parts.push(continuation.substring(0, closingQuote + 1));
+                closed = true;
+                break;
             }
 
-            // Calculate indentation level
-            const indent =
-                withoutComment.length - withoutComment.trimStart().length;
-            const line = withoutComment.trim();
-            return { line, lineNumber, indent };
-        })
-        .filter((token) => token.line.length > 0);
+            if (!closed) {
+                throw new Error(
+                    `Unterminated quoted text starting at line ${lineNumber}`
+                );
+            }
+            line = parts.join('\n');
+        }
+
+        tokens.push({ line, lineNumber, indent });
+    }
+
+    return tokens;
+}
+
+function stripIndent(line: string, width: number): string {
+    let offset = 0;
+    while (
+        offset < line.length &&
+        offset < width &&
+        (line[offset] === ' ' || line[offset] === '\t')
+    ) {
+        offset++;
+    }
+    return line.substring(offset);
 }
 
 /**
  * Parse text that may be a localization key or inline text
  * - @key -> returns "@key" (localization reference, resolved at snapshot time)
- * - "text" -> returns "text" (inline literal, quotes stripped)
+ * - "text" -> returns "text" (inline literal, quotes stripped; \" and \\
+ *   inside the quotes stand for a double quote and a backslash)
  * - text -> returns "text" (plain text)
  */
 function parseText(text: string): string {
@@ -131,9 +153,11 @@ function parseText(text: string): string {
         return trimmed;
     }
 
-    // Quoted inline text - strip quotes
+    // Quoted inline text - strip quotes and resolve escapes
     if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
-        return trimmed.substring(1, trimmed.length - 1);
+        return trimmed
+            .substring(1, trimmed.length - 1)
+            .replace(/\\(["\\])/g, '$1');
     }
 
     // Plain text (shouldn't normally happen in well-formed DSL, but handle it)
@@ -640,7 +664,7 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
         }
 
         // Structural and effect keywords are checked before the generic
-        // "line contains ':' → speaker line" rule, so a CHOICE/IF/GOTO/PORTRAIT
+        // "line contains ':' means speaker line" rule, so a CHOICE/IF/GOTO/PORTRAIT
         // or effect line whose text contains ':' is not mistaken for a speaker.
         if (current.line.startsWith('VOICE ')) {
             voice = current.line.substring(6).trim();

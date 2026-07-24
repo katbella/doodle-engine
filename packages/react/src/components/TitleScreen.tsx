@@ -7,6 +7,7 @@
 
 import type { ShellConfig } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
+import { screenBackgroundStyle } from './screenBackground';
 
 export interface TitleScreenProps {
     /** Resolved UI strings (from buildUIStrings or snapshot.ui) */
@@ -21,6 +22,8 @@ export interface TitleScreenProps {
     onContinue: () => void;
     /** Open settings */
     onSettings: () => void;
+    /** Open credits */
+    onCredits?: () => void;
     /** Game title text (shown when no logo) */
     title?: string;
     /** Subtitle text */
@@ -36,6 +39,7 @@ export function TitleScreen({
     onNewGame,
     onContinue,
     onSettings,
+    onCredits,
     title = 'Doodle Engine',
     subtitle,
     className = '',
@@ -43,9 +47,7 @@ export function TitleScreen({
     const displayLogo = useAssetUrl(shell?.logo);
     const background = useAssetUrl(shell?.background);
 
-    const bgStyle = background
-        ? { backgroundImage: `url(${background})` }
-        : undefined;
+    const bgStyle = screenBackgroundStyle(background);
 
     return (
         <div className={`title-screen ${className}`} style={bgStyle}>
@@ -66,6 +68,11 @@ export function TitleScreen({
                 <button className="title-button" onClick={onSettings}>
                     {ui['ui.settings']}
                 </button>
+                {onCredits && (
+                    <button className="title-button" onClick={onCredits}>
+                        {ui['ui.credits'] ?? 'Credits'}
+                    </button>
+                )}
             </div>
         </div>
     );

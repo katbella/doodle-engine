@@ -14,6 +14,8 @@ export interface VideoPlayerProps {
     src: string;
     /** Called when video ends or is skipped */
     onComplete: () => void;
+    /** Resolved UI strings from snapshot.ui; English defaults when absent. */
+    ui?: Record<string, string>;
     /** CSS class */
     className?: string;
 }
@@ -29,6 +31,7 @@ export function shouldCompleteVideoFromInput(command: InputCommand): boolean {
 export function VideoPlayer({
     src,
     onComplete,
+    ui,
     className = '',
 }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -56,7 +59,7 @@ export function VideoPlayer({
                 className="video-player-video"
             />
             <button className="video-player-skip-button" onClick={onComplete}>
-                Skip
+                {ui?.['ui.skip'] ?? 'Skip'}
             </button>
         </div>
     );
