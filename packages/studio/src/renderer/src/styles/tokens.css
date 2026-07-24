@@ -1,4 +1,4 @@
-/* Color, type, and spacing tokens. The Archivo and JetBrains Mono faces are
+/* Color, type, and spacing tokens. The Archivo and Monaspace Neon faces are
    imported in main.tsx; the stacks fall back to system fonts if those fail. */
 
 :root {
@@ -46,8 +46,8 @@
         'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI',
         sans-serif;
     --font-mono:
-        'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
-        'Cascadia Code', 'Consolas', monospace;
+        'Monaspace Neon', ui-monospace, 'Cascadia Code', 'Consolas',
+        monospace;
 
     --fw-normal: 400;
     --fw-medium: 500;

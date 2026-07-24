@@ -830,7 +830,7 @@ __metadata:
     "@doodle-engine/core": "workspace:*"
     "@doodle-engine/toolkit": "workspace:*"
     "@fontsource-variable/archivo": "npm:^5.2.8"
-    "@fontsource-variable/jetbrains-mono": "npm:^5.2.8"
+    "@fontsource/monaspace-neon": "npm:^5.3.0"
     "@monaco-editor/react": "npm:^4.6.0"
     "@playwright/test": "npm:^1.61.1"
     "@testing-library/dom": "npm:^10.4.0"
@@ -1229,10 +1229,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/jetbrains-mono@npm:^5.2.8":
-  version: 5.2.8
-  resolution: "@fontsource-variable/jetbrains-mono@npm:5.2.8"
-  checksum: 10c0/574e5463b802cfdd6ec8dd16724d2fd5ee38204815729c9dca0f457a417f0a4d32e6ec4ed2dfa0e5a5de5a9b0deaeb9f3c0b49b332763ed40172de43d6b1502f
+"@fontsource/monaspace-neon@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/monaspace-neon@npm:5.3.0"
+  checksum: 10c0/cf234af7771ab9047ec939cf931de29eeaf75e1e7dc451714c14cf8d041eaa97c0f548f969d68b29de80c10c42917430c128b5d5fa5b588484bc1d61b3e0b016
   languageName: node
   linkType: hard
 
