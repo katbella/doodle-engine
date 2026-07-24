@@ -54,15 +54,40 @@ jobs:
       - name: Studio end-to-end
         run: xvfb-run --auto-servernum yarn workspace @doodle-engine/studio test:e2e:run
 
+  studio-platform-tests:
+    name: Studio tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Test Studio
+        run: yarn workspace @doodle-engine/studio test
+
   verify:
     if: always()
-    needs: [checks, studio-e2e]
+    needs: [checks, studio-e2e, studio-platform-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Confirm all CI jobs passed
         env:
           CHECKS_RESULT: ${{ needs.checks.result }}
           STUDIO_E2E_RESULT: ${{ needs.studio-e2e.result }}
+          STUDIO_PLATFORM_RESULT: ${{ needs.studio-platform-tests.result }}
         run: |
           test "$CHECKS_RESULT" = "success"
           test "$STUDIO_E2E_RESULT" = "success"
+          test "$STUDIO_PLATFORM_RESULT" = "success"

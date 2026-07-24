@@ -37,7 +37,7 @@ Read the [Doodle Studio setup guide](https://doodleengine.dev/getting-started/in
 
 ## Building a Game
 
-Doodle Studio and the project files work together. You can create and edit story content in Studio without programming. You can also open the dialogue and YAML files directly, and change the game's React components and CSS to adjust what players see.
+Doodle Studio and the project files work together. You can create and edit story content in Studio without programming as well as open the dialogue and YAML files directly. In the files, you change the game's React components and CSS to adjust what players see.
 
 - Write branching dialogue with speakers, choices, conditions, and effects
 - Create locations, characters, items, quests, maps, and journal entries
@@ -54,9 +54,9 @@ Doodle Studio and the project files work together. You can create and edit story
 
 ## Rendering and Platforms
 
-The Doodle Engine core has no dependency on a UI framework. Doodle includes a complete React renderer. A project can use any renderer that connects to the engine.
+The Doodle Engine core has no dependency on a UI framework. While Doodle includes a complete React renderer, a project can use any renderer that connects to the engine.
 
-Games using the included renderer run in a web browser. They can be hosted on the web or wrapped for desktop and mobile. Other renderers can present the same game state and handle player input in their own environment.
+Games using the included renderer run in a web browser. They can be hosted on the web or wrapped for desktop and mobile.
 
 For more, see [Customizing Doodle Engine](https://doodleengine.dev/guides/customizing-doodle-engine/).
 

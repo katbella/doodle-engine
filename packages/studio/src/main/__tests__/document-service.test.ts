@@ -1,10 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
+import { mkdtemp, readFile, realpath, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { DocumentService, renameWithRetry } from '../document-service';
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+async function temporaryDirectory(prefix: string): Promise<string> {
+    const directory = await mkdtemp(join(tmpdir(), prefix));
+    return realpath(directory);
+}
 
 describe('DocumentService', () => {
     it('retries transient Windows rename failures with bounded backoff', async () => {
@@ -44,7 +48,7 @@ describe('DocumentService', () => {
     });
 
     it('reads a file, writes it atomically, and reads the new content back', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             await writeFile(join(dir, 'content.txt'), 'hello');
             const svc = new DocumentService();
@@ -67,7 +71,7 @@ describe('DocumentService', () => {
     });
 
     it('refuses to overwrite a file that changed on disk since it was read', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             await writeFile(join(dir, 'f.txt'), 'a');
@@ -85,7 +89,7 @@ describe('DocumentService', () => {
     });
 
     it('rejects a path that escapes the project', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             await expect(svc.read(dir, '../secret.txt')).rejects.toThrow(
@@ -97,7 +101,7 @@ describe('DocumentService', () => {
     });
 
     it('deletes a file so it can no longer be read', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             await writeFile(join(dir, 'gone.txt'), 'bye');
@@ -111,7 +115,7 @@ describe('DocumentService', () => {
     });
 
     it('renames a file and notifies the write hook for both paths', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const writes: string[] = [];
             const svc = new DocumentService((path) => writes.push(path));
@@ -135,7 +139,7 @@ describe('DocumentService', () => {
     });
 
     it('writes YAML field edits without losing comments or unrelated keys', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const file = join(dir, 'character.yaml');
             await writeFile(
@@ -165,7 +169,7 @@ describe('DocumentService', () => {
     });
 
     it('refuses to delete a path that escapes the project', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             await expect(svc.delete(dir, '../secret.txt')).rejects.toThrow(
@@ -179,7 +183,7 @@ describe('DocumentService', () => {
 
 describe('DocumentService external deletes and links', () => {
     it('reports a conflict instead of recreating a deleted file', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             await writeFile(join(dir, 'f.txt'), 'original');
@@ -199,8 +203,8 @@ describe('DocumentService external deletes and links', () => {
     });
 
     it('refuses to write through a link that points outside the project', async () => {
-        const outside = await mkdtemp(join(tmpdir(), 'doodle-outside-'));
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const outside = await temporaryDirectory('doodle-outside-');
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const { mkdir, symlink } = await import('node:fs/promises');
             await writeFile(join(outside, 'linked.yaml'), 'id: linked\n');
@@ -227,7 +231,7 @@ describe('DocumentService external deletes and links', () => {
     });
 
     it('creates a missing content folder when saving a brand-new file', async () => {
-        const dir = await mkdtemp(join(tmpdir(), 'doodle-doc-'));
+        const dir = await temporaryDirectory('doodle-doc-');
         try {
             const svc = new DocumentService();
             const result = await svc.write(

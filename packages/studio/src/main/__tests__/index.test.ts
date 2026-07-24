@@ -582,7 +582,11 @@ describe('Studio main process', () => {
         state.appListeners.get('activate')?.();
         expect(state.BrowserWindow).toHaveBeenCalledTimes(2);
         state.appListeners.get('window-all-closed')?.();
-        expect(state.app.quit).toHaveBeenCalled();
+        if (process.platform === 'darwin') {
+            expect(state.app.quit).not.toHaveBeenCalled();
+        } else {
+            expect(state.app.quit).toHaveBeenCalled();
+        }
         state.appListeners.get('before-quit')?.();
     });
 

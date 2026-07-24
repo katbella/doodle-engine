@@ -1,5 +1,11 @@
 # @doodle-engine/core
 
+## 0.2.1
+
+### Patch Changes
+
+- Version kept in lockstep with the Doodle Studio 0.2.1 packaging fix.
+
 ## 0.2.0
 
 ### Minor Changes

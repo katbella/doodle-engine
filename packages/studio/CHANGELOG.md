@@ -1,5 +1,11 @@
 # @doodle-engine/studio
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix Studio packaging checks on macOS and Windows by making filesystem path and app lifecycle tests platform-aware.
+
 ## 0.2.0
 
 ### Minor Changes

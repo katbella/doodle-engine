@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'fs/promises';
+import {
+    mkdtemp,
+    mkdir,
+    readFile,
+    realpath,
+    rm,
+    writeFile,
+} from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -11,7 +18,7 @@ import { AssetService } from '../asset-service';
 const temporaryDirectories: string[] = [];
 
 async function temporaryDirectory(prefix: string): Promise<string> {
-    const directory = await mkdtemp(join(tmpdir(), prefix));
+    const directory = await realpath(await mkdtemp(join(tmpdir(), prefix)));
     temporaryDirectories.push(directory);
     return directory;
 }
