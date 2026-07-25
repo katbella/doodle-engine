@@ -12,7 +12,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  select-checks:
+    name: Select checks
+    runs-on: ubuntu-latest
+    outputs:
+      product: ${{ steps.checks.outputs.product }}
+      studio_e2e: ${{ steps.checks.outputs.studio_e2e }}
+      release: ${{ steps.checks.outputs.release }}
+      docs: ${{ steps.checks.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Select the checks this change needs
+        id: checks
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/select-checks.mjs
+
+  release-checks:
+    name: Release scripts and workflows
+    needs: select-checks
+    if: needs.select-checks.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Test release scripts and workflows
+        run: node --test "scripts/__tests__/*.test.mjs"
+
+  quality:
+    name: Typecheck and coverage
+    needs: select-checks
+    if: needs.select-checks.outputs.product == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,6 +72,9 @@ jobs:
         run: yarn test:coverage
 
   studio-e2e:
+    name: Studio end-to-end
+    needs: select-checks
+    if: needs.select-checks.outputs.studio_e2e == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -48,19 +89,23 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build packages
-        run: yarn build
+      - name: Build Core
+        run: yarn workspace @doodle-engine/core build
+
+      - name: Build Toolkit
+        run: yarn workspace @doodle-engine/toolkit build
+
+      - name: Build Studio
+        run: yarn workspace @doodle-engine/studio build
 
       - name: Studio end-to-end
         run: xvfb-run --auto-servernum yarn workspace @doodle-engine/studio test:e2e:run
 
-  studio-platform-tests:
-    name: Studio tests (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  docs:
+    name: Documentation
+    needs: select-checks
+    if: needs.select-checks.outputs.docs == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
@@ -71,23 +116,29 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Install dependencies
-        run: yarn install --immutable
+      - name: Install documentation dependencies
+        run: yarn --cwd docs install --immutable
 
-      - name: Test Studio
-        run: yarn workspace @doodle-engine/studio test
+      - name: Build documentation
+        run: yarn --cwd docs build
 
   verify:
     if: always()
-    needs: [checks, studio-e2e, studio-platform-tests]
+    needs: [select-checks, release-checks, quality, studio-e2e, docs]
     runs-on: ubuntu-latest
     steps:
-      - name: Confirm all CI jobs passed
+      - name: Confirm required checks passed
         env:
-          CHECKS_RESULT: ${{ needs.checks.result }}
-          STUDIO_E2E_RESULT: ${{ needs.studio-e2e.result }}
-          STUDIO_PLATFORM_RESULT: ${{ needs.studio-platform-tests.result }}
+          RESULTS: >-
+            ${{ needs.select-checks.result }}
+            ${{ needs.release-checks.result }}
+            ${{ needs.quality.result }}
+            ${{ needs.studio-e2e.result }}
+            ${{ needs.docs.result }}
         run: |
-          test "$CHECKS_RESULT" = "success"
-          test "$STUDIO_E2E_RESULT" = "success"
-          test "$STUDIO_PLATFORM_RESULT" = "success"
+          for result in $RESULTS; do
+            case "$result" in
+              success|skipped) ;;
+              *) echo "A required check reported $result."; exit 1 ;;
+            esac
+          done

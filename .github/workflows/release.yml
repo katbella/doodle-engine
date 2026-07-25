@@ -1,25 +1,79 @@
-name: Release
+name: Release Doodle
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version change
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: release-doodle
+  cancel-in-progress: false
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  release:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
-      studio_tagged: ${{ steps.studio-release.outputs.studio_tagged }}
+      version: ${{ steps.prepare.outputs.version }}
+      previous_version: ${{ steps.prepare.outputs.previous_version }}
+      release_sha: ${{ steps.commit.outputs.release_sha || steps.prepare.outputs.release_sha }}
+    steps:
+      - name: Require the main branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Release Doodle must be run from main."
+          exit 1
+
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check release credentials
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "The NPM_TOKEN repository secret is missing."
+            exit 1
+          fi
+
+      - name: Prepare shared version
+        id: prepare
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs prepare --bump "${{ inputs.bump }}" --run-id "${{ github.run_id }}"
+
+      - name: Create the version commit
+        id: commit
+        if: steps.prepare.outputs.needs_commit == 'true'
+        run: >-
+          node scripts/release.mjs commit
+          --version "${{ steps.prepare.outputs.version }}"
+          --run-id "${{ github.run_id }}"
+
+  package-npm:
+    needs: prepare
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.release_sha }}
 
       - uses: actions/setup-node@v6
         with:
@@ -31,50 +85,102 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build
-        run: yarn build
+      - name: Build public packages
+        run: yarn build:packages
 
-      - name: Test
-        run: yarn test
+      - name: Pack and check public packages
+        run: node scripts/release.mjs pack --output-dir .release/npm
 
-      - name: Detect an intentional Studio version bump
-        id: studio-version
-        shell: bash
-        run: |
-          before="${{ github.event.before }}"
-          if ! git cat-file -e "${before}:packages/studio/package.json" 2>/dev/null; then
-            current="$(node -p "require('./packages/studio/package.json').version")"
-            echo "version=$current" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          previous="$(git show "${before}:packages/studio/package.json" | node -e "let data=''; process.stdin.on('data', chunk => data += chunk); process.stdin.on('end', () => process.stdout.write(JSON.parse(data).version))")"
-          current="$(node -p "require('./packages/studio/package.json').version")"
-          if [ "$previous" != "$current" ]; then
-            echo "version=$current" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create Release PR or Publish
-        id: changesets
-        uses: changesets/action@v1
+      - uses: actions/upload-artifact@v4
         with:
-          publish: yarn release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create Studio tag and GitHub release
-        id: studio-release
-        if: steps.studio-version.outputs.version != ''
-        run: node scripts/publish.mjs --studio-only
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          STUDIO_RELEASE_VERSION: ${{ steps.studio-version.outputs.version }}
+          name: npm-packages
+          path: .release/npm/*.tgz
+          if-no-files-found: error
+          retention-days: 7
 
   package-studio:
-    needs: release
-    if: needs.release.outputs.studio_tagged != ''
-    uses: ./.github/workflows/package-studio.yml
-    with:
-      studio_version: ${{ needs.release.outputs.studio_tagged }}
-      platform: both
-    secrets: inherit
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            script: package:win
+            extension: exe
+          - platform: mac
+            os: macos-latest
+            script: package:mac
+            extension: dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.release_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Core
+        run: yarn workspace @doodle-engine/core build
+
+      - name: Build Toolkit
+        run: yarn workspace @doodle-engine/toolkit build
+
+      - name: Build Studio installer
+        run: yarn workspace @doodle-engine/studio ${{ matrix.script }}
+
+      - name: Check Studio installer
+        run: node scripts/release.mjs verify-studio --version "${{ needs.prepare.outputs.version }}" --platform "${{ matrix.platform }}" --directory packages/studio/release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: studio-${{ matrix.platform }}
+          path: packages/studio/release/*.${{ matrix.extension }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [prepare, package-npm, package-studio]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.prepare.outputs.release_sha }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: npm-packages
+          path: .release/npm
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: studio-*
+          path: .release/studio
+          merge-multiple: true
+
+      - name: Publish Doodle
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: >-
+          node scripts/release.mjs publish
+          --version "${{ needs.prepare.outputs.version }}"
+          --previous-version "${{ needs.prepare.outputs.previous_version }}"
+          --release-sha "${{ needs.prepare.outputs.release_sha }}"
+          --npm-directory .release/npm
+          --studio-directory .release/studio

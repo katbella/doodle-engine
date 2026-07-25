@@ -1,5 +1,4 @@
-// Packages release independently, so Studio must select from all repository
-// releases instead of relying on GitHub's repository-wide "latest" release.
+// Identify Studio updates by their package tag and ignore unrelated releases.
 
 import type { StudioUpdatePlatform } from '../shared/project';
 
