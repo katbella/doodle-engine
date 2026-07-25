@@ -4,17 +4,22 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import {
+    RELEASE_MANIFEST_PATHS,
     RELEASE_PACKAGES,
     bumpVersion,
     checkNpmLatestVersions,
     compareVersions,
-    decideRelease,
+    decideReleaseVersion,
     latestCompletedStudioVersion,
-    parseReleaseCommit,
+    parseReleaseBranch,
+    parseReleaseTitle,
     parseVersion,
-    releaseCommitMessage,
+    releaseBranch,
+    releaseBumpKind,
+    releaseTitle,
     sharedManifestVersion,
     validatePackedPackage,
+    validateReleasePullRequest,
     writeReleaseVersion,
 } from '../release.mjs';
 import { selectChecks } from '../select-checks.mjs';
@@ -54,87 +59,248 @@ test('parses, compares, and bumps stable versions', () => {
 });
 
 test('starts one new version from the completed release', () => {
-    assert.deepEqual(
-        decideRelease({
+    assert.equal(
+        decideReleaseVersion({
             manifestVersion: '0.2.2',
             completedVersion: '0.2.2',
             bump: 'minor',
         }),
-        {
-            mode: 'create',
-            version: '0.3.0',
-            releaseSha: null,
-        }
+        '0.3.0'
     );
-});
-
-test('resumes the version already committed after a failed release', () => {
-    assert.deepEqual(
-        decideRelease({
-            manifestVersion: '0.2.3',
+    assert.equal(
+        decideReleaseVersion({
+            manifestVersion: '0.2.2',
             completedVersion: '0.2.2',
-            bump: 'major',
-            pendingCommit: 'abc123',
-        }),
-        {
-            mode: 'resume',
-            version: '0.2.3',
-            releaseSha: 'abc123',
-        }
-    );
-});
-
-test('rerunning the same completed workflow does not increment again', () => {
-    assert.deepEqual(
-        decideRelease({
-            manifestVersion: '0.2.3',
-            completedVersion: '0.2.3',
             bump: 'patch',
-            sameRunCommit: 'abc123',
         }),
-        {
-            mode: 'resume',
-            version: '0.2.3',
-            releaseSha: 'abc123',
-        }
+        '0.2.3'
     );
 });
 
-test('rerunning an older workflow cannot start a newer release', () => {
-    assert.deepEqual(
-        decideRelease({
-            manifestVersion: '0.4.0',
-            completedVersion: '0.4.0',
-            bump: 'major',
-            sameRunCommit: 'old123',
-            sameRunVersion: '0.3.0',
-        }),
-        {
-            mode: 'resume',
-            version: '0.3.0',
-            releaseSha: 'old123',
-        }
-    );
-});
-
-test('rejects unexplained manifest and release differences', () => {
+test('refuses to start a release while another one is unfinished', () => {
     assert.throws(
         () =>
-            decideRelease({
+            decideReleaseVersion({
                 manifestVersion: '0.2.3',
                 completedVersion: '0.2.2',
                 bump: 'patch',
             }),
-        /no matching release commit/
+        /ahead of the completed release/
     );
     assert.throws(
         () =>
-            decideRelease({
+            decideReleaseVersion({
                 manifestVersion: '0.2.1',
                 completedVersion: '0.2.2',
                 bump: 'patch',
             }),
         /behind/
+    );
+});
+
+test('names the release branch and pull request after the version', () => {
+    assert.equal(releaseBranch('0.3.0'), 'release/doodle-0.3.0');
+    assert.equal(releaseTitle('0.3.0'), 'Release Doodle 0.3.0');
+    assert.equal(parseReleaseBranch('release/doodle-0.3.0'), '0.3.0');
+    assert.equal(parseReleaseTitle('Release Doodle 0.3.0'), '0.3.0');
+    assert.equal(parseReleaseBranch('feature/release-notes'), null);
+    assert.equal(parseReleaseBranch('release/doodle-latest'), null);
+    assert.equal(parseReleaseTitle('chore: Release Doodle 0.3.0'), null);
+    assert.equal(parseReleaseTitle('Release Doodle 0.3.0-beta.1'), null);
+    assert.equal(parseReleaseBranch(''), null);
+    assert.equal(parseReleaseBranch(undefined), null);
+});
+
+test('recognizes patch, minor, and major increments only', () => {
+    assert.equal(releaseBumpKind('0.2.2', '0.2.3'), 'patch');
+    assert.equal(releaseBumpKind('0.2.2', '0.3.0'), 'minor');
+    assert.equal(releaseBumpKind('0.2.2', '1.0.0'), 'major');
+    assert.equal(releaseBumpKind('0.2.2', '0.2.5'), null);
+    assert.equal(releaseBumpKind('0.2.2', '0.4.0'), null);
+    assert.equal(releaseBumpKind('0.2.2', '1.0.1'), null);
+    assert.equal(releaseBumpKind('0.2.2', '0.2.2'), null);
+    assert.equal(releaseBumpKind('0.2.2', '0.2.1'), null);
+});
+
+function releaseManifests({
+    previousVersion = '0.2.9',
+    version = '0.3.0',
+    change = () => ({}),
+} = {}) {
+    return RELEASE_PACKAGES.map((pkg, index) => {
+        const before = {
+            name: pkg.name,
+            version: previousVersion,
+            scripts: { build: 'vite build' },
+            dependencies: { '@doodle-engine/core': 'workspace:*' },
+        };
+        return {
+            name: pkg.name,
+            before,
+            after: {
+                ...before,
+                version,
+                ...change(pkg, index),
+            },
+        };
+    });
+}
+
+function releasePullRequest(overrides = {}) {
+    return {
+        merged: true,
+        baseRef: 'main',
+        branch: 'release/doodle-0.3.0',
+        title: 'Release Doodle 0.3.0',
+        changedFiles: [...RELEASE_MANIFEST_PATHS],
+        manifests: releaseManifests(),
+        ...overrides,
+    };
+}
+
+test('accepts a merged release pull request that only changes the version', () => {
+    assert.deepEqual(validateReleasePullRequest(releasePullRequest()), {
+        version: '0.3.0',
+        previousVersion: '0.2.9',
+    });
+});
+
+test('only a merged release pull request into main can publish', () => {
+    assert.throws(
+        () => validateReleasePullRequest(releasePullRequest({ merged: false })),
+        /Only a merged release pull request/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({ baseRef: 'develop' })
+            ),
+        /expected "main"/
+    );
+});
+
+test('an ordinary pull request is never treated as a release', () => {
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({ branch: 'feature/dialogue-notes' })
+            ),
+        /not a Doodle release branch/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({ title: 'chore: bump versions' })
+            ),
+        /does not match Release Doodle 0\.3\.0/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    branch: 'release/doodle-0.4.0',
+                    title: 'Release Doodle 0.3.0',
+                })
+            ),
+        /does not match Release Doodle 0\.4\.0/
+    );
+});
+
+test('a release pull request may change only the five package manifests', () => {
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    changedFiles: [
+                        ...RELEASE_MANIFEST_PATHS,
+                        'packages/core/src/index.ts',
+                    ],
+                })
+            ),
+        /only change the five package manifests/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    changedFiles: RELEASE_MANIFEST_PATHS.slice(1),
+                })
+            ),
+        /only change the five package manifests/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({ changedFiles: ['yarn.lock'] })
+            ),
+        /only change the five package manifests/
+    );
+});
+
+test('rejects dependency, script, and metadata changes inside a manifest', () => {
+    const changes = [
+        () => ({ dependencies: { '@doodle-engine/core': '^9.9.9' } }),
+        () => ({ scripts: { build: 'rm -rf /' } }),
+        () => ({ description: 'a new description' }),
+        (pkg, index) => (index === 0 ? { private: true } : {}),
+    ];
+    for (const change of changes) {
+        assert.throws(
+            () =>
+                validateReleasePullRequest(
+                    releasePullRequest({
+                        manifests: releaseManifests({ change }),
+                    })
+                ),
+            /changed more than its version field/
+        );
+    }
+});
+
+test('every package manifest must reach the same release version', () => {
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    manifests: releaseManifests({
+                        change: (pkg, index) =>
+                            index === 2 ? { version: '0.2.9' } : {},
+                    }),
+                })
+            ),
+        /toolkit is at 0\.2\.9, expected 0\.3\.0/
+    );
+    const mixed = releaseManifests();
+    mixed[1].before = { ...mixed[1].before, version: '0.2.8' };
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({ manifests: mixed })
+            ),
+        /did not share one version/
+    );
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    manifests: releaseManifests().slice(1),
+                })
+            ),
+        /Expected 5 package manifests/
+    );
+});
+
+test('the release version must be one patch, minor, or major step', () => {
+    assert.throws(
+        () =>
+            validateReleasePullRequest(
+                releasePullRequest({
+                    branch: 'release/doodle-0.9.0',
+                    title: 'Release Doodle 0.9.0',
+                    manifests: releaseManifests({ version: '0.9.0' }),
+                })
+            ),
+        /is not a patch, minor, or major increment/
     );
 });
 
@@ -163,17 +329,6 @@ test('reports package versions that are not in lockstep', async (context) => {
     ]);
     context.after(() => rm(root, { recursive: true, force: true }));
     assert.throws(() => sharedManifestVersion(root), /toolkit: 0.2.1/);
-});
-
-test('creates and reads the automated release commit message', () => {
-    const message = releaseCommitMessage('0.3.0', '12345');
-    assert.equal(message, 'Release Doodle 0.3.0\n\nDoodle-Release-Run: 12345');
-    assert.deepEqual(parseReleaseCommit(message), {
-        version: '0.3.0',
-        runId: '12345',
-    });
-    assert.equal(parseReleaseCommit('Release Doodle 0.3.0'), null);
-    assert.equal(parseReleaseCommit('feat: not a release'), null);
 });
 
 test('finds the latest completed Studio release', () => {
@@ -328,4 +483,35 @@ test('selects the checks a change needs', () => {
             docs: false,
         }
     );
+});
+
+test('a release pull request runs the whole Ubuntu suite without docs', () => {
+    assert.deepEqual(
+        selectChecks(RELEASE_MANIFEST_PATHS, {
+            branch: 'release/doodle-0.3.0',
+        }),
+        {
+            product: true,
+            studio_e2e: true,
+            release: true,
+            docs: false,
+        }
+    );
+    assert.deepEqual(
+        selectChecks(['docs/src/content/docs/index.mdx'], {
+            branch: 'release/doodle-0.3.0',
+        }),
+        {
+            product: true,
+            studio_e2e: true,
+            release: true,
+            docs: false,
+        }
+    );
+    assert.deepEqual(selectChecks(['README.md'], { branch: 'feature/notes' }), {
+        product: false,
+        studio_e2e: false,
+        release: false,
+        docs: false,
+    });
 });

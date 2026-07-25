@@ -2,13 +2,23 @@ import { spawnSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseReleaseBranch } from './release.mjs';
 
 const SHARED_BUILD_FILE =
     /^(package\.json|yarn\.lock|\.yarnrc\.yml|tsconfig[^/]*\.json)$/;
 const STUDIO_E2E_PATH = /^packages\/(studio|core|toolkit)\//;
 const PACKAGE_MANIFEST = /^packages\/[^/]+\/package\.json$/;
 
-export function selectChecks(paths) {
+export function selectChecks(paths, { branch = '' } = {}) {
+    if (parseReleaseBranch(branch)) {
+        return {
+            product: true,
+            studio_e2e: true,
+            release: true,
+            docs: false,
+        };
+    }
+
     const changed = paths
         .map((path) => path.trim().replaceAll('\\', '/'))
         .filter(Boolean);
@@ -41,10 +51,12 @@ function changedFiles(baseSha, headSha) {
 }
 
 function main() {
-    const { BASE_SHA, HEAD_SHA } = process.env;
+    const { BASE_SHA, HEAD_SHA, HEAD_REF } = process.env;
     const checks =
         BASE_SHA && HEAD_SHA
-            ? selectChecks(changedFiles(BASE_SHA, HEAD_SHA))
+            ? selectChecks(changedFiles(BASE_SHA, HEAD_SHA), {
+                  branch: HEAD_REF ?? '',
+              })
             : { product: true, studio_e2e: true, release: true, docs: true };
 
     for (const [name, value] of Object.entries(checks)) {

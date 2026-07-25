@@ -1,0 +1,174 @@
+name: Publish Doodle
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      - packages/*/package.json
+
+concurrency:
+  group: publish-doodle
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate the merged release
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/doodle-')
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      previous_version: ${{ steps.validate.outputs.previous_version }}
+      release_sha: ${{ steps.validate.outputs.release_sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check the merged release pull request
+        id: validate
+        env:
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: >-
+          node scripts/release.mjs validate-pull-request
+          --merged "$PR_MERGED"
+          --base-ref "$PR_BASE_REF"
+          --branch "$PR_HEAD_REF"
+          --title "$PR_TITLE"
+          --merge-sha "$PR_MERGE_SHA"
+
+  package-npm:
+    name: Build the npm packages
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.validate.outputs.release_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build public packages
+        run: yarn build:packages
+
+      - name: Pack and check public packages
+        run: node scripts/release.mjs pack --output-dir .release/npm
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: .release/npm/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  package-studio:
+    name: Build Doodle Studio (${{ matrix.platform }})
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            script: package:win
+            extension: exe
+          - platform: mac
+            os: macos-latest
+            script: package:mac
+            extension: dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.validate.outputs.release_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Core
+        run: yarn workspace @doodle-engine/core build
+
+      - name: Build Toolkit
+        run: yarn workspace @doodle-engine/toolkit build
+
+      - name: Build Studio installer
+        run: yarn workspace @doodle-engine/studio ${{ matrix.script }}
+
+      - name: Check Studio installer
+        run: node scripts/release.mjs verify-studio --version "${{ needs.validate.outputs.version }}" --platform "${{ matrix.platform }}" --directory packages/studio/release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: studio-${{ matrix.platform }}
+          path: packages/studio/release/*.${{ matrix.extension }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish Doodle
+    needs: [validate, package-npm, package-studio]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.validate.outputs.release_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: npm-packages
+          path: .release/npm
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: studio-*
+          path: .release/studio
+          merge-multiple: true
+
+      - name: Publish Doodle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: >-
+          node scripts/release.mjs publish
+          --version "${{ needs.validate.outputs.version }}"
+          --previous-version "${{ needs.validate.outputs.previous_version }}"
+          --release-sha "${{ needs.validate.outputs.release_sha }}"
+          --npm-directory .release/npm
+          --studio-directory .release/studio
