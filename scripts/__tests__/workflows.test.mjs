@@ -65,6 +65,23 @@ test('PR CI runs coverage and E2E once without platform jobs', async () => {
     assert.match(workflow, /\n  verify:/);
 });
 
+test('workflows enable Corepack before running Yarn', async () => {
+    for (const path of [
+        '.github/workflows/ci.yml',
+        '.github/workflows/release.yml',
+        '.github/workflows/studio-platform-check.yml',
+    ]) {
+        const workflow = await repositoryFile(path);
+        assert.doesNotMatch(workflow, /cache:\s*yarn/);
+        for (const command of workflow.matchAll(/run: yarn /g)) {
+            assert.ok(
+                workflow.indexOf('run: corepack enable') < command.index,
+                `${path} runs Yarn before enabling Corepack`
+            );
+        }
+    }
+});
+
 test('verify waits for every other CI job', async () => {
     const workflow = await repositoryFile('.github/workflows/ci.yml');
     const jobs = [
