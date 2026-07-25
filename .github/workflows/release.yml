@@ -19,14 +19,12 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  prepare:
+  release-pull-request:
+    name: Create the release pull request
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.prepare.outputs.version }}
-      previous_version: ${{ steps.prepare.outputs.previous_version }}
-      release_sha: ${{ steps.commit.outputs.release_sha || steps.prepare.outputs.release_sha }}
     steps:
       - name: Require the main branch
         if: github.ref != 'refs/heads/main'
@@ -38,7 +36,6 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN || github.token }}
 
       - uses: actions/setup-node@v6
         with:
@@ -53,134 +50,16 @@ jobs:
             exit 1
           fi
 
-      - name: Prepare shared version
+      - name: Prepare the next version
         id: prepare
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/release.mjs prepare --bump "${{ inputs.bump }}" --run-id "${{ github.run_id }}"
+        run: node scripts/release.mjs prepare --bump "${{ inputs.bump }}"
 
-      - name: Create the version commit
-        id: commit
-        if: steps.prepare.outputs.needs_commit == 'true'
-        run: >-
-          node scripts/release.mjs commit
-          --version "${{ steps.prepare.outputs.version }}"
-          --run-id "${{ github.run_id }}"
-
-  package-npm:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.prepare.outputs.release_sha }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Build public packages
-        run: yarn build:packages
-
-      - name: Pack and check public packages
-        run: node scripts/release.mjs pack --output-dir .release/npm
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: npm-packages
-          path: .release/npm/*.tgz
-          if-no-files-found: error
-          retention-days: 7
-
-  package-studio:
-    needs: prepare
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows
-            os: windows-latest
-            script: package:win
-            extension: exe
-          - platform: mac
-            os: macos-latest
-            script: package:mac
-            extension: dmg
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.prepare.outputs.release_sha }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Build Core
-        run: yarn workspace @doodle-engine/core build
-
-      - name: Build Toolkit
-        run: yarn workspace @doodle-engine/toolkit build
-
-      - name: Build Studio installer
-        run: yarn workspace @doodle-engine/studio ${{ matrix.script }}
-
-      - name: Check Studio installer
-        run: node scripts/release.mjs verify-studio --version "${{ needs.prepare.outputs.version }}" --platform "${{ matrix.platform }}" --directory packages/studio/release
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: studio-${{ matrix.platform }}
-          path: packages/studio/release/*.${{ matrix.extension }}
-          if-no-files-found: error
-          retention-days: 7
-
-  publish:
-    needs: [prepare, package-npm, package-studio]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.prepare.outputs.release_sha }}
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN || github.token }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org
-
-      - uses: actions/download-artifact@v5
-        with:
-          name: npm-packages
-          path: .release/npm
-
-      - uses: actions/download-artifact@v5
-        with:
-          pattern: studio-*
-          path: .release/studio
-          merge-multiple: true
-
-      - name: Publish Doodle
+      - name: Open the release pull request
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: >-
-          node scripts/release.mjs publish
-          --version "${{ needs.prepare.outputs.version }}"
-          --previous-version "${{ needs.prepare.outputs.previous_version }}"
-          --release-sha "${{ needs.prepare.outputs.release_sha }}"
-          --npm-directory .release/npm
-          --studio-directory .release/studio
+          node scripts/release.mjs open-pull-request
+          --version "${{ steps.prepare.outputs.version }}"
+          --previous-version "${{ steps.prepare.outputs.previous_version }}"
