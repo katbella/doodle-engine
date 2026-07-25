@@ -42,7 +42,7 @@ export const RELEASE_PACKAGES = [
 
 const STUDIO_PACKAGE = RELEASE_PACKAGES.at(-1);
 const STUDIO_TAG_PREFIX = `${STUDIO_PACKAGE.name}@`;
-const RELEASE_SUBJECT_PREFIX = 'Release Doodle ';
+const RELEASE_SUBJECT_PREFIX = 'Release Doodle Engine ';
 const RELEASE_BRANCH_PREFIX = 'release/doodle-';
 const RELEASE_BASE_BRANCH = 'main';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -152,7 +152,9 @@ export function sharedManifestVersion(root = ROOT) {
         const details = manifests
             .map(({ name, manifest }) => `${name}: ${manifest.version}`)
             .join('\n');
-        throw new Error(`Doodle package versions do not match:\n${details}`);
+        throw new Error(
+            `Doodle Engine package versions do not match:\n${details}`
+        );
     }
     const version = manifests[0].manifest.version;
     parseVersion(version);
@@ -254,7 +256,7 @@ export function validateReleasePullRequest({
     const version = parseReleaseBranch(branch);
     if (!version) {
         throw new Error(
-            `"${branch}" is not a Doodle release branch such as ${RELEASE_BRANCH_PREFIX}0.3.0.`
+            `"${branch}" is not a Doodle Engine release branch such as ${RELEASE_BRANCH_PREFIX}0.3.0.`
         );
     }
 
@@ -575,7 +577,7 @@ function reuseReleasePullRequest(branch, version) {
 
 function releasePullRequestBody(version, previousVersion) {
     return [
-        `This pull request raises every Doodle package from ${previousVersion} to ${version}.`,
+        `This pull request raises every Doodle Engine package from ${previousVersion} to ${version}.`,
         '',
         'Merging it publishes the release:',
         '',
@@ -583,7 +585,7 @@ function releasePullRequestBody(version, previousVersion) {
         '- the Windows and macOS Doodle Studio installers',
         '- the five package tags and the GitHub release',
         '',
-        'It was created by the Release Doodle workflow. Only the `version` field',
+        'It was created by the Release Doodle Engine workflow. Only the `version` field',
         'of the five package manifests may change here.',
     ].join('\n');
 }
@@ -971,7 +973,7 @@ function createReleaseTags(version, releaseSha) {
 
 function releaseSummary(version) {
     return [
-        `All Doodle packages in this release use version ${version}:`,
+        `All Doodle Engine packages in this release use version ${version}:`,
         '',
         '- `@doodle-engine/core`',
         '- `@doodle-engine/react`',
@@ -998,7 +1000,7 @@ function publishGitHubRelease(version, previousVersion, studioDirectory) {
             '--draft',
             '--verify-tag',
             '--title',
-            `Doodle ${version}`,
+            `Doodle Engine ${version}`,
             '--notes',
             releaseSummary(version),
             '--generate-notes',

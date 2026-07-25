@@ -1,4 +1,4 @@
-name: Publish Doodle
+name: Publish Doodle Engine
 
 on:
   pull_request:
@@ -134,7 +134,7 @@ jobs:
           retention-days: 7
 
   publish:
-    name: Publish Doodle
+    name: Publish Doodle Engine
     needs: [validate, package-npm, package-studio]
     runs-on: ubuntu-latest
     permissions:
@@ -161,7 +161,7 @@ jobs:
           path: .release/studio
           merge-multiple: true
 
-      - name: Publish Doodle
+      - name: Publish Doodle Engine
         env:
           GH_TOKEN: ${{ github.token }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
