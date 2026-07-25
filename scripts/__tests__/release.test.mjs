@@ -100,13 +100,13 @@ test('refuses to start a release while another one is unfinished', () => {
 
 test('names the release branch and pull request after the version', () => {
     assert.equal(releaseBranch('0.3.0'), 'release/doodle-0.3.0');
-    assert.equal(releaseTitle('0.3.0'), 'Release Doodle 0.3.0');
+    assert.equal(releaseTitle('0.3.0'), 'Release Doodle Engine 0.3.0');
     assert.equal(parseReleaseBranch('release/doodle-0.3.0'), '0.3.0');
-    assert.equal(parseReleaseTitle('Release Doodle 0.3.0'), '0.3.0');
+    assert.equal(parseReleaseTitle('Release Doodle Engine 0.3.0'), '0.3.0');
     assert.equal(parseReleaseBranch('feature/release-notes'), null);
     assert.equal(parseReleaseBranch('release/doodle-latest'), null);
-    assert.equal(parseReleaseTitle('chore: Release Doodle 0.3.0'), null);
-    assert.equal(parseReleaseTitle('Release Doodle 0.3.0-beta.1'), null);
+    assert.equal(parseReleaseTitle('chore: Release Doodle Engine 0.3.0'), null);
+    assert.equal(parseReleaseTitle('Release Doodle Engine 0.3.0-beta.1'), null);
     assert.equal(parseReleaseBranch(''), null);
     assert.equal(parseReleaseBranch(undefined), null);
 });
@@ -151,7 +151,7 @@ function releasePullRequest(overrides = {}) {
         merged: true,
         baseRef: 'main',
         branch: 'release/doodle-0.3.0',
-        title: 'Release Doodle 0.3.0',
+        title: 'Release Doodle Engine 0.3.0',
         changedFiles: [...RELEASE_MANIFEST_PATHS],
         manifests: releaseManifests(),
         ...overrides,
@@ -185,24 +185,24 @@ test('an ordinary pull request is never treated as a release', () => {
             validateReleasePullRequest(
                 releasePullRequest({ branch: 'feature/dialogue-notes' })
             ),
-        /not a Doodle release branch/
+        /not a Doodle Engine release branch/
     );
     assert.throws(
         () =>
             validateReleasePullRequest(
                 releasePullRequest({ title: 'chore: bump versions' })
             ),
-        /does not match Release Doodle 0\.3\.0/
+        /does not match Release Doodle Engine 0\.3\.0/
     );
     assert.throws(
         () =>
             validateReleasePullRequest(
                 releasePullRequest({
                     branch: 'release/doodle-0.4.0',
-                    title: 'Release Doodle 0.3.0',
+                    title: 'Release Doodle Engine 0.3.0',
                 })
             ),
-        /does not match Release Doodle 0\.4\.0/
+        /does not match Release Doodle Engine 0\.4\.0/
     );
 });
 
@@ -296,7 +296,7 @@ test('the release version must be one patch, minor, or major step', () => {
             validateReleasePullRequest(
                 releasePullRequest({
                     branch: 'release/doodle-0.9.0',
-                    title: 'Release Doodle 0.9.0',
+                    title: 'Release Doodle Engine 0.9.0',
                     manifests: releaseManifests({ version: '0.9.0' }),
                 })
             ),

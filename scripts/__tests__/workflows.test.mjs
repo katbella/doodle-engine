@@ -27,6 +27,7 @@ test('keeps all five checked-in package versions in lockstep', async () => {
 
 test('release is manual-only and opens one release pull request', async () => {
     const workflow = await repositoryFile('.github/workflows/release.yml');
+    assert.match(workflow, /^name: Release Doodle Engine$/m);
     assert.match(workflow, /workflow_dispatch:/);
     assert.doesNotMatch(workflow, /^\s+push:/m);
     assert.match(workflow, /pull-requests:\s*write/);
@@ -40,6 +41,18 @@ test('release is manual-only and opens one release pull request', async () => {
         1
     );
     assert.doesNotMatch(workflow, /changesets\/action/);
+});
+
+test('public release names use the Doodle Engine family name', async () => {
+    const publishWorkflow = await repositoryFile(
+        '.github/workflows/publish.yml'
+    );
+    const script = await repositoryFile('scripts/release.mjs');
+
+    assert.match(publishWorkflow, /^name: Publish Doodle Engine$/m);
+    assert.match(script, /RELEASE_SUBJECT_PREFIX = 'Release Doodle Engine '/);
+    assert.match(script, /`Doodle Engine \$\{version\}`/);
+    assert.match(script, /All Doodle Engine packages in this release/);
 });
 
 test('the release workflow never publishes or pushes to main', async () => {
