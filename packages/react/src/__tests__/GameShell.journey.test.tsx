@@ -245,6 +245,28 @@ describe('GameShell player journeys', () => {
         expect(screen.getByText('Sin notas')).toBeTruthy();
     });
 
+    it('opens, dismisses, and restores focus for every bottom-bar panel', async () => {
+        const user = await startGame();
+        const panels = [
+            'Inventory',
+            'Journal',
+            'Notes',
+            'Map',
+            'Save/Load',
+            'Settings',
+        ];
+
+        for (const name of panels) {
+            const trigger = screen.getByRole('button', { name });
+            await user.click(trigger);
+            expect(screen.getByRole('dialog', { name })).toBeTruthy();
+
+            await user.keyboard('{Escape}');
+            expect(screen.queryByRole('dialog', { name })).toBeNull();
+            expect(trigger).toBe(document.activeElement);
+        }
+    });
+
     it('supports the inventory, notes, and map-travel journey through the composed UI', async () => {
         const user = await startGame();
 

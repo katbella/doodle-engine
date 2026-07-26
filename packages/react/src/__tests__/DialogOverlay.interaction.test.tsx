@@ -32,6 +32,38 @@ function Harness({ onDismiss = () => {} }: { onDismiss?: () => void }) {
     );
 }
 
+function NestedHarness() {
+    const [parentOpen, setParentOpen] = useState(false);
+    const [childOpen, setChildOpen] = useState(false);
+    return (
+        <>
+            <button onClick={() => setParentOpen(true)}>Open parent</button>
+            {parentOpen && (
+                <DialogOverlay
+                    overlayClassName="parent-overlay"
+                    className="parent-dialog"
+                    ariaLabel="Parent panel"
+                    onDismiss={() => setParentOpen(false)}
+                >
+                    <button onClick={() => setChildOpen(true)}>
+                        Open child
+                    </button>
+                    {childOpen && (
+                        <DialogOverlay
+                            overlayClassName="child-overlay"
+                            className="child-dialog"
+                            ariaLabel="Child panel"
+                            onDismiss={() => setChildOpen(false)}
+                        >
+                            <button>Child action</button>
+                        </DialogOverlay>
+                    )}
+                </DialogOverlay>
+            )}
+        </>
+    );
+}
+
 describe('DialogOverlay', () => {
     it('names the dialog, traps Tab, closes on Escape, and restores focus', () => {
         const onDismiss = vi.fn();
@@ -71,6 +103,29 @@ describe('DialogOverlay', () => {
         expect(onDismiss).not.toHaveBeenCalled();
         fireEvent.click(document.querySelector('.test-overlay')!);
         expect(onDismiss).toHaveBeenCalledOnce();
+    });
+
+    it('dismisses only the topmost nested dialog on Escape', () => {
+        render(<NestedHarness />);
+        fireEvent.click(screen.getByRole('button', { name: 'Open parent' }));
+        const childTrigger = screen.getByRole('button', {
+            name: 'Open child',
+        });
+        fireEvent.click(childTrigger);
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(
+            screen.queryByRole('dialog', { name: 'Child panel' })
+        ).toBeNull();
+        expect(
+            screen.getByRole('dialog', { name: 'Parent panel' })
+        ).toBeTruthy();
+        expect(childTrigger).toBe(document.activeElement);
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(
+            screen.queryByRole('dialog', { name: 'Parent panel' })
+        ).toBeNull();
     });
 });
 

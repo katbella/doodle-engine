@@ -11,11 +11,11 @@ After running `npm install` (or `yarn`/`pnpm`) in your Doodle Engine project:
 1. Open VS Code
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Extensions: Install from VSIX...**
-4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix` in your project
+4. Navigate to `node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax.vsix` in your project
 
 Then reload VS Code. The extension activates automatically for `.dlg` files.
 
-> **Note:** The `.vsix` file is committed to the repository as a build artifact. It only needs to be rebuilt when the grammar changes (`npx @vscode/vsce package --no-dependencies` in this directory).
+> **Note:** The `.vsix` file is committed to the repository as a build artifact. Run `yarn sync:bundled-assets` from the repository root after changing the extension or Studio icon.
 
 ## What It Highlights
 

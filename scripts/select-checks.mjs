@@ -8,6 +8,8 @@ const SHARED_BUILD_FILE =
     /^(package\.json|yarn\.lock|\.yarnrc\.yml|tsconfig[^/]*\.json)$/;
 const STUDIO_E2E_PATH = /^packages\/(studio|core|toolkit)\//;
 const PACKAGE_MANIFEST = /^packages\/[^/]+\/package\.json$/;
+const BUNDLED_ASSET_PATH =
+    /^(extensions\/vscode-dlg\/|packages\/cli\/extensions\/|packages\/studio\/(build|resources)\/icon\.png$)/;
 
 export function selectChecks(paths, { branch = '' } = {}) {
     if (parseReleaseBranch(branch)) {
@@ -32,7 +34,8 @@ export function selectChecks(paths, { branch = '' } = {}) {
             (path) =>
                 path.startsWith('.github/workflows/') ||
                 path.startsWith('scripts/') ||
-                PACKAGE_MANIFEST.test(path)
+                PACKAGE_MANIFEST.test(path) ||
+                BUNDLED_ASSET_PATH.test(path)
         ),
         docs: changed.some((path) => path.startsWith('docs/')),
     };

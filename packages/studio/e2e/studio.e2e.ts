@@ -39,6 +39,25 @@ async function quitApp(app: ElectronApplication): Promise<void> {
     await exited;
 }
 
+async function launchStudio(
+    profilePath: string,
+    launchEnv: NodeJS.ProcessEnv
+): Promise<ElectronApplication> {
+    return electron.launch({
+        args: [
+            join(studioDir, 'out/main/index.js'),
+            `--user-data-dir=${profilePath}`,
+            '--disable-gpu',
+            '--no-sandbox',
+        ],
+        cwd: studioDir,
+        env: {
+            ...launchEnv,
+            ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
+        },
+    });
+}
+
 async function setStudioTheme(
     app: ElectronApplication,
     page: Page,
@@ -276,22 +295,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
     const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...launchEnv } =
         process.env;
     const app = await test.step('launch Studio', () =>
-        electron.launch({
-            // Keep the test out of the user's real Studio profile. The app and
-            // fixture are local-only, so disable Chromium's nested sandbox and
-            // hardware GPU path for reliable child-process startup in CI.
-            args: [
-                join(studioDir, 'out/main/index.js'),
-                `--user-data-dir=${profileDir}`,
-                '--disable-gpu',
-                '--no-sandbox',
-            ],
-            cwd: studioDir,
-            env: {
-                ...launchEnv,
-                ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
-            },
-        }));
+        launchStudio(profileDir, launchEnv));
     let appClosed = false;
 
     try {
@@ -1458,19 +1462,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         await test.step('show a long recent path without clipping under remove', async () => {
             await quitApp(app);
             appClosed = true;
-            const reopened = await electron.launch({
-                args: [
-                    join(studioDir, 'out/main/index.js'),
-                    `--user-data-dir=${profileDir}`,
-                    '--disable-gpu',
-                    '--no-sandbox',
-                ],
-                cwd: studioDir,
-                env: {
-                    ...launchEnv,
-                    ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
-                },
-            });
+            const reopened = await launchStudio(profileDir, launchEnv);
             try {
                 const welcome = await reopened.firstWindow();
                 const recentItem = welcome.locator('.recent__item').first();

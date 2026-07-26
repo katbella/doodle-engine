@@ -883,8 +883,7 @@
 .dlg__add:hover {
     background: var(--surface-hover);
 }
-/* After .dlg__add so the danger color wins the same-specificity tie. */
-.node-editor__delete {
+.dlg__add.node-editor__delete {
     margin-left: auto;
     color: var(--danger);
 }
@@ -1494,7 +1493,7 @@
     flex-direction: column;
     gap: var(--space-1);
 }
-.field--inline {
+.field.field--inline {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -3166,8 +3165,6 @@ a.build__dest:hover {
     margin-top: var(--space-2);
 }
 
-/* `.field` itself is defined once, with the form styles — a duplicate here
-   would override `.field--inline`'s row layout by source order. */
 .modal .field__label {
     font-size: var(--text-xs);
     color: var(--text-dim);

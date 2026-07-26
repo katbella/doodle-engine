@@ -479,9 +479,13 @@ test('selects the checks a change needs', () => {
         {
             product: false,
             studio_e2e: false,
-            release: false,
+            release: true,
             docs: false,
         }
+    );
+    assert.equal(
+        selectChecks(['packages/studio/resources/icon.png']).release,
+        true
     );
 });
 

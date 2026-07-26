@@ -190,22 +190,6 @@
     animation: doodle-fade-in var(--doodle-transition-slow) ease;
 }
 
-.splash-title {
-    font-size: var(--doodle-font-size-2xl);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    margin: 0;
-    animation: doodle-fade-in var(--doodle-transition-slow) ease;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.splash-loading {
-    font-size: var(--doodle-font-size-sm);
-    color: var(--doodle-text-secondary);
-    margin-top: var(--doodle-spacing-lg);
-    opacity: 0.6;
-}
-
 /* ── Title Screen ────────────────────────────────────────────────── */
 
 .title-screen {
@@ -364,8 +348,7 @@
     }
 
     .splash-screen,
-    .splash-logo,
-    .splash-title {
+    .splash-logo {
         animation: none;
     }
 }

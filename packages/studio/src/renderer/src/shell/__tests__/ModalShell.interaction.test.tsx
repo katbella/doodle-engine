@@ -28,6 +28,34 @@ function Harness({ onDismiss = () => {} }: { onDismiss?: () => void }) {
     );
 }
 
+function NestedHarness() {
+    const [parentOpen, setParentOpen] = useState(false);
+    const [childOpen, setChildOpen] = useState(false);
+    return (
+        <>
+            <button onClick={() => setParentOpen(true)}>Open parent</button>
+            {parentOpen && (
+                <ModalShell
+                    title="Parent modal"
+                    onDismiss={() => setParentOpen(false)}
+                >
+                    <button onClick={() => setChildOpen(true)}>
+                        Open child
+                    </button>
+                    {childOpen && (
+                        <ModalShell
+                            title="Child modal"
+                            onDismiss={() => setChildOpen(false)}
+                        >
+                            <button>Child action</button>
+                        </ModalShell>
+                    )}
+                </ModalShell>
+            )}
+        </>
+    );
+}
+
 describe('ModalShell', () => {
     it('provides an accessible name and restores focus after Escape', () => {
         const onDismiss = vi.fn();
@@ -78,5 +106,28 @@ describe('ModalShell', () => {
 
         fireEvent.click(document.querySelector('.modal-backdrop')!);
         expect(onDismiss).toHaveBeenCalledOnce();
+    });
+
+    it('dismisses only the topmost nested modal on Escape', () => {
+        render(<NestedHarness />);
+        fireEvent.click(screen.getByRole('button', { name: 'Open parent' }));
+        const childTrigger = screen.getByRole('button', {
+            name: 'Open child',
+        });
+        fireEvent.click(childTrigger);
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(
+            screen.queryByRole('dialog', { name: 'Child modal' })
+        ).toBeNull();
+        expect(
+            screen.getByRole('dialog', { name: 'Parent modal' })
+        ).toBeTruthy();
+        expect(childTrigger).toBe(document.activeElement);
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(
+            screen.queryByRole('dialog', { name: 'Parent modal' })
+        ).toBeNull();
     });
 });
