@@ -10,7 +10,7 @@ export default defineConfig({
             formats: ['es', 'cjs'],
             fileName: 'react',
         },
-        rollupOptions: {
+        rolldownOptions: {
             external: ['react', 'react-dom', '@doodle-engine/core'],
         },
     },
