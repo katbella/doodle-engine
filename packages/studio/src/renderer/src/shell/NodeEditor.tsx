@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, X, Plus, Pencil, Play } from '../lib/icons';
 import {
     conditionDescriptor,
@@ -19,8 +19,7 @@ import { ConditionEffectBuilder } from './ConditionEffectBuilder';
 import { AssetField } from './AssetField';
 import { LocalizedTextField } from './LocalizedTextField';
 import { ConfirmModal } from './ConfirmModal';
-import { OverlayPortal } from './OverlayPortal';
-import { useModalDismiss } from '../lib/useModalDismiss';
+import { ModalShell } from './ModalShell';
 import {
     EMPTY_NAME_CATALOG,
     catalogFor,
@@ -118,18 +117,14 @@ function BuilderModal({
     children: React.ReactNode;
     onClose: () => void;
 }) {
-    useModalDismiss(onClose);
     return (
-        <OverlayPortal>
-            <div className="modal-backdrop" onClick={onClose}>
-                <div
-                    className="builder-modal"
-                    onClick={(event) => event.stopPropagation()}
-                >
-                    {children}
-                </div>
-            </div>
-        </OverlayPortal>
+        <ModalShell
+            ariaLabel="Build condition or effect"
+            onDismiss={onClose}
+            className="builder-modal"
+        >
+            {children}
+        </ModalShell>
     );
 }
 

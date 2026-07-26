@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import type { SnapshotItem } from '@doodle-engine/core';
 import { AssetImage } from './AssetImage';
+import { DialogOverlay } from './DialogOverlay';
+import { uiText } from '../uiText';
 
 export interface InventoryProps {
     items: SnapshotItem[];
@@ -18,15 +20,14 @@ export function Inventory({ items, ui, className = '' }: InventoryProps) {
 
     return (
         <div className={`inventory ${className}`}>
-            <h2>{ui?.['ui.inventory'] ?? 'Inventory'}</h2>
+            <h2>{uiText(ui, 'ui.inventory')}</h2>
             {items.length === 0 ? (
-                <p className="inventory-empty">
-                    {ui?.['ui.no_items'] ?? 'No items'}
-                </p>
+                <p className="inventory-empty">{uiText(ui, 'ui.no_items')}</p>
             ) : (
                 <div className="inventory-grid">
                     {items.map((item) => (
-                        <div
+                        <button
+                            type="button"
                             key={item.id}
                             className="inventory-item"
                             onClick={() => setInspecting(item)}
@@ -38,40 +39,37 @@ export function Inventory({ items, ui, className = '' }: InventoryProps) {
                                     className="item-icon"
                                 />
                             )}
-                            <div className="item-name">{item.name}</div>
-                        </div>
+                            <span className="item-name">{item.name}</span>
+                        </button>
                     ))}
                 </div>
             )}
 
             {inspecting && (
-                <div
-                    className="item-modal-overlay"
-                    onClick={() => setInspecting(null)}
+                <DialogOverlay
+                    overlayClassName="item-modal-overlay"
+                    className="item-modal"
+                    ariaLabel={inspecting.name}
+                    onDismiss={() => setInspecting(null)}
                 >
-                    <div
-                        className="item-modal"
-                        onClick={(e) => e.stopPropagation()}
+                    {inspecting.image && (
+                        <AssetImage
+                            src={inspecting.image}
+                            alt={inspecting.name}
+                            className="item-modal-image"
+                        />
+                    )}
+                    <h3 className="item-modal-name">{inspecting.name}</h3>
+                    <p className="item-modal-description">
+                        {inspecting.description}
+                    </p>
+                    <button
+                        className="item-modal-close"
+                        onClick={() => setInspecting(null)}
                     >
-                        {inspecting.image && (
-                            <AssetImage
-                                src={inspecting.image}
-                                alt={inspecting.name}
-                                className="item-modal-image"
-                            />
-                        )}
-                        <h3 className="item-modal-name">{inspecting.name}</h3>
-                        <p className="item-modal-description">
-                            {inspecting.description}
-                        </p>
-                        <button
-                            className="item-modal-close"
-                            onClick={() => setInspecting(null)}
-                        >
-                            {ui?.['ui.close'] ?? 'Close'}
-                        </button>
-                    </div>
-                </div>
+                        {uiText(ui, 'ui.close')}
+                    </button>
+                </DialogOverlay>
             )}
         </div>
     );

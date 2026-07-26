@@ -17,6 +17,7 @@ const tourDir = join(workspaceDir, '.build-test-studio-tour');
 const docsScreenshotDir = join(workspaceDir, 'docs/public/images/studio');
 const publishDocsScreenshots =
     process.env.DOODLE_PUBLISH_DOCS_SCREENSHOTS === '1';
+const captureVisualTour = process.env.DOODLE_CAPTURE_STUDIO_TOUR === '1';
 const preservedLocationComment = '# The tavern is busiest after sunset.';
 
 let fixtureDir = '';
@@ -40,7 +41,7 @@ async function quitApp(app: ElectronApplication): Promise<void> {
 
 async function setStudioTheme(
     app: ElectronApplication,
-    window: Page,
+    page: Page,
     theme: string
 ): Promise<void> {
     await app.evaluate(({ BrowserWindow }, value) => {
@@ -51,23 +52,23 @@ async function setStudioTheme(
     }, theme);
     await expect
         .poll(() =>
-            window.evaluate(() =>
+            page.evaluate(() =>
                 document.documentElement.getAttribute('data-theme')
             )
         )
         .toBe(theme);
-    await window.evaluate(() => document.fonts.ready);
+    await page.evaluate(() => document.fonts.ready);
 }
 
 async function writeWebpScreenshot(
-    window: Page,
+    page: Page,
     target: Page | Locator,
     filename: string,
     maxHeight?: number
 ): Promise<void> {
     if (!publishDocsScreenshots) return;
     const png = await target.screenshot({ animations: 'disabled' });
-    const encoded = await window.evaluate(
+    const encoded = await page.evaluate(
         async ({ base64, cropHeight }) => {
             const image = new Image();
             image.src = `data:image/png;base64,${base64}`;
@@ -94,27 +95,29 @@ async function writeWebpScreenshot(
 
 async function publishThemePair(
     app: ElectronApplication,
-    window: Page,
+    page: Page,
     target: Page | Locator,
     basename: string,
     maxHeight?: number
 ): Promise<void> {
     if (!publishDocsScreenshots) return;
-    await setStudioTheme(app, window, 'dark');
-    await writeWebpScreenshot(window, target, `${basename}.webp`, maxHeight);
-    await setStudioTheme(app, window, 'light');
+    await setStudioTheme(app, page, 'dark');
+    await writeWebpScreenshot(page, target, `${basename}.webp`, maxHeight);
+    await setStudioTheme(app, page, 'light');
     await writeWebpScreenshot(
-        window,
+        page,
         target,
         `${basename}-light.webp`,
         maxHeight
     );
-    await setStudioTheme(app, window, 'dark');
+    await setStudioTheme(app, page, 'dark');
 }
 
 test.beforeEach(async () => {
-    await rm(tourDir, { recursive: true, force: true });
-    await mkdir(tourDir, { recursive: true });
+    if (captureVisualTour) {
+        await rm(tourDir, { recursive: true, force: true });
+        await mkdir(tourDir, { recursive: true });
+    }
     fixtureDir = await mkdtemp(fixturePrefix);
     profileDir = await mkdtemp(profilePrefix);
     await mkdir(join(fixtureDir, 'node_modules'), { recursive: true });
@@ -292,7 +295,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
     let appClosed = false;
 
     try {
-        const window =
+        const page =
             await test.step('wait for the renderer and preload', async () => {
                 const firstWindow = await app.firstWindow();
                 await expect(
@@ -302,15 +305,17 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     .poll(() =>
                         firstWindow.evaluate(
                             () =>
-                                typeof window.studio?.openProjectPath ===
-                                    'function' && !('require' in window)
+                                typeof globalThis.window.studio
+                                    ?.openProjectPath === 'function' &&
+                                !('require' in globalThis.window)
                         )
                     )
                     .toBe(true);
-                await firstWindow.screenshot({
-                    path: join(tourDir, '01-welcome-dark.png'),
-                    animations: 'disabled',
-                });
+                if (captureVisualTour)
+                    await firstWindow.screenshot({
+                        path: join(tourDir, '01-welcome-dark.png'),
+                        animations: 'disabled',
+                    });
                 await publishThemePair(
                     app,
                     firstWindow,
@@ -322,10 +327,10 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
 
         await test.step('capture the new-project form', async () => {
             if (!publishDocsScreenshots) return;
-            await window.getByRole('button', { name: 'New project…' }).click();
-            const modal = window.locator('.modal');
+            await page.getByRole('button', { name: 'New project…' }).click();
+            const modal = page.locator('.modal');
             await expect(modal).toBeVisible();
-            await publishThemePair(app, window, modal, 'new-project');
+            await publishThemePair(app, page, modal, 'new-project');
             await modal.getByRole('button', { name: 'Cancel' }).click();
         });
 
@@ -336,39 +341,36 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     projectPath
                 );
             }, fixtureDir);
-            await expect(
-                window.getByText('the-salty-dog').first()
-            ).toBeVisible();
-            await window.screenshot({
-                path: join(tourDir, '02-project-overview-dark.png'),
-                animations: 'disabled',
-            });
-            await publishThemePair(app, window, window, 'workspace');
+            await expect(page.getByText('the-salty-dog').first()).toBeVisible();
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '02-project-overview-dark.png'),
+                    animations: 'disabled',
+                });
+            await publishThemePair(app, page, page, 'workspace');
             await publishThemePair(
                 app,
-                window,
-                window.locator('.topbar'),
+                page,
+                page.locator('.topbar'),
                 'studio-toolbar'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.rail'),
+                page,
+                page.locator('.rail'),
                 'project-rail'
             );
         });
 
         await test.step('keep app-level modals above the page', async () => {
-            await window
-                .getByRole('button', { name: /Command palette/ })
-                .click();
-            const palette = window.getByRole('dialog', {
+            await page.getByRole('button', { name: /Command palette/ }).click();
+            const palette = page.getByRole('dialog', {
                 name: 'Command palette',
             });
             await expect(palette).toBeVisible();
             // The search control keeps its fixed height when the results list
             // overflows.
-            const searchHeight = await window
+            const searchHeight = await page
                 .locator('.palette__search')
                 .evaluate((el) => el.getBoundingClientRect().height);
             expect(searchHeight).toBeGreaterThanOrEqual(55);
@@ -386,27 +388,28 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 .toBe(true);
             await expect
                 .poll(() =>
-                    window
+                    page
                         .locator('.modal-backdrop')
                         .evaluate(
                             (element) => element.parentElement === document.body
                         )
                 )
                 .toBe(true);
-            await window.screenshot({
-                path: join(tourDir, '03-command-palette-dark.png'),
-                animations: 'disabled',
-            });
-            await window.keyboard.press('Escape');
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '03-command-palette-dark.png'),
+                    animations: 'disabled',
+                });
+            await page.keyboard.press('Escape');
         });
 
-        await test.step('keep toolbar actions visible at the minimum window width', async () => {
+        await test.step('keep toolbar actions visible at the minimum page width', async () => {
             await app.evaluate(({ BrowserWindow }) => {
                 BrowserWindow.getAllWindows()[0]?.setSize(960, 700);
             });
             await expect
                 .poll(() =>
-                    window.evaluate(() => {
+                    page.evaluate(() => {
                         const bar = document.querySelector('.topbar');
                         if (!bar) return false;
                         const bounds = bar.getBoundingClientRect();
@@ -429,57 +432,58 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         });
 
         await test.step('edit the location and change tabs', async () => {
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'tavern' })
                 .click();
-            const name = window.locator('input[value="Tavern"]');
+            const name = page.locator('input[value="Tavern"]');
             await expect(name).toBeVisible();
-            await window.screenshot({
-                path: join(tourDir, '04-location-editor-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '04-location-editor-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
-                window.locator('.editor'),
+                page,
+                page.locator('.editor'),
                 'location-editor'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.rightpanel'),
+                page,
+                page.locator('.rightpanel'),
                 'references-panel'
             );
             if (publishDocsScreenshots) {
-                await window.getByRole('button', { name: 'Source' }).click();
+                await page.getByRole('button', { name: 'Source' }).click();
                 await expect(
-                    window.locator('.editor__source-body .monaco-editor')
+                    page.locator('.editor__source-body .monaco-editor')
                 ).toBeVisible();
                 await publishThemePair(
                     app,
-                    window,
-                    window.locator('.editor'),
+                    page,
+                    page.locator('.editor'),
                     'source-editor'
                 );
-                await window.getByRole('button', { name: 'Visual' }).click();
+                await page.getByRole('button', { name: 'Visual' }).click();
                 await expect(name).toBeVisible();
             }
             await name.fill('Renamed Tavern');
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'market' })
                 .click();
-            await expect(window.locator('input[value="Market"]')).toBeVisible();
+            await expect(page.locator('input[value="Market"]')).toBeVisible();
         });
 
         await test.step('place and drag a marker in the map preview', async () => {
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'world' })
                 .click();
-            const preview = window.locator('.map-preview');
-            const xInput = window.locator('input[title="x"]').first();
+            const preview = page.locator('.map-preview');
+            const xInput = page.locator('input[title="x"]').first();
             await expect(preview).toBeVisible();
             await xInput.click();
             const beforeClick = await xInput.inputValue();
@@ -487,7 +491,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await expect.poll(() => xInput.inputValue()).not.toBe(beforeClick);
 
             const previewBox = await preview.boundingBox();
-            const dot = window.locator('.map-preview__dot').first();
+            const dot = page.locator('.map-preview__dot').first();
             const dotBox = await dot.boundingBox();
             expect(previewBox).not.toBeNull();
             expect(dotBox).not.toBeNull();
@@ -500,34 +504,35 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 previewBox!.y + previewBox!.height
             );
 
-            const marker = window.locator('.map-preview__marker').first();
+            const marker = page.locator('.map-preview__marker').first();
             const markerBox = await marker.boundingBox();
             expect(markerBox).not.toBeNull();
             const beforeDrag = await xInput.inputValue();
-            await window.mouse.move(
+            await page.mouse.move(
                 markerBox!.x + markerBox!.width / 2,
                 markerBox!.y + markerBox!.height / 2
             );
-            await window.mouse.down();
-            await window.mouse.move(
+            await page.mouse.down();
+            await page.mouse.move(
                 previewBox!.x + previewBox!.width * 0.7,
                 previewBox!.y + previewBox!.height * 0.4,
                 { steps: 4 }
             );
-            await window.mouse.up();
+            await page.mouse.up();
             await expect.poll(() => xInput.inputValue()).not.toBe(beforeDrag);
-            await window.screenshot({
-                path: join(tourDir, '05-map-marker-interaction-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '05-map-marker-interaction-dark.png'),
+                    animations: 'disabled',
+                });
         });
 
         await test.step('align localized key chips across character controls', async () => {
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'bartender' })
                 .click();
-            const chips = window.locator('.localized-key-chip');
+            const chips = page.locator('.localized-key-chip');
             await expect(chips).toHaveCount(2);
             const chipLefts = await chips.evaluateAll((elements) =>
                 elements.map((element) => element.getBoundingClientRect().left)
@@ -535,38 +540,40 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             expect(
                 Math.max(...chipLefts) - Math.min(...chipLefts)
             ).toBeLessThanOrEqual(1);
-            await window.screenshot({
-                path: join(tourDir, '06-character-key-chips-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '06-character-key-chips-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
-                window.locator('.editor'),
+                page,
+                page.locator('.editor'),
                 'localized-fields'
             );
         });
 
         await test.step('capture the localization editor', async () => {
             if (!publishDocsScreenshots) return;
-            await window
-                .getByRole('button', { name: 'en', exact: true })
-                .click();
-            await expect(window.locator('.locale-editor')).toBeVisible();
+            if (captureVisualTour)
+                await page
+                    .getByRole('button', { name: 'en', exact: true })
+                    .click();
+            await expect(page.locator('.locale-editor')).toBeVisible();
             await publishThemePair(
                 app,
-                window,
-                window.locator('.editor'),
+                page,
+                page.locator('.editor'),
                 'localization'
             );
         });
 
         await test.step('keep every control in an asset row the same height', async () => {
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'opening' })
                 .click();
-            const row = window.locator('.asset-list__row').first();
+            const row = page.locator('.asset-list__row').first();
             await expect(row.locator('input')).toBeVisible();
             const heights = await row.evaluate((element) =>
                 Array.from(element.children).map(
@@ -577,78 +584,77 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             for (const height of heights) {
                 expect(Math.abs(height - heights[0])).toBeLessThanOrEqual(1);
             }
-            await window
-                .locator('.asset-list')
-                .first()
-                .screenshot({
-                    path: join(tourDir, '06b-interlude-sound-rows-dark.png'),
-                    animations: 'disabled',
-                });
-            await publishThemePair(
-                app,
-                window,
-                window.locator('.asset-list').first(),
-                'asset-fields'
-            );
+            if (captureVisualTour)
+                await page
+                    .locator('.asset-list')
+                    .first()
+                    .screenshot({
+                        path: join(
+                            tourDir,
+                            '06b-interlude-sound-rows-dark.png'
+                        ),
+                        animations: 'disabled',
+                    });
         });
 
         await test.step('capture flags and variables', async () => {
             if (!publishDocsScreenshots) return;
-            await window.getByRole('button', { name: /Flags & vars/ }).click();
+            await page.getByRole('button', { name: /Flags & vars/ }).click();
             await expect(
-                window.getByRole('heading', { name: 'Flags & variables' })
+                page.getByRole('heading', { name: 'Flags & variables' })
             ).toBeVisible();
             await publishThemePair(
                 app,
-                window,
-                window.locator('.flag-vars-page'),
+                page,
+                page.locator('.flag-vars-page'),
                 'flags-variables'
             );
         });
 
         await test.step('keep deep editor overlays portaled, visible, and anchored', async () => {
-            await window
+            await page
                 .locator('.rail__item-open')
                 .filter({ hasText: 'audit' })
                 .click();
-            await expect(window.locator('.node-editor')).toBeVisible();
-            await window.screenshot({
-                path: join(tourDir, '07-dialogue-editor-dark.png'),
-                animations: 'disabled',
-            });
+            await expect(page.locator('.node-editor')).toBeVisible();
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '07-dialogue-editor-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
-                window,
+                page,
+                page,
                 'studio-dialogue-workspace'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.editor'),
+                page,
+                page.locator('.editor'),
                 'dialogue-editor'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.dlg__outline'),
+                page,
+                page.locator('.dlg__outline'),
                 'dialogue-nodes'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.node-editor__head'),
+                page,
+                page.locator('.node-editor__head'),
                 'dialogue-node-header'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.dlg__main'),
+                page,
+                page.locator('.dlg__main'),
                 'dialogue-node-fields',
                 452
             );
 
-            const lineField = window
+            const lineField = page
                 .getByRole('textbox', { name: 'Line' })
                 .locator('..');
             await lineField.getByRole('button', { name: 'literal' }).click();
@@ -657,20 +663,21 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             ).toContainText(
                 'The key and its Swedish translation stay in the locale files'
             );
-            await window.screenshot({
-                path: join(tourDir, '08-unlinked-key-warning-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '08-unlinked-key-warning-dark.png'),
+                    animations: 'disabled',
+                });
             await lineField.getByRole('button', { name: '@key' }).click();
             await expect(
                 lineField.locator('.localized-key-chip')
             ).toContainText('@bartender.greeting');
 
-            const deepChoice = window.locator('.dlg__card').last();
+            const deepChoice = page.locator('.dlg__card').last();
             await deepChoice.scrollIntoViewIfNeeded();
             const keyChip = deepChoice.locator('.localized-key-chip');
             await keyChip.click();
-            const keyMenu = window.locator('.localized-key-menu');
+            const keyMenu = page.locator('.localized-key-menu');
             await expect(keyMenu).toBeVisible();
             expect(
                 await keyMenu.evaluate(
@@ -679,7 +686,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             ).toBe(true);
             await keyMenu.getByRole('button', { name: 'Change key…' }).click();
 
-            const picker = window.locator('.locale-key-picker');
+            const picker = page.locator('.locale-key-picker');
             await expect(picker).toBeVisible();
             expect(
                 await picker.evaluate(
@@ -697,30 +704,31 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     return Boolean(painted && element.contains(painted));
                 })
             ).toBe(true);
-            await window.screenshot({
-                path: join(tourDir, '09-key-picker-choice-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '09-key-picker-choice-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
+                page,
                 picker,
                 'localization-key-picker'
             );
             await picker.getByRole('button', { name: 'Cancel' }).click();
 
             await deepChoice.scrollIntoViewIfNeeded();
-            await publishThemePair(app, window, deepChoice, 'dialogue-choice');
+            await publishThemePair(app, page, deepChoice, 'dialogue-choice');
             if (publishDocsScreenshots) {
-                const firstChoice = window.locator('.dlg__card').first();
+                const firstChoice = page.locator('.dlg__card').first();
                 await firstChoice
                     .getByRole('button', { name: /Add requirement/ })
                     .click();
-                const conditionBuilder = window.locator('.builder-modal');
+                const conditionBuilder = page.locator('.builder-modal');
                 await expect(conditionBuilder).toBeVisible();
                 await publishThemePair(
                     app,
-                    window,
+                    page,
                     conditionBuilder,
                     'condition-builder'
                 );
@@ -735,7 +743,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await builderTrigger.click();
             // The builder is a centered modal: portaled to the body, dimmed
             // backdrop, nothing painting over it, fully inside the viewport.
-            const builder = window.locator('.builder-modal');
+            const builder = page.locator('.builder-modal');
             await expect(builder).toBeVisible();
             expect(
                 await builder.evaluate(
@@ -758,40 +766,37 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 return (
                     rect.top >= 0 &&
                     rect.left >= 0 &&
-                    rect.bottom <= window.innerHeight &&
-                    rect.right <= window.innerWidth
+                    rect.bottom <= globalThis.window.innerHeight &&
+                    rect.right <= globalThis.window.innerWidth
                 );
             });
             expect(insideViewport).toBe(true);
-            await window.screenshot({
-                path: join(tourDir, '10-builder-deep-choice-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '10-builder-deep-choice-dark.png'),
+                    animations: 'disabled',
+                });
             if (publishDocsScreenshots) {
                 await builder
                     .getByRole('button', { name: 'Play sound' })
                     .click();
-                await publishThemePair(
-                    app,
-                    window,
-                    builder,
-                    'effect-media-file'
-                );
+                await publishThemePair(app, page, builder, 'effect-media-file');
             }
             await builder.getByRole('button', { name: 'Cancel' }).click();
         });
 
         await test.step('keep the node header aligned and its delete action red', async () => {
-            const head = window.locator('.node-editor__head');
+            const head = page.locator('.node-editor__head');
             // Element crop: header alignment regressions vanish in full-page
             // shots and jump out in close-ups.
-            await head.screenshot({
-                path: join(tourDir, '07b-node-header-crop-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await head.screenshot({
+                    path: join(tourDir, '07b-node-header-crop-dark.png'),
+                    animations: 'disabled',
+                });
             const badge = head.locator('.dlg__node-badge');
             const badgeBox = await badge.boundingBox();
-            const idBox = await window
+            const idBox = await page
                 .locator('.node-editor__id-field')
                 .boundingBox();
             expect(badgeBox).not.toBeNull();
@@ -803,7 +808,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
 
             // The delete button keeps its danger color: same class family as
             // the add-node button, so stylesheet order cannot make them match.
-            const [deleteColor, addColor] = await window.evaluate(() => {
+            const [deleteColor, addColor] = await page.evaluate(() => {
                 const del = document.querySelector('.node-editor__delete');
                 const add = document.querySelector('.dlg__outline .dlg__add');
                 return [
@@ -816,7 +821,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         });
 
         await test.step('reveal rail actions on keyboard focus and resize the node outline', async () => {
-            const action = window
+            const action = page
                 .locator('.rail__item')
                 .filter({ hasText: 'tavern' })
                 .locator('.rail__item-action')
@@ -828,66 +833,65 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 )
             ).toBe('1');
 
-            const outline = window.locator('.dlg__outline');
+            const outline = page.locator('.dlg__outline');
             const before = (await outline.boundingBox())!.width;
-            const handle = window.locator('.dlg .resize-handle--x');
+            const handle = page.locator('.dlg .resize-handle--x');
             const handleBox = (await handle.boundingBox())!;
-            await window.mouse.move(
+            await page.mouse.move(
                 handleBox.x + handleBox.width / 2,
                 handleBox.y + handleBox.height / 2
             );
-            await window.mouse.down();
-            await window.mouse.move(
+            await page.mouse.down();
+            await page.mouse.move(
                 handleBox.x + handleBox.width / 2 + 80,
                 handleBox.y + handleBox.height / 2,
                 { steps: 4 }
             );
-            await window.mouse.up();
+            await page.mouse.up();
             await expect
                 .poll(async () => (await outline.boundingBox())!.width)
                 .toBeGreaterThan(before + 40);
         });
 
         await test.step('jump the playtest session from a node', async () => {
-            await window
-                .getByRole('button', { name: 'Play from here' })
-                .click();
-            const playback = window.locator('.playback__node-value');
+            await page.getByRole('button', { name: 'Play from here' }).click();
+            const playback = page.locator('.playback__node-value');
             await expect(playback).toBeVisible();
             await expect(playback).toContainText('audit / start');
-            await window.screenshot({
-                path: join(tourDir, '10b-play-from-here-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '10b-play-from-here-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
-                window.locator('.playtest__toolbar'),
+                page,
+                page.locator('.playtest__toolbar'),
                 'playtest-toolbar'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.playtest__body'),
+                page,
+                page.locator('.playtest__body'),
                 'playtest-choices'
             );
             await publishThemePair(
                 app,
-                window,
-                window.locator('.inspector'),
+                page,
+                page.locator('.inspector'),
                 'playtest-state'
             );
             if (publishDocsScreenshots) {
-                await window
+                await page
                     .getByRole('button', { name: 'Save test state' })
                     .click();
-                const saveStateModal = window
+                const saveStateModal = page
                     .locator('.modal')
                     .filter({ hasText: 'Save test state' });
                 await expect(saveStateModal).toBeVisible();
                 await publishThemePair(
                     app,
-                    window,
+                    page,
                     saveStateModal,
                     'save-test-state'
                 );
@@ -895,16 +899,16 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     .getByRole('button', { name: 'Cancel' })
                     .click();
 
-                await window
+                await page
                     .getByRole('button', { name: 'Start at node…' })
                     .click();
-                const startNodeModal = window
+                const startNodeModal = page
                     .locator('.modal')
                     .filter({ hasText: 'Start at node' });
                 await expect(startNodeModal).toBeVisible();
                 await publishThemePair(
                     app,
-                    window,
+                    page,
                     startNodeModal,
                     'start-node-picker'
                 );
@@ -915,12 +919,10 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         });
 
         await test.step('read the semantic trace across contrasting themes', async () => {
-            await window
-                .getByRole('button', { name: 'Order a drink.' })
-                .click();
-            await window.getByRole('button', { name: 'Debug trace' }).click();
+            await page.getByRole('button', { name: 'Order a drink.' }).click();
+            await page.getByRole('button', { name: 'Debug trace' }).click();
 
-            const effectRow = window
+            const effectRow = page
                 .locator('.trace__row')
                 .filter({ hasText: 'EFFECT' });
             await expect(
@@ -935,16 +937,16 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             ).toBeVisible();
 
             await expect(
-                window.locator('.trace__result--fail').first()
+                page.locator('.trace__result--fail').first()
             ).toHaveText('FAIL');
 
-            const transitionRow = window
+            const transitionRow = page
                 .locator('.trace__row')
                 .filter({ hasText: 'TRANSITION' });
             await expect(transitionRow.locator('svg.trace__to')).toBeVisible();
             await expect(transitionRow).not.toContainText('start to end');
 
-            const search = window.getByRole('textbox', {
+            const search = page.getByRole('textbox', {
                 name: 'Search trace by id',
             });
             await search.fill('start to end');
@@ -952,8 +954,8 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await search.fill('');
             await publishThemePair(
                 app,
-                window,
-                window.locator('.trace'),
+                page,
+                page.locator('.trace'),
                 'debug-trace'
             );
 
@@ -965,7 +967,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     );
                 }, theme);
             const usesThemeToken = (selector: string, token: string) =>
-                window
+                page
                     .locator(selector)
                     .first()
                     .evaluate((element, variable) => {
@@ -987,7 +989,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 await setTheme(theme);
                 await expect
                     .poll(() =>
-                        window.evaluate(() =>
+                        page.evaluate(() =>
                             document.documentElement.getAttribute('data-theme')
                         )
                     )
@@ -1005,23 +1007,24 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                         usesThemeToken('.trace__result--fail', '--error')
                     )
                     .toBe(true);
-                await window.locator('.trace').screenshot({
-                    path: join(tourDir, `10e-debug-trace-${label}.png`),
-                    animations: 'disabled',
-                });
+                if (captureVisualTour)
+                    await page.locator('.trace').screenshot({
+                        path: join(tourDir, `10e-debug-trace-${label}.png`),
+                        animations: 'disabled',
+                    });
             }
             await setTheme('dark');
         });
 
         await test.step('tour the dialogue graph and jump back to a node', async () => {
-            await window.getByRole('button', { name: 'Graph' }).click();
-            const startNode = window.locator('[data-node-id="start"]');
-            const endNode = window.locator('[data-node-id="end"]');
+            await page.getByRole('button', { name: 'Graph' }).click();
+            const startNode = page.locator('[data-node-id="start"]');
+            const endNode = page.locator('[data-node-id="end"]');
             await expect(startNode).toBeVisible();
             await expect(endNode).toBeVisible();
             // Six forward choice edges; end's GOTO back to start is a chip,
             // not a line.
-            await expect(window.locator('.graph__edge')).toHaveCount(6);
+            await expect(page.locator('.graph__edge')).toHaveCount(6);
             await expect(
                 startNode.locator('.graph__badge--start')
             ).toBeVisible();
@@ -1033,7 +1036,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             );
             // Hit-test: the node paints above the edge layer and owns clicks.
             const box = (await endNode.boundingBox())!;
-            const painted = await window.evaluate(
+            const painted = await page.evaluate(
                 ([x, y]) =>
                     document
                         .elementFromPoint(x, y)
@@ -1042,14 +1045,15 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 [box.x + box.width / 2, box.y + box.height / 2]
             );
             expect(painted).toBe('end');
-            await window.screenshot({
-                path: join(tourDir, '10d-dialogue-graph-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '10d-dialogue-graph-dark.png'),
+                    animations: 'disabled',
+                });
             await publishThemePair(
                 app,
-                window,
-                window.locator('.editor'),
+                page,
+                page.locator('.editor'),
                 'dialogue-graph'
             );
             // Click selects in place; the pencil opens the Visual editor.
@@ -1060,33 +1064,33 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     name: 'Open node end in the Visual editor',
                 })
                 .click();
-            await expect(window.locator('.node-editor')).toBeVisible();
-            await expect(window.locator('.dlg__node--active')).toContainText(
+            await expect(page.locator('.node-editor')).toBeVisible();
+            await expect(page.locator('.dlg__node--active')).toContainText(
                 'end'
             );
             // Later steps expect the start node selected again.
-            await window
+            await page
                 .getByRole('button', { name: 'start', exact: true })
                 .click();
             if (publishDocsScreenshots) {
-                await window.getByRole('button', { name: 'Source' }).click();
+                await page.getByRole('button', { name: 'Source' }).click();
                 await expect(
-                    window.locator('.editor__source-body .monaco-editor')
+                    page.locator('.editor__source-body .monaco-editor')
                 ).toBeVisible();
                 await publishThemePair(
                     app,
-                    window,
-                    window.locator('.editor'),
+                    page,
+                    page.locator('.editor'),
                     'dialogue-source'
                 );
-                const requirementLine = window
+                const requirementLine = page
                     .locator('.editor__source-body .view-line')
                     .filter({ hasText: 'REQUIRE hasFlag ready' });
                 await requirementLine.click();
-                await window.keyboard.press('End');
-                await window.keyboard.press('Control+ArrowLeft');
-                await window.keyboard.press('Control+Space');
-                const suggestions = window.locator(
+                await page.keyboard.press('End');
+                await page.keyboard.press('Control+ArrowLeft');
+                await page.keyboard.press('Control+Space');
+                const suggestions = page.locator(
                     '.editor__source-body .suggest-widget.visible'
                 );
                 await expect(suggestions).toBeVisible();
@@ -1094,28 +1098,29 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 await expect(suggestions).toContainText('metBartender');
                 await publishThemePair(
                     app,
-                    window,
-                    window.locator('.source__monaco'),
+                    page,
+                    page.locator('.source__monaco'),
                     'dialogue-intellisense',
                     600
                 );
-                await window.keyboard.press('Escape');
-                await window.getByRole('button', { name: 'Visual' }).click();
-                await expect(window.locator('.node-editor')).toBeVisible();
+                await page.keyboard.press('Escape');
+                await page.getByRole('button', { name: 'Visual' }).click();
+                await expect(page.locator('.node-editor')).toBeVisible();
             }
         });
 
         await test.step('show the status area on the dock strip', async () => {
-            const status = window.locator('.dock__status');
+            const status = page.locator('.dock__status');
             await expect(
                 status.locator('.dock__status-when').filter({
                     hasText: 'validated',
                 })
             ).toBeVisible();
-            await status.screenshot({
-                path: join(tourDir, '10c-dock-status-area-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await status.screenshot({
+                    path: join(tourDir, '10c-dock-status-area-dark.png'),
+                    animations: 'disabled',
+                });
             await expect(
                 status.getByRole('button', {
                     name: 'Open Doodle Studio documentation',
@@ -1124,8 +1129,8 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         });
 
         await test.step('show delete confirmation above the editor', async () => {
-            await window.getByRole('button', { name: 'Delete node' }).click();
-            const confirm = window.locator('.modal').filter({
+            await page.getByRole('button', { name: 'Delete node' }).click();
+            const confirm = page.locator('.modal').filter({
                 hasText: 'Delete node “start”?',
             });
             await expect(confirm).toBeVisible();
@@ -1139,38 +1144,37 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     return Boolean(painted && element.contains(painted));
                 })
             ).toBe(true);
-            await window.screenshot({
-                path: join(tourDir, '11-delete-confirm-dark.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '11-delete-confirm-dark.png'),
+                    animations: 'disabled',
+                });
             await confirm.getByRole('button', { name: 'Cancel' }).click();
         });
 
         await test.step('capture a completed production build', async () => {
             if (!publishDocsScreenshots) return;
-            await window
+            await page
                 .getByRole('button', { name: 'Build', exact: true })
                 .click();
-            await expect(window.getByText(/Build complete in/)).toBeVisible({
+            await expect(page.getByText(/Build complete in/)).toBeVisible({
                 timeout: 30_000,
             });
-            await window.locator('.build__dest').evaluate((element) => {
+            await page.locator('.build__dest').evaluate((element) => {
                 element.textContent = 'dist';
             });
             await publishThemePair(
                 app,
-                window,
-                window.locator('.dock__body'),
+                page,
+                page.locator('.dock__body'),
                 'build-output'
             );
-            await window
+            await page
                 .locator('.dock__tab')
                 .filter({ hasText: 'Problems' })
                 .click();
-            await window.mouse.move(700, 350);
-            await expect(window.locator('.tooltip__bubble--open')).toHaveCount(
-                0
-            );
+            await page.mouse.move(700, 350);
+            await expect(page.locator('.tooltip__bubble--open')).toHaveCount(0);
         });
 
         await test.step('tour the bundled themes and their default accents', async () => {
@@ -1189,7 +1193,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     );
                 }, color);
             const accent = () =>
-                window.evaluate(() =>
+                page.evaluate(() =>
                     getComputedStyle(document.documentElement)
                         .getPropertyValue('--accent')
                         .trim()
@@ -1217,30 +1221,28 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 await setTheme(theme);
                 await expect
                     .poll(() =>
-                        window.evaluate(() =>
+                        page.evaluate(() =>
                             document.documentElement.getAttribute('data-theme')
                         )
                     )
                     .toBe(theme);
                 await expect.poll(accent).toBe(themeAccent);
-                await window.screenshot({
-                    path: join(tourDir, `14-theme-${theme}.png`),
-                    animations: 'disabled',
-                });
-                await writeWebpScreenshot(
-                    window,
-                    window,
-                    `theme-${theme}.webp`
-                );
+                if (captureVisualTour)
+                    await page.screenshot({
+                        path: join(tourDir, `14-theme-${theme}.png`),
+                        animations: 'disabled',
+                    });
+                await writeWebpScreenshot(page, page, `theme-${theme}.webp`);
             }
 
             // A named accent beats the theme default; Default restores it.
             await setAccent('red');
             await expect.poll(accent).toBe('#ec3013');
-            await window.screenshot({
-                path: join(tourDir, '14d-theme-neon-accent-red.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '14d-theme-neon-accent-red.png'),
+                    animations: 'disabled',
+                });
             await setAccent('default');
             await expect.poll(accent).toBe('#35e6ff');
             await setTheme('dark');
@@ -1266,12 +1268,12 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     'Adds dialogue Source suggestions and clearer validation results.',
                 platform: 'windows',
             });
-            const updateModal = window.getByRole('dialog');
+            const updateModal = page.getByRole('dialog');
             await expect(updateModal).toContainText('Update available');
             await expect(updateModal).toContainText('Version 0.3.0');
             await publishThemePair(
                 app,
-                window,
+                page,
                 updateModal,
                 'studio-update-available'
             );
@@ -1287,7 +1289,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             );
             await publishThemePair(
                 app,
-                window,
+                page,
                 updateModal,
                 'studio-update-current'
             );
@@ -1303,23 +1305,24 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             });
             await expect
                 .poll(() =>
-                    window.evaluate(() =>
+                    page.evaluate(() =>
                         document.documentElement.getAttribute('data-theme')
                     )
                 )
                 .toBe('light');
-            await window.locator('.node-editor__head').screenshot({
-                path: join(tourDir, '12b-node-header-crop-light.png'),
-                animations: 'disabled',
-            });
-            const deepChoice = window.locator('.dlg__card').last();
+            if (captureVisualTour)
+                await page.locator('.node-editor__head').screenshot({
+                    path: join(tourDir, '12b-node-header-crop-light.png'),
+                    animations: 'disabled',
+                });
+            const deepChoice = page.locator('.dlg__card').last();
             await deepChoice.scrollIntoViewIfNeeded();
             await deepChoice.locator('.localized-key-chip').click();
-            await window
+            await page
                 .locator('.localized-key-menu')
                 .getByRole('button', { name: 'Change key…' })
                 .click();
-            const picker = window.locator('.locale-key-picker');
+            const picker = page.locator('.locale-key-picker');
             await expect(picker).toBeVisible();
             expect(
                 await picker.evaluate((element) => {
@@ -1331,21 +1334,22 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     return Boolean(painted && element.contains(painted));
                 })
             ).toBe(true);
-            await window.screenshot({
-                path: join(tourDir, '12-key-picker-choice-light.png'),
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: join(tourDir, '12-key-picker-choice-light.png'),
+                    animations: 'disabled',
+                });
             await picker.getByRole('button', { name: 'Cancel' }).click();
 
-            await window.locator('.tab--active').click({ button: 'right' });
-            const tabMenu = window.locator('.tabs__menu--context');
+            await page.locator('.tab--active').click({ button: 'right' });
+            const tabMenu = page.locator('.tabs__menu--context');
             await expect(tabMenu).toBeVisible();
             expect(
                 await tabMenu.evaluate(
                     (element) => element.parentElement === document.body
                 )
             ).toBe(true);
-            await window.locator('.topbar__name').click();
+            await page.locator('.topbar__name').click();
         });
 
         await test.step('verify the saved YAML', async () => {
@@ -1365,9 +1369,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
         });
 
         await test.step('show a validation problem in both themes', async () => {
-            const auditTab = window
-                .locator('.tab')
-                .filter({ hasText: 'audit' });
+            const auditTab = page.locator('.tab').filter({ hasText: 'audit' });
             await expect(auditTab.locator('.tab__dirty')).toHaveCount(0);
             await auditTab.getByRole('button', { name: 'Close audit' }).click();
 
@@ -1385,32 +1387,33 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                 'utf8'
             );
 
-            await window.getByRole('button', { name: 'Validate' }).click();
+            await page.getByRole('button', { name: 'Validate' }).click();
             const problemMessage =
                 'Node "start" condition "hasItem" references non-existent item "brass_key"';
-            const problemsTab = window
+            const problemsTab = page
                 .locator('.dock__tab')
                 .filter({ hasText: 'Problems' });
             await expect(problemsTab).toContainText('1');
             await problemsTab.click();
 
-            const problemsDock = window.locator('.dock');
+            const problemsDock = page.locator('.dock');
             await problemsDock
                 .getByRole('button', { name: new RegExp(problemMessage) })
                 .click();
-            await expect(window.locator('.dlg__node--active')).toContainText(
+            await expect(page.locator('.dlg__node--active')).toContainText(
                 'start'
             );
-            await expect(window.locator('.problem-reveal')).toBeVisible();
+            await expect(page.locator('.problem-reveal')).toBeVisible();
             await expect(
                 problemsDock.getByRole('button', { name: 'Copy problem' })
             ).toBeVisible();
 
             const lightPng = join(tourDir, 'validator-problems-light.png');
-            await window.screenshot({
-                path: lightPng,
-                animations: 'disabled',
-            });
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: lightPng,
+                    animations: 'disabled',
+                });
 
             await app.evaluate(({ BrowserWindow }) => {
                 BrowserWindow.getAllWindows()[0]?.webContents.send(
@@ -1420,7 +1423,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             });
             await expect
                 .poll(() =>
-                    window.evaluate(() =>
+                    page.evaluate(() =>
                         document.documentElement.getAttribute('data-theme')
                     )
                 )
@@ -1428,13 +1431,14 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             await problemsDock
                 .getByRole('button', { name: new RegExp(problemMessage) })
                 .click();
-            await expect(window.locator('.problem-reveal')).toBeVisible();
+            await expect(page.locator('.problem-reveal')).toBeVisible();
             const darkPng = join(tourDir, 'validator-problems-dark.png');
-            await window.screenshot({
-                path: darkPng,
-                animations: 'disabled',
-            });
-            await publishThemePair(app, window, window, 'validation-problems');
+            if (captureVisualTour)
+                await page.screenshot({
+                    path: darkPng,
+                    animations: 'disabled',
+                });
+            await publishThemePair(app, page, page, 'validation-problems');
 
             await app.evaluate(({ BrowserWindow }) => {
                 BrowserWindow.getAllWindows()[0]?.webContents.send(
@@ -1444,7 +1448,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
             });
             await expect
                 .poll(() =>
-                    window.evaluate(() =>
+                    page.evaluate(() =>
                         document.documentElement.getAttribute('data-theme')
                     )
                 )
@@ -1482,10 +1486,11 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                         getComputedStyle(path).overflowX !== 'visible'
                     );
                 });
-                await welcome.screenshot({
-                    path: join(tourDir, '13-welcome-recent-light.png'),
-                    animations: 'disabled',
-                });
+                if (captureVisualTour)
+                    await welcome.screenshot({
+                        path: join(tourDir, '13-welcome-recent-light.png'),
+                        animations: 'disabled',
+                    });
                 expect(separated).toBe(true);
             } finally {
                 await quitApp(reopened);

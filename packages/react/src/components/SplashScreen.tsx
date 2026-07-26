@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import type { ShellConfig } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
+import { uiText } from '../uiText';
 
 export interface SplashScreenProps {
     /** Shell splash config (from game.yaml) */
@@ -69,7 +70,7 @@ export function SplashScreen({
             style={bgStyle}
             onClick={onComplete}
             role="button"
-            aria-label={ui?.['ui.skip_splash'] ?? 'Skip splash screen'}
+            aria-label={uiText(ui, 'ui.skip_splash')}
             tabIndex={0}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') onComplete();

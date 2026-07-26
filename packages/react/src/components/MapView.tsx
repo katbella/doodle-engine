@@ -6,6 +6,8 @@ import { useState } from 'react';
 import type { SnapshotMap } from '@doodle-engine/core';
 import { formatHour } from './GameTime';
 import { AssetImage } from './AssetImage';
+import { DialogOverlay } from './DialogOverlay';
+import { uiText } from '../uiText';
 
 export interface MapViewProps {
     map: SnapshotMap | null;
@@ -51,7 +53,7 @@ export function MapView({
     ui,
     className = '',
 }: MapViewProps) {
-    const t = (key: string, fallback: string) => ui?.[key] ?? fallback;
+    const t = (key: string) => uiText(ui, key);
     const [pendingTravel, setPendingTravel] = useState<{
         locationId: string;
         locationName: string;
@@ -92,7 +94,12 @@ export function MapView({
             ? calculateArrivalTime(currentTime, hours)
             : null;
 
-        setPendingTravel({ locationId: destId, locationName: destName, hours, arrival });
+        setPendingTravel({
+            locationId: destId,
+            locationName: destName,
+            hours,
+            arrival,
+        });
     }
 
     return (
@@ -136,71 +143,65 @@ export function MapView({
             </div>
 
             {pendingTravel && (
-                <div
-                    className="travel-confirm-overlay"
-                    onClick={() => setPendingTravel(null)}
+                <DialogOverlay
+                    overlayClassName="travel-confirm-overlay"
+                    className="travel-confirm"
+                    ariaLabel={t('ui.travel_to').replace(
+                        '{destination}',
+                        pendingTravel.locationName
+                    )}
+                    onDismiss={() => setPendingTravel(null)}
                 >
-                    <div
-                        className="travel-confirm"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h3 className="travel-confirm-title">
-                            {t('ui.travel_to', 'Travel to {destination}?').replace(
-                                '{destination}',
-                                pendingTravel.locationName
-                            )}
-                        </h3>
-                        <p className="travel-confirm-time">
-                            {pendingTravel.hours === 1
-                                ? t(
-                                      'ui.travel_time_one',
-                                      'The journey will take 1 hour.'
-                                  )
-                                : t(
-                                      'ui.travel_time',
-                                      'The journey will take {hours} hours.'
-                                  ).replace(
-                                      '{hours}',
-                                      String(pendingTravel.hours)
-                                  )}
-                            {pendingTravel.arrival && (
-                                <>
-                                    <br />
-                                    <span className="travel-confirm-arrival">
-                                        {t('ui.arrive', 'Arrive: Day {day}, {time}')
-                                            .replace(
-                                                '{day}',
-                                                String(pendingTravel.arrival.day)
+                    <h3 className="travel-confirm-title">
+                        {t('ui.travel_to').replace(
+                            '{destination}',
+                            pendingTravel.locationName
+                        )}
+                    </h3>
+                    <p className="travel-confirm-time">
+                        {pendingTravel.hours === 1
+                            ? t('ui.travel_time_one')
+                            : t('ui.travel_time').replace(
+                                  '{hours}',
+                                  String(pendingTravel.hours)
+                              )}
+                        {pendingTravel.arrival && (
+                            <>
+                                <br />
+                                <span className="travel-confirm-arrival">
+                                    {t('ui.arrive')
+                                        .replace(
+                                            '{day}',
+                                            String(pendingTravel.arrival.day)
+                                        )
+                                        .replace(
+                                            '{time}',
+                                            formatHour(
+                                                pendingTravel.arrival.hour
                                             )
-                                            .replace(
-                                                '{time}',
-                                                formatHour(
-                                                    pendingTravel.arrival.hour
-                                                )
-                                            )}
-                                    </span>
-                                </>
-                            )}
-                        </p>
-                        <div className="travel-confirm-buttons">
-                            <button
-                                className="travel-confirm-cancel"
-                                onClick={() => setPendingTravel(null)}
-                            >
-                                {t('ui.cancel', 'Cancel')}
-                            </button>
-                            <button
-                                className="travel-confirm-go"
-                                onClick={() => {
-                                    onTravelTo(pendingTravel.locationId);
-                                    setPendingTravel(null);
-                                }}
-                            >
-                                {t('ui.travel', 'Travel')}
-                            </button>
-                        </div>
+                                        )}
+                                </span>
+                            </>
+                        )}
+                    </p>
+                    <div className="travel-confirm-buttons">
+                        <button
+                            className="travel-confirm-cancel"
+                            onClick={() => setPendingTravel(null)}
+                        >
+                            {t('ui.cancel')}
+                        </button>
+                        <button
+                            className="travel-confirm-go"
+                            onClick={() => {
+                                onTravelTo(pendingTravel.locationId);
+                                setPendingTravel(null);
+                            }}
+                        >
+                            {t('ui.travel')}
+                        </button>
                     </div>
-                </div>
+                </DialogOverlay>
             )}
         </div>
     );

@@ -17,6 +17,7 @@ import {
     saveStorageKeyForProject,
     type SaveSlot,
 } from '../saves';
+import { uiText } from '../uiText';
 
 export interface SaveLoadPanelProps {
     /** Resolved UI strings from snapshot.ui */
@@ -36,17 +37,17 @@ function formatTimestamp(timestamp: string): string {
 
 function displaySlotLabel(slot: SaveSlot, ui: Record<string, string>): string {
     if (slot.kind === 'quick' && slot.label === 'Quick Save') {
-        return ui['ui.quick_save'] ?? slot.label;
+        return uiText(ui, 'ui.quick_save');
     }
     if (slot.kind === 'auto' && slot.label === 'Autosave') {
-        return ui['ui.autosave'] ?? slot.label;
+        return uiText(ui, 'ui.autosave');
     }
     const day = slot.save.state?.currentTime?.day;
     if (slot.kind === 'manual' && slot.label === `Day ${day}`) {
-        return (ui['ui.day'] ?? 'Day {day}').replace('{day}', String(day));
+        return uiText(ui, 'ui.day').replace('{day}', String(day));
     }
     if (slot.kind === 'manual' && slot.label === 'Save') {
-        return ui['ui.save'] ?? slot.label;
+        return uiText(ui, 'ui.save');
     }
     return slot.label;
 }
@@ -74,14 +75,14 @@ export function SaveLoadPanel({
     const handleNewSave = () => {
         writeSave(localStorage, storageKey, onSave(), 'manual');
         refresh();
-        flash(ui['ui.saved'] ?? 'Saved!');
+        flash(uiText(ui, 'ui.saved'));
     };
 
     const handleLoad = (id: string) => {
         const data = loadSave(localStorage, storageKey, id);
         if (data) {
             onLoad(data);
-            flash(ui['ui.loaded'] ?? 'Loaded!');
+            flash(uiText(ui, 'ui.loaded'));
         }
     };
 
@@ -93,13 +94,11 @@ export function SaveLoadPanel({
     return (
         <div className={`save-load-panel ${className}`}>
             <button className="save-button" onClick={handleNewSave}>
-                {ui['ui.new_save'] ?? 'New Save'}
+                {uiText(ui, 'ui.new_save')}
             </button>
 
             {slots.length === 0 ? (
-                <p className="save-load-empty">
-                    {ui['ui.no_saves'] ?? 'No saves yet'}
-                </p>
+                <p className="save-load-empty">{uiText(ui, 'ui.no_saves')}</p>
             ) : (
                 <ul className="save-slot-list">
                     {slots.map((slot) => (
@@ -126,14 +125,14 @@ export function SaveLoadPanel({
                                     className="load-button"
                                     onClick={() => handleLoad(slot.id)}
                                 >
-                                    {ui['ui.load']}
+                                    {uiText(ui, 'ui.load')}
                                 </button>
                                 {slot.kind === 'manual' && (
                                     <button
                                         className="delete-button"
                                         onClick={() => handleDelete(slot.id)}
                                     >
-                                        {ui['ui.delete'] ?? 'Delete'}
+                                        {uiText(ui, 'ui.delete')}
                                     </button>
                                 )}
                             </div>

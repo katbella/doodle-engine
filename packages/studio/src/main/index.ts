@@ -45,7 +45,10 @@ import { ErrorLog } from './error-log';
 import { AssetService } from './asset-service';
 import { FlagVarNotesService } from './flag-var-notes-service';
 import { StudioUpdater } from './studio-updater';
-import { createGithubReleasesLoader } from './studio-release';
+import {
+    createGithubReleasesLoader,
+    isTrustedStudioDownloadUrl,
+} from './studio-release';
 import { STUDIO_VERSION } from './version';
 
 const STUDIO_RELEASE_REPO = 'katbella/doodle-engine';
@@ -108,6 +111,10 @@ function createWindow(): void {
     });
 
     mainWindow.once('ready-to-show', () => mainWindow?.show());
+    mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    mainWindow.webContents.on('will-navigate', (event) => {
+        event.preventDefault();
+    });
 
     if (process.env.ELECTRON_RENDERER_URL) {
         mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
@@ -370,8 +377,7 @@ async function updateEnginePackages(
     try {
         packages = await pinDoodlePackages(projectDir, version);
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         sendToRenderer(
             'install:log',
             projectDir,
@@ -496,7 +502,12 @@ app.whenReady().then(() => {
         currentVersion: STUDIO_VERSION,
         platform: process.platform,
         loadReleases: createGithubReleasesLoader(STUDIO_RELEASE_REPO),
-        openExternal: (url) => shell.openExternal(url),
+        openExternal: (url) => {
+            if (!isTrustedStudioDownloadUrl(url)) {
+                throw new Error('Refusing to open an untrusted update URL.');
+            }
+            return shell.openExternal(url);
+        },
         onState: (state) => sendToRenderer('update:state', state),
         onError: (context, error) => void recordError(context, error),
     });

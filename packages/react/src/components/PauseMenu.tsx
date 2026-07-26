@@ -2,6 +2,9 @@
  * PauseMenu - In-game overlay with Resume, Save, Load, Settings, Quit
  */
 
+import { DialogOverlay } from './DialogOverlay';
+import { uiText } from '../uiText';
+
 export interface PauseMenuProps {
     /** Resolved UI strings from snapshot.ui */
     ui: Record<string, string>;
@@ -31,35 +34,39 @@ export function PauseMenu({
     onQuitToTitle,
     className = '',
 }: PauseMenuProps) {
+    const title = uiText(ui, 'ui.paused');
     return (
-        <div className={`pause-menu-overlay ${className}`}>
-            <div className="pause-menu">
-                <h2 className="pause-title">{ui['ui.paused'] ?? 'Paused'}</h2>
-                <div className="pause-buttons">
-                    <button className="pause-button" onClick={onResume}>
-                        {ui['ui.resume']}
-                    </button>
-                    <button className="pause-button" onClick={onSave}>
-                        {ui['ui.save']}
-                    </button>
-                    <button
-                        className="pause-button"
-                        onClick={onLoad}
-                        disabled={!canLoad}
-                    >
-                        {ui['ui.load']}
-                    </button>
-                    <button className="pause-button" onClick={onSettings}>
-                        {ui['ui.settings']}
-                    </button>
-                    <button
-                        className="pause-button pause-button-quit"
-                        onClick={onQuitToTitle}
-                    >
-                        {ui['ui.quit_to_title'] ?? 'Quit to Title'}
-                    </button>
-                </div>
+        <DialogOverlay
+            overlayClassName={`pause-menu-overlay ${className}`}
+            className="pause-menu"
+            ariaLabel={title}
+            onDismiss={onResume}
+        >
+            <h2 className="pause-title">{title}</h2>
+            <div className="pause-buttons">
+                <button className="pause-button" onClick={onResume}>
+                    {uiText(ui, 'ui.resume')}
+                </button>
+                <button className="pause-button" onClick={onSave}>
+                    {uiText(ui, 'ui.save')}
+                </button>
+                <button
+                    className="pause-button"
+                    onClick={onLoad}
+                    disabled={!canLoad}
+                >
+                    {uiText(ui, 'ui.load')}
+                </button>
+                <button className="pause-button" onClick={onSettings}>
+                    {uiText(ui, 'ui.settings')}
+                </button>
+                <button
+                    className="pause-button pause-button-quit"
+                    onClick={onQuitToTitle}
+                >
+                    {uiText(ui, 'ui.quit_to_title')}
+                </button>
             </div>
-        </div>
+        </DialogOverlay>
     );
 }

@@ -30,30 +30,35 @@ vi.mock('../shell/Welcome', () => ({
     ),
 }));
 
-vi.mock('../shell/NewProjectModal', () => ({
-    NewProjectModal: (props: any) => (
-        <div className="modal-backdrop">
-            {props.error && <div role="alert">{props.error}</div>}
-            <button
-                onClick={() =>
-                    props.onCreate({
-                        name: 'Created',
-                        title: 'Created Game',
-                        subtitle: 'Created Subtitle',
-                        targetDir: 'C:/games',
-                        useDefaultRenderer: true,
-                        useStarterStyles: true,
-                        contentMode: 'starter',
-                        localizationMode: 'literal',
-                    })
-                }
-            >
-                Submit new project
-            </button>
-            <button onClick={props.onCancel}>Cancel new project</button>
-        </div>
-    ),
-}));
+vi.mock('../shell/NewProjectModal', async () => {
+    const { ModalShell } = await vi.importActual<
+        typeof import('../shell/ModalShell')
+    >('../shell/ModalShell');
+    return {
+        NewProjectModal: (props: any) => (
+            <ModalShell title="New project" onDismiss={props.onCancel}>
+                {props.error && <div role="alert">{props.error}</div>}
+                <button
+                    onClick={() =>
+                        props.onCreate({
+                            name: 'Created',
+                            title: 'Created Game',
+                            subtitle: 'Created Subtitle',
+                            targetDir: 'C:/games',
+                            useDefaultRenderer: true,
+                            useStarterStyles: true,
+                            contentMode: 'starter',
+                            localizationMode: 'literal',
+                        })
+                    }
+                >
+                    Submit new project
+                </button>
+                <button onClick={props.onCancel}>Cancel new project</button>
+            </ModalShell>
+        ),
+    };
+});
 
 vi.mock('../shell/TopBar', () => ({
     TopBar: (props: any) => (
@@ -118,9 +123,7 @@ vi.mock('../shell/EditorArea', () => ({
             </span>
             <span>reveal:{props.reveal?.message ?? 'none'}</span>
             <span>notes-error:{props.flagVarPage.notesError ?? 'none'}</span>
-            <span>
-                engine-update-error:{props.engineUpdateError ?? 'none'}
-            </span>
+            <span>engine-update-error:{props.engineUpdateError ?? 'none'}</span>
             <span>
                 notes-ready:
                 {props.flagVarPage.notes.flags.met_hero ?? 'none'}

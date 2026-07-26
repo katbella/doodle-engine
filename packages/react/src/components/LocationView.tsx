@@ -4,6 +4,7 @@
 
 import type { SnapshotLocation } from '@doodle-engine/core';
 import { AssetImage } from './AssetImage';
+import { uiText } from '../uiText';
 
 export interface LocationViewProps {
     location: SnapshotLocation;
@@ -24,7 +25,7 @@ export function LocationView({
                     <AssetImage src={location.banner} alt={location.name} />
                 ) : (
                     <div className="location-banner-placeholder">
-                        {ui?.['ui.location_banner'] ?? 'Location Banner'}
+                        {uiText(ui, 'ui.location_banner')}
                     </div>
                 )}
             </div>

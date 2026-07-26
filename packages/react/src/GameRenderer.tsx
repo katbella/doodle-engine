@@ -9,7 +9,7 @@
  * If no provider is found, the settings button is hidden.
  */
 
-import { useState, useContext } from 'react';
+import { useState, useContext, type ReactNode } from 'react';
 import { useGame } from './hooks/useGame';
 import { AudioSettingsContext } from './AudioSettingsContext';
 import { DialogueBox } from './components/DialogueBox';
@@ -26,8 +26,10 @@ import { Interlude } from './components/Interlude';
 import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { AssetImage } from './components/AssetImage';
+import { DialogOverlay } from './components/DialogOverlay';
 import { InputProviderBoundary, useInputAction } from './input/InputRouter';
 import { saveStorageKeyForProject } from './saves';
+import { uiText } from './uiText';
 
 export interface GameRendererProps {
     className?: string;
@@ -66,6 +68,27 @@ function BottomBarButton({
             <span className="bottom-bar-icon" data-icon={icon} />
             <span className="bottom-bar-label">{label}</span>
         </button>
+    );
+}
+
+function PanelDialog({
+    label,
+    onDismiss,
+    children,
+}: {
+    label: string;
+    onDismiss: () => void;
+    children: ReactNode;
+}) {
+    return (
+        <DialogOverlay
+            overlayClassName="panel-overlay"
+            className="panel"
+            ariaLabel={label}
+            onDismiss={onDismiss}
+        >
+            {children}
+        </DialogOverlay>
     );
 }
 
@@ -141,10 +164,8 @@ function GameRendererInner({
                                 onContinue={actions.continueDialogue}
                                 continueLabel={
                                     snapshot.dialogue.continueEndsDialogue
-                                        ? (snapshot.ui['ui.end_dialogue'] ??
-                                          'End Dialogue')
-                                        : (snapshot.ui['ui.continue'] ??
-                                          'Continue')
+                                        ? uiText(snapshot.ui, 'ui.end_dialogue')
+                                        : uiText(snapshot.ui, 'ui.continue')
                                 }
                             />
                         </div>
@@ -165,10 +186,10 @@ function GameRendererInner({
                     />
 
                     <div className="party-panel">
-                        <h2>{snapshot.ui['ui.party']}</h2>
+                        <h2>{uiText(snapshot.ui, 'ui.party')}</h2>
                         {snapshot.party.length === 0 ? (
                             <p className="party-empty">
-                                {snapshot.ui['ui.no_companions']}
+                                {uiText(snapshot.ui, 'ui.no_companions')}
                             </p>
                         ) : (
                             <div className="party-portraits">
@@ -197,7 +218,7 @@ function GameRendererInner({
 
                     {visibleVariables.length > 0 && (
                         <div className="resources-panel">
-                            <h2>{snapshot.ui['ui.resources']}</h2>
+                            <h2>{uiText(snapshot.ui, 'ui.resources')}</h2>
                             <ul className="resources-list">
                                 {visibleVariables.map(([key, value]) => (
                                     <li key={key} className="resource-entry">
@@ -217,7 +238,7 @@ function GameRendererInner({
 
             <nav className="game-bottom-bar">
                 <BottomBarButton
-                    label={snapshot.ui['ui.inventory']}
+                    label={uiText(snapshot.ui, 'ui.inventory')}
                     icon="inventory"
                     onClick={() =>
                         setActivePanel(
@@ -227,7 +248,7 @@ function GameRendererInner({
                     active={activePanel === 'inventory'}
                 />
                 <BottomBarButton
-                    label={snapshot.ui['ui.journal']}
+                    label={uiText(snapshot.ui, 'ui.journal')}
                     icon="journal"
                     onClick={() =>
                         setActivePanel(
@@ -237,7 +258,7 @@ function GameRendererInner({
                     active={activePanel === 'journal'}
                 />
                 <BottomBarButton
-                    label={snapshot.ui['ui.notes']}
+                    label={uiText(snapshot.ui, 'ui.notes')}
                     icon="notes"
                     onClick={() =>
                         setActivePanel(activePanel === 'notes' ? null : 'notes')
@@ -246,7 +267,7 @@ function GameRendererInner({
                 />
                 {snapshot.map && (
                     <BottomBarButton
-                        label={snapshot.ui['ui.map']}
+                        label={uiText(snapshot.ui, 'ui.map')}
                         icon="map"
                         onClick={() =>
                             setActivePanel(activePanel === 'map' ? null : 'map')
@@ -255,7 +276,7 @@ function GameRendererInner({
                     />
                 )}
                 <BottomBarButton
-                    label={snapshot.ui['ui.save_load']}
+                    label={uiText(snapshot.ui, 'ui.save_load')}
                     icon="save"
                     onClick={() =>
                         setActivePanel(
@@ -266,7 +287,7 @@ function GameRendererInner({
                 />
                 {audioSettings && (
                     <BottomBarButton
-                        label={snapshot.ui['ui.settings']}
+                        label={uiText(snapshot.ui, 'ui.settings')}
                         icon="settings"
                         onClick={() =>
                             setActivePanel(
@@ -279,126 +300,111 @@ function GameRendererInner({
             </nav>
 
             {activePanel === 'inventory' && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.inventory')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <Inventory
-                            ui={snapshot.ui}
-                            items={snapshot.inventory}
-                        />
-                        <button
-                            className="panel-close"
-                            onClick={() => setActivePanel(null)}
-                        >
-                            {snapshot.ui['ui.close']}
-                        </button>
-                    </div>
-                </div>
+                    <Inventory ui={snapshot.ui} items={snapshot.inventory} />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
             )}
             {activePanel === 'journal' && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.journal')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <Journal
-                            ui={snapshot.ui}
-                            quests={snapshot.quests}
-                            entries={snapshot.journal}
-                        />
-                        <button
-                            className="panel-close"
-                            onClick={() => setActivePanel(null)}
-                        >
-                            {snapshot.ui['ui.close']}
-                        </button>
-                    </div>
-                </div>
+                    <Journal
+                        ui={snapshot.ui}
+                        quests={snapshot.quests}
+                        entries={snapshot.journal}
+                    />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
             )}
             {activePanel === 'notes' && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.notes')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <PlayerNotes
-                            ui={snapshot.ui}
-                            notes={snapshot.playerNotes}
-                            onWrite={actions.writeNote}
-                            onDelete={actions.deleteNote}
-                        />
-                        <button
-                            className="panel-close"
-                            onClick={() => setActivePanel(null)}
-                        >
-                            {snapshot.ui['ui.close']}
-                        </button>
-                    </div>
-                </div>
+                    <PlayerNotes
+                        ui={snapshot.ui}
+                        notes={snapshot.playerNotes}
+                        onWrite={actions.writeNote}
+                        onDelete={actions.deleteNote}
+                    />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
             )}
             {activePanel === 'map' && snapshot.map && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.map')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <MapView
-                            ui={snapshot.ui}
-                            map={snapshot.map}
-                            currentLocation={snapshot.location.id}
-                            currentTime={snapshot.time}
-                            onTravelTo={(id) => {
-                                actions.travelTo(id);
-                                setActivePanel(null);
-                            }}
-                        />
-                        <button
-                            className="panel-close"
-                            onClick={() => setActivePanel(null)}
-                        >
-                            {snapshot.ui['ui.close']}
-                        </button>
-                    </div>
-                </div>
+                    <MapView
+                        ui={snapshot.ui}
+                        map={snapshot.map}
+                        currentLocation={snapshot.location.id}
+                        currentTime={snapshot.time}
+                        onTravelTo={(id) => {
+                            actions.travelTo(id);
+                            setActivePanel(null);
+                        }}
+                    />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
             )}
             {activePanel === 'saveload' && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.save_load')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <SaveLoadPanel
-                            ui={snapshot.ui}
-                            onSave={actions.saveGame}
-                            onLoad={actions.loadGame}
-                            projectId={projectId}
-                        />
-                        <button
-                            className="panel-close"
-                            onClick={() => setActivePanel(null)}
-                        >
-                            {snapshot.ui['ui.close']}
-                        </button>
-                    </div>
-                </div>
+                    <SaveLoadPanel
+                        ui={snapshot.ui}
+                        onSave={actions.saveGame}
+                        onLoad={actions.loadGame}
+                        projectId={projectId}
+                    />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
             )}
             {activePanel === 'settings' && audioSettings && (
-                <div
-                    className="panel-overlay"
-                    onClick={() => setActivePanel(null)}
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.settings')}
+                    onDismiss={() => setActivePanel(null)}
                 >
-                    <div className="panel" onClick={(e) => e.stopPropagation()}>
-                        <SettingsPanel
-                            ui={snapshot.ui}
-                            audio={audioSettings}
-                            onLocaleChange={actions.setLocale}
-                            currentLocale={snapshot.currentLocale}
-                            onBack={() => setActivePanel(null)}
-                        />
-                    </div>
-                </div>
+                    <SettingsPanel
+                        ui={snapshot.ui}
+                        audio={audioSettings}
+                        onLocaleChange={actions.setLocale}
+                        currentLocale={snapshot.currentLocale}
+                        onBack={() => setActivePanel(null)}
+                    />
+                </PanelDialog>
             )}
         </div>
     );

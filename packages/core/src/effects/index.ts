@@ -133,9 +133,7 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
             return applyRoll(effect.variable, effect.min, effect.max, state);
 
         default:
-            // TypeScript exhaustiveness check - this should never be reached
-            const _exhaustive: never = effect;
-            return state;
+            return effect satisfies never;
     }
 }
 
@@ -637,7 +635,10 @@ function applyNotify(message: string, state: GameState): GameState {
  *
  * Example: MUSIC romance_theme.ogg
  */
-function applyPlayMusic(track: string | undefined, state: GameState): GameState {
+function applyPlayMusic(
+    track: string | undefined,
+    state: GameState
+): GameState {
     return {
         ...state,
         musicOverride: track || null,

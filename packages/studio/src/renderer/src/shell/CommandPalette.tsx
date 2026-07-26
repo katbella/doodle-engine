@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { Search } from '../lib/icons';
-import { OverlayPortal } from './OverlayPortal';
+import { ModalShell } from './ModalShell';
 
 export interface Command {
     id: string;
@@ -34,10 +34,6 @@ export function CommandPalette({
     const [active, setActive] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const activeRef = useRef<HTMLButtonElement>(null);
-
-    useEffect(() => {
-        inputRef.current?.focus();
-    }, []);
 
     const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const filtered = useMemo(
@@ -74,96 +70,83 @@ export function CommandPalette({
     };
 
     return (
-        <OverlayPortal>
-            <div
-                className="modal-backdrop palette-backdrop"
-                onMouseDown={onClose}
-            >
-                <div
-                    className="palette"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Command palette"
-                    onMouseDown={(e) => e.stopPropagation()}
-                >
-                    <div className="palette__search">
-                        <Search size={16} aria-hidden />
-                        <input
-                            ref={inputRef}
-                            className="palette__input"
-                            placeholder="Type a command or search files…"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            onKeyDown={onKeyDown}
-                            role="combobox"
-                            aria-expanded="true"
-                            aria-controls="palette-list"
-                            aria-activedescendant={
-                                filtered[active]
-                                    ? `palette-opt-${filtered[active].id}`
-                                    : undefined
-                            }
-                        />
-                    </div>
-                    <div
-                        className="palette__list scroll"
-                        id="palette-list"
-                        role="listbox"
-                    >
-                        {filtered.length === 0 && (
-                            <div className="palette__empty">
-                                No matching commands.
-                            </div>
-                        )}
-                        {filtered.map((command, i) => {
-                            const showGroup =
-                                i === 0 ||
-                                filtered[i - 1].group !== command.group;
-                            return (
-                                <div key={command.id}>
-                                    {showGroup && (
-                                        <div className="palette__group">
-                                            {command.group}
-                                        </div>
-                                    )}
-                                    <button
-                                        ref={
-                                            i === active ? activeRef : undefined
-                                        }
-                                        id={`palette-opt-${command.id}`}
-                                        role="option"
-                                        aria-selected={i === active}
-                                        className={`palette__opt ${
-                                            i === active
-                                                ? 'palette__opt--active'
-                                                : ''
-                                        }`}
-                                        onMouseEnter={() => setActive(i)}
-                                        onClick={() => run(command)}
-                                    >
-                                        {command.icon && (
-                                            <span
-                                                className="palette__opt-icon"
-                                                aria-hidden
-                                            >
-                                                {command.icon}
-                                            </span>
-                                        )}
-                                        <span className="palette__opt-label">
-                                            {command.label}
-                                        </span>
-                                        {command.hint && (
-                                            <span className="palette__opt-hint">
-                                                {command.hint}
-                                            </span>
-                                        )}
-                                    </button>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
+        <ModalShell
+            ariaLabel="Command palette"
+            onDismiss={onClose}
+            className="palette"
+            backdropClassName="palette-backdrop"
+            initialFocusRef={inputRef}
+            dismissOnBackdropMouseDown
+        >
+            <div className="palette__search">
+                <Search size={16} aria-hidden />
+                <input
+                    ref={inputRef}
+                    className="palette__input"
+                    placeholder="Type a command or search files…"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={onKeyDown}
+                    role="combobox"
+                    aria-expanded="true"
+                    aria-controls="palette-list"
+                    aria-activedescendant={
+                        filtered[active]
+                            ? `palette-opt-${filtered[active].id}`
+                            : undefined
+                    }
+                />
             </div>
-        </OverlayPortal>
+            <div
+                className="palette__list scroll"
+                id="palette-list"
+                role="listbox"
+            >
+                {filtered.length === 0 && (
+                    <div className="palette__empty">No matching commands.</div>
+                )}
+                {filtered.map((command, i) => {
+                    const showGroup =
+                        i === 0 || filtered[i - 1].group !== command.group;
+                    return (
+                        <div key={command.id}>
+                            {showGroup && (
+                                <div className="palette__group">
+                                    {command.group}
+                                </div>
+                            )}
+                            <button
+                                ref={i === active ? activeRef : undefined}
+                                id={`palette-opt-${command.id}`}
+                                role="option"
+                                aria-selected={i === active}
+                                className={`palette__opt ${
+                                    i === active ? 'palette__opt--active' : ''
+                                }`}
+                                onMouseEnter={() => setActive(i)}
+                                onClick={() => run(command)}
+                            >
+                                {command.icon && (
+                                    <span
+                                        className="palette__opt-icon"
+                                        aria-hidden
+                                    >
+                                        {command.icon}
+                                    </span>
+                                )}
+                                <span className="palette__opt-label">
+                                    {command.label}
+                                </span>
+                                {command.hint && (
+                                    <span className="palette__opt-hint">
+                                        {command.hint}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+        </ModalShell>
     );
 }

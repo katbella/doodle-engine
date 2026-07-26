@@ -486,10 +486,6 @@
     padding-bottom: 9px;
     padding-left: var(--space-3);
 }
-.rail__refs {
-    font-size: var(--text-xs);
-    color: var(--text-faint);
-}
 .rail__new {
     display: flex;
     align-items: center;
@@ -755,7 +751,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: var(--text-xs);
-    font-weight: var(--fw-regular);
+    font-weight: var(--fw-normal);
     color: var(--text-faint);
 }
 .dlg__node-badge {
@@ -1231,9 +1227,6 @@
     z-index: var(--z-popover);
     display: flex;
     overflow: auto;
-}
-.popover-anchor {
-    position: relative;
 }
 .popover-backdrop {
     position: fixed;
@@ -2682,66 +2675,6 @@
         animation: none !important;
     }
 }
-.orphan__msg {
-    color: var(--text-dim);
-}
-.symbols__group {
-    margin-bottom: var(--space-3);
-}
-.symbols__head {
-    font-size: var(--label-size);
-    font-weight: var(--label-weight);
-    letter-spacing: var(--label-track);
-    text-transform: uppercase;
-    color: var(--text-faint);
-    padding: 4px 0;
-}
-.symbol {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: 5px 0;
-    font-size: var(--text-sm);
-    border-bottom: 1px solid var(--border-faint);
-}
-.symbol__id {
-    flex: 1;
-    color: var(--text);
-}
-.symbol__count {
-    color: var(--text-faint);
-    font-size: var(--text-xs);
-}
-.symbol__count--link {
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-.symbol__count--link:hover {
-    color: var(--accent);
-}
-.symbol-uses {
-    max-width: 760px;
-}
-.symbol-uses__head {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-2);
-    color: var(--text);
-    font-size: var(--text-sm);
-}
-.symbol-uses__back {
-    color: var(--text-dim);
-}
-.symbol-uses__back:hover {
-    color: var(--accent);
-}
-.symbol__rename {
-    color: var(--text-faint);
-}
-.symbol__rename:hover {
-    color: var(--accent);
-}
 .reference {
     display: flex;
     flex-direction: column;
@@ -2804,12 +2737,8 @@
 .reference__where {
     color: var(--text);
 }
-.reference__file {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--text-faint);
-}
 .welcome {
+    position: relative;
     grid-row: 1 / -1;
     height: 100%;
     display: flex;
@@ -3011,9 +2940,6 @@ a.build__dest:hover {
     margin-left: var(--space-2);
 }
 
-.welcome {
-    position: relative;
-}
 .welcome__tools {
     position: absolute;
     top: var(--space-4);

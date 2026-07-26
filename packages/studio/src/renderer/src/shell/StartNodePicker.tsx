@@ -6,8 +6,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { ContentRegistry } from '@doodle-engine/core';
-import { useModalDismiss } from '../lib/useModalDismiss';
-import { OverlayPortal } from './OverlayPortal';
+import { ModalShell } from './ModalShell';
 
 export interface NodeTarget {
     dialogueId: string;
@@ -24,7 +23,6 @@ export function StartNodePicker({
     onPick: (target: NodeTarget) => void;
     onCancel: () => void;
 }) {
-    useModalDismiss(onCancel);
     const [query, setQuery] = useState('');
 
     const groups = useMemo(() => {
@@ -54,61 +52,52 @@ export function StartNodePicker({
     }, [registry, query]);
 
     return (
-        <OverlayPortal>
-            <div className="modal-backdrop" onClick={onCancel}>
-                <div
-                    className="modal modal--tall"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="modal__title">Start at node</div>
-                    <input
-                        className="field__input"
-                        placeholder="Search dialogues and nodes…"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        autoFocus
-                        spellCheck={false}
-                        aria-label="Search dialogues and nodes"
-                    />
-                    <div className="nodepick scroll">
-                        {groups.length === 0 ? (
-                            <div className="dock__empty">No nodes match.</div>
-                        ) : (
-                            groups.map((group) => (
-                                <div
-                                    key={group.dialogueId}
-                                    className="nodepick__group"
+        <ModalShell
+            title="Start at node"
+            onDismiss={onCancel}
+            className="modal modal--tall"
+        >
+            <input
+                className="field__input"
+                placeholder="Search dialogues and nodes…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                autoFocus
+                spellCheck={false}
+                aria-label="Search dialogues and nodes"
+            />
+            <div className="nodepick scroll">
+                {groups.length === 0 ? (
+                    <div className="dock__empty">No nodes match.</div>
+                ) : (
+                    groups.map((group) => (
+                        <div key={group.dialogueId} className="nodepick__group">
+                            <div className="nodepick__dialogue mono">
+                                {group.dialogueId}
+                            </div>
+                            {group.nodes.map((node) => (
+                                <button
+                                    key={node.nodeId}
+                                    className="nodepick__node"
+                                    onClick={() => onPick(node)}
                                 >
-                                    <div className="nodepick__dialogue mono">
-                                        {group.dialogueId}
-                                    </div>
-                                    {group.nodes.map((node) => (
-                                        <button
-                                            key={node.nodeId}
-                                            className="nodepick__node"
-                                            onClick={() => onPick(node)}
-                                        >
-                                            <span className="mono">
-                                                {node.nodeId}
-                                            </span>
-                                            {node.isStart && (
-                                                <span className="nodepick__start">
-                                                    start
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <div className="modal__actions">
-                        <button className="btn" onClick={onCancel}>
-                            Cancel
-                        </button>
-                    </div>
-                </div>
+                                    <span className="mono">{node.nodeId}</span>
+                                    {node.isStart && (
+                                        <span className="nodepick__start">
+                                            start
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    ))
+                )}
             </div>
-        </OverlayPortal>
+            <div className="modal__actions">
+                <button className="btn" onClick={onCancel}>
+                    Cancel
+                </button>
+            </div>
+        </ModalShell>
     );
 }

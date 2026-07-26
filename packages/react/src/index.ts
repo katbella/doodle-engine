@@ -48,6 +48,7 @@ export {
     useInputAction,
     useInputRouter,
 } from './input/InputRouter';
+export { uiText } from './uiText';
 export type {
     InputCommand,
     InputCommandEvent,
@@ -80,6 +81,9 @@ export type { CharacterListProps } from './components/CharacterList';
 
 export { Inventory } from './components/Inventory';
 export type { InventoryProps } from './components/Inventory';
+
+export { DialogOverlay } from './components/DialogOverlay';
+export type { DialogOverlayProps } from './components/DialogOverlay';
 
 export { Journal } from './components/Journal';
 export type { JournalProps } from './components/Journal';

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
     compareVersions,
     createGithubReleasesLoader,
+    isTrustedStudioDownloadUrl,
     parseStudioTag,
     parseVersion,
     selectStudioUpdate,
@@ -76,6 +77,35 @@ describe('studioUpdatePlatform', () => {
         expect(studioUpdatePlatform('win32')).toBe('windows');
         expect(studioUpdatePlatform('darwin')).toBe('mac');
         expect(studioUpdatePlatform('linux')).toBe('other');
+    });
+});
+
+describe('isTrustedStudioDownloadUrl', () => {
+    it('accepts installers from the canonical GitHub release path', () => {
+        expect(
+            isTrustedStudioDownloadUrl(
+                'https://github.com/katbella/doodle-engine/releases/download/%40doodle-engine%2Fstudio%400.3.0/doodle-studio-0.3.0-setup.exe'
+            )
+        ).toBe(true);
+    });
+
+    it('rejects non-HTTPS, lookalike hosts, other repositories, and malformed URLs', () => {
+        expect(
+            isTrustedStudioDownloadUrl(
+                'http://github.com/katbella/doodle-engine/releases/download/v1/file.exe'
+            )
+        ).toBe(false);
+        expect(
+            isTrustedStudioDownloadUrl(
+                'https://github.com.evil.test/katbella/doodle-engine/releases/download/v1/file.exe'
+            )
+        ).toBe(false);
+        expect(
+            isTrustedStudioDownloadUrl(
+                'https://github.com/other/doodle-engine/releases/download/v1/file.exe'
+            )
+        ).toBe(false);
+        expect(isTrustedStudioDownloadUrl('javascript:alert(1)')).toBe(false);
     });
 });
 

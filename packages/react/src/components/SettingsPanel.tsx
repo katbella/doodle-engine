@@ -3,6 +3,7 @@
  */
 
 import type { UISoundControls } from '../hooks/useUISounds';
+import { uiText } from '../uiText';
 
 export interface SettingsPanelAudio {
     masterVolume: number;
@@ -46,35 +47,33 @@ export function SettingsPanel({
 }: SettingsPanelProps) {
     return (
         <div className={`settings-panel ${className}`}>
-            <h2 className="settings-title">
-                {ui?.['ui.settings'] ?? 'Settings'}
-            </h2>
+            <h2 className="settings-title">{uiText(ui, 'ui.settings')}</h2>
 
             <div className="settings-section">
-                <h3>{ui?.['ui.audio'] ?? 'Audio'}</h3>
+                <h3>{uiText(ui, 'ui.audio')}</h3>
                 <VolumeSlider
-                    label={ui?.['ui.volume_master'] ?? 'Master'}
+                    label={uiText(ui, 'ui.volume_master')}
                     value={audio.masterVolume}
                     onChange={audio.setMasterVolume}
                 />
                 <VolumeSlider
-                    label={ui?.['ui.volume_music'] ?? 'Music'}
+                    label={uiText(ui, 'ui.volume_music')}
                     value={audio.musicVolume}
                     onChange={audio.setMusicVolume}
                 />
                 <VolumeSlider
-                    label={ui?.['ui.volume_sound'] ?? 'Sound Effects'}
+                    label={uiText(ui, 'ui.volume_sound')}
                     value={audio.soundVolume}
                     onChange={audio.setSoundVolume}
                 />
                 <VolumeSlider
-                    label={ui?.['ui.volume_voice'] ?? 'Voice'}
+                    label={uiText(ui, 'ui.volume_voice')}
                     value={audio.voiceVolume}
                     onChange={audio.setVoiceVolume}
                 />
                 {uiSoundControls && (
                     <VolumeSlider
-                        label={ui?.['ui.volume_ui'] ?? 'UI Sounds'}
+                        label={uiText(ui, 'ui.volume_ui')}
                         value={uiSoundControls.volume}
                         onChange={uiSoundControls.setVolume}
                     />
@@ -85,7 +84,7 @@ export function SettingsPanel({
                 availableLocales.length > 1 &&
                 onLocaleChange && (
                     <div className="settings-section">
-                        <h3>{ui?.['ui.language'] ?? 'Language'}</h3>
+                        <h3>{uiText(ui, 'ui.language')}</h3>
                         <select
                             className="settings-locale-select"
                             value={currentLocale}
@@ -101,7 +100,7 @@ export function SettingsPanel({
                 )}
 
             <button className="settings-back-button" onClick={onBack}>
-                {ui?.['ui.back'] ?? 'Back'}
+                {uiText(ui, 'ui.back')}
             </button>
         </div>
     );

@@ -8,6 +8,7 @@
 import type { ShellConfig } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
+import { uiText } from '../uiText';
 
 export interface TitleScreenProps {
     /** Resolved UI strings (from buildUIStrings or snapshot.ui) */
@@ -58,19 +59,19 @@ export function TitleScreen({
             {subtitle && <p className="title-subtitle">{subtitle}</p>}
             <div className="title-menu">
                 <button className="title-button" onClick={onNewGame}>
-                    {ui['ui.new_game']}
+                    {uiText(ui, 'ui.new_game')}
                 </button>
                 {hasSaveData && (
                     <button className="title-button" onClick={onContinue}>
-                        {ui['ui.resume']}
+                        {uiText(ui, 'ui.resume')}
                     </button>
                 )}
                 <button className="title-button" onClick={onSettings}>
-                    {ui['ui.settings']}
+                    {uiText(ui, 'ui.settings')}
                 </button>
                 {onCredits && (
                     <button className="title-button" onClick={onCredits}>
-                        {ui['ui.credits'] ?? 'Credits'}
+                        {uiText(ui, 'ui.credits')}
                     </button>
                 )}
             </div>
