@@ -37,12 +37,12 @@
         "@types/node": "^24.0.0",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
-        "@vitejs/plugin-react": "^4.3.0",
+        "@vitejs/plugin-react": "^5.2.0",
         "@vitest/coverage-v8": "4.1.6",
         "chokidar": "^4.0.0",
-        "electron": "^33.2.0",
+        "electron": "^43.2.0",
         "electron-builder": "26.15.3",
-        "electron-vite": "^3.0.0",
+        "electron-vite": "^5.0.0",
         "jsdom": "^29.1.1",
         "lucide-react": "^1.24.0",
         "monaco-editor": "^0.52.0",
@@ -50,14 +50,14 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "typescript": "^5.7.0",
-        "vite": "^6.4.3",
+        "vite": "^7.3.6",
         "vitest": "^4.1.6",
         "yaml": "^2.8.3"
     },
     "build": {
         "appId": "com.doodle-engine.studio",
         "productName": "Doodle Studio",
-        "electronVersion": "33.4.11",
+        "electronVersion": "43.2.0",
         "directories": {
             "output": "release",
             "buildResources": "build"

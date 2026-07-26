@@ -20,7 +20,7 @@ export default defineConfig({
             formats: ['es'],
             fileName: (_format, entryName) => `${entryName}.js`,
         },
-        rollupOptions: {
+        rolldownOptions: {
             // Externalize everything that will be in node_modules at runtime
             external: [
                 // Workspace packages

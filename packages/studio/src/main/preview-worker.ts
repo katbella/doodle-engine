@@ -12,13 +12,14 @@
  *               | { type: 'error', message } | { type: 'stopped' }
  */
 
-import type { ViteDevServer } from 'vite';
 import { startDevServer } from '@doodle-engine/toolkit';
 
 const parentPort = (process as unknown as { parentPort: Electron.ParentPort })
     .parentPort;
 
-let server: ViteDevServer | null = null;
+type PreviewServer = Awaited<ReturnType<typeof startDevServer>>;
+
+let server: PreviewServer | null = null;
 
 parentPort.on('message', async (event) => {
     const msg = event.data as
@@ -33,7 +34,7 @@ parentPort.on('message', async (event) => {
     if (msg.type === 'start') {
         if (server) return;
         try {
-            server = await startDevServer({
+            const startedServer = await startDevServer({
                 projectDir: msg.projectDir,
                 port: msg.port ?? 3000,
                 open: false,
@@ -54,8 +55,9 @@ parentPort.on('message', async (event) => {
                 onError: (message) =>
                     parentPort.postMessage({ type: 'log', line: message }),
             });
+            server = startedServer;
             const url =
-                server.resolvedUrls?.local?.[0] ??
+                startedServer.resolvedUrls?.local?.[0] ??
                 `http://localhost:${msg.port ?? 3000}/`;
             parentPort.postMessage({ type: 'ready', url });
         } catch (error) {

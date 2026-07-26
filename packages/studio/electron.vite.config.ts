@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
+import { defineConfig } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 
 const pkg = JSON.parse(
@@ -12,9 +12,9 @@ const pkg = JSON.parse(
  *
  * Three separate builds: the Node main process, the preload bridge, and the
  * Chromium renderer (React). Everything the app needs at runtime (core, toolkit,
- * chokidar, yaml) is a devDependency, so externalizeDepsPlugin bundles it into
- * out/ — the packaged app ships no node_modules. Vite and the React plugin are
- * loaded from the opened project instead (see project-modules in the toolkit).
+ * chokidar, yaml) is a devDependency, so electron-vite bundles it into out/ —
+ * the packaged app ships no node_modules. Vite and the React plugin are loaded
+ * from the opened project instead (see project-modules in the toolkit).
  *
  * The main build has extra entries for the build and preview utility processes.
  * A build or dev server runs the project's own untrusted Vite config, so it runs
@@ -26,7 +26,6 @@ export default defineConfig({
         define: {
             __DOODLE_VERSION__: JSON.stringify(pkg.version),
         },
-        plugins: [externalizeDepsPlugin()],
         build: {
             rollupOptions: {
                 input: {
@@ -37,9 +36,7 @@ export default defineConfig({
             },
         },
     },
-    preload: {
-        plugins: [externalizeDepsPlugin()],
-    },
+    preload: {},
     renderer: {
         resolve: {
             alias: {

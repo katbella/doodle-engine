@@ -19,7 +19,7 @@ export default defineConfig({
             fileName: (format, entryName) =>
                 `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
         },
-        rollupOptions: {
+        rolldownOptions: {
             // Externalize everything that will be in node_modules at runtime.
             external: [
                 // Workspace packages
