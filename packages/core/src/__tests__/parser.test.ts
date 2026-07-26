@@ -109,6 +109,33 @@ describe('parseCondition', () => {
         });
     });
 
+    it('should parse character stat comparisons', () => {
+        expect(
+            parseCondition('characterStatEquals player class @class.ranger')
+        ).toEqual({
+            type: 'characterStatEquals',
+            characterId: 'player',
+            stat: 'class',
+            value: '@class.ranger',
+        });
+        expect(
+            parseCondition('characterStatGreaterThan player strength 16.1')
+        ).toEqual({
+            type: 'characterStatGreaterThan',
+            characterId: 'player',
+            stat: 'strength',
+            value: 16.1,
+        });
+        expect(
+            parseCondition('characterStatLessThan elisa strength 18')
+        ).toEqual({
+            type: 'characterStatLessThan',
+            characterId: 'elisa',
+            stat: 'strength',
+            value: 18,
+        });
+    });
+
     it('should parse timeIs', () => {
         const condition = parseCondition('timeIs 20 6');
         expect(condition).toEqual({

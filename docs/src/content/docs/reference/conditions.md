@@ -1,6 +1,6 @@
 ---
 title: Conditions
-description: All 15 condition types with examples.
+description: All 18 condition types with examples.
 ---
 
 Conditions are tests against game state that return true or false. They're used in dialogue choices (`REQUIRE`), conditional branches (`IF`), triggered dialogues, and triggered interludes.
@@ -82,6 +82,57 @@ REQUIRE variableLessThan reputation 0
 | ---------- | -------- | --------------------- |
 | `variable` | `string` | Variable key          |
 | `value`    | `number` | Threshold (exclusive) |
+
+## characterStatEquals
+
+Check whether a character stat exactly equals a number or string. Use the
+reserved character ID `player` for the player character.
+
+```text
+REQUIRE characterStatEquals player class @class.ranger
+REQUIRE characterStatEquals elisa level 5
+```
+
+| Parameter     | Type               | Description              |
+| ------------- | ------------------ | ------------------------ |
+| `characterId` | `string`           | Character ID or `player` |
+| `stat`        | `string`           | Stable stat key          |
+| `value`       | `number \| string` | Value to compare against |
+
+Numbers only equal numbers and strings only equal strings. The engine does not
+convert between them.
+
+## characterStatGreaterThan
+
+Check whether a numeric character stat is strictly greater than a number.
+
+```text
+REQUIRE characterStatGreaterThan player strength 16.1
+```
+
+| Parameter     | Type     | Description              |
+| ------------- | -------- | ------------------------ |
+| `characterId` | `string` | Character ID or `player` |
+| `stat`        | `string` | Stable stat key          |
+| `value`       | `number` | Threshold (exclusive)    |
+
+This condition returns false when the stat is missing or is a string.
+
+## characterStatLessThan
+
+Check whether a numeric character stat is strictly less than a number.
+
+```text
+REQUIRE characterStatLessThan elisa strength 18
+```
+
+| Parameter     | Type     | Description              |
+| ------------- | -------- | ------------------------ |
+| `characterId` | `string` | Character ID or `player` |
+| `stat`        | `string` | Stable stat key          |
+| `value`       | `number` | Threshold (exclusive)    |
+
+This condition returns false when the stat is missing or is a string.
 
 ## atLocation
 

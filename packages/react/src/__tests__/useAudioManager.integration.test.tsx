@@ -28,6 +28,16 @@ class FakeAudio {
 
 function snapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     return {
+        player: {
+            id: 'player',
+            name: 'Player',
+            title: '',
+            biography: '',
+            portrait: '',
+            profileComplete: true,
+            stats: {},
+            statNames: {},
+        },
         location: { id: 'town', name: 'Town', description: '', banner: '' },
         charactersHere: [],
         itemsHere: [],

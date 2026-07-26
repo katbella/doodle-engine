@@ -21,6 +21,16 @@ import { LocationView } from '../components/LocationView';
 
 function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     return {
+        player: {
+            id: 'player',
+            name: 'Player',
+            title: '',
+            biography: '',
+            portrait: '',
+            profileComplete: true,
+            stats: {},
+            statNames: {},
+        },
         location: {
             id: 'town',
             name: 'Town',
@@ -232,12 +242,14 @@ describe('React components', () => {
                         {
                             id: 'sage',
                             name: 'Sage',
+                            title: '',
                             biography: '',
                             portrait: '/assets/images/portraits/sage.png',
                             location: 'town',
                             inParty: false,
                             relationship: 0,
                             stats: {},
+                            statNames: {},
                         },
                     ]}
                     onTalkTo={() => {}}

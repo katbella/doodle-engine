@@ -66,6 +66,9 @@ const ALL_CONDITION_TYPES: Condition['type'][] = [
     'questAtStage',
     'characterAt',
     'characterInParty',
+    'characterStatEquals',
+    'characterStatGreaterThan',
+    'characterStatLessThan',
     'relationshipAbove',
     'relationshipBelow',
     'timeIs',
@@ -104,8 +107,8 @@ const ALL_EFFECT_TYPES: Effect['type'][] = [
 ];
 
 describe('condition descriptors', () => {
-    it('covers all 15 condition types, one each', () => {
-        expect(CONDITION_DESCRIPTORS).toHaveLength(15);
+    it('covers all 18 condition types, one each', () => {
+        expect(CONDITION_DESCRIPTORS).toHaveLength(18);
         const types = CONDITION_DESCRIPTORS.map((d) => d.type).sort();
         expect(types).toEqual([...ALL_CONDITION_TYPES].sort());
         expect(new Set(types).size).toBe(types.length);

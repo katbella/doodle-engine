@@ -114,6 +114,36 @@ export interface CharacterInPartyCondition {
     characterId: string;
 }
 
+export interface CharacterStatEqualsCondition {
+    type: 'characterStatEquals';
+    /** Character ID, or "player" */
+    characterId: string;
+    /** Stat key */
+    stat: string;
+    /** Value to compare against */
+    value: number | string;
+}
+
+export interface CharacterStatGreaterThanCondition {
+    type: 'characterStatGreaterThan';
+    /** Character ID, or "player" */
+    characterId: string;
+    /** Stat key */
+    stat: string;
+    /** Exclusive numeric threshold */
+    value: number;
+}
+
+export interface CharacterStatLessThanCondition {
+    type: 'characterStatLessThan';
+    /** Character ID, or "player" */
+    characterId: string;
+    /** Stat key */
+    stat: string;
+    /** Exclusive numeric threshold */
+    value: number;
+}
+
 /**
  * Check if relationship with a character is above a value.
  * Example: relationshipAbove bartender 5
@@ -193,6 +223,9 @@ export type Condition =
     | QuestAtStageCondition
     | CharacterAtCondition
     | CharacterInPartyCondition
+    | CharacterStatEqualsCondition
+    | CharacterStatGreaterThanCondition
+    | CharacterStatLessThanCondition
     | RelationshipAboveCondition
     | RelationshipBelowCondition
     | TimeIsCondition

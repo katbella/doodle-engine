@@ -49,6 +49,7 @@ import { PROJECT_ID } from './project';
 - Player notes
 - Current dialogue state
 - Character locations, party membership, relationships, and stats
+- Player profile text and player stats
 - Map availability and the current locale
 
 `SaveData` also includes a save-format version and timestamp. It contains game state rather than the content definitions themselves, so loading uses the content from the current version of the game.

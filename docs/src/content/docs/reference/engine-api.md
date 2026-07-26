@@ -33,6 +33,27 @@ const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 ```
 
+### setPlayerProfile
+
+```typescript
+setPlayerProfile(profile: PlayerProfileInput): Snapshot
+```
+
+Complete a player-entered profile when `content/game.yaml` sets
+`playerCreatesProfile: true`. `name` is required after trimming; `title` and
+`biography` are optional. A custom renderer may also supply `portrait`.
+
+```typescript
+const snapshot = engine.setPlayerProfile({
+    name: 'Aria',
+    title: 'Warden',
+    biography: 'A ranger from the northern road.',
+});
+```
+
+The built-in React renderer calls this method through
+`actions.setPlayerProfile`.
+
 ### loadGame
 
 ```typescript

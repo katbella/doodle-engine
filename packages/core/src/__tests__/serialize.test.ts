@@ -29,7 +29,10 @@ describe('serializeDialogue — round-trips the starter dialogues', () => {
     );
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.dlg'))) {
         it(`parse, serialize, parse is stable for ${file}`, () => {
-            roundTrips(readFileSync(join(dir, file), 'utf-8'), file.replace(/\.dlg$/, ''));
+            roundTrips(
+                readFileSync(join(dir, file), 'utf-8'),
+                file.replace(/\.dlg$/, '')
+            );
         });
     }
 });
@@ -88,6 +91,24 @@ describe('serializeCondition / serializeEffect — every type parses back', () =
         { type: 'questAtStage', questId: 'q', stageId: 's' },
         { type: 'characterAt', characterId: 'c', locationId: 'l' },
         { type: 'characterInParty', characterId: 'c' },
+        {
+            type: 'characterStatEquals',
+            characterId: 'player',
+            stat: 'class',
+            value: '@class.ranger',
+        },
+        {
+            type: 'characterStatGreaterThan',
+            characterId: 'player',
+            stat: 'strength',
+            value: 16.1,
+        },
+        {
+            type: 'characterStatLessThan',
+            characterId: 'c',
+            stat: 'strength',
+            value: 18,
+        },
         { type: 'relationshipAbove', characterId: 'c', value: 2 },
         { type: 'relationshipBelow', characterId: 'c', value: 2 },
         { type: 'timeIs', startHour: 20, endHour: 6 },
@@ -130,7 +151,10 @@ describe('serializeCondition / serializeEffect — every type parses back', () =
                 choices: [],
                 conditionalBranches: [{ condition, next: 'x' }],
             });
-            const parsed = parseDialogue(`${node}\n\nNODE x\n  NARRATOR: @t\n`, 'd');
+            const parsed = parseDialogue(
+                `${node}\n\nNODE x\n  NARRATOR: @t\n`,
+                'd'
+            );
             expect(parsed.nodes[0].conditionalBranches?.[0].condition).toEqual(
                 condition
             );
@@ -147,7 +171,10 @@ describe('serializeCondition / serializeEffect — every type parses back', () =
                 effects: [effect],
                 next: 'x',
             });
-            const parsed = parseDialogue(`${node}\n\nNODE x\n  NARRATOR: @t\n`, 'd');
+            const parsed = parseDialogue(
+                `${node}\n\nNODE x\n  NARRATOR: @t\n`,
+                'd'
+            );
             expect(parsed.nodes[0].effects?.[0]).toEqual(effect);
         }
     });

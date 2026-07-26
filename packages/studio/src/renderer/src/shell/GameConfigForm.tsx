@@ -65,6 +65,7 @@ export function GameConfigForm({
     }, [dir, path]);
 
     const OWNED = [
+        'playerCreatesProfile',
         'startLocation',
         'startTime',
         'startFlags',
@@ -225,6 +226,18 @@ export function GameConfigForm({
 
             <section className="game-config__section">
                 <h2 className="game-config__section-title">Starting state</h2>
+                <label className="field field--inline">
+                    <input
+                        type="checkbox"
+                        checked={config.playerCreatesProfile === true}
+                        onChange={(event) =>
+                            set('playerCreatesProfile', event.target.checked)
+                        }
+                    />
+                    <span className="field__label">
+                        Ask the player to create a profile
+                    </span>
+                </label>
                 <div className="game-config__starting-grid">
                     <label className="field">
                         <span className="field__label">Location</span>

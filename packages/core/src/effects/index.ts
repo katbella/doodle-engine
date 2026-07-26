@@ -543,9 +543,20 @@ function applyAddRelationship(
 function applySetCharacterStat(
     characterId: string,
     stat: string,
-    value: unknown,
+    value: number | string,
     state: GameState
 ): GameState {
+    if (characterId === 'player') {
+        if (!state.player) return state;
+        return {
+            ...state,
+            player: {
+                ...state.player,
+                stats: { ...state.player.stats, [stat]: value },
+            },
+        };
+    }
+
     const characterState = state.characterState[characterId];
     if (!characterState) {
         return state;
@@ -568,7 +579,7 @@ function applySetCharacterStat(
 
 /**
  * Add to (or subtract from) a character stat.
- * Only works if the current stat value is a number.
+ * Non-numeric and missing values are replaced with the supplied number.
  *
  * Example: ADD characterStat elisa health -10
  */
@@ -578,6 +589,24 @@ function applyAddCharacterStat(
     value: number,
     state: GameState
 ): GameState {
+    if (characterId === 'player') {
+        if (!state.player) return state;
+        const currentValue = state.player.stats[stat];
+        return {
+            ...state,
+            player: {
+                ...state.player,
+                stats: {
+                    ...state.player.stats,
+                    [stat]:
+                        typeof currentValue === 'number'
+                            ? currentValue + value
+                            : value,
+                },
+            },
+        };
+    }
+
     const characterState = state.characterState[characterId];
     if (!characterState) {
         return state;

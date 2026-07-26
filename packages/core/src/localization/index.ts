@@ -6,6 +6,18 @@
  */
 
 import type { LocaleData } from '../types/registry';
+import type { StatValue } from '../types/entities';
+
+export interface TextCharacterValues {
+    name: string;
+    title: string;
+    biography: string;
+    stats: Record<string, StatValue>;
+    /** Player-entered profile text must not be treated as localization keys. */
+    literalProfile?: boolean;
+}
+
+export type TextCharacterMap = Record<string, TextCharacterValues>;
 
 /**
  * Resolve a localization key to a translated string.
@@ -28,7 +40,8 @@ import type { LocaleData } from '../types/registry';
 export function resolveText(
     text: string,
     localeData: LocaleData,
-    variables?: Record<string, number | string>
+    variables?: Record<string, number | string>,
+    characters?: TextCharacterMap
 ): string {
     // Resolve @localization key first
     let resolved: string;
@@ -37,6 +50,31 @@ export function resolveText(
         resolved = localeData[key] ?? text;
     } else {
         resolved = text;
+    }
+
+    if (characters && resolved.includes('{')) {
+        resolved = resolved.replace(
+            /\{(\w+)\.(name|title|biography|stats\.(\w+))\}/g,
+            (placeholder, characterId, path, stat) => {
+                const character = characters[characterId];
+                if (!character) return placeholder;
+
+                const value =
+                    stat === undefined
+                        ? character[path as 'name' | 'title' | 'biography']
+                        : character.stats[stat];
+                if (value === undefined) return placeholder;
+
+                if (
+                    typeof value === 'string' &&
+                    value.startsWith('@') &&
+                    (stat !== undefined || !character.literalProfile)
+                ) {
+                    return localeData[value.slice(1)] ?? value;
+                }
+                return String(value);
+            }
+        );
     }
 
     // Substitute {varName} placeholders with variable values
@@ -49,4 +87,3 @@ export function resolveText(
 
     return resolved;
 }
-

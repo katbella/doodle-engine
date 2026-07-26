@@ -3,6 +3,8 @@
  * These represent all mutable data that changes during gameplay.
  */
 
+import type { StatValue } from './entities';
+
 /**
  * In-game time representation.
  */
@@ -23,8 +25,32 @@ export interface CharacterState {
     inParty: boolean;
     /** Disposition value toward the player */
     relationship: number;
-    /** Stats for game-specific data - engine stores but doesn't interpret */
-    stats: Record<string, unknown>;
+    /** Game-specific stat values */
+    stats: Record<string, StatValue>;
+}
+
+export interface PlayerCharacterState {
+    /** Whether this game asks the player to supply profile text */
+    playerCreatesProfile: boolean;
+    /** Player-facing name */
+    name: string;
+    /** Player-facing title */
+    title: string;
+    /** Player-facing biography */
+    biography: string;
+    /** Portrait reference used by custom renderers */
+    portrait: string;
+    /** Whether required player-created profile data has been supplied */
+    profileComplete: boolean;
+    /** Game-specific stat values */
+    stats: Record<string, StatValue>;
+}
+
+export interface PlayerProfileInput {
+    name: string;
+    title?: string;
+    biography?: string;
+    portrait?: string;
 }
 
 /**
@@ -54,6 +80,9 @@ export interface PlayerNote {
  * This is what gets saved and loaded.
  */
 export interface GameState {
+    /** Mutable player profile and stats */
+    player?: PlayerCharacterState;
+
     /** Location ID where the player currently is */
     currentLocation: string;
 

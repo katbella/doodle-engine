@@ -270,3 +270,13 @@
     font-size: var(--text-sm);
     color: var(--text-faint);
 }
+
+/* Character and player stat rows */
+.stats-row {
+    align-items: flex-end;
+}
+
+.stats-field {
+    flex: 1;
+    min-width: 0;
+}

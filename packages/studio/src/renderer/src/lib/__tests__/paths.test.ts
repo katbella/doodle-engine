@@ -20,6 +20,7 @@ const project = {
 
 describe('renderer file paths', () => {
     it('maps every registry-backed section to its loader key', () => {
+        expect(sectionFileKey('player', 'player')).toBe('player:player');
         expect(sectionFileKey('dialogues', 'intro')).toBe('dialogues:intro');
         expect(sectionFileKey('characters', 'hero')).toBe('characters:hero');
         expect(sectionFileKey('locations', 'town')).toBe('locations:town');
@@ -35,6 +36,14 @@ describe('renderer file paths', () => {
     });
 
     it('uses mapped files and documented conventional fallbacks', () => {
+        expect(
+            filePathFor(project, {
+                key: 'player:player',
+                label: 'Player',
+                section: 'player',
+                itemId: 'player',
+            })
+        ).toBe('content/player.yaml');
         expect(
             filePathFor(project, {
                 key: 'characters:hero',
@@ -81,6 +90,10 @@ describe('renderer file paths', () => {
         expect(locateFile('content/game.yaml')).toEqual({
             section: 'config',
             itemId: 'game',
+        });
+        expect(locateFile('content/player.yaml')).toEqual({
+            section: 'player',
+            itemId: 'player',
         });
         expect(locateFile('content/dialogues/intro.dlg')).toEqual({
             section: 'dialogues',

@@ -83,6 +83,65 @@ describe('loadContent', () => {
         }
     });
 
+    it('loads the singleton player profile', async () => {
+        const dir = await makeProject({
+            'content/game.yaml': `${GAME}playerCreatesProfile: true\n`,
+            'content/player.yaml': [
+                'name: "@player.name"',
+                'title: Ranger',
+                'biography: A traveler.',
+                'portrait: hero.png',
+                'stats:',
+                '  strength:',
+                '    name: Strength',
+                '    value: 16.2',
+            ].join('\n'),
+            'content/locations/town.yaml': TOWN,
+        });
+
+        try {
+            const loaded = await loadContent(join(dir, 'content'));
+            expect(loaded.parseErrors).toEqual([]);
+            expect(loaded.config.playerCreatesProfile).toBe(true);
+            expect(loaded.registry.player?.name).toBe('@player.name');
+            expect(loaded.registry.player?.title).toBe('Ranger');
+            expect(loaded.registry.player?.stats.strength).toEqual({
+                name: 'Strength',
+                value: 16.2,
+            });
+            expect(loaded.fileMap.get('player:player')).toContain(
+                'player.yaml'
+            );
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    it.each([
+        ['a YAML list', '[]', 'must contain a YAML object'],
+        ['malformed YAML', 'name: [', 'Could not read player.yaml as YAML'],
+    ])(
+        'reports player.yaml when it contains %s',
+        async (_, source, message) => {
+            const dir = await makeProject({
+                'content/game.yaml': GAME,
+                'content/player.yaml': source,
+                'content/locations/town.yaml': TOWN,
+            });
+
+            try {
+                const loaded = await loadContent(join(dir, 'content'));
+
+                expect(loaded.registry.player).toBeUndefined();
+                expect(loaded.parseErrors).toHaveLength(1);
+                expect(loaded.parseErrors[0].file).toContain('player.yaml');
+                expect(loaded.parseErrors[0].message).toContain(message);
+            } finally {
+                await rm(dir, { recursive: true, force: true });
+            }
+        }
+    );
+
     it('loads multiline dialogue from a project', async () => {
         const dir = await makeProject({
             'content/game.yaml': GAME,

@@ -11,6 +11,15 @@ import type { GameState } from '../types/state';
 // Helper to create a minimal game state for testing
 function createTestState(): GameState {
     return {
+        player: {
+            playerCreatesProfile: false,
+            name: 'Hero',
+            title: '',
+            biography: '',
+            portrait: '',
+            profileComplete: true,
+            stats: { strength: 16 },
+        },
         currentLocation: 'tavern',
         currentTime: { day: 1, hour: 14 },
         flags: { metBartender: true },
@@ -257,7 +266,9 @@ describe('Effect Processors', () => {
             const state = createTestState();
             const newState = applyEffect(effect, state);
 
-            expect(newState.characterState.pixel_the_dog.location).toBe('market');
+            expect(newState.characterState.pixel_the_dog.location).toBe(
+                'market'
+            );
         });
 
         it('should not move non-party characters', () => {
@@ -435,7 +446,9 @@ describe('Effect Processors', () => {
             const state = createTestState();
             const newState = applyEffect(effect, state);
 
-            expect(newState.characterState.pixel_the_dog.location).toBe('tavern');
+            expect(newState.characterState.pixel_the_dog.location).toBe(
+                'tavern'
+            );
         });
     });
 
@@ -506,6 +519,20 @@ describe('Effect Processors', () => {
     });
 
     describe('setCharacterStat', () => {
+        it('should set a player stat', () => {
+            const newState = applyEffect(
+                {
+                    type: 'setCharacterStat',
+                    characterId: 'player',
+                    stat: 'class',
+                    value: '@class.ranger',
+                },
+                createTestState()
+            );
+
+            expect(newState.player?.stats.class).toBe('@class.ranger');
+        });
+
         it('should set character stat value', () => {
             const effect: Effect = {
                 type: 'setCharacterStat',
@@ -534,6 +561,20 @@ describe('Effect Processors', () => {
     });
 
     describe('addCharacterStat', () => {
+        it('should add to a numeric player stat', () => {
+            const newState = applyEffect(
+                {
+                    type: 'addCharacterStat',
+                    characterId: 'player',
+                    stat: 'strength',
+                    value: 0.2,
+                },
+                createTestState()
+            );
+
+            expect(newState.player?.stats.strength).toBe(16.2);
+        });
+
         it('should add to existing numeric stat', () => {
             const effect: Effect = {
                 type: 'addCharacterStat',
@@ -609,7 +650,10 @@ describe('Effect Processors', () => {
                 type: 'playMusic',
                 track: '',
             };
-            const state = { ...createTestState(), musicOverride: 'romance_theme.ogg' };
+            const state = {
+                ...createTestState(),
+                musicOverride: 'romance_theme.ogg',
+            };
             const newState = applyEffect(effect, state);
 
             expect(newState.musicOverride).toBeNull();
@@ -619,7 +663,10 @@ describe('Effect Processors', () => {
             const effect: Effect = {
                 type: 'playMusic',
             };
-            const state = { ...createTestState(), musicOverride: 'romance_theme.ogg' };
+            const state = {
+                ...createTestState(),
+                musicOverride: 'romance_theme.ogg',
+            };
             const newState = applyEffect(effect, state);
 
             expect(newState.musicOverride).toBeNull();

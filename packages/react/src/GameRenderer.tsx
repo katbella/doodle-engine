@@ -25,6 +25,8 @@ import { SaveLoadPanel } from './components/SaveLoadPanel';
 import { Interlude } from './components/Interlude';
 import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
+import { CharacterSheet } from './components/CharacterSheet';
+import { PlayerSetup } from './components/PlayerSetup';
 import { AssetImage } from './components/AssetImage';
 import { DialogOverlay } from './components/DialogOverlay';
 import { InputProviderBoundary, useInputAction } from './input/InputRouter';
@@ -40,6 +42,7 @@ export interface GameRendererProps {
 }
 
 type ActivePanel =
+    | 'party'
     | 'inventory'
     | 'journal'
     | 'notes'
@@ -110,6 +113,10 @@ function GameRendererInner({
     const audioSettings = useContext(AudioSettingsContext);
 
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+    const [partyIndex, setPartyIndex] = useState(0);
+    const partyProfiles = [snapshot.player, ...snapshot.party];
+    const selectedPartyProfile =
+        partyProfiles[partyIndex % partyProfiles.length];
 
     useInputAction(
         ({ command }) => {
@@ -143,6 +150,13 @@ function GameRendererInner({
                 <Interlude
                     interlude={snapshot.pendingInterlude}
                     onDismiss={actions.dismissInterlude}
+                />
+            )}
+
+            {!snapshot.player.profileComplete && (
+                <PlayerSetup
+                    ui={snapshot.ui}
+                    onSubmit={actions.setPlayerProfile}
                 />
             )}
 
@@ -238,6 +252,14 @@ function GameRendererInner({
 
             <nav className="game-bottom-bar">
                 <BottomBarButton
+                    label={uiText(snapshot.ui, 'ui.party')}
+                    icon="party"
+                    onClick={() =>
+                        setActivePanel(activePanel === 'party' ? null : 'party')
+                    }
+                    active={activePanel === 'party'}
+                />
+                <BottomBarButton
                     label={uiText(snapshot.ui, 'ui.inventory')}
                     icon="inventory"
                     onClick={() =>
@@ -298,6 +320,39 @@ function GameRendererInner({
                     />
                 )}
             </nav>
+
+            {activePanel === 'party' && (
+                <PanelDialog
+                    label={uiText(snapshot.ui, 'ui.party')}
+                    onDismiss={() => setActivePanel(null)}
+                >
+                    <CharacterSheet
+                        ui={snapshot.ui}
+                        character={selectedPartyProfile}
+                        position={partyIndex % partyProfiles.length}
+                        count={partyProfiles.length}
+                        onPrevious={() =>
+                            setPartyIndex(
+                                (current) =>
+                                    (current - 1 + partyProfiles.length) %
+                                    partyProfiles.length
+                            )
+                        }
+                        onNext={() =>
+                            setPartyIndex(
+                                (current) =>
+                                    (current + 1) % partyProfiles.length
+                            )
+                        }
+                    />
+                    <button
+                        className="panel-close"
+                        onClick={() => setActivePanel(null)}
+                    >
+                        {uiText(snapshot.ui, 'ui.close')}
+                    </button>
+                </PanelDialog>
+            )}
 
             {activePanel === 'inventory' && (
                 <PanelDialog

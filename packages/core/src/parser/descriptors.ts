@@ -1,5 +1,5 @@
 /**
- * Descriptors for the closed sets of conditions (15) and effects (27).
+ * Descriptors for the closed sets of conditions and effects.
  *
  * This is the single source of truth for *how each type is shaped* — its
  * grouping, its keyword form, and its ordered arguments with their kinds. The
@@ -64,6 +64,8 @@ export interface ArgDescriptor {
     kind: ArgKind;
     /** Optional args may be left empty (only `playMusic.track` today). */
     optional?: boolean;
+    /** The reserved player target is valid for this character argument. */
+    allowsPlayer?: boolean;
 }
 
 /** Grouping for the builder's searchable, sectioned type list. */
@@ -109,7 +111,7 @@ export interface EffectDescriptor {
     keyword: string;
 }
 
-/** All 15 conditions, in builder display order. */
+/** All 18 conditions, in builder display order. */
 export const CONDITION_DESCRIPTORS: ConditionDescriptor[] = [
     {
         type: 'hasFlag',
@@ -196,6 +198,54 @@ export const CONDITION_DESCRIPTORS: ConditionDescriptor[] = [
         keyword: 'characterInParty',
         args: [
             { name: 'characterId', label: 'Character', kind: 'characterId' },
+        ],
+    },
+    {
+        type: 'characterStatEquals',
+        label: 'Character stat equals',
+        group: 'Characters',
+        keyword: 'characterStatEquals',
+        args: [
+            {
+                name: 'characterId',
+                label: 'Character',
+                kind: 'characterId',
+                allowsPlayer: true,
+            },
+            { name: 'stat', label: 'Stat', kind: 'stat' },
+            { name: 'value', label: 'Value', kind: 'value' },
+        ],
+    },
+    {
+        type: 'characterStatGreaterThan',
+        label: 'Character stat greater than',
+        group: 'Characters',
+        keyword: 'characterStatGreaterThan',
+        args: [
+            {
+                name: 'characterId',
+                label: 'Character',
+                kind: 'characterId',
+                allowsPlayer: true,
+            },
+            { name: 'stat', label: 'Stat', kind: 'stat' },
+            { name: 'value', label: 'Value', kind: 'number' },
+        ],
+    },
+    {
+        type: 'characterStatLessThan',
+        label: 'Character stat less than',
+        group: 'Characters',
+        keyword: 'characterStatLessThan',
+        args: [
+            {
+                name: 'characterId',
+                label: 'Character',
+                kind: 'characterId',
+                allowsPlayer: true,
+            },
+            { name: 'stat', label: 'Stat', kind: 'stat' },
+            { name: 'value', label: 'Value', kind: 'number' },
         ],
     },
     {
@@ -410,7 +460,12 @@ export const EFFECT_DESCRIPTORS: EffectDescriptor[] = [
         group: 'Characters',
         keyword: 'SET characterStat',
         args: [
-            { name: 'characterId', label: 'Character', kind: 'characterId' },
+            {
+                name: 'characterId',
+                label: 'Character',
+                kind: 'characterId',
+                allowsPlayer: true,
+            },
             { name: 'stat', label: 'Stat', kind: 'stat' },
             { name: 'value', label: 'Value', kind: 'value' },
         ],
@@ -421,7 +476,12 @@ export const EFFECT_DESCRIPTORS: EffectDescriptor[] = [
         group: 'Characters',
         keyword: 'ADD characterStat',
         args: [
-            { name: 'characterId', label: 'Character', kind: 'characterId' },
+            {
+                name: 'characterId',
+                label: 'Character',
+                kind: 'characterId',
+                allowsPlayer: true,
+            },
             { name: 'stat', label: 'Stat', kind: 'stat' },
             { name: 'value', label: 'Amount', kind: 'number' },
         ],

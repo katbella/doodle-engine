@@ -28,6 +28,14 @@ Placeholders in curly braces are replaced while the game runs. Keep the same pla
 | `ui.notes` | Notes |
 | `ui.characters` | Characters |
 | `ui.party` | Party |
+| `ui.party_members` | Party members |
+| `ui.previous_character` | Previous |
+| `ui.next_character` | Next |
+| `ui.create_player` | Create your character |
+| `ui.player_name` | Name |
+| `ui.player_title` | Title |
+| `ui.player_biography` | Biography |
+| `ui.begin_adventure` | Begin adventure |
 | `ui.resources` | Resources |
 | `ui.no_items` | No items |
 | `ui.location_banner` | Location Banner |

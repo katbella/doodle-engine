@@ -1,7 +1,10 @@
 import type { SectionKey } from '../types';
 
 /** Content types the user can create a new item for. */
-export type CreatableSection = Exclude<SectionKey, 'config' | 'flags-vars'>;
+export type CreatableSection = Exclude<
+    SectionKey,
+    'player' | 'config' | 'flags-vars'
+>;
 
 export const CREATABLE_SECTIONS: {
     key: CreatableSection;
@@ -51,6 +54,7 @@ export function templateForNewItem(
             return [
                 `id: ${id}`,
                 `name: ${id}`,
+                `title: ""`,
                 `biography: ""`,
                 `portrait: ""`,
                 `location: ""`,

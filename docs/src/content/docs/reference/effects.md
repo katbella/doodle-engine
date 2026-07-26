@@ -205,18 +205,23 @@ ADD relationship bartender -2
 
 ### SET characterStat
 
-Set a stat value on a character.
+Set a character stat to a number or string. Use the reserved character ID
+`player` for the player character. A string must be one token or a localization
+key.
 
 ```text
 SET characterStat elisa level 5
+SET characterStat player class @class.ranger
 ```
 
 ### ADD characterStat
 
-Add to (or subtract from) a character's stat.
+Add to or subtract from a numeric character stat. If the stat is missing or is
+a string, the supplied number becomes its new value, matching `ADD variable`.
 
 ```text
 ADD characterStat elisa health -10
+ADD characterStat player strength 0.5
 ```
 
 ## Map

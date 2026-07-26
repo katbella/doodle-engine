@@ -163,6 +163,7 @@ actions.travelTo(locationId: string)     // Travel via map
 actions.writeNote(title, text)           // Add a player note
 actions.deleteNote(noteId: string)       // Remove a player note
 actions.setLocale(locale: string)        // Change language
+actions.setPlayerProfile(profile)        // Complete a player-entered profile
 actions.saveGame()                       // Returns SaveData
 actions.loadGame(saveData: SaveData)     // Restore from save
 actions.dismissInterlude()               // Clear a pending interlude
@@ -179,6 +180,7 @@ import {
     ChoiceList,
     LocationView,
     CharacterList,
+    PlayerSetup,
     MapView,
     Inventory,
     Journal,
@@ -205,6 +207,12 @@ function MyLayout() {
                 characters={snapshot.charactersHere}
                 onTalkTo={actions.talkTo}
             />
+
+            {!snapshot.player.profileComplete && (
+                <PlayerSetup
+                    onSubmit={actions.setPlayerProfile}
+                />
+            )}
 
             <Inventory items={snapshot.inventory} />
 
@@ -293,6 +301,9 @@ const snapshot = engine.newGame(config);
 
 // Render snapshot however you want
 renderMyUI(snapshot);
+
+// A non-React renderer can inspect snapshot.player and snapshot.party,
+// then complete a requested profile with engine.setPlayerProfile(profile).
 
 // On user action
 const newSnapshot = engine.selectChoice('choice_1');

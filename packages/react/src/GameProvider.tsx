@@ -14,6 +14,7 @@ import {
 } from 'react';
 import { Engine, enableDevTools } from '@doodle-engine/core';
 import type { Snapshot, SaveData } from '@doodle-engine/core';
+import type { PlayerProfileInput } from '@doodle-engine/core';
 
 export interface GameContextValue {
     snapshot: Snapshot;
@@ -28,6 +29,7 @@ export interface GameContextValue {
         saveGame: () => SaveData;
         loadGame: (saveData: SaveData) => void;
         dismissInterlude: () => void;
+        setPlayerProfile: (profile: PlayerProfileInput) => void;
     };
 }
 
@@ -152,6 +154,13 @@ export function GameProvider({
         setSnapshot(engine.dismissInterlude());
     }, [engine]);
 
+    const setPlayerProfile = useCallback(
+        (profile: PlayerProfileInput) => {
+            setSnapshot(engine.setPlayerProfile(profile));
+        },
+        [engine]
+    );
+
     const contextValue: GameContextValue = {
         snapshot,
         actions: {
@@ -165,6 +174,7 @@ export function GameProvider({
             saveGame,
             loadGame,
             dismissInterlude,
+            setPlayerProfile,
         },
     };
 

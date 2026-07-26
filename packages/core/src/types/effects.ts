@@ -207,7 +207,7 @@ export interface SetCharacterStatEffect {
     /** Stat key to set */
     stat: string;
     /** Value to set */
-    value: unknown;
+    value: number | string;
 }
 
 /**

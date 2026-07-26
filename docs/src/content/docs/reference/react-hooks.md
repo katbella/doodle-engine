@@ -39,6 +39,7 @@ interface GameContextValue {
         writeNote: (title: string, text: string) => void;
         deleteNote: (noteId: string) => void;
         setLocale: (locale: string) => void;
+        setPlayerProfile: (profile: PlayerProfileInput) => void;
         saveGame: () => SaveData;
         loadGame: (saveData: SaveData) => void;
         dismissInterlude: () => void;
@@ -54,18 +55,19 @@ Must be used inside a `GameProvider`. Throws an error if used outside.
 
 Each action calls the corresponding engine method and updates the snapshot:
 
-| Action                   | Description                                  |
-| ------------------------ | -------------------------------------------- |
-| `selectChoice(choiceId)` | Pick a dialogue choice                       |
-| `continueDialogue()`     | Advance past a text-only dialogue node       |
-| `talkTo(characterId)`    | Start conversation with a character          |
-| `travelTo(locationId)`   | Travel to a map location                     |
-| `writeNote(title, text)` | Add a player note                            |
-| `deleteNote(noteId)`     | Remove a player note                         |
-| `setLocale(locale)`      | Change language                              |
-| `saveGame()`             | Returns `SaveData` (doesn't update snapshot) |
-| `loadGame(saveData)`     | Restores state and updates snapshot          |
-| `dismissInterlude()`     | Clears a pending interlude from the snapshot |
+| Action                         | Description                                  |
+| ------------------------------ | -------------------------------------------- |
+| `selectChoice(choiceId)`       | Pick a dialogue choice                       |
+| `continueDialogue()`           | Advance past a text-only dialogue node       |
+| `talkTo(characterId)`          | Start conversation with a character          |
+| `travelTo(locationId)`         | Travel to a map location                     |
+| `writeNote(title, text)`       | Add a player note                            |
+| `deleteNote(noteId)`           | Remove a player note                         |
+| `setLocale(locale)`            | Change language                              |
+| `setPlayerProfile(profile)`    | Complete a requested player profile          |
+| `saveGame()`                   | Returns `SaveData` (doesn't update snapshot) |
+| `loadGame(saveData)`           | Restores state and updates snapshot          |
+| `dismissInterlude()`           | Clears a pending interlude from the snapshot |
 
 ---
 

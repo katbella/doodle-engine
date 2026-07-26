@@ -272,6 +272,10 @@ function describeReason(
             return `${condition.characterId} is at ${fmt(values.characterLocation)}`;
         case 'characterInParty':
             return `${condition.characterId} not in party`;
+        case 'characterStatEquals':
+        case 'characterStatGreaterThan':
+        case 'characterStatLessThan':
+            return `${condition.characterId}.${condition.stat} is ${fmt(values.characterStat)}`;
         case 'relationshipAbove':
         case 'relationshipBelow':
             return `relationship is ${fmt(values.relationship)}`;

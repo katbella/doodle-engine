@@ -9,6 +9,7 @@
 import type {
     Location,
     Character,
+    PlayerCharacter,
     Item,
     Map,
     Dialogue,
@@ -37,6 +38,9 @@ export interface LocaleData {
  * All lookups are by ID using Record<id, entity> for O(1) access.
  */
 export interface ContentRegistry {
+    /** Player profile loaded from content/player.yaml */
+    player?: PlayerCharacter;
+
     /** All locations indexed by ID */
     locations: Record<string, Location>;
 

@@ -54,6 +54,8 @@ export function validateContent(
 
     // Check required fields first, so every later check can trust the shapes.
     errors.push(...validateEntityShapes(registry, fileMap));
+    errors.push(...validatePlayer(registry, fileMap, config));
+    errors.push(...validateCharacterStats(registry, fileMap));
     errors.push(...validateIdentifiers(registry, fileMap, config));
 
     // Validate dialogues
@@ -100,11 +102,109 @@ export function validateContent(
     return errors;
 }
 
+function validatePlayer(
+    registry: ContentRegistry,
+    fileMap: Map<string, string>,
+    config?: GameConfig
+): ValidationError[] {
+    const player = registry.player;
+    const errors: ValidationError[] = [];
+
+    if (
+        config?.playerCreatesProfile !== undefined &&
+        typeof config.playerCreatesProfile !== 'boolean'
+    ) {
+        errors.push({
+            file: 'content/game.yaml',
+            message: 'Game config playerCreatesProfile must be true or false',
+            suggestion: 'Set playerCreatesProfile to true or false',
+        });
+    }
+    if (!player) return errors;
+
+    const file = fileFor(fileMap, 'player', 'player');
+    if (
+        config?.playerCreatesProfile !== true &&
+        (typeof player.name !== 'string' || player.name === '')
+    ) {
+        errors.push({
+            file,
+            message: 'A developer-defined player must have a name',
+            suggestion:
+                'Add a name or enable playerCreatesProfile in game.yaml',
+        });
+    }
+    return errors;
+}
+
+function validateCharacterStats(
+    registry: ContentRegistry,
+    fileMap: Map<string, string>
+): ValidationError[] {
+    const errors: ValidationError[] = [];
+    const validate = (stats: unknown, file: string, subject: string) => {
+        if (stats === undefined) return;
+        if (!stats || typeof stats !== 'object' || Array.isArray(stats)) {
+            errors.push({
+                file,
+                message: `${subject} stats must be a key-value object`,
+                suggestion: 'Use stat keys with number or string values',
+            });
+            return;
+        }
+
+        for (const [key, entry] of Object.entries(stats)) {
+            if (!isValidIdentifier(key)) {
+                errors.push({
+                    file,
+                    message: `${subject} stat "${key}" must use only letters, numbers, and underscores`,
+                    suggestion:
+                        'Replace spaces, dashes, and punctuation with underscores',
+                });
+            }
+
+            if (typeof entry === 'number' || typeof entry === 'string') {
+                continue;
+            }
+            if (
+                !entry ||
+                typeof entry !== 'object' ||
+                Array.isArray(entry) ||
+                typeof (entry as any).name !== 'string' ||
+                (typeof (entry as any).value !== 'number' &&
+                    typeof (entry as any).value !== 'string')
+            ) {
+                errors.push({
+                    file,
+                    message: `${subject} stat "${key}" must have a display name and a number or string value`,
+                    suggestion: `Use "${key}: { name: ${key}, value: 0 }"`,
+                });
+            }
+        }
+    };
+
+    for (const character of Object.values(registry.characters)) {
+        validate(
+            character.stats,
+            fileFor(fileMap, 'characters', character.id),
+            `Character "${character.id}"`
+        );
+    }
+    if (registry.player) {
+        validate(
+            registry.player.stats,
+            fileFor(fileMap, 'player', 'player'),
+            'Player'
+        );
+    }
+    return errors;
+}
+
 // Required fields per entity type. These are the fields the engine reads on
 // every entity of that type; presentation extras like banners and music are
 // allowed to be absent.
 const REQUIRED_FIELDS: {
-    collection: keyof ContentRegistry;
+    collection: Exclude<keyof ContentRegistry, 'player'>;
     label: string;
     fields: string[];
 }[] = [
@@ -158,6 +258,14 @@ function validateIdentifiers(
         }>) {
             const id = String(entity.id);
             check(entity.id, `${label} id`, fileFor(fileMap, collection, id));
+            if (collection === 'characters' && id === 'player') {
+                errors.push({
+                    file: fileFor(fileMap, collection, id),
+                    message:
+                        'Character id "player" is reserved for the player profile',
+                    suggestion: 'Give this character a different id',
+                });
+            }
         }
     }
 
@@ -488,6 +596,18 @@ function validateConditionReferences(
             `Create character "${condition.characterId}" or update the condition`
         );
     } else if (
+        (condition.type === 'characterStatEquals' ||
+            condition.type === 'characterStatGreaterThan' ||
+            condition.type === 'characterStatLessThan') &&
+        hasValue(condition.characterId) &&
+        condition.characterId !== 'player' &&
+        !registry.characters[condition.characterId]
+    ) {
+        missing(
+            `condition "${condition.type}" references non-existent character "${condition.characterId}"`,
+            `Use "player", create character "${condition.characterId}", or update the condition`
+        );
+    } else if (
         (condition.type === 'relationshipAbove' ||
             condition.type === 'relationshipBelow') &&
         hasValue(condition.characterId) &&
@@ -655,15 +775,24 @@ function validateEffectReferences(
             effect.type === 'addToParty' ||
             effect.type === 'removeFromParty' ||
             effect.type === 'setRelationship' ||
-            effect.type === 'addRelationship' ||
-            effect.type === 'setCharacterStat' ||
-            effect.type === 'addCharacterStat') &&
+            effect.type === 'addRelationship') &&
         hasValue(effect.characterId) &&
         !registry.characters[effect.characterId]
     ) {
         missing(
             `effect "${effect.type}" references non-existent character "${effect.characterId}"`,
             `Create character "${effect.characterId}" or update the effect`
+        );
+    } else if (
+        (effect.type === 'setCharacterStat' ||
+            effect.type === 'addCharacterStat') &&
+        hasValue(effect.characterId) &&
+        effect.characterId !== 'player' &&
+        !registry.characters[effect.characterId]
+    ) {
+        missing(
+            `effect "${effect.type}" references non-existent character "${effect.characterId}"`,
+            `Use "player", create character "${effect.characterId}", or update the effect`
         );
     } else if (
         effect.type === 'setCharacterLocation' &&
@@ -848,6 +977,9 @@ const CONDITION_FIELDS: Record<string, string[]> = {
     atLocation: ['locationId'],
     characterAt: ['characterId', 'locationId'],
     characterInParty: ['characterId'],
+    characterStatEquals: ['characterId', 'stat', 'value'],
+    characterStatGreaterThan: ['characterId', 'stat', 'value'],
+    characterStatLessThan: ['characterId', 'stat', 'value'],
     relationshipAbove: ['characterId', 'value'],
     relationshipBelow: ['characterId', 'value'],
     itemAt: ['itemId', 'locationId'],
@@ -1186,6 +1318,42 @@ function validateLocalizationKeys(
         }
         if (isLocalizationKey(character.biography)) {
             checkKey(character.biography, character.id, 'characters');
+        }
+        if (isLocalizationKey(character.title)) {
+            checkKey(character.title, character.id, 'characters');
+        }
+        for (const stat of Object.values(character.stats ?? {})) {
+            if (typeof stat === 'object' && stat !== null) {
+                if (isLocalizationKey(stat.name)) {
+                    checkKey(stat.name, character.id, 'characters');
+                }
+                if (isLocalizationKey(stat.value)) {
+                    checkKey(stat.value, character.id, 'characters');
+                }
+            } else if (isLocalizationKey(stat)) {
+                checkKey(stat, character.id, 'characters');
+            }
+        }
+    }
+
+    const player = registry.player;
+    if (player) {
+        for (const field of [player.name, player.title, player.biography]) {
+            if (isLocalizationKey(field)) {
+                checkKey(field, 'player', 'player');
+            }
+        }
+        for (const stat of Object.values(player.stats ?? {})) {
+            if (typeof stat === 'object' && stat !== null) {
+                if (isLocalizationKey(stat.name)) {
+                    checkKey(stat.name, 'player', 'player');
+                }
+                if (isLocalizationKey(stat.value)) {
+                    checkKey(stat.value, 'player', 'player');
+                }
+            } else if (isLocalizationKey(stat)) {
+                checkKey(stat, 'player', 'player');
+            }
         }
     }
 

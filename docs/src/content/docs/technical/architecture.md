@@ -21,6 +21,7 @@ Game content is defined in YAML and `.dlg` files. At startup, it is loaded into 
 
 ```ts
 interface ContentRegistry {
+    player?: PlayerCharacter;
     locations: Record<string, Location>;
     characters: Record<string, Character>;
     items: Record<string, Item>;
@@ -39,6 +40,7 @@ Game state tracks everything that changes during play:
 
 ```ts
 interface GameState {
+    player: PlayerCharacterState;
     currentLocation: string;
     currentTime: { day: number; hour: number };
     flags: Record<string, boolean>;
@@ -66,6 +68,7 @@ The snapshot is computed from the current state and content registry. It looks u
 
 ```ts
 interface Snapshot {
+    player: SnapshotPlayerCharacter;
     location: SnapshotLocation;
     charactersHere: SnapshotCharacter[];
     itemsHere: SnapshotItem[];

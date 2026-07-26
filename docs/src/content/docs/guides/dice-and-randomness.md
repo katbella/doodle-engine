@@ -120,9 +120,10 @@ Effects inside an `IF` block run only when that condition passes. In the hidden 
 | `1 4 4`   | 4 on a d4        | 25%    |
 | `1 2 2`   | 2 on a coin flip | 50%    |
 
-## Variable interpolation
+## Text interpolation
 
-`{varName}` works anywhere in dialogue text, not just with rolls. Any variable in `state.variables` can be interpolated:
+`{varName}` works anywhere in dialogue text, not just with rolls. Any variable
+in `state.variables` can be interpolated:
 
 ```text
 # Show current gold
@@ -130,6 +131,17 @@ BARTENDER: "You've got {gold} gold on you. Enough for a drink?"
 
 # Show quest progress
 NARRATOR: "Reputation: {reputation}."
+
+# Show player profile text and character stats
+NARRATOR: "{player.name}, your strength is {player.stats.strength}."
+ELISA: "Ah, you're a {player.stats.class}!"
 ```
 
-If the variable doesn't exist, the placeholder is left as-is (`{gold}`).
+Profile fields use `{player.name}` and `{player.title}`. Character stats use
+`{characterId.stats.statKey}`, including `{player.stats.statKey}` for player
+stats. Numeric and string values are supported, and localized string stat
+values are resolved before display. Hidden underscore-prefixed stats can also
+be interpolated.
+
+Placeholders work in dialogue lines, choices, and notifications. If a variable,
+character, field, or stat does not exist, the placeholder is left as written.

@@ -1,5 +1,6 @@
 id: bartender
 name: "@character.bartender.name"
+title: ""
 biography: "@character.bartender.bio"
 portrait: ""
 location: tavern

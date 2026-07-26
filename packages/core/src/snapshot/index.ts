@@ -25,10 +25,12 @@ import type {
     SnapshotMap,
     SnapshotMapLocation,
     SnapshotInterlude,
+    SnapshotPlayerCharacter,
 } from '../types/snapshot';
-import { resolveText } from '../localization';
+import { resolveText, type TextCharacterMap } from '../localization';
 import { evaluateConditions } from '../conditions';
 import { resolveAssetPath } from '../assets/paths';
+import { statNameSources } from '../stats';
 
 // =============================================================================
 // UI String Defaults
@@ -56,6 +58,14 @@ export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.notes': 'Notes',
     'ui.characters': 'Characters',
     'ui.party': 'Party',
+    'ui.party_members': 'Party members',
+    'ui.previous_character': 'Previous character',
+    'ui.next_character': 'Next character',
+    'ui.create_player': 'Create your character',
+    'ui.player_name': 'Name',
+    'ui.player_title': 'Title',
+    'ui.player_biography': 'Biography',
+    'ui.begin_adventure': 'Begin adventure',
     'ui.resources': 'Resources',
     'ui.no_items': 'No items',
     'ui.location_banner': 'Location Banner',
@@ -138,9 +148,11 @@ export function buildSnapshot(
     // Get locale data for current language
     const localeData = registry.locales[state.currentLocale] ?? {};
 
-    // Helper to resolve localization keys and {varName} interpolation
+    const textCharacters = buildTextCharacterMap(state, registry);
+
+    // Helper to resolve localization keys and interpolation
     const resolve = (text: string) =>
-        resolveText(text, localeData, state.variables);
+        resolveText(text, localeData, state.variables, textCharacters);
 
     // Build resolved UI strings (with English fallbacks)
     const ui = buildUIStrings(localeData);
@@ -172,6 +184,8 @@ export function buildSnapshot(
 
     // Build party members
     const party = buildPartySnapshot(state, registry, resolve);
+
+    const player = buildPlayerSnapshot(state, registry, resolve);
 
     // Build inventory
     const inventory = buildInventorySnapshot(state, registry, resolve);
@@ -230,6 +244,7 @@ export function buildSnapshot(
     }
 
     return {
+        player,
         location,
         charactersHere,
         itemsHere,
@@ -251,6 +266,76 @@ export function buildSnapshot(
         pendingInterlude,
         ui,
         currentLocale: state.currentLocale,
+    };
+}
+
+function buildTextCharacterMap(
+    state: GameState,
+    registry: ContentRegistry
+): TextCharacterMap {
+    const characters: TextCharacterMap = {};
+    for (const [id, character] of Object.entries(registry.characters)) {
+        characters[id] = {
+            name: character.name,
+            title: character.title ?? '',
+            biography: character.biography ?? '',
+            stats: state.characterState[id]?.stats ?? {},
+        };
+    }
+
+    const playerState = state.player;
+    characters.player = {
+        name: playerState?.name ?? 'Player',
+        title: playerState?.title ?? '',
+        biography: playerState?.biography ?? '',
+        stats: playerState?.stats ?? {},
+        literalProfile: playerState?.playerCreatesProfile === true,
+    };
+    return characters;
+}
+
+function localizedStats(
+    values: Record<string, number | string>,
+    names: Record<string, string>,
+    resolve: (text: string) => string
+) {
+    const stats: Record<string, number | string> = {};
+    const statNames: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(values)) {
+        stats[key] = typeof value === 'string' ? resolve(value) : value;
+        statNames[key] = resolve(names[key] ?? key);
+    }
+    return { stats, statNames };
+}
+
+function buildPlayerSnapshot(
+    state: GameState,
+    registry: ContentRegistry,
+    resolve: (text: string) => string
+): SnapshotPlayerCharacter {
+    const playerState = state.player;
+    const playerDefinition = registry.player;
+    const playerCreated = playerState?.playerCreatesProfile === true;
+    const values = playerState?.stats ?? {};
+    const { stats, statNames } = localizedStats(
+        values,
+        statNameSources(playerDefinition?.stats),
+        resolve
+    );
+
+    const profileValue = (value: string | undefined) =>
+        playerCreated ? (value ?? '') : resolve(value ?? '');
+
+    return {
+        id: 'player',
+        name: profileValue(playerState?.name ?? 'Player'),
+        title: profileValue(playerState?.title),
+        biography: profileValue(playerState?.biography),
+        portrait: resolveAssetPath(playerState?.portrait, 'portrait'),
+        profileComplete: playerState?.profileComplete ?? true,
+        stats,
+        statNames,
     };
 }
 
@@ -309,12 +394,17 @@ function buildCharactersHereSnapshot(
                 charactersHere.push({
                     id: character.id,
                     name: resolve(character.name),
+                    title: resolve(character.title ?? ''),
                     biography: resolve(character.biography),
                     portrait: resolveAssetPath(character.portrait, 'portrait'),
                     location: characterState.location,
                     inParty: characterState.inParty,
                     relationship: characterState.relationship,
-                    stats: characterState.stats,
+                    ...localizedStats(
+                        characterState.stats,
+                        statNameSources(character.stats),
+                        resolve
+                    ),
                 });
             }
         }
@@ -466,12 +556,17 @@ function buildPartySnapshot(
                 party.push({
                     id: character.id,
                     name: resolve(character.name),
+                    title: resolve(character.title ?? ''),
                     biography: resolve(character.biography),
                     portrait: resolveAssetPath(character.portrait, 'portrait'),
                     location: characterState.location,
                     inParty: characterState.inParty,
                     relationship: characterState.relationship,
-                    stats: characterState.stats,
+                    ...localizedStats(
+                        characterState.stats,
+                        statNameSources(character.stats),
+                        resolve
+                    ),
                 });
             }
         }

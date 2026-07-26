@@ -50,6 +50,7 @@ export function DetailView({
 
 const SINGULAR: Record<SectionKey, string> = {
     dialogues: 'dialogue',
+    player: 'player',
     characters: 'character',
     locations: 'location',
     items: 'item',
@@ -68,6 +69,8 @@ function pickEntity(
     id: string
 ): object | undefined {
     switch (section) {
+        case 'player':
+            return registry.player;
         case 'characters':
             return registry.characters[id];
         case 'locations':

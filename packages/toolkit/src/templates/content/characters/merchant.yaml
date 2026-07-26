@@ -1,5 +1,6 @@
 id: merchant
 name: "@character.merchant.name"
+title: ""
 biography: "@character.merchant.bio"
 portrait: ""
 location: market

@@ -7,7 +7,7 @@
  * - Dialogue keywords: SPEAKER:, NARRATOR:, VOICE
  * - Choice blocks with conditions and effects
  * - Conditional blocks (IF/END)
- * - All 15 condition types
+ * - All supported condition types
  * - All 27 effect types
  * - @localization keys and "inline text"
  */
@@ -228,6 +228,32 @@ export function parseCondition(conditionStr: string): Condition {
             };
         case 'characterInParty':
             return { type: 'characterInParty', characterId: parts[1] };
+        case 'characterStatEquals':
+            if (parts.length > 4) {
+                throw new Error(
+                    `Condition "characterStatEquals" takes a single value; multi-word values are not supported. Use a single token or a @locale key.`
+                );
+            }
+            return {
+                type: 'characterStatEquals',
+                characterId: parts[1],
+                stat: parts[2],
+                value: isNaN(Number(parts[3])) ? parts[3] : Number(parts[3]),
+            };
+        case 'characterStatGreaterThan':
+            return {
+                type: 'characterStatGreaterThan',
+                characterId: parts[1],
+                stat: parts[2],
+                value: Number(parts[3]),
+            };
+        case 'characterStatLessThan':
+            return {
+                type: 'characterStatLessThan',
+                characterId: parts[1],
+                stat: parts[2],
+                value: Number(parts[3]),
+            };
         case 'relationshipAbove':
             return {
                 type: 'relationshipAbove',
