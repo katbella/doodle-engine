@@ -1,7 +1,7 @@
 /**
  * GameRenderer - Main component that renders the complete game UI
  *
- * Renders the game layout, dialogue, characters, and bottom-bar panels.
+ * Renders the game layout, dialogue, characters, and game menu panels.
  * Audio playback is NOT managed here. The wrapper (GameShell or custom)
  * is responsible for calling useAudioManager.
  *
@@ -50,7 +50,7 @@ type ActivePanel =
     | 'settings'
     | null;
 
-function BottomBarButton({
+function GameMenuButton({
     label,
     icon,
     onClick,
@@ -63,12 +63,12 @@ function BottomBarButton({
 }) {
     return (
         <button
-            className={`bottom-bar-button ${active ? 'active' : ''}`}
+            className={`game-menu-button ${active ? 'active' : ''}`}
             onClick={onClick}
             title={label}
         >
-            <span className="bottom-bar-icon" data-icon={icon} />
-            <span className="bottom-bar-label">{label}</span>
+            <span className="game-menu-icon" data-icon={icon} />
+            <span className="game-menu-label">{label}</span>
         </button>
     );
 }
@@ -162,7 +162,7 @@ function GameRendererInner({
             <NotificationArea notifications={snapshot.notifications} />
 
             <div className="game-layout">
-                <main className="game-main">
+                <main className="game-content">
                     <LocationView
                         ui={snapshot.ui}
                         location={snapshot.location}
@@ -191,7 +191,7 @@ function GameRendererInner({
                     )}
                 </main>
 
-                <aside className="game-sidebar">
+                <aside className="game-status">
                     <GameTime
                         ui={snapshot.ui}
                         time={snapshot.time}
@@ -249,8 +249,8 @@ function GameRendererInner({
                 </aside>
             </div>
 
-            <nav className="game-bottom-bar">
-                <BottomBarButton
+            <nav className="game-menu">
+                <GameMenuButton
                     label={uiText(snapshot.ui, 'ui.party')}
                     icon="party"
                     onClick={() =>
@@ -258,7 +258,7 @@ function GameRendererInner({
                     }
                     active={activePanel === 'party'}
                 />
-                <BottomBarButton
+                <GameMenuButton
                     label={uiText(snapshot.ui, 'ui.inventory')}
                     icon="inventory"
                     onClick={() =>
@@ -268,7 +268,7 @@ function GameRendererInner({
                     }
                     active={activePanel === 'inventory'}
                 />
-                <BottomBarButton
+                <GameMenuButton
                     label={uiText(snapshot.ui, 'ui.journal')}
                     icon="journal"
                     onClick={() =>
@@ -278,7 +278,7 @@ function GameRendererInner({
                     }
                     active={activePanel === 'journal'}
                 />
-                <BottomBarButton
+                <GameMenuButton
                     label={uiText(snapshot.ui, 'ui.notes')}
                     icon="notes"
                     onClick={() =>
@@ -287,7 +287,7 @@ function GameRendererInner({
                     active={activePanel === 'notes'}
                 />
                 {snapshot.map && (
-                    <BottomBarButton
+                    <GameMenuButton
                         label={uiText(snapshot.ui, 'ui.map')}
                         icon="map"
                         onClick={() =>
@@ -296,7 +296,7 @@ function GameRendererInner({
                         active={activePanel === 'map'}
                     />
                 )}
-                <BottomBarButton
+                <GameMenuButton
                     label={uiText(snapshot.ui, 'ui.save_load')}
                     icon="save"
                     onClick={() =>
@@ -307,7 +307,7 @@ function GameRendererInner({
                     active={activePanel === 'saveload'}
                 />
                 {audioSettings && (
-                    <BottomBarButton
+                    <GameMenuButton
                         label={uiText(snapshot.ui, 'ui.settings')}
                         icon="settings"
                         onClick={() =>

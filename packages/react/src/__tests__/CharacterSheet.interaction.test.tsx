@@ -56,7 +56,7 @@ describe('CharacterSheet', () => {
 });
 
 describe('GameRenderer party panel', () => {
-    it('opens from its own bottom-bar action and cycles through party profiles', async () => {
+    it('opens from its own game-menu action and cycles through party profiles', async () => {
         const user = userEvent.setup();
         const snapshot: Snapshot = {
             player: {
