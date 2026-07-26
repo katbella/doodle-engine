@@ -1,0 +1,197 @@
+/* ── Modal Dialogs ──────────────────────────────────────────────── */
+
+.modal-backdrop {
+    position: fixed;
+    z-index: var(--z-modal);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--bg) 68%, transparent);
+}
+
+.modal {
+    width: 460px;
+    max-width: 90vw;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-overlay);
+}
+
+/* A modal with a scrolling body (e.g. a searchable list) capped to the viewport. */
+.modal--tall {
+    max-height: 76vh;
+}
+
+.modal--about {
+    width: min(420px, calc(100vw - 32px));
+}
+
+.modal--update {
+    width: min(520px, calc(100vw - 32px));
+    gap: var(--space-4);
+}
+
+.about__version {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+}
+
+.about__copyright {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: var(--text-sm);
+}
+
+.update__checking {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-dim);
+    font-size: var(--text-base);
+}
+
+.update__version-summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.update__available-version,
+.update__current-version {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    font-weight: var(--fw-semibold);
+}
+
+.update__installed-version {
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+}
+
+.update__notes {
+    max-height: min(220px, 36vh);
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border-faint);
+    background: var(--surface-input);
+}
+
+.update__notes-title {
+    color: var(--text);
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
+}
+
+.update__notes-list {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 0;
+    padding-left: var(--space-4);
+    color: var(--text-dim);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    overflow-wrap: anywhere;
+}
+
+.modal--update .modal__actions {
+    margin-top: 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-faint);
+}
+
+.modal__title {
+    flex-shrink: 0;
+    font-weight: var(--fw-heavy);
+    font-size: var(--text-xl);
+}
+
+.modal__error {
+    padding: var(--space-3);
+    border: 1px solid var(--error);
+    background: var(--error-tint);
+    color: var(--text);
+    font-size: var(--text-sm);
+    line-height: var(--leading-body);
+    overflow-wrap: anywhere;
+}
+
+.modal__message {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--text-dim);
+}
+
+.modal__actions {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.modal .field__label {
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+}
+
+.field__input {
+    width: 100%;
+    height: 30px;
+    padding: 0 var(--space-2);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: var(--text-sm);
+}
+
+/* The picker's search is the modal's main control — full width, full size. */
+.locale-key-picker .field__input {
+    flex: 0 0 38px;
+    height: 38px;
+    padding: 0 var(--space-3);
+    font-size: var(--text-md);
+}
+
+.field__error {
+    margin-top: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--error);
+}
+
+.field__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.field__value {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.field--check {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text);
+}
+
+.field__check-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}

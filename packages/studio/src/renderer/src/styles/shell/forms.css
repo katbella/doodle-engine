@@ -1,0 +1,272 @@
+/* ── Entity, Locale, and Project Forms ──────────────────────────── */
+
+/* Full width so the scrollbar sits at the region's right edge; the readable
+   640px column is centered with side padding that grows on wider regions. */
+.form {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-4) max(var(--space-5), calc((100% - 640px) / 2));
+}
+
+.form__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+}
+
+.locale-editor {
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-4) var(--space-5);
+}
+
+.locale-editor__tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 960px;
+    margin: var(--space-3) 0;
+}
+
+.locale-editor__filter {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: var(--space-2);
+    min-width: 0;
+    color: var(--text-faint);
+}
+
+.locale-editor__add {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    max-width: 960px;
+    margin-bottom: var(--space-3);
+}
+
+.locale-editor__add .dlg__input {
+    width: min(420px, 100%);
+}
+
+.locale-editor__table {
+    display: flex;
+    flex-direction: column;
+    max-width: 960px;
+    border: 1px solid var(--border-faint);
+}
+
+.locale-editor__row {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 2fr) 24px;
+    align-items: start;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+}
+
+.locale-editor__row:last-child {
+    border-bottom: none;
+}
+
+.locale-editor__key {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-dim);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+}
+
+.locale-editor__value {
+    font-family: var(--font-ui);
+}
+
+.locale-editor__delete {
+    margin-top: var(--space-1);
+}
+
+.form__title {
+    font-size: var(--text-xl);
+    font-weight: var(--fw-semibold);
+    color: var(--text);
+}
+
+.form__kind {
+    font-size: var(--tag-size);
+    font-weight: var(--tag-weight);
+    text-transform: uppercase;
+    letter-spacing: var(--tag-track);
+    color: var(--text-faint);
+}
+
+.game-config {
+    gap: calc(var(--space-5) + var(--space-2));
+    padding: var(--space-5) max(var(--space-5), calc((100% - 960px) / 2));
+}
+
+.game-config__kind {
+    font-size: var(--text-base);
+    color: var(--text-dim);
+}
+
+.game-config__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+}
+
+.game-config__section + .game-config__section {
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border-faint);
+}
+
+.game-config__section-title,
+.game-config__subsection-title {
+    margin: 0;
+    color: var(--text);
+}
+
+.game-config__section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--fw-semibold);
+    line-height: var(--leading-tight);
+}
+
+.game-config__subsection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.game-config__subsection-title {
+    font-size: var(--text-md);
+    font-weight: var(--fw-semibold);
+}
+
+.game-config__starting-grid,
+.game-config__state-grid {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.game-config__starting-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.game-config__state-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.game-config .node-editor__grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: var(--space-4);
+}
+
+.game-config .field {
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.game-config .field__label {
+    font-size: var(--text-base);
+    font-weight: var(--fw-medium);
+}
+
+.game-config .field__hint {
+    font-size: var(--text-sm);
+}
+
+.game-config .dlg__input,
+.game-config .dlg__select {
+    min-width: 0;
+    height: 34px;
+    font-size: var(--text-md);
+}
+
+.game-config__starting-grid .dlg__select,
+.game-config__state-grid .dlg__select {
+    width: 100%;
+}
+
+.game-config .game-config__add-select {
+    width: auto;
+    min-width: 150px;
+}
+
+.game-config__state-grid .dlg__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(100px, 0.7fr) 24px;
+}
+
+.game-config .form__list {
+    gap: var(--space-2);
+}
+
+.game-config .form__list-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 32px;
+    padding: 3px 3px 3px var(--space-2);
+    font-size: var(--text-base);
+    background: var(--surface-input);
+    border-color: var(--border);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.field.field--inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 30px;
+    gap: var(--space-2);
+}
+
+/* The checkbox sits beside its label at its natural size, never full-width. */
+.field--inline input[type='checkbox'] {
+    width: auto;
+    flex: none;
+    margin: 0;
+}
+
+.field__labelrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+/* Label + "required" travel together on the left; toggles sit alone on the
+   right. Without this group, space-between scatters three children. */
+.field__labelgroup {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.field__label {
+    font-size: var(--text-sm);
+    color: var(--text-dim);
+}
+
+.field__req {
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+}
+
+.field__hint {
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+}

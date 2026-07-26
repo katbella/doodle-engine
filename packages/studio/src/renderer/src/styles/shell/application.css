@@ -1,0 +1,128 @@
+/* ── Application Frame and Top Bar ──────────────────────────────── */
+
+.app {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto min(var(--dock-h, 220px), 55vh);
+    background: var(--bg);
+}
+
+.topbar {
+    position: relative;
+    z-index: var(--z-menu);
+    min-height: 46px;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(220px, 360px) auto;
+    align-items: center;
+    gap: var(--space-4);
+    padding: 0 var(--space-4);
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--border);
+}
+
+.topbar__project,
+.topbar__actions {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.topbar__project {
+    gap: var(--space-2);
+}
+
+.topbar__actions {
+    justify-content: flex-end;
+    gap: var(--space-2);
+    white-space: nowrap;
+}
+
+.topbar__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: var(--fw-heavy);
+    font-size: var(--text-base);
+    letter-spacing: -0.01em;
+}
+
+.topbar__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.topbar__nav > .tooltip:first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar__nav > .tooltip:first-child > .topbar__palette {
+    width: 100%;
+}
+
+.topbar__palette {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    text-align: left;
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+}
+
+.topbar__flags {
+    flex: none;
+    white-space: nowrap;
+}
+
+.topbar__flags-count {
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.topbar__palette:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+}
+
+.topbar__palette kbd {
+    margin-left: auto;
+    padding: 1px 6px;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+    background: var(--surface-hover);
+    border: 1px solid var(--border-faint);
+}
+
+@media (max-width: 1180px) {
+    .topbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-2) var(--space-3);
+        padding-top: var(--space-2);
+        padding-bottom: var(--space-2);
+    }
+
+    .topbar__project {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .topbar__actions {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .topbar__nav {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}

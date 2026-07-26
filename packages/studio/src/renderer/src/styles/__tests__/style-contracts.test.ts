@@ -3,12 +3,20 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const stylesDir = fileURLToPath(new URL('..', import.meta.url));
-const shell = readFileSync(`${stylesDir}/shell.css`, 'utf8');
+const shellEntry = readFileSync(`${stylesDir}/shell.css`, 'utf8');
+const shell = [
+    shellEntry,
+    ...[...shellEntry.matchAll(/@import\s+['"](.+)['"];/g)].map((match) =>
+        readFileSync(`${stylesDir}/${match[1]}`, 'utf8')
+    ),
+].join('\n');
 const tokens = readFileSync(`${stylesDir}/tokens.css`, 'utf8');
+const themes = readFileSync(`${stylesDir}/themes.css`, 'utf8');
+const globals = readFileSync(`${stylesDir}/globals.css`, 'utf8');
 
 describe('Studio style contracts', () => {
     it('defines every custom property used by the stylesheets', () => {
-        const source = `${tokens}\n${shell}`;
+        const source = `${tokens}\n${themes}\n${globals}\n${shell}`;
         const definitions = new Set(
             [...source.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(
                 (match) => match[1]

@@ -1,0 +1,111 @@
+/**
+ * Doodle Studio Global Styles
+ *
+ * Element defaults, accessibility behavior, shared utilities, and scrollbars.
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    font-weight: var(--fw-normal);
+    line-height: var(--leading-body);
+    /* Deliberately no -webkit-font-smoothing: grayscale renders the UI too thin
+       on the dark theme. */
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+}
+
+/* Chrome isn't selectable; text content stays selectable so it can be copied. */
+button,
+.rail__section,
+.tab,
+.dock__tab,
+.seg__opt {
+    user-select: none;
+}
+
+::selection {
+    background: var(--accent-tint);
+}
+
+button {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.scroll {
+    overflow: auto;
+}
+
+/* One visible, themed scrollbar everywhere, so it shows in light mode too. */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Monaco draws custom slider elements instead of native scrollbars. Keep
+   their track, thumb, hover, and active states in the Studio theme system. */
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider {
+    background: var(--scrollbar-thumb);
+    border-radius: 6px;
+}
+
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider:hover,
+.monaco-editor .monaco-scrollable-element > .scrollbar > .slider.active {
+    background: var(--scrollbar-thumb-hover);
+}
+
+.monaco-editor ::-webkit-scrollbar-thumb {
+    background: initial;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+.lucide {
+    flex: none;
+    stroke-width: 2px;
+    vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
