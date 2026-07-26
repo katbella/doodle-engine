@@ -170,6 +170,7 @@ export function ConditionEffectBuilder({
                             arg={arg}
                             value={draft.values[arg.name] ?? ''}
                             registry={registry}
+                            allowsPlayer={arg.allowsPlayer === true}
                             questId={draft.values.questId}
                             projectDir={projectDir}
                             nameCatalog={nameCatalog}
@@ -236,6 +237,7 @@ function ArgField({
     arg,
     value,
     registry,
+    allowsPlayer,
     questId,
     projectDir,
     assetKind,
@@ -246,6 +248,7 @@ function ArgField({
     arg: ArgDescriptor;
     value: string;
     registry: ContentRegistry;
+    allowsPlayer: boolean;
     /** The quest chosen in this same builder, so stage lists the right stages. */
     questId?: string;
     projectDir?: string;
@@ -331,6 +334,7 @@ function ArgField({
                 target
             ] ?? {}
         );
+        if (allowsPlayer) ids.unshift('player');
         return (
             <label className="builder__arg">
                 {label}

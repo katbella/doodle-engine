@@ -11,6 +11,18 @@ import type { GameState } from '../types/state';
 // Test fixtures
 function createTestRegistry(): ContentRegistry {
     return {
+        player: {
+            stats: {
+                class: {
+                    name: '@stat.class',
+                    value: '@class.ranger',
+                },
+                _storyScore: {
+                    name: 'Story score',
+                    value: 2,
+                },
+            },
+        },
         locations: {
             tavern: {
                 id: 'tavern',
@@ -33,6 +45,7 @@ function createTestRegistry(): ContentRegistry {
             bartender: {
                 id: 'bartender',
                 name: '@character.bartender.name',
+                title: '@character.bartender.title',
                 biography: '@character.bartender.bio',
                 portrait: 'bartender.png',
                 location: 'tavern',
@@ -42,11 +55,14 @@ function createTestRegistry(): ContentRegistry {
             pixel_the_dog: {
                 id: 'pixel_the_dog',
                 name: '@character.pixel.name',
+                title: '@character.pixel.title',
                 biography: '@character.pixel.bio',
                 portrait: 'pixel.png',
                 location: 'camp',
                 dialogue: 'pixel_greeting',
-                stats: {},
+                stats: {
+                    level: { name: '@stat.level', value: 3 },
+                },
             },
         },
         items: {
@@ -134,6 +150,7 @@ function createTestRegistry(): ContentRegistry {
                 category: 'places',
             },
         },
+        interludes: {},
         locales: {
             en: {
                 'location.tavern.name': 'The Salty Dog',
@@ -141,8 +158,10 @@ function createTestRegistry(): ContentRegistry {
                 'location.market.name': 'Central Market',
                 'location.market.description': 'A bustling marketplace',
                 'character.bartender.name': 'Marcus',
+                'character.bartender.title': 'Innkeeper',
                 'character.bartender.bio': 'A gruff bartender',
                 'character.pixel.name': 'Pixel the Dog',
+                'character.pixel.title': 'Faithful Hound',
                 'character.pixel.bio': 'A loyal companion',
                 'item.rusty_key.name': 'Rusty Key',
                 'item.rusty_key.description': 'An old rusty key',
@@ -159,6 +178,9 @@ function createTestRegistry(): ContentRegistry {
                 'journal.tavern.title': 'The Salty Dog',
                 'journal.tavern.text': 'I found a tavern',
                 'notification.test': 'Test notification',
+                'stat.class': 'Class',
+                'stat.level': 'Level',
+                'class.ranger': 'Ranger',
             },
         },
     };
@@ -166,6 +188,15 @@ function createTestRegistry(): ContentRegistry {
 
 function createTestState(): GameState {
     return {
+        player: {
+            playerCreatesProfile: true,
+            name: 'Avery',
+            title: 'Warden',
+            biography: 'A traveler.',
+            portrait: '',
+            profileComplete: true,
+            stats: { class: '@class.ranger', _storyScore: 2 },
+        },
         currentLocation: 'tavern',
         currentTime: { day: 1, hour: 14 },
         flags: {},
@@ -213,6 +244,27 @@ describe('Snapshot Builder', () => {
             expect(snapshot).toBeDefined();
             expect(snapshot.location).toBeDefined();
             expect(snapshot.time).toEqual({ day: 1, hour: 14 });
+            expect(snapshot.player.name).toBe('Avery');
+        });
+
+        it('builds a text-only interlude without a background', () => {
+            const state = {
+                ...createTestState(),
+                pendingInterlude: 'text_only',
+            };
+            const registry = createTestRegistry();
+            registry.interludes.text_only = {
+                id: 'text_only',
+                text: 'The room falls silent.',
+            };
+
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.pendingInterlude).toMatchObject({
+                id: 'text_only',
+                text: 'The room falls silent.',
+            });
+            expect(snapshot.pendingInterlude?.background).toBeUndefined();
         });
 
         it('should resolve location localization', () => {
@@ -232,6 +284,19 @@ describe('Snapshot Builder', () => {
             expect(snapshot.charactersHere).toHaveLength(1);
             expect(snapshot.charactersHere[0].id).toBe('bartender');
             expect(snapshot.charactersHere[0].name).toBe('Marcus');
+            expect(snapshot.charactersHere[0].title).toBe('Innkeeper');
+        });
+
+        it('localizes stat names and string values', () => {
+            const snapshot = buildSnapshot(
+                createTestState(),
+                createTestRegistry()
+            );
+
+            expect(snapshot.player.statNames.class).toBe('Class');
+            expect(snapshot.player.stats.class).toBe('Ranger');
+            expect(snapshot.party[0].statNames.level).toBe('Level');
+            expect(snapshot.party[0].stats.level).toBe(3);
         });
 
         it('should include items at current location', () => {
@@ -498,6 +563,68 @@ describe('Snapshot Builder', () => {
     });
 
     describe('variable interpolation', () => {
+        it('substitutes player profile fields and character stat values', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'bartender_greeting',
+                    nodeId: 'intro',
+                },
+            };
+            const registry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    bartender_greeting: {
+                        id: 'bartender_greeting',
+                        startNode: 'intro',
+                        nodes: [
+                            {
+                                id: 'intro',
+                                speaker: 'bartender',
+                                text: 'Welcome, {player.name}. You are a {player.stats.class}; Pixel is level {pixel_the_dog.stats.level}.',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            };
+
+            expect(buildSnapshot(state, registry).dialogue?.text).toBe(
+                'Welcome, Avery. You are a Ranger; Pixel is level 3.'
+            );
+        });
+
+        it('leaves missing character stat placeholders unchanged', () => {
+            const state = {
+                ...createTestState(),
+                dialogueState: {
+                    dialogueId: 'bartender_greeting',
+                    nodeId: 'intro',
+                },
+            };
+            const registry = {
+                ...createTestRegistry(),
+                dialogues: {
+                    bartender_greeting: {
+                        id: 'bartender_greeting',
+                        startNode: 'intro',
+                        nodes: [
+                            {
+                                id: 'intro',
+                                speaker: 'bartender',
+                                text: '{player.stats.missing}',
+                                choices: [],
+                            },
+                        ],
+                    },
+                },
+            };
+
+            expect(buildSnapshot(state, registry).dialogue?.text).toBe(
+                '{player.stats.missing}'
+            );
+        });
+
         it('should substitute {varName} placeholders in dialogue text', () => {
             const state = {
                 ...createTestState(),

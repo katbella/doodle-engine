@@ -3,7 +3,6 @@
  */
 
 import type { AssetLoadingState } from '@doodle-engine/core';
-import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
 import { uiText } from '../uiText';
 
@@ -51,8 +50,7 @@ export function LoadingScreen({
     startLabel = 'Start game',
     className = '',
 }: LoadingScreenProps) {
-    const backgroundUrl = useAssetUrl(background);
-    const bgStyle = screenBackgroundStyle(backgroundUrl);
+    const bgStyle = screenBackgroundStyle(background ?? '');
 
     const percent = Math.round(state.overallProgress * 100);
     const label = phaseLabel(state.phase, ui);

@@ -10,6 +10,7 @@ import type { SectionKey, Tab } from '../types';
  * their paths are derived by convention instead.
  */
 const SECTION_TO_COLLECTION: Partial<Record<SectionKey, string>> = {
+    player: 'player',
     dialogues: 'dialogues',
     characters: 'characters',
     locations: 'locations',
@@ -36,6 +37,7 @@ export function sectionFileKey(
  * the map) are derived by convention so a broken file can still be opened.
  */
 export function filePathFor(project: OpenProject, tab: Tab): string | null {
+    if (tab.section === 'player') return 'content/player.yaml';
     if (tab.section === 'config') return 'content/game.yaml';
     if (tab.section === 'locales') {
         return `content/locales/${tab.itemId}.yaml`;
@@ -61,6 +63,7 @@ const DIR_TO_SECTION: Record<string, SectionKey> = {
 };
 
 const COLLECTION_TO_SECTION: Record<string, SectionKey> = {
+    player: 'player',
     dialogues: 'dialogues',
     characters: 'characters',
     locations: 'locations',
@@ -82,6 +85,9 @@ export function locateFile(
     const f = file.replace(/\\/g, '/');
 
     if (f === 'content/game.yaml') return { section: 'config', itemId: 'game' };
+    if (f === 'content/player.yaml') {
+        return { section: 'player', itemId: 'player' };
+    }
 
     const dlg = f.match(/content\/dialogues\/(.+)\.dlg$/);
     if (dlg) return { section: 'dialogues', itemId: dlg[1] };

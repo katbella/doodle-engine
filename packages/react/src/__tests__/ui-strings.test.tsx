@@ -54,12 +54,14 @@ describe('built-in labels come from ui strings', () => {
                     {
                         id: 'a',
                         name: 'Anna',
+                        title: '',
                         portrait: '',
                         biography: '',
                         location: 'town',
                         inParty: false,
                         relationship: 0,
                         stats: {},
+                        statNames: {},
                     },
                 ]}
                 onTalkTo={() => {}}

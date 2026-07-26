@@ -245,7 +245,7 @@ describe('GameShell player journeys', () => {
         expect(screen.getByText('Sin notas')).toBeTruthy();
     });
 
-    it('opens, dismisses, and restores focus for every bottom-bar panel', async () => {
+    it('opens, dismisses, and restores focus for every game-menu panel', async () => {
         const user = await startGame();
         const panels = [
             'Inventory',

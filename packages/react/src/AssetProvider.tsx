@@ -9,8 +9,6 @@
  */
 
 import {
-    createContext,
-    useContext,
     useState,
     useEffect,
     useCallback,
@@ -24,32 +22,6 @@ import type {
     AssetEntry,
 } from '@doodle-engine/core';
 import { createAssetLoader } from '@doodle-engine/core';
-
-export interface AssetContextValue {
-    /** Current loading state */
-    state: AssetLoadingState;
-    /** Get URL for an asset (returns the path, cached by the loader) */
-    getAssetUrl: (path: string) => string;
-    /** Check if a specific asset is ready */
-    isReady: (path: string) => boolean;
-    /** Prefetch assets for upcoming content */
-    prefetch: (paths: string[]) => void;
-    /** The underlying loader instance */
-    loader: AssetLoader;
-}
-
-export const AssetContext = createContext<AssetContextValue | null>(null);
-
-export function useAssetContext(): AssetContextValue {
-    const ctx = useContext(AssetContext);
-    if (!ctx)
-        throw new Error('useAssetContext must be used within AssetProvider');
-    return ctx;
-}
-
-export function useOptionalAssetContext(): AssetContextValue | null {
-    return useContext(AssetContext);
-}
 
 export interface AssetProviderProps {
     /** Asset manifest (from api/manifest or bundled) */
@@ -93,7 +65,6 @@ export function AssetProvider({
 
     const [state, setStateInternal] = useState<AssetLoadingState>(IDLE_STATE);
     const [allDone, setAllDone] = useState(false);
-    const [readyPaths, setReadyPaths] = useState<Set<string>>(new Set());
 
     const setState = useCallback(
         (next: AssetLoadingState) => {
@@ -173,12 +144,6 @@ export function AssetProvider({
 
                 if (cancelled) return;
 
-                setReadyPaths((prev) => {
-                    const next = new Set(prev);
-                    shellPaths.forEach((p) => next.add(p));
-                    return next;
-                });
-
                 // ── Phase: loading-game ───────────────────────────────────────
                 setState({
                     phase: 'loading-game',
@@ -216,12 +181,6 @@ export function AssetProvider({
 
                 if (cancelled) return;
 
-                setReadyPaths((prev) => {
-                    const next = new Set(prev);
-                    gamePaths.forEach((p) => next.add(p));
-                    return next;
-                });
-
                 setState({
                     phase: 'complete',
                     bytesLoaded: manifest.totalSize,
@@ -257,41 +216,11 @@ export function AssetProvider({
         };
     }, [manifest, loader, setState]);
 
-    const getAssetUrl = useCallback(
-        (path: string) => loader.getUrl(path),
-        [loader]
-    );
-
-    const isReady = useCallback(
-        (path: string) => readyPaths.has(path),
-        [readyPaths]
-    );
-
-    const prefetch = useCallback(
-        (paths: string[]) => loader.prefetch(paths),
-        [loader]
-    );
-
-    const ctx: AssetContextValue = {
-        state,
-        getAssetUrl,
-        isReady,
-        prefetch,
-        loader,
-    };
-
     // A shell may keep the completed loading screen mounted until the player
     // explicitly continues, which also provides a browser audio gesture.
     if (!allDone || !readyToContinue) {
-        const loadingNode = renderLoading ? renderLoading(state) : null;
-        return (
-            <AssetContext.Provider value={ctx}>
-                {loadingNode}
-            </AssetContext.Provider>
-        );
+        return renderLoading ? renderLoading(state) : null;
     }
 
-    return (
-        <AssetContext.Provider value={ctx}>{children}</AssetContext.Provider>
-    );
+    return <>{children}</>;
 }

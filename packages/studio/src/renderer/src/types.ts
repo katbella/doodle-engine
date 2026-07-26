@@ -1,5 +1,6 @@
 export type SectionKey =
     | 'dialogues'
+    | 'player'
     | 'characters'
     | 'locations'
     | 'items'

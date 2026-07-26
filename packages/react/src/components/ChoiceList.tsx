@@ -4,6 +4,7 @@
 
 import type { SnapshotChoice } from '@doodle-engine/core';
 import { useInputAction, type InputCommand } from '../input/InputRouter';
+import { FormattedText } from './FormattedText';
 
 export interface ChoiceListProps {
     choices: SnapshotChoice[];
@@ -96,7 +97,7 @@ export function ChoiceList({
                     className="choice-button"
                     onClick={() => onSelectChoice(choice.id)}
                 >
-                    {choice.text}
+                    <FormattedText text={choice.text} />
                 </button>
             ))}
         </div>

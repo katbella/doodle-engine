@@ -5,7 +5,6 @@
 import { useState } from 'react';
 import type { SnapshotMap } from '@doodle-engine/core';
 import { formatHour } from './GameTime';
-import { AssetImage } from './AssetImage';
 import { DialogOverlay } from './DialogOverlay';
 import { uiText } from '../uiText';
 
@@ -108,7 +107,7 @@ export function MapView({
 
             <div className="map-container" style={{ position: 'relative' }}>
                 {map.image && (
-                    <AssetImage
+                    <img
                         src={map.image}
                         alt={map.name}
                         className="map-image"

@@ -42,8 +42,8 @@
     --doodle-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
 
     /* Layout dimensions */
-    --doodle-bottom-bar-height: 64px;
-    --doodle-sidebar-width: 200px;
+    --doodle-game-menu-size: 64px;
+    --doodle-game-status-size: 200px;
 }
 
 /* ── Reset ────────────────────────────────────────────────────────── */
@@ -65,9 +65,9 @@ body {
 
 .game-renderer { }
 .game-layout { }
-.game-main { }
-.game-sidebar { }
-.game-bottom-bar { }
+.game-content { }
+.game-status { }
+.game-menu { }
 
 /* ── Location ─────────────────────────────────────────────────────── */
 
@@ -118,6 +118,28 @@ body {
 .party-portrait-placeholder { }
 .party-name { }
 
+/* ── Character Sheet ──────────────────────────────────────────────── */
+
+.character-sheet { }
+.character-sheet-header { }
+.character-sheet-portrait { }
+.character-sheet-portrait-image { }
+.character-sheet-portrait-placeholder { }
+.character-sheet-identity { }
+.character-sheet-title { }
+.character-sheet-biography { }
+.character-sheet-stats { }
+.character-sheet-stat { }
+.character-sheet-navigation { }
+.player-emblem { }
+
+/* ── Player Setup ─────────────────────────────────────────────────── */
+
+.player-setup-overlay { }
+.player-setup { }
+.player-setup-form { }
+.player-setup-emblem { }
+
 /* ── Resources ────────────────────────────────────────────────────── */
 
 .resources-panel { }
@@ -126,11 +148,11 @@ body {
 .resource-name { }
 .resource-value { }
 
-/* ── Bottom Bar ───────────────────────────────────────────────────── */
+/* ── Game Menu ────────────────────────────────────────────────────── */
 
-.bottom-bar-button { }
-.bottom-bar-icon { }
-.bottom-bar-label { }
+.game-menu-button { }
+.game-menu-icon { }
+.game-menu-label { }
 
 /* ── Panels / Overlays ────────────────────────────────────────────── */
 

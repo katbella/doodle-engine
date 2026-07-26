@@ -11,11 +11,14 @@ import {
     compareVersions,
     decideReleaseVersion,
     latestCompletedStudioVersion,
+    normalizeReleaseSummary,
     parseReleaseBranch,
+    parseReleaseSummary,
     parseReleaseTitle,
     parseVersion,
     releaseBranch,
     releaseBumpKind,
+    releasePullRequestBody,
     releaseTitle,
     sharedManifestVersion,
     validatePackedPackage,
@@ -109,6 +112,24 @@ test('names the release branch and pull request after the version', () => {
     assert.equal(parseReleaseTitle('Release Doodle Engine 0.3.0-beta.1'), null);
     assert.equal(parseReleaseBranch(''), null);
     assert.equal(parseReleaseBranch(undefined), null);
+});
+
+test('stores the release summary in the release pull request', () => {
+    const summary = normalizeReleaseSummary(
+        `  ${'A detailed release summary '.repeat(12)}
+        with its full ending.  `
+    );
+    const body = releasePullRequestBody('0.3.0', '0.2.9', summary);
+
+    assert.ok(summary.length > 200);
+    assert.equal(parseReleaseSummary(body), summary);
+    assert.match(body, /^## Release summary\n\nA detailed release summary/);
+    assert.match(body, /\n\n## Release details\n/);
+    assert.throws(() => normalizeReleaseSummary(' \n '), /must not be empty/);
+    assert.throws(
+        () => parseReleaseSummary('## Release details\n\nNo summary here.'),
+        /missing its release summary/
+    );
 });
 
 test('recognizes patch, minor, and major increments only', () => {

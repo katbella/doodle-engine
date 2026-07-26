@@ -28,7 +28,7 @@ ambient: fire_crackling.ogg
 | `id`          | `string` | Unique identifier              |
 | `name`        | `string` | Display name (supports `@key`) |
 | `description` | `string` | Text shown at this location    |
-| `banner`      | `string` | Banner image filename                      |
+| `banner`      | `string` | Banner image filename          |
 | `music`       | `string` | Background music filename      |
 | `ambient`     | `string` | Ambient sound filename         |
 
@@ -39,22 +39,88 @@ ambient: fire_crackling.ogg
 ```yaml
 id: bartender
 name: '@character.bartender.name'
+title: '@character.bartender.title'
 biography: '@character.bartender.bio'
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
-stats: {}
+stats:
+    strength:
+        name: '@stat.strength'
+        value: 16.2
+    class:
+        name: '@stat.class'
+        value: '@class.ranger'
 ```
 
-| Field       | Type                      | Description                    |
-| ----------- | ------------------------- | ------------------------------ |
-| `id`        | `string`                  | Unique identifier              |
-| `name`      | `string`                  | Display name (supports `@key`) |
-| `biography` | `string`                  | Character background text      |
-| `portrait`  | `string`                  | Portrait image filename                      |
-| `location`  | `string`                  | Starting location ID           |
-| `dialogue`  | `string`                  | Dialogue ID for conversations  |
-| `stats`     | `Record<string, unknown>` | Stats for game-specific data   |
+| Field       | Type                            | Description                        |
+| ----------- | ------------------------------- | ---------------------------------- |
+| `id`        | `string`                        | Unique identifier                  |
+| `name`      | `string`                        | Display name (supports `@key`)     |
+| `title`     | `string`                        | Optional title (supports `@key`)   |
+| `biography` | `string`                        | Character background text          |
+| `portrait`  | `string`                        | Portrait image filename            |
+| `location`  | `string`                        | Starting location ID               |
+| `dialogue`  | `string`                        | Dialogue ID for conversations      |
+| `stats`     | `Record<string, CharacterStat>` | Numeric or string character traits |
+
+Each stat has a stable key, a player-facing `name`, and a numeric or string
+`value`. Both the name and a string value support `@key` localization. Decimal
+numbers are valid. Prefix a stat key with `_` to keep it off the built-in
+character sheet while retaining it for conditions, effects, and text
+interpolation.
+
+The shorter `strength: 16` form is also accepted. Its key becomes the display
+name.
+
+## PlayerCharacter
+
+**File:** `content/player.yaml`
+
+The player is defined separately from NPCs. It does not have a location,
+dialogue, relationship, or party-membership field.
+
+For a profile supplied by the game:
+
+```yaml
+name: '@player.name'
+title: '@player.title'
+biography: '@player.biography'
+portrait: hero.png
+stats:
+    strength:
+        name: '@stat.strength'
+        value: 16
+```
+
+The same file can provide the replaceable profile text used by the project
+template:
+
+```yaml
+name: '@player.name'
+title: ''
+biography: ''
+portrait: ''
+stats:
+    class:
+        name: '@stat.class'
+        value: '@class.ranger'
+```
+
+| Field       | Type                            | Description                                |
+| ----------- | ------------------------------- | ------------------------------------------ |
+| `name`      | `string`                        | Optional fixed name (supports `@key`)      |
+| `title`     | `string`                        | Optional fixed title (supports `@key`)     |
+| `biography` | `string`                        | Optional fixed biography (supports `@key`) |
+| `portrait`  | `string`                        | Optional fixed portrait filename           |
+| `stats`     | `Record<string, CharacterStat>` | Stats defined by the game                  |
+
+The profile mode is selected by `playerCreatesProfile` in `content/game.yaml`.
+When it is `true`, the built-in renderer asks for a name, title, and biography;
+only the name is required. Those entered values replace the corresponding
+profile text. The modal uses its generic player emblem and does not provide
+portrait uploads. When the flag is false, the profile fields from `player.yaml`
+are used directly. Stats always come from `player.yaml`.
 
 ## Item
 
@@ -98,13 +164,13 @@ locations:
       y: 200
 ```
 
-| Field       | Type            | Description                        |
-| ----------- | --------------- | ---------------------------------- |
-| `id`        | `string`        | Unique identifier                  |
-| `name`      | `string`        | Display name (supports `@key`)     |
-| `image`     | `string`        | Map background image filename                      |
+| Field       | Type            | Description                                                                             |
+| ----------- | --------------- | --------------------------------------------------------------------------------------- |
+| `id`        | `string`        | Unique identifier                                                                       |
+| `name`      | `string`        | Display name (supports `@key`)                                                          |
+| `image`     | `string`        | Map background image filename                                                           |
 | `scale`     | `number`        | Pixels per hour of travel. Must be greater than zero. Higher values mean faster travel. |
-| `locations` | `MapLocation[]` | Location markers                   |
+| `locations` | `MapLocation[]` | Location markers                                                                        |
 
 ### MapLocation
 
@@ -184,7 +250,7 @@ text: |
 | Field               | Type          | Required | Description                                                          |
 | ------------------- | ------------- | -------- | -------------------------------------------------------------------- |
 | `id`                | `string`      | Yes      | Unique identifier                                                    |
-| `background`        | `string`      | Yes      | Background image filename                                            |
+| `background`        | `string`      | No       | Optional background image filename                                   |
 | `text`              | `string`      | Yes      | Narrative text (supports `@key`)                                     |
 | `banner`            | `string`      | No       | Optional decorative frame/border image                               |
 | `music`             | `string`      | No       | Music track to play                                                  |
@@ -203,6 +269,7 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 **File:** `content/game.yaml`
 
 ```yaml
+playerCreatesProfile: true
 startLocation: tavern
 startTime:
     day: 1
@@ -215,14 +282,19 @@ startVariables:
 startInventory: []
 ```
 
-| Field            | Type                               | Description                     |
-| ---------------- | ---------------------------------- | ------------------------------- |
-| `shell?`         | `ShellConfig`                      | Shell screen configuration      |
-| `startLocation`  | `string`                           | Starting location ID            |
-| `startTime`      | `{ day: number, hour: number }`    | Starting time                   |
-| `startFlags`     | `Record<string, boolean>`          | Initial flags                   |
-| `startVariables` | `Record<string, number \| string>` | Initial variables               |
-| `startInventory` | `string[]`                         | Item IDs the player starts with |
+| Field                  | Type                               | Description                                                |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| `playerCreatesProfile` | `boolean`                          | Ask the player for profile text in the built-in renderer   |
+| `shell?`               | `ShellConfig`                      | Shell screen configuration                                 |
+| `startLocation`        | `string`                           | Starting location ID                                       |
+| `startTime`            | `{ day: number, hour: number }`    | Starting time                                              |
+| `startFlags`           | `Record<string, boolean>`          | Initial flags                                              |
+| `startVariables`       | `Record<string, number \| string>` | Initial variables                                          |
+| `startInventory`       | `string[]`                         | Item IDs the player starts with                            |
+
+`playerCreatesProfile` defaults to `false`. It controls how the player profile
+is initialized; the profile content and starting stats remain in
+`content/player.yaml`.
 
 ## Locale
 

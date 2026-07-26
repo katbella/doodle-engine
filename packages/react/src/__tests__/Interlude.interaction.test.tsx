@@ -3,8 +3,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AssetContextValue } from '../AssetProvider';
-import { AssetContext } from '../AssetProvider';
 import { AudioSettingsContext } from '../AudioSettingsContext';
 import { Interlude } from '../components/Interlude';
 import { InputProvider } from '../input/InputRouter';
@@ -45,59 +43,58 @@ const interlude = {
     sounds: ['/wind.ogg', '/rain.ogg'],
 };
 
-function renderInterlude(onDismiss = vi.fn()) {
-    const assetContext: AssetContextValue = {
-        state: {
-            phase: 'complete',
-            bytesLoaded: 1,
-            bytesTotal: 1,
-            assetsLoaded: 1,
-            assetsTotal: 1,
-            progress: 1,
-            overallProgress: 1,
-            currentAsset: null,
-            error: null,
-        },
-        getAssetUrl: (path) => `/cached${path}`,
-        isReady: () => true,
-        prefetch: () => {},
-        loader: {} as AssetContextValue['loader'],
-    };
+function renderInterlude(
+    onDismiss = vi.fn(),
+    value: Parameters<typeof Interlude>[0]['interlude'] = interlude
+) {
     return render(
         <InputProvider>
-            <AssetContext.Provider value={assetContext}>
-                <AudioSettingsContext.Provider
-                    value={{
-                        masterVolume: 0.5,
-                        musicVolume: 0.4,
-                        soundVolume: 0.6,
-                        voiceVolume: 0.8,
-                        setMasterVolume: vi.fn(),
-                        setMusicVolume: vi.fn(),
-                        setSoundVolume: vi.fn(),
-                        setVoiceVolume: vi.fn(),
-                    }}
-                >
-                    <Interlude
-                        interlude={interlude}
-                        onDismiss={onDismiss}
-                        ui={{ 'ui.skip': 'Omitir' }}
-                    />
-                </AudioSettingsContext.Provider>
-            </AssetContext.Provider>
+            <AudioSettingsContext.Provider
+                value={{
+                    masterVolume: 0.5,
+                    musicVolume: 0.4,
+                    soundVolume: 0.6,
+                    voiceVolume: 0.8,
+                    setMasterVolume: vi.fn(),
+                    setMusicVolume: vi.fn(),
+                    setSoundVolume: vi.fn(),
+                    setVoiceVolume: vi.fn(),
+                }}
+            >
+                <Interlude
+                    interlude={value}
+                    onDismiss={onDismiss}
+                    ui={{ 'ui.skip': 'Omitir' }}
+                />
+            </AudioSettingsContext.Provider>
         </InputProvider>
     );
 }
 
 describe('Interlude interactions', () => {
+    it('renders a text-only interlude without a background image', () => {
+        const { container } = renderInterlude(vi.fn(), {
+            id: 'text_only',
+            text: 'The room falls silent.',
+            scroll: true,
+            scrollSpeed: 30,
+        });
+
+        expect(
+            (container.querySelector('.interlude-overlay') as HTMLElement).style
+                .backgroundImage
+        ).toBe('');
+        expect(screen.getByText('The room falls silent.')).toBeTruthy();
+    });
+
     it('plays and cleans up all configured audio channels', () => {
         const { unmount } = renderInterlude();
 
         expect(FakeAudio.instances.map((audio) => audio.src)).toEqual([
-            '/cached/music.ogg',
-            '/cached/voice.ogg',
-            '/cached/wind.ogg',
-            '/cached/rain.ogg',
+            '/music.ogg',
+            '/voice.ogg',
+            '/wind.ogg',
+            '/rain.ogg',
         ]);
         expect(FakeAudio.instances[0]).toMatchObject({
             loop: true,

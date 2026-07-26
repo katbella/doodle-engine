@@ -5,6 +5,7 @@
  */
 
 import type { Time, PlayerNote } from './state';
+import type { StatValue } from './entities';
 
 /**
  * Location information in a snapshot (localized).
@@ -28,6 +29,8 @@ export interface SnapshotCharacter {
     id: string;
     /** Localized display name */
     name: string;
+    /** Localized title */
+    title: string;
     /** Localized biography text */
     biography: string;
     /** Portrait image filename */
@@ -38,8 +41,29 @@ export interface SnapshotCharacter {
     inParty: boolean;
     /** Relationship value with the player */
     relationship: number;
-    /** Character stats */
-    stats: Record<string, unknown>;
+    /** Localized character stat values */
+    stats: Record<string, StatValue>;
+    /** Localized player-facing names for each stat */
+    statNames: Record<string, string>;
+}
+
+export interface SnapshotPlayerCharacter {
+    /** Reserved player identifier */
+    id: 'player';
+    /** Localized or player-entered display name */
+    name: string;
+    /** Localized or player-entered title */
+    title: string;
+    /** Localized or player-entered biography */
+    biography: string;
+    /** Portrait filename, empty when the renderer should use its default */
+    portrait: string;
+    /** Whether the player-created profile is ready */
+    profileComplete: boolean;
+    /** Localized player stat values */
+    stats: Record<string, StatValue>;
+    /** Localized player-facing names for each stat */
+    statNames: Record<string, string>;
 }
 
 /**
@@ -156,8 +180,8 @@ export interface SnapshotMap {
 export interface SnapshotInterlude {
     /** Interlude ID */
     id: string;
-    /** Background image filename */
-    background: string;
+    /** Optional background image filename */
+    background?: string;
     /** Optional decorative banner/frame image */
     banner?: string;
     /** Optional music track filename */
@@ -180,6 +204,9 @@ export interface SnapshotInterlude {
  * The renderer never sees raw game state, content registry, or localization keys.
  */
 export interface Snapshot {
+    /** Player profile and stats */
+    player: SnapshotPlayerCharacter;
+
     /** Current location information */
     location: SnapshotLocation;
 

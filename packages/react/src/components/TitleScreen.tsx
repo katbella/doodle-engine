@@ -6,7 +6,6 @@
  */
 
 import type { ShellConfig } from '@doodle-engine/core';
-import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
 import { uiText } from '../uiText';
 
@@ -45,10 +44,10 @@ export function TitleScreen({
     subtitle,
     className = '',
 }: TitleScreenProps) {
-    const displayLogo = useAssetUrl(shell?.logo);
-    const background = useAssetUrl(shell?.background);
+    const displayLogo = shell?.logo;
+    const background = shell?.background;
 
-    const bgStyle = screenBackgroundStyle(background);
+    const bgStyle = screenBackgroundStyle(background ?? '');
 
     return (
         <div className={`title-screen ${className}`} style={bgStyle}>

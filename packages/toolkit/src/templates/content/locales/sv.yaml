@@ -20,6 +20,15 @@ ui.no_companions: "Inga följeslagare"
 ui.narrator: "Berättare"
 ui.characters: "Karaktärer"
 ui.party: "Grupp"
+ui.party_members: "Gruppmedlemmar"
+ui.previous_character: "Föregående"
+ui.next_character: "Nästa"
+ui.create_player: "Skapa din karaktär"
+ui.player_name: "Namn"
+ui.player_title: "Titel"
+ui.player_biography: "Biografi"
+ui.begin_adventure: "Börja äventyret"
+player.name: "Spelare"
 ui.resources: "Resurser"
 ui.no_items: "Inga föremål"
 ui.location_banner: "Platsbild"
@@ -73,7 +82,7 @@ ui.time_night: "Natt"
 # ===================
 # Narrator Intros
 # ===================
-narrator.tavern_intro: "Du skjuter upp den tunga ekdörren och kliver in. Först slår värmen emot dig, sedan doften av avslagen öl, vedrök och något som steks i köket. Några gäster sitter böjda över sina stop. Bakom baren torkar en bredaxlad man glas och betraktar dig med stilla intresse."
+narrator.tavern_intro: "_Du skjuter upp den tunga ekdörren och kliver in._ Först slår värmen emot dig, sedan doften av avslagen öl, vedrök och något som steks i köket. Några gäster sitter böjda över sina stop. Bakom baren torkar en bredaxlad man glas och betraktar dig med stilla intresse."
 narrator.market_intro: "Torget öppnar sig framför dig i ett myller av färg och ljud. Stånd med färgglada markiser kantar varje sida. Köpmän ropar ut sina priser, barn ilar mellan vagnarna och någonstans spelar en gatumusikant på en ostämd fiol."
 narrator.choice.look_around: "Se dig omkring."
 
@@ -142,7 +151,7 @@ interlude.chapter_one.text: |
 # ===================
 # Bartender Dialogue
 # ===================
-bartender.greeting: "Välkommen till Den Salta Hunden, främling. Vad får det lov att vara?"
+bartender.greeting: "Välkommen till *Den Salta Hunden*, främling. Vad får det lov att vara?"
 bartender.farewell: "Var försiktig där ute. Gatorna är inte lika säkra som förr."
 
 # Choices
@@ -166,7 +175,7 @@ bartender.choice.got_it: "Jag förstår. Jag tar hand om det."
 bartender.choice.anytime: "Ingen orsak."
 
 # Responses
-bartender.rumors: "Det sägs att märkligt folk stryker omkring vid hamnen om nätterna. Och köpmannen på torget söker visst hjälp. Jag hittade förresten det här på golvet häromdagen. Märkliga tecken. Du kan få det."
+bartender.rumors: "Det sägs att märkligt folk stryker omkring vid hamnen om nätterna. Och köpmannen på torget söker visst hjälp. Jag hittade det här cD6A84B[*gamla myntet*] på golvet häromdagen. Märkliga tecken. Du kan få det."
 bartender.rumors_detail: "Några säger att de har sett ljus ute på den gamla piren efter midnatt. Förmodligen smugglare, men vem vet nu för tiden. Håll ögonen öppna."
 bartender.order_drink: "Fem guld för husets special, det starkaste på den här sidan floden. Vad säger du?"
 bartender.after_drink: "Kul att du gillar den! Jag bryggde den själv. Nåväl, något annat?"
@@ -188,7 +197,7 @@ merchant.choice.heard_about_work: "Marcus skickade mig angående ett jobb."
 merchant.choice.delivery_done: "Leveransen är klar."
 merchant.choice.whats_this_place: "Berätta om marknaden."
 merchant.choice.goodbye: "Jag tittar bara. Hej då."
-merchant.choice.buy_map: "Jag tar kartan. (20 guld)"
+merchant.choice.buy_map: "Jag tar *kartan*. (20 guld)"
 merchant.choice.too_pricey: "Lite för dyrt för mig."
 merchant.choice.accept_task: "Jag är med. Vad behöver du?"
 merchant.choice.need_to_think: "Låt mig tänka på saken."

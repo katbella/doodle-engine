@@ -33,6 +33,27 @@ const engine = new Engine(registry);
 const snapshot = engine.newGame(config);
 ```
 
+### setPlayerProfile
+
+```typescript
+setPlayerProfile(profile: PlayerProfileInput): Snapshot
+```
+
+Complete a player-entered profile when `content/game.yaml` sets
+`playerCreatesProfile: true`. `name` is required after trimming; `title` and
+`biography` are optional. A custom renderer may also supply `portrait`.
+
+```typescript
+const snapshot = engine.setPlayerProfile({
+    name: 'Aria',
+    title: 'Warden',
+    biography: 'A ranger from the northern road.',
+});
+```
+
+The built-in React renderer calls this method through
+`actions.setPlayerProfile`.
+
 ### loadGame
 
 ```typescript
@@ -212,6 +233,16 @@ const snapshot = engine.dismissInterlude();
 
 These methods support playtest tools, state inspectors, and other development-only workflows.
 
+### setTrace
+
+```typescript
+setTrace(sink: TraceSink | null): void
+```
+
+Send engine decisions to a debug tool while it runs. A trace sink can receive
+node, condition, effect, transition, hidden-choice, and error events. Pass
+`null` to stop tracing.
+
 ### applyDebugEffect
 
 ```typescript
@@ -236,6 +267,16 @@ startDialogueAt(dialogueId: string, nodeId: string): Snapshot
 
 Start a dialogue at a chosen node for testing. The node's effects run normally, and a silent node advances normally. If the dialogue or node is missing, the game remains at its current state.
 
+### explainChoices
+
+```typescript
+explainChoices(): ChoiceVisibility[]
+```
+
+Report whether each choice on the current dialogue node is visible. A hidden
+choice includes its first failed condition and the state values that condition
+read. Returns an empty array when no dialogue is active.
+
 ## Data Flow
 
 Player action methods follow the same pattern:
@@ -252,3 +293,28 @@ Transient state such as notifications, pending sounds, pending video, and pendin
 After `newGame()` and `travelTo()`, the engine checks for dialogues with a `triggerLocation` matching the current location. The first dialogue whose conditions pass begins automatically. One triggered dialogue can begin per location change.
 
 The engine also checks triggered interludes after `newGame()` and `travelTo()`. If an interlude's `triggerLocation` and `triggerConditions` match, the snapshot includes it as `pendingInterlude`.
+
+## Text Formatting
+
+### parseRichText
+
+```typescript
+parseRichText(text: string): RichTextSegment[]
+```
+
+Convert resolved dialogue or choice text into ordered segments with `bold`,
+`italic`, and `color` properties for a custom renderer to apply.
+
+```typescript
+import { parseRichText } from '@doodle-engine/core';
+
+const segments = parseRichText('Take the cE5C453[*key*].');
+// [
+//     { text: 'Take the ' },
+//     { text: 'key', bold: true, color: '#E5C453' },
+//     { text: '.' },
+// ]
+```
+
+[Format Dialogue Text](/guides/writing-dialogues/#format-dialogue-text) for the
+complete formatting syntax.

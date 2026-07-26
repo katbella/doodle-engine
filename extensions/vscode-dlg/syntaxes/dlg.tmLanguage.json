@@ -43,6 +43,9 @@
             "include": "#interpolation"
         },
         {
+            "include": "#richText"
+        },
+        {
             "include": "#string"
         },
         {
@@ -180,7 +183,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.dlg",
-                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|relationshipAbove|relationshipBelow|timeIs|itemAt|roll)\\b"
+                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|characterStatEquals|characterStatGreaterThan|characterStatLessThan|relationshipAbove|relationshipBelow|timeIs|itemAt|roll)\\b"
                 }
             ]
         },
@@ -212,7 +215,23 @@
             "patterns": [
                 {
                     "name": "variable.other.interpolation.dlg",
-                    "match": "\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+                    "match": "\\{[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*\\}"
+                }
+            ]
+        },
+        "richText": {
+            "patterns": [
+                {
+                    "name": "markup.bold.dlg",
+                    "match": "(?<!\\\\)\\*[^*\\n]+(?<!\\\\)\\*"
+                },
+                {
+                    "name": "markup.italic.dlg",
+                    "match": "(?<!\\\\)_[^_\\n]+(?<!\\\\)_"
+                },
+                {
+                    "name": "markup.other.color.dlg",
+                    "match": "(?<!\\\\)c[0-9A-Fa-f]{6}\\[[^\\]\\n]+(?<!\\\\)\\]"
                 }
             ]
         },
@@ -231,6 +250,9 @@
                 }
             },
             "patterns": [
+                {
+                    "include": "#richText"
+                },
                 {
                     "include": "#interpolation"
                 },

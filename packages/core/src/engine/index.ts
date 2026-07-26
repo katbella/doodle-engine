@@ -11,7 +11,12 @@
  */
 
 import type { ContentRegistry } from '../types/registry';
-import type { GameState, CharacterState } from '../types/state';
+import type {
+    GameState,
+    CharacterState,
+    PlayerCharacterState,
+    PlayerProfileInput,
+} from '../types/state';
 import type {
     GameConfig,
     DialogueNode,
@@ -34,6 +39,7 @@ import {
     evaluateCondition,
     describeConditionValues,
 } from '../conditions';
+import { initialStatValues } from '../stats';
 
 /**
  * How many automatic dialogue steps (silent nodes and START dialogue
@@ -104,7 +110,7 @@ export class Engine {
                 location: character.location,
                 inParty: false,
                 relationship: 0,
-                stats: { ...character.stats }, // Clone stats
+                stats: initialStatValues(character.stats),
             };
         }
 
@@ -119,6 +125,10 @@ export class Engine {
 
         // Create initial game state
         this.state = {
+            player: createPlayerState(
+                this.registry,
+                config.playerCreatesProfile ?? false
+            ),
             currentLocation: config.startLocation,
             currentTime: { ...config.startTime },
             flags: { ...config.startFlags },
@@ -156,7 +166,19 @@ export class Engine {
      * @returns Snapshot of the loaded game
      */
     loadGame(saveData: SaveData): Snapshot {
-        this.state = { ...saveData.state };
+        const playerCreatesProfile =
+            saveData.state.player?.playerCreatesProfile ??
+            this.state.player?.playerCreatesProfile ??
+            false;
+        this.state = {
+            ...saveData.state,
+            player: saveData.state.player
+                ? {
+                      ...saveData.state.player,
+                      playerCreatesProfile,
+                  }
+                : createPlayerState(this.registry, playerCreatesProfile),
+        };
 
         return this.buildSnapshotAndClearTransients();
     }
@@ -174,6 +196,32 @@ export class Engine {
             timestamp: new Date().toISOString(),
             state: { ...this.state },
         };
+    }
+
+    setPlayerProfile(profile: PlayerProfileInput): Snapshot {
+        if (!this.state.player?.playerCreatesProfile) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        const name = profile.name.trim();
+        if (!name) {
+            return this.buildSnapshotAndClearTransients();
+        }
+
+        this.state = {
+            ...this.state,
+            player: {
+                ...this.state.player,
+                name,
+                title: profile.title?.trim() ?? '',
+                biography: profile.biography?.trim() ?? '',
+                portrait:
+                    profile.portrait?.trim() ?? this.state.player.portrait,
+                profileComplete: true,
+            },
+        };
+
+        return this.buildSnapshotAndClearTransients();
     }
 
     /**
@@ -1247,5 +1295,33 @@ export function createInitialState(currentLocale = 'en'): GameState {
         pendingVideo: null,
         pendingInterlude: null,
         currentLocale,
+    };
+}
+
+function createPlayerState(
+    registry: ContentRegistry,
+    playerCreatesProfile: boolean
+): PlayerCharacterState {
+    const player = registry.player;
+    if (!player) {
+        return {
+            playerCreatesProfile,
+            name: playerCreatesProfile ? '' : 'Player',
+            title: '',
+            biography: '',
+            portrait: '',
+            profileComplete: !playerCreatesProfile,
+            stats: {},
+        };
+    }
+
+    return {
+        playerCreatesProfile,
+        name: playerCreatesProfile ? '' : (player.name ?? 'Player'),
+        title: playerCreatesProfile ? '' : (player.title ?? ''),
+        biography: playerCreatesProfile ? '' : (player.biography ?? ''),
+        portrait: playerCreatesProfile ? '' : (player.portrait ?? ''),
+        profileComplete: !playerCreatesProfile,
+        stats: initialStatValues(player.stats),
     };
 }

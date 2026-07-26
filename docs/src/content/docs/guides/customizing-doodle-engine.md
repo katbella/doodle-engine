@@ -19,7 +19,8 @@ const snapshot = engine.newGame(config);
 
 // The snapshot contains the current game screen data:
 // snapshot.location, snapshot.dialogue, snapshot.choices,
-// snapshot.charactersHere, snapshot.inventory, snapshot.quests, etc.
+// snapshot.player, snapshot.party, snapshot.charactersHere,
+// snapshot.inventory, snapshot.quests, etc.
 
 // Call engine methods, get new snapshots:
 const newSnapshot = engine.talkTo('bartender');
@@ -61,6 +62,7 @@ import {
     DialogueBox,
     ChoiceList,
     CharacterList,
+    PlayerSetup,
     LocationView,
     Inventory,
     MapView,
@@ -88,6 +90,12 @@ function MyCustomUI() {
                 <CharacterList
                     characters={snapshot.charactersHere}
                     onTalkTo={actions.talkTo}
+                />
+            )}
+
+            {!snapshot.player.profileComplete && (
+                <PlayerSetup
+                    onSubmit={actions.setPlayerProfile}
                 />
             )}
 

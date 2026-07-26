@@ -92,7 +92,7 @@ const STRUCTURAL_COMPLETIONS = [
         label: 'CHOICE',
         detail: 'Add a player choice',
         documentation:
-            '**Add a player choice**\n\n`CHOICE <text>`\n\nPut its requirements, effects, and destination underneath it, then close the choice with `END`.',
+            '**Add a player choice**\n\n`CHOICE <text>`\n\nChoice text supports `*bold*`, `_italic_`, and `cRRGGBB[color]` formatting. Put its requirements, effects, and destination underneath it, then close the choice with `END`.',
     },
     {
         label: 'END',
@@ -128,7 +128,7 @@ const STRUCTURAL_COMPLETIONS = [
         label: 'NARRATOR:',
         detail: 'Write a narrator line',
         documentation:
-            '**Write narration with no speaker**\n\n`NARRATOR: <text>`\n\nThe text can be plain dialogue, quoted text, or an `@localization.key`.',
+            '**Write narration with no speaker**\n\n`NARRATOR: <text>`\n\nThe text can be plain dialogue, quoted text, or an `@localization.key`. It supports `*bold*`, `_italic_`, and `cRRGGBB[color]` formatting.',
     },
 ] as const;
 
@@ -625,7 +625,8 @@ function idsForArgument(
     kind: DlgArgumentKind,
     argumentValues: string[],
     argumentIndex: number,
-    context: DlgCompletionContext
+    context: DlgCompletionContext,
+    keyword: string | null
 ): string[] {
     if (kind === 'nodeId') return [...(context.nodeIds ?? [])];
     if (kind === 'flag') {
@@ -650,7 +651,20 @@ function idsForArgument(
     if (!target || !context.registry) return [];
     const collection = context.registry[target as keyof ContentRegistry];
     if (!collection || Array.isArray(collection)) return [];
-    return Object.keys(collection);
+    const ids = Object.keys(collection);
+    if (
+        kind === 'characterId' &&
+        [
+            'characterStatEquals',
+            'characterStatGreaterThan',
+            'characterStatLessThan',
+            'SET characterStat',
+            'ADD characterStat',
+        ].includes(keyword ?? '')
+    ) {
+        ids.unshift('player');
+    }
+    return ids;
 }
 
 /**
@@ -675,7 +689,8 @@ export function dlgCompletions(
             cursor.argumentKind,
             cursor.argumentValues,
             cursor.argumentIndex,
-            context
+            context,
+            cursor.keyword
         );
         if (cursor.keyword === 'GOTO') labels.push('location');
         return [...new Set(labels)].sort().map((label) => ({

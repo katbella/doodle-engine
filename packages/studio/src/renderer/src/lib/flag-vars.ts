@@ -139,6 +139,7 @@ export function buildStatSummaries(registry: ContentRegistry): StatSummary[] {
     for (const character of Object.values(registry.characters)) {
         Object.keys(character.stats ?? {}).forEach(add);
     }
+    Object.keys(registry.player?.stats ?? {}).forEach(add);
     for (const item of Object.values(registry.items)) {
         Object.keys(item.stats ?? {}).forEach(add);
     }

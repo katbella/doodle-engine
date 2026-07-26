@@ -15,11 +15,13 @@ function installInstruction(platform: StudioUpdatePlatform): string {
 export function StudioUpdateModal({
     state,
     onDownload,
+    onViewChangelog,
     onCheck,
     onClose,
 }: {
     state: StudioUpdateState;
     onDownload: () => void;
+    onViewChangelog: () => void;
     onCheck: () => void;
     onClose: () => void;
 }) {
@@ -29,7 +31,7 @@ export function StudioUpdateModal({
             className="modal modal--update"
             onDismiss={onClose}
         >
-            <Body state={state} />
+            <Body state={state} onViewChangelog={onViewChangelog} />
             <Actions
                 state={state}
                 onDownload={onDownload}
@@ -40,7 +42,13 @@ export function StudioUpdateModal({
     );
 }
 
-function Body({ state }: { state: StudioUpdateState }) {
+function Body({
+    state,
+    onViewChangelog,
+}: {
+    state: StudioUpdateState;
+    onViewChangelog: () => void;
+}) {
     switch (state.status) {
         case 'checking':
             return (
@@ -70,7 +78,10 @@ function Body({ state }: { state: StudioUpdateState }) {
                         {installInstruction(state.platform)}
                     </p>
                     {state.releaseNotes && (
-                        <ReleaseNotes notes={state.releaseNotes} />
+                        <ReleaseNotes
+                            notes={state.releaseNotes}
+                            onViewChangelog={onViewChangelog}
+                        />
                     )}
                 </>
             );
@@ -149,50 +160,84 @@ function titleForState(state: StudioUpdateState): string {
     }
 }
 
-function ReleaseNotes({ notes }: { notes: string }) {
-    const items = releaseNoteItems(notes);
-    if (items.length === 0) return null;
+function ReleaseNotes({
+    notes,
+    onViewChangelog,
+}: {
+    notes: string;
+    onViewChangelog: () => void;
+}) {
+    const summary = releaseNoteSummary(notes);
+    if (!summary) return null;
     return (
         <section className="update__notes" aria-labelledby="update-notes-title">
             <div className="update__notes-title" id="update-notes-title">
                 What’s new
             </div>
-            <ul className="update__notes-list">
-                {items.map((item, index) => (
-                    <li key={`${index}:${item}`}>{item}</li>
-                ))}
-            </ul>
+            <p className="update__notes-summary">{summary}</p>
+            <button
+                type="button"
+                className="update__notes-link"
+                onClick={onViewChangelog}
+            >
+                View full changelog
+            </button>
         </section>
     );
 }
 
-/** Keep untrusted GitHub notes short and render them only as React text. */
-function releaseNoteItems(notes: string): string[] {
-    const trimmed = notes.trim();
-    const limit = 600;
-    const clamped =
-        trimmed.length > limit
-            ? `${trimmed.slice(0, limit).trimEnd()}…`
-            : trimmed;
-    return clamped
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(
-            (line) =>
-                line.length > 0 &&
-                !/^#{1,6}\s+(what'?s changed|what'?s new)$/i.test(line) &&
-                !/^(?:\*\*)?full changelog(?:\*\*)?\s*:/i.test(line)
-        )
-        .map((line) =>
-            line
-                .replace(/^#{1,6}\s+/, '')
-                .replace(/^(?:[-*+]|\d+[.)])\s+/, '')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .replace(/(\*\*|__)(.*?)\1/g, '$2')
-                .replace(/`([^`]+)`/g, '$1')
-                .replace(/\s+by\s+@\S+\s+in\s+https?:\/\/\S+\s*$/i, '')
-                .trim()
-        )
-        .filter(Boolean)
-        .slice(0, 6);
+function releaseNoteSummary(notes: string): string | null {
+    const lines = notes.split(/\r?\n/);
+    const firstLine = lines.find((line) => line.trim().length > 0);
+    if (firstLine && !/^#{1,6}\s+/.test(firstLine.trim())) {
+        const summary = cleanReleaseNoteLine(firstLine);
+        if (
+            summary &&
+            !/^All Doodle Engine packages in this release use version\b/i.test(
+                summary
+            )
+        ) {
+            return clampSummary(summary);
+        }
+    }
+
+    const changesHeading = lines.findIndex((line) =>
+        /^#{1,6}\s+what'?s changed\s*$/i.test(line.trim())
+    );
+    const candidates =
+        changesHeading >= 0 ? lines.slice(changesHeading + 1) : lines;
+
+    for (const candidate of candidates) {
+        const line = candidate.trim();
+        if (
+            line.length === 0 ||
+            /^#{1,6}\s+/.test(line) ||
+            /^(?:\*\*)?full changelog(?:\*\*)?\s*:/i.test(line)
+        ) {
+            continue;
+        }
+
+        const summary = cleanReleaseNoteLine(line);
+        if (summary) return clampSummary(summary);
+    }
+
+    return null;
+}
+
+function cleanReleaseNoteLine(line: string): string {
+    return line
+        .replace(/^(?:[-*+]|\d+[.)])\s+/, '')
+        .replace(/\s+by\s+@\S+\s+in\s+https?:\/\/\S+\s*$/i, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')
+        .replace(/`([^`]+)`/g, '$1')
+        .trim();
+}
+
+function clampSummary(summary: string): string {
+    const limit = 200;
+    if (summary.length <= limit) return summary;
+    const wordBoundary = summary.lastIndexOf(' ', limit);
+    const end = wordBoundary >= limit / 2 ? wordBoundary : limit;
+    return `${summary.slice(0, end).trimEnd()}…`;
 }

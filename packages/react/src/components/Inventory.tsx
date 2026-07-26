@@ -4,7 +4,6 @@
 
 import { useState } from 'react';
 import type { SnapshotItem } from '@doodle-engine/core';
-import { AssetImage } from './AssetImage';
 import { DialogOverlay } from './DialogOverlay';
 import { uiText } from '../uiText';
 
@@ -33,7 +32,7 @@ export function Inventory({ items, ui, className = '' }: InventoryProps) {
                             onClick={() => setInspecting(item)}
                         >
                             {item.icon && (
-                                <AssetImage
+                                <img
                                     src={item.icon}
                                     alt={item.name}
                                     className="item-icon"
@@ -53,7 +52,7 @@ export function Inventory({ items, ui, className = '' }: InventoryProps) {
                     onDismiss={() => setInspecting(null)}
                 >
                     {inspecting.image && (
-                        <AssetImage
+                        <img
                             src={inspecting.image}
                             alt={inspecting.name}
                             className="item-modal-image"

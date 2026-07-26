@@ -17,6 +17,9 @@ afterEach(cleanup);
 
 const project = {
     projectDir: 'C:/story',
+    config: {
+        playerCreatesProfile: false,
+    },
     registry: {
         locations: { town: { id: 'town' }, market: { id: 'market' } },
         dialogues: { intro: { id: 'intro' } },
@@ -142,7 +145,9 @@ extension:
         await user.click(literal[1]);
         expect(screen.getByDisplayValue('A storied hero.')).toBeTruthy();
         await user.click(screen.getAllByRole('button', { name: '@key' })[0]);
-        await user.click(screen.getByRole('button', { name: /@bio\.hero/ }));
+        await user.click(
+            screen.getAllByRole('button', { name: /@bio\.hero/ }).at(-1)!
+        );
         await user.click(
             screen.getByRole('button', { name: 'Use @bio.hero text' })
         );
@@ -152,16 +157,73 @@ extension:
         await user.selectOptions(selects[0], 'town');
         await user.selectOptions(selects[1], '');
         await user.click(screen.getByRole('button', { name: 'Add stat' }));
-        expect(screen.getByDisplayValue('stat')).toBeTruthy();
-        const strength = screen.getByDisplayValue('strength');
+        expect(screen.getAllByLabelText('Display name')).toHaveLength(2);
+        expect(screen.getByDisplayValue('Stat')).toBeTruthy();
+        expect(screen.getAllByLabelText('Starting value')).toHaveLength(2);
+        const strength = screen.getAllByLabelText('Stat key')[0];
         await user.clear(strength);
         await user.type(strength, 'power');
+        expect(screen.getByDisplayValue('strength')).toBeTruthy();
+        expect(screen.getAllByLabelText('Starting value')).toHaveLength(2);
         const statValue = screen.getByDisplayValue('10');
         await user.clear(statValue);
         await user.type(statValue, '12');
         await user.click(
             screen.getAllByRole('button', { name: 'Remove stat' })[0]
         );
+    });
+
+    it('shows the player profile fields supplied by the game', async () => {
+        installBridge(`name: Aria
+title: Warden
+biography: A ranger from the north.
+portrait: aria.png
+stats:
+  strength:
+    name: Strength
+    value: 16
+`);
+        editor('player');
+
+        expect(await screen.findByText('player.yaml')).toBeTruthy();
+        expect(screen.getByDisplayValue('Aria')).toBeTruthy();
+        expect(screen.getByDisplayValue('Warden')).toBeTruthy();
+        expect(
+            screen.getByDisplayValue('A ranger from the north.')
+        ).toBeTruthy();
+        expect(screen.getByDisplayValue('aria.png')).toBeTruthy();
+        expect(
+            (screen.getByLabelText('Starting value') as HTMLInputElement).value
+        ).toBe('16');
+    });
+
+    it('keeps player profile fields available when profile entry is enabled', async () => {
+        installBridge(`name: Player
+title: ""
+biography: ""
+portrait: ""
+stats:
+  strength:
+    name: Strength
+    value: 16
+`);
+        const playerCreatedProject = {
+            ...project,
+            config: {
+                ...project.config,
+                playerCreatesProfile: true,
+            },
+        } as OpenProject;
+        editor('player', vi.fn(), vi.fn(), playerCreatedProject);
+
+        expect(await screen.findByText('player.yaml')).toBeTruthy();
+        expect(screen.getByDisplayValue('Player')).toBeTruthy();
+        expect(screen.getByText('Title')).toBeTruthy();
+        expect(screen.getByText('Biography')).toBeTruthy();
+        expect(screen.getByText('Portrait')).toBeTruthy();
+        expect(
+            (screen.getByLabelText('Starting value') as HTMLInputElement).value
+        ).toBe('16');
     });
 
     it('edits every interlude scalar and list control', async () => {

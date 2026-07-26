@@ -108,6 +108,7 @@ export function extractAssetPaths(
     for (const character of Object.values(registry.characters)) {
         addGame(resolveAssetPath(character.portrait, 'portrait'));
     }
+    addGame(resolveAssetPath(registry.player?.portrait, 'portrait'));
 
     // Items: icon, image
     for (const item of Object.values(registry.items)) {

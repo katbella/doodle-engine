@@ -63,12 +63,22 @@ npm run dev
 | `maps/`       | `.yaml`   | Parsed as Map entity                                                     |
 | `quests/`     | `.yaml`   | Parsed as Quest entity                                                   |
 | `game.yaml`   | `.yaml`   | Parsed as GameConfig                                                     |
+| `player.yaml` | `.yaml`   | Parsed as the optional PlayerCharacter singleton                         |
 
 ### /api/content response
 
 ```json
 {
   "registry": {
+    "player": {
+      "name": "@player.name",
+      "title": "",
+      "biography": "",
+      "portrait": "",
+      "stats": {
+        "strength": { "name": "Strength", "value": 10 }
+      }
+    },
     "locations": { ... },
     "characters": { ... },
     "items": { ... },
@@ -80,6 +90,7 @@ npm run dev
     "locales": { ... }
   },
   "config": {
+    "playerCreatesProfile": true,
     "startLocation": "tavern",
     "startTime": { "day": 1, "hour": 8 },
     ...
@@ -202,6 +213,7 @@ npm run validate
     - `hasItem` has `itemId` argument
     - `questAtStage` has `questId` and `stageId` arguments
     - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
+    - Character-stat conditions have `characterId`, `stat`, and `value` arguments
     - Built-in condition references point to existing locations, items, characters, quests, and quest stages
 - **Effects**
     - Node, choice, and IF branch effects are validated
@@ -228,6 +240,9 @@ npm run validate
     - Built-in effect references point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
 - **Character dialogue references**
     - Characters' `dialogue` field points to existing dialogue IDs
+- **Player and character stats**
+    - Stat keys are valid identifiers and stat definitions contain only a display name and numeric or string value
+    - The reserved `player` target is accepted for character-stat conditions and effects
 - **Content references**
     - `game.yaml` `startLocation` and `startInventory` point to existing content
     - Character starting locations exist
@@ -235,7 +250,7 @@ npm run validate
     - Dialogue and interlude trigger locations exist
     - Maps reference existing locations, and a location appears on at most one map
 - **Localization keys**
-    - All `@key` references in locations, characters, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
+    - All `@key` references in locations, characters, the player profile, stat names and values, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
 
 ### Exit codes
 

@@ -7,6 +7,7 @@ import {
     templateForNewItem,
     type CreatableSection,
 } from '../new-content';
+import { ENTITY_FORMS } from '../entity-fields';
 
 describe('pathForNewItem', () => {
     it('puts dialogues in content/dialogues with a .dlg extension', () => {
@@ -55,5 +56,19 @@ describe('templateForNewItem', () => {
         ) as { location: string; dialogue: string };
         expect(character.location).toBe('');
         expect(character.dialogue).toBe('');
+    });
+
+    it('creates text-only interludes with an optional background', () => {
+        expect(
+            parseYaml(templateForNewItem('interludes', 'chapter_one'))
+        ).toEqual({
+            id: 'chapter_one',
+            text: '',
+        });
+        expect(
+            ENTITY_FORMS.interludes?.fields.find(
+                ({ name }) => name === 'background'
+            )?.required
+        ).toBeUndefined();
     });
 });

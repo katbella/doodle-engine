@@ -92,6 +92,94 @@ function makeConfig(overrides: Partial<GameConfig> = {}): GameConfig {
 }
 
 describe('validateContent', () => {
+    it('accepts valid player profiles and character stat conditions', () => {
+        const registry = makeRegistry({
+            player: {
+                name: 'Player',
+                stats: {
+                    strength: { name: 'Strength', value: 16.2 },
+                    class: { name: 'Class', value: 'ranger' },
+                },
+            },
+            dialogues: {
+                test_dialogue: makeDialogueWithCondition({
+                    type: 'characterStatGreaterThan',
+                    characterId: 'player',
+                    stat: 'strength',
+                    value: 16.1,
+                }),
+            },
+        });
+
+        expect(
+            validateContent(
+                registry,
+                new Map(),
+                makeConfig({ playerCreatesProfile: true })
+            )
+        ).toEqual([]);
+    });
+
+    it('rejects invalid stat values and the reserved player character id', () => {
+        const registry = makeRegistry({
+            player: {
+                name: 'Hero',
+                stats: {
+                    invalid: {
+                        name: 'Invalid',
+                        value: true,
+                    } as any,
+                },
+            },
+            characters: {
+                player: {
+                    id: 'player',
+                    name: 'Imposter',
+                    biography: '',
+                    portrait: '',
+                    location: 'town',
+                    dialogue: '',
+                    stats: {},
+                },
+            },
+        });
+
+        const result = messages(registry);
+        expect(
+            result.some((message) =>
+                message.includes('must have a display name')
+            )
+        ).toBe(true);
+        expect(
+            result.some((message) =>
+                message.includes('reserved for the player profile')
+            )
+        ).toBe(true);
+    });
+
+    it('validates the game profile flag', () => {
+        const registry = makeRegistry({
+            player: {
+                name: 'Hero',
+                stats: {},
+            },
+        });
+
+        const result = validateContent(
+            registry,
+            new Map(),
+            makeConfig({ playerCreatesProfile: 'yes' as any })
+        );
+
+        expect(
+            result.some((error) =>
+                error.message.includes(
+                    'Game config playerCreatesProfile must be true or false'
+                )
+            )
+        ).toBe(true);
+    });
+
     it('accepts valid map structure', () => {
         expect(
             validateContent(makeRegistry(), new Map(), makeConfig())

@@ -1079,6 +1079,7 @@ export function App() {
                     <StudioUpdateModal
                         state={updater.state}
                         onDownload={updater.openDownload}
+                        onViewChangelog={updater.openChangelog}
                         onCheck={updater.check}
                         onClose={updater.close}
                     />
@@ -1422,6 +1423,7 @@ export function App() {
                 <StudioUpdateModal
                     state={updater.state}
                     onDownload={updater.openDownload}
+                    onViewChangelog={updater.openChangelog}
                     onCheck={updater.check}
                     onClose={updater.close}
                 />

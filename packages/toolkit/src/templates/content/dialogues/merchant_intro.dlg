@@ -32,6 +32,7 @@ NODE browse
   MERCHANT: @merchant.browse
 
   # Conditional purchase: need enough gold (demonstrates: variableGreaterThan)
+  # This choice uses *bold* around the item name.
   CHOICE @merchant.choice.buy_map
     REQUIRE variableGreaterThan gold 19
     ADD variable gold -20

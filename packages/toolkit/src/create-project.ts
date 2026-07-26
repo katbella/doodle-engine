@@ -241,6 +241,10 @@ async function writeMinimalContent(
         MINIMAL_GAME_CONFIG
     );
     await writeFile(
+        join(projectPath, 'content', 'player.yaml'),
+        MINIMAL_PLAYER_PROFILE
+    );
+    await writeFile(
         join(projectPath, 'content', 'locations', 'start.yaml'),
         localizationMode === 'localized'
             ? MINIMAL_LOCALIZED_LOCATION
@@ -262,6 +266,7 @@ async function writeMinimalContent(
 
 const MINIMAL_GAME_CONFIG = `# Game Configuration
 
+playerCreatesProfile: true
 startLocation: start
 startTime:
   day: 1
@@ -269,6 +274,13 @@ startTime:
 startFlags: {}
 startVariables: {}
 startInventory: []
+`;
+
+const MINIMAL_PLAYER_PROFILE = `name: "Player"
+title: ""
+biography: ""
+portrait: ""
+stats: {}
 `;
 
 const MINIMAL_LITERAL_LOCATION = `id: start

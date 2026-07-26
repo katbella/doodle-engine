@@ -216,7 +216,7 @@ When you create a project in Studio, you can include starter styles or begin wit
 - **Starter styles**: a dark fantasy theme with warm gold accents, sized layout panels, bottom bar, and panels for inventory, journal, map, and save/load. Everything is defined with CSS custom properties so you can retheme by editing `:root` values in `src/index.css`.
 - **Minimal CSS**: a body reset that leaves the visual design to your project.
 
-You can switch at any time by replacing `src/index.css`. The components use class names that describe each part of the interface, such as `.game-renderer`, `.game-layout`, `.game-main`, `.game-sidebar`, `.game-bottom-bar`, `.dialogue-box`, and `.choice-button`.
+You can switch at any time by replacing `src/index.css`. The components use class names that describe each part of the interface, such as `.game-renderer`, `.game-layout`, `.game-content`, `.game-status`, `.game-menu`, `.dialogue-box`, and `.choice-button`.
 
 To retheme the starter styles, override the custom properties:
 

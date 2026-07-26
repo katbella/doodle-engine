@@ -25,6 +25,7 @@
 #     menuOpen: assets/audio/ui/menu_open.ogg
 #     menuClose: assets/audio/ui/menu_close.ogg
 
+playerCreatesProfile: true
 startLocation: tavern
 startTime:
   day: 1

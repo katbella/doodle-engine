@@ -24,6 +24,7 @@ export interface StudioUpdateCandidate {
 const STUDIO_TAG_PREFIX = '@doodle-engine/studio@';
 const STUDIO_RELEASE_DOWNLOAD_PREFIX =
     '/katbella/doodle-engine/releases/download/';
+const STUDIO_RELEASE_PAGE_PREFIX = '/katbella/doodle-engine/releases/tag/';
 const RELEASES_PER_PAGE = 100;
 const RELEASE_REQUEST_TIMEOUT_MS = 15_000;
 
@@ -68,6 +69,27 @@ export function isTrustedStudioDownloadUrl(value: string): boolean {
             url.username === '' &&
             url.password === '' &&
             url.pathname.startsWith(STUDIO_RELEASE_DOWNLOAD_PREFIX)
+        );
+    } catch {
+        return false;
+    }
+}
+
+export function studioReleasePageUrl(version: string): string {
+    const tag = `${STUDIO_TAG_PREFIX}${version}`;
+    return `https://github.com${STUDIO_RELEASE_PAGE_PREFIX}${encodeURIComponent(tag)}`;
+}
+
+export function isTrustedStudioReleaseUrl(value: string): boolean {
+    try {
+        const url = new URL(value);
+        return (
+            url.protocol === 'https:' &&
+            url.hostname === 'github.com' &&
+            url.port === '' &&
+            url.username === '' &&
+            url.password === '' &&
+            url.pathname.startsWith(STUDIO_RELEASE_PAGE_PREFIX)
         );
     } catch {
         return false;

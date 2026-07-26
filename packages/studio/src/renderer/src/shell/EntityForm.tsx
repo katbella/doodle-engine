@@ -235,7 +235,11 @@ function EntityFormInner({
             )}
 
             <div className="form__head">
-                <span className="form__title">{String(values.id ?? '')}</span>
+                <span className="form__title">
+                    {section === 'player'
+                        ? 'player.yaml'
+                        : String(values.id ?? '')}
+                </span>
                 <span className="form__kind">{form.label}</span>
             </div>
 
@@ -534,9 +538,44 @@ function StatsBag({
     onChange: (value: Record<string, unknown> | undefined) => void;
 }) {
     const entries = Object.entries(value);
-    const setEntry = (key: string, v: string) => {
-        const num = Number(v);
-        onChange({ ...value, [key]: v !== '' && !isNaN(num) ? num : v });
+    const normalized = (key: string, entry: unknown) => {
+        if (
+            entry &&
+            typeof entry === 'object' &&
+            !Array.isArray(entry) &&
+            typeof (entry as any).name === 'string'
+        ) {
+            return {
+                name: (entry as any).name as string,
+                value: (entry as any).value as unknown,
+            };
+        }
+        return { name: key, value: entry };
+    };
+    const parseValue = (text: string) => {
+        const number = Number(text);
+        return text !== '' && !isNaN(number) ? number : text;
+    };
+    const setEntry = (
+        key: string,
+        patch: Partial<{ name: string; value: unknown }>
+    ) => {
+        onChange({
+            ...value,
+            [key]: { ...normalized(key, value[key]), ...patch },
+        });
+    };
+    const rename = (key: string, nextKey: string) => {
+        const stat = normalized(key, value[key]);
+        onChange(
+            Object.fromEntries(
+                entries.map(([entryKey, entry]) =>
+                    entryKey === key
+                        ? [nextKey, { name: stat.name, value: stat.value }]
+                        : [entryKey, entry]
+                )
+            )
+        );
     };
     const remove = (key: string) => {
         const next = { ...value };
@@ -546,7 +585,7 @@ function StatsBag({
     const add = () => {
         let key = 'stat';
         for (let n = 2; key in value; n++) key = `stat_${n}`;
-        onChange({ ...value, [key]: '' });
+        onChange({ ...value, [key]: { name: 'Stat', value: '' } });
     };
 
     return (
@@ -557,35 +596,54 @@ function StatsBag({
                     <Plus size={13} /> Add stat
                 </button>
             </div>
-            {entries.map(([key, v]) => (
-                <div key={key} className="dlg__row">
-                    <input
-                        className="dlg__input mono"
-                        value={key}
-                        spellCheck={false}
-                        onChange={(e) => {
-                            const next = { ...value };
-                            delete next[key];
-                            next[e.target.value] = v;
-                            onChange(next);
-                        }}
-                    />
-                    <input
-                        className="dlg__input mono"
-                        value={String(v)}
-                        spellCheck={false}
-                        onChange={(e) => setEntry(key, e.target.value)}
-                    />
-                    <button
-                        type="button"
-                        className="dlg__x"
-                        onClick={() => remove(key)}
-                        aria-label="Remove stat"
-                    >
-                        <X size={15} />
-                    </button>
-                </div>
-            ))}
+            {entries.map(([key, entry], index) => {
+                const stat = normalized(key, entry);
+                return (
+                    <div key={index} className="dlg__row stats-row">
+                        <label className="field stats-field">
+                            <span className="field__label">Stat key</span>
+                            <input
+                                className="dlg__input mono"
+                                value={key}
+                                spellCheck={false}
+                                onChange={(e) => rename(key, e.target.value)}
+                            />
+                        </label>
+                        <label className="field stats-field">
+                            <span className="field__label">Display name</span>
+                            <input
+                                className="dlg__input mono"
+                                value={stat.name}
+                                spellCheck={false}
+                                onChange={(e) =>
+                                    setEntry(key, { name: e.target.value })
+                                }
+                            />
+                        </label>
+                        <label className="field stats-field">
+                            <span className="field__label">Starting value</span>
+                            <input
+                                className="dlg__input mono"
+                                value={String(stat.value ?? '')}
+                                spellCheck={false}
+                                onChange={(e) =>
+                                    setEntry(key, {
+                                        value: parseValue(e.target.value),
+                                    })
+                                }
+                            />
+                        </label>
+                        <button
+                            type="button"
+                            className="dlg__x"
+                            onClick={() => remove(key)}
+                            aria-label="Remove stat"
+                        >
+                            <X size={15} />
+                        </button>
+                    </div>
+                );
+            })}
         </div>
     );
 }

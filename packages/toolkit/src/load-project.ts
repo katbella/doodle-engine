@@ -69,6 +69,7 @@ export async function loadContent(
     baseDir: string = dirname(contentDir)
 ): Promise<LoadedContent> {
     const registry: any = {
+        player: undefined,
         locations: {},
         characters: {},
         items: {},
@@ -105,8 +106,10 @@ export async function loadContent(
             if (!data || typeof data !== 'object' || !data.id) {
                 parseErrors.push({
                     file: relPath,
-                    message: 'This file has no "id" field, so it cannot be loaded',
-                    suggestion: 'Give it a unique id, like the other files in this folder',
+                    message:
+                        'This file has no "id" field, so it cannot be loaded',
+                    suggestion:
+                        'Give it a unique id, like the other files in this folder',
                 });
                 continue;
             }
@@ -125,6 +128,34 @@ export async function loadContent(
             registry[key][data.id] = data;
             fileMap.set(mapKey, relPath);
         }
+    }
+
+    const playerPath = join(contentDir, 'player.yaml');
+    try {
+        const source = await readFile(playerPath, 'utf-8');
+        try {
+            const data = parseYaml(source);
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                parseErrors.push({
+                    file: relative(baseDir, playerPath),
+                    message: 'player.yaml must contain a YAML object',
+                    suggestion: 'Add the player profile fields to player.yaml',
+                });
+            } else {
+                registry.player = data;
+                fileMap.set('player:player', relative(baseDir, playerPath));
+            }
+        } catch (error) {
+            parseErrors.push({
+                file: relative(baseDir, playerPath),
+                message: `Could not read player.yaml as YAML: ${
+                    error instanceof Error ? error.message : String(error)
+                }`,
+                suggestion: 'Fix the YAML syntax error in player.yaml',
+            });
+        }
+    } catch {
+        // player.yaml is optional.
     }
 
     // Locale files (flat key-value YAML, keyed by filename)
@@ -170,7 +201,8 @@ export async function loadContent(
                                 ? error.message
                                 : String(error)
                         }`,
-                        suggestion: 'Fix the DSL syntax error in this .dlg file',
+                        suggestion:
+                            'Fix the DSL syntax error in this .dlg file',
                     });
                 }
             }

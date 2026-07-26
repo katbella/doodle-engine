@@ -17,6 +17,10 @@ export { isValidIdentifier } from './identifiers';
 export type {
     Location,
     Character,
+    PlayerCharacter,
+    CharacterStat,
+    CharacterStats,
+    StatValue,
     Item,
     Map,
     MapLocation,
@@ -64,6 +68,9 @@ export type {
     QuestAtStageCondition,
     CharacterAtCondition,
     CharacterInPartyCondition,
+    CharacterStatEqualsCondition,
+    CharacterStatGreaterThanCondition,
+    CharacterStatLessThanCondition,
     RelationshipAboveCondition,
     RelationshipBelowCondition,
     TimeIsCondition,
@@ -107,6 +114,8 @@ export type {
 export type {
     GameState,
     CharacterState,
+    PlayerCharacterState,
+    PlayerProfileInput,
     DialogueState,
     PlayerNote,
     Time,
@@ -117,6 +126,7 @@ export type {
     Snapshot,
     SnapshotLocation,
     SnapshotCharacter,
+    SnapshotPlayerCharacter,
     SnapshotItem,
     SnapshotChoice,
     SnapshotDialogue,
@@ -145,6 +155,10 @@ export { applyEffect, applyEffects } from './effects';
 
 // Localization
 export { resolveText } from './localization';
+
+// Dialogue text formatting
+export { parseRichText } from './rich-text';
+export type { RichTextSegment } from './rich-text';
 
 // Snapshot Builder
 export { buildSnapshot, buildUIStrings, UI_DEFAULTS } from './snapshot';

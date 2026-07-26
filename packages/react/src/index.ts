@@ -10,14 +10,9 @@ export { VERSION } from '@doodle-engine/core';
 export { GameProvider, GameContext } from './GameProvider';
 export type { GameContextValue, GameProviderProps } from './GameProvider';
 
-// Asset Provider and Context
-export {
-    AssetProvider,
-    AssetContext,
-    useAssetContext,
-    useOptionalAssetContext,
-} from './AssetProvider';
-export type { AssetContextValue, AssetProviderProps } from './AssetProvider';
+// Asset loading
+export { AssetProvider } from './AssetProvider';
+export type { AssetProviderProps } from './AssetProvider';
 
 // Audio Settings (persistent volume state)
 export {
@@ -36,8 +31,6 @@ export type {
 } from './hooks/useAudioManager';
 export { useUISounds } from './hooks/useUISounds';
 export type { UISoundConfig, UISoundControls } from './hooks/useUISounds';
-export { useAsset, useAssetUrl, usePrefetch } from './hooks/useAsset';
-export type { UseAssetResult } from './hooks/useAsset';
 export {
     InputProvider,
     InputProviderBoundary,
@@ -70,6 +63,9 @@ export type { GameShellProps } from './GameShell';
 export { DialogueBox } from './components/DialogueBox';
 export type { DialogueBoxProps } from './components/DialogueBox';
 
+export { FormattedText } from './components/FormattedText';
+export type { FormattedTextProps } from './components/FormattedText';
+
 export { ChoiceList } from './components/ChoiceList';
 export type { ChoiceListProps } from './components/ChoiceList';
 
@@ -78,6 +74,15 @@ export type { LocationViewProps } from './components/LocationView';
 
 export { CharacterList } from './components/CharacterList';
 export type { CharacterListProps } from './components/CharacterList';
+
+export { CharacterSheet } from './components/CharacterSheet';
+export type { CharacterSheetProps } from './components/CharacterSheet';
+
+export { PlayerSetup } from './components/PlayerSetup';
+export type { PlayerSetupProps } from './components/PlayerSetup';
+
+export { PlayerEmblem } from './components/PlayerEmblem';
+export type { PlayerEmblemProps } from './components/PlayerEmblem';
 
 export { Inventory } from './components/Inventory';
 export type { InventoryProps } from './components/Inventory';
@@ -116,9 +121,6 @@ export { TitleScreen } from './components/TitleScreen';
 export type { TitleScreenProps } from './components/TitleScreen';
 export { CreditsScreen } from './components/CreditsScreen';
 export type { CreditsScreenProps } from './components/CreditsScreen';
-
-export { AssetImage } from './components/AssetImage';
-export type { AssetImageProps } from './components/AssetImage';
 
 export { PauseMenu } from './components/PauseMenu';
 export type { PauseMenuProps } from './components/PauseMenu';

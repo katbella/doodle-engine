@@ -12,21 +12,29 @@ Create `content/characters/bartender.yaml`:
 ```yaml
 id: bartender
 name: Marcus the Bartender
+title: Keeper of the Salty Dog
 biography: A gruff man with kind eyes who has heard every story twice.
 portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
-stats: {}
+stats:
+    strength:
+        name: Strength
+        value: 12
+    class:
+        name: Class
+        value: Innkeeper
 ```
 
-| Field       | Description                                                      |
-| ----------- | ---------------------------------------------------------------- |
-| `id`        | Unique identifier, used in dialogue speaker lines and effects    |
-| `name`      | Display name                                                      |
-| `biography` | Character background text                                        |
-| `portrait`  | Portrait image                                                   |
-| `location`  | Starting location ID                                             |
-| `dialogue`  | Dialogue ID when the player talks to them                        |
+| Field       | Description                                                           |
+| ----------- | --------------------------------------------------------------------- |
+| `id`        | Unique identifier, used in dialogue speaker lines and effects         |
+| `name`      | Display name                                                          |
+| `title`     | Optional title                                                        |
+| `biography` | Character background text                                             |
+| `portrait`  | Portrait image                                                        |
+| `location`  | Starting location ID                                                  |
+| `dialogue`  | Dialogue ID when the player talks to them                             |
 | `stats`     | Stats for game-specific data (e.g., `{ level: 5, class: "warrior" }`) |
 
 ## Characters at Location vs Party
@@ -119,14 +127,101 @@ END
 
 ## Character Stats
 
-Characters have a `stats` object for game-specific data:
+Stats are character-specific traits. They are separate from variables such as
+gold, reputation, or quest progress. A stat key is used by game logic, while
+its `name` and string `value` can use localization keys:
 
-```text
-# Set a stat
-SET characterStat elisa level 5
-
-# Add to a numeric stat
-ADD characterStat elisa health -10
+```yaml
+stats:
+    strength:
+        name: '@stat.strength'
+        value: 16.2
+    class:
+        name: '@stat.class'
+        value: '@class.ranger'
+    _storyScore:
+        name: Story score
+        value: 4
 ```
 
-Character stats are available to the renderer as `SnapshotCharacter.stats`. See [Custom Renderer](/technical/custom-renderer/) for using snapshot data in your own interface.
+Stat values can only be numbers or strings. A key beginning with `_` is hidden
+from the built-in character sheet, but conditions, effects, and interpolation
+can still use it. The older shorthand `strength: 16.2` remains valid and uses
+the key as the display name.
+
+Use the three stat conditions to branch on a stat:
+
+```text
+REQUIRE characterStatEquals player class @class.ranger
+REQUIRE characterStatGreaterThan player strength 16.1
+REQUIRE characterStatLessThan elisa strength 18
+```
+
+Equality supports numbers and strings. Greater-than and less-than checks are
+strict and only pass for numeric stats. Values are not converted between
+strings and numbers.
+
+Set a string or numeric value, or add to a numeric value:
+
+```text
+SET characterStat elisa level 5
+ADD characterStat elisa health -10
+SET characterStat player class @class.ranger
+ADD characterStat player strength 0.5
+```
+
+Use character and player data in dialogue, choices, and notifications:
+
+```text
+NARRATOR: "{player.name}, {elisa.title} is watching."
+ELISA: "Ah, you're a {player.stats.class}!"
+NARRATOR: "Strength: {player.stats.strength}."
+```
+
+Missing placeholders remain unchanged.
+
+## Player Profile and Party Sheets
+
+The player has a separate singleton file, `content/player.yaml`. To let the
+player enter their own profile in the built-in renderer, enable the behavior in
+`content/game.yaml`:
+
+```yaml
+# content/game.yaml
+playerCreatesProfile: true
+```
+
+Define the player character and starting stats in `content/player.yaml`:
+
+```yaml
+# content/player.yaml
+name: '@player.name'
+title: ''
+biography: ''
+portrait: ''
+stats:
+    strength:
+        name: Strength
+        value: 10
+```
+
+The start modal asks for a required name plus an optional title and biography.
+The modal uses the localized UI strings for its labels and input hints, along
+with a generic emblem; it has no portrait upload.
+
+To provide a fixed protagonist instead, omit `playerCreatesProfile` or set it
+to `false` in `game.yaml`. The `name`, `title`, `biography`, and `portrait`
+values in `player.yaml` are then used directly. When profile entry is enabled,
+the entered name, title, and biography replace those profile values for the
+save. If `player.yaml` is absent, the engine supplies a generic player with no
+stats.
+
+The built-in renderer has a dedicated Party action in its bottom bar. Its
+character sheet starts with the player, then cycles through current party
+members with Previous and Next controls. Characters at the current location
+still start dialogue when selected; opening the Party panel is the separate way
+to inspect stats.
+
+Player profile text and all character stats are included in saves. Characters
+without a `title`, projects without `player.yaml`, and old scalar stat entries
+continue to work.

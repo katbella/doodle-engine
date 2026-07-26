@@ -117,6 +117,7 @@ const state = vi.hoisted(() => {
         })),
         checkForUpdates: vi.fn(async () => {}),
         openDownload: vi.fn(async () => {}),
+        openChangelog: vi.fn(async () => {}),
     };
     const shell = {
         openExternal: vi.fn(),
@@ -472,6 +473,12 @@ describe('Studio main process', () => {
         expect(state.shell.openExternal).toHaveBeenCalledWith(
             'https://github.com/katbella/doodle-engine/releases/download/%40doodle-engine%2Fstudio%400.3.0/doodle-studio-0.3.0-setup.exe'
         );
+        await state.updaterOpenExternal?.(
+            'https://github.com/katbella/doodle-engine/releases/tag/%40doodle-engine%2Fstudio%400.3.0'
+        );
+        expect(state.shell.openExternal).toHaveBeenCalledWith(
+            'https://github.com/katbella/doodle-engine/releases/tag/%40doodle-engine%2Fstudio%400.3.0'
+        );
         state.shell.openExternal.mockClear();
         const viewMenu = state.menuTemplate?.find(
             (item) => item.label === 'View'
@@ -671,6 +678,8 @@ describe('Studio main process', () => {
         expect(state.studioUpdater.checkForUpdates).toHaveBeenCalledWith(true);
         await state.ipcHandlers.get('update:openDownload')?.({});
         expect(state.studioUpdater.openDownload).toHaveBeenCalled();
+        await state.ipcHandlers.get('update:openChangelog')?.({});
+        expect(state.studioUpdater.openChangelog).toHaveBeenCalled();
 
         const nextState = {
             status: 'downloading',
@@ -830,6 +839,16 @@ describe('Studio main process', () => {
             'C:/games/story'
         );
         await vi.waitFor(() => expect(state.spawned).toHaveLength(1));
+        expect(state.spawn).toHaveBeenNthCalledWith(
+            1,
+            process.platform === 'win32'
+                ? (process.env.ComSpec ?? 'cmd.exe')
+                : 'yarn',
+            process.platform === 'win32'
+                ? ['/d', '/s', '/c', 'yarn', 'install']
+                : ['install'],
+            { cwd: 'C:/games/story' }
+        );
         const child = state.spawned[0];
         child.emitStdout('resolved packages\n');
         child.emitStderr('warning\n');

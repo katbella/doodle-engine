@@ -3,7 +3,9 @@ title: Content Registry
 description: How game content is loaded and organized.
 ---
 
-The `ContentRegistry` is a read-only data structure that holds all game content. It is built at load time from the `content/` directory and is never modified by the engine or renderer during gameplay.
+The `ContentRegistry` is a read-only data structure that holds all game
+definitions. It is built at load time from the `content/` directory and is
+never modified by the engine or renderer during gameplay.
 
 The registry organizes content by ID so the engine can find it without scanning project files during play.
 
@@ -11,6 +13,7 @@ The registry organizes content by ID so the engine can find it without scanning 
 
 ```ts
 interface ContentRegistry {
+    player?: PlayerCharacter;
     locations: Record<string, Location>;
     characters: Record<string, Character>;
     items: Record<string, Item>;
@@ -23,7 +26,10 @@ interface ContentRegistry {
 }
 ```
 
-Every content entity, such as a location or character, is indexed by its `id` field. For example, a location with `id: tavern` is stored at `registry.locations.tavern`.
+Collections are indexed by each entity's `id`. For example, a location with
+`id: tavern` is stored at `registry.locations.tavern`. The player is different:
+`content/player.yaml` is a single optional definition stored directly at
+`registry.player`, never under `registry.characters`.
 
 ## How Content is Loaded
 
@@ -37,17 +43,18 @@ The dev server (`npm run dev`) builds the registry automatically:
 
 ### Loading by Directory
 
-| Directory                   | Registry Field            | Loader                        |
-| --------------------------- | ------------------------- | ----------------------------- |
-| `content/locations/*.yaml`  | `registry.locations`      | YAML parse, keyed by `id`     |
-| `content/characters/*.yaml` | `registry.characters`     | YAML parse, keyed by `id`     |
-| `content/items/*.yaml`      | `registry.items`          | YAML parse, keyed by `id`     |
-| `content/maps/*.yaml`       | `registry.maps`           | YAML parse, keyed by `id`     |
-| `content/dialogues/*.dlg`   | `registry.dialogues`      | DSL parser, keyed by filename |
-| `content/quests/*.yaml`     | `registry.quests`         | YAML parse, keyed by `id`     |
-| `content/journal/*.yaml`    | `registry.journalEntries` | YAML parse, keyed by `id`     |
-| `content/interludes/*.yaml` | `registry.interludes`     | YAML parse, keyed by `id`     |
-| `content/locales/*.yaml`    | `registry.locales`        | YAML parse, keyed by filename |
+| Directory                   | Registry Field            | Loader                         |
+| --------------------------- | ------------------------- | ------------------------------ |
+| `content/locations/*.yaml`  | `registry.locations`      | YAML parse, keyed by `id`      |
+| `content/characters/*.yaml` | `registry.characters`     | YAML parse, keyed by `id`      |
+| `content/items/*.yaml`      | `registry.items`          | YAML parse, keyed by `id`      |
+| `content/maps/*.yaml`       | `registry.maps`           | YAML parse, keyed by `id`      |
+| `content/dialogues/*.dlg`   | `registry.dialogues`      | DSL parser, keyed by filename  |
+| `content/quests/*.yaml`     | `registry.quests`         | YAML parse, keyed by `id`      |
+| `content/journal/*.yaml`    | `registry.journalEntries` | YAML parse, keyed by `id`      |
+| `content/interludes/*.yaml` | `registry.interludes`     | YAML parse, keyed by `id`      |
+| `content/locales/*.yaml`    | `registry.locales`        | YAML parse, keyed by filename  |
+| `content/player.yaml`       | `registry.player`         | YAML parse, optional singleton |
 
 ### Special Cases
 
@@ -55,7 +62,37 @@ The dev server (`npm run dev`) builds the registry automatically:
 
 **Dialogue files** use the filename without its extension as the dialogue ID. For example, `bartender_greeting.dlg` becomes `registry.dialogues.bartender_greeting`.
 
+**player.yaml** is an optional singleton. It defines the player character's
+profile fields and starting stats. It has no `id`,
+location, dialogue, relationship, or party-membership field. The toolkit records
+its source as `player:player` in the file map used by Studio.
+
 **game.yaml** is loaded separately as a `GameConfig`, not part of the registry.
+Its `playerCreatesProfile` flag decides whether the profile comes from
+`player.yaml` or is entered by the player. If the flag and `player.yaml` are
+both absent, the engine uses a generic `Player` profile and does not open the
+profile modal.
+
+## Definitions, State, and Snapshots
+
+The player data has three distinct forms:
+
+- `registry.player` contains the immutable definition loaded from
+  `player.yaml`, including detailed stat definitions such as
+  `{ name: "Strength", value: 16 }`.
+- `GameState.player` contains the current profile text and current stat values.
+  Effects update this state, and saves preserve it.
+- `snapshot.player` contains renderer-ready profile text, localized stat
+  values, and a separate `statNames` map.
+
+NPCs use the same separation for stats: character YAML provides the stat names
+and starting values, `GameState.characterState[id].stats` holds current values,
+and each `SnapshotCharacter` exposes `stats` plus `statNames`. Keeping the name
+separate lets game logic address a stable stat key while renderers display a
+localized label.
+
+Localization applies to player and character profile fields, stat names, and
+string stat values. Player-entered profile text remains literal.
 
 ## How the Engine Uses the Registry
 
@@ -69,7 +106,9 @@ The engine uses the registry to:
 
 - Look up location data when building snapshots
 - Find character dialogues when `talkTo` is called
-- Resolve localization keys and interpolate `{varName}` placeholders at snapshot time
+- Initialize the player profile and character stats for a new game
+- Resolve localization keys and interpolate variables, player profile fields,
+  and character stats at snapshot time
 - Check triggered dialogue and interlude conditions on location change
 - Determine travel distances from map data
 
@@ -91,6 +130,7 @@ Entities reference each other by ID:
 
 - Character `dialogue` field references a dialogue ID
 - Character `location` field references a location ID
+- `GameConfig.playerCreatesProfile` selects fixed or player-entered profile text
 - Item `location` field references a location ID, `"inventory"`, or a character ID
 - Map `locations[].id` references a location ID
 - Dialogue `triggerLocation` references a location ID

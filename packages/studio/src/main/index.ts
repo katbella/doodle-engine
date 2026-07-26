@@ -48,6 +48,7 @@ import { StudioUpdater } from './studio-updater';
 import {
     createGithubReleasesLoader,
     isTrustedStudioDownloadUrl,
+    isTrustedStudioReleaseUrl,
 } from './studio-release';
 import { STUDIO_VERSION } from './version';
 
@@ -343,9 +344,16 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
     send(`Installing dependencies with ${packageManager}…`);
 
     return new Promise((resolve) => {
-        const child = spawn(packageManager, ['install'], {
+        const command =
+            process.platform === 'win32'
+                ? (process.env.ComSpec ?? 'cmd.exe')
+                : packageManager;
+        const args =
+            process.platform === 'win32'
+                ? ['/d', '/s', '/c', packageManager, 'install']
+                : ['install'];
+        const child = spawn(command, args, {
             cwd: projectDir,
-            shell: process.platform === 'win32',
         });
         const forward = (chunk: Buffer) => {
             const text = chunk.toString().replace(/\s+$/, '');
@@ -503,7 +511,10 @@ app.whenReady().then(() => {
         platform: process.platform,
         loadReleases: createGithubReleasesLoader(STUDIO_RELEASE_REPO),
         openExternal: (url) => {
-            if (!isTrustedStudioDownloadUrl(url)) {
+            if (
+                !isTrustedStudioDownloadUrl(url) &&
+                !isTrustedStudioReleaseUrl(url)
+            ) {
                 throw new Error('Refusing to open an untrusted update URL.');
             }
             return shell.openExternal(url);
@@ -648,6 +659,7 @@ app.whenReady().then(() => {
     handle('update:getState', () => updater?.getState());
     handle('update:check', () => updater?.checkForUpdates(true));
     handle('update:openDownload', () => updater?.openDownload());
+    handle('update:openChangelog', () => updater?.openChangelog());
 
     const documents = new DocumentService(markSelfWrite);
     const assets = new AssetService(markSelfWrite);

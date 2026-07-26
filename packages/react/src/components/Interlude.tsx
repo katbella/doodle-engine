@@ -1,15 +1,14 @@
 /**
  * Interlude - Full-screen narrative text scene
  *
- * Displays a background image with scrolling text, like chapter cards
- * in Infinity Engine games such as Baldur's Gate. The player can skip at any time.
+ * Displays scrolling text with optional art and audio. The player can skip at
+ * any time.
  */
 
 import { useEffect, useRef, useCallback, useContext } from 'react';
 import type { SnapshotInterlude } from '@doodle-engine/core';
 import { AudioSettingsContext } from '../AudioSettingsContext';
 import { useInputAction, type InputCommand } from '../input/InputRouter';
-import { useOptionalAssetContext } from '../AssetProvider';
 import { uiText } from '../uiText';
 
 export interface InterludeProps {
@@ -52,13 +51,6 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
     const scrollOffsetRef = useRef(0);
     const manualPausedRef = useRef(false);
     const lastTimeRef = useRef<number | null>(null);
-    const assetContext = useOptionalAssetContext();
-    const getAssetUrl = useCallback(
-        (path: string | undefined) =>
-            path ? (assetContext?.getAssetUrl(path) ?? path) : '',
-        [assetContext]
-    );
-
     // Volumes from context if available (Interlude may be used outside AudioSettingsProvider)
     const audioSettings = useContext(AudioSettingsContext);
     const masterVol = audioSettings?.masterVolume ?? 1;
@@ -69,7 +61,7 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
     // Music: loops for the duration of the interlude
     useEffect(() => {
         if (!interlude.music) return;
-        const audio = new Audio(getAssetUrl(interlude.music));
+        const audio = new Audio(interlude.music);
         audio.loop = true;
         audio.volume = masterVol * musicVol;
         audio.play().catch(() => {});
@@ -77,25 +69,25 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
             audio.pause();
             audio.src = '';
         };
-    }, [interlude.music, masterVol, musicVol, getAssetUrl]);
+    }, [interlude.music, masterVol, musicVol]);
 
     // Voice narration: plays once
     useEffect(() => {
         if (!interlude.voice) return;
-        const audio = new Audio(getAssetUrl(interlude.voice));
+        const audio = new Audio(interlude.voice);
         audio.volume = masterVol * voiceVol;
         audio.play().catch(() => {});
         return () => {
             audio.pause();
             audio.src = '';
         };
-    }, [interlude.voice, masterVol, voiceVol, getAssetUrl]);
+    }, [interlude.voice, masterVol, voiceVol]);
 
     // Ambient sounds: each loops independently
     useEffect(() => {
         if (!interlude.sounds?.length) return;
         const audios = interlude.sounds.map((src) => {
-            const audio = new Audio(getAssetUrl(src));
+            const audio = new Audio(src);
             audio.loop = true;
             audio.volume = masterVol * soundVol;
             audio.play().catch(() => {});
@@ -107,7 +99,7 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
                 a.src = '';
             });
         };
-    }, [interlude.sounds, masterVol, soundVol, getAssetUrl]);
+    }, [interlude.sounds, masterVol, soundVol]);
 
     // Auto-scroll: refs update the DOM directly to avoid per-frame React re-renders
     useEffect(() => {
@@ -194,15 +186,19 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
     return (
         <div
             className="interlude-overlay"
-            style={{
-                backgroundImage: `url(${getAssetUrl(interlude.background)})`,
-            }}
+            style={
+                interlude.background
+                    ? {
+                          backgroundImage: `url(${interlude.background})`,
+                      }
+                    : undefined
+            }
             onClick={onDismiss}
         >
             {interlude.banner && (
                 <img
                     className="interlude-banner"
-                    src={getAssetUrl(interlude.banner)}
+                    src={interlude.banner}
                     alt=""
                     aria-hidden="true"
                 />

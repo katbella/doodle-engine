@@ -7,7 +7,6 @@
 
 import { useEffect, useRef } from 'react';
 import type { ShellConfig } from '@doodle-engine/core';
-import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
 import { uiText } from '../uiText';
 
@@ -32,9 +31,9 @@ export function SplashScreen({
     className = '',
 }: SplashScreenProps) {
     const displayDuration = shell?.duration ?? 2000;
-    const displayLogo = useAssetUrl(shell?.logo);
-    const background = useAssetUrl(shell?.background);
-    const sound = useAssetUrl(shell?.sound);
+    const displayLogo = shell?.logo;
+    const background = shell?.background;
+    const sound = shell?.sound;
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -62,7 +61,7 @@ export function SplashScreen({
         };
     }, [sound, volume]);
 
-    const bgStyle = screenBackgroundStyle(background);
+    const bgStyle = screenBackgroundStyle(background ?? '');
 
     return (
         <div

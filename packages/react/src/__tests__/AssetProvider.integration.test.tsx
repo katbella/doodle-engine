@@ -2,13 +2,8 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { AssetLoader, AssetManifest } from '@doodle-engine/core';
-import {
-    AssetProvider,
-    useAssetContext,
-    useOptionalAssetContext,
-} from '../AssetProvider';
+import { AssetProvider } from '../AssetProvider';
 
 afterEach(cleanup);
 
@@ -25,29 +20,16 @@ function makeLoader(loadMany: AssetLoader['loadMany']): AssetLoader {
         isAvailable: vi.fn(async () => true),
         load: vi.fn(async () => {}),
         loadMany,
-        getUrl: vi.fn((path: string) => `/cached${path}`),
-        prefetch: vi.fn(),
         clear: vi.fn(async () => {}),
     };
 }
 
 function Consumer() {
-    const assets = useAssetContext();
-    return (
-        <div>
-            <span>{assets.state.phase}</span>
-            <span>{assets.getAssetUrl('/game.png')}</span>
-            <span>{assets.isReady('/shell.png') ? 'shell-ready' : ''}</span>
-            <span>{assets.isReady('/game.png') ? 'game-ready' : ''}</span>
-            <button onClick={() => assets.prefetch(['/next.png'])}>
-                Prefetch
-            </button>
-        </div>
-    );
+    return <p>Game loaded</p>;
 }
 
 describe('AssetProvider', () => {
-    it('loads shell and game assets in order and exposes completed assets', async () => {
+    it('loads shell and game assets in order before rendering children', async () => {
         const states: string[] = [];
         const loadMany = vi.fn<AssetLoader['loadMany']>(
             async (paths, onProgress) => {
@@ -55,8 +37,6 @@ describe('AssetProvider', () => {
             }
         );
         const loader = makeLoader(loadMany);
-        const user = userEvent.setup();
-
         render(
             <AssetProvider
                 manifest={manifest}
@@ -68,9 +48,7 @@ describe('AssetProvider', () => {
             </AssetProvider>
         );
 
-        expect(await screen.findByText('/cached/game.png')).toBeTruthy();
-        expect(screen.getByText('shell-ready')).toBeTruthy();
-        expect(screen.getByText('game-ready')).toBeTruthy();
+        expect(await screen.findByText('Game loaded')).toBeTruthy();
         expect(loadMany.mock.calls.map(([paths]) => paths)).toEqual([
             ['/shell.png'],
             ['/game.png'],
@@ -79,8 +57,6 @@ describe('AssetProvider', () => {
         expect(states).toContain('loading-game');
         expect(states.at(-1)).toBe('complete');
 
-        await user.click(screen.getByRole('button', { name: 'Prefetch' }));
-        expect(loader.prefetch).toHaveBeenCalledWith(['/next.png']);
     });
 
     it('renders the failed state and does not expose children', async () => {
@@ -165,17 +141,5 @@ describe('AssetProvider', () => {
             </AssetProvider>
         );
         expect(await screen.findByText('Fast game ready')).toBeTruthy();
-    });
-
-    it('distinguishes optional access from required access', () => {
-        function OptionalConsumer() {
-            return <p>{useOptionalAssetContext() ? 'present' : 'absent'}</p>;
-        }
-        expect(() => render(<Consumer />)).toThrow(
-            'useAssetContext must be used within AssetProvider'
-        );
-        cleanup();
-        render(<OptionalConsumer />);
-        expect(screen.getByText('absent')).toBeTruthy();
     });
 });

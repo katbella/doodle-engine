@@ -81,6 +81,27 @@ export function evaluateCondition(
         case 'characterInParty':
             return evaluateCharacterInParty(condition.characterId, state);
 
+        case 'characterStatEquals':
+            return (
+                characterStats(condition.characterId, state)?.[
+                    condition.stat
+                ] === condition.value
+            );
+
+        case 'characterStatGreaterThan': {
+            const value = characterStats(condition.characterId, state)?.[
+                condition.stat
+            ];
+            return typeof value === 'number' && value > condition.value;
+        }
+
+        case 'characterStatLessThan': {
+            const value = characterStats(condition.characterId, state)?.[
+                condition.stat
+            ];
+            return typeof value === 'number' && value < condition.value;
+        }
+
         case 'relationshipAbove':
             return evaluateRelationshipAbove(
                 condition.characterId,
@@ -265,6 +286,12 @@ function evaluateCharacterInParty(
     return characterState?.inParty === true;
 }
 
+function characterStats(characterId: string, state: GameState) {
+    return characterId === 'player'
+        ? state.player?.stats
+        : state.characterState[characterId]?.stats;
+}
+
 /**
  * Check if relationship with a character is above a value (exclusive).
  * Returns false if the character doesn't exist in characterState.
@@ -394,6 +421,15 @@ export function describeConditionValues(
                 inParty:
                     state.characterState[condition.characterId]?.inParty ??
                     false,
+            };
+
+        case 'characterStatEquals':
+        case 'characterStatGreaterThan':
+        case 'characterStatLessThan':
+            return {
+                characterStat: characterStats(condition.characterId, state)?.[
+                    condition.stat
+                ],
             };
 
         case 'relationshipAbove':

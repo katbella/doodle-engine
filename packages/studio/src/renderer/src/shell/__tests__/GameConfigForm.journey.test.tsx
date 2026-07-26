@@ -181,6 +181,11 @@ describe('GameConfigForm author journeys', () => {
             await screen.findByLabelText('Location'),
             'market'
         );
+        await user.click(
+            screen.getByRole('checkbox', {
+                name: 'Ask the player to create a profile',
+            })
+        );
         const day = screen.getByLabelText('Day');
         await user.clear(day);
         await user.type(day, '2');
@@ -207,6 +212,7 @@ describe('GameConfigForm author journeys', () => {
             project.projectDir,
             'game.yaml',
             [
+                { path: ['playerCreatesProfile'], value: true },
                 { path: ['startLocation'], value: 'market' },
                 { path: ['startTime'], value: { day: 2, hour: 8 } },
                 { path: ['startFlags'], value: { introSeen: true } },

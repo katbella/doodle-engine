@@ -82,6 +82,12 @@ const character: EntityForm = {
             required: true,
         },
         {
+            name: 'title',
+            label: 'Title',
+            control: { kind: 'localizable' },
+            textKind: 'short',
+        },
+        {
             name: 'biography',
             label: 'Biography',
             control: { kind: 'localizable' },
@@ -102,6 +108,36 @@ const character: EntityForm = {
             name: 'dialogue',
             label: 'Dialogue',
             control: { kind: 'reference', target: 'dialogues' },
+        },
+        { name: 'stats', label: 'Stats', control: { kind: 'statsBag' } },
+    ],
+};
+
+const player: EntityForm = {
+    label: 'Player',
+    fields: [
+        {
+            name: 'name',
+            label: 'Name',
+            control: { kind: 'localizable' },
+            textKind: 'short',
+        },
+        {
+            name: 'title',
+            label: 'Title',
+            control: { kind: 'localizable' },
+            textKind: 'short',
+        },
+        {
+            name: 'biography',
+            label: 'Biography',
+            control: { kind: 'localizable' },
+            textKind: 'prose',
+        },
+        {
+            name: 'portrait',
+            label: 'Portrait',
+            control: { kind: 'asset', category: 'portrait' },
         },
         { name: 'stats', label: 'Stats', control: { kind: 'statsBag' } },
     ],
@@ -232,7 +268,6 @@ const interlude: EntityForm = {
             name: 'background',
             label: 'Background',
             control: { kind: 'asset', category: 'banner' },
-            required: true,
         },
         {
             name: 'banner',
@@ -316,6 +351,7 @@ const journal: EntityForm = {
 /** Forms by section. Sections not here (dialogues, locales, config) have their
  * own dedicated editors. */
 export const ENTITY_FORMS: Partial<Record<SectionKey, EntityForm>> = {
+    player,
     characters: character,
     locations: location,
     items: item,

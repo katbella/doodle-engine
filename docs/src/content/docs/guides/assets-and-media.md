@@ -71,6 +71,7 @@ Here, Doodle loads `tavern.png` from `assets/images/banners/` and `tavern_ambien
 | `location.music`                             | `assets/audio/music/{filename}`         |
 | `location.ambient`                           | `assets/audio/sfx/{filename}`           |
 | `character.portrait`                         | `assets/images/portraits/{filename}`    |
+| `player.portrait`                            | `assets/images/portraits/{filename}`    |
 | `item.icon`, `item.image`                    | `assets/images/items/{filename}`        |
 | `map.image`                                  | `assets/images/maps/{filename}`         |
 | `interlude.background`, `interlude.banner`   | `assets/images/banners/{filename}`      |
@@ -131,6 +132,11 @@ portrait: bartender.png
 location: tavern
 dialogue: bartender_greeting
 ```
+
+A fixed `portrait` in `content/player.yaml` uses the same portraits directory.
+When it is omitted, the built-in renderer shows its generic player emblem.
+Player-created profiles do not offer a portrait upload; a custom renderer can
+provide its own portrait policy and storage.
 
 ### Item Images
 

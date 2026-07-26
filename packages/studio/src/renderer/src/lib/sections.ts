@@ -64,6 +64,21 @@ export function buildSections(project: OpenProject): RailSection[] {
             label: 'Characters',
             items: listed('characters', Object.keys(r.characters)),
         },
+        ...(r.player
+            ? [
+                  {
+                      key: 'player' as const,
+                      label: 'Player',
+                      items: [
+                          {
+                              id: 'player',
+                              label: 'player.yaml',
+                              status: statusForPath('content/player.yaml'),
+                          },
+                      ],
+                  },
+              ]
+            : []),
         {
             key: 'locations',
             label: 'Locations',

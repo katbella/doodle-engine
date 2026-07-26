@@ -11,6 +11,15 @@ import type { GameState } from '../types/state';
 // Helper to create a minimal game state for testing
 function createTestState(): GameState {
     return {
+        player: {
+            playerCreatesProfile: false,
+            name: 'Hero',
+            title: '',
+            biography: '',
+            portrait: '',
+            profileComplete: true,
+            stats: { strength: 16.2, class: '@class.ranger' },
+        },
         currentLocation: 'tavern',
         currentTime: { day: 1, hour: 14 },
         flags: {
@@ -67,6 +76,71 @@ function createTestState(): GameState {
 }
 
 describe('Condition Evaluators', () => {
+    describe('character stats', () => {
+        it('compares number and string values for characters and the player', () => {
+            const state = createTestState();
+            expect(
+                evaluateCondition(
+                    {
+                        type: 'characterStatGreaterThan',
+                        characterId: 'player',
+                        stat: 'strength',
+                        value: 16.1,
+                    },
+                    state
+                )
+            ).toBe(true);
+            expect(
+                evaluateCondition(
+                    {
+                        type: 'characterStatEquals',
+                        characterId: 'player',
+                        stat: 'class',
+                        value: '@class.ranger',
+                    },
+                    state
+                )
+            ).toBe(true);
+            expect(
+                evaluateCondition(
+                    {
+                        type: 'characterStatLessThan',
+                        characterId: 'pixel_the_dog',
+                        stat: 'level',
+                        value: 4,
+                    },
+                    state
+                )
+            ).toBe(true);
+        });
+
+        it('does not coerce strings or pass missing stats', () => {
+            const state = createTestState();
+            expect(
+                evaluateCondition(
+                    {
+                        type: 'characterStatGreaterThan',
+                        characterId: 'player',
+                        stat: 'class',
+                        value: 1,
+                    },
+                    state
+                )
+            ).toBe(false);
+            expect(
+                evaluateCondition(
+                    {
+                        type: 'characterStatEquals',
+                        characterId: 'player',
+                        stat: 'missing',
+                        value: 0,
+                    },
+                    state
+                )
+            ).toBe(false);
+        });
+    });
+
     describe('hasFlag', () => {
         it('should return true when flag is set', () => {
             const condition: Condition = {

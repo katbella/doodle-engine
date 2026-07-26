@@ -11,6 +11,11 @@ import type { GameConfig } from '../types/entities';
 // Test fixtures
 function createTestRegistry(): ContentRegistry {
     return {
+        player: {
+            stats: {
+                strength: { name: 'Strength', value: 16 },
+            },
+        },
         locations: {
             tavern: {
                 id: 'tavern',
@@ -223,6 +228,7 @@ function createTestRegistry(): ContentRegistry {
 
 function createTestConfig(): GameConfig {
     return {
+        playerCreatesProfile: true,
         startLocation: 'tavern',
         startTime: { day: 1, hour: 8 },
         startFlags: {},
@@ -300,6 +306,31 @@ describe('Engine', () => {
             expect(snapshot.itemsHere[0].id).toBe('rusty_key');
         });
 
+        it('uses the fixed player profile when profile entry is disabled', () => {
+            registry.player = {
+                name: 'Aria',
+                title: 'Warden',
+                biography: 'A ranger.',
+                portrait: 'aria.png',
+                stats: {
+                    strength: { name: 'Strength', value: 16 },
+                },
+            };
+
+            const snapshot = engine.newGame({
+                ...createTestConfig(),
+                playerCreatesProfile: false,
+            });
+
+            expect(snapshot.player).toMatchObject({
+                name: 'Aria',
+                title: 'Warden',
+                biography: 'A ranger.',
+                profileComplete: true,
+            });
+            expect(snapshot.player.stats.strength).toBe(16);
+        });
+
         it('should mark startInventory items as being in inventory', () => {
             const config = {
                 ...createTestConfig(),
@@ -338,6 +369,42 @@ describe('Engine', () => {
     });
 
     describe('saveGame / loadGame', () => {
+        it('persists a player-created profile and player stats', () => {
+            engine.newGame(createTestConfig());
+            const snapshot = engine.setPlayerProfile({
+                name: 'Avery',
+                title: 'Warden',
+                biography: 'A traveler.',
+            });
+
+            expect(snapshot.player.profileComplete).toBe(true);
+            expect(snapshot.player.name).toBe('Avery');
+            expect(snapshot.player.stats.strength).toBe(16);
+
+            const save = engine.saveGame();
+            const loaded = new Engine(registry).loadGame(save);
+            expect(loaded.player.name).toBe('Avery');
+            expect(loaded.player.title).toBe('Warden');
+        });
+
+        it('ignores profile submissions when profile entry is disabled', () => {
+            registry.player = {
+                name: 'Aria',
+                stats: {},
+            };
+            engine.newGame({
+                ...createTestConfig(),
+                playerCreatesProfile: false,
+            });
+
+            const snapshot = engine.setPlayerProfile({
+                name: 'Replacement',
+            });
+
+            expect(snapshot.player.name).toBe('Aria');
+            expect(snapshot.player.profileComplete).toBe(true);
+        });
+
         it('should save and load game state', () => {
             const config = createTestConfig();
             engine.newGame(config);
@@ -450,7 +517,9 @@ describe('Engine', () => {
             expect(snapshot.choices.map((choice) => choice.id)).not.toContain(
                 'hidden_choice'
             );
-            expect(engine.saveGame().state.flags.pickedHiddenChoice).toBeUndefined();
+            expect(
+                engine.saveGame().state.flags.pickedHiddenChoice
+            ).toBeUndefined();
         });
 
         it('should complete flow through startDialogue to endDialogue', () => {
@@ -619,7 +688,9 @@ describe('Engine', () => {
             engine.travelTo('market');
 
             const afterTravel = engine.saveGame();
-            expect(afterTravel.state.characterState.bartender.location).toBe('market');
+            expect(afterTravel.state.characterState.bartender.location).toBe(
+                'market'
+            );
         });
 
         it('should not move non-party characters when traveling', () => {
@@ -630,7 +701,9 @@ describe('Engine', () => {
             engine.travelTo('market');
 
             const afterTravel = engine.saveGame();
-            expect(afterTravel.state.characterState.pixel_the_dog.location).toBe('camp');
+            expect(
+                afterTravel.state.characterState.pixel_the_dog.location
+            ).toBe('camp');
         });
 
         it('should not allow travel when map is disabled', () => {

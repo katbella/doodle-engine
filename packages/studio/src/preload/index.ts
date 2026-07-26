@@ -94,6 +94,7 @@ const api: StudioApi = {
     getStudioUpdateState: () => ipcRenderer.invoke('update:getState'),
     checkForStudioUpdates: () => ipcRenderer.invoke('update:check'),
     openStudioUpdateDownload: () => ipcRenderer.invoke('update:openDownload'),
+    openStudioUpdateChangelog: () => ipcRenderer.invoke('update:openChangelog'),
     onStudioUpdateState: (callback) => {
         const listener = (_event: unknown, state: StudioUpdateState) =>
             callback(state);

@@ -7,7 +7,6 @@
 
 import { useRef } from 'react';
 import { useInputAction, type InputCommand } from '../input/InputRouter';
-import { useAssetUrl } from '../hooks/useAsset';
 import { uiText } from '../uiText';
 
 export interface VideoPlayerProps {
@@ -34,8 +33,6 @@ export function VideoPlayer({
     className = '',
 }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const videoSrc = useAssetUrl(src);
-
     useInputAction(
         ({ command }) => {
             if (shouldCompleteVideoFromInput(command)) {
@@ -52,7 +49,7 @@ export function VideoPlayer({
         <div className={`video-player-overlay ${className}`}>
             <video
                 ref={videoRef}
-                src={videoSrc}
+                src={src}
                 autoPlay
                 onEnded={onComplete}
                 className="video-player-video"

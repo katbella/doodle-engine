@@ -99,20 +99,6 @@ describe('createAssetLoader', () => {
         expect(calls[3][0]).toBe(2);
     });
 
-    it('getUrl returns the original path', () => {
-        const loader = createAssetLoader('1');
-        expect(loader.getUrl('/assets/foo.png')).toBe('/assets/foo.png');
-    });
-
-    it('prefetch loads assets non-blocking', async () => {
-        const loader = createAssetLoader('1');
-        loader.prefetch(['/assets/foo.png', '/assets/bar.ogg']);
-        // Give microtasks a tick to process
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        expect(fetchMock).toHaveBeenCalledWith('/assets/foo.png');
-        expect(fetchMock).toHaveBeenCalledWith('/assets/bar.ogg');
-    });
-
     it('load throws on non-ok response', async () => {
         fetchMock.mockResolvedValueOnce(makeResponse(false));
         const loader = createAssetLoader('1');

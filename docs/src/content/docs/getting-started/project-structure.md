@@ -22,6 +22,7 @@ my-game/
     maps/             # Map YAML files
     quests/           # Quest YAML files
     game.yaml         # Game configuration
+    player.yaml       # Optional player profile and stats
   assets/
     images/
       banners/        # Location and interlude banner images
@@ -62,11 +63,20 @@ All game content lives in `content/`. The engine loads each type from its corres
 | `maps/`       | `.yaml`   | Map definitions       |
 | `quests/`     | `.yaml`   | Quest definitions     |
 
+`player.yaml` is a single optional file rather than a directory of entities. It
+defines the player's profile fields and starting stats. `game.yaml` decides
+whether the built-in renderer uses those profile fields directly or asks the
+player to enter replacement profile text. See [Characters &
+Party](/guides/characters-and-party/#player-profile-and-party-sheets).
+
 ### game.yaml
 
-`game.yaml` sets the starting location, time, flags, variables, and inventory. Its required fields are:
+`game.yaml` must provide the starting location, time, flags, variables, and
+inventory. Set the optional `playerCreatesProfile` field to `true` when the
+built-in renderer should ask for the player's name, title, and biography:
 
 ```yaml
+playerCreatesProfile: true # Ask for the player's name, title, and biography
 startLocation: tavern # Where the player begins
 startTime:
     day: 1

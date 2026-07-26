@@ -6,6 +6,17 @@
 import type { Condition } from './conditions';
 import type { Effect } from './effects';
 
+export type StatValue = number | string;
+
+export interface CharacterStat {
+    /** Player-facing name (supports @localization keys) */
+    name: string;
+    /** Current starting value */
+    value: StatValue;
+}
+
+export type CharacterStats = Record<string, CharacterStat | StatValue>;
+
 /**
  * A location in the game world where the player can be.
  */
@@ -32,6 +43,8 @@ export interface Character {
     id: string;
     /** Display name (supports @localization keys) */
     name: string;
+    /** Optional title (supports @localization keys) */
+    title?: string;
     /** Character background text */
     biography: string;
     /** Character portrait image */
@@ -40,8 +53,24 @@ export interface Character {
     location: string;
     /** Dialogue ID when player talks to this character */
     dialogue: string;
-    /** Stats for game-specific data - engine stores but doesn't interpret */
-    stats: Record<string, unknown>;
+    /** Game-specific stats */
+    stats: CharacterStats;
+}
+
+/**
+ * The player's static profile and starting stats.
+ */
+export interface PlayerCharacter {
+    /** Fixed display name */
+    name?: string;
+    /** Fixed title */
+    title?: string;
+    /** Fixed biography */
+    biography?: string;
+    /** Fixed portrait */
+    portrait?: string;
+    /** Game-specific stats */
+    stats: CharacterStats;
 }
 
 /**
@@ -207,8 +236,8 @@ export interface JournalEntry {
 export interface Interlude {
     /** Unique identifier for this interlude */
     id: string;
-    /** Background image filename */
-    background: string;
+    /** Optional background image filename */
+    background?: string;
     /** Optional decorative banner/frame image overlaid on the background */
     banner?: string;
     /** Optional music track to play during the interlude */
@@ -272,6 +301,8 @@ export interface ShellConfig {
 export interface GameConfig {
     /** Shell screen configuration */
     shell?: ShellConfig;
+    /** Whether the renderer asks the player to enter profile text */
+    playerCreatesProfile?: boolean;
     /** Starting location ID */
     startLocation: string;
     /** Starting time */
