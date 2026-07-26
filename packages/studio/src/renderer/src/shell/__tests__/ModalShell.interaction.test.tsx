@@ -81,9 +81,13 @@ describe('ModalShell', () => {
 
     it('contains forward and backward Tab focus', () => {
         render(<Harness />);
-        fireEvent.click(screen.getByRole('button', { name: 'Open modal' }));
+        const trigger = screen.getByRole('button', { name: 'Open modal' });
+        fireEvent.click(trigger);
         const first = screen.getByRole('button', { name: 'First action' });
         const last = screen.getByRole('button', { name: 'Last action' });
+
+        trigger.focus();
+        expect(first).toBe(document.activeElement);
 
         last.focus();
         fireEvent.keyDown(document, { key: 'Tab' });
@@ -92,6 +96,19 @@ describe('ModalShell', () => {
         first.focus();
         fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
         expect(last).toBe(document.activeElement);
+    });
+
+    it('keeps focus on the dialog when it has no focusable children', () => {
+        render(
+            <ModalShell ariaLabel="Empty modal" onDismiss={() => {}}>
+                <p>No actions</p>
+            </ModalShell>
+        );
+        const dialog = screen.getByRole('dialog', { name: 'Empty modal' });
+
+        fireEvent.keyDown(document, { key: 'Tab' });
+
+        expect(dialog).toBe(document.activeElement);
     });
 
     it('dismisses from the backdrop but not from inside the dialog', () => {
