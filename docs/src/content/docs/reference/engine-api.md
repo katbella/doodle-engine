@@ -273,3 +273,28 @@ Transient state such as notifications, pending sounds, pending video, and pendin
 After `newGame()` and `travelTo()`, the engine checks for dialogues with a `triggerLocation` matching the current location. The first dialogue whose conditions pass begins automatically. One triggered dialogue can begin per location change.
 
 The engine also checks triggered interludes after `newGame()` and `travelTo()`. If an interlude's `triggerLocation` and `triggerConditions` match, the snapshot includes it as `pendingInterlude`.
+
+## Text Formatting
+
+### parseRichText
+
+```typescript
+parseRichText(text: string): RichTextSegment[]
+```
+
+Convert resolved dialogue or choice text into ordered segments with `bold`,
+`italic`, and `color` properties for a custom renderer to apply.
+
+```typescript
+import { parseRichText } from '@doodle-engine/core';
+
+const segments = parseRichText('Take the cE5C453[*key*].');
+// [
+//     { text: 'Take the ' },
+//     { text: 'key', bold: true, color: '#E5C453' },
+//     { text: '.' },
+// ]
+```
+
+[Format Dialogue Text](/guides/writing-dialogues/#format-dialogue-text) for the
+complete formatting syntax.

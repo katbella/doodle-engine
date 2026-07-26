@@ -3,7 +3,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { afterEach, describe, expect, it } from 'vitest';
-import { resolveText } from '@doodle-engine/core';
+import { parseRichText, resolveText } from '@doodle-engine/core';
 import { createProject } from '../create-project';
 import { loadProject } from '../load-project';
 import { validateContent } from '../validate';
@@ -103,13 +103,21 @@ describe('createProject language setup', () => {
             'utf-8'
         );
         expect(bartenderSource).toContain(
-            'BARTENDER: Welcome to the Salty Dog, stranger. What can I get you?'
+            'BARTENDER: Welcome to the *Salty Dog*, stranger. What can I get you?'
         );
         expect(bartenderSource).toContain(
             "CHOICE What's the news around here?"
         );
         expect(bartenderSource).not.toContain('BARTENDER: "');
         expect(bartenderSource).not.toContain('CHOICE "');
+        expect(bartenderSource).toContain('cD6A84B[*old coin*]');
+        const tavernIntroSource = await readFile(
+            join(projectPath, 'content', 'dialogues', 'tavern_intro.dlg'),
+            'utf-8'
+        );
+        expect(tavernIntroSource).toContain(
+            'NARRATOR: _You push open the heavy oak door and step inside._'
+        );
 
         const contentDir = join(projectPath, 'content');
         const contentFiles = await readdir(contentDir, { recursive: true });
@@ -153,6 +161,32 @@ describe('createProject language setup', () => {
         expect(englishKeys.length).toBeGreaterThan(0);
         expect(swedishKeys.sort()).toEqual(englishKeys.sort());
         expect(loaded.registry.locales.sv['ui.language']).toBe('Språk');
+        expect(
+            parseRichText(loaded.registry.locales.en['bartender.rumors'])
+        ).toContainEqual({
+            text: 'old coin',
+            bold: true,
+            color: '#D6A84B',
+        });
+        expect(
+            parseRichText(loaded.registry.locales.sv['bartender.rumors'])
+        ).toContainEqual({
+            text: 'gamla myntet',
+            bold: true,
+            color: '#D6A84B',
+        });
+        expect(
+            parseRichText(loaded.registry.locales.en['narrator.tavern_intro'])
+        ).toContainEqual({
+            text: 'You push open the heavy oak door and step inside.',
+            italic: true,
+        });
+        expect(
+            parseRichText(loaded.registry.locales.sv['narrator.tavern_intro'])
+        ).toContainEqual({
+            text: 'Du skjuter upp den tunga ekdörren och kliver in.',
+            italic: true,
+        });
 
         const swedishInterlude = resolveText(
             loaded.registry.interludes.chapter_one.text,

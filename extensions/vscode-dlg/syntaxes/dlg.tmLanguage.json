@@ -43,6 +43,9 @@
             "include": "#interpolation"
         },
         {
+            "include": "#richText"
+        },
+        {
             "include": "#string"
         },
         {
@@ -216,6 +219,22 @@
                 }
             ]
         },
+        "richText": {
+            "patterns": [
+                {
+                    "name": "markup.bold.dlg",
+                    "match": "(?<!\\\\)\\*[^*\\n]+(?<!\\\\)\\*"
+                },
+                {
+                    "name": "markup.italic.dlg",
+                    "match": "(?<!\\\\)_[^_\\n]+(?<!\\\\)_"
+                },
+                {
+                    "name": "markup.other.color.dlg",
+                    "match": "(?<!\\\\)c[0-9A-Fa-f]{6}\\[[^\\]\\n]+(?<!\\\\)\\]"
+                }
+            ]
+        },
         "string": {
             "name": "string.quoted.double.dlg",
             "begin": "\"",
@@ -231,6 +250,9 @@
                 }
             },
             "patterns": [
+                {
+                    "include": "#richText"
+                },
                 {
                     "include": "#interpolation"
                 },

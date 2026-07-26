@@ -25,6 +25,25 @@ describe('ChoiceList real interaction', () => {
         expect(onSelectChoice).toHaveBeenCalledExactlyOnceWith('leave');
     });
 
+    it('renders formatting inside choice text', () => {
+        render(
+            <ChoiceList
+                choices={[
+                    {
+                        id: 'take_key',
+                        text: 'Take the cE5C453[*key*]',
+                    },
+                ]}
+                onSelectChoice={() => {}}
+                onContinue={() => {}}
+            />
+        );
+
+        const key = screen.getByText('key');
+        expect(key.tagName).toBe('STRONG');
+        expect(key.parentElement?.style.color).toBe('rgb(229, 196, 83)');
+    });
+
     it('pressing "2" on the keyboard selects the second choice', () => {
         const onSelectChoice = vi.fn();
         render(

@@ -113,6 +113,7 @@ When used inside `GameShell`, both providers are already set up. When used stand
 ## DialogueBox
 
 Displays the current dialogue node with speaker name, portrait, and text.
+It renders the DSL's bold, italic, and color syntax without interpreting HTML.
 
 ```tsx
 import { DialogueBox } from '@doodle-engine/react';
@@ -155,6 +156,20 @@ import { ChoiceList } from '@doodle-engine/react';
 Number keys 1–9 select choices by position. Enter and Space trigger the Continue button when it is shown.
 These shortcuts are routed through `InputProvider`, so higher-priority overlays
 such as interludes, videos, and panels can consume input before dialogue sees it.
+
+Choice labels render the same bold, italic, and color syntax as dialogue text.
+
+## FormattedText
+
+Renders one resolved string using the dialogue formatting syntax. Use this
+component when a custom React layout displays dialogue text outside
+`DialogueBox` or `ChoiceList`.
+
+```tsx
+import { FormattedText } from '@doodle-engine/react';
+
+<FormattedText text={snapshot.dialogue.text} />;
+```
 
 ## LocationView
 
@@ -233,10 +248,7 @@ portrait input.
 ```tsx
 import { PlayerSetup } from '@doodle-engine/react';
 
-<PlayerSetup
-    ui={snapshot.ui}
-    onSubmit={actions.setPlayerProfile}
-/>;
+<PlayerSetup ui={snapshot.ui} onSubmit={actions.setPlayerProfile} />;
 ```
 
 | Prop       | Type                                    | Default  | Description               |

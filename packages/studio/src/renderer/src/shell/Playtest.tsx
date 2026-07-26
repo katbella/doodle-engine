@@ -7,9 +7,21 @@
  * touches project files. State edits go through the engine's debug-effect path,
  * so they behave exactly like in-game effects.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+    Fragment,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react';
 import { Play, X } from '../lib/icons';
-import type { ContentRegistry, GameConfig } from '@doodle-engine/core';
+import {
+    parseRichText,
+    type ContentRegistry,
+    type GameConfig,
+    type RichTextSegment,
+} from '@doodle-engine/core';
 import type { OpenProject } from '../../../shared/project';
 import { PlaytestSession, reloadSession } from '../lib/playtest';
 import { useTestStates } from '../lib/useTestStates';
@@ -282,7 +294,7 @@ function Playback({
                     {dialogue.speakerName}
                 </span>
                 <span className="playback__text">
-                    {dialogue.text}
+                    <PlaytestText text={dialogue.text} />
                     {line?.key && <KeyTag k={line.key} />}
                 </span>
             </div>
@@ -309,14 +321,14 @@ function Playback({
                                         )
                                     }
                                 >
-                                    {row.display.text}
+                                    <PlaytestText text={row.display.text} />
                                     {row.display.key && (
                                         <KeyTag k={row.display.key} />
                                     )}
                                 </button>
                             ) : (
                                 <span className="pchoice__text">
-                                    {row.display.text}
+                                    <PlaytestText text={row.display.text} />
                                     {row.display.key && (
                                         <KeyTag k={row.display.key} />
                                     )}
@@ -529,6 +541,23 @@ function Group({
             {children}
         </div>
     );
+}
+
+/** Render resolved dialogue formatting as safe semantic elements. */
+function PlaytestText({ text }: { text: string }) {
+    return <>{parseRichText(text).map(renderTextSegment)}</>;
+}
+
+function renderTextSegment(segment: RichTextSegment, index: number): ReactNode {
+    let content: ReactNode = segment.text;
+
+    if (segment.italic) content = <em>{content}</em>;
+    if (segment.bold) content = <strong>{content}</strong>;
+    if (segment.color) {
+        content = <span style={{ color: segment.color }}>{content}</span>;
+    }
+
+    return <Fragment key={index}>{content}</Fragment>;
 }
 
 /** A small monospace chip showing the `@key` a line came from, so a writer can

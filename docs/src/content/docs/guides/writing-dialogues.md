@@ -177,6 +177,34 @@ NODE emotional_scene
 - `VOICE` sets an audio file to play for this node
 - `PORTRAIT` overrides the character's default portrait
 
+## Format Dialogue Text
+
+Add formatting around the exact words you want to emphasize:
+
+```text
+BARTENDER: He hands you a cE5C453[*key*].
+NARRATOR: _For a moment, nobody speaks._
+CHOICE Take the *key*.
+```
+
+The player sees:
+
+- **Bartender:** He hands you a <span style="color: #E5C453"><strong>key</strong></span>.
+- **Narrator:** _For a moment, nobody speaks._
+- **Choice:** Take the **key**.
+
+| Effect         | Syntax                           | Output                                                   |
+| -------------- | -------------------------------- | -------------------------------------------------------- |
+| Bold           | `*key*`                          | **key**                                                  |
+| Italic         | `_For a moment, nobody speaks._` | _For a moment, nobody speaks._                           |
+| Color          | `cE5C453[key]`                   | <span style="color: #E5C453">key</span>                  |
+| Bold and color | `cE5C453[*key*]`                 | <span style="color: #E5C453"><strong>key</strong></span> |
+
+Formatting can be nested and works in both dialogue text and locale values.
+Enter it directly in a dialogue text field or Source view. Put a backslash
+before `*`, `_`, or a color expression when those characters should appear as
+ordinary text.
+
 ## Comments
 
 Lines starting with `#` are comments:

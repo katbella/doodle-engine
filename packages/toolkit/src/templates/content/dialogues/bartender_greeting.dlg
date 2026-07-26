@@ -3,6 +3,7 @@
 # Nodes can have multiple CHOICE blocks; REQUIRE hides a choice if the condition fails.
 
 NODE start
+  # The displayed text uses *bold* around the tavern name.
   BARTENDER: @bartender.greeting
 
   # Always available: ask for rumors (demonstrates: flag, relationship, journalEntry)
@@ -40,6 +41,7 @@ NODE start
   END
 
 NODE rumors
+  # The displayed text nests *bold* inside cRRGGBB[color] for the old coin.
   BARTENDER: @bartender.rumors
   ADD journalEntry tavern_discovery
   ADD item old_coin

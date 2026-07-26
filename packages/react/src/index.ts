@@ -70,6 +70,9 @@ export type { GameShellProps } from './GameShell';
 export { DialogueBox } from './components/DialogueBox';
 export type { DialogueBoxProps } from './components/DialogueBox';
 
+export { FormattedText } from './components/FormattedText';
+export type { FormattedTextProps } from './components/FormattedText';
+
 export { ChoiceList } from './components/ChoiceList';
 export type { ChoiceListProps } from './components/ChoiceList';
 

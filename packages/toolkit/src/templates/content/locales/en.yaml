@@ -82,7 +82,7 @@ ui.time_night: "Night"
 # ===================
 # Narrator Intros
 # ===================
-narrator.tavern_intro: "You push open the heavy oak door and step inside. The warmth hits you first, then the smell: stale ale, wood smoke, and something frying in the kitchen. A few patrons hunch over their mugs. Behind the bar, a broad-shouldered man wipes down glasses, watching you with quiet interest."
+narrator.tavern_intro: "_You push open the heavy oak door and step inside._ The warmth hits you first, then the smell: stale ale, wood smoke, and something frying in the kitchen. A few patrons hunch over their mugs. Behind the bar, a broad-shouldered man wipes down glasses, watching you with quiet interest."
 narrator.market_intro: "The market square opens up before you, a riot of color and noise. Stalls line every side, draped in bright awnings. Merchants call out their prices, children dart between carts, and somewhere a street musician plays an out-of-tune fiddle."
 narrator.choice.look_around: "Look around."
 
@@ -151,7 +151,7 @@ interlude.chapter_one.text: |
 # ===================
 # Bartender Dialogue
 # ===================
-bartender.greeting: "Welcome to the Salty Dog, stranger. What can I get you?"
+bartender.greeting: "Welcome to the *Salty Dog*, stranger. What can I get you?"
 bartender.farewell: "Take care out there. The streets aren't as safe as they used to be."
 
 # Choices
@@ -175,7 +175,7 @@ bartender.choice.got_it: "Got it. I'll take care of it."
 bartender.choice.anytime: "Anytime."
 
 # Responses
-bartender.rumors: "Word is there's been strange folk poking around the docks at night. And the merchant in the market square has been looking for hired help. Oh, found this on the floor the other day. Strange markings. You can have it."
+bartender.rumors: "Word is there's been strange folk poking around the docks at night. And the merchant in the market square has been looking for hired help. Oh, I found this cD6A84B[*old coin*] on the floor the other day. Strange markings. You can have it."
 bartender.rumors_detail: "Some say they've seen lights out on the old pier after midnight. Probably smugglers, but who knows these days. Keep your wits about you."
 bartender.order_drink: "Five gold for the house special, strongest thing this side of the river. What do you say?"
 bartender.after_drink: "Glad you like it! Brewed it myself. Now then, anything else?"
@@ -197,7 +197,7 @@ merchant.choice.heard_about_work: "Marcus sent me about some work."
 merchant.choice.delivery_done: "The delivery is done."
 merchant.choice.whats_this_place: "Tell me about the market."
 merchant.choice.goodbye: "Just browsing. Goodbye."
-merchant.choice.buy_map: "I'll take the map. (20 gold)"
+merchant.choice.buy_map: "I'll take the *map*. (20 gold)"
 merchant.choice.too_pricey: "A bit rich for my blood."
 merchant.choice.accept_task: "I'm in. What do you need?"
 merchant.choice.need_to_think: "Let me think about it."

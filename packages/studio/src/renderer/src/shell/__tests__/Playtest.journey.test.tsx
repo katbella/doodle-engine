@@ -56,12 +56,12 @@ const project: OpenProject = {
                         choices: [
                             {
                                 id: 'open',
-                                text: 'Ask openly',
+                                text: 'Ask *openly*',
                                 next: 'inside',
                             },
                             {
                                 id: 'secret',
-                                text: 'Use the secret word',
+                                text: 'Use the cD6A84B[_secret_] word',
                                 conditions: [
                                     { type: 'hasFlag', flag: 'knowsSecret' },
                                 ],
@@ -92,8 +92,8 @@ const project: OpenProject = {
         journalEntries: {},
         interludes: {},
         locales: {
-            en: { 'door.welcome': 'Welcome.' },
-            sv: { 'door.welcome': 'Välkommen.' },
+            en: { 'door.welcome': 'Welcome to *the room*.' },
+            sv: { 'door.welcome': 'Välkommen till *rummet*.' },
         },
     },
     config: {
@@ -131,7 +131,7 @@ describe('Playtest author journeys', () => {
         ) as HTMLButtonElement;
         await user.click(startNode);
 
-        expect(screen.getByText('Welcome.')).toBeTruthy();
+        expect(screen.getByText('the room').tagName).toBe('STRONG');
         expect(screen.getByText('door / start')).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Debug trace' }));
         expect(screen.getByText('start')).toBeTruthy();
@@ -143,14 +143,25 @@ describe('Playtest author journeys', () => {
             screen.getByLabelText('Playtest locale'),
             'sv'
         );
-        expect(screen.getByText('Välkommen.')).toBeTruthy();
+        expect(screen.getByText('rummet').tagName).toBe('STRONG');
         expect(screen.getByText('AVAILABLE')).toBeTruthy();
         expect(screen.getByText('HIDDEN')).toBeTruthy();
+        const availableChoice = screen.getByRole('button', {
+            name: 'Ask openly',
+        });
+        expect(availableChoice.querySelector('strong')?.textContent).toBe(
+            'openly'
+        );
+        const hiddenColor = document.querySelector<HTMLElement>(
+            '.pchoice__text span[style]'
+        );
+        expect(hiddenColor?.style.color).toBe('rgb(214, 168, 75)');
+        expect(hiddenColor?.querySelector('em')?.textContent).toBe('secret');
         expect(
             screen.getByText(/Why hidden: REQUIRE hasFlag knowsSecret/)
         ).toBeTruthy();
 
-        await user.click(screen.getByRole('button', { name: 'Ask openly' }));
+        await user.click(availableChoice);
         expect(screen.getByText('Inside the room.')).toBeTruthy();
         expect(screen.getByText('door / inside')).toBeTruthy();
         expect(

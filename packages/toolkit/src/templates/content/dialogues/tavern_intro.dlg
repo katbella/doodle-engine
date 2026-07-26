@@ -9,6 +9,7 @@ REQUIRE notFlag seenTavernIntro
 NODE start
   # NARRATOR: has no speaker. Used for scene-setting text.
   # Dialogue text can be written inline or referenced with a localization key.
+  # The opening phrase uses _italics_ in this automatic introduction.
   NARRATOR: @narrator.tavern_intro
 
   # Effects run immediately when this node is reached, before choices are shown.

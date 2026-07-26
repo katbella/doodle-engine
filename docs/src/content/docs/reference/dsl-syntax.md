@@ -412,7 +412,51 @@ When the engine prepares the snapshot, it looks up the `@key` in the current loc
 
 For single-language games, plain or quoted text is simpler. Add `@keys` later when you need multiple languages.
 
-> **Quotes and `@keys` are for what characters say:** speaker and `NARRATOR` lines, `CHOICE` text, and `NOTIFY` messages. Write flag names, values, and IDs (in effects and conditions) as plain single words. For multi-word display text, use a locale string.
+:::note[Displayed text and IDs]
+Use plain text, quotes, and `@keys` for displayed text in speaker and
+`NARRATOR` lines, `CHOICE` text, and `NOTIFY` messages. Write flag names,
+values, and IDs in effects and conditions as plain single words. Put multi-word
+display text in a locale string.
+:::
+
+### Formatting dialogue text
+
+Speaker lines, narrator text, and choices support lightweight formatting:
+
+```text
+BARTENDER: He hands you a cE5C453[*key*].
+NARRATOR: _The room falls silent._
+CHOICE Take the *key*.
+```
+
+The player sees:
+
+- **Bartender:** He hands you a <span style="color: #E5C453"><strong>key</strong></span>.
+- **Narrator:** _The room falls silent._
+- **Choice:** Take the **key**.
+
+| Effect         | Syntax                     | Output                                                   |
+| -------------- | -------------------------- | -------------------------------------------------------- |
+| Bold           | `*key*`                    | **key**                                                  |
+| Italic         | `_The room falls silent._` | _The room falls silent._                                 |
+| Color          | `cE5C453[key]`             | <span style="color: #E5C453">key</span>                  |
+| Bold and color | `cE5C453[*key*]`           | <span style="color: #E5C453"><strong>key</strong></span> |
+
+The same syntax works inside locale values:
+
+```yaml
+bartender.gives_key: 'He hands you a cE5C453[*key*].'
+```
+
+Color codes use exactly six hexadecimal digits without a leading `#`. To show
+formatting punctuation literally, put a backslash before it:
+
+```text
+NARRATOR: Write \*word\* to display *word* without bold formatting.
+```
+
+Unclosed formatting is displayed literally. Enter formatting directly in
+dialogue text or locale values.
 
 ## Comments
 

@@ -92,7 +92,7 @@ const STRUCTURAL_COMPLETIONS = [
         label: 'CHOICE',
         detail: 'Add a player choice',
         documentation:
-            '**Add a player choice**\n\n`CHOICE <text>`\n\nPut its requirements, effects, and destination underneath it, then close the choice with `END`.',
+            '**Add a player choice**\n\n`CHOICE <text>`\n\nChoice text supports `*bold*`, `_italic_`, and `cRRGGBB[color]` formatting. Put its requirements, effects, and destination underneath it, then close the choice with `END`.',
     },
     {
         label: 'END',
@@ -128,7 +128,7 @@ const STRUCTURAL_COMPLETIONS = [
         label: 'NARRATOR:',
         detail: 'Write a narrator line',
         documentation:
-            '**Write narration with no speaker**\n\n`NARRATOR: <text>`\n\nThe text can be plain dialogue, quoted text, or an `@localization.key`.',
+            '**Write narration with no speaker**\n\n`NARRATOR: <text>`\n\nThe text can be plain dialogue, quoted text, or an `@localization.key`. It supports `*bold*`, `_italic_`, and `cRRGGBB[color]` formatting.',
     },
 ] as const;
 

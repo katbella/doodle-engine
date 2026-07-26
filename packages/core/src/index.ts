@@ -156,6 +156,10 @@ export { applyEffect, applyEffects } from './effects';
 // Localization
 export { resolveText } from './localization';
 
+// Dialogue text formatting
+export { parseRichText } from './rich-text';
+export type { RichTextSegment } from './rich-text';
+
 // Snapshot Builder
 export { buildSnapshot, buildUIStrings, UI_DEFAULTS } from './snapshot';
 

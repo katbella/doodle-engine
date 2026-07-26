@@ -343,9 +343,16 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
     send(`Installing dependencies with ${packageManager}…`);
 
     return new Promise((resolve) => {
-        const child = spawn(packageManager, ['install'], {
+        const command =
+            process.platform === 'win32'
+                ? (process.env.ComSpec ?? 'cmd.exe')
+                : packageManager;
+        const args =
+            process.platform === 'win32'
+                ? ['/d', '/s', '/c', packageManager, 'install']
+                : ['install'];
+        const child = spawn(command, args, {
             cwd: projectDir,
-            shell: process.platform === 'win32',
         });
         const forward = (chunk: Buffer) => {
             const text = chunk.toString().replace(/\s+$/, '');

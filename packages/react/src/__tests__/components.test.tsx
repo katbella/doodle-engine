@@ -226,14 +226,14 @@ describe('React components', () => {
                     dialogue={{
                         speaker: 'narrator',
                         speakerName: 'Narrator',
-                        text: 'Look there.\n\nThe room is empty.',
+                        text: 'Look *there*.\n\nThe room is cE5C453[_empty_].',
                         portrait: '/assets/images/portraits/narrator.png',
                     }}
                 />
             )
         );
         expect(dialogueHtml).toContain(
-            'Look there.<br/><br/>The room is empty.'
+            'Look <strong>there</strong>.<br/><br/>The room is <span style="color:#E5C453"><em>empty</em></span>.'
         );
         const characterHtml = renderToStaticMarkup(
             withAssetContext(

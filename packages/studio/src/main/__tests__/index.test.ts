@@ -830,6 +830,16 @@ describe('Studio main process', () => {
             'C:/games/story'
         );
         await vi.waitFor(() => expect(state.spawned).toHaveLength(1));
+        expect(state.spawn).toHaveBeenNthCalledWith(
+            1,
+            process.platform === 'win32'
+                ? (process.env.ComSpec ?? 'cmd.exe')
+                : 'yarn',
+            process.platform === 'win32'
+                ? ['/d', '/s', '/c', 'yarn', 'install']
+                : ['install'],
+            { cwd: 'C:/games/story' }
+        );
         const child = state.spawned[0];
         child.emitStdout('resolved packages\n');
         child.emitStderr('warning\n');
