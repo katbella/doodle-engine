@@ -3,9 +3,11 @@ import {
     compareVersions,
     createGithubReleasesLoader,
     isTrustedStudioDownloadUrl,
+    isTrustedStudioReleaseUrl,
     parseStudioTag,
     parseVersion,
     selectStudioUpdate,
+    studioReleasePageUrl,
     studioUpdatePlatform,
     type GithubRelease,
 } from '../studio-release';
@@ -106,6 +108,29 @@ describe('isTrustedStudioDownloadUrl', () => {
             )
         ).toBe(false);
         expect(isTrustedStudioDownloadUrl('javascript:alert(1)')).toBe(false);
+    });
+});
+
+describe('Studio release page URLs', () => {
+    it('builds and accepts the canonical page for a Studio release', () => {
+        const url = studioReleasePageUrl('0.3.0');
+        expect(url).toBe(
+            'https://github.com/katbella/doodle-engine/releases/tag/%40doodle-engine%2Fstudio%400.3.0'
+        );
+        expect(isTrustedStudioReleaseUrl(url)).toBe(true);
+    });
+
+    it('rejects other hosts and repositories', () => {
+        expect(
+            isTrustedStudioReleaseUrl(
+                'https://github.com.evil.test/katbella/doodle-engine/releases/tag/release'
+            )
+        ).toBe(false);
+        expect(
+            isTrustedStudioReleaseUrl(
+                'https://github.com/other/doodle-engine/releases/tag/release'
+            )
+        ).toBe(false);
     });
 });
 

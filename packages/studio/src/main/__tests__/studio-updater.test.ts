@@ -88,6 +88,11 @@ describe('StudioUpdater', () => {
         expect(openExternal).toHaveBeenCalledWith(
             'https://downloads.test/doodle-studio-0.3.0-setup.exe'
         );
+
+        await updater.openChangelog();
+        expect(openExternal).toHaveBeenCalledWith(
+            'https://github.com/katbella/doodle-engine/releases/tag/%40doodle-engine%2Fstudio%400.3.0'
+        );
     });
 
     it('reports "current" when nothing is newer', async () => {
@@ -103,6 +108,7 @@ describe('StudioUpdater', () => {
             manual: true,
         });
         await updater.openDownload();
+        await updater.openChangelog();
         expect(openExternal).not.toHaveBeenCalled();
     });
 

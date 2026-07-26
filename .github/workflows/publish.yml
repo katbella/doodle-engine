@@ -25,6 +25,7 @@ jobs:
       version: ${{ steps.validate.outputs.version }}
       previous_version: ${{ steps.validate.outputs.previous_version }}
       release_sha: ${{ steps.validate.outputs.release_sha }}
+      summary: ${{ steps.validate.outputs.summary }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -42,6 +43,7 @@ jobs:
           PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
           PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
           PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: >-
           node scripts/release.mjs validate-pull-request
@@ -49,6 +51,7 @@ jobs:
           --base-ref "$PR_BASE_REF"
           --branch "$PR_HEAD_REF"
           --title "$PR_TITLE"
+          --body "$PR_BODY"
           --merge-sha "$PR_MERGE_SHA"
 
   package-npm:
@@ -165,10 +168,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_SUMMARY: ${{ needs.validate.outputs.summary }}
         run: >-
           node scripts/release.mjs publish
           --version "${{ needs.validate.outputs.version }}"
           --previous-version "${{ needs.validate.outputs.previous_version }}"
           --release-sha "${{ needs.validate.outputs.release_sha }}"
+          --summary "$RELEASE_SUMMARY"
           --npm-directory .release/npm
           --studio-directory .release/studio

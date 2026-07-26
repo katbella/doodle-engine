@@ -45,6 +45,7 @@ const STUDIO_TAG_PREFIX = `${STUDIO_PACKAGE.name}@`;
 const RELEASE_SUBJECT_PREFIX = 'Release Doodle Engine ';
 const RELEASE_BRANCH_PREFIX = 'release/doodle-';
 const RELEASE_BASE_BRANCH = 'main';
+const RELEASE_SUMMARY_HEADING = '## Release summary';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export const RELEASE_MANIFEST_PATHS = RELEASE_PACKAGES.map(
@@ -548,11 +549,12 @@ function validateReleasePullRequestTitle(pullRequest, version) {
     }
 }
 
-function reuseReleasePullRequest(branch, version) {
+function reuseReleasePullRequest(branch, version, body) {
     const pullRequests = releasePullRequests(branch);
     const open = pullRequests.find(({ state }) => state === 'OPEN');
     if (open) {
         validateReleasePullRequestTitle(open, version);
+        runCommand('gh', ['pr', 'edit', String(open.number), '--body', body]);
         console.log(`Reusing release pull request ${open.url}`);
         return open.url;
     }
@@ -561,6 +563,7 @@ function reuseReleasePullRequest(branch, version) {
     if (closed) {
         validateReleasePullRequestTitle(closed, version);
         runCommand('gh', ['pr', 'reopen', String(closed.number)]);
+        runCommand('gh', ['pr', 'edit', String(closed.number), '--body', body]);
         console.log(`Reopened release pull request ${closed.url}`);
         return closed.url;
     }
@@ -575,8 +578,41 @@ function reuseReleasePullRequest(branch, version) {
     return null;
 }
 
-function releasePullRequestBody(version, previousVersion) {
+export function normalizeReleaseSummary(value) {
+    const summary = String(value ?? '')
+        .trim()
+        .replace(/\s+/g, ' ');
+    if (!summary) {
+        throw new Error('Release summary must not be empty.');
+    }
+    return summary;
+}
+
+export function parseReleaseSummary(body) {
+    const lines = String(body ?? '').split(/\r?\n/);
+    const start = lines.findIndex(
+        (line) => line.trim() === RELEASE_SUMMARY_HEADING
+    );
+    if (start < 0) {
+        throw new Error('Release pull request is missing its release summary.');
+    }
+
+    const summaryLines = [];
+    for (const line of lines.slice(start + 1)) {
+        if (/^##\s+/.test(line.trim())) break;
+        summaryLines.push(line);
+    }
+    return normalizeReleaseSummary(summaryLines.join(' '));
+}
+
+export function releasePullRequestBody(version, previousVersion, summary) {
     return [
+        RELEASE_SUMMARY_HEADING,
+        '',
+        normalizeReleaseSummary(summary),
+        '',
+        '## Release details',
+        '',
         `This pull request raises every Doodle Engine package from ${previousVersion} to ${version}.`,
         '',
         'Merging it publishes the release:',
@@ -593,7 +629,9 @@ function releasePullRequestBody(version, previousVersion) {
 function openReleasePullRequest(options) {
     const version = requiredOption(options, 'version');
     const previousVersion = requiredOption(options, 'previous-version');
+    const summary = normalizeReleaseSummary(requiredOption(options, 'summary'));
     const branch = releaseBranch(version);
+    const body = releasePullRequestBody(version, previousVersion, summary);
 
     const remoteBranch = gitOutput(['ls-remote', '--heads', 'origin', branch]);
     if (remoteBranch) {
@@ -643,7 +681,7 @@ function openReleasePullRequest(options) {
         runCommand('git', ['push', 'origin', `${branch}:${branch}`]);
     }
 
-    const existingUrl = reuseReleasePullRequest(branch, version);
+    const existingUrl = reuseReleasePullRequest(branch, version, body);
     if (existingUrl) {
         writeActionsOutput({ pull_request: existingUrl });
         return;
@@ -659,7 +697,7 @@ function openReleasePullRequest(options) {
         '--title',
         releaseTitle(version),
         '--body',
-        releasePullRequestBody(version, previousVersion),
+        body,
     ]);
     writeActionsOutput({
         pull_request: created.stdout.trim(),
@@ -736,6 +774,7 @@ function validateMergedReleasePullRequest(options) {
     const title = requiredOption(options, 'title');
     const mergeSha = requiredOption(options, 'merge-sha');
     const merged = options.merged === 'true';
+    const summary = parseReleaseSummary(requiredOption(options, 'body'));
 
     runCommand('git', ['fetch', 'origin', 'main', '--force'], { cwd: ROOT });
 
@@ -762,6 +801,7 @@ function validateMergedReleasePullRequest(options) {
         version,
         previous_version: previousVersion,
         release_sha: gitOutput(['rev-parse', mergeSha]),
+        summary,
     });
 }
 
@@ -971,8 +1011,10 @@ function createReleaseTags(version, releaseSha) {
     runCommand('git', ['push', '--atomic', 'origin', ...refs]);
 }
 
-function releaseSummary(version) {
+function releaseNotes(version, summary) {
     return [
+        summary,
+        '',
         `All Doodle Engine packages in this release use version ${version}:`,
         '',
         '- `@doodle-engine/core`',
@@ -983,7 +1025,12 @@ function releaseSummary(version) {
     ].join('\n');
 }
 
-function publishGitHubRelease(version, previousVersion, studioDirectory) {
+function publishGitHubRelease(
+    version,
+    previousVersion,
+    studioDirectory,
+    summary
+) {
     const tag = `${STUDIO_TAG_PREFIX}${version}`;
     const view = runCommand(
         'gh',
@@ -1002,7 +1049,7 @@ function publishGitHubRelease(version, previousVersion, studioDirectory) {
             '--title',
             `Doodle Engine ${version}`,
             '--notes',
-            releaseSummary(version),
+            releaseNotes(version, summary),
             '--generate-notes',
             '--notes-start-tag',
             `${STUDIO_TAG_PREFIX}${previousVersion}`,
@@ -1044,6 +1091,7 @@ async function publishRelease(options) {
     const version = requiredOption(options, 'version');
     const previousVersion = requiredOption(options, 'previous-version');
     const releaseSha = requiredOption(options, 'release-sha');
+    const summary = normalizeReleaseSummary(requiredOption(options, 'summary'));
     const npmDirectory = resolve(
         ROOT,
         requiredOption(options, 'npm-directory')
@@ -1069,7 +1117,7 @@ async function publishRelease(options) {
     checkTargetTags(version, releaseSha);
     await publishNpmPackages(tarballs, version);
     createReleaseTags(version, releaseSha);
-    publishGitHubRelease(version, previousVersion, studioDirectory);
+    publishGitHubRelease(version, previousVersion, studioDirectory, summary);
 }
 
 function parseOptions(args) {

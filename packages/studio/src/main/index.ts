@@ -48,6 +48,7 @@ import { StudioUpdater } from './studio-updater';
 import {
     createGithubReleasesLoader,
     isTrustedStudioDownloadUrl,
+    isTrustedStudioReleaseUrl,
 } from './studio-release';
 import { STUDIO_VERSION } from './version';
 
@@ -510,7 +511,10 @@ app.whenReady().then(() => {
         platform: process.platform,
         loadReleases: createGithubReleasesLoader(STUDIO_RELEASE_REPO),
         openExternal: (url) => {
-            if (!isTrustedStudioDownloadUrl(url)) {
+            if (
+                !isTrustedStudioDownloadUrl(url) &&
+                !isTrustedStudioReleaseUrl(url)
+            ) {
                 throw new Error('Refusing to open an untrusted update URL.');
             }
             return shell.openExternal(url);
@@ -655,6 +659,7 @@ app.whenReady().then(() => {
     handle('update:getState', () => updater?.getState());
     handle('update:check', () => updater?.checkForUpdates(true));
     handle('update:openDownload', () => updater?.openDownload());
+    handle('update:openChangelog', () => updater?.openChangelog());
 
     const documents = new DocumentService(markSelfWrite);
     const assets = new AssetService(markSelfWrite);

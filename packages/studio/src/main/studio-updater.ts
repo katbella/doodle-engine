@@ -3,6 +3,7 @@
 import type { StudioUpdateState } from '../shared/project';
 import {
     selectStudioUpdate,
+    studioReleasePageUrl,
     studioUpdatePlatform,
     type GithubRelease,
     type StudioUpdateCandidate,
@@ -82,6 +83,15 @@ export class StudioUpdater {
             await this.openExternal(this.downloadUrl);
         } catch (error) {
             this.onError?.('update:openDownload', error);
+        }
+    }
+
+    async openChangelog(): Promise<void> {
+        if (this.state.status !== 'available') return;
+        try {
+            await this.openExternal(studioReleasePageUrl(this.state.version));
+        } catch (error) {
+            this.onError?.('update:openChangelog', error);
         }
     }
 

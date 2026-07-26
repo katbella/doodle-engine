@@ -12,6 +12,10 @@ on:
           - patch
           - minor
           - major
+      summary:
+        description: One-sentence release summary
+        required: true
+        type: string
 
 concurrency:
   group: release-doodle
@@ -59,7 +63,9 @@ jobs:
       - name: Open the release pull request
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_SUMMARY: ${{ inputs.summary }}
         run: >-
           node scripts/release.mjs open-pull-request
           --version "${{ steps.prepare.outputs.version }}"
           --previous-version "${{ steps.prepare.outputs.previous_version }}"
+          --summary "$RELEASE_SUMMARY"

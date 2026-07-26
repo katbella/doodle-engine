@@ -174,6 +174,7 @@ describe('preload bridge', () => {
             [() => api.getStudioUpdateState(), 'update:getState', []],
             [() => api.checkForStudioUpdates(), 'update:check', []],
             [() => api.openStudioUpdateDownload(), 'update:openDownload', []],
+            [() => api.openStudioUpdateChangelog(), 'update:openChangelog', []],
         ];
 
         for (const [call, channel, args] of calls) {

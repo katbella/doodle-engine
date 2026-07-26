@@ -392,6 +392,7 @@ export interface StudioApi {
     getStudioUpdateState: () => Promise<StudioUpdateState>;
     checkForStudioUpdates: () => Promise<void>;
     openStudioUpdateDownload: () => Promise<void>;
+    openStudioUpdateChangelog: () => Promise<void>;
     onStudioUpdateState: (
         callback: (state: StudioUpdateState) => void
     ) => () => void;

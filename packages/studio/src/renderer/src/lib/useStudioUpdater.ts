@@ -6,6 +6,7 @@ export interface StudioUpdaterUi {
     open: boolean;
     check: () => void;
     openDownload: () => void;
+    openChangelog: () => void;
     close: () => void;
 }
 
@@ -46,9 +47,12 @@ export function useStudioUpdater(): StudioUpdaterUi {
     const openDownload = useCallback(() => {
         void window.studio.openStudioUpdateDownload?.();
     }, []);
+    const openChangelog = useCallback(() => {
+        void window.studio.openStudioUpdateChangelog?.();
+    }, []);
     const close = useCallback(() => setOpen(false), []);
 
-    return { state, open, check, openDownload, close };
+    return { state, open, check, openDownload, openChangelog, close };
 }
 
 function shouldShow(state: StudioUpdateState): boolean {

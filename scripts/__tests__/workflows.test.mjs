@@ -31,6 +31,12 @@ test('release is manual-only and opens one release pull request', async () => {
     assert.doesNotMatch(workflow, /^\s+push:/m);
     assert.match(workflow, /pull-requests:\s*write/);
     assert.match(workflow, /if: github\.ref != 'refs\/heads\/main'/);
+    assert.match(
+        workflow,
+        /summary:\n\s+description: One-sentence release summary\n\s+required: true/
+    );
+    assert.match(workflow, /RELEASE_SUMMARY: \$\{\{ inputs\.summary \}\}/);
+    assert.match(workflow, /--summary "\$RELEASE_SUMMARY"/);
     assert.equal(
         occurrences(workflow, /node scripts\/release\.mjs prepare/g),
         1
@@ -39,6 +45,25 @@ test('release is manual-only and opens one release pull request', async () => {
         occurrences(workflow, /node scripts\/release\.mjs open-pull-request/g),
         1
     );
+});
+
+test('publishing carries the release summary from the merged pull request', async () => {
+    const workflow = await repositoryFile('.github/workflows/publish.yml');
+
+    assert.match(
+        workflow,
+        /PR_BODY: \$\{\{ github\.event\.pull_request\.body \}\}/
+    );
+    assert.match(workflow, /--body "\$PR_BODY"/);
+    assert.match(
+        workflow,
+        /summary: \$\{\{ steps\.validate\.outputs\.summary \}\}/
+    );
+    assert.match(
+        workflow,
+        /RELEASE_SUMMARY: \$\{\{ needs\.validate\.outputs\.summary \}\}/
+    );
+    assert.match(workflow, /--summary "\$RELEASE_SUMMARY"/);
 });
 
 test('public release names use the Doodle Engine family name', async () => {
