@@ -1,0 +1,332 @@
+/* ── Dialogue Editor ────────────────────────────────────────────── */
+
+/* Column sizes come from the inline style (the node outline is resizable);
+   this is the fallback shape: outline, drag handle, editor. */
+.dlg {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 220px auto 1fr;
+}
+
+.dlg__outline {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--border-faint);
+}
+
+.dlg__outline-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.dlg__node {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: 8px var(--space-3);
+    text-align: left;
+    border-left: 2px solid transparent;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+}
+
+.dlg__node:hover {
+    color: var(--text);
+    background: var(--overlay-hover);
+}
+
+.dlg__node--active {
+    color: var(--text);
+    background: var(--accent-tint);
+    border-left-color: var(--accent);
+}
+
+.dlg__node-id {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+}
+
+.dlg__node-preview {
+    order: 3;
+    width: 100%;
+    padding-left: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-xs);
+    font-weight: var(--fw-normal);
+    color: var(--text-faint);
+}
+
+.dlg__node-badge {
+    flex: none;
+    padding: 2px 6px;
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
+    background: var(--valid);
+    color: var(--accent-ink);
+}
+
+.dlg__main {
+    min-height: 0;
+    padding: var(--space-4) var(--space-5);
+}
+
+.node-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    width: 100%;
+    max-width: 1080px;
+}
+
+.node-editor__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* The id input is 28px tall; every control beside it matches that height
+   exactly, so the row reads as one toolbar instead of chips of assorted
+   sizes floating next to a bigger input. */
+.node-editor__head .dlg__add,
+.node-editor__head .dlg__node-badge {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 var(--space-3);
+    font-size: var(--text-sm);
+}
+
+.node-editor__label {
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-faint);
+}
+
+.node-editor__id-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.node-editor__id-input {
+    width: auto;
+    min-width: 180px;
+    height: 28px;
+    font-size: var(--text-md);
+    color: var(--text);
+}
+
+.node-editor__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+.node-editor__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.node-editor__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-2);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border-faint);
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.dlg__input,
+.dlg__select {
+    width: 100%;
+    height: 30px;
+    padding: 0 var(--space-2);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: var(--text-base);
+}
+
+.dlg__select {
+    width: auto;
+    min-width: 160px;
+}
+
+.dlg__input--invalid {
+    border-color: var(--error);
+}
+
+.dlg__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.dlg__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.dlg__x {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--text-faint);
+}
+
+.dlg__x:hover {
+    color: var(--error);
+}
+
+.dlg__add {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 6px var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--accent);
+    border: 1px solid var(--border);
+}
+
+.dlg__add:hover {
+    background: var(--surface-hover);
+}
+
+.dlg__add.node-editor__delete {
+    margin-left: auto;
+    color: var(--danger);
+}
+
+.dlg__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-faint);
+    border-left: 2px solid var(--border);
+}
+
+.dlg__empty {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+}
+
+.dlg__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.dlg__card-actions {
+    display: flex;
+    align-items: center;
+}
+
+.dlg__move {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--text-faint);
+}
+
+.dlg__move:hover:not(:disabled) {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.dlg__move:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.dlg__sub {
+    margin-top: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+}
+
+.dlg__target {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.dlg__card .dlg__target {
+    margin-top: var(--space-2);
+}
+
+.dlg__note {
+    font-size: var(--text-xs);
+    color: var(--warn);
+}
+
+/* A committed condition/effect, shown as a read-only chip; click to edit. */
+.dlg__chip {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    padding: 6px var(--space-2);
+    text-align: left;
+    font-size: var(--text-sm);
+    color: var(--text);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-faint);
+    border-left: 2px solid var(--valid);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dlg__chip:hover {
+    background: var(--surface-hover);
+}
+
+.dlg__chip-edit {
+    margin-left: var(--space-2);
+    color: var(--text-faint);
+    vertical-align: -1px;
+}
+
+.dlg__chip:hover .dlg__chip-edit,
+.dlg__chip:focus-visible .dlg__chip-edit {
+    color: var(--accent);
+}

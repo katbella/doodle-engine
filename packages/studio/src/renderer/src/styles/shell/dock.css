@@ -1,0 +1,113 @@
+/* ── Detail Panel and Bottom Dock ───────────────────────────────── */
+
+.rightpanel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.panel__label {
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: var(--space-2);
+}
+
+.panel__muted {
+    font-size: var(--text-sm);
+    color: var(--text-faint);
+}
+
+.dock {
+    position: relative;
+    z-index: var(--z-dock);
+    background: var(--bg-editor);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dock__tabs {
+    display: flex;
+    height: 32px;
+    border-bottom: 1px solid var(--border-faint);
+}
+
+/* Ambient utilities live at the strip's right end: timestamps, dev-server
+   indicator, help, theme. Roomy gaps — this is a resting place for the eye,
+   not a control cluster. */
+.dock__status {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+}
+
+.dock__status-when {
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+.dock__status-server {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-dim);
+}
+
+.dock__status-server:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+/* Quiet ghost icons: bordered buttons look like controls demanding a
+   decision; here they are ambient utilities. Hover and focus states keep
+   them discoverable as clickable. */
+.dock__status .btn--icon {
+    border: none;
+    padding: 4px;
+    color: var(--text-faint);
+}
+
+.dock__status .btn--icon:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.dock__tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-dim);
+}
+
+.dock__tab--active {
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.dock__count {
+    color: var(--text-faint);
+}
+
+.dock__body {
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-3) var(--space-4);
+}

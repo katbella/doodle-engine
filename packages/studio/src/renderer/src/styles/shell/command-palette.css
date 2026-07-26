@@ -1,0 +1,103 @@
+/* ── Command Palette ────────────────────────────────────────────── */
+
+.palette-backdrop {
+    align-items: flex-start;
+    padding-top: 12vh;
+}
+
+.palette {
+    width: 560px;
+    max-width: 92vw;
+    max-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-overlay);
+}
+
+.palette__search {
+    display: flex;
+    flex: 0 0 56px;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--border-faint);
+    color: var(--text-faint);
+}
+
+.palette__input {
+    flex: 1;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: var(--text-lg);
+    font-family: inherit;
+    outline: none;
+}
+
+.palette__input::placeholder {
+    color: var(--text-faint);
+}
+
+.palette__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.palette__group {
+    padding: var(--space-3) var(--space-3) var(--space-1);
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.palette__opt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: 9px var(--space-3);
+    text-align: left;
+    color: var(--text-dim);
+    font-size: var(--text-base);
+    font-weight: var(--fw-medium);
+}
+
+.palette__opt--active {
+    background: var(--accent-tint);
+    color: var(--text);
+}
+
+.palette__opt-icon {
+    display: inline-flex;
+    color: var(--text-faint);
+}
+
+.palette__opt--active .palette__opt-icon {
+    color: var(--accent);
+}
+
+.palette__opt-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.palette__opt-hint {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+}
+
+.palette__empty {
+    padding: var(--space-4);
+    text-align: center;
+    color: var(--text-faint);
+    font-size: var(--text-base);
+}

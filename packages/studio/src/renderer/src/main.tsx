@@ -5,6 +5,8 @@ import '@fontsource-variable/archivo';
 import '@fontsource/monaspace-neon';
 import '@fontsource/monaspace-neon/600.css';
 import './styles/tokens.css';
+import './styles/themes.css';
+import './styles/globals.css';
 import './styles/shell.css';
 
 createRoot(document.getElementById('root')!).render(

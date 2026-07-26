@@ -1,0 +1,299 @@
+/* ── Project Rail and Navigation ────────────────────────────────── */
+
+.rail {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.rail__overview {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: none;
+    width: 100%;
+    padding: 11px var(--space-3);
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border-faint);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-semibold);
+    text-align: left;
+}
+
+.rail__overview:hover {
+    color: var(--text);
+    background: var(--overlay-hover);
+}
+
+.rail__overview--active {
+    color: var(--text);
+    background: var(--accent-tint);
+    box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.rail__overview svg {
+    color: var(--text-faint);
+}
+
+.rail__overview--active svg {
+    color: var(--accent);
+}
+
+.rail__search {
+    position: relative;
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+}
+
+.rail__search-icon {
+    position: absolute;
+    left: calc(var(--space-3) + var(--space-2));
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    pointer-events: none;
+}
+
+.rail__searchbox {
+    width: 100%;
+    height: 30px;
+    padding: 0 var(--space-2) 0 30px;
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: var(--text-sm);
+}
+
+.rail__searchbox::placeholder {
+    color: var(--text-faint);
+}
+
+.tooltip {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+}
+
+.tooltip__bubble {
+    position: absolute;
+    z-index: var(--z-popover);
+    top: calc(100% + 8px);
+    left: 50%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: max-content;
+    max-width: 260px;
+    padding: 6px var(--space-2);
+    color: var(--text);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-overlay);
+    font-size: var(--text-xs);
+    line-height: var(--leading-body);
+    white-space: normal;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -2px);
+    transition:
+        opacity 90ms ease-out,
+        transform 90ms ease-out,
+        visibility 0s linear 90ms;
+}
+
+.tooltip__bubble--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+    transition-delay: 0s;
+}
+
+.tooltip__bubble kbd {
+    flex: none;
+    padding: 1px 5px;
+    color: var(--text-dim);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    white-space: nowrap;
+}
+
+.topbar__actions .tooltip__bubble {
+    right: 0;
+    left: auto;
+    transform: translateY(-2px);
+}
+
+.topbar__actions .tooltip__bubble--open {
+    transform: translateY(0);
+}
+
+.rail__searchbox:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.rail__list {
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-1) 0;
+}
+
+.rail__section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: 9px var(--space-3);
+    text-align: left;
+    font-size: var(--label-size);
+    font-weight: var(--label-weight);
+    letter-spacing: var(--label-track);
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.rail__section:hover {
+    color: var(--text);
+    background: var(--overlay-hover);
+}
+
+.rail__caret {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-faint);
+}
+
+.rail__section:hover .rail__caret {
+    color: var(--text);
+}
+
+.rail__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: var(--fw-semibold);
+    color: var(--text-faint);
+}
+
+.rail__section-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border-faint);
+}
+
+.rail__list > div:first-child .rail__section-row {
+    border-top: none;
+}
+
+.rail__section-row .rail__section {
+    flex: 1;
+}
+
+.rail__section-add {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-faint);
+    opacity: 0;
+}
+
+.rail__section-row:hover .rail__section-add {
+    opacity: 1;
+}
+
+.rail__section-add:hover {
+    color: var(--accent);
+}
+
+.rail__item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-dim);
+    border-left: 2px solid transparent;
+}
+
+.rail__item:hover {
+    color: var(--text);
+    background: var(--overlay-hover);
+}
+
+.rail__item--active {
+    color: var(--text);
+    background: var(--accent-tint);
+    border-left-color: var(--accent);
+}
+
+.rail__item-open {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: 1;
+    min-width: 0;
+    padding: 7px var(--space-3) 7px 26px;
+    text-align: left;
+    color: inherit;
+}
+
+.rail__item-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rail__item-action {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 6px;
+    color: var(--text-faint);
+    opacity: 0;
+}
+
+/* Reveal on keyboard focus too, so tab users can reach edit and delete. */
+.rail__item:hover .rail__item-action,
+.rail__item:focus-within .rail__item-action {
+    opacity: 1;
+}
+
+.rail__item-action:hover {
+    color: var(--accent);
+}
+
+.rail__item-delete:hover {
+    color: var(--error);
+}
+
+.rail__item--config {
+    border-top: 1px solid var(--border-faint);
+}
+
+.rail__item--config .rail__item-open {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: var(--space-3);
+}
+
+.rail__new {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-top: 1px solid var(--border-faint);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-faint);
+    text-align: left;
+    width: 100%;
+}
+
+.rail__new:hover {
+    color: var(--accent);
+}

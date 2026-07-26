@@ -1,0 +1,219 @@
+/* ── Editor Tabs and Source View ────────────────────────────────── */
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-editor);
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.tabs__shell {
+    position: relative;
+    display: flex;
+    height: 34px;
+    flex: none;
+    border-bottom: 1px solid var(--border);
+}
+
+.tabs {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tabs__overflow-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    color: var(--text-dim);
+    background: var(--surface-raised);
+    border-left: 1px solid var(--border);
+}
+
+.tabs__overflow-button:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.tabs__menu {
+    position: fixed;
+    z-index: var(--z-menu);
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    max-width: 320px;
+    padding: var(--space-1);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-overlay);
+}
+
+.tabs__menu--overflow {
+    overflow: auto;
+}
+
+.tabs__menu--context {
+    overflow: auto;
+}
+
+.tabs__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    padding: 7px var(--space-2);
+    overflow: hidden;
+    color: var(--text-dim);
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tabs__menu-item:hover:not(:disabled),
+.tabs__menu-item--active {
+    color: var(--text);
+    background: var(--accent-tint);
+}
+
+.tabs__menu-item:disabled {
+    opacity: 0.4;
+}
+
+.tabs__menu-separator {
+    margin: var(--space-1) 0;
+    border-top: 1px solid var(--border-faint);
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-dim);
+    border-right: 1px solid var(--border-faint);
+    white-space: nowrap;
+    flex: none;
+}
+
+.tab:hover {
+    color: var(--text);
+}
+
+.tab--active {
+    color: var(--text);
+    background: var(--bg-editor);
+    box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.tab__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-faint);
+}
+
+.tab__close:hover {
+    color: var(--text);
+}
+
+.editor__body {
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-5);
+}
+
+.editor__toolbar {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+}
+
+.editor__source-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab__dirty {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--text-dim);
+}
+
+.seg {
+    display: flex;
+    border: 1px solid var(--border);
+}
+
+.seg__opt {
+    padding: 4px var(--space-3);
+    font-size: var(--text-sm);
+    /* The unselected option is a readable choice, not decoration; keep it
+       brighter than --text-dim but still clearly not the active one. */
+    color: color-mix(in srgb, var(--text) 70%, var(--text-dim));
+}
+
+.seg__opt--on {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: var(--fw-semibold);
+}
+
+.seg__opt:not(.seg__opt--on):hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.source {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.source__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border-faint);
+}
+
+.source__path {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--text-dim);
+}
+
+.source__path-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.source__monaco {
+    flex: 1;
+    min-height: 0;
+}

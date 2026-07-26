@@ -1,7 +1,13 @@
 import { spawn } from 'node:child_process';
 
-const command = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
-const child = spawn(command, ['test:e2e:run', 'studio.e2e.ts'], {
+const yarnArguments = ['test:e2e:run', 'studio.e2e.ts'];
+const command =
+    process.platform === 'win32' ? (process.env.ComSpec ?? 'cmd.exe') : 'yarn';
+const commandArguments =
+    process.platform === 'win32'
+        ? ['/d', '/s', '/c', 'yarn', ...yarnArguments]
+        : yarnArguments;
+const child = spawn(command, commandArguments, {
     cwd: process.cwd(),
     env: {
         ...process.env,
