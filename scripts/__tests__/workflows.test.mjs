@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -40,7 +39,6 @@ test('release is manual-only and opens one release pull request', async () => {
         occurrences(workflow, /node scripts\/release\.mjs open-pull-request/g),
         1
     );
-    assert.doesNotMatch(workflow, /changesets\/action/);
 });
 
 test('public release names use the Doodle Engine family name', async () => {
@@ -221,15 +219,17 @@ test('documentation deploys only for documentation changes', async () => {
     assert.match(workflow, /paths:\s*\n\s+- docs\/\*\*/);
 });
 
-test('Changesets and the old packaging workflow are removed', async () => {
-    const packageJson = JSON.parse(await repositoryFile('package.json'));
-    assert.equal(packageJson.devDependencies['@changesets/cli'], undefined);
-    assert.equal(packageJson.scripts.changeset, undefined);
-    assert.equal(packageJson.scripts.version, undefined);
-    assert.equal(packageJson.scripts.release, undefined);
-    assert.equal(
-        existsSync(join(root, '.github', 'workflows', 'package-studio.yml')),
-        false
-    );
-    assert.equal(existsSync(join(root, '.changeset', 'config.json')), false);
+test('publish.yml is the only workflow that packages or publishes releases', async () => {
+    const workflowDir = join(root, '.github', 'workflows');
+    const releaseActions =
+        /npm publish|release\.mjs (?:pack|publish)|script:\s*package:(?:win|mac)|electron-builder|gh release|git tag/;
+    for (const name of await readdir(workflowDir)) {
+        if (!/\.ya?ml$/.test(name) || name === 'publish.yml') continue;
+        const workflow = await repositoryFile(`.github/workflows/${name}`);
+        assert.doesNotMatch(
+            workflow,
+            releaseActions,
+            `${name} duplicates release packaging or publication`
+        );
+    }
 });

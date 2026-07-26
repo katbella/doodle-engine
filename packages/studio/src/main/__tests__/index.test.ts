@@ -11,7 +11,11 @@ const state = vi.hoisted(() => {
     const forked: any[] = [];
     const spawned: any[] = [];
 
-    const webContents = { send: vi.fn() };
+    const webContents = {
+        send: vi.fn(),
+        setWindowOpenHandler: vi.fn(),
+        on: vi.fn(),
+    };
     const browserWindow = {
         once: vi.fn((_event: string, listener: Listener) => listener()),
         show: vi.fn(),
@@ -165,9 +169,12 @@ const state = vi.hoisted(() => {
         state.ready = undefined;
         state.menuTemplate = undefined;
         state.lastWindowOptions = undefined;
+        state.updaterOpenExternal = undefined;
 
         for (const mock of [
             webContents.send,
+            webContents.setWindowOpenHandler,
+            webContents.on,
             browserWindow.once,
             browserWindow.show,
             browserWindow.loadURL,
@@ -315,6 +322,9 @@ const state = vi.hoisted(() => {
         menuTemplate: undefined as any[] | undefined,
         lastWindowOptions: undefined as unknown,
         updaterOnState: undefined as Listener | undefined,
+        updaterOpenExternal: undefined as
+            | ((url: string) => Promise<unknown>)
+            | undefined,
     };
 });
 
@@ -376,6 +386,7 @@ vi.mock('../error-log', () => ({ ErrorLog: state.ErrorLog }));
 vi.mock('../studio-updater', () => ({
     StudioUpdater: vi.fn(function (options: any) {
         state.updaterOnState = options.onState;
+        state.updaterOpenExternal = options.openExternal;
         return state.studioUpdater;
     }),
 }));
@@ -440,6 +451,28 @@ describe('Studio main process', () => {
         expect(state.browserWindow.loadFile).toHaveBeenCalledWith(
             expect.stringContaining('renderer')
         );
+        expect(state.webContents.setWindowOpenHandler).toHaveBeenCalledOnce();
+        expect(
+            state.webContents.setWindowOpenHandler.mock.calls[0][0]({
+                url: 'https://example.test',
+            })
+        ).toEqual({ action: 'deny' });
+        const willNavigate = state.webContents.on.mock.calls.find(
+            (call) => call[0] === 'will-navigate'
+        )?.[1];
+        const navigationEvent = { preventDefault: vi.fn() };
+        willNavigate(navigationEvent, 'https://example.test');
+        expect(navigationEvent.preventDefault).toHaveBeenCalledOnce();
+        expect(() =>
+            state.updaterOpenExternal?.('https://downloads.test/setup.exe')
+        ).toThrow('untrusted update URL');
+        await state.updaterOpenExternal?.(
+            'https://github.com/katbella/doodle-engine/releases/download/%40doodle-engine%2Fstudio%400.3.0/doodle-studio-0.3.0-setup.exe'
+        );
+        expect(state.shell.openExternal).toHaveBeenCalledWith(
+            'https://github.com/katbella/doodle-engine/releases/download/%40doodle-engine%2Fstudio%400.3.0/doodle-studio-0.3.0-setup.exe'
+        );
+        state.shell.openExternal.mockClear();
         const viewMenu = state.menuTemplate?.find(
             (item) => item.label === 'View'
         );
@@ -451,9 +484,7 @@ describe('Studio main process', () => {
             'togglefullscreen',
         ]);
         expect(
-            viewMenu.submenu.some(
-                (item: any) => item.role === 'toggleDevTools'
-            )
+            viewMenu.submenu.some((item: any) => item.role === 'toggleDevTools')
         ).toBe(false);
 
         const fileMenu = state.menuTemplate?.find(

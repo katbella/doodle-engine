@@ -46,13 +46,11 @@
         'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI',
         sans-serif;
     --font-mono:
-        'Monaspace Neon', ui-monospace, 'Cascadia Code', 'Consolas',
-        monospace;
+        'Monaspace Neon', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
 
     --fw-normal: 400;
     --fw-medium: 500;
     --fw-semibold: 600;
-    --fw-bold: 700;
     --fw-heavy: 800;
 
     /* Coherent Studio type ramp. The 11px floor keeps secondary chrome
@@ -85,6 +83,7 @@
     --space-3: 12px;
     --space-4: 16px;
     --space-5: 22px;
+    --space-6: 30px;
 
     /* Floating surfaces share one ordered stacking scale. */
     --z-dock: 10;

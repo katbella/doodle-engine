@@ -45,6 +45,12 @@ jobs:
         with:
           node-version: 24
 
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Test release scripts and workflows
         run: node --test "scripts/__tests__/*.test.mjs"
 

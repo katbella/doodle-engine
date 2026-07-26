@@ -1,6 +1,5 @@
-import { useModalDismiss } from '../lib/useModalDismiss';
 import { Download } from '../lib/icons';
-import { OverlayPortal } from './OverlayPortal';
+import { ModalShell } from './ModalShell';
 import type {
     StudioUpdatePlatform,
     StudioUpdateState,
@@ -24,30 +23,20 @@ export function StudioUpdateModal({
     onCheck: () => void;
     onClose: () => void;
 }) {
-    useModalDismiss(onClose);
     return (
-        <OverlayPortal>
-            <div className="modal-backdrop" onClick={onClose}>
-                <div
-                    className="modal modal--update"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="update-title"
-                    onClick={(event) => event.stopPropagation()}
-                >
-                    <div className="modal__title" id="update-title">
-                        {titleForState(state)}
-                    </div>
-                    <Body state={state} />
-                    <Actions
-                        state={state}
-                        onDownload={onDownload}
-                        onCheck={onCheck}
-                        onClose={onClose}
-                    />
-                </div>
-            </div>
-        </OverlayPortal>
+        <ModalShell
+            title={titleForState(state)}
+            className="modal modal--update"
+            onDismiss={onClose}
+        >
+            <Body state={state} />
+            <Actions
+                state={state}
+                onDownload={onDownload}
+                onCheck={onCheck}
+                onClose={onClose}
+            />
+        </ModalShell>
     );
 }
 

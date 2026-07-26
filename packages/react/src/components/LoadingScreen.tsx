@@ -5,6 +5,7 @@
 import type { AssetLoadingState } from '@doodle-engine/core';
 import { useAssetUrl } from '../hooks/useAsset';
 import { screenBackgroundStyle } from './screenBackground';
+import { uiText } from '../uiText';
 
 export interface LoadingScreenProps {
     /** Asset loading state (from AssetProvider) */
@@ -29,15 +30,15 @@ function phaseLabel(
 ): string {
     switch (phase) {
         case 'loading-shell':
-            return ui?.['ui.loading'] ?? 'Loading...';
+            return uiText(ui, 'ui.loading');
         case 'loading-game':
-            return ui?.['ui.loading_game_assets'] ?? 'Loading game assets...';
+            return uiText(ui, 'ui.loading_game_assets');
         case 'complete':
-            return ui?.['ui.ready'] ?? 'Ready!';
+            return uiText(ui, 'ui.ready');
         case 'error':
-            return ui?.['ui.error_loading_assets'] ?? 'Error loading assets';
+            return uiText(ui, 'ui.error_loading_assets');
         default:
-            return ui?.['ui.loading'] ?? 'Loading...';
+            return uiText(ui, 'ui.loading');
     }
 }
 
@@ -77,7 +78,12 @@ export function LoadingScreen({
                         <div className="loading-screen-bar-track">
                             <div
                                 className="loading-screen-bar-fill"
-                                style={{ width: `${percent}%` }}
+                                style={{
+                                    transform: `scaleX(${Math.min(
+                                        1,
+                                        Math.max(0, state.overallProgress)
+                                    )})`,
+                                }}
                             />
                         </div>
                     )}
@@ -93,10 +99,7 @@ export function LoadingScreen({
                 </div>
 
                 {state.error && (
-                    <p
-                        className="loading-screen-message"
-                        style={{ color: '#f87171' }}
-                    >
+                    <p className="loading-screen-message loading-screen-message--error">
                         {state.error}
                     </p>
                 )}

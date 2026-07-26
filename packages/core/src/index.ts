@@ -147,7 +147,7 @@ export { applyEffect, applyEffects } from './effects';
 export { resolveText } from './localization';
 
 // Snapshot Builder
-export { buildSnapshot, buildUIStrings } from './snapshot';
+export { buildSnapshot, buildUIStrings, UI_DEFAULTS } from './snapshot';
 
 // Engine
 export { Engine, createInitialState } from './engine';

@@ -2,6 +2,8 @@
  * GameTime - Displays current in-game time
  */
 
+import { uiText } from '../uiText';
+
 export type TimeFormat = 'numeric' | 'narrative' | 'short';
 
 export interface GameTimeProps {
@@ -12,17 +14,14 @@ export interface GameTimeProps {
     className?: string;
 }
 
-function getTimeOfDay(
-    hour: number,
-    t: (key: string, fallback: string) => string
-): string {
-    if (hour >= 5 && hour < 8) return t('ui.time_dawn', 'Dawn');
-    if (hour >= 8 && hour < 12) return t('ui.time_morning', 'Morning');
-    if (hour >= 12 && hour < 14) return t('ui.time_midday', 'Midday');
-    if (hour >= 14 && hour < 17) return t('ui.time_afternoon', 'Afternoon');
-    if (hour >= 17 && hour < 20) return t('ui.time_evening', 'Evening');
-    if (hour >= 20 && hour < 22) return t('ui.time_dusk', 'Dusk');
-    return t('ui.time_night', 'Night');
+function getTimeOfDay(hour: number, t: (key: string) => string): string {
+    if (hour >= 5 && hour < 8) return t('ui.time_dawn');
+    if (hour >= 8 && hour < 12) return t('ui.time_morning');
+    if (hour >= 12 && hour < 14) return t('ui.time_midday');
+    if (hour >= 14 && hour < 17) return t('ui.time_afternoon');
+    if (hour >= 17 && hour < 20) return t('ui.time_evening');
+    if (hour >= 20 && hour < 22) return t('ui.time_dusk');
+    return t('ui.time_night');
 }
 
 export function formatHour(hour: number): string {
@@ -35,8 +34,8 @@ export function GameTime({
     ui,
     className = '',
 }: GameTimeProps) {
-    const t = (key: string, fallback: string) => ui?.[key] ?? fallback;
-    const day = t('ui.day', 'Day {day}').replace('{day}', String(time.day));
+    const t = (key: string) => uiText(ui, key);
+    const day = t('ui.day').replace('{day}', String(time.day));
     let display: string;
 
     switch (format) {

@@ -22,13 +22,15 @@
         "test:e2e": "yarn workspace @doodle-engine/studio test:e2e",
         "typecheck": "yarn workspace @doodle-engine/studio typecheck",
         "build:packages": "yarn workspaces foreach -At --exclude @doodle-engine/studio run build",
+        "sync:bundled-assets": "node scripts/sync-bundled-assets.mjs",
         "docs:dev": "yarn --cwd docs dev",
-        "docs:build": "yarn --cwd docs build"
+        "docs:build": "yarn --cwd docs build && node --test scripts/__tests__/docs-screenshots.test.mjs"
     },
     "engines": {
         "node": ">=24.0.0"
     },
     "devDependencies": {
+        "extract-zip": "2.0.1",
         "prettier": "3.8.1"
     }
 }

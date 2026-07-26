@@ -117,9 +117,7 @@ export function evaluateCondition(
             );
 
         default:
-            // TypeScript exhaustiveness check - this should never be reached
-            const _exhaustive: never = condition;
-            return false;
+            return condition satisfies never;
     }
 }
 
@@ -416,8 +414,7 @@ export function describeConditionValues(
             return {};
 
         default: {
-            const _exhaustive: never = condition;
-            return {};
+            return condition satisfies never;
         }
     }
 }

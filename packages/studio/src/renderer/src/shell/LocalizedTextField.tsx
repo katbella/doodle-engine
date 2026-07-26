@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentRegistry } from '@doodle-engine/core';
 import { useLocaleWriter } from '../lib/locale-writer';
 import { authoredTextPreview, languageName } from '../lib/localized-text';
-import { useModalDismiss } from '../lib/useModalDismiss';
-import { AnchoredOverlay, OverlayPortal } from './OverlayPortal';
+import { AnchoredOverlay } from './OverlayPortal';
+import { ModalShell } from './ModalShell';
 
 export type TextContentKind = 'short' | 'prose' | 'single-line-wrap';
 
@@ -318,7 +318,6 @@ function LocaleKeyPicker({
     onCreate: (key: string) => void;
     onCancel: () => void;
 }) {
-    useModalDismiss(onCancel);
     const [query, setQuery] = useState('');
     const [pendingKey, setPendingKey] = useState<string | null>(null);
     const [active, setActive] = useState(0);
@@ -370,138 +369,130 @@ function LocaleKeyPicker({
     };
 
     return (
-        <OverlayPortal>
-            <div className="modal-backdrop" onClick={onCancel}>
-                <div
-                    className="modal modal--tall locale-key-picker"
-                    role="dialog"
-                    aria-modal="true"
-                    onClick={(event) => event.stopPropagation()}
-                >
-                    {pendingKey ? (
-                        <>
-                            <div className="modal__title">
-                                Choose which text to keep
-                            </div>
-                            <p className="modal__message">
-                                Linking to{' '}
-                                <span className="mono">@{pendingKey}</span>{' '}
-                                would replace the current literal text. Choose
-                                the value explicitly.
-                            </p>
-                            <div className="locale-key-picker__comparison">
-                                <div>
-                                    <span className="field__label">
-                                        Current literal
+        <ModalShell
+            title={
+                pendingKey
+                    ? 'Choose which text to keep'
+                    : 'Choose a localized text key'
+            }
+            onDismiss={onCancel}
+            className="modal modal--tall locale-key-picker"
+        >
+            {pendingKey ? (
+                <>
+                    <p className="modal__message">
+                        Linking to <span className="mono">@{pendingKey}</span>{' '}
+                        would replace the current literal text. Choose the value
+                        explicitly.
+                    </p>
+                    <div className="locale-key-picker__comparison">
+                        <div>
+                            <span className="field__label">
+                                Current literal
+                            </span>
+                            <span>{currentText}</span>
+                        </div>
+                        <div>
+                            <span className="field__label">
+                                @{pendingKey} · {locale}
+                            </span>
+                            <span>{values[pendingKey]}</span>
+                        </div>
+                    </div>
+                    <div className="modal__actions">
+                        <button
+                            className="btn"
+                            onClick={() => setPendingKey(null)}
+                        >
+                            Back
+                        </button>
+                        <button
+                            className="btn"
+                            onClick={() => onPick(pendingKey, false)}
+                        >
+                            Use @{pendingKey} text
+                        </button>
+                        <button
+                            className="btn btn--accent"
+                            onClick={() => onPick(pendingKey, true)}
+                        >
+                            Overwrite @{pendingKey} with current text
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <input
+                        className="field__input"
+                        value={query}
+                        autoFocus
+                        spellCheck={false}
+                        aria-label="Search locale keys"
+                        placeholder={`Search ${languageName(locale)} keys and text…`}
+                        onChange={(event) => {
+                            setQuery(event.target.value);
+                            setActive(0);
+                        }}
+                        onKeyDown={onSearchKeyDown}
+                    />
+                    <div className="locale-key-picker__list scroll">
+                        {matches.map(([key, value], index) => (
+                            <button
+                                type="button"
+                                key={key}
+                                className={`locale-key-picker__row ${
+                                    key === preferredKey
+                                        ? 'locale-key-picker__row--current'
+                                        : ''
+                                } ${
+                                    index === activeRow
+                                        ? 'locale-key-picker__row--active'
+                                        : ''
+                                }`}
+                                onClick={() => pickRow(index)}
+                            >
+                                <span className="mono locale-key-picker__key">
+                                    @{key}
+                                </span>
+                                <span className="locale-key-picker__value">
+                                    {value ||
+                                        `Empty in ${languageName(locale)}`}
+                                </span>
+                            </button>
+                        ))}
+                        {canCreate && (
+                            <button
+                                type="button"
+                                className={`locale-key-picker__row locale-key-picker__create ${
+                                    activeRow === matches.length
+                                        ? 'locale-key-picker__row--active'
+                                        : ''
+                                }`}
+                                onClick={() => onCreate(normalized)}
+                            >
+                                Create “{normalized}”
+                                {currentText && (
+                                    <span className="locale-key-picker__value">
+                                        with the current text
                                     </span>
-                                    <span>{currentText}</span>
-                                </div>
-                                <div>
-                                    <span className="field__label">
-                                        @{pendingKey} · {locale}
-                                    </span>
-                                    <span>{values[pendingKey]}</span>
-                                </div>
-                            </div>
-                            <div className="modal__actions">
-                                <button
-                                    className="btn"
-                                    onClick={() => setPendingKey(null)}
-                                >
-                                    Back
-                                </button>
-                                <button
-                                    className="btn"
-                                    onClick={() => onPick(pendingKey, false)}
-                                >
-                                    Use @{pendingKey} text
-                                </button>
-                                <button
-                                    className="btn btn--accent"
-                                    onClick={() => onPick(pendingKey, true)}
-                                >
-                                    Overwrite @{pendingKey} with current text
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="modal__title">
-                                Choose a localized text key
-                            </div>
-                            <input
-                                className="field__input"
-                                value={query}
-                                autoFocus
-                                spellCheck={false}
-                                aria-label="Search locale keys"
-                                placeholder={`Search ${languageName(locale)} keys and text…`}
-                                onChange={(event) => {
-                                    setQuery(event.target.value);
-                                    setActive(0);
-                                }}
-                                onKeyDown={onSearchKeyDown}
-                            />
-                            <div className="locale-key-picker__list scroll">
-                                {matches.map(([key, value], index) => (
-                                    <button
-                                        type="button"
-                                        key={key}
-                                        className={`locale-key-picker__row ${
-                                            key === preferredKey
-                                                ? 'locale-key-picker__row--current'
-                                                : ''
-                                        } ${
-                                            index === activeRow
-                                                ? 'locale-key-picker__row--active'
-                                                : ''
-                                        }`}
-                                        onClick={() => pickRow(index)}
-                                    >
-                                        <span className="mono locale-key-picker__key">
-                                            @{key}
-                                        </span>
-                                        <span className="locale-key-picker__value">
-                                            {value ||
-                                                `Empty in ${languageName(locale)}`}
-                                        </span>
-                                    </button>
-                                ))}
-                                {canCreate && (
-                                    <button
-                                        type="button"
-                                        className={`locale-key-picker__row locale-key-picker__create ${
-                                            activeRow === matches.length
-                                                ? 'locale-key-picker__row--active'
-                                                : ''
-                                        }`}
-                                        onClick={() => onCreate(normalized)}
-                                    >
-                                        Create “{normalized}”
-                                        {currentText && (
-                                            <span className="locale-key-picker__value">
-                                                with the current text
-                                            </span>
-                                        )}
-                                    </button>
                                 )}
-                                {matches.length === 0 && !canCreate && (
-                                    <div className="dock__empty">
-                                        {normalized
-                                            ? 'Use letters, numbers, dots, dashes, or underscores.'
-                                            : 'No locale keys yet. Type a name to create one.'}
-                                    </div>
-                                )}
+                            </button>
+                        )}
+                        {matches.length === 0 && !canCreate && (
+                            <div className="dock__empty">
+                                {normalized
+                                    ? 'Use letters, numbers, dots, dashes, or underscores.'
+                                    : 'No locale keys yet. Type a name to create one.'}
                             </div>
-                            <div className="modal__actions">
-                                <button className="btn" onClick={onCancel}>
-                                    Cancel
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-        </OverlayPortal>
+                        )}
+                    </div>
+                    <div className="modal__actions">
+                        <button className="btn" onClick={onCancel}>
+                            Cancel
+                        </button>
+                    </div>
+                </>
+            )}
+        </ModalShell>
     );
 }

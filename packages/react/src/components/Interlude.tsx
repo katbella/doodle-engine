@@ -10,6 +10,7 @@ import type { SnapshotInterlude } from '@doodle-engine/core';
 import { AudioSettingsContext } from '../AudioSettingsContext';
 import { useInputAction, type InputCommand } from '../input/InputRouter';
 import { useOptionalAssetContext } from '../AssetProvider';
+import { uiText } from '../uiText';
 
 export interface InterludeProps {
     interlude: SnapshotInterlude;
@@ -227,7 +228,7 @@ export function Interlude({ interlude, onDismiss, ui }: InterludeProps) {
                     onDismiss();
                 }}
             >
-                {ui?.['ui.skip'] ?? 'Skip'} &raquo;
+                {uiText(ui, 'ui.skip')} &raquo;
             </button>
         </div>
     );

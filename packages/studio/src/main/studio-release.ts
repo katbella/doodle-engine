@@ -22,6 +22,8 @@ export interface StudioUpdateCandidate {
 }
 
 const STUDIO_TAG_PREFIX = '@doodle-engine/studio@';
+const STUDIO_RELEASE_DOWNLOAD_PREFIX =
+    '/katbella/doodle-engine/releases/download/';
 const RELEASES_PER_PAGE = 100;
 const RELEASE_REQUEST_TIMEOUT_MS = 15_000;
 
@@ -54,6 +56,22 @@ export function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
 export function parseStudioTag(tag: string): string | null {
     if (!tag.startsWith(STUDIO_TAG_PREFIX)) return null;
     return tag.slice(STUDIO_TAG_PREFIX.length);
+}
+
+export function isTrustedStudioDownloadUrl(value: string): boolean {
+    try {
+        const url = new URL(value);
+        return (
+            url.protocol === 'https:' &&
+            url.hostname === 'github.com' &&
+            url.port === '' &&
+            url.username === '' &&
+            url.password === '' &&
+            url.pathname.startsWith(STUDIO_RELEASE_DOWNLOAD_PREFIX)
+        );
+    } catch {
+        return false;
+    }
 }
 
 export function studioUpdatePlatform(

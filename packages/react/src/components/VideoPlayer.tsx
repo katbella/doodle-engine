@@ -8,6 +8,7 @@
 import { useRef } from 'react';
 import { useInputAction, type InputCommand } from '../input/InputRouter';
 import { useAssetUrl } from '../hooks/useAsset';
+import { uiText } from '../uiText';
 
 export interface VideoPlayerProps {
     /** Video file path (resolved by the engine) */
@@ -22,9 +23,7 @@ export interface VideoPlayerProps {
 
 export function shouldCompleteVideoFromInput(command: InputCommand): boolean {
     return (
-        command === 'cancel' ||
-        command === 'confirm' ||
-        command === 'continue'
+        command === 'cancel' || command === 'confirm' || command === 'continue'
     );
 }
 
@@ -59,7 +58,7 @@ export function VideoPlayer({
                 className="video-player-video"
             />
             <button className="video-player-skip-button" onClick={onComplete}>
-                {ui?.['ui.skip'] ?? 'Skip'}
+                {uiText(ui, 'ui.skip')}
             </button>
         </div>
     );

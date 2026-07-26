@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import type { PlayerNote } from '@doodle-engine/core';
+import { uiText } from '../uiText';
 
 export interface PlayerNotesProps {
     notes: PlayerNote[];
@@ -34,31 +35,31 @@ export function PlayerNotes({
 
     return (
         <div className={`player-notes ${className}`}>
-            <h2>{ui?.['ui.notes'] ?? 'Notes'}</h2>
+            <h2>{uiText(ui, 'ui.notes')}</h2>
 
             <form className="player-notes-form" onSubmit={handleSubmit}>
                 <input
                     className="player-notes-title-input"
                     type="text"
-                    placeholder={ui?.['ui.note_title'] ?? 'Title'}
+                    placeholder={uiText(ui, 'ui.note_title')}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
                 <textarea
                     className="player-notes-text-input"
-                    placeholder={ui?.['ui.note_text'] ?? 'Write a note...'}
+                    placeholder={uiText(ui, 'ui.note_text')}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     rows={3}
                 />
                 <button className="player-notes-add-button" type="submit">
-                    {ui?.['ui.add_note'] ?? 'Add Note'}
+                    {uiText(ui, 'ui.add_note')}
                 </button>
             </form>
 
             {notes.length === 0 ? (
                 <p className="player-notes-empty">
-                    {ui?.['ui.no_notes'] ?? 'No notes yet'}
+                    {uiText(ui, 'ui.no_notes')}
                 </p>
             ) : (
                 <ul className="player-notes-list">
@@ -73,9 +74,9 @@ export function PlayerNotes({
                             <button
                                 className="player-note-delete"
                                 onClick={() => onDelete(note.id)}
-                                aria-label={ui?.['ui.delete'] ?? 'Delete'}
+                                aria-label={uiText(ui, 'ui.delete')}
                             >
-                                {ui?.['ui.delete'] ?? 'Delete'}
+                                {uiText(ui, 'ui.delete')}
                             </button>
                         </li>
                     ))}

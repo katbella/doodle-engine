@@ -13,6 +13,7 @@ import {
     createInitialState,
     resolveAssetPath,
 } from '@doodle-engine/core';
+import { uiText } from './uiText';
 import type {
     ContentRegistry,
     GameConfig,
@@ -592,9 +593,9 @@ function GameShellPlaying({
                 <button
                     className="game-shell-menu-button"
                     onClick={onPause}
-                    aria-label={snapshot.ui['ui.menu'] ?? 'Menu'}
+                    aria-label={uiText(snapshot.ui, 'ui.menu')}
                 >
-                    {snapshot.ui['ui.menu'] ?? 'Menu'}
+                    {uiText(snapshot.ui, 'ui.menu')}
                 </button>
             )}
 

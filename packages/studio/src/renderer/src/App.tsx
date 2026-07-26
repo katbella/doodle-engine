@@ -39,6 +39,7 @@ import { CreateItemModal } from './shell/CreateItemModal';
 import { RenameModal } from './shell/RenameModal';
 import { ConfirmModal } from './shell/ConfirmModal';
 import { FlagVarRenameModal } from './shell/FlagVarRenameModal';
+import { isAnyModalOpen } from './shell/ModalShell';
 import { TopBar } from './shell/TopBar';
 import { EngineBanner } from './shell/EngineBanner';
 import { LeftRail } from './shell/LeftRail';
@@ -458,9 +459,7 @@ export function App() {
             if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
                 // Modal and builder dialogs own keyboard focus. Never stack the
                 // command palette over one of them.
-                if (
-                    document.querySelector('.modal-backdrop, .popover-backdrop')
-                ) {
+                if (isAnyModalOpen()) {
                     e.preventDefault();
                     return;
                 }

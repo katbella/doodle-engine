@@ -395,7 +395,7 @@ export class Engine {
      */
     writeNote(title: string, text: string): Snapshot {
         const note = {
-            id: `note_${Date.now()}`,
+            id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             title,
             text,
         };

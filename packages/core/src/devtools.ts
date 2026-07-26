@@ -176,17 +176,12 @@ export function enableDevTools(engine: Engine, onUpdate: () => void) {
             console.log('Quest Progress:', state.questProgress);
             console.log('');
             console.log('Available commands:');
-            console.log('  doodle.setFlag(flag)');
-            console.log('  doodle.clearFlag(flag)');
-            console.log('  doodle.setVariable(variable, value)');
-            console.log('  doodle.getVariable(variable)');
-            console.log('  doodle.teleport(locationId)');
-            console.log('  doodle.triggerDialogue(dialogueId)');
-            console.log('  doodle.setQuestStage(questId, stageId)');
-            console.log('  doodle.addItem(itemId)');
-            console.log('  doodle.removeItem(itemId)');
-            console.log('  doodle.inspectState()');
-            console.log('  doodle.inspectRegistry()');
+            console.log(
+                Object.keys(window.doodle ?? {})
+                    .sort()
+                    .map((name) => `  doodle.${name}(...)`)
+                    .join('\n')
+            );
             console.log('');
             console.log('📚 Docs: https://doodleengine.dev/');
         },

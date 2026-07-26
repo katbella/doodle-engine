@@ -1,5 +1,4 @@
-import { useModalDismiss } from '../lib/useModalDismiss';
-import { OverlayPortal } from './OverlayPortal';
+import { ModalShell } from './ModalShell';
 
 export function AboutModal({
     version,
@@ -9,35 +8,23 @@ export function AboutModal({
     onClose: () => void;
 }) {
     const currentYear = new Date().getFullYear();
-    useModalDismiss(onClose);
     return (
-        <OverlayPortal>
-            <div className="modal-backdrop" onClick={onClose}>
-                <div
-                    className="modal modal--about"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="about-title"
-                    onClick={(event) => event.stopPropagation()}
-                >
-                    <div className="modal__title" id="about-title">
-                        Doodle Studio
-                    </div>
-                    <div className="about__version">Version {version}</div>
-                    <p className="modal__message">
-                        A visual editor and playtesting environment for Doodle
-                        Engine games.
-                    </p>
-                    <p className="about__copyright">
-                        &copy; {currentYear} Kat Bella
-                    </p>
-                    <div className="modal__actions">
-                        <button className="btn btn--accent" onClick={onClose}>
-                            Close
-                        </button>
-                    </div>
-                </div>
+        <ModalShell
+            title="Doodle Studio"
+            className="modal modal--about"
+            onDismiss={onClose}
+        >
+            <div className="about__version">Version {version}</div>
+            <p className="modal__message">
+                A visual editor and playtesting environment for Doodle Engine
+                games.
+            </p>
+            <p className="about__copyright">&copy; {currentYear} Kat Bella</p>
+            <div className="modal__actions">
+                <button className="btn btn--accent" onClick={onClose}>
+                    Close
+                </button>
             </div>
-        </OverlayPortal>
+        </ModalShell>
     );
 }

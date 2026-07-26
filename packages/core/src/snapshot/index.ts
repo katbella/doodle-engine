@@ -36,7 +36,7 @@ import { resolveAssetPath } from '../assets/paths';
 
 // Every label the built-in renderer shows. Locale files override any of
 // these with a matching ui.* key; the English text is the default.
-const UI_DEFAULTS: Record<string, string> = {
+export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.continue': 'Continue',
     'ui.end_dialogue': 'End Dialogue',
     'ui.inventory': 'Inventory',

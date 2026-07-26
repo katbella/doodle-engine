@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { uiText } from '../uiText';
 
 export interface CreditsScreenProps {
     ui: Record<string, string>;
@@ -18,22 +19,17 @@ export function CreditsScreen({
     return (
         <div className={`credits-screen ${className}`}>
             <div className="credits-panel">
-                <h1 className="credits-heading">
-                    {ui['ui.credits'] ?? 'Credits'}
-                </h1>
+                <h1 className="credits-heading">{uiText(ui, 'ui.credits')}</h1>
                 <div className="credits-content">
                     {children ?? (
                         <>
                             <p>{title}</p>
-                            <p>
-                                {ui['ui.made_with_doodle_engine'] ??
-                                    'Made with Doodle Engine'}
-                            </p>
+                            <p>{uiText(ui, 'ui.made_with_doodle_engine')}</p>
                         </>
                     )}
                 </div>
                 <button className="title-button" onClick={onBack}>
-                    {ui['ui.back']}
+                    {uiText(ui, 'ui.back')}
                 </button>
             </div>
         </div>

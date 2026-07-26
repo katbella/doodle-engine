@@ -4,6 +4,7 @@
 
 import type { SnapshotCharacter } from '@doodle-engine/core';
 import { AssetImage } from './AssetImage';
+import { uiText } from '../uiText';
 
 export interface CharacterListProps {
     characters: SnapshotCharacter[];
@@ -25,7 +26,7 @@ export function CharacterList({
 
     return (
         <div className={`character-list ${className}`}>
-            <h2>{ui?.['ui.characters'] ?? 'Characters'}</h2>
+            <h2>{uiText(ui, 'ui.characters')}</h2>
             <div className="character-grid">
                 {characters.map((character) => (
                     <button

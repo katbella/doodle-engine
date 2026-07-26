@@ -49,7 +49,7 @@ describe('CreateItemModal', () => {
         const onCreate = vi.fn();
         const onCancel = vi.fn();
         const user = userEvent.setup();
-        const { container } = render(
+        render(
             <CreateItemModal
                 initialSection="items"
                 existingIds={() => []}
@@ -136,7 +136,7 @@ describe('NewProjectModal', () => {
         installBridge(vi.fn(async () => null));
         const onCancel = vi.fn();
         const user = userEvent.setup();
-        const { container } = render(
+        render(
             <NewProjectModal
                 onCreate={vi.fn()}
                 onCancel={onCancel}

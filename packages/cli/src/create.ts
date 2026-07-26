@@ -250,7 +250,7 @@ export async function create(projectName: string) {
     console.log(crayon.dim('    2. Run "Extensions: Install from VSIX..."'));
     console.log(
         crayon.dim(
-            '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax-1.1.0.vsix'
+            '    3. Select: node_modules/@doodle-engine/cli/extensions/doodle-dlg-syntax.vsix'
         )
     );
     console.log('');

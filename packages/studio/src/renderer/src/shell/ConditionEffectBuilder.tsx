@@ -129,7 +129,7 @@ export function ConditionEffectBuilder({
             : 'effect';
 
     return (
-        <div className="builder" role="dialog" aria-label={`Build ${mode}`}>
+        <div className="builder">
             <div className="modal__title">
                 {initial ? `Edit ${noun}` : `Add ${noun}`}
             </div>
