@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import extract from 'extract-zip';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const extensionDirectory = join(root, 'extensions', 'vscode-dlg');
@@ -15,34 +16,6 @@ const cliArtifact = join(
     'extensions',
     'doodle-dlg-syntax.vsix'
 );
-
-function archive(path, args, encoding) {
-    const result = spawnSync('tar', [...args, path], { encoding });
-    if (result.error) throw result.error;
-    assert.equal(
-        result.status,
-        0,
-        result.stderr?.toString().trim() || `Could not read ${path}`
-    );
-    return result.stdout;
-}
-
-function archiveEntries(path) {
-    return archive(path, ['-tf'], 'utf8').trim().split(/\r?\n/).sort();
-}
-
-function archiveFile(path, entry) {
-    const result = spawnSync('tar', ['-xOf', path, entry], {
-        encoding: 'utf8',
-    });
-    if (result.error) throw result.error;
-    assert.equal(
-        result.status,
-        0,
-        result.stderr.trim() || `Could not read ${entry}`
-    );
-    return result.stdout;
-}
 
 function valuesFromAlternation(pattern) {
     const match = pattern.match(/\(([^()]+)\)/);
@@ -63,8 +36,18 @@ test('committed bundled assets match their sources', async () => {
     );
 });
 
-test('the VSIX contains only the extension runtime files', async () => {
-    assert.deepEqual(archiveEntries(sourceArtifact), [
+test('the VSIX contains only the extension runtime files', async (t) => {
+    const extracted = await mkdtemp(join(tmpdir(), 'doodle-vsix-test-'));
+    const entries = [];
+    t.after(() => rm(extracted, { recursive: true, force: true }));
+    await extract(sourceArtifact, {
+        dir: extracted,
+        onEntry: (entry) => {
+            if (!entry.fileName.endsWith('/')) entries.push(entry.fileName);
+        },
+    });
+
+    assert.deepEqual(entries.sort(), [
         '[Content_Types].xml',
         'extension.vsixmanifest',
         'extension/LICENSE.txt',
@@ -78,7 +61,7 @@ test('the VSIX contains only the extension runtime files', async () => {
         await readFile(join(extensionDirectory, 'package.json'), 'utf8')
     );
     const packagedManifest = JSON.parse(
-        archiveFile(sourceArtifact, 'extension/package.json')
+        await readFile(join(extracted, 'extension', 'package.json'), 'utf8')
     );
     assert.deepEqual(packagedManifest, sourceManifest);
 
@@ -87,17 +70,15 @@ test('the VSIX contains only the extension runtime files', async () => {
         'utf8'
     );
     assert.equal(
-        archiveFile(sourceArtifact, 'extension/readme.md').replaceAll(
-            '\r\n',
-            '\n'
-        ),
+        (
+            await readFile(join(extracted, 'extension', 'readme.md'), 'utf8')
+        ).replaceAll('\r\n', '\n'),
         sourceReadme.replaceAll('\r\n', '\n')
     );
     assert.equal(
-        archiveFile(sourceArtifact, 'extension/LICENSE.txt').replaceAll(
-            '\r\n',
-            '\n'
-        ),
+        (
+            await readFile(join(extracted, 'extension', 'LICENSE.txt'), 'utf8')
+        ).replaceAll('\r\n', '\n'),
         (await readFile(join(root, 'LICENSE'), 'utf8')).replaceAll('\r\n', '\n')
     );
 });

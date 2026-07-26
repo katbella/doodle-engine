@@ -30,6 +30,7 @@
         "node": ">=24.0.0"
     },
     "devDependencies": {
+        "extract-zip": "2.0.1",
         "prettier": "3.8.1"
     }
 }

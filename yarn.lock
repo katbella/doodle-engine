@@ -2597,6 +2597,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "doodle-engine@workspace:."
   dependencies:
+    extract-zip: "npm:2.0.1"
     prettier: "npm:3.8.1"
   languageName: unknown
   linkType: soft
@@ -2940,7 +2941,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"extract-zip@npm:^2.0.1":
+"extract-zip@npm:2.0.1, extract-zip@npm:^2.0.1":
   version: 2.0.1
   resolution: "extract-zip@npm:2.0.1"
   dependencies:

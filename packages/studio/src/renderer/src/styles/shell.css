@@ -1,7 +1,6 @@
 .app {
     height: 100%;
     display: grid;
-    /* The dock keeps its chosen height but can never crush the editor. */
     grid-template-rows: auto minmax(0, 1fr) auto min(var(--dock-h, 220px), 55vh);
     background: var(--bg);
 }
