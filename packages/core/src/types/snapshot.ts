@@ -180,8 +180,8 @@ export interface SnapshotMap {
 export interface SnapshotInterlude {
     /** Interlude ID */
     id: string;
-    /** Background image filename */
-    background: string;
+    /** Optional background image filename */
+    background?: string;
     /** Optional decorative banner/frame image */
     banner?: string;
     /** Optional music track filename */

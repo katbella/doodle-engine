@@ -24,12 +24,6 @@ export interface AssetLoader {
         onProgress?: (loaded: number, total: number, current: string) => void
     ): Promise<void>;
 
-    /** Get a URL that can be used in src attributes (may be blob URL or original) */
-    getUrl(path: string): string;
-
-    /** Preload assets that might be needed soon (non-blocking) */
-    prefetch(paths: string[]): void;
-
     /** Clear all cached assets */
     clear(): Promise<void>;
 }
@@ -117,18 +111,6 @@ export function createAssetLoader(version: string = '1'): AssetLoader {
                 await loadAsset(path);
                 loadedCount++;
                 onProgress?.(loadedCount, total, path);
-            }
-        },
-
-        getUrl(path: string): string {
-            return path;
-        },
-
-        prefetch(paths: string[]): void {
-            for (const path of paths) {
-                loadAsset(path).catch(() => {
-                    // Prefetch failures are non-fatal
-                });
             }
         },
 

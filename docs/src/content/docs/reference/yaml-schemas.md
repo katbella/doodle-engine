@@ -250,7 +250,7 @@ text: |
 | Field               | Type          | Required | Description                                                          |
 | ------------------- | ------------- | -------- | -------------------------------------------------------------------- |
 | `id`                | `string`      | Yes      | Unique identifier                                                    |
-| `background`        | `string`      | Yes      | Background image filename                                            |
+| `background`        | `string`      | No       | Optional background image filename                                   |
 | `text`              | `string`      | Yes      | Narrative text (supports `@key`)                                     |
 | `banner`            | `string`      | No       | Optional decorative frame/border image                               |
 | `music`             | `string`      | No       | Music track to play                                                  |

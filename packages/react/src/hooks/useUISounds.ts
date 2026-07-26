@@ -6,7 +6,6 @@
  */
 
 import { useRef, useState, useCallback } from 'react';
-import { useOptionalAssetContext } from '../AssetProvider';
 
 export interface UISoundConfig {
     /** Whether UI sounds are enabled */
@@ -77,19 +76,17 @@ export function useUISounds(config: UISoundConfig = {}): UISoundControls {
     const [enabled, setEnabled] = useState(initialEnabled);
     const [volume, setVolume] = useState(initialVolume);
     const soundMap = useRef({ ...DEFAULT_SOUNDS, ...sounds });
-    const assetContext = useOptionalAssetContext();
-
     const play = useCallback(
         (file: string) => {
             if (!enabled || !file) return;
             const path = resolveSoundPath(basePath, file);
-            const audio = new Audio(assetContext?.getAssetUrl(path) ?? path);
+            const audio = new Audio(path);
             audio.volume = volume;
             audio.play().catch(() => {
                 // Ignore autoplay restrictions
             });
         },
-        [enabled, volume, basePath, assetContext]
+        [enabled, volume, basePath]
     );
 
     const playSound = useCallback(

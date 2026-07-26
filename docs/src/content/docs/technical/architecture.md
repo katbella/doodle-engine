@@ -40,7 +40,7 @@ Game state tracks everything that changes during play:
 
 ```ts
 interface GameState {
-    player: PlayerCharacterState;
+    player?: PlayerCharacterState;
     currentLocation: string;
     currentTime: { day: number; hour: number };
     flags: Record<string, boolean>;

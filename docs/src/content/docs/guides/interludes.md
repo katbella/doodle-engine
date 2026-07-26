@@ -3,7 +3,9 @@ title: Narrative Interludes
 description: Full-screen text scenes for chapter transitions and dream sequences.
 ---
 
-Interludes are full-screen narrative scenes for chapter breaks, dreams, and other story transitions. Inspired by the chapter screens in Infinity Engine games such as *Baldur's Gate*, they combine scrolling text with background art and optional audio. Players can read at their own pace or skip when ready.
+Interludes are full-screen narrative scenes for chapter breaks, dreams, and
+other story transitions. They show scrolling text with optional background art
+and audio. Players can read at their own pace or skip when ready.
 
 ## Creating an Interlude
 
@@ -32,7 +34,7 @@ text: |
 | Field               | Required | Description                                                                          |
 | ------------------- | -------- | ------------------------------------------------------------------------------------ |
 | `id`                | Yes      | Unique identifier                                                                    |
-| `background`        | Yes      | Background image path                                                                |
+| `background`        | No       | Optional background image path                                                       |
 | `text`              | Yes      | The narrative text (plain text or `@localization.key`)                               |
 | `banner`            | No       | Optional decorative frame/border image overlaid on the background                    |
 | `music`             | No       | Music track to play during the interlude                                             |

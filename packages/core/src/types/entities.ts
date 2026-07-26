@@ -236,8 +236,8 @@ export interface JournalEntry {
 export interface Interlude {
     /** Unique identifier for this interlude */
     id: string;
-    /** Background image filename */
-    background: string;
+    /** Optional background image filename */
+    background?: string;
     /** Optional decorative banner/frame image overlaid on the background */
     banner?: string;
     /** Optional music track to play during the interlude */

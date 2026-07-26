@@ -1,10 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { Engine, type GameState, type Snapshot } from '@doodle-engine/core';
 import type { ContentRegistry } from '@doodle-engine/core';
-import type { AssetContextValue } from '../AssetProvider';
-import { AssetContext } from '../AssetProvider';
 import { GameProvider } from '../GameProvider';
 import { GameRenderer } from '../GameRenderer';
 import { resolveChoiceListInput } from '../components/ChoiceList';
@@ -117,37 +114,6 @@ function makeState(): GameState {
     };
 }
 
-function withAssetContext(children: ReactNode) {
-    const value: AssetContextValue = {
-        state: {
-            phase: 'complete',
-            bytesLoaded: 1,
-            bytesTotal: 1,
-            assetsLoaded: 1,
-            assetsTotal: 1,
-            progress: 1,
-            overallProgress: 1,
-            currentAsset: null,
-            error: null,
-        },
-        getAssetUrl: (path) => `/cdn${path}`,
-        isReady: () => true,
-        prefetch: () => {},
-        loader: {
-            isAvailable: async () => true,
-            load: async () => {},
-            loadMany: async () => {},
-            getUrl: (path) => `/cdn${path}`,
-            prefetch: () => {},
-            clear: async () => {},
-        },
-    };
-
-    return (
-        <AssetContext.Provider value={value}>{children}</AssetContext.Provider>
-    );
-}
-
 describe('React components', () => {
     it('resolves ChoiceList input commands', () => {
         const choices = [
@@ -184,123 +150,109 @@ describe('React components', () => {
         expect(shouldCompleteVideoFromInput('choice1')).toBe(false);
     });
 
-    it('uses asset context URLs for stock media components', () => {
+    it('uses snapshot paths for stock media components', () => {
         const locationHtml = renderToStaticMarkup(
-            withAssetContext(
-                <LocationView
-                    location={{
-                        id: 'town',
-                        name: 'Town',
-                        description: 'A quiet town.',
-                        banner: '/assets/images/town.png',
-                    }}
-                />
-            )
+            <LocationView
+                location={{
+                    id: 'town',
+                    name: 'Town',
+                    description: 'A quiet town.',
+                    banner: '/assets/images/town.png',
+                }}
+            />
         );
         const videoHtml = renderToStaticMarkup(
-            withAssetContext(
-                <VideoPlayer
-                    src="/assets/video/intro.mp4"
-                    onComplete={() => {}}
-                />
-            )
+            <VideoPlayer
+                src="/assets/video/intro.mp4"
+                onComplete={() => {}}
+            />
         );
         const interludeHtml = renderToStaticMarkup(
-            withAssetContext(
-                <Interlude
-                    interlude={{
-                        id: 'opening',
-                        background: '/assets/images/opening.jpg',
-                        banner: '/assets/images/banner.png',
-                        text: 'Opening text.',
-                        scroll: true,
-                        scrollSpeed: 30,
-                    }}
-                    onDismiss={() => {}}
-                />
-            )
+            <Interlude
+                interlude={{
+                    id: 'opening',
+                    background: '/assets/images/opening.jpg',
+                    banner: '/assets/images/banner.png',
+                    text: 'Opening text.',
+                    scroll: true,
+                    scrollSpeed: 30,
+                }}
+                onDismiss={() => {}}
+            />
         );
         const dialogueHtml = renderToStaticMarkup(
-            withAssetContext(
-                <DialogueBox
-                    dialogue={{
-                        speaker: 'narrator',
-                        speakerName: 'Narrator',
-                        text: 'Look *there*.\n\nThe room is cE5C453[_empty_].',
-                        portrait: '/assets/images/portraits/narrator.png',
-                    }}
-                />
-            )
+            <DialogueBox
+                dialogue={{
+                    speaker: 'narrator',
+                    speakerName: 'Narrator',
+                    text: 'Look *there*.\n\nThe room is cE5C453[_empty_].',
+                    portrait: '/assets/images/portraits/narrator.png',
+                }}
+            />
         );
         expect(dialogueHtml).toContain(
             'Look <strong>there</strong>.<br/><br/>The room is <span style="color:#E5C453"><em>empty</em></span>.'
         );
         const characterHtml = renderToStaticMarkup(
-            withAssetContext(
-                <CharacterList
-                    characters={[
-                        {
-                            id: 'sage',
-                            name: 'Sage',
-                            title: '',
-                            biography: '',
-                            portrait: '/assets/images/portraits/sage.png',
-                            location: 'town',
-                            inParty: false,
-                            relationship: 0,
-                            stats: {},
-                            statNames: {},
-                        },
-                    ]}
-                    onTalkTo={() => {}}
-                />
-            )
+            <CharacterList
+                characters={[
+                    {
+                        id: 'sage',
+                        name: 'Sage',
+                        title: '',
+                        biography: '',
+                        portrait: '/assets/images/portraits/sage.png',
+                        location: 'town',
+                        inParty: false,
+                        relationship: 0,
+                        stats: {},
+                        statNames: {},
+                    },
+                ]}
+                onTalkTo={() => {}}
+            />
         );
         const inventoryHtml = renderToStaticMarkup(
-            withAssetContext(
-                <Inventory
-                    items={[
-                        {
-                            id: 'coin',
-                            name: 'Coin',
-                            description: 'Old coin.',
-                            icon: '/assets/images/items/coin_icon.png',
-                            image: '/assets/images/items/coin.png',
-                            stats: {},
-                        },
-                    ]}
-                />
-            )
+            <Inventory
+                items={[
+                    {
+                        id: 'coin',
+                        name: 'Coin',
+                        description: 'Old coin.',
+                        icon: '/assets/images/items/coin_icon.png',
+                        image: '/assets/images/items/coin.png',
+                        stats: {},
+                    },
+                ]}
+            />
         );
         const mapHtml = renderToStaticMarkup(
-            withAssetContext(
-                <MapView
-                    map={{
-                        id: 'town',
-                        name: 'Town Map',
-                        image: '/assets/images/maps/town.png',
-                        scale: 1,
-                        locations: [],
-                    }}
-                    onTravelTo={() => {}}
-                />
-            )
+            <MapView
+                map={{
+                    id: 'town',
+                    name: 'Town Map',
+                    image: '/assets/images/maps/town.png',
+                    scale: 1,
+                    locations: [],
+                }}
+                onTravelTo={() => {}}
+            />
         );
 
-        expect(locationHtml).toContain('/cdn/assets/images/town.png');
-        expect(videoHtml).toContain('/cdn/assets/video/intro.mp4');
-        expect(interludeHtml).toContain('/cdn/assets/images/opening.jpg');
-        expect(interludeHtml).toContain('/cdn/assets/images/banner.png');
+        expect(locationHtml).toContain('/assets/images/town.png');
+        expect(videoHtml).toContain('/assets/video/intro.mp4');
+        expect(interludeHtml).toContain('/assets/images/opening.jpg');
+        expect(interludeHtml).toContain('/assets/images/banner.png');
         expect(dialogueHtml).toContain(
-            '/cdn/assets/images/portraits/narrator.png'
+            '/assets/images/portraits/narrator.png'
         );
         expect(characterHtml).toContain(
-            '/cdn/assets/images/portraits/sage.png'
+            '/assets/images/portraits/sage.png'
         );
         expect(inventoryHtml).toContain(
-            '/cdn/assets/images/items/coin_icon.png'
+            '/assets/images/items/coin_icon.png'
         );
-        expect(mapHtml).toContain('/cdn/assets/images/maps/town.png');
+        expect(mapHtml).toContain('/assets/images/maps/town.png');
     });
 
     it('renders GameRenderer through GameProvider with dialogue and interlude', () => {

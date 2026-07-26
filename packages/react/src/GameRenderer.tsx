@@ -27,7 +27,6 @@ import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CharacterSheet } from './components/CharacterSheet';
 import { PlayerSetup } from './components/PlayerSetup';
-import { AssetImage } from './components/AssetImage';
 import { DialogOverlay } from './components/DialogOverlay';
 import { InputProviderBoundary, useInputAction } from './input/InputRouter';
 import { saveStorageKeyForProject } from './saves';
@@ -213,7 +212,7 @@ function GameRendererInner({
                                         className="party-member"
                                     >
                                         {member.portrait ? (
-                                            <AssetImage
+                                            <img
                                                 src={member.portrait}
                                                 alt={member.name}
                                                 className="party-portrait"

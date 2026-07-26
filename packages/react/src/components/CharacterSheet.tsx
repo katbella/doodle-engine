@@ -6,7 +6,6 @@ import type {
     SnapshotCharacter,
     SnapshotPlayerCharacter,
 } from '@doodle-engine/core';
-import { AssetImage } from './AssetImage';
 import { PlayerEmblem } from './PlayerEmblem';
 import { uiText } from '../uiText';
 
@@ -37,7 +36,7 @@ export function CharacterSheet({
             <header className="character-sheet-header">
                 <div className="character-sheet-portrait">
                     {character.portrait ? (
-                        <AssetImage
+                        <img
                             src={character.portrait}
                             alt={character.name}
                             className="character-sheet-portrait-image"

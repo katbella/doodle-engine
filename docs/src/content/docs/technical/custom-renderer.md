@@ -187,6 +187,7 @@ import {
     NotificationArea,
     SaveLoadPanel,
 } from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
 
 function MyLayout() {
     const { snapshot, actions } = useGame();

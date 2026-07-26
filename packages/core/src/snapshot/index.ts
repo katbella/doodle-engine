@@ -229,7 +229,9 @@ export function buildSnapshot(
         if (interlude) {
             pendingInterlude = {
                 id: interlude.id,
-                background: resolveAssetPath(interlude.background, 'banner'),
+                background: interlude.background
+                    ? resolveAssetPath(interlude.background, 'banner')
+                    : undefined,
                 banner: resolveAssetPath(interlude.banner, 'banner'),
                 music: resolveAssetPath(interlude.music, 'music'),
                 voice: resolveAssetPath(interlude.voice, 'voice'),

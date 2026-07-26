@@ -233,6 +233,16 @@ const snapshot = engine.dismissInterlude();
 
 These methods support playtest tools, state inspectors, and other development-only workflows.
 
+### setTrace
+
+```typescript
+setTrace(sink: TraceSink | null): void
+```
+
+Send engine decisions to a debug tool while it runs. A trace sink can receive
+node, condition, effect, transition, hidden-choice, and error events. Pass
+`null` to stop tracing.
+
 ### applyDebugEffect
 
 ```typescript
@@ -256,6 +266,16 @@ startDialogueAt(dialogueId: string, nodeId: string): Snapshot
 ```
 
 Start a dialogue at a chosen node for testing. The node's effects run normally, and a silent node advances normally. If the dialogue or node is missing, the game remains at its current state.
+
+### explainChoices
+
+```typescript
+explainChoices(): ChoiceVisibility[]
+```
+
+Report whether each choice on the current dialogue node is visible. A hidden
+choice includes its first failed condition and the state values that condition
+read. Returns an empty array when no dialogue is active.
 
 ## Data Flow
 

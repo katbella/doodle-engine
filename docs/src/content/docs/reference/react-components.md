@@ -1,6 +1,6 @@
 ---
 title: React Components
-description: Reference for all React components and their props.
+description: Reference for Doodle's React renderer components and their props.
 ---
 
 All components are exported from `@doodle-engine/react`. A prop is a setting passed to a React component.
@@ -418,6 +418,39 @@ import { NotificationArea } from '@doodle-engine/react';
 
 Notifications are transient. They appear in one snapshot and are automatically cleared by the engine.
 
+## DialogOverlay
+
+Accessible modal foundation for custom renderer panels. It moves focus into the
+dialog, keeps keyboard focus inside it, and restores focus when it closes.
+
+```tsx
+import { DialogOverlay } from '@doodle-engine/react';
+
+<DialogOverlay
+    ariaLabel="Quest details"
+    overlayClassName="quest-dialog-overlay"
+    className="quest-dialog"
+    onDismiss={closeQuest}
+>
+    <h2>The Missing Courier</h2>
+    <p>Find the courier on the north road.</p>
+    <button onClick={closeQuest}>Close</button>
+</DialogOverlay>;
+```
+
+### Props
+
+| Prop                | Type                             | Default  | Description                              |
+| ------------------- | -------------------------------- | -------- | ---------------------------------------- |
+| `children`          | `ReactNode`                      | required | Dialog content                           |
+| `onDismiss`         | `() => void`                     | required | Close handler                            |
+| `ariaLabel`         | `string`                         | required | Accessible name for the dialog           |
+| `overlayClassName`  | `string`                         | required | CSS class for the full-screen overlay    |
+| `className`         | `string`                         | required | CSS class for the dialog panel           |
+| `initialFocusRef`   | `RefObject<HTMLElement \| null>` | —        | Element that receives focus when opened  |
+| `dismissOnBackdrop` | `boolean`                        | `true`   | Close when the outer overlay is selected |
+| `dismissOnEscape`   | `boolean`                        | `true`   | Close when Escape is pressed             |
+
 ## SaveLoadPanel
 
 Save and load game state via localStorage.
@@ -446,13 +479,16 @@ import { PROJECT_ID } from './project';
 
 ### Features
 
-- Save button serializes to localStorage
-- Load button disabled when no save exists
-- Shows temporary "Saved!" / "Loaded!" / "No save found" feedback
+- Lists quick saves, autosaves, and manual saves for the current project
+- **New Save** adds a manual save
+- Every slot can be loaded; manual saves can also be deleted
+- Shows temporary saved and loaded feedback
 
 ## Interlude
 
-Full-screen narrative scene with a background image and scrolling text. `GameRenderer` and `GameShell` display interludes automatically; custom renderers can use this component directly.
+Full-screen narrative scene with scrolling text and optional background art.
+`GameRenderer` and `GameShell` display interludes automatically; custom
+renderers can use this component directly.
 
 ```tsx
 import { Interlude } from '@doodle-engine/react';
@@ -465,10 +501,11 @@ import { Interlude } from '@doodle-engine/react';
 
 ### Props
 
-| Prop        | Type                | Description                                    |
-| ----------- | ------------------- | ---------------------------------------------- |
-| `interlude` | `SnapshotInterlude` | Interlude data from the snapshot               |
-| `onDismiss` | `() => void`        | Called when the player dismisses the interlude |
+| Prop        | Type                     | Default  | Description                                    |
+| ----------- | ------------------------ | -------- | ---------------------------------------------- |
+| `interlude` | `SnapshotInterlude`      | required | Interlude data from the snapshot               |
+| `onDismiss` | `() => void`             | required | Called when the player dismisses the interlude |
+| `ui`        | `Record<string, string>` | `{}`     | Resolved UI strings                            |
 
 The player can dismiss with the Skip button, by clicking the outer overlay, or with Space, Enter, or Escape. Mouse wheel and arrow keys scroll manually and pause auto-scroll. Keyboard commands are registered at high priority so the dialogue UI underneath does not also receive the same input.
 
@@ -492,32 +529,6 @@ import { VideoPlayer } from '@doodle-engine/react';
 | `src`        | `string`     | required | Video file path (resolved by engine) |
 | `onComplete` | `() => void` | required | Called when video ends or is skipped |
 | `className`  | `string`     | `''`     | CSS class                            |
-
-## AssetImage
-
-Image component for the asset-loading system. It shows a placeholder while the image loads from the cache, then fades in.
-
-```tsx
-import { AssetImage } from '@doodle-engine/react';
-
-<AssetImage
-    src={snapshot.location.banner}
-    alt={snapshot.location.name}
-    className="location-banner"
-/>;
-```
-
-### Props
-
-Extends all standard `<img>` HTML attributes, plus:
-
-| Prop          | Type     | Default         | Description                           |
-| ------------- | -------- | --------------- | ------------------------------------- |
-| `src`         | `string` | required        | Asset path from snapshot              |
-| `placeholder` | `string` | transparent 1x1 | Shown while loading                   |
-| `fadeIn`      | `number` | `200`           | Fade-in duration in ms (0 to disable) |
-
-Asset paths from the snapshot are already resolved. Pass them directly.
 
 ## LoadingScreen
 
@@ -611,6 +622,31 @@ import { TitleScreen } from '@doodle-engine/react';
 | `onContinue`  | `() => void`             | required          | Continue handler                     |
 | `onSettings`  | `() => void`             | required          | Settings handler                     |
 | `className`   | `string`                 | `''`              | CSS class                            |
+
+## CreditsScreen
+
+Credits page with a heading, game title, Doodle Engine credit, and Back button.
+Pass `children` to replace the default credit content.
+
+```tsx
+import { CreditsScreen } from '@doodle-engine/react';
+
+<CreditsScreen
+    ui={snapshot.ui}
+    title="The Lantern at Greywater"
+    onBack={showTitle}
+/>;
+```
+
+### Props
+
+| Prop        | Type                     | Default  | Description                           |
+| ----------- | ------------------------ | -------- | ------------------------------------- |
+| `ui`        | `Record<string, string>` | required | Resolved UI strings                   |
+| `title`     | `string`                 | required | Game title in the default credits     |
+| `children`  | `ReactNode`              | —        | Custom content replacing the defaults |
+| `onBack`    | `() => void`             | required | Return handler                        |
+| `className` | `string`                 | `''`     | CSS class                             |
 
 ## PauseMenu
 

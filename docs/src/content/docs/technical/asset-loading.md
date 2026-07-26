@@ -30,6 +30,9 @@ The default loading screen is rendered with CSS, so it can appear before any med
 
 When loading finishes, the player selects **Start game** to continue. Use `GameShell`'s `renderLoading` prop to provide custom loading content, or `LoadingScreen`'s `renderProgress` prop to replace the default progress display.
 
+`PROJECT_ID` in the examples below is the stable ID exported by the generated
+`project.ts` file.
+
 ## Configuring Shell Assets
 
 Add a `shell:` section to your `content/game.yaml`:
@@ -130,7 +133,10 @@ The service worker is registered only by release builds. During development, `As
 
 Doodle’s default loader uses browser `fetch` and the browser Cache API. Web builds and desktop or mobile wrappers that display the web build through a local server can use it unchanged.
 
-Pass a custom `AssetLoader` when the application runs in a host that retrieves or caches media differently, or when a test needs to replace network loading. The loader must provide methods for loading one or many paths, reporting availability, returning a usable URL, and clearing its cache:
+Pass a custom `AssetLoader` when the application runs in a host that retrieves
+or caches media differently, or when a test needs to replace network loading.
+The loader must provide methods for loading one or many paths, reporting
+availability, and clearing its cache:
 
 ```tsx
 import type { AssetLoader } from '@doodle-engine/core';
@@ -143,8 +149,6 @@ const localLoader: AssetLoader = {
             onProgress?.(index + 1, paths.length, path)
         );
     },
-    getUrl: (path) => path,
-    prefetch: () => {},
     clear: async () => {},
 };
 
@@ -156,5 +160,3 @@ const localLoader: AssetLoader = {
     assetLoader={localLoader}
 />
 ```
-
-The `prefetch` method remains part of the loader interface for custom loading strategies. The default `AssetProvider` already loads the complete manifest before rendering the game, so normal Doodle projects do not need to call it.

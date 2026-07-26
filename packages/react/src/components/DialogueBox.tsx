@@ -3,7 +3,6 @@
  */
 
 import type { SnapshotDialogue } from '@doodle-engine/core';
-import { AssetImage } from './AssetImage';
 import { FormattedText } from './FormattedText';
 
 export interface DialogueBoxProps {
@@ -16,7 +15,7 @@ export function DialogueBox({ dialogue, className = '' }: DialogueBoxProps) {
         <div className={`dialogue-box ${className}`}>
             {dialogue.portrait && (
                 <div className="dialogue-portrait">
-                    <AssetImage
+                    <img
                         src={dialogue.portrait}
                         alt={dialogue.speakerName}
                     />

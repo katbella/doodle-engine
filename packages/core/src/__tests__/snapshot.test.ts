@@ -247,6 +247,26 @@ describe('Snapshot Builder', () => {
             expect(snapshot.player.name).toBe('Avery');
         });
 
+        it('builds a text-only interlude without a background', () => {
+            const state = {
+                ...createTestState(),
+                pendingInterlude: 'text_only',
+            };
+            const registry = createTestRegistry();
+            registry.interludes.text_only = {
+                id: 'text_only',
+                text: 'The room falls silent.',
+            };
+
+            const snapshot = buildSnapshot(state, registry);
+
+            expect(snapshot.pendingInterlude).toMatchObject({
+                id: 'text_only',
+                text: 'The room falls silent.',
+            });
+            expect(snapshot.pendingInterlude?.background).toBeUndefined();
+        });
+
         it('should resolve location localization', () => {
             const state = createTestState();
             const registry = createTestRegistry();

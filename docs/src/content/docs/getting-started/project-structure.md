@@ -71,10 +71,12 @@ Party](/guides/characters-and-party/#player-profile-and-party-sheets).
 
 ### game.yaml
 
-`game.yaml` sets the starting location, time, flags, variables, and inventory. Its required fields are:
+`game.yaml` must provide the starting location, time, flags, variables, and
+inventory. Set the optional `playerCreatesProfile` field to `true` when the
+built-in renderer should ask for the player's name, title, and biography:
 
 ```yaml
-playerCreatesProfile: true # Ask the player for profile text
+playerCreatesProfile: true # Ask for the player's name, title, and biography
 startLocation: tavern # Where the player begins
 startTime:
     day: 1

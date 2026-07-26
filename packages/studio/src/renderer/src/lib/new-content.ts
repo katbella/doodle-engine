@@ -103,7 +103,7 @@ export function templateForNewItem(
                 '',
             ].join('\n');
         case 'interludes':
-            return [`id: ${id}`, `background: ""`, `text: ""`, ''].join('\n');
+            return [`id: ${id}`, `text: ""`, ''].join('\n');
         case 'journal':
             return [
                 `id: ${id}`,

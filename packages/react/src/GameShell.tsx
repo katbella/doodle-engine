@@ -26,7 +26,6 @@ import { GameProvider } from './GameProvider';
 import { GameRenderer } from './GameRenderer';
 import { AssetProvider } from './AssetProvider';
 import { useAudioManager } from './hooks/useAudioManager';
-import { useAssetUrl } from './hooks/useAsset';
 import { useUISounds } from './hooks/useUISounds';
 import {
     AudioSettingsProvider,
@@ -298,9 +297,7 @@ function GameShellInner({
     // Title screen music
     const audioSettings = useAudioSettings();
     const titleMusicRef = useRef<HTMLAudioElement | null>(null);
-    const titleMusicPath = useAssetUrl(
-        resolveAssetPath(shell?.title?.music, 'music')
-    );
+    const titleMusicPath = resolveAssetPath(shell?.title?.music, 'music');
 
     useEffect(() => {
         if (screen !== 'title' || !titleMusicPath) return;

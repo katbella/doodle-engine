@@ -1,6 +1,6 @@
 ---
 title: React Hooks
-description: Reference for useGame and useAudioManager hooks.
+description: Reference for Doodle's React hooks and save-slot helpers.
 ---
 
 A React hook is a function that gives a component access to shared state or behavior. Doodle's hooks provide game state, player actions, audio, and input handling.
@@ -68,6 +68,38 @@ Each action calls the corresponding engine method and updates the snapshot:
 | `saveGame()`                   | Returns `SaveData` (doesn't update snapshot) |
 | `loadGame(saveData)`           | Restores state and updates snapshot          |
 | `dismissInterlude()`           | Clears a pending interlude from the snapshot |
+
+---
+
+## useAudioSettings
+
+Read and update the persistent volume settings from `AudioSettingsProvider`.
+
+```tsx
+import { useAudioSettings } from '@doodle-engine/react';
+
+function MusicVolume() {
+    const audio = useAudioSettings();
+
+    return (
+        <input
+            aria-label="Music volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={audio.musicVolume}
+            onChange={(event) =>
+                audio.setMusicVolume(Number(event.target.value))
+            }
+        />
+    );
+}
+```
+
+The returned object contains `masterVolume`, `musicVolume`, `soundVolume`, and
+`voiceVolume`, plus a setter for each value. The hook must be used inside
+`AudioSettingsProvider`.
 
 ---
 
@@ -335,3 +367,54 @@ function CustomInputBridge() {
     return null;
 }
 ```
+
+---
+
+## Save-slot helpers
+
+Use these helpers when a custom renderer needs its own save interface. Generate
+the storage key from the project's stable ID, then use that same key for every
+operation.
+
+```tsx
+import {
+    latestSave,
+    saveStorageKeyForProject,
+    useGame,
+    writeSave,
+} from '@doodle-engine/react';
+import { PROJECT_ID } from './project';
+
+function SaveButtons() {
+    const { actions } = useGame();
+    const saveKey = saveStorageKeyForProject(PROJECT_ID);
+
+    const save = () => {
+        writeSave(localStorage, saveKey, actions.saveGame(), 'manual');
+    };
+    const load = () => {
+        const savedGame = latestSave(localStorage, saveKey);
+        if (savedGame) actions.loadGame(savedGame);
+    };
+
+    return (
+        <>
+            <button onClick={save}>Save</button>
+            <button onClick={load}>Load latest</button>
+        </>
+    );
+}
+```
+
+| Helper                                           | Result                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------- |
+| `saveStorageKeyForProject(id)`                   | Validated storage key for one project                      |
+| `listSaves(storage, key)`                        | All quick, auto, and manual slots in display order         |
+| `hasSaves(storage, key)`                         | Whether at least one slot exists                           |
+| `writeSave(storage, key, save, kind?, options?)` | Written slot; quick and auto overwrite their existing kind |
+| `loadSave(storage, key, id)`                     | Saved game for one slot, or `null`                         |
+| `deleteSave(storage, key, id)`                   | Removes one slot                                           |
+| `latestSave(storage, key)`                       | Most recent saved game, or `null`                          |
+
+See [Save & Load](/guides/save-and-load/) for project isolation, slot behavior,
+and migration details.

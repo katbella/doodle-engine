@@ -268,7 +268,6 @@ const interlude: EntityForm = {
             name: 'background',
             label: 'Background',
             control: { kind: 'asset', category: 'banner' },
-            required: true,
         },
         {
             name: 'banner',
