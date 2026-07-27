@@ -148,7 +148,6 @@ describe('buildProject success', () => {
         const localAssetPaths = [...manifest.shell, ...manifest.game].map(
             (entry) => entry.path as string
         );
-        expect(localAssetPaths.length).toBeGreaterThan(0);
         expect(
             localAssetPaths.every((path) => path.startsWith('assets/'))
         ).toBe(true);

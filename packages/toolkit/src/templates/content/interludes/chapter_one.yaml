@@ -1,7 +1,6 @@
 id: chapter_one
-# Background image shown fullscreen during the interlude.
-# Replace with your own image in assets/images/.
-background: interlude_background.svg
+# Optional: background image shown fullscreen during the interlude.
+# background: assets/images/banners/chapter_one.jpg
 
 # Optional: decorative border/frame image overlaid on the background.
 # banner: assets/images/ui/chapter_frame.png

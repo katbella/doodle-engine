@@ -15,6 +15,7 @@ import { LocaleWriterBoundary } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
 import { ConditionList, EffectList } from './NodeEditor';
 import type { Condition, Effect } from '@doodle-engine/core';
+import { EditorLoading } from './EditorLoading';
 
 /**
  * Visual form for a YAML entity (character, location, item, quest, map,
@@ -169,12 +170,7 @@ function EntityFormInner({
     }, []);
 
     if (loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" />
-                Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (error || !form) {
         return (
@@ -190,7 +186,7 @@ function EntityFormInner({
     }
 
     return (
-        <div className="form scroll">
+        <div className="form entity-form scroll">
             {conflict && (
                 <div className="banner">
                     <TriangleAlert
@@ -753,7 +749,11 @@ function StageListEditor({
                     </div>
                 );
             })}
-            <button className="dlg__add" onClick={add}>
+            <button
+                type="button"
+                className="dlg__add entity-list-action"
+                onClick={add}
+            >
                 <Plus size={13} /> Add stage
             </button>
             {deleteIndex !== null && (
@@ -1041,7 +1041,11 @@ function MarkerListEditor({
                     </div>
                 );
             })}
-            <button className="dlg__add" onClick={add}>
+            <button
+                type="button"
+                className="dlg__add entity-list-action"
+                onClick={add}
+            >
                 <Plus size={13} /> Add marker
             </button>
         </div>

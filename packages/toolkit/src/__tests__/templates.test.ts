@@ -12,7 +12,6 @@ import chapterOneYaml from '../templates/content/interludes/chapter_one.yaml?raw
 import tavernYaml from '../templates/content/locations/tavern.yaml?raw';
 import marketYaml from '../templates/content/locations/market.yaml?raw';
 import townMapYaml from '../templates/content/maps/town.yaml?raw';
-import interludeBackgroundSvg from '../templates/assets/images/banners/interlude_background.svg?raw';
 import { getAvailableLocales } from '../templates/src/locale-options';
 
 const templateFiles = import.meta.glob('../templates/**/*', {
@@ -83,14 +82,10 @@ describe('scaffold templates', () => {
         expect(townMapYaml).toContain('- id: market');
     });
 
-    it('starter interlude references a bundled background asset', () => {
-        expect(chapterOneYaml).toContain(
-            'background: interlude_background.svg'
-        );
-        expect(chapterOneYaml).toContain(
-            'text: "@interlude.chapter_one.text"'
-        );
-        expect(interludeBackgroundSvg).toContain('<svg');
+    it('starter interlude leaves optional media unset', () => {
+        expect(chapterOneYaml).not.toMatch(/^background:/m);
+        expect(chapterOneYaml).not.toMatch(/^banner:/m);
+        expect(chapterOneYaml).toContain('text: "@interlude.chapter_one.text"');
     });
 
     it('bundles every active local media asset referenced by starter content', () => {
@@ -123,7 +118,7 @@ describe('scaffold templates', () => {
             }
         }
 
-        expect(assetRefs).toEqual(['interlude_background.svg']);
+        expect(assetRefs).toEqual([]);
         for (const ref of assetRefs) {
             const expectedPath = ref.startsWith('/assets/')
                 ? ref.slice(1)

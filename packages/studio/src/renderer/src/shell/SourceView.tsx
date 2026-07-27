@@ -7,6 +7,7 @@ import { languageForPath } from '../lib/monaco-setup';
 import type { NameCatalog } from '../lib/flag-vars';
 import { EMPTY_NAME_CATALOG } from '../lib/flag-vars';
 import { lineInMessage, quotedTokenInMessage } from '../lib/paths';
+import { EditorLoading } from './EditorLoading';
 
 const norm = (s: string) => s.replace(/\\/g, '/');
 
@@ -243,12 +244,7 @@ export function SourceView({
     }, [content, language, nameCatalog, project.registry]);
 
     if (loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" />
-                Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (error) {
         return <div className="editor__empty">{error}</div>;

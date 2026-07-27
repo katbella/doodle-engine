@@ -11,6 +11,7 @@ import { ResizeHandle } from './ResizeHandle';
 import { usePersistedSize } from '../lib/usePersistedSize';
 import { dialogueProblemTarget } from '../lib/paths';
 import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
+import { EditorLoading } from './EditorLoading';
 
 /**
  * Visual editor for a .dlg file. It parses the file into a dialogue, edits that
@@ -328,12 +329,7 @@ function DialogueEditorInner({
     };
 
     if (loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" />
-                Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (parseError || !dialogue) {
         return (
