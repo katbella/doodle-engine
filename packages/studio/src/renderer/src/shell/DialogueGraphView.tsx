@@ -5,6 +5,7 @@ import type { OpenProject } from '../../../shared/project';
 import { Pencil } from '../lib/icons';
 import { authoredTextPreview } from '../lib/localized-text';
 import { useLocaleWriter } from '../lib/locale-writer';
+import { EditorLoading } from './EditorLoading';
 import {
     edgePath,
     layoutDialogue,
@@ -245,12 +246,7 @@ export function DialogueGraphView({
     };
 
     if (loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" />
-                Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (parseError || !graph) {
         return (

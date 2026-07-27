@@ -7,6 +7,7 @@ import {
     useLocaleWriter,
 } from '../lib/locale-writer';
 import { ConfirmModal } from './ConfirmModal';
+import { EditorLoading } from './EditorLoading';
 
 interface LocaleEditorProps {
     project: OpenProject;
@@ -100,11 +101,7 @@ function LocaleEditorInner({
     };
 
     if (!file || file.loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" /> Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (file.error && !file.missing) {
         return (

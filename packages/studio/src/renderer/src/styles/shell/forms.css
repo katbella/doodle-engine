@@ -1,7 +1,7 @@
 /* ── Entity, Locale, and Project Forms ──────────────────────────── */
 
 /* Full width so the scrollbar sits at the region's right edge; the readable
-   640px column is centered with side padding that grows on wider regions. */
+   column is centered with side padding that grows on wider regions. */
 .form {
     min-height: 0;
     display: flex;
@@ -9,6 +9,14 @@
     gap: var(--space-4);
     width: 100%;
     padding: var(--space-4) max(var(--space-5), calc((100% - 640px) / 2));
+}
+
+.entity-form {
+    padding-inline: max(var(--space-5), calc((100% - 800px) / 2));
+}
+
+.entity-list-action {
+    align-self: flex-start;
 }
 
 .form__head {

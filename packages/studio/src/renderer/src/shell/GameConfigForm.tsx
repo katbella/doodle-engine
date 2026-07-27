@@ -7,6 +7,7 @@ import type { YamlEdit } from '../../../shared/project';
 import { AssetField } from './AssetField';
 import { NameAwareField } from './NameAwareField';
 import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
+import { EditorLoading } from './EditorLoading';
 
 /**
  * Form for game.yaml: starting state and shell media. Saves through writeEntity,
@@ -151,12 +152,7 @@ export function GameConfigForm({
     }, []);
 
     if (loading) {
-        return (
-            <div className="editor__empty">
-                <span className="spinner" />
-                Loading…
-            </div>
-        );
+        return <EditorLoading />;
     }
     if (error) {
         return (
