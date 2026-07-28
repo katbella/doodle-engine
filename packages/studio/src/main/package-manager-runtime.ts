@@ -74,11 +74,7 @@ export function parseEnvironmentPath(output: string): string | null {
     return path;
 }
 
-/**
- * Keep Studio-managed npm installs independent from the user's global npm
- * cache. The cache is disposable and belongs in the platform's per-user cache
- * location rather than Electron's configuration directory.
- */
+/** Return Studio's per-user npm cache path for this platform. */
 export function npmCachePath(
     platform: NodeJS.Platform,
     env: NodeJS.ProcessEnv,
