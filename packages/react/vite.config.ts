@@ -11,7 +11,11 @@ export default defineConfig({
             fileName: 'react',
         },
         rolldownOptions: {
-            external: ['react', 'react-dom', '@doodle-engine/core'],
+            external: [
+                /^react(?:\/.*)?$/,
+                /^react-dom(?:\/.*)?$/,
+                '@doodle-engine/core',
+            ],
         },
     },
     plugins: [
