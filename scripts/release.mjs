@@ -934,7 +934,7 @@ function verifyStudio(options) {
         platform === 'windows'
             ? `doodle-studio-${version}-setup.exe`
             : platform === 'mac'
-              ? `doodle-studio-${version}-arm64.dmg`
+              ? `doodle-studio-${version}-universal.dmg`
               : null;
     if (!expected) throw new Error(`Unknown Studio platform "${platform}".`);
     if (!files.includes(expected)) {
