@@ -1,10 +1,54 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+    npmCachePath,
     parseEnvironmentPath,
     resolveDependencyInstallRuntime,
 } from '../package-manager-runtime';
 
 describe('package manager runtime', () => {
+    it('uses each platform standard per-user cache location', () => {
+        expect(
+            npmCachePath('darwin', { HOME: '/Users/writer' }, '/Users/writer')
+        ).toBe('/Users/writer/Library/Caches/com.doodle-engine.studio/npm');
+        expect(
+            npmCachePath(
+                'win32',
+                {
+                    LOCALAPPDATA: 'C:\\Users\\writer\\AppData\\Local',
+                },
+                'C:\\Users\\writer'
+            )
+        ).toBe(
+            'C:\\Users\\writer\\AppData\\Local\\com.doodle-engine.studio\\npm'
+        );
+        expect(
+            npmCachePath(
+                'linux',
+                { XDG_CACHE_HOME: '/home/writer/.local/cache' },
+                '/home/writer'
+            )
+        ).toBe('/home/writer/.local/cache/com.doodle-engine.studio/npm');
+    });
+
+    it('ignores relative cache roots from the environment', () => {
+        expect(
+            npmCachePath(
+                'linux',
+                { XDG_CACHE_HOME: 'relative/cache' },
+                '/home/writer'
+            )
+        ).toBe('/home/writer/.cache/com.doodle-engine.studio/npm');
+        expect(
+            npmCachePath(
+                'win32',
+                { LOCALAPPDATA: 'relative\\cache' },
+                'C:\\Users\\writer'
+            )
+        ).toBe(
+            'C:\\Users\\writer\\AppData\\Local\\com.doodle-engine.studio\\npm'
+        );
+    });
+
     it('recovers PATH from noisy login-shell output', () => {
         expect(
             parseEnvironmentPath(
@@ -36,7 +80,9 @@ describe('package manager runtime', () => {
                     PATH: '/usr/bin:/bin',
                     SHELL: '/bin/zsh',
                     HOME: '/Users/writer',
+                    npm_config_cache: '/Users/writer/.npm',
                 },
+                homeDir: '/Users/writer',
                 runCommand,
             })
         ).resolves.toEqual({
@@ -47,6 +93,8 @@ describe('package manager runtime', () => {
                 PATH: '/Users/writer/.nvm/versions/node/v24.4.0/bin:/usr/bin',
                 SHELL: '/bin/zsh',
                 HOME: '/Users/writer',
+                npm_config_cache:
+                    '/Users/writer/Library/Caches/com.doodle-engine.studio/npm',
             },
             nodeVersion: 'v24.4.0',
         });
@@ -66,23 +114,26 @@ describe('package manager runtime', () => {
             }
         );
 
-        await expect(
-            resolveDependencyInstallRuntime('pnpm', {
-                platform: 'linux',
-                baseEnv: {
-                    PATH: '/usr/bin',
-                    SHELL: '/bin/bash',
-                    HOME: '/home/writer',
-                },
-                runCommand,
-            })
-        ).resolves.toMatchObject({
+        const result = await resolveDependencyInstallRuntime('pnpm', {
+            platform: 'linux',
+            baseEnv: {
+                PATH: '/usr/bin',
+                SHELL: '/bin/bash',
+                HOME: '/home/writer',
+            },
+            runCommand,
+        });
+
+        expect(result).toMatchObject({
             ok: true,
             command: 'pnpm',
             args: ['install'],
             env: { PATH: '/home/writer/.volta/bin:/usr/bin' },
             nodeVersion: 'v24.4.0',
         });
+        if (result.ok) {
+            expect(result.env).not.toHaveProperty('npm_config_cache');
+        }
     });
 
     it('runs Windows package-manager shims through cmd.exe', async () => {
@@ -99,13 +150,19 @@ describe('package manager runtime', () => {
                 baseEnv: {
                     PATH: 'C:\\Program Files\\nodejs',
                     ComSpec: 'C:\\Windows\\System32\\cmd.exe',
+                    LOCALAPPDATA: 'C:\\Users\\writer\\AppData\\Local',
                 },
+                homeDir: 'C:\\Users\\writer',
                 runCommand,
             })
         ).resolves.toMatchObject({
             ok: true,
             command: 'C:\\Windows\\System32\\cmd.exe',
             args: ['/d', '/s', '/c', 'npm', 'install'],
+            env: {
+                npm_config_cache:
+                    'C:\\Users\\writer\\AppData\\Local\\com.doodle-engine.studio\\npm',
+            },
             nodeVersion: 'v24.4.0',
         });
         expect(runCommand).toHaveBeenCalledTimes(2);
