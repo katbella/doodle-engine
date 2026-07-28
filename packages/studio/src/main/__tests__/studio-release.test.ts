@@ -161,14 +161,15 @@ describe('selectStudioUpdate', () => {
             release(studioTag('0.3.0'), {
                 assets: [
                     installer('doodle-studio-0.3.0-setup.exe'),
-                    installer('doodle-studio-0.3.0-arm64.dmg'),
+                    installer('doodle-studio-0.3.0-universal.dmg'),
                 ],
             }),
         ];
         expect(selectStudioUpdate(releases, '0.2.0', 'mac')).toEqual({
             version: '0.3.0',
             releaseNotes: null,
-            downloadUrl: 'https://downloads.test/doodle-studio-0.3.0-arm64.dmg',
+            downloadUrl:
+                'https://downloads.test/doodle-studio-0.3.0-universal.dmg',
         });
     });
 
@@ -204,7 +205,7 @@ describe('selectStudioUpdate', () => {
                 assets: [installer('doodle-studio-setup.exe')],
             }),
             release(studioTag('0.8.0'), {
-                assets: [installer('doodle-studio-0.8.0-arm64.dmg')],
+                assets: [installer('doodle-studio-0.8.0-universal.dmg')],
             }),
         ];
         expect(selectStudioUpdate(releases, '0.2.0', 'windows')).toBeNull();
@@ -213,7 +214,7 @@ describe('selectStudioUpdate', () => {
     it('ignores a release that is missing this platform installer', () => {
         const releases = [
             release(studioTag('0.5.0'), {
-                assets: [installer('doodle-studio-0.5.0-arm64.dmg')],
+                assets: [installer('doodle-studio-0.5.0-universal.dmg')],
             }),
         ];
         expect(selectStudioUpdate(releases, '0.2.0', 'windows')).toBeNull();
