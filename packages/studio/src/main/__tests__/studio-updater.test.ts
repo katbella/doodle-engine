@@ -204,7 +204,7 @@ describe('StudioUpdater', () => {
     it('offers the DMG on macOS', async () => {
         const { updater, states } = makeUpdater(
             async () => [
-                studioRelease('0.3.0', 'doodle-studio-0.3.0-universal.dmg'),
+                studioRelease('0.3.0', 'doodle-studio-0.3.0-arm64.dmg'),
             ],
             'darwin'
         );
