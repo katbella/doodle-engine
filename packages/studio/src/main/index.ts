@@ -29,6 +29,7 @@ import { WatchService } from './watch-service';
 import { readEngineInfo } from './engine-info';
 import { pinDoodlePackages } from './engine-update';
 import { detectPackageManager } from './package-manager';
+import { resolveDependencyInstallRuntime } from './package-manager-runtime';
 import type { YamlEdit } from '@doodle-engine/toolkit';
 import type {
     InstallResult,
@@ -342,19 +343,24 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
         sendToRenderer('install:log', projectDir, line);
     const packageManager = await detectPackageManager(projectDir);
     send(`Installing dependencies with ${packageManager}…`);
+    const runtime = await resolveDependencyInstallRuntime(packageManager);
+    if (!runtime.ok) {
+        send(`✗ ${runtime.message}`);
+        return { ok: false, packageManager };
+    }
+    send(`Using Node.js ${runtime.nodeVersion}.`);
 
     return new Promise((resolve) => {
-        const command =
-            process.platform === 'win32'
-                ? (process.env.ComSpec ?? 'cmd.exe')
-                : packageManager;
-        const args =
-            process.platform === 'win32'
-                ? ['/d', '/s', '/c', packageManager, 'install']
-                : ['install'];
-        const child = spawn(command, args, {
+        const child = spawn(runtime.command, runtime.args, {
             cwd: projectDir,
+            env: runtime.env,
         });
+        let settled = false;
+        const finish = (ok: boolean) => {
+            if (settled) return;
+            settled = true;
+            resolve({ ok, packageManager });
+        };
         const forward = (chunk: Buffer) => {
             const text = chunk.toString().replace(/\s+$/, '');
             if (text) send(text);
@@ -362,16 +368,20 @@ async function installDependencies(projectDir: string): Promise<InstallResult> {
         child.stdout?.on('data', forward);
         child.stderr?.on('data', forward);
         child.on('error', (error) => {
-            send(`Could not run ${packageManager}: ${error.message}`);
-            resolve({ ok: false, packageManager });
+            if (settled) return;
+            send(
+                `✗ Doodle Studio could not start ${packageManager}: ${error.message}`
+            );
+            finish(false);
         });
         child.on('close', (code) => {
+            if (settled) return;
             send(
                 code === 0
                     ? '✓ Dependencies installed.'
                     : `✗ Install failed (exit code ${code}).`
             );
-            resolve({ ok: code === 0, packageManager });
+            finish(code === 0);
         });
     });
 }

@@ -100,6 +100,8 @@ const state = vi.hoisted(() => {
     const readEngineInfo = vi.fn();
     const pinDoodlePackages = vi.fn();
     const detectPackageManager = vi.fn();
+    const resolveDependencyInstallRuntime = vi.fn();
+    const installEnv = { PATH: '/test/bin:/usr/bin' };
     const syncThemeMenuChecks = vi.fn();
     const createThemeMenu = vi.fn(() => ({ label: 'Themes' }));
     const errorLog = {
@@ -202,6 +204,7 @@ const state = vi.hoisted(() => {
             readEngineInfo,
             pinDoodlePackages,
             detectPackageManager,
+            resolveDependencyInstallRuntime,
             syncThemeMenuChecks,
             createThemeMenu,
             ErrorLog,
@@ -252,6 +255,19 @@ const state = vi.hoisted(() => {
             '@doodle-engine/cli',
         ]);
         detectPackageManager.mockResolvedValue('yarn');
+        resolveDependencyInstallRuntime.mockResolvedValue({
+            ok: true,
+            command:
+                process.platform === 'win32'
+                    ? (process.env.ComSpec ?? 'cmd.exe')
+                    : 'yarn',
+            args:
+                process.platform === 'win32'
+                    ? ['/d', '/s', '/c', 'yarn', 'install']
+                    : ['install'],
+            env: installEnv,
+            nodeVersion: '24.0.0',
+        });
         shell.openPath.mockResolvedValue('');
         showOpenDialog.mockResolvedValue({ canceled: true, filePaths: [] });
         createThemeMenu.mockReturnValue({ label: 'Themes' });
@@ -307,6 +323,8 @@ const state = vi.hoisted(() => {
         readEngineInfo,
         pinDoodlePackages,
         detectPackageManager,
+        resolveDependencyInstallRuntime,
+        installEnv,
         syncThemeMenuChecks,
         createThemeMenu,
         ErrorLog,
@@ -378,6 +396,9 @@ vi.mock('../engine-update', () => ({
 }));
 vi.mock('../package-manager', () => ({
     detectPackageManager: state.detectPackageManager,
+}));
+vi.mock('../package-manager-runtime', () => ({
+    resolveDependencyInstallRuntime: state.resolveDependencyInstallRuntime,
 }));
 vi.mock('../theme-menu', () => ({
     createThemeMenu: state.createThemeMenu,
@@ -839,6 +860,9 @@ describe('Studio main process', () => {
             'C:/games/story'
         );
         await vi.waitFor(() => expect(state.spawned).toHaveLength(1));
+        expect(state.resolveDependencyInstallRuntime).toHaveBeenCalledWith(
+            'yarn'
+        );
         expect(state.spawn).toHaveBeenNthCalledWith(
             1,
             process.platform === 'win32'
@@ -847,7 +871,7 @@ describe('Studio main process', () => {
             process.platform === 'win32'
                 ? ['/d', '/s', '/c', 'yarn', 'install']
                 : ['install'],
-            { cwd: 'C:/games/story' }
+            { cwd: 'C:/games/story', env: state.installEnv }
         );
         const child = state.spawned[0];
         child.emitStdout('resolved packages\n');
@@ -864,10 +888,18 @@ describe('Studio main process', () => {
         );
         await vi.waitFor(() => expect(state.spawned).toHaveLength(2));
         state.spawned[1].emit('error', new Error('not found'));
+        state.spawned[1].emit('close', -2);
         await expect(failedInstall).resolves.toEqual({
             ok: false,
             packageManager: 'yarn',
         });
+        const installLines = state.webContents.send.mock.calls
+            .filter(([channel]) => channel === 'install:log')
+            .map(([, , line]) => line);
+        expect(installLines).toContain(
+            '✗ Doodle Studio could not start yarn: not found'
+        );
+        expect(installLines).not.toContain('✗ Install failed (exit code -2).');
 
         const update = state.ipcHandlers.get('project:updateEngine')?.(
             {},
@@ -935,5 +967,27 @@ describe('Studio main process', () => {
         stoppedPreview.emit('message', { type: 'stopped' });
         stoppedPreview.emit('exit');
         await expect(stopped).resolves.toBeNull();
+    });
+
+    it('reports a missing dependency toolchain without spawning an install', async () => {
+        await boot();
+        state.resolveDependencyInstallRuntime.mockResolvedValueOnce({
+            ok: false,
+            message:
+                'Doodle Studio could not find Node.js. Install Node.js 24 or newer, then reopen Doodle Studio.',
+        });
+
+        await expect(
+            state.ipcHandlers.get('project:installDeps')?.({}, 'C:/games/story')
+        ).resolves.toEqual({
+            ok: false,
+            packageManager: 'yarn',
+        });
+        expect(state.spawn).not.toHaveBeenCalled();
+        expect(state.webContents.send).toHaveBeenCalledWith(
+            'install:log',
+            'C:/games/story',
+            '✗ Doodle Studio could not find Node.js. Install Node.js 24 or newer, then reopen Doodle Studio.'
+        );
     });
 });
