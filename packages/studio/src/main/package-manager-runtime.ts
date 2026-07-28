@@ -1,9 +1,11 @@
 import { execFile } from 'node:child_process';
-import { isAbsolute } from 'node:path';
+import { homedir } from 'node:os';
+import { isAbsolute, posix, win32 } from 'node:path';
 import type { PackageManager } from './package-manager';
 
 const REQUIRED_NODE_MAJOR = 24;
 const COMMAND_TIMEOUT_MS = 5_000;
+const STUDIO_CACHE_DIRECTORY = 'com.doodle-engine.studio';
 
 type CommandRunner = (
     command: string,
@@ -27,6 +29,7 @@ export interface DependencyInstallRuntimeError {
 interface RuntimeOptions {
     platform?: NodeJS.Platform;
     baseEnv?: NodeJS.ProcessEnv;
+    homeDir?: string;
     runCommand?: CommandRunner;
 }
 
@@ -69,6 +72,37 @@ export function parseEnvironmentPath(output: string): string | null {
         if (line.startsWith('PATH=')) path = line.slice('PATH='.length);
     }
     return path;
+}
+
+/** Return Studio's per-user npm cache path for this platform. */
+export function npmCachePath(
+    platform: NodeJS.Platform,
+    env: NodeJS.ProcessEnv,
+    homeDir: string
+): string {
+    if (platform === 'win32') {
+        const root =
+            env.LOCALAPPDATA && win32.isAbsolute(env.LOCALAPPDATA)
+                ? env.LOCALAPPDATA
+                : win32.join(homeDir, 'AppData', 'Local');
+        return win32.join(root, STUDIO_CACHE_DIRECTORY, 'npm');
+    }
+
+    if (platform === 'darwin') {
+        return posix.join(
+            homeDir,
+            'Library',
+            'Caches',
+            STUDIO_CACHE_DIRECTORY,
+            'npm'
+        );
+    }
+
+    const root =
+        env.XDG_CACHE_HOME && posix.isAbsolute(env.XDG_CACHE_HOME)
+            ? env.XDG_CACHE_HOME
+            : posix.join(homeDir, '.cache');
+    return posix.join(root, STUDIO_CACHE_DIRECTORY, 'npm');
 }
 
 async function unixLoginEnvironment(
@@ -178,12 +212,24 @@ export async function resolveDependencyInstallRuntime(
         };
     }
 
+    const installEnv =
+        packageManager === 'npm'
+            ? {
+                  ...env,
+                  npm_config_cache: npmCachePath(
+                      platform,
+                      env,
+                      options.homeDir ?? homedir()
+                  ),
+              }
+            : env;
+
     if (platform === 'win32') {
         return {
             ok: true,
             command: env.ComSpec ?? 'cmd.exe',
             args: ['/d', '/s', '/c', packageManager, 'install'],
-            env,
+            env: installEnv,
             nodeVersion,
         };
     }
@@ -191,7 +237,7 @@ export async function resolveDependencyInstallRuntime(
         ok: true,
         command: packageManager,
         args: ['install'],
-        env,
+        env: installEnv,
         nodeVersion,
     };
 }
