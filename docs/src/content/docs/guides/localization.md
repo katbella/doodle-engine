@@ -5,7 +5,7 @@ description: How to localize your game with the @key system.
 
 Doodle Engine can display text directly or look it up through a localization key. Write text directly while working in one language. When you are ready to translate the game, use `@key` references to connect player-facing text to locale files.
 
-For visual editing, see [Localization in Studio](/studio/localization/). This guide explains the files and renderer APIs behind it.
+For visual editing, see [Localization in Studio](/studio/localization/). This guide explains the files and renderer APIs behind it: locale files, `@key` references, how resolution works, and how to translate the built-in interface. Localizing is incremental, so direct text and `@key` references can coexist in one project while you convert it.
 
 ## Locale Files
 

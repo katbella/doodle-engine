@@ -3,20 +3,22 @@ title: Adding Locations
 description: How to create locations and connect them with maps.
 ---
 
-Locations are the places in your game world. Players travel between them using the map.
+Locations are the places in your game world. Players travel between them using the map. This guide covers defining a location, connecting locations with a map, narrating first visits, and moving the player and characters around, all by editing project files. In Doodle Studio, the same fields appear in the visual editor when you select a location in the project rail.
 
 ## Defining a Location
 
-Create `content/locations/tavern.yaml`:
+Each location is one YAML file in `content/locations/`. The starter project ships two, `tavern.yaml` and `market.yaml`. This is `content/locations/tavern.yaml`:
 
 ```yaml
 id: tavern
-name: The Salty Dog
-description: A warm tavern overlooking the harbor.
-banner: tavern.png
-music: tavern_ambience.ogg
-ambient: fireplace.ogg
+name: "The Salty Dog"
+description: "A dimly lit tavern smelling of salt and stale ale. Candles flicker on rough wooden tables, and the murmur of conversation fills the air."
+banner: ""
+music: ""
+ambient: ""
 ```
+
+The `banner`, `music`, and `ambient` fields name files in the project's `assets/` folders. The starter locations leave them empty, and you can too while you write. To add a new location, create another YAML file in the same folder with its own `id`.
 
 | Field         | Description                                                       |
 | ------------- | ----------------------------------------------------------------- |
@@ -29,21 +31,23 @@ ambient: fireplace.ogg
 
 ## Creating a Map
 
-Maps connect locations and let players travel between them. Create `content/maps/town.yaml`:
+Maps connect locations and let players travel between them. The starter project's `content/maps/town.yaml` connects its two locations:
 
 ```yaml
 id: town
-name: Harbor Town
-image: town_map.png
+name: "Town"
+image: ""
 scale: 100
 locations:
     - id: tavern
-      x: 200
-      y: 350
-    - id: market
-      x: 500
+      x: 100
       y: 200
+    - id: market
+      x: 300
+      y: 150
 ```
+
+To add your new location to the map, append it to `locations` with its own coordinates. To give the map a background, place an image in `assets/images/maps/` and set `image` to its filename, such as `image: town_map.png`.
 
 | Field       | Description                                                     |
 | ----------- | --------------------------------------------------------------- |
@@ -67,14 +71,15 @@ To calculate your scale: divide your map's width in pixels by how many hours you
 
 **Formula**: `travel time = distance in pixels / scale`
 
-Minimum travel time is always 1 hour, regardless of scale.
+:::note
+Travel always takes at least 1 hour, regardless of scale. Two markers placed close together still cost the player an hour of game time.
+:::
 
 ## Location Intro Dialogues
 
-Use triggered dialogues to narrate a location's first visit:
+Use triggered dialogues to narrate a location's first visit, the way the starter project's `content/dialogues/tavern_intro.dlg` does:
 
 ```text
-# content/dialogues/tavern_intro.dlg
 TRIGGER tavern
 REQUIRE notFlag seenTavernIntro
 
@@ -131,3 +136,9 @@ SET characterLocation merchant market
 ```
 
 This assigns the `merchant` character to the `market` location. If the merchant was previously at the tavern, the merchant will disappear from the tavern and become available at the market. Only characters assigned to the player's current location appear in the `charactersHere` list.
+
+## Check Your Work
+
+Run `npm run validate`, or select **Validate** in Studio. It confirms that map markers point at existing locations, that no location sits on two maps, and that `startLocation` and travel references resolve. Then open the game and travel: the new location should appear on the map, cost travel time, and run any triggered dialogue on arrival.
+
+Next, give the place inhabitants with [Characters & Party](/guides/characters-and-party/), or set its mood with [Audio](/guides/audio/).

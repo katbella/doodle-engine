@@ -5,6 +5,8 @@ description: How player actions update game state and produce snapshots.
 
 Doodle Engine follows a one-way data flow pattern: **player actions go in, engine state updates, and a snapshot comes out**.
 
+You can write a complete game without reading this page. It is here for when you customize the renderer, debug surprising state, or want to know what the engine is doing underneath, and the [Glossary](/reference/glossary/) defines each term used below.
+
 ## Overview
 
 1. The **player** performs an action (talk to character, select choice, travel)

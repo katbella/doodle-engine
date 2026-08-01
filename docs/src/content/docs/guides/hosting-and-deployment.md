@@ -3,7 +3,9 @@ title: Hosting & Deployment
 description: How to build and deploy your Doodle Engine game.
 ---
 
-Doodle Engine games are web applications. A production build contains static HTML, CSS, and JavaScript that can be published on a static web host.
+Doodle Engine games are web applications. A production build contains static HTML, CSS, and JavaScript that can be published on a static web host, with no server-side software to run. This guide takes a finished project from build to publish; the only prerequisites are a project that passes validation and, for the wrapper sections, the toolchain of whichever wrapper you choose.
+
+Studio users can produce the same `dist/` output with the **Build** button; see [Validate, Preview, and Build](/studio/validation-builds/#build-for-production). Everything after the build step is identical for both workflows.
 
 ## Building for Production
 
@@ -43,7 +45,11 @@ The build output is fully static. Upload the `dist/` folder to any static host. 
 
 ## Desktop Packaging
 
-Doodle Engine games can be packaged as desktop applications with a web-to-desktop wrapper. Configure the wrapper to serve `dist/` through a small local HTTP server. Opening `index.html` directly through a `file://` address prevents the browser from loading the game's content.
+Doodle Engine games can be packaged as desktop applications with a web-to-desktop wrapper.
+
+:::caution
+Configure the wrapper to serve `dist/` through a small local HTTP server. Opening `index.html` directly through a `file://` address prevents the browser from loading the game's content, so the game appears broken even though the build is fine.
+:::
 
 **[Electron](https://www.electronjs.org/)**: runs your game in a desktop window powered by Chromium, the browser engine used by Chrome:
 
@@ -68,3 +74,7 @@ Most tools in this space (such as Capacitor or Cordova-based solutions) follow a
 3. Build and sign for iOS or Android through the wrapper's toolchain
 
 Check the documentation for whichever tool you choose, as setup steps and platform requirements vary.
+
+## Check the Build Before Uploading
+
+Run `npm run preview` after building. It serves the actual `dist/` folder locally, so what you see is what the host will serve, including the content and manifest endpoints. Play far enough to confirm assets load and a save works, then upload. If the hosted game misbehaves in ways the preview did not, the difference is almost always host configuration rather than the build.

@@ -76,7 +76,7 @@ For more, see [Customizing Doodle Engine](https://doodleengine.dev/guides/custom
 ## Quick Start
 
 ```bash
-npx @doodle-engine/cli create my-game
+npx doodle-engine create my-game
 cd my-game
 npm install
 npm run dev

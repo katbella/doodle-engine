@@ -5,6 +5,8 @@ description: How to organize and use images, audio, and video in your game.
 
 Doodle Engine games can include images, audio, and video. The development server loads these files while you work, and production builds include them with the finished game.
 
+The system rests on one convention: put each file in the folder for its media type, then write only its filename in the matching content field. This page explains that convention, the recommended formats, and the escape hatches for files outside it. Studio users can let the app do the filing: [Assets in Studio](/studio/assets/) imports a file and fills in the field in one step.
+
 ## Project Structure
 
 New projects include these asset directories:

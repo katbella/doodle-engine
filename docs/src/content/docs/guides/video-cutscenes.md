@@ -3,7 +3,7 @@ title: Video & Cutscenes
 description: How to add fullscreen video cutscenes to your game.
 ---
 
-Doodle Engine supports fullscreen video cutscenes triggered from dialogue. Videos play as an overlay and can be skipped by the player.
+Doodle Engine supports fullscreen video cutscenes triggered from dialogue. Videos play as an overlay and can be skipped by the player. With the default renderer this needs only two things: a video file in `assets/video/` and a `VIDEO` line in a dialogue. The custom renderer section applies only if you have replaced `GameShell`.
 
 ## Adding a Video
 
@@ -135,3 +135,7 @@ NODE quest_complete
     GOTO farewell
   END
 ```
+
+## Check Your Work
+
+Reach the node in play: the video should cover the screen, then return you to the dialogue underneath when it ends or is skipped. If nothing plays, confirm the file is in `assets/video/` under exactly the name the `VIDEO` line uses; a missing file also fails `npm run build`. Large videos are usually the heaviest files in a game, so the [compression advice](/guides/assets-and-media/#compression-tips) in Assets & Media matters most here.

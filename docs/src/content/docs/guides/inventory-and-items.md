@@ -3,21 +3,23 @@ title: Inventory & Items
 description: How to define items and manage inventory through dialogue effects.
 ---
 
-Items are defined in YAML. Place them in the starting inventory, give them to the player through story events, or move them between characters and locations.
+Items are defined in YAML. Place them in the starting inventory, give them to the player through story events, or move them between characters and locations. This guide covers the item file, the effects that move items around, and the conditions that check for them. In Doodle Studio, items are edited under **Items** in the project rail.
 
 ## Defining an Item
 
-Create `content/items/old_coin.yaml`:
+Each item is one YAML file in `content/items/`. The starter project ships this one as `content/items/old_coin.yaml`:
 
 ```yaml
 id: old_coin
-name: Old Coin
-description: A salt-stained coin stamped with an unfamiliar crest.
-icon: old_coin_icon.png
-image: old_coin.png
-location: inventory
+name: "Old Coin"
+description: "A tarnished coin with strange markings. It doesn't match any currency you've seen before."
+icon: ""
+image: ""
+location: tavern
 stats: {}
 ```
+
+The starter coin begins at the tavern and is handed to the player during dialogue. An item that should already be in the player's pockets uses `location: inventory` instead, and `icon` and `image` name files in `assets/images/items/` when the item has artwork.
 
 | Field         | Description                                                        |
 | ------------- | ------------------------------------------------------------------ |
@@ -50,6 +52,10 @@ CHOICE Sell the old coin.
   GOTO trade_complete
 END
 ```
+
+:::note
+`REMOVE item` takes the item out of the game entirely, not just out of the inventory. Afterward, `hasItem` and `itemAt` are both false for it. To put an item somewhere instead, use `MOVE item`.
+:::
 
 ## Moving Items
 
@@ -106,3 +112,9 @@ interface SnapshotItem {
     stats: Record<string, unknown>;
 }
 ```
+
+## Check Your Work
+
+Run `npm run validate`, or select **Validate** in Studio. It confirms each item's `location` is `inventory`, an existing location, or an existing character, and that every `ADD`, `REMOVE`, `MOVE`, and `hasItem` names a real item. Then earn the item in play and open the Inventory panel to see its name and description; Studio's [Playtest](/studio/playtesting/) can add and remove items directly when you want to test a branch without earning them first.
+
+Items usually gate story with `hasItem`, so [Writing Dialogues](/guides/writing-dialogues/) covers where those checks go. To give items artwork, see [Assets & Media](/guides/assets-and-media/).

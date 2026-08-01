@@ -3,8 +3,6 @@ title: Why Doodle Engine
 description: When to use Doodle Engine and what problems it solves.
 ---
 
-## The Idea Behind Doodle Engine
-
 Doodle Engine is for story-rich games built around dialogue, exploration, and a world that remembers what the player has done. It supports traditional text adventures and games with the hallmarks of a classic computer RPG.
 
 It takes inspiration from the Infinity Engine games of the late 1990s and early 2000s, especially *Baldur's Gate*, *Icewind Dale*, and *Planescape: Torment*. In those games, story is closely tied to game state. Conversations respond to the world and change it in return, allowing dialogue, exploration, and player choices to shape one another.
@@ -21,12 +19,13 @@ Stories matter in games. When the story and game world are connected, player cho
 
 ## Design Philosophy
 
-Doodle Engine follows four practical principles:
+Narrative and game systems belong together. Dialogue reads and changes the same state as the rest of the game, so a conversation can depend on where the player has been and change what happens next.
 
-- **Narrative and game systems belong together.** Dialogue reads and changes the same state as the rest of the game.
-- **Content should be approachable.** Doodle Studio provides visual authoring and playtesting, and the project remains in readable files for direct editing and version control.
-- **Projects should start with useful defaults.** A new project includes a playable shell and established patterns for content, saving, and validation. Each part can evolve with the game.
-- **Presentation should stay flexible.** The engine keeps game state separate from the interface. You can use the built-in React renderer, customize it, or create your own.
+Content should be approachable. Doodle Studio provides visual authoring and playtesting, and the project stays in readable files the whole time, so direct editing and version control always work.
+
+A new project starts with useful defaults: a playable shell, established patterns for content and saving, and validation from the first minute. Each part can evolve with the game.
+
+Presentation stays flexible because the engine keeps game state separate from the interface. Use the built-in React renderer, restyle it, or replace it entirely.
 
 ## Comparison to Other Tools
 
@@ -46,28 +45,12 @@ Twine, Ink, Ren'Py, and Doodle Engine can all be used to make branching narrativ
 
 ## When to Use Doodle Engine
 
-Doodle Engine is a good fit when:
+Doodle Engine is a good fit when dialogue, exploration, and player choice are the heart of your game, and conversations need to reflect and change a persistent world. It gives you the structure of a classic RPG without building around real-time movement or combat, lets you combine text with rich visuals, music, voice, and video, and leaves the interface and presentation under your control. Games release on web, desktop, or mobile.
 
-- Dialogue, exploration, and player choice are central to the game
-- Conversations need to reflect and change a persistent world
-- You want the structure of a classic RPG without building the game around real-time movement or combat
-- You want to combine text with rich visuals, music, voice, and video
-- You want a visual workspace for building and playtesting the game
-- You want control over the game's interface and visual presentation
-- You plan to release the game on web, desktop, or mobile
-
-Another engine may fit better when:
-
-- You need **real-time combat**, **pathfinding**, or **physics**
-- You are building a **visual novel** centered on character sprites and scene composition
-- You want a **pure hypertext** tool with minimal structure
+Another engine may fit better if you need real-time combat, pathfinding, or physics; if you are building a visual novel centered on character sprites and scene composition; or if you want a pure hypertext tool with minimal structure.
 
 ## Who Is It For
 
-Doodle supports solo creators working across several disciplines and teams whose members contribute different parts of the game.
+Doodle works for solo creators wearing several hats and for teams where each person contributes a different part. Writers and narrative designers create the dialogue, characters, quests, and branching stories. Game designers shape locations, progression, inventory, relationships, and world state. Programmers extend the game and its presentation with TypeScript and web technologies, while artists and audio creators supply the portraits, backgrounds, music, voice, and video the game uses. The readable project structure also makes it a practical teaching tool for narrative game development.
 
-- **Writers and narrative designers** can create dialogue, characters, quests, and branching stories.
-- **Game designers** can shape locations, progression, inventory, relationships, and world state.
-- **Programmers** can extend the game and its presentation with TypeScript and web technologies.
-- **Visual artists and audio creators** can provide the portraits, backgrounds, music, voice, sound, and video used by the game.
-- **Educators and students** can use the project structure to teach or learn narrative game development.
+Ready to try it? [Studio or CLI?](/getting-started/studio-or-cli/) helps you pick a way of working, and [Installation](/getting-started/installation/) gets you to a running game.

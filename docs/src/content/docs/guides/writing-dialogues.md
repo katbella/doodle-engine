@@ -3,63 +3,13 @@ title: Writing Dialogues
 description: How to write branching dialogue scripts with the .dlg DSL.
 ---
 
-Dialogues are written in `.dlg` files using a DSL (domain-specific language), a small scripting format made for branching conversations. Keywords such as `NODE`, `CHOICE`, `GOTO`, and `SET` describe how the conversation flows. Place dialogue files in `content/dialogues/`.
+This guide teaches you to write a branching conversation in a `.dlg` file: nodes, choices, conditions, effects, and the routes between them. You need a project and a way to run it, either `npm run dev` in a terminal or Studio's Playtest. Doodle Studio users can write the same files in Source mode, or use the visual node editor described in [Dialogue Editing in Studio](/studio/dialogues/).
 
-## Write Text Directly
-
-Write dialogue and choice text as ordinary sentences:
-
-```text
-BARTENDER: Hello there.
-CHOICE Ask about the locked room.
-```
-
-Most punctuation can be used directly. Put quotation marks around text containing `#` because an unquoted `#` begins a comment:
-
-```text
-BARTENDER: "Room #3, second door."
-```
-
-To keep a paragraph break inside one dialogue entry, wrap the entry in quotation marks and continue it on the following lines:
-
-```text
-BARTENDER: "I've been having a good time.
-
-It's been 84 years."
-```
-
-The full entry appears before the player continues or chooses a response. Single-line dialogue does not need quotation marks.
-
-Speaker lines, narrator lines, choices, and notifications all accept plain text. IDs and effect arguments use letters, numbers, and underscores, as in `bartender`, `heardRumors`, and `odd_jobs`. See [Localization](/guides/localization/) when you are ready to replace displayed text with `@keys` for another language.
-
-Here is a complete example using plain text:
-
-```text
-NODE start
-  BARTENDER: Well, well. A new face. What brings you to the Salty Dog?
-
-  CHOICE Any news around town?
-    SET flag heardRumors
-    ADD relationship bartender 1
-    GOTO rumors
-  END
-
-  CHOICE Nothing. Just passing through.
-    GOTO farewell
-  END
-
-NODE rumors
-  BARTENDER: Word is the merchant at the market square is looking for help. Pays well, too.
-  GOTO farewell
-
-NODE farewell
-  BARTENDER: Safe travels.
-  END dialogue
-```
+Dialogues are written in a DSL (domain-specific language), a small scripting format made for branching conversations. Keywords such as `NODE`, `CHOICE`, `GOTO`, and `SET` describe how the conversation flows. Dialogue files live in `content/dialogues/`, and each file's name becomes its dialogue ID: `bartender_greeting.dlg` is the dialogue `bartender_greeting`.
 
 ## Basic Structure
 
-A dialogue is a graph: a set of connected **nodes**. A node can show one character or narrator line, offer choices for the player, apply effects, and route to another node:
+A dialogue is a graph: a set of connected **nodes**. A node is one moment in the conversation. It can show one character or narrator line, offer choices, apply effects, and route onward. The first `NODE` in the file is where the conversation starts.
 
 ```text
 NODE start
@@ -82,20 +32,46 @@ NODE farewell
   END dialogue
 ```
 
-### Key Rules
+A few keywords carry this whole example. `BARTENDER:` is a speaker line; the name before the colon is matched to a character ID, case-insensitively. `CHOICE` starts an option the player can pick, and `END` closes it. `GOTO` routes to another node. `END dialogue` closes the conversation, while a bare `END` only closes a `CHOICE` or `IF` block.
 
-- The first `NODE` is the start node
-- `SPEAKER:` lines set who's talking (matched to character ID, case-insensitive)
-- Each node has **one** speaker line; to let another character speak, route to another node
-- A quoted speaker line can span several lines while remaining one dialogue entry
-- `NARRATOR:` lines have no speaker and are used for descriptions
-- `GOTO` routes to another node
-- `END dialogue` closes the conversation
-- `END` (without `dialogue`) closes a CHOICE or IF block
-- A node with text but no choices shows a **Continue** button, or **End Dialogue** when advancing will close the conversation.
-- A node with no text and no choices is a **silent processing node** that auto-advances instantly
+Each node holds one speaker line. To let another character answer, route to a new node where that character speaks; that is how a conversation moves between speakers. For text with no speaker, use `NARRATOR:`.
 
-## Conditions on Choices
+What the player sees depends on what the node contains. A node with choices shows them as buttons. A node with text but no choices shows a **Continue** button, or **End Dialogue** when continuing would close the conversation. A node with no text and no choices is a silent processing node: the engine applies its effects and advances instantly, which is useful for dice rolls and hidden branching.
+
+## Write Text Directly
+
+Write dialogue and choice text as ordinary sentences:
+
+```text
+BARTENDER: Hello there.
+CHOICE Ask about the locked room.
+```
+
+Most punctuation works as-is, including colons inside the line. The one character to watch is `#`.
+
+:::caution
+An unquoted `#` starts a comment, so everything after it disappears from the line. Put quotation marks around text that needs a literal `#`:
+
+```text
+BARTENDER: "Room #3, second door."
+```
+:::
+
+To keep a paragraph break inside one dialogue entry, wrap the entry in quotation marks and continue it on the following lines:
+
+```text
+BARTENDER: "I've been having a good time.
+
+It's been 84 years."
+```
+
+The full entry appears before the player continues or chooses a response. Single-line dialogue does not need quotation marks.
+
+Speaker lines, narrator lines, choices, and notifications all accept plain text. IDs and effect arguments are different: they use letters, numbers, and underscores only, as in `bartender`, `heardRumors`, and `odd_jobs`. When your game needs another language, [Localization](/guides/localization/) explains how to replace displayed text with `@keys`.
+
+## Choices
+
+A choice holds the words shown to the player, an optional set of conditions and effects, and the place the conversation goes next.
 
 Add `REQUIRE` inside a choice when it should only be available under certain conditions:
 
@@ -106,9 +82,7 @@ CHOICE Buy a drink for five gold.
 END
 ```
 
-The player sees this choice when `gold` is greater than 4. See [Conditions](/reference/conditions/) for every available check.
-
-## Effects on Choices
+The player sees this choice only when `gold` is greater than 4. A choice with a failing condition is hidden, not greyed out. See [Conditions](/reference/conditions/) for every available check.
 
 Effects change game state after the player selects a choice:
 
@@ -124,11 +98,11 @@ END
 
 The effects run from top to bottom before the conversation moves to `after_drink`. Conditions and effects can be used together in the same choice.
 
-To show narration when a choice is picked, route it to a node with `GOTO` and put the line in that node.
+A choice cannot contain a spoken line. To show narration or a reply when a choice is picked, route it to a node with `GOTO` and put the line in that node.
 
 ## Conditional Branching
 
-Use `IF` blocks for automatic branching based on conditions. Everything inside the first passing `IF` block runs:
+Use `IF` blocks for automatic branching based on conditions. The player never sees an `IF` block; it is author-controlled routing.
 
 ```text
 NODE check_quest
@@ -142,11 +116,11 @@ NODE check_quest
   GOTO default_greeting
 ```
 
-If the condition passes, that IF block's effects run and its `GOTO` target is used. If a passing IF block has effects but no `GOTO`, the effects run and the node falls through to its regular `GOTO`. If no IF condition passes, the engine falls through to the next block or the node's regular `GOTO`.
+The engine checks `IF` blocks from top to bottom and runs the first one whose condition passes: its effects run, and its `GOTO` target is used. If a passing block has effects but no `GOTO`, the effects run and the node falls through to its regular `GOTO`. If no condition passes, the engine also falls through to the node's regular `GOTO`.
 
 ## Triggered Dialogues
 
-Dialogues can auto-trigger when the player enters a location:
+Dialogues can start automatically when the player enters a location. Declare the trigger at the top of the file, before any `NODE`:
 
 ```text
 TRIGGER tavern
@@ -161,9 +135,7 @@ NODE start
   END
 ```
 
-- `TRIGGER <locationId>` runs when the player enters this location
-- `REQUIRE` at the top level sets conditions that must pass for the trigger
-- Pair `notFlag` with a matching `SET flag` effect for an intro that plays once
+`TRIGGER <locationId>` runs the dialogue when the player enters that location, and top-level `REQUIRE` lines set the conditions the trigger needs. Pairing `notFlag` with a matching `SET flag` effect, as above, makes an intro play exactly once.
 
 ## Voice and Portrait Overrides
 
@@ -174,8 +146,7 @@ NODE emotional_scene
   BARTENDER: I thought we had more time.
 ```
 
-- `VOICE` sets an audio file to play for this node
-- `PORTRAIT` overrides the character's default portrait
+`VOICE` sets an audio file to play for this node, and `PORTRAIT` overrides the character's default portrait, for example to show a different expression. Both files are looked up in the standard asset folders described in [Assets & Media](/guides/assets-and-media/).
 
 ## Format Dialogue Text
 
@@ -200,10 +171,7 @@ The player sees:
 | Color          | `cE5C453[key]`                   | <span style="color: #E5C453">key</span>                  |
 | Bold and color | `cE5C453[*key*]`                 | <span style="color: #E5C453"><strong>key</strong></span> |
 
-Formatting can be nested and works in both dialogue text and locale values.
-Enter it directly in a dialogue text field or Source view. Put a backslash
-before `*`, `_`, or a color expression when those characters should appear as
-ordinary text.
+Formatting can be nested and works in both dialogue text and locale values. Put a backslash before `*`, `_`, or a color expression when those characters should appear as ordinary text.
 
 ## Comments
 
@@ -217,11 +185,11 @@ NODE quest_complete
   ADD variable gold 50
 ```
 
-Comments can appear anywhere. If a `#` appears inside quotes, it's preserved as text.
+Comments can appear anywhere. A `#` inside quotes is preserved as text.
 
 ## Starting Other Dialogues
 
-You can chain dialogues using the `START dialogue` effect:
+Chain dialogues with the `START dialogue` effect:
 
 ```text
 CHOICE Ask to speak with the merchant.
@@ -229,9 +197,13 @@ CHOICE Ask to speak with the merchant.
 END
 ```
 
+The current dialogue ends and the new one begins at its first node. Use it for self-contained sequences; for a branch that should return to earlier choices, keep the nodes in the same file and route back with `GOTO`.
+
 ## Complete Example
 
 Triggered introductions and character conversations live in separate files. The triggered file begins when the player enters its location. The character conversation begins when the player selects that character in the game interface.
+
+The starter project ships both files with more branches than shown here.
 
 `content/dialogues/tavern_intro.dlg`:
 
@@ -289,4 +261,10 @@ NODE farewell
   END dialogue
 ```
 
-See [DSL Syntax Reference](/reference/dsl-syntax/) for the complete keyword list.
+## Check Your Work
+
+Save the file and run `npm run validate`, or select **Validate** in Studio. Validation catches the usual dialogue mistakes immediately: a `GOTO` pointing at a node that does not exist, a missing effect argument, or a speaker that matches no character. During `npm run dev`, the same checks run automatically every time you save.
+
+Then play the branch. Talk to the character in the running game, or use Studio's [Playtest](/studio/playtesting/) to start at any node and see exactly why a choice is shown or hidden.
+
+For the full keyword list and the finer grammar rules, see the [DSL Syntax reference](/reference/dsl-syntax/). [Dice & Randomness](/guides/dice-and-randomness/) builds on silent nodes for skill checks, and [Creating Quests](/guides/creating-quests/) connects dialogue to quest progress.

@@ -3,11 +3,13 @@ title: Your First Game
 description: Explore the starter game created by Doodle Engine.
 ---
 
-Choose **Playable example story** when creating the project used in this guide. It demonstrates the main parts of Doodle Engine.
+This page walks through the starter game file by file, so you can see how a working Doodle Engine project fits together before writing your own content.
 
-If you are working in Doodle Studio, begin with the [Studio walkthrough](/studio/). It shows how to explore and change this content in the visual editor.
+Before starting, you need a project created with **Playable example story** selected, and its dependencies installed. [Installation](/getting-started/installation/) covers both.
 
-The walkthrough below uses the command line and a code editor. Start the game with `npm run dev`, open `http://localhost:3000`, and keep the game open while you change its files.
+If you are working in Doodle Studio, begin with the [Studio walkthrough](/studio/) instead. It explores and changes this same content in the visual editor.
+
+The walkthrough below uses the command line and a code editor. Start the game with `npm run dev`, open `http://localhost:3000`, and keep the game open while you change its files. Whenever you save a content file, the terminal reports the change, the browser reloads, and any mistake appears as a validation error you can fix on the spot.
 
 ## A Few Terms
 
@@ -19,11 +21,14 @@ You will see these names throughout the guides:
 - The **renderer** is the game's interface: the screens, controls, layout, and styles the player sees.
 - The **asset manifest** is the list of images, audio, and video the game needs to load.
 
+The [Glossary](/reference/glossary/) collects these and the rest of Doodle Engine's vocabulary in one place.
+
 ## game.yaml
 
-Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory.
+Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory. The file begins with a commented-out `shell:` section for customizing the game's splash, loading, and title screens; below it are the starting values:
 
 ```yaml
+playerCreatesProfile: true
 startLocation: tavern
 startTime:
     day: 1
@@ -36,6 +41,8 @@ startVariables:
 startInventory: []
 ```
 
+`playerCreatesProfile: true` makes the game ask the player for a name before the story begins.
+
 See [YAML Schemas](/reference/yaml-schemas/) for every field this file supports.
 
 ## Locations
@@ -44,11 +51,11 @@ Open `content/locations/tavern.yaml`. Each location has an `id`, a name, a descr
 
 ```yaml
 id: tavern
-name: 'The Salty Dog'
-description: 'A dimly lit tavern smelling of salt and stale ale. Candles flicker on rough wooden tables, and the murmur of conversation fills the air.'
-banner: ''
-music: ''
-ambient: ''
+name: "The Salty Dog"
+description: "A dimly lit tavern smelling of salt and stale ale. Candles flicker on rough wooden tables, and the murmur of conversation fills the air."
+banner: ""
+music: ""
+ambient: ""
 ```
 
 See [Adding Locations](/guides/adding-locations/) for the complete location fields and map setup. When you are ready to translate your game, [Localization](/guides/localization/) explains how to replace text with locale keys.
@@ -59,9 +66,10 @@ Open `content/characters/bartender.yaml`. Characters have a name, portrait, an a
 
 ```yaml
 id: bartender
-name: 'Marcus the Bartender'
+name: "Marcus the Bartender"
+title: ""
 biography: "A gruff man with kind eyes who's heard every story twice. He keeps the peace at The Salty Dog with a firm hand and a generous pour."
-portrait: ''
+portrait: ""
 location: tavern
 dialogue: bartender_greeting
 stats: {}
@@ -107,15 +115,15 @@ Open `content/quests/odd_jobs.yaml`. Quests have a list of stages. Dialogues adv
 
 ```yaml
 id: odd_jobs
-name: 'Odd Jobs'
-description: 'The bartender mentioned someone at the market who could use a hand.'
+name: "Odd Jobs"
+description: "The bartender mentioned someone at the market who could use a hand."
 stages:
     - id: started
-      description: 'Marcus mentioned work at the market. I should talk to the merchant there.'
+      description: "Marcus mentioned work at the market. I should talk to the merchant there."
     - id: talked_to_merchant
-      description: 'Elena needs a delivery watched. Time to head to the docks.'
+      description: "Elena needs a delivery watched. Time to head to the docks."
     - id: complete
-      description: 'Job well done. Elena paid 50 gold for the trouble.'
+      description: "Job well done. Elena paid 50 gold for the trouble."
 ```
 
 See [Creating Quests](/guides/creating-quests/) for journal entries and multi-stage quest design.
@@ -126,4 +134,8 @@ Open `src/App.tsx`. It fetches two resources from the development server: the co
 
 See [Game Shell](/guides/game-shell/) for configuration options, or [Custom Renderer](/technical/custom-renderer/) to build your own UI.
 
-A good way to learn the engine is to experiment with the starter game. Change a line, condition, effect, or starting value, then return to the game to see what changed. The guides explain each feature as you need it.
+## Try a change
+
+Make one edit now to see the loop in action. Open `content/dialogues/bartender_greeting.dlg`, change the bartender's opening line in the `start` node, and save. The dev server prints `Content changed`, the browser reloads, and talking to Marcus shows your words.
+
+From here, experiment freely: change a line, a condition, an effect, or a starting value, then return to the game to see the result. When you are ready to build something of your own, continue with [Writing Dialogues](/guides/writing-dialogues/), [Adding Locations](/guides/adding-locations/), and [Creating Quests](/guides/creating-quests/).

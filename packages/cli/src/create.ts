@@ -69,8 +69,8 @@ export async function create(projectName: string) {
                 value: 'starter',
             },
             {
-                title: 'Minimal project',
-                description: 'One starting location, ready for your content',
+                title: 'Minimal project with one starting location',
+                description: 'Empty sections ready for your content',
                 value: 'minimal',
             },
         ],
@@ -90,11 +90,11 @@ export async function create(projectName: string) {
         message: 'How should starter text be stored?',
         choices: [
             {
-                title: 'English text: simple content with a locale starter file',
+                title: 'English text with a locale starter file',
                 value: 'literal',
             },
             {
-                title: 'English + Swedish: localization keys and translations',
+                title: 'English and Swedish localization example',
                 value: 'localized',
             },
         ],

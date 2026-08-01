@@ -403,6 +403,7 @@ __metadata:
     vitest: "npm:^4.1.6"
   bin:
     doodle: ./dist/cli.js
+    doodle-engine: ./dist/cli.js
   languageName: unknown
   linkType: soft
 

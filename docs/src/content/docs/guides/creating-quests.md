@@ -3,23 +3,25 @@ title: Creating Quests
 description: How to create multi-stage quests with conditions and rewards.
 ---
 
-Quests track player progress through multi-stage objectives. They're defined in YAML and advanced through dialogue effects.
+Quests track player progress through multi-stage objectives. They're defined in YAML and advanced through dialogue effects, so this guide assumes you can already write a basic dialogue; [Writing Dialogues](/guides/writing-dialogues/) covers that. In Doodle Studio, quests are edited under **Quests** in the project rail, and the quest effects below are available in the effect builder.
+
+A quest has no logic of its own. The dialogue decides when a stage changes, and the quest file supplies the names and journal text for each stage. That split means one quest can be advanced from any number of conversations.
 
 ## Defining a Quest
 
-Create `content/quests/odd_jobs.yaml`:
+Each quest is one YAML file in `content/quests/`. The starter project ships this one as `content/quests/odd_jobs.yaml`:
 
 ```yaml
 id: odd_jobs
-name: Odd Jobs
-description: Help the merchants around the harbor.
+name: "Odd Jobs"
+description: "The bartender mentioned someone at the market who could use a hand."
 stages:
     - id: started
-      description: Marcus mentioned work at the market.
+      description: "Marcus mentioned work at the market. I should talk to the merchant there."
     - id: talked_to_merchant
-      description: Elena needs someone to watch a delivery.
+      description: "Elena needs a delivery watched. Time to head to the docks."
     - id: complete
-      description: The delivery arrived safely.
+      description: "Job well done. Elena paid 50 gold for the trouble."
 ```
 
 Each stage has an `id` and a `description` shown in the player's journal.
@@ -97,5 +99,9 @@ Active quests appear in the Journal component. Each quest shows:
 - Current stage description
 
 The Journal shows any quest that has a stage in `questProgress`. Use a stage ID such as `complete` for the final stage. A custom renderer can use that ID to separate or hide completed quests.
+
+## Check Your Work
+
+Run `npm run validate`, or select **Validate** in Studio. It confirms that every `SET questStage` and `questAtStage` names an existing quest and stage. Then play the path: accept the quest, watch the notification appear, and open the Journal to see the stage description change as you progress. Studio's [Playtest](/studio/playtesting/) can set quest stages directly, which makes testing later stages fast.
 
 See [Localization](/guides/localization/) when the quest text needs to support another language.

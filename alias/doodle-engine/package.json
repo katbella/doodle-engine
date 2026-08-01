@@ -1,0 +1,28 @@
+{
+    "name": "doodle-engine",
+    "version": "1.0.0",
+    "type": "module",
+    "author": "Kat Bella",
+    "license": "MIT",
+    "description": "Doodle Engine command line. Create a narrative game project with: npx doodle-engine create my-game",
+    "bin": {
+        "doodle-engine": "./bin.mjs"
+    },
+    "files": [
+        "bin.mjs"
+    ],
+    "dependencies": {
+        "@doodle-engine/cli": ">=0.2.11"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/katbella/doodle-engine",
+        "directory": "alias/doodle-engine"
+    },
+    "engines": {
+        "node": ">=24.0.0"
+    }
+}

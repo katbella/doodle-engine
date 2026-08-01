@@ -5,6 +5,8 @@ description: How to save and load game state.
 
 Doodle Engine’s built-in game shell lets players continue their latest game, make manual saves, use a quick save, and return to an autosave after traveling. Saves are stored in the player’s browser by default.
 
+If you use the default renderer, saving already works and this page is mostly background: what the slots are, what a save contains, and the one thing you must never change. The code sections at the end are for custom renderers and custom storage.
+
 ## Saving in the Built-in Renderer
 
 The game shell keeps three kinds of save:
@@ -15,13 +17,15 @@ The game shell keeps three kinds of save:
 
 The Save/Load panel lists the quick save and autosave first, followed by manual saves with the newest at the top. **Load** restores the selected save. The title screen’s **Continue** button restores the most recent save of any kind.
 
-All three kinds are stored in the player’s browser. Studio and `doodle create` give every project its own random ID, so one Doodle game cannot list or load another game’s saves by accident.
+All three kinds are stored in the player’s browser. Studio and the CLI's `create` command give every project its own random ID, so one Doodle game cannot list or load another game’s saves by accident.
 
 The generated ID lives in `src/project.ts`.
 
-**Keep `PROJECT_ID` unchanged when you rename, move, rebuild, or release an update to the same game. Changing it separates the game from its existing saves.**
+:::caution[Treat `PROJECT_ID` as permanent]
+Keep `PROJECT_ID` unchanged when you rename, move, rebuild, or release an update to the same game. Changing it separates the game from its players' existing saves.
 
-**If you copy a project to make a different game, give the copy a new `PROJECT_ID` before releasing it. Two different games with the same ID can share saves when they are hosted on the same website.**
+If you copy a project to make a different game, give the copy a new `PROJECT_ID` before releasing it. Two different games with the same ID can share saves when they are hosted on the same website.
+:::
 
 The project ID prevents accidental save conflicts. It is not a password: code running on the same website can still read or change browser storage. Games hosted on different domains are already kept separate by the browser.
 

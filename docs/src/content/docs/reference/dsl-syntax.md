@@ -472,7 +472,7 @@ A `#` inside a quoted string is preserved as text. In plain text, `#` starts a c
 
 ## Complete Example
 
-Triggered intro and character conversation live in separate files.
+Triggered intro and character conversation live in separate files, using localization keys for every displayed line.
 
 `content/dialogues/tavern_intro.dlg`:
 

@@ -3,7 +3,7 @@ title: Notifications
 description: Show short messages when dialogue effects change the game.
 ---
 
-Notifications tell the player that something just happened, such as receiving an item, starting a quest, or gaining reputation. Use the `NOTIFY` effect in a dialogue node, choice, or conditional branch.
+Notifications tell the player that something just happened, such as receiving an item, starting a quest, or gaining reputation. Use the `NOTIFY` effect in a dialogue node, choice, or conditional branch. In Doodle Studio, the same effect is available in the effect builder as **notify**.
 
 ## Show a Notification
 

@@ -139,9 +139,9 @@ export async function createProject(
         version: '0.1.0',
         type: 'module',
         scripts: {
-            dev: 'doodle dev',
-            build: 'doodle build',
-            validate: 'doodle validate',
+            dev: 'doodle-engine dev',
+            build: 'doodle-engine build',
+            validate: 'doodle-engine validate',
             preview: 'vite preview',
         },
         dependencies: {
@@ -188,6 +188,8 @@ export async function createProject(
         let output = content;
         if (outPath === 'index.html') {
             output = content.replace('{{GAME_TITLE}}', escapeHtml(title));
+        } else if (outPath === 'README.md') {
+            output = content.replace('{{GAME_TITLE}}', title);
         } else if (outPath === 'content/locales/en.yaml') {
             output =
                 localizationMode === 'literal'

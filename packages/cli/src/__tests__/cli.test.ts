@@ -20,7 +20,7 @@ const packageVersion = JSON.parse(
 describe('CLI program', () => {
     it('registers its version and commands', () => {
         const program = createCli();
-        expect(program.name()).toBe('doodle');
+        expect(program.name()).toBe('doodle-engine');
         expect(program.version()).toBe(packageVersion);
         expect(program.commands.map((command) => command.name())).toEqual([
             'create',

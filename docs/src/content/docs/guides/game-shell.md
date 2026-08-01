@@ -3,7 +3,7 @@ title: Game Shell
 description: Using GameShell for splash screens, title menus, pause, settings, and video.
 ---
 
-`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback.
+`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. Configuration lives in two places: props passed to the component in `src/App.tsx`, and the `shell:` section of `content/game.yaml` for media the shell should load.
 
 ## Basic Usage
 
@@ -185,7 +185,7 @@ See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding vid
 />
 ```
 
-Studio and `doodle create` store this ID in `src/project.ts`. Keep it for every release of the same game. A missing, changed, or malformed ID stops save access instead of falling back to shared storage.
+Studio and the CLI's `create` command store this ID in `src/project.ts`. Keep it for every release of the same game. A missing, changed, or malformed ID stops save access instead of falling back to shared storage.
 
 ## Game Audio
 
