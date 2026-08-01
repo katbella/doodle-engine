@@ -5,26 +5,24 @@ description: How to create characters, manage relationships, and build a party.
 
 Characters give the player people to meet, speak with, build relationships with, and invite into the party. Each character begins at an assigned location and can move as the story changes.
 
+This guide works through the character file, the difference between characters at a location and the party, relationships, stats, and the player's own profile. Examples edit files directly; in Doodle Studio, the same fields appear when you select a character in the project rail.
+
 ## Defining a Character
 
-Create `content/characters/bartender.yaml`:
+Each character is one YAML file in `content/characters/`. The starter project ships two, `bartender.yaml` and `merchant.yaml`. This is `content/characters/bartender.yaml`:
 
 ```yaml
 id: bartender
-name: Marcus the Bartender
-title: Keeper of the Salty Dog
-biography: A gruff man with kind eyes who has heard every story twice.
-portrait: bartender.png
+name: "Marcus the Bartender"
+title: ""
+biography: "A gruff man with kind eyes who's heard every story twice. He keeps the peace at The Salty Dog with a firm hand and a generous pour."
+portrait: ""
 location: tavern
 dialogue: bartender_greeting
-stats:
-    strength:
-        name: Strength
-        value: 12
-    class:
-        name: Class
-        value: Innkeeper
+stats: {}
 ```
+
+The starter characters leave `title`, `portrait`, and `stats` empty. `title` takes an optional player-facing title, `portrait` names an image in `assets/images/portraits/`, and the [Character Stats](#character-stats) section below covers what goes in `stats`.
 
 | Field       | Description                                                           |
 | ----------- | --------------------------------------------------------------------- |
@@ -83,7 +81,9 @@ CHOICE Demand an answer.
 END
 ```
 
-`relationshipAbove` and `relationshipBelow` use strict comparisons, so the threshold itself does not pass the condition.
+:::note
+`relationshipAbove` and `relationshipBelow` use strict comparisons, so the threshold itself does not pass. `REQUIRE relationshipAbove bartender 5` needs a relationship of 6 or more.
+:::
 
 ## Party Management
 
@@ -225,3 +225,9 @@ to inspect stats.
 Player profile text and all character stats are included in saves. Characters
 without a `title`, projects without `player.yaml`, and old scalar stat entries
 continue to work.
+
+## Check Your Work
+
+Run `npm run validate`, or select **Validate** in Studio. It confirms the character's `location` and `dialogue` references exist and that stat definitions are well-formed. Then visit the character's location in the running game: they should appear among the characters there, and selecting them should start their dialogue.
+
+A character usually exists to be talked to, so [Writing Dialogues](/guides/writing-dialogues/) is the natural next step. [Creating Quests](/guides/creating-quests/) shows how those conversations drive longer objectives.

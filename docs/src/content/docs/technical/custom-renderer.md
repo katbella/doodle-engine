@@ -5,6 +5,8 @@ description: Build a game interface with Doodle's React APIs or another UI frame
 
 The built-in `GameRenderer` assembles Doodle's standard interface. A custom renderer can arrange the React components differently or present engine state through an interface of its own.
 
+Before starting here, make sure CSS is not enough: [Game Shell styling](/guides/game-shell/#styling) retheming covers most visual changes without any code. This page assumes React and TypeScript experience, a working project, and familiarity with the snapshot idea from [Architecture](/technical/architecture/).
+
 ## Using useGame
 
 The `useGame` hook provides the current snapshot, which contains the data for the current game screen, and the methods for player actions:

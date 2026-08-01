@@ -7,15 +7,31 @@ Interludes are full-screen narrative scenes for chapter breaks, dreams, and
 other story transitions. They show scrolling text with optional background art
 and audio. Players can read at their own pace or skip when ready.
 
+This guide covers the interlude file and the two ways to show one: from a
+dialogue effect, or automatically when the player enters a location. In Doodle
+Studio, interludes are edited under **Interludes** in the project rail.
+
 ## Creating an Interlude
 
-Create a YAML file in `content/interludes/`:
+Create a YAML file in `content/interludes/`. The starter project ships one, `content/interludes/chapter_one.yaml`. Its text lives in the locale file under the key `interlude.chapter_one.text`:
 
 ```yaml
-# content/interludes/chapter_one.yaml
 id: chapter_one
-background: dusk_road.jpg
-text: |
+text: "@interlude.chapter_one.text"
+triggerLocation: tavern
+triggerConditions:
+    - type: notFlag
+      flag: seenChapterOne
+effects:
+    - type: setFlag
+      flag: seenChapterOne
+```
+
+The locale entry holds the narrative text with its paragraph breaks:
+
+```yaml
+# content/locales/en.yaml
+interlude.chapter_one.text: |
     Chapter One: A New Beginning
 
     The road behind you stretches long and empty.
@@ -28,6 +44,8 @@ text: |
 
     It might as well be you.
 ```
+
+Text can also be written directly in the interlude file using the same `text: |` block form.
 
 ### All Fields
 
@@ -109,23 +127,7 @@ Volumes follow the player's current settings. All audio stops when the player sk
 
 ## Localized Text
 
-Use a localization key for multi-language support:
-
-```yaml
-id: chapter_one
-background: dusk_road.jpg
-text: '@chapter.one.intro'
-```
-
-Then in `content/locales/en.yaml`:
-
-```yaml
-chapter.one.intro: |
-    Chapter One: A New Beginning
-
-    The road behind you stretches long and empty.
-    ...
-```
+The starter's `chapter_one` interlude already keeps its text behind a localization key, as shown in [Creating an Interlude](#creating-an-interlude). For multi-language support, add the same key with translated text to each additional locale file. Interludes written with direct `text: |` blocks need to move that text into a key before they can be translated. See [Localization](/guides/localization/).
 
 ## Custom Renderer
 
@@ -151,3 +153,9 @@ function MyRenderer() {
 ```
 
 `snapshot.pendingInterlude` is `null` when no interlude is pending. The `GameRenderer` and `GameShell` handle this automatically.
+
+## Check Your Work
+
+Run `npm run validate`, or select **Validate** in Studio. It confirms the interlude's trigger location, conditions, effects, and any `INTERLUDE` references resolve. Then reach the interlude in play: enter its trigger location, or take the dialogue path that shows it. The scene should appear full-screen, scroll at reading pace, skip on Escape, and, if you paired `notFlag` with `setFlag`, not appear on a second visit.
+
+Interludes pair naturally with music and narration; [Audio](/guides/audio/) covers preparing those files.

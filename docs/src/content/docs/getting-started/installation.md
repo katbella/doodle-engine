@@ -1,21 +1,26 @@
 ---
 title: Installation
-description: Install Doodle Studio and use the command-line tools in a game project.
+description: Set up Doodle Studio, the command-line tools, or both.
 ---
 
-Install Doodle Studio to create a game project. Every new project also includes command-line tools for running, checking, and building the game.
+There are two ways to create and work on a Doodle Engine game, and both produce the same kind of project:
 
-[Compare Doodle Studio and the CLI](/getting-started/studio-or-cli/)
+- **Doodle Studio** is the visual desktop editor. Install it when you want to build your game with visual tools and built-in playtesting.
+- **The command line** creates and runs projects from a terminal, and you edit the files in your own code editor.
+
+You can set up either one now and add the other later. Both work on the same project folder. If you are not sure which suits you, read [Studio or CLI?](/getting-started/studio-or-cli/) first.
 
 ## Doodle Studio setup
 
-Doodle Studio is the visual desktop editor and the recommended starting point for a first game.
-
-1. Download the current installer from the [latest Doodle Studio release](https://github.com/katbella/doodle-engine/releases/latest).
-2. Run the installer, then launch **Doodle Studio** from the Start menu or desktop shortcut.
+1. Download the installer for your operating system from the [latest Doodle Studio release](https://github.com/katbella/doodle-engine/releases/latest): the `.exe` installer on Windows, or the `.dmg` on macOS.
+2. On Windows, run the installer, then launch **Doodle Studio** from the Start menu or desktop shortcut. On macOS, open the `.dmg` and drag Doodle Studio into the Applications folder, then launch it from Applications.
 3. Select **New project…**, name the project and game, and choose where to create it.
 4. Keep **Playable example story** selected and choose **English text with a locale starter file**.
 5. Keep the default React renderer and starter styles selected, then select **Create**.
+
+:::caution[First launch may be blocked]
+Doodle Studio installers are not yet code-signed, so Windows SmartScreen or macOS Gatekeeper may block the first launch of an installer downloaded from the releases page. See [Security prompts](/studio/updates/#security-prompts) for how to proceed safely on each platform.
+:::
 
 The generated game uses Node.js packages for Preview and Build. Install [Node.js 24 or newer](https://nodejs.org/) before using those commands. When Studio displays the dependency banner in a new project, select **Install dependencies**.
 
@@ -23,20 +28,31 @@ The generated game uses Node.js packages for Preview and Build. Install [Node.js
 
 ## Command-line setup
 
-To use the command line with a project created in Studio, install:
+To create and run projects from the terminal, install:
 
 - **Node.js 24 or newer** from [nodejs.org](https://nodejs.org/)
 - **npm**, which is included with Node.js. Yarn and pnpm also work
 - **A code editor** such as [VS Code](https://code.visualstudio.com/)
 
-Open a terminal in the project folder, then install its dependencies and start the game:
+Create a project with the `create` command. It asks the same questions as Studio's New Project window: a game title, the starting content, how text is stored, and which renderer to include.
 
 ```bash
+npx doodle-engine create my-game
+```
+
+For your first project, choose **Playable example story** and **English text with a locale starter file** when the command asks.
+
+Then install the project's dependencies and start the game:
+
+```bash
+cd my-game
 npm install       # or: yarn install / pnpm install
 npm run dev       # or: yarn dev / pnpm dev
 ```
 
 Your game is running at `http://localhost:3000`.
+
+This also works on a project that was created in Studio: open a terminal in the project folder and run the same `npm install` and `npm run dev` commands.
 
 [Explore the starter project](/getting-started/your-first-game/)
 

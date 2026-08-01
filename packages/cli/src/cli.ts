@@ -20,7 +20,7 @@ export function createCli(): Command {
     const program = new Command();
 
     program
-        .name('doodle')
+        .name('doodle-engine')
         .description(
             crayon.magenta('🐾 Doodle Engine') +
                 crayon.dim(': Narrative RPG development tools')

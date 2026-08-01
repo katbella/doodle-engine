@@ -4,6 +4,10 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
     site: 'https://doodleengine.dev',
     base: '/',
+    redirects: {
+        '/guides/variable-naming/': '/guides/flags-and-variables/',
+        '/guides/debugging-with-devtools/': '/technical/debugging-with-devtools/',
+    },
     integrations: [
         starlight({
             title: 'Doodle Engine',
@@ -75,69 +79,92 @@ export default defineConfig({
                     label: 'Guides',
                     items: [
                         {
-                            label: 'Writing Dialogues',
-                            slug: 'guides/writing-dialogues',
+                            label: 'Story & Content',
+                            items: [
+                                {
+                                    label: 'Writing Dialogues',
+                                    slug: 'guides/writing-dialogues',
+                                },
+                                {
+                                    label: 'VS Code Extension',
+                                    slug: 'guides/vscode-extension',
+                                },
+                                {
+                                    label: 'Adding Locations',
+                                    slug: 'guides/adding-locations',
+                                },
+                                {
+                                    label: 'Characters & Party',
+                                    slug: 'guides/characters-and-party',
+                                },
+                                {
+                                    label: 'Creating Quests',
+                                    slug: 'guides/creating-quests',
+                                },
+                                {
+                                    label: 'Inventory & Items',
+                                    slug: 'guides/inventory-and-items',
+                                },
+                                {
+                                    label: 'Dice & Randomness',
+                                    slug: 'guides/dice-and-randomness',
+                                },
+                                {
+                                    label: 'Interludes',
+                                    slug: 'guides/interludes',
+                                },
+                                {
+                                    label: 'Notifications',
+                                    slug: 'guides/notifications',
+                                },
+                                {
+                                    label: 'Flags & Variables',
+                                    slug: 'guides/flags-and-variables',
+                                },
+                                {
+                                    label: 'Localization',
+                                    slug: 'guides/localization',
+                                },
+                            ],
                         },
                         {
-                            label: 'VS Code Extension',
-                            slug: 'guides/vscode-extension',
+                            label: 'Presentation & Media',
+                            items: [
+                                {
+                                    label: 'Assets & Media',
+                                    slug: 'guides/assets-and-media',
+                                },
+                                {
+                                    label: 'Game Shell',
+                                    slug: 'guides/game-shell',
+                                },
+                                { label: 'Audio', slug: 'guides/audio' },
+                                {
+                                    label: 'Video & Cutscenes',
+                                    slug: 'guides/video-cutscenes',
+                                },
+                                {
+                                    label: 'Customizing Doodle Engine',
+                                    slug: 'guides/customizing-doodle-engine',
+                                },
+                            ],
                         },
                         {
-                            label: 'Adding Locations',
-                            slug: 'guides/adding-locations',
-                        },
-                        {
-                            label: 'Characters & Party',
-                            slug: 'guides/characters-and-party',
-                        },
-                        {
-                            label: 'Creating Quests',
-                            slug: 'guides/creating-quests',
-                        },
-                        {
-                            label: 'Inventory & Items',
-                            slug: 'guides/inventory-and-items',
-                        },
-                        {
-                            label: 'Dice & Randomness',
-                            slug: 'guides/dice-and-randomness',
-                        },
-                        { label: 'Interludes', slug: 'guides/interludes' },
-                        {
-                            label: 'Notifications',
-                            slug: 'guides/notifications',
-                        },
-                        { label: 'Localization', slug: 'guides/localization' },
-                        {
-                            label: 'Variable Naming',
-                            slug: 'guides/variable-naming',
-                        },
-                        { label: 'Game Shell', slug: 'guides/game-shell' },
-                        { label: 'Audio', slug: 'guides/audio' },
-                        {
-                            label: 'Video & Cutscenes',
-                            slug: 'guides/video-cutscenes',
-                        },
-                        {
-                            label: 'Assets & Media',
-                            slug: 'guides/assets-and-media',
-                        },
-                        { label: 'Save & Load', slug: 'guides/save-and-load' },
-                        {
-                            label: 'Hosting & Deployment',
-                            slug: 'guides/hosting-and-deployment',
-                        },
-                        {
-                            label: 'Content Validation',
-                            slug: 'guides/content-validation',
-                        },
-                        {
-                            label: 'Debugging with DevTools',
-                            slug: 'guides/debugging-with-devtools',
-                        },
-                        {
-                            label: 'Customizing Doodle Engine',
-                            slug: 'guides/customizing-doodle-engine',
+                            label: 'Testing & Shipping',
+                            items: [
+                                {
+                                    label: 'Content Validation',
+                                    slug: 'guides/content-validation',
+                                },
+                                {
+                                    label: 'Save & Load',
+                                    slug: 'guides/save-and-load',
+                                },
+                                {
+                                    label: 'Hosting & Deployment',
+                                    slug: 'guides/hosting-and-deployment',
+                                },
+                            ],
                         },
                     ],
                 },
@@ -160,11 +187,16 @@ export default defineConfig({
                             label: 'Asset Loading',
                             slug: 'technical/asset-loading',
                         },
+                        {
+                            label: 'Debugging with DevTools',
+                            slug: 'technical/debugging-with-devtools',
+                        },
                     ],
                 },
                 {
                     label: 'Reference',
                     items: [
+                        { label: 'Glossary', slug: 'reference/glossary' },
                         { label: 'Engine API', slug: 'reference/engine-api' },
                         { label: 'Conditions', slug: 'reference/conditions' },
                         { label: 'Effects', slug: 'reference/effects' },

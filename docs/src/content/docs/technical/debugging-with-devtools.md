@@ -5,7 +5,11 @@ description: Use window.doodle API to debug your game during development.
 
 The browser console API, `window.doodle`, lets you inspect and change game state while testing. It works with any renderer when dev tools are enabled.
 
-New React projects use `devTools={import.meta.env.DEV}` to enable these commands during development and omit them from release builds.
+New React projects use `devTools={import.meta.env.DEV}` to enable these commands during development and omit them from release builds, so in a fresh project you can skip straight to [Using Dev Tools](#using-dev-tools). Studio users testing dialogue state usually want [Playtest](/studio/playtesting/) instead, which offers the same state control without the console; dev tools shine when you are testing in the real browser through Preview or `npm run dev`.
+
+:::note
+`window.doodle` appears only after a game has started, once you click New Game or Continue. On the title screen the object does not exist yet.
+:::
 
 ## Enabling Dev Tools
 
@@ -82,7 +86,7 @@ if (import.meta.env.DEV) {
 
 ### Flag Manipulation
 
-Flags are boolean game state values used in conditions and branching.
+Flags are boolean game state values used in conditions and branching. Setting them from the console tests flag-dependent dialogue without playing through the events that would normally set them.
 
 ```js
 // Set a flag
@@ -93,11 +97,9 @@ doodle.setFlag('met_merchant');
 doodle.clearFlag('quest_started');
 ```
 
-**Use case**: Test dialogue branches that depend on flags without playing through the entire game.
-
 ### Variable Manipulation
 
-Variables store numeric or string values (gold, counters, player name, etc.).
+Variables store numeric or string values such as gold and counters. Change them to test shop systems, stat checks, or any mechanic that depends on a value.
 
 ```js
 // Set a variable
@@ -109,11 +111,9 @@ doodle.getVariable('gold');
 // 500
 ```
 
-**Use case**: Test shop systems, stat checks, or any mechanic that depends on variables.
-
 ### Location Control
 
-Move the player directly to any location.
+Move the player directly to any location instead of traversing the map.
 
 ```js
 doodle.teleport('tavern');
@@ -121,22 +121,18 @@ doodle.teleport('market');
 doodle.teleport('dungeon_entrance');
 ```
 
-**Use case**: Quickly navigate to specific locations to test content without traversing the map.
-
 ### Dialogue Control
 
-Start any dialogue directly.
+Start any dialogue directly, skipping the prerequisites that would normally lead to it.
 
 ```js
 doodle.triggerDialogue('bartender_greeting');
 doodle.triggerDialogue('merchant_intro');
 ```
 
-**Use case**: Test specific dialogue trees without playing through prerequisites.
-
 ### Quest Control
 
-Set quest stages directly to test quest progression.
+Set quest stages directly to test quest UI, journal entries, and quest-dependent content at any point in the progression.
 
 ```js
 doodle.setQuestStage('odd_jobs', 'in_progress');
@@ -144,11 +140,9 @@ doodle.setQuestStage('odd_jobs', 'completed');
 doodle.setQuestStage('main_quest', 'chapter_2');
 ```
 
-**Use case**: Test quest UI, journal entries, and quest-dependent content.
-
 ### Inventory Control
 
-Add or remove items from inventory without picking them up.
+Add or remove items without picking them up in the story, for testing inventory UI and item-dependent dialogue.
 
 ```js
 // Add an item
@@ -159,11 +153,9 @@ doodle.addItem('rusty_sword');
 doodle.removeItem('old_coin');
 ```
 
-**Use case**: Test inventory UI, item-dependent dialogue, or mechanics that require specific items.
-
 ### Inspection
 
-View the current game state and content registry.
+View the current game state and content registry when behavior differs from what you expected, or to verify that content loaded.
 
 ```js
 // Show current state summary and command list
@@ -181,8 +173,6 @@ console.log(registry.characters);
 ```
 
 Both commands return copies, so exploring their results does not change the running game.
-
-**Use case**: Debug state issues, verify that content loaded, or inspect the engine's current data.
 
 ## Example Debugging Workflows
 
@@ -266,7 +256,4 @@ New React projects include this check. Use the same pattern in custom renderers.
 
 ## Tips
 
-- Use `doodle.inspect()` as your starting point. It shows the current game state and lists all available commands.
-- Combine commands to set up complex scenarios: set multiple flags, add items, then trigger dialogue.
-- Save console commands in a text file or browser snippet for scenarios you test repeatedly.
-- Use `inspectState()` to explore current progress and `inspectRegistry()` to explore loaded game content.
+Start every session with `doodle.inspect()`; it prints the current state and the full command list, so you never have to remember the API. Commands combine well: set a few flags, add an item, then trigger the dialogue you want to test, all in sequence. For scenarios you test repeatedly, keep the command sequence in a text file or a browser snippet and paste it in.

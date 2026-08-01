@@ -3,33 +3,39 @@ title: CLI Commands
 description: Reference for the Doodle Engine command-line tools.
 ---
 
-The `@doodle-engine/cli` package provides the commands used by each game project: `npx doodle dev`, `npx doodle build`, and `npx doodle validate`.
-
-New projects provide these npm scripts:
+Doodle Engine's command-line tools come from the `@doodle-engine/cli` package, which every project includes as a development dependency. You never invoke that package by name except once, to create a project. Inside a project, each tool runs as an npm script:
 
 - `npm run dev` starts the development server
 - `npm run build` creates a production build
 - `npm run validate` checks the game content
-- `npm run preview` runs `vite preview`
+- `npm run preview` serves a finished build locally
 
-## npx doodle create
+## npx doodle-engine create
 
 Create a game project in the current folder:
 
 ```bash
-npx doodle create my-game
+npx doodle-engine create my-game
 ```
 
-The command asks how you want to begin:
+This is the one command that runs outside a project. `doodle-engine` is a small npm package that launches the Doodle Engine CLI, so the command works with nothing installed beyond Node.js. The command asks the same questions as Studio's New Project window, with the same option names:
 
 - **Playable example story** creates a small connected game you can explore and replace piece by piece.
-- **Minimal project** creates one starting location and leaves the other content sections ready for your work.
+- **Minimal project with one starting location** leaves the other content sections ready for your work.
 
-You will also choose how the project stores text. Start with English written directly in the content, or include an English and Swedish localization example. Either localization choice works with either starting-content choice.
+You will also choose how the project stores text: **English text with a locale starter file** writes English directly in the content, and **English and Swedish localization example** demonstrates translation keys. Either localization choice works with either starting-content choice.
 
 The **default React renderer** provides a ready-to-use React interface that can be customized later. If you select it, you can also include the starter styles.
 
-## npx doodle dev
+When it finishes, follow the printed next steps:
+
+```bash
+cd my-game
+npm install
+npm run dev
+```
+
+## npm run dev
 
 Start the development server with content hot-reload.
 
@@ -161,7 +167,7 @@ New applications pass `devTools={import.meta.env.DEV}`, which includes `window.d
 
 ---
 
-## npx doodle build
+## npm run build
 
 Build the game for production.
 
@@ -179,21 +185,25 @@ npm run build
 6. Builds with Vite production settings. Generated applications omit `window.doodle` from production builds.
 7. **Writes `dist/asset-manifest.json`** listing all game assets with types, sizes, and tiers
 8. **Generates `dist/sw.js`**, a service worker that caches the app, the content, and the assets, so the game keeps working offline after the first visit
-9. Writes manifest to `dist/api/manifest` so `vite preview` can serve it
+9. Writes manifest to `dist/api/manifest` so `npm run preview` can serve it
 
 Validation errors stop the build and return exit code 1. The terminal displays each error to fix before building again.
 
-### Preview
+---
 
-After building, preview the production build:
+## npm run preview
+
+Serve the finished build from `dist/` locally, so you can check it before uploading:
 
 ```bash
-npx vite preview
+npm run preview
 ```
+
+Run it after `npm run build`.
 
 ---
 
-## npx doodle validate
+## npm run validate
 
 Validate all game content without building or running the dev server.
 

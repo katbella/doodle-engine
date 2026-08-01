@@ -7,6 +7,10 @@ The `ContentRegistry` is a read-only data structure that holds all game
 definitions. It is built at load time from the `content/` directory and is
 never modified by the engine or renderer during gameplay.
 
+This page is for developers working with the engine API or a custom renderer.
+Content authors never touch the registry directly; it is simply where their
+files end up at runtime.
+
 The registry organizes content by ID so the engine can find it without scanning project files during play.
 
 ## Structure
@@ -139,4 +143,4 @@ Entities reference each other by ID:
 - `GameConfig.startLocation` references a location ID
 - `GameConfig.startInventory` contains item IDs
 
-`npx doodle validate` and `npx doodle build` check these references before release. At runtime, the engine uses fallback behavior where possible: some actions leave state unchanged, and a missing location produces a fallback snapshot.
+`npm run validate` and `npm run build` check these references before release. At runtime, the engine uses fallback behavior where possible: some actions leave state unchanged, and a missing location produces a fallback snapshot.

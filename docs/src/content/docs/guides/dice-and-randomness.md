@@ -3,7 +3,9 @@ title: Dice & Randomness
 description: Add skill checks, random outcomes, and variable interpolation to your dialogues.
 ---
 
-Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive).
+Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive). Which one you want depends on a single question: does anyone need to see the number? `ROLL` stores the result in a variable you can display and reuse; the `roll` condition just passes or fails.
+
+The examples are dialogue script; [Writing Dialogues](/guides/writing-dialogues/) covers the basics, and silent processing nodes from that guide do the heavy lifting here.
 
 ## ROLL effect
 
@@ -145,3 +147,7 @@ be interpolated.
 
 Placeholders work in dialogue lines, choices, and notifications. If a variable,
 character, field, or stat does not exist, the placeholder is left as written.
+
+## Check Your Work
+
+Random branches are the hardest content to test by playing naturally, because you cannot choose what you roll. Studio's [Playtest](/studio/playtesting/) solves this: after a `ROLL`, edit the rolled variable in the state inspector to force each branch, and the debug trace shows every condition the roll passed or failed. From the browser, `doodle.setVariable('bluffRoll', 20)` in [dev tools](/technical/debugging-with-devtools/) does the same job.

@@ -5,6 +5,8 @@ description: Check game content for errors during development and before release
 
 Validation checks the structure of YAML and dialogue files and confirms that references point to existing content. It runs during development, before builds, and whenever you run it manually.
 
+This page shows the commands and output for the CLI workflow. In Doodle Studio, the same checks run behind the **Validate** button, and [Validate, Preview, and Build](/studio/validation-builds/) covers working through problems there.
+
 ## When Validation Runs
 
 ### During Development (`npm run dev`)
@@ -366,17 +368,11 @@ jobs:
 
 `npm run validate` returns exit code 1 when it finds errors, which tells the CI service that the check failed.
 
-## Validation Checklist
+## Working Habits That Help
 
-1. **Fix errors while the change is fresh**: Resolve errors when they appear in `npm run dev`.
+Fix errors while the change is fresh: an error that appears in `npm run dev` seconds after you saved is trivial to trace, and the same mistake found a week later is not. Running `npm run validate` before committing keeps broken references out of version control.
 
-2. **Run validation before committing**: Run `npm run validate` before pushing changes to catch errors early.
-
-3. **Use descriptive IDs**: Clear node IDs, quest IDs, and dialogue IDs make validation errors easier to understand.
-
-4. **Split long dialogues when it improves navigation**: Focused files make errors easier to locate.
-
-5. **Use locale keys consistently**: Follow a naming convention for locale keys (e.g., `entity_type.entity_id.field`) to make missing keys easier to spot.
+Naming does a lot of quiet work here. Descriptive node, quest, and dialogue IDs make error messages readable on their own, and a consistent locale key convention such as `entity_type.entity_id.field` makes a missing key obvious at a glance. When a dialogue file grows unwieldy, splitting it also narrows down where errors point.
 
 ## Validation and Playtesting
 

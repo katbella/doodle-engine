@@ -75,6 +75,14 @@ describe('createProject language setup', () => {
         expect(packageJson.devDependencies['@doodle-engine/cli']).toBe(
             DOODLE_VERSION
         );
+
+        const readme = await readFile(
+            join(first.projectPath, 'README.md'),
+            'utf-8'
+        );
+        expect(readme).toContain('# first-game');
+        expect(readme).toContain('npm run dev');
+        expect(readme).not.toContain('{{GAME_TITLE}}');
     });
 
     it('creates literal English content and a commented blank locale file by default', async () => {

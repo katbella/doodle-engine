@@ -29,6 +29,7 @@ my-game/
       portraits/      # Character portrait images
       items/          # Item icons and detail images
       maps/           # Map background images
+      ui/             # Interface images (shell screens, frames)
     audio/
       music/          # Music tracks
       sfx/            # Game sound effects and ambient sounds
@@ -40,11 +41,14 @@ my-game/
   src/
     main.tsx          # Entry point
     App.tsx           # Root component
-    project.ts       # Stable identity used to keep saves separate
+    project.ts        # Stable identity used to keep saves separate
+    locale-options.ts # Builds the language list from the loaded locales
     index.css         # Styles
   index.html          # HTML shell
+  README.md           # Commands and pointers for this project
   package.json
   tsconfig.json
+  .gitignore
 ```
 
 ## Content Directory
@@ -62,6 +66,10 @@ All game content lives in `content/`. The engine loads each type from its corres
 | `locations/`  | `.yaml`   | Location definitions  |
 | `maps/`       | `.yaml`   | Map definitions       |
 | `quests/`     | `.yaml`   | Quest definitions     |
+
+:::note[Which name counts: the filename or the `id`?]
+YAML entities are identified by the `id` field inside the file, so `tavern.yaml` could be renamed without changing the game. Dialogues and locales are the exception: a dialogue's ID is its filename without `.dlg`, and a locale's code is its filename without `.yaml`. Renaming those files changes their IDs.
+:::
 
 `player.yaml` is a single optional file rather than a directory of entities. It
 defines the player's profile fields and starting stats. `game.yaml` decides
@@ -128,6 +136,7 @@ The `src/` directory contains the game application. Studio uses this application
 - **main.tsx**: mounts the React app
 - **App.tsx**: fetches the content registry (loaded game definitions) and asset manifest (media list), then renders `GameShell` or your custom renderer providers
 - **project.ts**: contains the project’s generated identity. **Keep it unchanged for every release of the same game. If a copied project becomes a different game, give the copy a new ID before releasing it.**
+- **locale-options.ts**: turns the loaded locale codes into the language list shown in Settings
 - **index.css**: styles for the game interface
 
 For custom renderers, replace `GameRenderer` with your own components. The `useGame` React hook gives those components the current game screen and player actions. See [Custom Renderer](/technical/custom-renderer/).

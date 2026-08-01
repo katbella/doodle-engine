@@ -5,6 +5,17 @@ description: Choose between Doodle Studio, the command line, or a combination of
 
 Doodle Studio and the Doodle Engine CLI work with the same project files. Studio is the desktop app for creating and testing a game. The CLI runs development, validation, and build commands from the terminal. Use either one or both.
 
+Every task has a home in each workflow:
+
+| Task                    | In Doodle Studio                          | With the CLI and a text editor                     |
+| ----------------------- | ----------------------------------------- | -------------------------------------------------- |
+| Create a project        | **New project…** on the Welcome screen    | `npx doodle-engine create my-game`                 |
+| Edit content            | Visual mode or Source mode                | Any editor; YAML and `.dlg` files                  |
+| Check content           | **Validate** button                       | `npm run validate`                                 |
+| Test a story branch     | Playtest with state inspector             | `npm run dev` plus the [browser dev tools](/technical/debugging-with-devtools/) |
+| Play the full game      | **Preview** button                        | `npm run dev`                                      |
+| Create release files    | **Build** button                          | `npm run build`                                    |
+
 ## Doodle Studio
 
 Doodle Studio is the desktop workspace for writing, worldbuilding, and testing your game. Add and edit content through its visual controls or built-in source editor.
@@ -27,7 +38,7 @@ Use Visual mode for purpose-built controls, or Source mode to edit files directl
 
 ## Command Line
 
-The CLI starts the development server, validates game content, and creates production builds. Edit the project in any code editor, then run these commands from the terminal.
+The CLI scaffolds new projects with `npx @doodle-engine/cli create`, starts the development server, validates game content, and creates production builds. Edit the project in any code editor, then run these commands from the terminal.
 
 [Set up the CLI](/getting-started/installation/#command-line-setup)
 

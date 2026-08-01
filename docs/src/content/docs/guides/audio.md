@@ -3,7 +3,7 @@ title: Audio
 description: How to add music, ambient sounds, voice lines, and sound effects.
 ---
 
-Doodle Engine supports location music, ambient sound, voice lines, and sound effects. `GameShell` handles playback. Custom React renderers can use `useAudioManager`.
+Doodle Engine supports location music, ambient sound, voice lines, and sound effects. If your project uses the default renderer, `GameShell` already handles playback, and adding audio is purely a matter of placing files and naming them in content. The second half of this page covers `useAudioManager` for custom React renderers.
 
 ## Setting Up Audio
 
@@ -181,3 +181,7 @@ assets/
     voice/
       bartender_greeting.ogg
 ```
+
+## Check Your Work
+
+Start the game and travel to the location: its music should begin, and crossfade when you travel somewhere with a different track. A `SOUND` effect plays once at the moment its node or choice runs. If a file stays silent, check the filename in the content field against the file on disk and confirm it sits in the folder for that field; a missing file is also reported when the asset manifest is built during `npm run dev` and at the start of every build.
