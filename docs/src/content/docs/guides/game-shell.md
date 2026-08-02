@@ -16,8 +16,6 @@ import { PROJECT_ID } from '../project';
     config={config}
     manifest={manifest}
     projectId={PROJECT_ID}
-    title="My Game"
-    subtitle="A text-based adventure"
 />;
 ```
 
@@ -51,6 +49,8 @@ If `shell.splash` is not defined, the splash screen is skipped and the game goes
 
 ## Title Screen
 
+The title screen uses the top-level `title` and `subtitle` fields from `content/game.yaml`.
+
 The title screen shows:
 
 - The logo image (if `shell.title.logo` is configured in `game.yaml`)
@@ -81,7 +81,6 @@ The title screen includes a **Credits** button. By default, the credits screen s
     config={config}
     manifest={manifest}
     projectId={PROJECT_ID}
-    title="Harbor Lights"
     credits={
         <>
             <p>Written and designed by Your Name</p>

@@ -1,5 +1,8 @@
 # Game Configuration
 
+title: __GAME_TITLE_JSON__
+subtitle: __GAME_SUBTITLE_JSON__
+
 # Shell screen configuration
 # Uncomment and provide your own assets to customize the game shell.
 # The game will work without these. Screens will use styled gradients and skip sounds.

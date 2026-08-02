@@ -10,8 +10,8 @@ import { EMPTY_NAME_CATALOG, type NameCatalog } from '../lib/flag-vars';
 import { EditorLoading } from './EditorLoading';
 
 /**
- * Form for game.yaml: starting state and shell media. Saves through writeEntity,
- * so comments, key order, and unmodeled fields are kept.
+ * Form for game.yaml. Saves through writeEntity, so comments, key order, and
+ * unmodeled fields are kept.
  */
 export function GameConfigForm({
     project,
@@ -66,6 +66,8 @@ export function GameConfigForm({
     }, [dir, path]);
 
     const OWNED = [
+        'title',
+        'subtitle',
         'playerCreatesProfile',
         'startLocation',
         'startTime',
@@ -219,6 +221,40 @@ export function GameConfigForm({
                 <span className="form__title">game.yaml</span>
                 <span className="game-config__kind">Game configuration</span>
             </div>
+
+            <section className="game-config__section">
+                <h2 className="game-config__section-title">Game details</h2>
+                <div className="game-config__details-grid">
+                    <label className="field">
+                        <span className="field__label">Game title</span>
+                        <input
+                            className="dlg__input"
+                            value={
+                                typeof config.title === 'string'
+                                    ? config.title
+                                    : ''
+                            }
+                            onChange={(event) =>
+                                set('title', event.target.value)
+                            }
+                        />
+                    </label>
+                    <label className="field">
+                        <span className="field__label">Subtitle</span>
+                        <input
+                            className="dlg__input"
+                            value={
+                                typeof config.subtitle === 'string'
+                                    ? config.subtitle
+                                    : ''
+                            }
+                            onChange={(event) =>
+                                set('subtitle', event.target.value)
+                            }
+                        />
+                    </label>
+                </div>
+            </section>
 
             <section className="game-config__section">
                 <h2 className="game-config__section-title">Starting state</h2>

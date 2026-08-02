@@ -37,6 +37,7 @@ const project: OpenProject = {
         locales: {},
     },
     config: {
+        title: 'Test Game',
         startLocation: 'town',
         startTime: { day: 1, hour: 8 },
         startFlags: {},

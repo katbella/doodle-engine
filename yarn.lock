@@ -450,7 +450,7 @@ __metadata:
   dependencies:
     "@doodle-engine/core": "workspace:*"
     "@doodle-engine/toolkit": "workspace:*"
-    "@fontsource-variable/archivo": "npm:^5.3.0"
+    "@fontsource-variable/ibm-plex-sans": "npm:^5.3.0"
     "@fontsource/monaspace-neon": "npm:^5.3.0"
     "@monaco-editor/react": "npm:^4.6.0"
     "@playwright/test": "npm:^1.61.1"
@@ -1031,10 +1031,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/archivo@npm:^5.3.0":
+"@fontsource-variable/ibm-plex-sans@npm:^5.3.0":
   version: 5.3.0
-  resolution: "@fontsource-variable/archivo@npm:5.3.0"
-  checksum: 10c0/3af011f6ee09716625424c518bc9c4da93aa0989fc09904398451a125ef738d82af7d74569e195082dac6fc1df1c3a4aeba5d6d85f1a652245d001ed3aaf0c8c
+  resolution: "@fontsource-variable/ibm-plex-sans@npm:5.3.0"
+  checksum: 10c0/3fe44e92a441c956654d08be2fc1310f5527e241961f1386f4dcbe1ecfee4d3a387e1ca8b108afa48184647f3aa9db0d6547c2dd63a0442c2d369401c9a2e306
   languageName: node
   linkType: hard
 

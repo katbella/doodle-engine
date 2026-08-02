@@ -82,6 +82,7 @@ function messages(registry: ContentRegistry): string[] {
 
 function makeConfig(overrides: Partial<GameConfig> = {}): GameConfig {
     return {
+        title: 'Test Game',
         startLocation: 'town',
         startTime: { day: 1, hour: 8 },
         startFlags: {},
@@ -303,6 +304,9 @@ describe('validateContent', () => {
             startInventory: undefined,
         } as any);
 
+        expect(errors.map((error) => error.message)).toContain(
+            'Game config missing required "title"'
+        );
         expect(errors.map((error) => error.message)).toContain(
             'Game config missing required "startLocation"'
         );

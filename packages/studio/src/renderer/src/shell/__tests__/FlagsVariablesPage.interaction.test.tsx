@@ -154,6 +154,9 @@ describe('FlagsVariablesPage', () => {
             within(health).getByRole('button', { name: /Orphaned notes/ })
         ).toBeTruthy();
         expect(within(health).getByText('4 findings')).toBeTruthy();
+        expect(screen.getAllByText('Flag').length).toBeGreaterThan(0);
+        expect(screen.getByText('Checked')).toBeTruthy();
+        expect(screen.getByText('Set')).toBeTruthy();
         expect(
             screen.queryByText('Select a flag or variable to inspect it.')
         ).toBeNull();

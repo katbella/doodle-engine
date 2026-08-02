@@ -193,7 +193,7 @@ function LocaleEditorInner({
                     </div>
                 ))}
                 {entries.length === 0 && (
-                    <div className="dock__empty">
+                    <div className="locale-editor__empty">
                         No locale keys match this filter.
                     </div>
                 )}

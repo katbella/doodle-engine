@@ -66,7 +66,7 @@
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-columns: minmax(0, 1fr) auto var(--inspector-w, 340px);
 }
 
 /* Playback column */
@@ -298,6 +298,7 @@
 
 /* State inspector column */
 .inspector {
+    min-width: 0;
     background: var(--surface-raised);
     padding: var(--space-4);
     display: flex;
@@ -342,6 +343,11 @@
     gap: var(--space-2);
 }
 
+.irow--field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 1fr);
+}
+
 .irow__key {
     flex: 1;
     font-size: var(--text-sm);
@@ -367,9 +373,11 @@
 }
 
 .ivalue {
-    width: 96px;
+    width: 100%;
+    min-width: 0;
+    height: 26px;
     font-size: var(--text-sm);
-    padding: 2px var(--space-2);
+    padding: 0 var(--space-2);
     background: var(--surface-input);
     border: 1px solid var(--border);
     color: var(--text);

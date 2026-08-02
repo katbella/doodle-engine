@@ -7,6 +7,7 @@ import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { parse as parseYaml } from 'yaml';
 import { buildProject, copyProjectAssets } from '../build-project';
 import { createProject } from '../create-project';
 
@@ -96,15 +97,21 @@ describe('buildProject success', () => {
         expect(
             await readFile(join(projectPath, 'index.html'), 'utf-8')
         ).toContain('<title>Test &quot;Quoted&quot; &amp; Game</title>');
-        expect(
-            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
-        ).toContain('const GAME_TITLE = "Test \\"Quoted\\" & Game";');
-        expect(
-            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
-        ).toContain('const GAME_SUBTITLE = "A \\"Quoted\\" Subtitle";');
-        expect(
-            await readFile(join(projectPath, 'src', 'App.tsx'), 'utf-8')
-        ).not.toContain('Made with Doodle Engine');
+        const gameConfig = parseYaml(
+            await readFile(
+                join(projectPath, 'content', 'game.yaml'),
+                'utf-8'
+            )
+        );
+        expect(gameConfig.title).toBe('Test "Quoted" & Game');
+        expect(gameConfig.subtitle).toBe('A "Quoted" Subtitle');
+        const appSource = await readFile(
+            join(projectPath, 'src', 'App.tsx'),
+            'utf-8'
+        );
+        expect(appSource).not.toContain('GAME_TITLE');
+        expect(appSource).not.toContain('GAME_SUBTITLE');
+        expect(appSource).not.toContain('Made with Doodle Engine');
 
         const logs: string[] = [];
         const result = await buildProject({

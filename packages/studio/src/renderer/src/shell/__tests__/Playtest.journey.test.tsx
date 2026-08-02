@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OpenProject } from '../../../../shared/project';
 import { Playtest } from '../Playtest';
@@ -97,6 +97,7 @@ const project: OpenProject = {
         },
     },
     config: {
+        title: 'Test Game',
         startLocation: 'room',
         startTime: { day: 1, hour: 8 },
         startFlags: { knowsSecret: false },
@@ -120,6 +121,36 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('Playtest author journeys', () => {
+    it('resizes and remembers the State inspector width', () => {
+        const { container, unmount } = render(<Playtest project={project} />);
+        const body = container.querySelector<HTMLElement>('.playtest__body')!;
+        const handle = screen.getByRole('separator') as HTMLElement;
+        let captured = false;
+        handle.setPointerCapture = () => {
+            captured = true;
+        };
+        handle.hasPointerCapture = () => captured;
+        handle.releasePointerCapture = () => {
+            captured = false;
+        };
+
+        expect(body.style.getPropertyValue('--inspector-w')).toBe('340px');
+        fireEvent.pointerDown(handle, { pointerId: 1, clientX: 340 });
+        fireEvent.pointerMove(handle, { pointerId: 1, clientX: 240 });
+        expect(body.style.getPropertyValue('--inspector-w')).toBe('440px');
+        expect(
+            localStorage.getItem('doodle-studio-playtest-inspector-width')
+        ).toBe('440');
+
+        unmount();
+        const rerendered = render(<Playtest project={project} />);
+        expect(
+            rerendered.container
+                .querySelector<HTMLElement>('.playtest__body')!
+                .style.getPropertyValue('--inspector-w')
+        ).toBe('440px');
+    });
+
     it('starts at a node, explains choices, edits state, and restores a named checkpoint', async () => {
         const user = userEvent.setup();
         render(<Playtest project={project} />);

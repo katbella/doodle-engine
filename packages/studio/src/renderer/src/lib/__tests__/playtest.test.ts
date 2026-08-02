@@ -132,6 +132,7 @@ function registry(): ContentRegistry {
 
 function config(): GameConfig {
     return {
+        title: 'Test Game',
         startLocation: 'tavern',
         startTime: { day: 1, hour: 8 },
         startFlags: {},

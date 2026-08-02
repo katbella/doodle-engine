@@ -24,6 +24,7 @@ describe('Studio style contracts', () => {
         );
         const runtimeProperties = new Set([
             '--dock-h',
+            '--inspector-w',
             '--rail-w',
             '--right-w',
         ]);

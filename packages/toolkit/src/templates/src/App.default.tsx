@@ -8,9 +8,6 @@ import { GameShell } from '@doodle-engine/react';
 import { getAvailableLocales } from './locale-options';
 import { PROJECT_ID } from './project';
 
-const GAME_TITLE = __GAME_TITLE_JSON__;
-const GAME_SUBTITLE = __GAME_SUBTITLE_JSON__;
-
 export function App() {
     const [content, setContent] = useState<{
         registry: ContentRegistry;
@@ -46,8 +43,6 @@ export function App() {
             registry={content.registry}
             config={content.config}
             manifest={manifest}
-            title={GAME_TITLE}
-            subtitle={GAME_SUBTITLE || undefined}
             projectId={PROJECT_ID}
             availableLocales={getAvailableLocales(content.registry.locales)}
             devTools={import.meta.env.DEV}

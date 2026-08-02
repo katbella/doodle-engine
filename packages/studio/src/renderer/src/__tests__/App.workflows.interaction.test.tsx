@@ -340,6 +340,7 @@ function makeProject(depsInstalled = true): OpenProject {
             locales: {},
         },
         config: {
+            title: 'Test Game',
             startLocation: 'town',
             startTime: { day: 1, hour: 8 },
             startFlags: { met_hero: true },

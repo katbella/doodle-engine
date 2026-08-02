@@ -269,6 +269,8 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 **File:** `content/game.yaml`
 
 ```yaml
+title: My Game
+subtitle: A text-based adventure
 playerCreatesProfile: true
 startLocation: tavern
 startTime:
@@ -284,6 +286,8 @@ startInventory: []
 
 | Field                  | Type                               | Description                                                |
 | ---------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| `title`                | `string`                           | Player-facing game title                                   |
+| `subtitle?`            | `string`                           | Optional line beneath the title                            |
 | `playerCreatesProfile` | `boolean`                          | Ask the player for profile text in the built-in renderer   |
 | `shell?`               | `ShellConfig`                      | Shell screen configuration                                 |
 | `startLocation`        | `string`                           | Starting location ID                                       |

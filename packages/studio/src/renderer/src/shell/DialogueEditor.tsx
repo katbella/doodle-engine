@@ -416,7 +416,7 @@ function DialogueEditorInner({
                     >
                         <span className="dlg__node-id">{node.id}</span>
                         {node.id === dialogue.startNode && (
-                            <span className="dlg__node-badge">start</span>
+                            <span className="dlg__node-badge">Start</span>
                         )}
                         <span className="dlg__node-preview">
                             {displayedText(node.text)}

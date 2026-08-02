@@ -577,15 +577,17 @@ export function NodeEditor({
     return (
         <div className="node-editor">
             <div className="node-editor__head" data-problem-target="node">
-                <span className="node-editor__label">NODE</span>
+                <span
+                    className={`node-editor__label ${isStart ? 'node-editor__label--start' : ''}`}
+                >
+                    {isStart ? 'Start node' : 'Node'}
+                </span>
                 <NodeIdField
                     id={node.id}
                     nodeIds={nodeIds}
                     onRename={(newId) => onRename(node.id, newId)}
                 />
-                {isStart ? (
-                    <span className="dlg__node-badge">start</span>
-                ) : (
+                {!isStart && (
                     <button className="dlg__add" onClick={onMakeStart}>
                         Set as start
                     </button>
@@ -783,7 +785,7 @@ export function NodeEditor({
                             data-problem-target={`choice:${choice.id}`}
                         >
                             <div className="dlg__card-head">
-                                <span>CHOICE</span>
+                                <span>Choice</span>
                                 <div className="dlg__card-actions">
                                     <button
                                         className="dlg__move"

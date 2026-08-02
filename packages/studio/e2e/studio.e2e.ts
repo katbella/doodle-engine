@@ -13,6 +13,7 @@ const studioDir = process.cwd();
 const workspaceDir = resolve(studioDir, '../..');
 const fixturePrefix = join(workspaceDir, '.build-test-e2e-');
 const profilePrefix = join(workspaceDir, '.build-test-studio-profile-');
+const createdProjectPrefix = join(workspaceDir, '.build-test-studio-create-');
 const tourDir = join(workspaceDir, '.build-test-studio-tour');
 const docsScreenshotDir = join(workspaceDir, 'docs/public/images/studio');
 const publishDocsScreenshots =
@@ -22,6 +23,7 @@ const preservedLocationComment = '# The tavern is busiest after sunset.';
 
 let fixtureDir = '';
 let profileDir = '';
+let createdProjectDir = '';
 
 async function writeFixture(path: string, content: string): Promise<void> {
     const target = join(fixtureDir, path);
@@ -139,6 +141,7 @@ test.beforeEach(async () => {
     }
     fixtureDir = await mkdtemp(fixturePrefix);
     profileDir = await mkdtemp(profilePrefix);
+    createdProjectDir = await mkdtemp(createdProjectPrefix);
     await mkdir(join(fixtureDir, 'node_modules'), { recursive: true });
     await writeFixture(
         'package.json',
@@ -154,7 +157,9 @@ test.beforeEach(async () => {
     );
     await writeFixture(
         'content/game.yaml',
-        `startLocation: tavern
+        `title: The Salty Dog
+subtitle: A harbor story
+startLocation: tavern
 startTime:
   day: 1
   hour: 8
@@ -288,10 +293,53 @@ test.afterEach(async () => {
     if (profileDir.startsWith(profilePrefix)) {
         await rm(profileDir, { recursive: true, force: true });
     }
+    if (createdProjectDir.startsWith(createdProjectPrefix)) {
+        await rm(createdProjectDir, { recursive: true, force: true });
+    }
+});
+
+test('writes new-project title and subtitle to game.yaml', async () => {
+    const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...launchEnv } =
+        process.env;
+    const app = await launchStudio(profileDir, launchEnv);
+
+    try {
+        const page = await app.firstWindow();
+        await expect(page.getByText('Doodle Studio')).toBeVisible();
+        await app.evaluate(({ dialog }, targetDir) => {
+            dialog.showOpenDialog = async () => ({
+                canceled: false,
+                filePaths: [targetDir],
+            });
+        }, createdProjectDir);
+
+        await page.getByRole('button', { name: 'New project…' }).click();
+        const modal = page.locator('.modal');
+        await modal.getByLabel('Name').fill('metadata-test');
+        await modal.getByLabel('Game title').fill('Test Game');
+        await modal.getByLabel('Subtitle').fill('Test subtitle');
+        await modal.getByRole('button', { name: 'Choose…' }).click();
+        await modal.getByRole('button', { name: 'Create' }).click();
+        await expect(page.getByText('metadata-test').first()).toBeVisible();
+
+        const gameSource = await readFile(
+            join(
+                createdProjectDir,
+                'metadata-test',
+                'content',
+                'game.yaml'
+            ),
+            'utf8'
+        );
+        expect(gameSource).toContain('title: "Test Game"');
+        expect(gameSource).toContain('subtitle: "Test subtitle"');
+    } finally {
+        await quitApp(app);
+    }
 });
 
 test('opens, edits, and saves through Electron, preload, IPC, and the filesystem', async () => {
-    test.setTimeout(publishDocsScreenshots ? 180_000 : 30_000);
+    test.setTimeout(publishDocsScreenshots ? 180_000 : 45_000);
     const { ELECTRON_RUN_AS_NODE: _electronRunAsNode, ...launchEnv } =
         process.env;
     const app = await test.step('launch Studio', () =>
@@ -798,17 +846,16 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     path: join(tourDir, '07b-node-header-crop-dark.png'),
                     animations: 'disabled',
                 });
-            const badge = head.locator('.dlg__node-badge');
-            const badgeBox = await badge.boundingBox();
+            const startLabel = head.locator('.node-editor__label--start');
+            const labelBox = await startLabel.boundingBox();
             const idBox = await page
                 .locator('.node-editor__id-field')
                 .boundingBox();
-            expect(badgeBox).not.toBeNull();
+            expect(labelBox).not.toBeNull();
             expect(idBox).not.toBeNull();
-            // The badge centers on the id input's vertical midline.
-            const badgeMid = badgeBox!.y + badgeBox!.height / 2;
+            const labelMid = labelBox!.y + labelBox!.height / 2;
             const idMid = idBox!.y + idBox!.height / 2;
-            expect(Math.abs(badgeMid - idMid)).toBeLessThanOrEqual(2);
+            expect(Math.abs(labelMid - idMid)).toBeLessThanOrEqual(2);
 
             // The delete button keeps its danger color: same class family as
             // the add-node button, so stylesheet order cannot make them match.

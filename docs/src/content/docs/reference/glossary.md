@@ -67,7 +67,7 @@ A named on/off value in game state, used to remember that something happened: `m
 
 ## Game config
 
-The settings in `content/game.yaml`: the starting location, time, flags, variables, and inventory, whether the player enters their own profile (`playerCreatesProfile`), and the optional `shell:` section for splash, loading, and title screen media. The engine reads it once when a new game starts. See [YAML Schemas](/reference/yaml-schemas/#gameconfig).
+The settings in `content/game.yaml`: the game title and optional subtitle, starting location, time, flags, variables, and inventory, whether the player enters their own profile (`playerCreatesProfile`), and the optional `shell:` section for splash, loading, and title screen media. The engine reads it once when a new game starts. See [YAML Schemas](/reference/yaml-schemas/#gameconfig).
 
 ## Game shell
 
