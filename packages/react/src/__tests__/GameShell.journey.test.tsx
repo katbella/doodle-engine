@@ -176,17 +176,17 @@ describe('GameShell player journeys', () => {
         renderShell({
             gameConfig: {
                 ...config,
-                title: 'Harbor Lights',
-                subtitle: 'A story in the fog',
+                title: 'Test Game',
+                subtitle: 'Test subtitle',
             },
         });
         await continueFromLoading(user);
 
         expect(
-            screen.getByRole('heading', { name: 'Harbor Lights' })
+            screen.getByRole('heading', { name: 'Test Game' })
         ).toBeTruthy();
-        expect(screen.getByText('A story in the fog')).toBeTruthy();
-        expect(document.title).toBe('Harbor Lights');
+        expect(screen.getByText('Test subtitle')).toBeTruthy();
+        expect(document.title).toBe('Test Game');
     });
 
     it('opens credits from the title screen and returns', async () => {

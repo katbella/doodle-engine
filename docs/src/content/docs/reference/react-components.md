@@ -759,7 +759,7 @@ import { PROJECT_ID } from './project';
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                 | Override the loading screen                                     |
 | `devTools`         | `boolean`                                 | `false`           | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
-The game title and subtitle come from `game.yaml`. Splash screen, loading background, title logo, and UI sounds are configured there under `shell:`. See [Asset Loading](/technical/asset-loading/) for the full shell config reference.
+The title and optional subtitle are configured in `game.yaml`. Splash screen, loading background, title logo, and UI sounds are configured under `shell:`. See [Asset Loading](/technical/asset-loading/) for the full shell config reference.
 
 ### Features
 

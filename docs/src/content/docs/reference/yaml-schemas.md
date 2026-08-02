@@ -269,8 +269,8 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 **File:** `content/game.yaml`
 
 ```yaml
-title: The Lantern at Greywater
-subtitle: A mystery on the marsh
+title: My Game
+subtitle: A text-based adventure
 playerCreatesProfile: true
 startLocation: tavern
 startTime:

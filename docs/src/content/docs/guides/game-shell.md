@@ -3,7 +3,7 @@ title: Game Shell
 description: Using GameShell for splash screens, title menus, pause, settings, and video.
 ---
 
-`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. The game title, subtitle, and shell media are configured in `content/game.yaml`. Custom credits remain React content in `src/App.tsx`.
+`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. Configuration lives in two places: props passed to the component in `src/App.tsx`, and the `shell:` section of `content/game.yaml` for media the shell should load.
 
 ## Basic Usage
 
@@ -49,12 +49,7 @@ If `shell.splash` is not defined, the splash screen is skipped and the game goes
 
 ## Title Screen
 
-Set the title and optional subtitle at the top of `content/game.yaml`:
-
-```yaml
-title: Harbor Lights
-subtitle: A story of fog and forgotten promises
-```
+The title screen uses the top-level `title` and `subtitle` fields from `content/game.yaml`.
 
 The title screen shows:
 

@@ -139,16 +139,16 @@ describe('GameConfigForm author journeys', () => {
 
         const title = await screen.findByLabelText('Game title');
         await user.clear(title);
-        await user.type(title, 'Harbor Lights');
+        await user.type(title, 'Test Game');
         const subtitle = screen.getByLabelText('Subtitle');
         await user.clear(subtitle);
-        await user.type(subtitle, 'A story in the fog');
+        await user.type(subtitle, 'Test subtitle');
 
         view.unmount();
         await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
         expect(writeEntity.mock.calls[0][2]).toEqual([
-            { path: ['title'], value: 'Harbor Lights' },
-            { path: ['subtitle'], value: 'A story in the fog' },
+            { path: ['title'], value: 'Test Game' },
+            { path: ['subtitle'], value: 'Test subtitle' },
         ]);
     });
 

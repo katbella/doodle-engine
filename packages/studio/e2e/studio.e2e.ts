@@ -316,8 +316,8 @@ test('writes new-project title and subtitle to game.yaml', async () => {
         await page.getByRole('button', { name: 'New project…' }).click();
         const modal = page.locator('.modal');
         await modal.getByLabel('Name').fill('metadata-test');
-        await modal.getByLabel('Game title').fill('Harbor Lights');
-        await modal.getByLabel('Subtitle').fill('A story in the fog');
+        await modal.getByLabel('Game title').fill('Test Game');
+        await modal.getByLabel('Subtitle').fill('Test subtitle');
         await modal.getByRole('button', { name: 'Choose…' }).click();
         await modal.getByRole('button', { name: 'Create' }).click();
         await expect(page.getByText('metadata-test').first()).toBeVisible();
@@ -331,8 +331,8 @@ test('writes new-project title and subtitle to game.yaml', async () => {
             ),
             'utf8'
         );
-        expect(gameSource).toContain('title: "Harbor Lights"');
-        expect(gameSource).toContain('subtitle: "A story in the fog"');
+        expect(gameSource).toContain('title: "Test Game"');
+        expect(gameSource).toContain('subtitle: "Test subtitle"');
     } finally {
         await quitApp(app);
     }
