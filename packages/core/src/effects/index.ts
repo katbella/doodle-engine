@@ -209,7 +209,7 @@ function applySetVariable(
 /**
  * Add to (or subtract from) a numeric variable.
  * If the variable doesn't exist, initializes it to the value.
- * If the variable is a string, this effect does nothing.
+ * If the variable contains text, replaces it with the supplied number.
  *
  * Example: ADD variable gold -50
  */
@@ -220,7 +220,7 @@ function applyAddVariable(
 ): GameState {
     const currentValue = state.variables[variable];
 
-    // Only add if current value is a number or doesn't exist
+    // ADD always produces a number: it adds to numbers and replaces other values.
     const newValue =
         typeof currentValue === 'number' ? currentValue + value : value;
 

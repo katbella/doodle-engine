@@ -49,7 +49,7 @@ Check if a variable equals a specific value.
 
 ```text
 REQUIRE variableEquals gold 100
-REQUIRE variableEquals playerName "Aria"
+REQUIRE variableEquals playerName Aria
 ```
 
 | Parameter  | Type               | Description              |

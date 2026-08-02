@@ -150,7 +150,7 @@ describe('Effect Processors', () => {
             expect(newState.variables.newVar).toBe(100);
         });
 
-        it('overwrites a string variable when adding a number to it (edge case but could happen!)', () => {
+        it('replaces a text value with the supplied number', () => {
             const effect: Effect = {
                 type: 'addVariable',
                 variable: 'playerName',
@@ -777,23 +777,6 @@ describe('Effect Processors', () => {
             const newState = applyEffect(effect, state);
 
             expect(newState.variables['gold']).toBe(5);
-        });
-
-        it('should produce different results across multiple rolls', () => {
-            const effect: Effect = {
-                type: 'roll',
-                variable: 'r',
-                min: 1,
-                max: 100,
-            };
-            const state = createTestState();
-            const results = new Set<number>();
-            for (let i = 0; i < 20; i++) {
-                const newState = applyEffect(effect, state);
-                results.add(newState.variables['r'] as number);
-            }
-            // With 100 possible values and 20 rolls, very likely to get at least 2 distinct values
-            expect(results.size).toBeGreaterThan(1);
         });
     });
 

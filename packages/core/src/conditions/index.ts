@@ -1,13 +1,13 @@
 /**
  * Condition evaluation system for the Doodle Engine.
  *
- * Conditions are pure functions that test game state and return true or false.
+ * Conditions test a rule and return true or false.
  * They are used throughout the engine to:
  * - Filter dialogue choices that should be visible
  * - Determine which dialogue nodes to show
  * - Decide if triggered dialogues should start
  *
- * All evaluators are pure functions with no side effects.
+ * Evaluating a condition does not change game state.
  */
 
 import type { Condition } from '../types/conditions';

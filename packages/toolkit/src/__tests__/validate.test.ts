@@ -484,6 +484,54 @@ describe('validateContent', () => {
         expect(validateContent(registry, new Map())).toEqual([]);
     });
 
+    it('requires timeIs hours to be between 0 and 23', () => {
+        const registry = makeRegistry({
+            dialogues: {
+                test_dialogue: makeDialogueWithCondition({
+                    type: 'timeIs',
+                    startHour: -1,
+                    endHour: 24,
+                }),
+            },
+        });
+
+        expect(messages(registry)).toContain(
+            'Node "start" condition "timeIs" argument "startHour" must be between 0 and 23'
+        );
+        expect(messages(registry)).toContain(
+            'Node "start" condition "timeIs" argument "endHour" must be between 0 and 23'
+        );
+    });
+
+    it('validates stat names used in conditions and effects', () => {
+        const dialogue = makeDialogue([
+            {
+                type: 'setCharacterStat',
+                characterId: 'player',
+                stat: 'combat-power',
+                value: 5,
+            },
+        ]);
+        dialogue.nodes[0].conditions = [
+            {
+                type: 'characterStatGreaterThan',
+                characterId: 'player',
+                stat: 'combat-power',
+                value: 2,
+            },
+        ];
+        const registry = makeRegistry({
+            dialogues: { test_dialogue: dialogue },
+        });
+
+        expect(messages(registry)).toContain(
+            'Node "start" condition "characterStatGreaterThan" argument "stat" must use only letters, numbers, and underscores'
+        );
+        expect(messages(registry)).toContain(
+            'Node "start" effect "setCharacterStat" argument "stat" must use only letters, numbers, and underscores'
+        );
+    });
+
     it('reports duplicate choice IDs within a node', () => {
         const registry = makeRegistry({
             dialogues: {

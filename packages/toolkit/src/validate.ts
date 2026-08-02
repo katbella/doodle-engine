@@ -1112,6 +1112,7 @@ function validateNumberArgs(
 const IDENTIFIER_ARGUMENT_KINDS = new Set([
     'flag',
     'variable',
+    'stat',
     'itemId',
     'characterId',
     'locationId',
@@ -1181,6 +1182,20 @@ function validateCondition(
                 file,
                 errors
             );
+            for (const field of ['startHour', 'endHour'] as const) {
+                const value = condition[field];
+                if (
+                    typeof value === 'number' &&
+                    Number.isFinite(value) &&
+                    (value < 0 || value > 23)
+                ) {
+                    errors.push({
+                        file,
+                        message: `${site} condition "timeIs" argument "${field}" must be between 0 and 23`,
+                        suggestion: `Give "${field}" an hour from 0 through 23`,
+                    });
+                }
+            }
         }
         return errors;
     }
