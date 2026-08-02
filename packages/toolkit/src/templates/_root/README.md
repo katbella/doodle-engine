@@ -19,6 +19,7 @@ Other commands:
 npm run validate   # check content for errors
 npm run build      # create release files in dist/
 npm run preview    # serve the finished build locally
+npm run typecheck  # check the game's TypeScript
 ```
 
 ## Where things live

@@ -248,14 +248,17 @@ function MyLayout() {
 The snapshot provides the current game screen data:
 
 ```typescript
+snapshot.player; // Player profile and stats
 snapshot.location; // Current location (name, description, banner)
 snapshot.dialogue; // Current dialogue node or null
 snapshot.choices; // Available choices (empty if no dialogue or auto-advance)
 snapshot.charactersHere; // NPCs at current location
+snapshot.itemsHere; // Items at current location, not in inventory
 snapshot.party; // Characters in the player's party
 snapshot.inventory; // Player's items
 snapshot.quests; // Active quests with current stage
 snapshot.journal; // Unlocked journal entries
+snapshot.playerNotes; // Notes written by the player
 snapshot.variables; // Game variables (gold, reputation, etc.)
 snapshot.time; // Current in-game time { day, hour }
 snapshot.map; // Map data or null if disabled

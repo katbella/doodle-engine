@@ -105,7 +105,7 @@ The returned object contains `masterVolume`, `musicVolume`, `soundVolume`, and
 
 ## useAudioManager
 
-Manages audio playback as the snapshot changes. Pass the current volume values each time the component renders; active audio updates when those values change.
+Manages audio playback as the snapshot changes. Pass the current volume values each time the component renders. Active audio updates when those values change.
 
 Store volume state in `AudioSettingsContext` or another application store and pass the values to the hook.
 
@@ -223,6 +223,7 @@ function MyUI() {
 | `volume`           | `number`  | `0.5`              | Volume level (0-1)           |
 | `sounds`           | `object`  | —                  | Custom sound file names      |
 | `sounds.click`     | `string`  | `'click.ogg'`      | Click sound file             |
+| `sounds.hover`     | `string`  | `'hover.ogg'`      | Hover sound file             |
 | `sounds.menuOpen`  | `string`  | `'menu_open.ogg'`  | Menu open sound file         |
 | `sounds.menuClose` | `string`  | `'menu_close.ogg'` | Menu close sound file        |
 

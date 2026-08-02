@@ -138,4 +138,4 @@ NODE quest_complete
 
 ## Check Your Work
 
-Reach the node in play: the video should cover the screen, then return you to the dialogue underneath when it ends or is skipped. If nothing plays, confirm the file is in `assets/video/` under exactly the name the `VIDEO` line uses; a missing file also fails `npm run build`. Large videos are usually the heaviest files in a game, so the [compression advice](/guides/assets-and-media/#compression-tips) in Assets & Media matters most here.
+Reach the node in play: the video should cover the screen, then return you to the dialogue underneath when it ends or is skipped. If nothing plays, confirm the file is in `assets/video/` under exactly the name the `VIDEO` line uses. A missing file also fails `npm run build`. Large videos are usually the heaviest files in a game, so the [compression advice](/guides/assets-and-media/#compression-tips) in Assets & Media matters most here.

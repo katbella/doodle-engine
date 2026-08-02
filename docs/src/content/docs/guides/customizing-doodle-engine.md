@@ -5,7 +5,7 @@ description: How to customize Doodle Engine beyond the defaults.
 
 Doodle Engine keeps game state separate from presentation. A renderer is the code that turns that state into the interface the player sees. You can restyle the built-in renderer, compose a different interface from Doodle's React components, or build your own renderer. Conditions, effects, and custom save storage provide further ways to shape the game.
 
-This page is an overview of those customization layers, ordered from least to most work. For restyling alone, CSS is enough and [Game Shell styling](/guides/game-shell/#styling) covers it; you only reach for the code on this page when styling cannot express the interface you want. The examples assume TypeScript and React basics.
+This page is an overview of those customization layers, ordered from least to most work. For restyling alone, CSS is enough and [Game Shell styling](/guides/game-shell/#styling) covers it. The code on this page is for when styling cannot express the interface you want. The examples assume TypeScript and React basics.
 
 ## Building a Custom Renderer
 

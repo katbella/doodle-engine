@@ -33,7 +33,7 @@ CHOICE Buy a drink for five gold.
 END
 ```
 
-`variableEquals`, `variableGreaterThan`, and `variableLessThan` compare against a value; the greater and less checks are strict, so the threshold itself does not pass. A variable can also appear inside displayed text as `{gold}`; [Dice & Randomness](/guides/dice-and-randomness/#text-interpolation) covers interpolation.
+`variableEquals`, `variableGreaterThan`, and `variableLessThan` compare against a value. The greater and less checks are strict, so the threshold itself does not pass. A variable can also appear inside displayed text as `{gold}`, which [Dice & Randomness](/guides/dice-and-randomness/#text-interpolation) covers.
 
 Starting values for both come from `content/game.yaml`:
 
@@ -74,8 +74,8 @@ Hide anything that is bookkeeping rather than information the player should watc
 
 Keep a variable visible when the player should be aware of it and watch it change: resources like `gold` or `health`, standing like `reputation` or `karma`, and any story metric the game wants the player thinking about. The starter project follows this split with visible `gold` and `reputation` beside hidden `_drinksBought`.
 
-Flags are never shown to the player by the built-in renderer, so they need no such convention. The same underscore prefix does hide character stats from the built-in character sheet; see [Character Stats](/guides/characters-and-party/#character-stats).
+Flags are never shown to the player by the built-in renderer, so they need no such convention. The same underscore prefix hides character stats from the built-in character sheet, covered in [Character Stats](/guides/characters-and-party/#character-stats).
 
 ## Keeping Track at Scale
 
-Nothing declares a flag or variable ahead of time; the first `SET` brings it into being. That is convenient and also how typos become bugs: `metBartender` set in one file and `metBartneder` checked in another simply never match. Studio's [Flags & Variables page](/studio/flags-and-variables/) exists for exactly this, with checks for names that are set but never read, read but never set, or nearly identical, plus notes that travel with the project. From the files side, `npm run validate` confirms the names are well-formed, and Studio's playtester shows every flag and variable live while you test a branch.
+Nothing declares a flag or variable ahead of time. The first `SET` brings it into being. That is convenient and also how typos become bugs: `metBartender` set in one file and `metBartneder` checked in another simply never match. Studio's [Flags & Variables page](/studio/flags-and-variables/) exists for exactly this, with checks for names that are set but never read, read but never set, or nearly identical, plus notes that travel with the project. From the files side, `npm run validate` confirms the names are well-formed, and Studio's playtester shows every flag and variable live while you test a branch.

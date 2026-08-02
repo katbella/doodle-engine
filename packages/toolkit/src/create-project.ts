@@ -143,6 +143,7 @@ export async function createProject(
             build: 'doodle-engine build',
             validate: 'doodle-engine validate',
             preview: 'vite preview',
+            typecheck: 'tsc --noEmit',
         },
         dependencies: {
             '@doodle-engine/core': DOODLE_VERSION,

@@ -32,9 +32,9 @@ NODE farewell
   END dialogue
 ```
 
-A few keywords carry this whole example. `BARTENDER:` is a speaker line; the name before the colon is matched to a character ID, case-insensitively. `CHOICE` starts an option the player can pick, and `END` closes it. `GOTO` routes to another node. `END dialogue` closes the conversation, while a bare `END` only closes a `CHOICE` or `IF` block.
+Each keyword in that example does one job. `BARTENDER:` is a speaker line, and the name before the colon is matched to a character ID, case-insensitively. `CHOICE` starts an option the player can pick, and `END` closes it. `GOTO` routes to another node. `END dialogue` closes the conversation, while a bare `END` only closes a `CHOICE` or `IF` block.
 
-Each node holds one speaker line. To let another character answer, route to a new node where that character speaks; that is how a conversation moves between speakers. For text with no speaker, use `NARRATOR:`.
+Each node holds one speaker line. To let another character answer, route to a new node where that character speaks. For text with no speaker, use `NARRATOR:`.
 
 What the player sees depends on what the node contains. A node with choices shows them as buttons. A node with text but no choices shows a **Continue** button, or **End Dialogue** when continuing would close the conversation. A node with no text and no choices is a silent processing node: the engine applies its effects and advances instantly, which is useful for dice rolls and hidden branching.
 
@@ -98,11 +98,11 @@ END
 
 The effects run from top to bottom before the conversation moves to `after_drink`. Conditions and effects can be used together in the same choice.
 
-A choice cannot contain a spoken line. To show narration or a reply when a choice is picked, route it to a node with `GOTO` and put the line in that node.
+To show narration or a reply when a choice is picked, route it to a node with `GOTO` and put the line in that node. A choice holds its text, conditions, effects, and route.
 
 ## Conditional Branching
 
-Use `IF` blocks for automatic branching based on conditions. The player never sees an `IF` block; it is author-controlled routing.
+Use `IF` blocks for automatic branching based on conditions. The player never sees an `IF` block. It is routing you control.
 
 ```text
 NODE check_quest
@@ -197,7 +197,7 @@ CHOICE Ask to speak with the merchant.
 END
 ```
 
-The current dialogue ends and the new one begins at its first node. Use it for self-contained sequences; for a branch that should return to earlier choices, keep the nodes in the same file and route back with `GOTO`.
+The current dialogue ends and the new one begins at its first node. Use it for self-contained sequences. For a branch that should return to earlier choices, keep the nodes in the same file and route back with `GOTO`.
 
 ## Complete Example
 

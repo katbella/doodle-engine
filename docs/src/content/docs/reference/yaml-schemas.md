@@ -293,7 +293,7 @@ startInventory: []
 | `startInventory`       | `string[]`                         | Item IDs the player starts with                            |
 
 `playerCreatesProfile` defaults to `false`. It controls how the player profile
-is initialized; the profile content and starting stats remain in
+is initialized. The profile content and starting stats remain in
 `content/player.yaml`.
 
 ## Locale

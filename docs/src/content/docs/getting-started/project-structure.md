@@ -47,7 +47,7 @@ my-game/
   index.html          # HTML shell
   README.md           # Commands and pointers for this project
   package.json
-  tsconfig.json
+  tsconfig.json       # TypeScript settings your editor reads
   .gitignore
 ```
 

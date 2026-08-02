@@ -5,7 +5,7 @@ description: How to create characters, manage relationships, and build a party.
 
 Characters give the player people to meet, speak with, build relationships with, and invite into the party. Each character begins at an assigned location and can move as the story changes.
 
-This guide works through the character file, the difference between characters at a location and the party, relationships, stats, and the player's own profile. Examples edit files directly; in Doodle Studio, the same fields appear when you select a character in the project rail.
+This guide works through the character file, the difference between characters at a location and the party, relationships, stats, and the player's own profile. Examples edit files directly. In Doodle Studio, the same fields appear when you select a character in the project rail.
 
 ## Defining a Character
 
@@ -207,7 +207,7 @@ stats:
 
 The start modal asks for a required name plus an optional title and biography.
 The modal uses the localized UI strings for its labels and input hints, along
-with a generic emblem; it has no portrait upload.
+with a generic emblem, and it has no portrait upload.
 
 To provide a fixed protagonist instead, omit `playerCreatesProfile` or set it
 to `false` in `game.yaml`. The `name`, `title`, `biography`, and `portrait`
@@ -219,7 +219,7 @@ stats.
 The built-in renderer has a dedicated Party action in its bottom bar. Its
 character sheet starts with the player, then cycles through current party
 members with Previous and Next controls. Characters at the current location
-still start dialogue when selected; opening the Party panel is the separate way
+still start dialogue when selected. Opening the Party panel is the separate way
 to inspect stats.
 
 Player profile text and all character stats are included in saves. Characters

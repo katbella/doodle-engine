@@ -183,10 +183,11 @@ import { LocationView } from '@doodle-engine/react';
 
 ### Props
 
-| Prop        | Type               | Default  | Description   |
-| ----------- | ------------------ | -------- | ------------- |
-| `location`  | `SnapshotLocation` | required | Location data |
-| `className` | `string`           | `''`     | CSS class     |
+| Prop        | Type                     | Default  | Description         |
+| ----------- | ------------------------ | -------- | ------------------- |
+| `location`  | `SnapshotLocation`       | required | Location data       |
+| `ui`        | `Record<string, string>` | —        | Resolved UI strings |
+| `className` | `string`                 | `''`     | CSS class           |
 
 ## CharacterList
 
@@ -207,6 +208,7 @@ import { CharacterList } from '@doodle-engine/react';
 | ------------ | ------------------------------- | -------- | --------------------- |
 | `characters` | `SnapshotCharacter[]`           | required | Characters to display |
 | `onTalkTo`   | `(characterId: string) => void` | required | Talk handler          |
+| `ui`         | `Record<string, string>`        | —        | Resolved UI strings   |
 | `className`  | `string`                        | `''`     | CSS class             |
 
 Selecting a location character calls `onTalkTo`. Character inspection is kept
@@ -242,8 +244,8 @@ import { CharacterSheet } from '@doodle-engine/react';
 ## PlayerSetup
 
 Displays the non-dismissible start modal for a player-created profile. Name is
-required; title and biography are optional. The component deliberately has no
-portrait input.
+required, and title and biography are optional. The component deliberately has
+no portrait input.
 
 ```tsx
 import { PlayerSetup } from '@doodle-engine/react';
@@ -288,9 +290,10 @@ import { GameTime } from '@doodle-engine/react';
 
 | Prop        | Type                                  | Default     | Description        |
 | ----------- | ------------------------------------- | ----------- | ------------------ |
-| `time`      | `{ day: number; hour: number }`       | required    | Time from snapshot |
-| `format`    | `'numeric' \| 'narrative' \| 'short'` | `'numeric'` | Display format     |
-| `className` | `string`                              | `''`        | CSS class          |
+| `time`      | `{ day: number; hour: number }`       | required    | Time from snapshot  |
+| `format`    | `'numeric' \| 'narrative' \| 'short'` | `'numeric'` | Display format      |
+| `ui`        | `Record<string, string>`              | —           | Resolved UI strings |
+| `className` | `string`                              | `''`        | CSS class           |
 
 ### Formats
 
@@ -323,6 +326,7 @@ import { MapView } from '@doodle-engine/react';
 | `currentTime`     | `{ day: number; hour: number}` | —        | Current time for arrival calculation         |
 | `onTravelTo`      | `(locationId: string) => void` | required | Travel handler                               |
 | `confirmTravel`   | `boolean`                      | `true`   | Show confirmation dialog before travel       |
+| `ui`              | `Record<string, string>`       | —        | Resolved UI strings                          |
 | `className`       | `string`                       | `''`     | CSS class                                    |
 
 When `confirmTravel` is `true` and the player clicks a location, a dialog shows the destination name and estimated journey time before any travel occurs. If `currentTime` is provided, the dialog also shows the expected arrival time. If `currentLocation` is not provided, the dialog skips the time estimate and just asks for confirmation. Travel time display is approximate. The engine applies its own time advancement rules when `travelTo` is called.
@@ -339,10 +343,11 @@ import { Inventory } from '@doodle-engine/react';
 
 ### Props
 
-| Prop        | Type             | Default  | Description     |
-| ----------- | ---------------- | -------- | --------------- |
-| `items`     | `SnapshotItem[]` | required | Inventory items |
-| `className` | `string`         | `''`     | CSS class       |
+| Prop        | Type                     | Default  | Description         |
+| ----------- | ------------------------ | -------- | ------------------- |
+| `items`     | `SnapshotItem[]`         | required | Inventory items     |
+| `ui`        | `Record<string, string>` | —        | Resolved UI strings |
+| `className` | `string`                 | `''`     | CSS class           |
 
 ### Features
 
@@ -367,6 +372,7 @@ import { Journal } from '@doodle-engine/react';
 | ----------- | ------------------------ | -------- | ------------------------ |
 | `quests`    | `SnapshotQuest[]`        | required | Active quests            |
 | `entries`   | `SnapshotJournalEntry[]` | required | Unlocked journal entries |
+| `ui`        | `Record<string, string>` | —        | Resolved UI strings      |
 | `className` | `string`                 | `''`     | CSS class                |
 
 ### Layout
@@ -395,6 +401,7 @@ import { PlayerNotes } from '@doodle-engine/react';
 | `notes`     | `PlayerNote[]`                          | required | Player-written notes |
 | `onWrite`   | `(title: string, text: string) => void` | required | Add note handler     |
 | `onDelete`  | `(noteId: string) => void`              | required | Delete note handler  |
+| `ui`        | `Record<string, string>`                | —        | Resolved UI strings  |
 | `className` | `string`                                | `''`     | CSS class            |
 
 Notes are stored in game state and persisted through save/load.
@@ -481,14 +488,14 @@ import { PROJECT_ID } from './project';
 
 - Lists quick saves, autosaves, and manual saves for the current project
 - **New Save** adds a manual save
-- Every slot can be loaded; manual saves can also be deleted
+- Every slot can be loaded, and manual saves can also be deleted
 - Shows temporary saved and loaded feedback
 
 ## Interlude
 
 Full-screen narrative scene with scrolling text and optional background art.
-`GameRenderer` and `GameShell` display interludes automatically; custom
-renderers can use this component directly.
+`GameRenderer` and `GameShell` display interludes automatically. A custom
+renderer can use this component directly.
 
 ```tsx
 import { Interlude } from '@doodle-engine/react';
@@ -524,11 +531,12 @@ import { VideoPlayer } from '@doodle-engine/react';
 
 ### Props
 
-| Prop         | Type         | Default  | Description                          |
-| ------------ | ------------ | -------- | ------------------------------------ |
-| `src`        | `string`     | required | Video file path (resolved by engine) |
-| `onComplete` | `() => void` | required | Called when video ends or is skipped |
-| `className`  | `string`     | `''`     | CSS class                            |
+| Prop         | Type                     | Default  | Description                          |
+| ------------ | ------------------------ | -------- | ------------------------------------ |
+| `src`        | `string`                 | required | Video file path (resolved by engine) |
+| `onComplete` | `() => void`             | required | Called when video ends or is skipped |
+| `ui`         | `Record<string, string>` | —        | Resolved UI strings                  |
+| `className`  | `string`                 | `''`     | CSS class                            |
 
 ## LoadingScreen
 
@@ -553,6 +561,7 @@ import { LoadingScreen } from '@doodle-engine/react'
 | `state`          | `AssetLoadingState`                              | required     | Loading state from `AssetProvider`                     |
 | `background`     | `string`                                         | —            | Background image URL (from `shell.loading.background`) |
 | `renderProgress` | `(progress: number, phase: string) => ReactNode` | —            | Custom progress bar renderer                           |
+| `ui`             | `Record<string, string>`                         | —            | Resolved UI strings                                    |
 | `onStart`        | `() => void`                                     | —            | Show and handle the button when loading is complete    |
 | `startLabel`     | `string`                                         | `Start game` | Completed-loading button label                         |
 | `className`      | `string`                                         | `''`         | CSS class                                              |
@@ -574,11 +583,13 @@ import { SplashScreen } from '@doodle-engine/react';
 
 ### Props
 
-| Prop         | Type                    | Default  | Description                    |
-| ------------ | ----------------------- | -------- | ------------------------------ |
-| `shell`      | `ShellConfig['splash']` | —        | Splash config from `game.yaml` |
-| `onComplete` | `() => void`            | required | Called when splash finishes    |
-| `className`  | `string`                | `''`     | CSS class                      |
+| Prop         | Type                     | Default  | Description                     |
+| ------------ | ------------------------ | -------- | ------------------------------- |
+| `shell`      | `ShellConfig['splash']`  | —        | Splash config from `game.yaml`  |
+| `onComplete` | `() => void`             | required | Called when splash finishes     |
+| `ui`         | `Record<string, string>` | —        | Resolved UI strings             |
+| `volume`     | `number`                 | `0.8`    | Splash sound volume, `0` to `1` |
+| `className`  | `string`                 | `''`     | CSS class                       |
 
 Duration defaults to `2000ms` if not set in `shell.duration`. Click anywhere to skip.
 
@@ -621,6 +632,7 @@ import { TitleScreen } from '@doodle-engine/react';
 | `onNewGame`   | `() => void`             | required          | New Game handler                     |
 | `onContinue`  | `() => void`             | required          | Continue handler                     |
 | `onSettings`  | `() => void`             | required          | Settings handler                     |
+| `onCredits`   | `() => void`             | —                 | Credits handler                      |
 | `className`   | `string`                 | `''`              | CSS class                            |
 
 ## CreditsScreen
@@ -673,6 +685,7 @@ import { PauseMenu } from '@doodle-engine/react';
 | `onResume`      | `() => void`             | required | Resume gameplay      |
 | `onSave`        | `() => void`             | required | Save game            |
 | `onLoad`        | `() => void`             | required | Load saved game      |
+| `canLoad`       | `boolean`                | —        | Disables Load when `false` |
 | `onSettings`    | `() => void`             | required | Open settings        |
 | `onQuitToTitle` | `() => void`             | required | Quit to title screen |
 | `className`     | `string`                 | `''`     | CSS class            |
@@ -706,6 +719,7 @@ const audioSettings = useAudioSettings();
 | `currentLocale`    | `string`                            | —        | Current language code     |
 | `onLocaleChange`   | `(locale: string) => void`          | —        | Language change handler   |
 | `onBack`           | `() => void`                        | required | Back/close handler        |
+| `ui`               | `Record<string, string>`            | —        | Resolved UI strings       |
 | `className`        | `string`                            | `''`     | CSS class                 |
 
 `SettingsPanelAudio` has the same shape as `AudioSettings` from `AudioSettingsContext`, so you can pass `useAudioSettings()` directly as the `audio` prop.
@@ -741,6 +755,7 @@ import { PROJECT_ID } from './project';
 | `assetLoader`      | `AssetLoader`                             | —                 | Custom asset loader (for non-browser environments)              |
 | `title`            | `string`                                  | `'Doodle Engine'` | Game title text                                                 |
 | `subtitle`         | `string`                                  | —                 | Subtitle text                                                   |
+| `credits`          | `ReactNode`                               | —                 | Credits content, replacing the default credit                   |
 | `uiSounds`         | `UISoundConfig \| false`                  | —                 | UI sound config, or `false` to disable                          |
 | `audioOptions`     | `AudioManagerOptions`                     | —                 | Crossfade duration and other audio config                       |
 | `availableLocales` | `{ code: string; label: string }[]`       | —                 | Language options for settings                                   |

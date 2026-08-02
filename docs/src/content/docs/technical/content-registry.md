@@ -8,8 +8,8 @@ definitions. It is built at load time from the `content/` directory and is
 never modified by the engine or renderer during gameplay.
 
 This page is for developers working with the engine API or a custom renderer.
-Content authors never touch the registry directly; it is simply where their
-files end up at runtime.
+You never touch the registry directly while writing content. It is simply
+where your files end up at runtime.
 
 The registry organizes content by ID so the engine can find it without scanning project files during play.
 

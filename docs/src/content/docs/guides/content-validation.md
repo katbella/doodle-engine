@@ -77,7 +77,7 @@ Run this command for:
 
 ### Dialogue Parsing
 
-Validation parses each `.dlg` file, turning its text into dialogue data. If the syntax is invalid, the error names the file and the part that could not be read. Examples include an unknown keyword, condition, or effect; more than one speaker line in a node; a spoken line inside a choice; or a quoted value where the language expects a plain token.
+Validation parses each `.dlg` file, turning its text into dialogue data. If the syntax is invalid, the error names the file and the part that could not be read. Examples include an unknown keyword, condition, or effect, more than one speaker line in a node, a spoken line inside a choice, or a quoted value where the language expects a plain token.
 
 ```text
 content/dialogues/bartender_greeting.dlg
@@ -114,6 +114,7 @@ All conditions must have their required arguments:
 | `characterInParty`                                          | `characterId`                   |
 | `relationshipAbove`, `relationshipBelow`                    | `characterId`, `value`          |
 | `variableEquals`, `variableGreaterThan`, `variableLessThan` | `variable`, `value`             |
+| `characterStatEquals`, `characterStatGreaterThan`, `characterStatLessThan` | `characterId`, `stat`, `value` |
 | `itemAt`                                                    | `itemId`, `locationId`          |
 | `timeIs`                                                    | `startHour`, `endHour`          |
 | `roll`                                                      | `min`, `max`, `threshold`       |
@@ -185,7 +186,7 @@ Every content file must load before its fields and references can be checked:
 
 - A YAML file with a syntax error is reported by name, and the other files in its folder still load
 - A YAML entity file must have an `id`
-- Two files of the same type cannot share an `id`; the clash is reported with both file names
+- Each `id` is unique within its type. A clash is reported with both file names
 - An invalid `game.yaml` is reported by name
 - Each entity must have the fields the engine reads: locations need `name` and `description`, characters need `name`, items need `name` and `location`, maps need `name`, quests need `name` and at least one stage, journal entries need `title` and `text`, interludes need `text`
 - Content IDs, dialogue node IDs, quest stage IDs, flags, and variables may contain only letters, numbers, and underscores
@@ -224,7 +225,7 @@ location.
 The asset manifest is the list of media files included with the game. Missing
 images, audio, and video are reported when this list is created: during
 `npm run dev` when the browser loads the game and at the start of every build.
-`npm run validate` checks content and references; it does not scan media files.
+`npm run validate` checks content and references. It does not scan media files.
 
 ### Localization Keys
 

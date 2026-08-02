@@ -3,9 +3,9 @@ title: Hosting & Deployment
 description: How to build and deploy your Doodle Engine game.
 ---
 
-Doodle Engine games are web applications. A production build contains static HTML, CSS, and JavaScript that can be published on a static web host, with no server-side software to run. This guide takes a finished project from build to publish; the only prerequisites are a project that passes validation and, for the wrapper sections, the toolchain of whichever wrapper you choose.
+Doodle Engine games are web applications. A production build contains static HTML, CSS, and JavaScript that can be published on a static web host, with no server-side software to run. This guide takes a finished project from build to publish. You need a project that passes validation, plus the toolchain of whichever wrapper you choose for the desktop and mobile sections.
 
-Studio users can produce the same `dist/` output with the **Build** button; see [Validate, Preview, and Build](/studio/validation-builds/#build-for-production). Everything after the build step is identical for both workflows.
+Studio users can produce the same `dist/` output with the **Build** button, described in [Validate, Preview, and Build](/studio/validation-builds/#build-for-production). Everything after the build step is identical for both workflows.
 
 ## Building for Production
 

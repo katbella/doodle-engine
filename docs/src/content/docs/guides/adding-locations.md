@@ -69,7 +69,7 @@ To calculate your scale: divide your map's width in pixels by how many hours you
 
 **Example**: For a 500-pixel-wide map that takes 5 hours to cross, use `scale: 100`.
 
-**Formula**: `travel time = distance in pixels / scale`
+**Formula**: `travel time in hours = round(distance in pixels / scale)`
 
 :::note
 Travel always takes at least 1 hour, regardless of scale. Two markers placed close together still cost the player an hour of game time.
@@ -99,9 +99,10 @@ The `TRIGGER` keyword starts this dialogue when the player enters the tavern. Th
 When a player travels with the map:
 
 1. `currentLocation` updates to the new location
-2. Time advances based on map `scale` and distance. The formula is `travel time = distance in pixels / scale`.
-3. Any active dialogue ends
-4. Triggered dialogues and interludes at the new location are checked
+2. Time advances by `round(distance / scale)` hours, minimum 1
+3. Party members move to the new location
+4. Any active dialogue ends
+5. Triggered dialogues and interludes at the new location are checked
 
 You can also move the player from dialogue:
 
