@@ -184,4 +184,4 @@ assets/
 
 ## Check Your Work
 
-Start the game and travel to the location: its music should begin, and crossfade when you travel somewhere with a different track. A `SOUND` effect plays once at the moment its node or choice runs. If a file stays silent, check the filename in the content field against the file on disk and confirm it sits in the folder for that field; a missing file is also reported when the asset manifest is built during `npm run dev` and at the start of every build.
+Start the game and travel to the location: its music should begin, and crossfade when you travel somewhere with a different track. A `SOUND` effect plays once at the moment its node or choice runs. If a file stays silent, check the filename in the content field against the file on disk and confirm it sits in the folder for that field. A missing file is also reported when the asset manifest is built during `npm run dev` and at the start of every build.

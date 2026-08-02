@@ -98,7 +98,7 @@ import { PROJECT_ID } from './project';
 | `projectId` | `string`                       | required | Stable ID from the generated `project.ts` |
 | `className` | `string`                       | `''`     | CSS class                                 |
 
-The `@doodle-engine/react` package also exports `listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, and `hasSaves` for a custom save interface. Pass their keys through `saveStorageKeyForProject(PROJECT_ID)`; shared and hand-written keys are rejected.
+The `@doodle-engine/react` package also exports `listSaves`, `writeSave`, `loadSave`, `deleteSave`, `latestSave`, and `hasSaves` for a custom save interface. Pass their keys through `saveStorageKeyForProject(PROJECT_ID)`. Shared and hand-written keys are rejected.
 
 ## Storing Saves Elsewhere
 

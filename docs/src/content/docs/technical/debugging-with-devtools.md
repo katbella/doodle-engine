@@ -5,7 +5,7 @@ description: Use window.doodle API to debug your game during development.
 
 The browser console API, `window.doodle`, lets you inspect and change game state while testing. It works with any renderer when dev tools are enabled.
 
-New React projects use `devTools={import.meta.env.DEV}` to enable these commands during development and omit them from release builds, so in a fresh project you can skip straight to [Using Dev Tools](#using-dev-tools). Studio users testing dialogue state usually want [Playtest](/studio/playtesting/) instead, which offers the same state control without the console; dev tools shine when you are testing in the real browser through Preview or `npm run dev`.
+New React projects use `devTools={import.meta.env.DEV}` to enable these commands during development and omit them from release builds, so in a fresh project you can skip straight to [Using Dev Tools](#using-dev-tools). Studio users testing dialogue state usually want [Playtest](/studio/playtesting/) instead, which offers the same state control without the console. Dev tools are for testing in the real browser through Preview or `npm run dev`.
 
 :::note
 `window.doodle` appears only after a game has started, once you click New Game or Continue. On the title screen the object does not exist yet.
@@ -256,4 +256,4 @@ New React projects include this check. Use the same pattern in custom renderers.
 
 ## Tips
 
-Start every session with `doodle.inspect()`; it prints the current state and the full command list, so you never have to remember the API. Commands combine well: set a few flags, add an item, then trigger the dialogue you want to test, all in sequence. For scenarios you test repeatedly, keep the command sequence in a text file or a browser snippet and paste it in.
+Start every session with `doodle.inspect()`. It prints the current state and the full command list, so you never have to remember the API. Commands combine well: set a few flags, add an item, then trigger the dialogue you want to test, all in sequence. For scenarios you test repeatedly, keep the command sequence in a text file or a browser snippet and paste it in.

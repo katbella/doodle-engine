@@ -102,6 +102,10 @@ export default defineConfig({
                                     slug: 'guides/creating-quests',
                                 },
                                 {
+                                    label: 'Journal Entries',
+                                    slug: 'guides/journal-entries',
+                                },
+                                {
                                     label: 'Inventory & Items',
                                     slug: 'guides/inventory-and-items',
                                 },
@@ -112,6 +116,10 @@ export default defineConfig({
                                 {
                                     label: 'Interludes',
                                     slug: 'guides/interludes',
+                                },
+                                {
+                                    label: 'Player Notes',
+                                    slug: 'guides/player-notes',
                                 },
                                 {
                                     label: 'Notifications',

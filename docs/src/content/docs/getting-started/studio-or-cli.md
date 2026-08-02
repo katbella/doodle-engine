@@ -44,7 +44,7 @@ The CLI scaffolds new projects with `npx @doodle-engine/cli create`, starts the 
 
 ## Use both when it helps
 
-Studio and the CLI use the same project folder. Work in Studio, your own editor, or both; no conversion is required.
+Studio and the CLI use the same project folder. Work in Studio, your own editor, or both. Nothing needs converting between them.
 
 ## Customize the Game's Presentation
 

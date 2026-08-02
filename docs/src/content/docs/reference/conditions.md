@@ -262,7 +262,7 @@ END
 - Branch on the result in multiple places
 - Reference the roll elsewhere in the scene
 
-For a hidden check with no displayed result, the `roll` condition works well in `IF` blocks or triggered content. For visible player choices, use `ROLL` first and check the stored variable. See the [Dice & Randomness guide](/guides/dice-and-randomness/).
+Use `roll` for a hidden check in an `IF` block or triggered content. To roll when the player picks a choice, route that choice to a node that uses `ROLL` and `IF`. See the [Dice & Randomness guide](/guides/dice-and-randomness/).
 
 ## Using Conditions in Dialogue
 

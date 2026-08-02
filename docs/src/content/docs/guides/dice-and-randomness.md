@@ -3,7 +3,7 @@ title: Dice & Randomness
 description: Add skill checks, random outcomes, and variable interpolation to your dialogues.
 ---
 
-Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive). Which one you want depends on a single question: does anyone need to see the number? `ROLL` stores the result in a variable you can display and reuse; the `roll` condition just passes or fails.
+Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive). Which one you want depends on a single question: does anyone need to see the number? `ROLL` stores the result in a variable you can display and reuse. The `roll` condition just passes or fails.
 
 The examples are dialogue script; [Writing Dialogues](/guides/writing-dialogues/) covers the basics, and silent processing nodes from that guide do the heavy lifting here.
 

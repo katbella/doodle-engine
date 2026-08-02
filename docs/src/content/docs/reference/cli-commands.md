@@ -9,6 +9,7 @@ Doodle Engine's command-line tools come from the `@doodle-engine/cli` package, w
 - `npm run build` creates a production build
 - `npm run validate` checks the game content
 - `npm run preview` serves a finished build locally
+- `npm run typecheck` checks the game's TypeScript
 
 ## npx doodle-engine create
 

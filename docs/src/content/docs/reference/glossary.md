@@ -11,11 +11,11 @@ A media file used by the game: an image, an audio file, or a video. Assets live 
 
 ## Asset manifest
 
-The generated list of every asset the game needs, with each file's type and size. It has two groups: **shell assets** (splash, loading, and title screen media) load first, and **game assets** (portraits, banners, music, video) load during the loading screen. The development server generates it on request; a production build writes it to disk. The manifest is a list of what to load, while the [content registry](#content-registry) holds the game's definitions. See [Asset Manifest](/reference/asset-manifest/).
+The generated list of every asset the game needs, with each file's type and size. It has two groups: **shell assets** (splash, loading, and title screen media) load first, and **game assets** (portraits, banners, music, video) load during the loading screen. The development server generates it on request, and a production build writes it to disk. The manifest is a list of what to load, while the [content registry](#content-registry) holds the game's definitions. See [Asset Manifest](/reference/asset-manifest/).
 
 ## Character
 
-A person in the game world, defined in a YAML file in `content/characters/`. A character has a name, an assigned starting location, a portrait, optional stats, and a `dialogue` field naming the conversation that starts when the player talks to them. The player is not a character file; it has its own optional `content/player.yaml`. See [Characters & Party](/guides/characters-and-party/).
+A person in the game world, defined in a YAML file in `content/characters/`. A character has a name, an assigned starting location, a portrait, optional stats, and a `dialogue` field naming the conversation that starts when the player talks to them. The player is not a character file, and has its own optional `content/player.yaml`. See [Characters & Party](/guides/characters-and-party/).
 
 ## Choice
 
@@ -35,7 +35,7 @@ Everything that defines your game's world and story: locations, characters, item
 
 ## Content registry
 
-The read-only, in-memory collection of all loaded content, organized by type and indexed by ID, so the engine can look up any definition without reading files during play. It is built from `content/` when the game loads and passed to the [engine](#engine)'s constructor. It holds definitions only; nothing in it records progress. See [Content Registry](/technical/content-registry/).
+The read-only, in-memory collection of all loaded content, organized by type and indexed by ID, so the engine can look up any definition without reading files during play. It is built from `content/` when the game loads and passed to the [engine](#engine)'s constructor. It holds definitions only. Nothing in it records progress. See [Content Registry](/technical/content-registry/).
 
 ## Dev server
 
@@ -71,7 +71,7 @@ The settings in `content/game.yaml`: the starting location, time, flags, variabl
 
 ## Game shell
 
-The screens and menus around the game itself, provided by the `GameShell` React component: asset loading, the splash and title screens, the pause menu, settings, credits, save/load, and video playback. The shell wraps the [renderer](#renderer); during play, `GameRenderer` draws the game inside it. See [Game Shell](/guides/game-shell/).
+The screens and menus around the game itself, provided by the `GameShell` React component: asset loading, the splash and title screens, the pause menu, settings, credits, save/load, and video playback. The shell wraps the [renderer](#renderer), and during play `GameRenderer` draws the game inside it. See [Game Shell](/guides/game-shell/).
 
 ## Game state
 
@@ -89,13 +89,17 @@ A full-screen narrative scene with scrolling text and optional background art an
 
 An object the player can carry or find, defined in `content/items/`. An item starts in the player's inventory, at a location, or with a character, and moves through the `ADD item`, `REMOVE item`, and `MOVE item` effects. See [Inventory & Items](/guides/inventory-and-items/).
 
+## Journal entry
+
+A fixed piece of writing, defined in `content/journal/`, that the player unlocks through the `ADD journalEntry` effect. Entries hold lore, people, and places, carry a `category` for grouping, and appear in the Journal panel beneath the active quests. An entry is either unlocked or not, which is what separates it from a [quest](#quest) and its stages, and from a [player note](#player-note) the player writes. See [Journal Entries](/guides/journal-entries/).
+
 ## Locale
 
 One language's text, stored as a flat key-to-text YAML file in `content/locales/`. The filename is the locale code: `en.yaml` is `"en"`. Content refers to a locale entry with a [localization key](#localization-key). See [Localization](/guides/localization/).
 
 ## Localization key
 
-A reference to a locale entry, written with an `@` prefix: `name: "@location.tavern.name"`. When building a snapshot, the engine replaces the key with the text from the current locale; a missing key is shown as the raw `@key` so it can be found and fixed. See [Localization](/guides/localization/).
+A reference to a locale entry, written with an `@` prefix: `name: "@location.tavern.name"`. When building a snapshot, the engine replaces the key with the text from the current locale. A missing key is shown as the raw `@key` so it can be found and fixed. See [Localization](/guides/localization/).
 
 ## Location
 
@@ -107,11 +111,15 @@ A travel screen connecting locations, defined in `content/maps/`. A map has a ba
 
 ## Node
 
-One moment in a dialogue: at most one speaker or narrator line, optional choices, optional conditions and effects, and a route onward. A node with text and no choices shows a Continue button; a node with no text and no choices is a silent processing node that applies its effects and advances instantly. See [DSL Syntax](/reference/dsl-syntax/#text-nodes-and-silent-nodes).
+One moment in a dialogue: at most one speaker or narrator line, optional choices, optional conditions and effects, and a route onward. A node with text and no choices shows a Continue button. A node with no text and no choices is a silent processing node that applies its effects and advances instantly. See [DSL Syntax](/reference/dsl-syntax/#text-nodes-and-silent-nodes).
 
 ## Party
 
 The characters traveling with the player. Party members appear in the snapshot's `party` list rather than among the characters at a location, and they move with the player. The `ADD toParty` and `REMOVE fromParty` effects manage membership. See [Characters & Party](/guides/characters-and-party/#party-management).
+
+## Player note
+
+A note the player writes during play, holding a title and some text. Notes are kept in game state and restored with a save. They are the player's own record, distinct from a [journal entry](#journal-entry), which is content you write and the game unlocks. See [Player Notes](/guides/player-notes/).
 
 ## Project
 
@@ -135,7 +143,7 @@ The code that turns a [snapshot](#snapshot) into the interface the player sees a
 
 ## Snapshot
 
-The engine's description of the current game screen, produced after every player action: the resolved location, dialogue line, visible choices, party, inventory, quests, and interface strings, with localization keys already resolved and hidden choices already filtered out. The renderer displays snapshots; it never reads engine state directly. See [Architecture](/technical/architecture/).
+The engine's description of the current game screen, produced after every player action: the resolved location, dialogue line, visible choices, party, inventory, quests, and interface strings, with localization keys already resolved and hidden choices already filtered out. The renderer displays snapshots and never reads engine state directly. See [Architecture](/technical/architecture/).
 
 ## Stat
 

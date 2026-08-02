@@ -110,9 +110,9 @@ Action methods such as `newGame()`, `travelTo()`, and `selectChoice()` return a 
 
 Conditions are evaluated by the engine in three places:
 
-- Snapshot building filters dialogue choices; choices with failing `REQUIRE` are hidden.
+- Snapshot building filters dialogue choices. A choice with a failing `REQUIRE` is hidden.
 - Engine actions check triggered dialogues and interludes when a game starts or travel changes location.
-- Dialogue advancement evaluates `IF` branches; the first passing branch runs its effects and controls routing.
+- Dialogue advancement evaluates `IF` branches. The first passing branch runs its effects and controls routing.
 
 The snapshot contains the player options whose conditions passed, ready for the renderer to display.
 

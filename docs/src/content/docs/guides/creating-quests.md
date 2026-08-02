@@ -100,6 +100,8 @@ Active quests appear in the Journal component. Each quest shows:
 
 The Journal shows any quest that has a stage in `questProgress`. Use a stage ID such as `complete` for the final stage. A custom renderer can use that ID to separate or hide completed quests.
 
+Below the quests, the same panel lists unlocked journal entries. See [Journal Entries](/guides/journal-entries/) for writing them and the `ADD journalEntry` effect used above.
+
 ## Check Your Work
 
 Run `npm run validate`, or select **Validate** in Studio. It confirms that every `SET questStage` and `questAtStage` names an existing quest and stage. Then play the path: accept the quest, watch the notification appear, and open the Journal to see the stage description change as you progress. Studio's [Playtest](/studio/playtesting/) can set quest stages directly, which makes testing later stages fast.

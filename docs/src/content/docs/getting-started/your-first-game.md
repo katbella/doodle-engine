@@ -25,7 +25,7 @@ The [Glossary](/reference/glossary/) collects these and the rest of Doodle Engin
 
 ## game.yaml
 
-Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory. The file begins with a commented-out `shell:` section for customizing the game's splash, loading, and title screens; below it are the starting values:
+Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory. The file begins with a commented-out `shell:` section for customizing the game's splash, loading, and title screens. Below that are the starting values:
 
 ```yaml
 playerCreatesProfile: true

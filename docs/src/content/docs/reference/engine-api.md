@@ -135,9 +135,11 @@ const snapshot = engine.talkTo('bartender');
 travelTo(locationId: string): Snapshot
 ```
 
-Travel to a location on the current map. The current map is the map that contains the player's current location. Travel calculates time from marker distance and map scale, advances time, ends any active dialogue, and checks for triggered dialogues and interludes at the destination.
+Travel to a location on the current map. The current map is the map that contains the player's current location. Travel advances time, moves party members to the destination, ends any active dialogue, and checks for triggered dialogues and interludes at the destination.
 
-The snapshot remains unchanged when the map is disabled (`mapEnabled: false`), the current location has no map, or the destination is on a different map.
+Travel time is `round(distance / scale)` in hours, using the straight-line distance between the two markers, with a minimum of 1 hour.
+
+The snapshot remains unchanged when the map is disabled (`mapEnabled: false`), the current location has no map, the destination is on a different map, or `scale` is zero, negative, or not a number.
 
 ```typescript
 const snapshot = engine.travelTo('market');
@@ -293,6 +295,37 @@ Transient state such as notifications, pending sounds, pending video, and pendin
 After `newGame()` and `travelTo()`, the engine checks for dialogues with a `triggerLocation` matching the current location. The first dialogue whose conditions pass begins automatically. One triggered dialogue can begin per location change.
 
 The engine also checks triggered interludes after `newGame()` and `travelTo()`. If an interlude's `triggerLocation` and `triggerConditions` match, the snapshot includes it as `pendingInterlude`.
+
+## Text
+
+### resolveText
+
+```typescript
+resolveText(
+    text: string,
+    localeData: LocaleData,
+    variables?: Record<string, number | string>,
+    characters?: TextCharacterMap
+): string
+```
+
+| Parameter    | Type                               | Description                                        |
+| ------------ | ---------------------------------- | -------------------------------------------------- |
+| `text`       | `string`                           | A `@key` or plain text                             |
+| `localeData` | `LocaleData`                       | Locale dictionary for the current language         |
+| `variables`  | `Record<string, number \| string>` | Values for `{variable}` placeholders               |
+| `characters` | `TextCharacterMap`                 | Values for `{id.name}` and `{id.stats.key}`        |
+
+Text starting with `@` is looked up in `localeData`, and a missing key returns the `@key` itself. Text without `@` is returned as written. Placeholders are filled in afterwards from `variables` and `characters`, and any placeholder without a matching value is left as written.
+
+```typescript
+import { resolveText } from '@doodle-engine/core';
+
+resolveText('@bluff.rolled', localeData, { bluffRoll: 17 });
+// "You spin the tale with 17 on your roll, and Marcus listens carefully."
+```
+
+The engine calls this while building a snapshot, so a renderer receives finished text.
 
 ## Text Formatting
 

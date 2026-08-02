@@ -269,7 +269,7 @@ Play a fullscreen video/cutscene. Bare filenames resolve to the normal video ass
 VIDEO intro_cinematic.mp4
 ```
 
-The video appears as `pendingVideo` in the snapshot returned by the action. This is a transient field, meaning it lasts for one engine update. `GameShell` keeps the value until `VideoPlayer` finishes; custom renderers need to retain it for playback as well.
+The video appears as `pendingVideo` in the snapshot returned by the action. This is a transient field, meaning it lasts for one engine update. `GameShell` keeps the value until `VideoPlayer` finishes. A custom renderer needs to retain it for playback as well.
 
 ## Interludes
 

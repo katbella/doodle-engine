@@ -70,14 +70,7 @@ When the engine prepares text for the renderer, it resolves each `@key` referenc
 2. If found, returns the translated string
 3. If the key is missing, displays the `@key` so you can identify the missing translation
 
-The resolution function:
-
-```typescript
-import { resolveText } from '@doodle-engine/core';
-
-const text = resolveText('@bartender.greeting', localeData);
-// "Welcome! What can I do for you?"
-```
+The engine does this while building each snapshot. See [resolveText](/reference/engine-api/#resolvetext).
 
 ## Changing Language at Runtime
 

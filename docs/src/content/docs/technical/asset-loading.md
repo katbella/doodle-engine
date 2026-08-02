@@ -60,7 +60,7 @@ shell:
         menuClose: assets/audio/ui/menu_close.ogg
 ```
 
-All fields are optional. Screens use their built-in presentation when an image or sound is omitted. Use project-relative paths beginning with `assets/`; the build checks that each referenced local file exists.
+All fields are optional. Screens use their built-in presentation when an image or sound is omitted. Use project-relative paths beginning with `assets/`. The build checks that each referenced local file exists.
 
 ## Customizing the Loading Screen
 
@@ -88,8 +88,8 @@ The `state` object includes:
     phase: 'idle' | 'loading-shell' | 'loading-game' | 'complete' | 'error';
     bytesLoaded: number;
     bytesTotal: number;
-    assetsLoaded: number;
-    assetsTotal: number;
+    assetsLoaded?: number;
+    assetsTotal?: number;
     progress: number;
     overallProgress: number;
     currentAsset: string | null;
