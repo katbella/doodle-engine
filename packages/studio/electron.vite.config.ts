@@ -7,6 +7,11 @@ const pkg = JSON.parse(
     readFileSync(resolve(__dirname, 'package.json'), 'utf-8')
 );
 
+const workspaceAliases = {
+    '@doodle-engine/core': resolve(__dirname, '../core/src/index.ts'),
+    '@doodle-engine/toolkit': resolve(__dirname, '../toolkit/src/index.ts'),
+};
+
 /**
  * Electron build config for Doodle Studio.
  *
@@ -23,6 +28,9 @@ const pkg = JSON.parse(
  */
 export default defineConfig({
     main: {
+        resolve: {
+            alias: workspaceAliases,
+        },
         define: {
             __DOODLE_VERSION__: JSON.stringify(pkg.version),
         },
@@ -41,6 +49,7 @@ export default defineConfig({
         resolve: {
             alias: {
                 '@': resolve('src/renderer/src'),
+                '@doodle-engine/core': workspaceAliases['@doodle-engine/core'],
             },
         },
         plugins: [react()],

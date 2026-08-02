@@ -143,6 +143,8 @@ describe('createProject language setup', () => {
         }
 
         const loaded = await loadProject(projectPath);
+        expect(loaded.config.title).toBe('literal-game');
+        expect(loaded.config.subtitle).toBe('');
         expect(loaded.parseErrors).toEqual([]);
         expect(
             validateContent(loaded.registry, loaded.fileMap, loaded.config)
@@ -225,6 +227,8 @@ describe('createProject language setup', () => {
         const targetDir = await makeTempDir();
         const { projectPath } = await createProject('minimal-game', {
             targetDir,
+            title: 'Minimal Story',
+            subtitle: 'A small beginning',
             useDefaultRenderer: true,
             useStarterStyles: true,
             contentMode: 'minimal',
@@ -251,6 +255,8 @@ describe('createProject language setup', () => {
         expect(start).toContain('name: "Starting Place"');
 
         const loaded = await loadProject(projectPath);
+        expect(loaded.config.title).toBe('Minimal Story');
+        expect(loaded.config.subtitle).toBe('A small beginning');
         expect(loaded.config.startLocation).toBe('start');
         expect(Object.keys(loaded.registry.locations)).toEqual(['start']);
         expect(loaded.parseErrors).toEqual([]);

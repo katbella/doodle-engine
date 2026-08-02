@@ -33,6 +33,7 @@ const manifest: AssetManifest = {
 };
 
 const config: GameConfig = {
+    title: 'Test Game',
     startLocation: 'tavern',
     startTime: { day: 1, hour: 8 },
     startFlags: {},
@@ -130,7 +131,6 @@ async function startGame(registry = makeRegistry()) {
             registry={registry}
             config={config}
             manifest={manifest}
-            title="Test Game"
             projectId={PROJECT_ID}
             uiSounds={false}
         />
@@ -163,7 +163,6 @@ function renderShell({
             registry={registry}
             config={gameConfig}
             manifest={manifest}
-            title="Test Game"
             projectId={PROJECT_ID}
             uiSounds={enableUISounds ? undefined : false}
             availableLocales={availableLocales}
@@ -172,6 +171,24 @@ function renderShell({
 }
 
 describe('GameShell player journeys', () => {
+    it('uses the game config title and subtitle for the title screen and browser tab', async () => {
+        const user = userEvent.setup();
+        renderShell({
+            gameConfig: {
+                ...config,
+                title: 'Harbor Lights',
+                subtitle: 'A story in the fog',
+            },
+        });
+        await continueFromLoading(user);
+
+        expect(
+            screen.getByRole('heading', { name: 'Harbor Lights' })
+        ).toBeTruthy();
+        expect(screen.getByText('A story in the fog')).toBeTruthy();
+        expect(document.title).toBe('Harbor Lights');
+    });
+
     it('opens credits from the title screen and returns', async () => {
         const user = userEvent.setup();
         renderShell();

@@ -60,10 +60,6 @@ export interface GameShellProps {
     manifest: AssetManifest;
     /** Custom asset loader (for non-browser environments) */
     assetLoader?: AssetLoader;
-    /** Game title for title screen */
-    title?: string;
-    /** Subtitle text */
-    subtitle?: string;
     /** Credits content. Defaults to the game title and Doodle Engine credit. */
     credits?: React.ReactNode;
     /** UI sound configuration, or false to disable */
@@ -90,8 +86,6 @@ export function GameShell({
     config,
     manifest,
     assetLoader,
-    title = 'Doodle Engine',
-    subtitle,
     credits,
     uiSounds: uiSoundsConfig,
     audioOptions,
@@ -103,8 +97,24 @@ export function GameShell({
 }: GameShellProps) {
     const storageKey = saveStorageKeyForProject(projectId);
     const shell = config.shell;
+    const title =
+        typeof config.title === 'string' && config.title.trim()
+            ? config.title.trim()
+            : 'Doodle Engine';
+    const subtitle =
+        typeof config.subtitle === 'string' && config.subtitle.trim()
+            ? config.subtitle.trim()
+            : undefined;
     const loadingUi = buildUIStrings(registry.locales['en'] ?? {});
     const [gameStarted, setGameStarted] = useState(false);
+
+    useEffect(() => {
+        const previousTitle = document.title;
+        document.title = title;
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [title]);
 
     return (
         <AudioSettingsProvider defaults={audioOptions}>

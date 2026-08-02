@@ -40,6 +40,7 @@ const project: OpenProject = {
         locales: {},
     },
     config: {
+        title: 'Test Game',
         startLocation: '',
         startTime: { day: 1, hour: 8 },
         startFlags: {},
@@ -314,7 +315,7 @@ describe('DialogueEditor author journeys', () => {
         await user.click(screen.getByRole('button', { name: 'Set as start' }));
         expect(
             within(screen.getByRole('button', { name: /second/ })).getByText(
-                'start'
+                'Start'
             )
         ).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Delete node' }));

@@ -366,6 +366,24 @@ function validateReferences(
     const errors: ValidationError[] = [];
 
     if (config) {
+        if (typeof config.title !== 'string' || !config.title.trim()) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: 'Game config missing required "title"',
+                suggestion: 'Set title to the name players should see',
+            });
+        }
+        if (
+            config.subtitle !== undefined &&
+            typeof config.subtitle !== 'string'
+        ) {
+            errors.push({
+                file: 'content/game.yaml',
+                message: 'Game config "subtitle" must be text',
+                suggestion: 'Write the subtitle as text or remove it',
+            });
+        }
+
         if (!hasValue(config.startLocation)) {
             errors.push({
                 file: 'content/game.yaml',

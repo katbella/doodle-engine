@@ -215,6 +215,7 @@ export async function loadContent(
     // ask for a start location); a game.yaml that exists but cannot be parsed
     // is a reported problem, never a silent fallback.
     const defaults = () => ({
+        title: '',
         startLocation: '',
         startTime: { day: 1, hour: 8 },
         startFlags: {},

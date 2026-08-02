@@ -74,11 +74,11 @@
 
 .dlg__node-badge {
     flex: none;
-    padding: 2px 6px;
-    font-size: var(--text-xs);
-    font-weight: var(--fw-semibold);
-    background: var(--valid);
-    color: var(--accent-ink);
+    padding: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--fw-heavy);
+    background: transparent;
+    color: var(--valid);
 }
 
 .dlg__main {
@@ -100,22 +100,22 @@
     gap: var(--space-2);
 }
 
-/* The id input is 28px tall; every control beside it matches that height
-   exactly, so the row reads as one toolbar instead of chips of assorted
-   sizes floating next to a bigger input. */
-.node-editor__head .dlg__add,
-.node-editor__head .dlg__node-badge {
-    display: inline-flex;
-    align-items: center;
-    height: 28px;
+/* Header actions stretch to the node-name field instead of carrying a second,
+   competing control height. */
+.node-editor__head .dlg__add {
+    align-self: stretch;
     padding: 0 var(--space-3);
-    font-size: var(--text-sm);
 }
 
 .node-editor__label {
+    flex: none;
     font-size: var(--text-base);
     font-weight: var(--fw-semibold);
     color: var(--text-faint);
+}
+
+.node-editor__label--start {
+    color: var(--valid);
 }
 
 .node-editor__id-field {
@@ -126,7 +126,6 @@
 .node-editor__id-input {
     width: auto;
     min-width: 180px;
-    height: 28px;
     font-size: var(--text-md);
     color: var(--text);
 }
@@ -140,7 +139,7 @@
 .node-editor__section {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
 }
 
 .node-editor__section-head {
@@ -148,7 +147,7 @@
     align-items: center;
     justify-content: space-between;
     margin-top: var(--space-2);
-    padding-bottom: var(--space-1);
+    padding-bottom: var(--space-2);
     border-bottom: 1px solid var(--border-faint);
     font-size: var(--label-size);
     font-weight: var(--label-weight);
@@ -180,7 +179,7 @@
 .dlg__list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
 }
 
 .dlg__row {
@@ -227,8 +226,8 @@
 .dlg__card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-4);
+    gap: var(--space-4);
+    padding: var(--space-5);
     background: var(--surface-raised);
     border: 1px solid var(--border-faint);
     border-left: 2px solid var(--border);
@@ -246,16 +245,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: var(--label-size);
-    font-weight: var(--label-weight);
-    letter-spacing: var(--label-track);
-    text-transform: uppercase;
-    color: var(--text-faint);
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-dim);
 }
 
 .dlg__card-actions {
     display: flex;
     align-items: center;
+    gap: var(--space-1);
 }
 
 .dlg__move {
@@ -280,8 +278,9 @@
 
 .dlg__sub {
     margin-top: var(--space-2);
-    font-size: var(--text-sm);
-    color: var(--text-faint);
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
+    color: var(--text-dim);
 }
 
 .dlg__target {

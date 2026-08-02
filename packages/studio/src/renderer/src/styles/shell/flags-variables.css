@@ -27,7 +27,8 @@
 }
 
 .flag-vars-page__header h1 {
-    font-size: var(--text-xl);
+    font-size: var(--text-2xl);
+    font-weight: var(--fw-semibold);
 }
 
 .flag-vars-page__header p,
@@ -69,9 +70,14 @@
     font-weight: var(--fw-semibold);
 }
 
-.health-shelf__total,
-.health-shelf__tray-heading > span {
+.health-shelf__total {
     color: var(--valid);
+    font-size: var(--text-base);
+    font-variant-numeric: tabular-nums;
+}
+
+.health-shelf__tray-heading > span {
+    color: var(--warn);
     font-size: var(--text-base);
     font-variant-numeric: tabular-nums;
 }
@@ -122,7 +128,7 @@
 
 .health-shelf__check-copy strong {
     color: inherit;
-    font-size: var(--text-md);
+    font-size: var(--text-base);
     font-weight: var(--fw-semibold);
 }
 
@@ -150,20 +156,21 @@
 }
 
 .health-shelf__tray-heading {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--border-faint);
 }
 
 .health-shelf__tray-heading h3 {
     font-size: var(--text-md);
+    font-weight: var(--fw-semibold);
 }
 
 .health-shelf__issues {
     display: flex;
     flex-direction: column;
-    max-height: 128px;
+    max-height: 216px;
     overflow: auto;
-    padding: 0 var(--space-3) var(--space-2);
+    padding: 0 var(--space-4) var(--space-3);
 }
 
 .health-shelf__issue,
@@ -174,10 +181,14 @@
     justify-content: space-between;
     gap: var(--space-2);
     min-width: 0;
-    padding: 5px 0;
+    padding: var(--space-2) 0;
     color: var(--text-dim);
     font-size: var(--text-base);
     border-top: 1px solid var(--border-faint);
+}
+
+.health-shelf__issues > :first-child {
+    border-top: 0;
 }
 
 .health-shelf__issue:hover,
@@ -315,7 +326,7 @@
     grid-template-columns: minmax(0, 1fr) auto 34px;
     gap: var(--space-2);
     color: var(--text);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
 }
 
 .flag-vars-list__row:hover,
@@ -342,8 +353,6 @@
 .flag-vars-list__kind {
     font-size: var(--tag-size);
     font-weight: var(--tag-weight);
-    letter-spacing: var(--tag-track);
-    text-transform: uppercase;
 }
 
 .flag-vars-list__uses {
@@ -388,13 +397,12 @@
     color: var(--accent);
     font-size: var(--tag-size);
     font-weight: var(--tag-weight);
-    text-transform: uppercase;
-    letter-spacing: var(--tag-track);
 }
 
 .flag-var-detail__head h2 {
     margin-top: 3px;
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
+    font-weight: var(--fw-semibold);
     overflow-wrap: anywhere;
 }
 
@@ -404,7 +412,12 @@
     gap: var(--space-2);
     margin-top: var(--space-4);
     color: var(--text-dim);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
+}
+
+.flag-var-detail__note > span {
+    color: var(--text);
+    font-weight: var(--fw-semibold);
 }
 
 .flag-var-detail__note textarea {
@@ -450,7 +463,8 @@
 
 .flag-var-detail__references h3 {
     margin-bottom: var(--space-2);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
+    font-weight: var(--fw-semibold);
 }
 
 .flag-var-detail__file {

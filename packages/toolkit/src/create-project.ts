@@ -27,9 +27,9 @@ export type ScaffoldContentMode = 'starter' | 'minimal';
 export interface CreateProjectOptions {
     /** Directory to create the new project folder inside (usually the cwd). */
     targetDir: string;
-    /** Player-facing game title used by the generated HTML and renderer. */
+    /** Player-facing game title written to game.yaml and the generated HTML. */
     title?: string;
-    /** Optional player-facing subtitle used by the generated renderer. */
+    /** Optional player-facing subtitle written to game.yaml. */
     subtitle?: string;
     /** Use the batteries-included GameShell renderer instead of a custom one. */
     useDefaultRenderer: boolean;
@@ -209,20 +209,26 @@ export async function createProject(
             '__PROJECT_ID_JSON__',
             JSON.stringify(projectId)
         );
+        output = output
+            .replace('__GAME_TITLE_JSON__', JSON.stringify(title))
+            .replace('__GAME_SUBTITLE_JSON__', JSON.stringify(subtitle));
         await writeFile(dest, output);
     }
 
     if (contentMode === 'minimal') {
-        await writeMinimalContent(projectPath, localizationMode);
+        await writeMinimalContent(
+            projectPath,
+            localizationMode,
+            title,
+            subtitle
+        );
     }
 
     // --- src/App.tsx (pick variant based on renderer choice) ---
     const appKey = useDefaultRenderer
         ? './templates/src/App.default.tsx'
         : './templates/src/App.custom.tsx';
-    const app = TEMPLATES[appKey]
-        .replace('__GAME_TITLE_JSON__', JSON.stringify(title))
-        .replace('__GAME_SUBTITLE_JSON__', JSON.stringify(subtitle));
+    const app = TEMPLATES[appKey];
     await writeFile(join(projectPath, 'src/App.tsx'), app);
 
     // --- src/index.css (pick variant based on styles choice) ---
@@ -237,11 +243,16 @@ export async function createProject(
 
 async function writeMinimalContent(
     projectPath: string,
-    localizationMode: ScaffoldLocalizationMode
+    localizationMode: ScaffoldLocalizationMode,
+    title: string,
+    subtitle: string
 ): Promise<void> {
     await writeFile(
         join(projectPath, 'content', 'game.yaml'),
-        MINIMAL_GAME_CONFIG
+        MINIMAL_GAME_CONFIG.replace(
+            '__GAME_TITLE_JSON__',
+            JSON.stringify(title)
+        ).replace('__GAME_SUBTITLE_JSON__', JSON.stringify(subtitle))
     );
     await writeFile(
         join(projectPath, 'content', 'player.yaml'),
@@ -269,6 +280,8 @@ async function writeMinimalContent(
 
 const MINIMAL_GAME_CONFIG = `# Game Configuration
 
+title: __GAME_TITLE_JSON__
+subtitle: __GAME_SUBTITLE_JSON__
 playerCreatesProfile: true
 startLocation: start
 startTime:

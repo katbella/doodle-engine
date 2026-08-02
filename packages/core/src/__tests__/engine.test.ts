@@ -228,6 +228,7 @@ function createTestRegistry(): ContentRegistry {
 
 function createTestConfig(): GameConfig {
     return {
+        title: 'Test Game',
         playerCreatesProfile: true,
         startLocation: 'tavern',
         startTime: { day: 1, hour: 8 },

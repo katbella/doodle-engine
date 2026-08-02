@@ -737,8 +737,6 @@ import { PROJECT_ID } from './project';
     config={config}
     manifest={manifest}
     projectId={PROJECT_ID}
-    title="My Game"
-    subtitle="A text-based adventure"
     availableLocales={[{ code: 'en', label: 'English' }]}
     devTools={import.meta.env.DEV}
 />;
@@ -753,8 +751,6 @@ import { PROJECT_ID } from './project';
 | `manifest`         | `AssetManifest`                           | required          | Asset manifest from `/api/manifest`                             |
 | `projectId`        | `string`                                  | required          | Stable ID from the generated `project.ts`                       |
 | `assetLoader`      | `AssetLoader`                             | —                 | Custom asset loader (for non-browser environments)              |
-| `title`            | `string`                                  | `'Doodle Engine'` | Game title text                                                 |
-| `subtitle`         | `string`                                  | —                 | Subtitle text                                                   |
 | `credits`          | `ReactNode`                               | —                 | Credits content, replacing the default credit                   |
 | `uiSounds`         | `UISoundConfig \| false`                  | —                 | UI sound config, or `false` to disable                          |
 | `audioOptions`     | `AudioManagerOptions`                     | —                 | Crossfade duration and other audio config                       |
@@ -763,7 +759,7 @@ import { PROJECT_ID } from './project';
 | `renderLoading`    | `(state: AssetLoadingState) => ReactNode` | —                 | Override the loading screen                                     |
 | `devTools`         | `boolean`                                 | `false`           | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
-Splash screen, loading background, title logo, and UI sounds are configured in `game.yaml` under `shell:`. See [Asset Loading](/technical/asset-loading/) for the full shell config reference.
+The game title and subtitle come from `game.yaml`. Splash screen, loading background, title logo, and UI sounds are configured there under `shell:`. See [Asset Loading](/technical/asset-loading/) for the full shell config reference.
 
 ### Features
 

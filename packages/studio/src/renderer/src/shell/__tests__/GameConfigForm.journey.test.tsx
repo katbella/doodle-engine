@@ -56,6 +56,8 @@ const project: OpenProject = {
         locales: {},
     },
     config: {
+        title: 'Existing Game',
+        subtitle: 'Existing Subtitle',
         startLocation: 'tavern',
         startTime: { day: 1, hour: 8 },
         startFlags: { introSeen: false },
@@ -76,6 +78,8 @@ const project: OpenProject = {
 };
 
 const source = `# This comment and shell block must survive form saves
+title: Existing Game
+subtitle: Existing Subtitle
 startLocation: tavern
 startTime: { day: 1, hour: 8 }
 startFlags: { introSeen: false }
@@ -124,6 +128,30 @@ function renderForm() {
 afterEach(cleanup);
 
 describe('GameConfigForm author journeys', () => {
+    it('edits the game title and subtitle in game.yaml', async () => {
+        const { writeEntity } = installBridge({
+            ok: true,
+            conflict: false,
+            mtimeMs: 11,
+        });
+        const user = userEvent.setup();
+        const view = renderForm();
+
+        const title = await screen.findByLabelText('Game title');
+        await user.clear(title);
+        await user.type(title, 'Harbor Lights');
+        const subtitle = screen.getByLabelText('Subtitle');
+        await user.clear(subtitle);
+        await user.type(subtitle, 'A story in the fog');
+
+        view.unmount();
+        await waitFor(() => expect(writeEntity).toHaveBeenCalledOnce());
+        expect(writeEntity.mock.calls[0][2]).toEqual([
+            { path: ['title'], value: 'Harbor Lights' },
+            { path: ['subtitle'], value: 'A story in the fog' },
+        ]);
+    });
+
     it('saves pending configuration changes with Cmd+S', async () => {
         const { writeEntity } = installBridge({
             ok: true,

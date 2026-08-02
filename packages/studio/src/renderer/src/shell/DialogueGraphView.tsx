@@ -151,19 +151,39 @@ export function DialogueGraphView({
         applyCamera();
     }, [graph]);
 
-    // Native wheel listener: React registers wheel passively, and zoom must
-    // preventDefault so the page doesn't scroll. Ctrl+wheel is how touchpad
-    // pinch arrives, and it's the same gesture here.
+    // Native wheel listener: React registers wheel passively, and canvas
+    // gestures must prevent the surrounding page from scrolling. Trackpads
+    // send two-finger movement as an ordinary wheel event and pinch as
+    // Ctrl+wheel, so keep pan and zoom as distinct gestures.
     useEffect(() => {
         const svg = svgRef.current;
         if (!svg) return;
         const onWheel = (event: WheelEvent) => {
             event.preventDefault();
             const rect = svg.getBoundingClientRect();
+            const deltaUnit =
+                event.deltaMode === 1
+                    ? 16
+                    : event.deltaMode === 2
+                      ? rect.height
+                      : 1;
+            const dx = event.deltaX * deltaUnit;
+            const dy = event.deltaY * deltaUnit;
+            const camera = cameraRef.current;
+
+            if (!event.ctrlKey) {
+                cameraRef.current = {
+                    ...camera,
+                    x: camera.x - dx,
+                    y: camera.y - dy,
+                };
+                scheduleCamera();
+                return;
+            }
+
             const cx = event.clientX - rect.left;
             const cy = event.clientY - rect.top;
-            const camera = cameraRef.current;
-            const factor = Math.exp(-event.deltaY * 0.0016);
+            const factor = Math.exp(-dy * 0.0016);
             const k = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, camera.k * factor));
             // Keep the world point under the cursor fixed while scaling.
             const scale = k / camera.k;
@@ -274,7 +294,7 @@ export function DialogueGraphView({
             ref={svgRef}
             className="graph"
             role="application"
-            aria-label={`Graph of ${dialogueId}. Drag to pan, scroll to zoom, click a node to select it, double-click to open it in the Visual editor.`}
+            aria-label={`Graph of ${dialogueId}. Drag or scroll to pan, pinch or Control-scroll to zoom, click a node to select it, double-click to open it in the Visual editor.`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
@@ -354,7 +374,7 @@ export function DialogueGraphView({
                                         </span>
                                         {n.isStart && (
                                             <span className="graph__badge graph__badge--start">
-                                                start
+                                                Start
                                             </span>
                                         )}
                                         {n.isEnd && n.node && (

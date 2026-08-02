@@ -41,6 +41,16 @@ function noteSection(kind: FlagVarKind): keyof FlagVarNotes {
     return kind === 'flag' ? 'flags' : 'variables';
 }
 
+function kindLabel(kind: FlagVarKind): string {
+    return kind === 'flag' ? 'Flag' : 'Variable';
+}
+
+function accessLabel(access: Reference['access']): string {
+    if (access === 'check') return 'Checked';
+    if (access === 'set') return 'Set';
+    return 'Use';
+}
+
 function groupedReferences(references: Reference[]) {
     const groups = new Map<string | null, Reference[]>();
     for (const reference of references) {
@@ -330,7 +340,9 @@ export function FlagsVariablesPage({
                                                     {entry.summary.id}
                                                 </span>
                                                 <span className="flag-vars-list__kind">
-                                                    {entry.summary.kind}
+                                                    {kindLabel(
+                                                        entry.summary.kind
+                                                    )}
                                                 </span>
                                                 <span className="flag-vars-list__uses">
                                                     {entry.summary.count}
@@ -418,7 +430,9 @@ function HealthShelf({
             onClick={() => onSelect({ kind: summary.kind, id: summary.id })}
         >
             <span className="mono">{summary.id}</span>
-            <span>{summary.kind}</span>
+            <span className="flag-vars-list__kind">
+                {kindLabel(summary.kind)}
+            </span>
         </button>
     );
 
@@ -643,7 +657,7 @@ function SymbolDetail({
             <div className="flag-var-detail__head">
                 <div>
                     <span className="flag-var-detail__kind">
-                        {summary.kind}
+                        {kindLabel(summary.kind)}
                     </span>
                     <h2 className="mono">{summary.id}</h2>
                     <p>{usageSummary(summary)}</p>
@@ -714,7 +728,7 @@ function SymbolDetail({
                                     >
                                         <span>{reference.where}</span>
                                         <span className="flag-vars-list__kind">
-                                            {reference.access ?? 'use'}
+                                            {accessLabel(reference.access)}
                                         </span>
                                     </button>
                                 ))}

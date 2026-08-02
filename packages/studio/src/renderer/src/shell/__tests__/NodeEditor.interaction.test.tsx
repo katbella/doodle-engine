@@ -184,9 +184,9 @@ describe('NodeEditor', () => {
         await user.click(screen.getByRole('button', { name: 'Set as start' }));
         await user.click(screen.getByRole('button', { name: 'Delete node' }));
         rerender(<Harness isStart />);
-        expect(document.querySelector('.dlg__node-badge')?.textContent).toBe(
-            'start'
-        );
+        expect(
+            document.querySelector('.node-editor__label--start')?.textContent
+        ).toBe('Start node');
         expect(
             screen.queryByRole('button', { name: 'Set as start' })
         ).toBeNull();

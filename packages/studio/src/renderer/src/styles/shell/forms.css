@@ -45,7 +45,27 @@
     flex: 1;
     gap: var(--space-2);
     min-width: 0;
+    height: 34px;
+    padding: 0 var(--space-2);
     color: var(--text-faint);
+    background: var(--surface-input);
+    border: 1px solid var(--border);
+}
+
+.locale-editor__filter:focus-within {
+    border-color: var(--accent);
+}
+
+.locale-editor__filter .dlg__input {
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+}
+
+.locale-editor__tools > .btn {
+    height: 34px;
 }
 
 .locale-editor__add {
@@ -66,6 +86,15 @@
     flex-direction: column;
     max-width: 960px;
     border: 1px solid var(--border-faint);
+}
+
+.locale-editor__empty {
+    display: flex;
+    align-items: center;
+    min-height: 64px;
+    padding: var(--space-4);
+    color: var(--text-faint);
+    font-size: var(--text-base);
 }
 
 .locale-editor__row {
@@ -157,9 +186,14 @@
 }
 
 .game-config__starting-grid,
-.game-config__state-grid {
+.game-config__state-grid,
+.game-config__details-grid {
     display: grid;
     gap: var(--space-4);
+}
+
+.game-config__details-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
 }
 
 .game-config__starting-grid {
@@ -229,7 +263,7 @@
 .field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
 }
 
 .field.field--inline {
@@ -282,6 +316,12 @@
 /* Character and player stat rows */
 .stats-row {
     align-items: flex-end;
+}
+
+/* Match the remove control's center to the inputs rather than the full
+   label-and-input columns beside it. */
+.stats-row > .dlg__x {
+    height: 30px;
 }
 
 .stats-field {

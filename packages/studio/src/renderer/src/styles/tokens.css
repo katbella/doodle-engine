@@ -1,4 +1,4 @@
-/* Color, type, and spacing tokens. The Archivo and Monaspace Neon faces are
+/* Color, type, and spacing tokens. The IBM Plex Sans and Monaspace Neon faces are
    imported in main.tsx; the stacks fall back to system fonts if those fail. */
 
 :root {
@@ -43,15 +43,15 @@
     --info: #7aa8e0;
 
     --font-ui:
-        'Archivo Variable', 'Archivo', system-ui, -apple-system, 'Segoe UI',
-        sans-serif;
+        'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, -apple-system,
+        'Segoe UI', sans-serif;
     --font-mono:
         'Monaspace Neon', ui-monospace, 'Cascadia Code', 'Consolas', monospace;
 
     --fw-normal: 400;
     --fw-medium: 500;
     --fw-semibold: 600;
-    --fw-heavy: 800;
+    --fw-heavy: 700;
 
     /* Coherent Studio type ramp. The 11px floor keeps secondary chrome
        readable without competing with the 14–15px narrative surfaces. */

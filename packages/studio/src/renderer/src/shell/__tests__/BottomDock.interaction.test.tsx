@@ -28,6 +28,7 @@ function project(problems: OpenProject['problems'] = []): OpenProject {
             locales: {},
         },
         config: {
+            title: 'Test Game',
             startLocation: '',
             startTime: { day: 1, hour: 8 },
             startFlags: {},

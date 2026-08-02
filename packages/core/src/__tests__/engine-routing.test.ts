@@ -39,6 +39,7 @@ function registryWith(
 }
 
 const config: GameConfig = {
+    title: 'Test Game',
     startLocation: 'town',
     startTime: { day: 1, hour: 8 },
     startFlags: {},
@@ -361,6 +362,7 @@ describe('travel with a bad map scale', () => {
     }
 
     const travelConfig: GameConfig = {
+        title: 'Test Game',
         startLocation: 'a',
         startTime: { day: 1, hour: 8 },
         startFlags: {},

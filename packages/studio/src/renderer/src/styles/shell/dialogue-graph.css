@@ -177,9 +177,13 @@
 }
 
 .graph__badge--start {
-    background: var(--valid);
-    border-color: var(--valid);
-    color: var(--accent-ink);
+    padding: 0;
+    font-size: var(--text-sm);
+    font-weight: var(--fw-heavy);
+    background: transparent;
+    border: 0;
+    color: var(--valid);
+    text-transform: none;
 }
 
 .graph__node-preview {

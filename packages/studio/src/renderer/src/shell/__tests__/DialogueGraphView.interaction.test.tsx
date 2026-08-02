@@ -174,7 +174,7 @@ describe('DialogueGraphView', () => {
         expect(topic.classList.contains('graph__node--selected')).toBe(true);
     });
 
-    it('pans with pointer drag and zooms on wheel without re-laying-out', async () => {
+    it('pans with pointer drag or trackpad scroll and zooms on pinch without re-laying-out', async () => {
         installBridge();
         renderGraph();
         await findNode('start');
@@ -190,11 +190,33 @@ describe('DialogueGraphView', () => {
             expect(scene.getAttribute('transform')).not.toBe(before)
         );
 
-        const panned = scene.getAttribute('transform')!;
-        fireEvent.wheel(svg, { deltaY: -240, clientX: 20, clientY: 20 });
+        const dragged = scene.getAttribute('transform')!;
+        const scaleAfterDrag = dragged.match(/scale\(([^)]+)\)/)?.[1];
+        fireEvent.wheel(svg, {
+            deltaX: 30,
+            deltaY: 20,
+            clientX: 20,
+            clientY: 20,
+        });
         await waitFor(() =>
-            expect(scene.getAttribute('transform')).not.toBe(panned)
+            expect(scene.getAttribute('transform')).not.toBe(dragged)
         );
+
+        const scrolled = scene.getAttribute('transform')!;
+        expect(scrolled.match(/scale\(([^)]+)\)/)?.[1]).toBe(scaleAfterDrag);
+
+        fireEvent.wheel(svg, {
+            deltaY: -240,
+            clientX: 20,
+            clientY: 20,
+            ctrlKey: true,
+        });
+        await waitFor(() =>
+            expect(scene.getAttribute('transform')).not.toBe(scrolled)
+        );
+        expect(
+            scene.getAttribute('transform')?.match(/scale\(([^)]+)\)/)?.[1]
+        ).not.toBe(scaleAfterDrag);
     });
 
     it('guides the author to Source when the dialogue cannot be parsed', async () => {

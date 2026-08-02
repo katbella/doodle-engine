@@ -3,7 +3,7 @@ title: Game Shell
 description: Using GameShell for splash screens, title menus, pause, settings, and video.
 ---
 
-`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. Configuration lives in two places: props passed to the component in `src/App.tsx`, and the `shell:` section of `content/game.yaml` for media the shell should load.
+`GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. The game title, subtitle, and shell media are configured in `content/game.yaml`. Custom credits remain React content in `src/App.tsx`.
 
 ## Basic Usage
 
@@ -16,8 +16,6 @@ import { PROJECT_ID } from '../project';
     config={config}
     manifest={manifest}
     projectId={PROJECT_ID}
-    title="My Game"
-    subtitle="A text-based adventure"
 />;
 ```
 
@@ -51,6 +49,13 @@ If `shell.splash` is not defined, the splash screen is skipped and the game goes
 
 ## Title Screen
 
+Set the title and optional subtitle at the top of `content/game.yaml`:
+
+```yaml
+title: Harbor Lights
+subtitle: A story of fog and forgotten promises
+```
+
 The title screen shows:
 
 - The logo image (if `shell.title.logo` is configured in `game.yaml`)
@@ -81,7 +86,6 @@ The title screen includes a **Credits** button. By default, the credits screen s
     config={config}
     manifest={manifest}
     projectId={PROJECT_ID}
-    title="Harbor Lights"
     credits={
         <>
             <p>Written and designed by Your Name</p>

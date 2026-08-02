@@ -82,6 +82,7 @@ function createRegistry(): ContentRegistry {
 }
 
 const config: GameConfig = {
+    title: 'Test Game',
     startLocation: 'tavern',
     startTime: { day: 2, hour: 9 },
     startFlags: {},

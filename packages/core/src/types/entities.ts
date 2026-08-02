@@ -299,6 +299,10 @@ export interface ShellConfig {
  * Game configuration that defines starting conditions.
  */
 export interface GameConfig {
+    /** Player-facing game title */
+    title: string;
+    /** Optional line shown beneath the game title */
+    subtitle?: string;
     /** Shell screen configuration */
     shell?: ShellConfig;
     /** Whether the renderer asks the player to enter profile text */

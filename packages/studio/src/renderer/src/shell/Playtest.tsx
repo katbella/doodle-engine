@@ -13,6 +13,7 @@ import {
     useEffect,
     useRef,
     useState,
+    type CSSProperties,
     type ReactNode,
 } from 'react';
 import { Play, X } from '../lib/icons';
@@ -28,6 +29,8 @@ import { useTestStates } from '../lib/useTestStates';
 import { DebugTrace } from './DebugTrace';
 import { StartNodePicker, type NodeTarget } from './StartNodePicker';
 import { NameStateModal } from './NameStateModal';
+import { ResizeHandle } from './ResizeHandle';
+import { usePersistedSize } from '../lib/usePersistedSize';
 
 type InnerTab = 'playtest' | 'trace';
 
@@ -136,6 +139,10 @@ export function Playtest({
     const hasDialogues = Object.keys(project.registry.dialogues).length > 0;
     const currentLocale = session.getState().currentLocale;
     const localeIds = Object.keys(project.registry.locales).sort();
+    const [inspectorWidth, setInspectorWidth] = usePersistedSize(
+        'doodle-studio-playtest-inspector-width',
+        340
+    );
 
     return (
         <div className="playtest">
@@ -224,8 +231,23 @@ export function Playtest({
             </div>
 
             {tab === 'playtest' && (
-                <div className="playtest__body">
+                <div
+                    className="playtest__body"
+                    style={
+                        {
+                            '--inspector-w': `${inspectorWidth}px`,
+                        } as CSSProperties
+                    }
+                >
                     <Playback session={session} onAct={act} />
+                    <ResizeHandle
+                        axis="x"
+                        size={inspectorWidth}
+                        min={240}
+                        max={640}
+                        invert
+                        onResize={setInspectorWidth}
+                    />
                     <StateInspector
                         session={session}
                         project={project}
@@ -406,7 +428,7 @@ function StateInspector({
                     <span className="inspector__empty">none</span>
                 )}
                 {Object.entries(state.variables).map(([variable, value]) => (
-                    <div key={variable} className="irow">
+                    <div key={variable} className="irow irow--field">
                         <span className="irow__key mono">{variable}</span>
                         <input
                             className="ivalue mono"
@@ -459,7 +481,7 @@ function StateInspector({
             {questIds.length > 0 && (
                 <Group label="Quest stages">
                     {questIds.map((questId) => (
-                        <div key={questId} className="irow">
+                        <div key={questId} className="irow irow--field">
                             <span className="irow__key mono">{questId}</span>
                             <select
                                 className="ivalue mono"
@@ -492,7 +514,7 @@ function StateInspector({
             {characterIds.length > 0 && (
                 <Group label="Relationships">
                     {characterIds.map((characterId) => (
-                        <div key={characterId} className="irow">
+                        <div key={characterId} className="irow irow--field">
                             <span className="irow__key mono">
                                 {characterId}
                             </span>
