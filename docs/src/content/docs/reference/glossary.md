@@ -47,7 +47,7 @@ One conversation, written in a `.dlg` file in `content/dialogues/`. A dialogue i
 
 ## DSL
 
-Short for domain-specific language: a small scripting format built for one job. Doodle's DSL is the format of `.dlg` files, with keywords such as `NODE`, `CHOICE`, `REQUIRE`, `SET`, and `GOTO` describing how a conversation flows and what it changes. It is content, not program code. See [DSL Syntax](/reference/dsl-syntax/).
+Short for domain-specific language: a small scripting format built for one job. Doodle Engine's DSL is the format of `.dlg` files, with keywords such as `NODE`, `CHOICE`, `REQUIRE`, `SET`, and `GOTO` describing how a conversation flows and what it changes. It is content, not program code. See [DSL Syntax](/reference/dsl-syntax/).
 
 ## Effect
 
@@ -79,7 +79,7 @@ Everything that changes during play: the player's location and time, flags, vari
 
 ## IF block
 
-An author-controlled branch inside a dialogue node. The engine checks IF blocks top to bottom, runs the effects of the first one whose condition passes, and follows its `GOTO` if it has one. The player never sees this happen, which separates IF blocks from [choices](#choice). See [DSL Syntax](/reference/dsl-syntax/#conditional-blocks-if).
+A conditional branch inside a dialogue node that the player does not choose directly. The engine checks IF blocks top to bottom, runs the effects of the first one whose condition passes, and follows its `GOTO` if it has one. The player never sees this happen, which separates IF blocks from [choices](#choice). See [DSL Syntax](/reference/dsl-syntax/#conditional-blocks-if).
 
 ## Interlude
 
@@ -127,7 +127,7 @@ One game: a folder containing its `content/`, `assets/`, `src/` application code
 
 ## Project ID
 
-The generated identifier in `src/project.ts` that keeps a game's browser saves separate from other Doodle games. It must stay the same across releases of one game, and a copied project must get a new one before release. See [Save & Load](/guides/save-and-load/).
+The generated identifier in `src/project.ts` that keeps a game's browser saves separate from other Doodle Engine games. It must stay the same across releases of one game, and a copied project must get a new one before release. See [Save & Load](/guides/save-and-load/).
 
 ## Quest
 
@@ -139,7 +139,7 @@ A per-character number, starting at 0, that records how a character regards the 
 
 ## Renderer
 
-The code that turns a [snapshot](#snapshot) into the interface the player sees and calls engine actions when the player does something. Doodle ships a complete React renderer (`GameRenderer` inside `GameShell`), and because the engine has no interface code, you can restyle it, rearrange its components, or replace it entirely. See [Custom Renderer](/technical/custom-renderer/).
+The code that turns a [snapshot](#snapshot) into the interface the player sees and calls engine actions when the player does something. Doodle Engine ships a complete React renderer (`GameRenderer` inside `GameShell`), and because the engine has no interface code, you can restyle it, rearrange its components, or replace it entirely. See [Custom Renderer](/technical/custom-renderer/).
 
 ## Snapshot
 

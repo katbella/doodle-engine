@@ -3,7 +3,7 @@ title: Asset Loading
 description: How the asset loading system works, and how to configure shell assets.
 ---
 
-Doodle loads every media file listed in the asset manifest before the game shell appears. The asset manifest is the generated list of images, audio, and video referenced by the project.
+Doodle Engine loads every media file listed in the asset manifest before the game shell appears. The asset manifest is the generated list of images, audio, and video referenced by the project.
 
 This page explains startup loading for developers changing `GameShell` or building a custom renderer. For adding media to game content, see [Assets & Media](/guides/assets-and-media/).
 
@@ -131,7 +131,7 @@ The service worker is registered only by release builds. During development, `As
 
 ## Custom Asset Loaders
 
-Doodle’s default loader uses browser `fetch` and the browser Cache API. Web builds and desktop or mobile wrappers that display the web build through a local server can use it unchanged.
+Doodle Engine’s default loader uses browser `fetch` and the browser Cache API. Web builds and desktop or mobile wrappers that display the web build through a local server can use it unchanged.
 
 Pass a custom `AssetLoader` when the application runs in a host that retrieves
 or caches media differently, or when a test needs to replace network loading.

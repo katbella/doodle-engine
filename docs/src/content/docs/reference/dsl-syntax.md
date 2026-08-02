@@ -206,7 +206,7 @@ GOTO greeting
 3. If the passing IF block has a `GOTO`, that target is used
 4. If the passing IF block has no `GOTO`, the node falls through to its regular `GOTO` (if present)
 5. If no IF conditions pass, the node falls through to its regular `GOTO` (if present)
-6. IF blocks are **invisible to the player**: they create author-controlled branching
+6. IF blocks are **invisible to the player**: they create conditional branches
 7. Multiple IF blocks can exist in a node, but only the first passing one executes
 
 **Example:**
@@ -289,7 +289,7 @@ NODE failure
 
 ### IF vs CHOICE REQUIRE
 
-**IF blocks** (author-controlled branching):
+**IF blocks** (conditional branching):
 
 - Invisible to the player
 - The first matching branch runs

@@ -3,7 +3,9 @@ title: Writing Dialogues
 description: How to write branching dialogue scripts with the .dlg DSL.
 ---
 
-This guide teaches you to write a branching conversation in a `.dlg` file: nodes, choices, conditions, effects, and the routes between them. You need a project and a way to run it, either `npm run dev` in a terminal or Studio's Playtest. Doodle Studio users can write the same files in Source mode, or use the visual node editor described in [Dialogue Editing in Studio](/studio/dialogues/).
+This guide builds a branching conversation in a `.dlg` file and explains the dialogue language as you use it. Start with the project created in [Your First Game](/getting-started/your-first-game/).
+
+If you work with the CLI and a separate text editor, keep the game running with `npm run dev` while you make changes. In Doodle Studio, you can write the same file in Source mode or use the node editor in Visual mode. [Dialogue Editing in Studio](/studio/dialogues/) explains those controls, and [Playtesting in Studio](/studio/playtesting/) shows how to test the conversation without leaving Doodle Studio.
 
 Dialogues are written in a DSL (domain-specific language), a small scripting format made for branching conversations. Keywords such as `NODE`, `CHOICE`, `GOTO`, and `SET` describe how the conversation flows. Dialogue files live in `content/dialogues/`, and each file's name becomes its dialogue ID: `bartender_greeting.dlg` is the dialogue `bartender_greeting`.
 

@@ -56,115 +56,15 @@ npm run dev
 8. Triggers full page reload when content files change
 9. Serves the app in development mode. Generated apps pass `devTools={import.meta.env.DEV}`, which exposes `window.doodle` while the game is running.
 
-### Content loading
+### Content and validation
 
-| Directory     | File Type | How it's loaded                                                          |
-| ------------- | --------- | ------------------------------------------------------------------------ |
-| `characters/` | `.yaml`   | Parsed as Character entity                                               |
-| `dialogues/`  | `.dlg`    | Parsed with `parseDialogue()`                                            |
-| `interludes/` | `.yaml`   | Parsed as Interlude entity                                               |
-| `items/`      | `.yaml`   | Parsed as Item entity                                                    |
-| `journal/`    | `.yaml`   | Parsed as JournalEntry entity                                            |
-| `locales/`    | `.yaml`   | Loaded as translation entries, with the filename used as the locale code |
-| `locations/`  | `.yaml`   | Parsed as Location entity                                                |
-| `maps/`       | `.yaml`   | Parsed as Map entity                                                     |
-| `quests/`     | `.yaml`   | Parsed as Quest entity                                                   |
-| `game.yaml`   | `.yaml`   | Parsed as GameConfig                                                     |
-| `player.yaml` | `.yaml`   | Parsed as the optional PlayerCharacter singleton                         |
+The server loads the project files into the registry served by `/api/content`. [Content Registry](/technical/content-registry/#how-content-is-loaded) documents how each directory and special file is represented.
 
-### /api/content response
+When content changes, the server runs the same checks as `npm run validate`. Problems appear in the terminal without stopping the server. See [Content Validation](/guides/content-validation/#what-gets-validated) for the complete set of checks and example fixes.
 
-```json
-{
-  "registry": {
-    "player": {
-      "name": "@player.name",
-      "title": "",
-      "biography": "",
-      "portrait": "",
-      "stats": {
-        "strength": { "name": "Strength", "value": 10 }
-      }
-    },
-    "locations": { ... },
-    "characters": { ... },
-    "items": { ... },
-    "maps": { ... },
-    "dialogues": { ... },
-    "quests": { ... },
-    "journalEntries": { ... },
-    "interludes": { ... },
-    "locales": { ... }
-  },
-  "config": {
-    "playerCreatesProfile": true,
-    "startLocation": "tavern",
-    "startTime": { "day": 1, "hour": 8 },
-    ...
-  }
-}
-```
+### Browser dev tools
 
-### Content validation
-
-When content files change, the dev server automatically validates:
-
-- **Dialogue structure**: GOTO targets exist, no duplicate node IDs, startNode exists
-- **Conditions & Effects**: Required arguments are present (e.g., `hasFlag` needs `flag`, `setVariable` needs `variable` and `value`)
-- **Character references**: Characters' dialogue IDs point to existing dialogues
-- **Localization keys**: All `@key` references exist in locale files
-
-Validation errors appear in the terminal while the development server continues running.
-
-Example validation output:
-
-```text
-✗ Found 2 validation errors:
-
-content/dialogues/bartender_greeting.dlg
-  Node "greet" GOTO "invalid_node" points to non-existent node
-  Add NODE invalid_node or fix the GOTO target
-
-content/characters/merchant.yaml
-  Character "merchant" references non-existent dialogue "merchant_chat"
-  Create dialogue "merchant_chat" or fix the reference
-```
-
-### Dev Tools API
-
-In development mode, a `window.doodle` object is exposed in the browser console with debugging utilities:
-
-```js
-// Flag manipulation
-doodle.setFlag('quest_started');
-doodle.clearFlag('quest_started');
-
-// Variable manipulation
-doodle.setVariable('gold', 100);
-doodle.getVariable('gold');
-
-// Location control
-doodle.teleport('tavern');
-
-// Dialogue control
-doodle.triggerDialogue('bartender_greeting');
-
-// Quest control
-doodle.setQuestStage('odd_jobs', 'in_progress');
-
-// Inventory control
-doodle.addItem('old_coin');
-doodle.removeItem('old_coin');
-
-// Inspection
-doodle.inspect(); // Show current state and available commands
-doodle.inspectState(); // View current progress and game state
-doodle.inspectRegistry(); // View all loaded game content
-```
-
-The inspection commands return copies, so exploring their results does not change the running game.
-
-New applications pass `devTools={import.meta.env.DEV}`, which includes `window.doodle` during development and omits it from production builds.
+Generated applications expose `window.doodle` while the development build is running and omit it from production builds. [Debugging with Dev Tools](/technical/debugging-with-devtools/) lists the commands and shows how to prepare test state in the browser console.
 
 ---
 
@@ -214,54 +114,7 @@ npm run validate
 
 ### What it validates
 
-- **Dialogue structure**
-    - `startNode` exists in dialogue
-    - No duplicate node IDs within a dialogue
-    - All GOTO targets (from `node.next`, `choice.next`, `conditionalBranches[].next`) point to existing nodes
-    - IF branch conditions and effects have required arguments
-- **Conditions**
-    - `hasFlag`/`notFlag` have `flag` argument
-    - `hasItem` has `itemId` argument
-    - `questAtStage` has `questId` and `stageId` arguments
-    - `variableEquals`/`variableGreaterThan`/`variableLessThan` have `variable` and `value` arguments
-    - Character-stat conditions have `characterId`, `stat`, and `value` arguments
-    - Built-in condition references point to existing locations, items, characters, quests, and quest stages
-- **Effects**
-    - Node, choice, and IF branch effects are validated
-    - `setFlag`/`clearFlag` have `flag` argument
-    - `setVariable`/`addVariable` have `variable` and `value` arguments
-    - `addItem`/`removeItem` have `itemId` argument
-    - `moveItem` has `itemId` and `locationId` arguments
-    - `setQuestStage` has `questId` and `stageId` arguments
-    - `addJournalEntry` has `entryId` argument
-    - `setCharacterLocation` has `characterId` and `locationId` arguments
-    - `addToParty`/`removeFromParty` have `characterId` argument
-    - `setRelationship`/`addRelationship` have `characterId` and `value` arguments
-    - `setCharacterStat`/`addCharacterStat` have `characterId`, `stat`, and `value` arguments
-    - `setMapEnabled` has `enabled` argument
-    - `advanceTime` has `hours` argument
-    - `goToLocation` has `locationId` argument
-    - `startDialogue` has `dialogueId` argument
-    - `playMusic` has no required argument; bare `MUSIC` clears the override
-    - `playSound` has `sound` argument
-    - `playVideo` has `file` argument
-    - `notify` has `message` argument
-    - `showInterlude` has `interludeId` argument
-    - `roll` has `variable`, `min`, and `max` arguments
-    - Built-in effect references point to existing locations, items, characters, quests, quest stages, journal entries, dialogues, and interludes
-- **Character dialogue references**
-    - Characters' `dialogue` field points to existing dialogue IDs
-- **Player and character stats**
-    - Stat keys are valid identifiers and stat definitions contain only a display name and numeric or string value
-    - The reserved `player` target is accepted for character-stat conditions and effects
-- **Content references**
-    - `game.yaml` `startLocation` and `startInventory` point to existing content
-    - Character starting locations exist
-    - Item starting locations are `inventory`, an existing location, or an existing character
-    - Dialogue and interlude trigger locations exist
-    - Maps reference existing locations, and a location appears on at most one map
-- **Localization keys**
-    - All `@key` references in locations, characters, the player profile, stat names and values, items, quests, journal entries, dialogues, and interludes exist in at least one locale file
+The command checks file syntax and required fields, IDs, dialogue routes, conditions and effects, references between content, maps, and localization keys. [Content Validation](/guides/content-validation/#what-gets-validated) is the authoritative list of checks and explains where asset-file checks differ.
 
 ### Exit codes
 

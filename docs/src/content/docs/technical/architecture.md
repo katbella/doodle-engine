@@ -19,22 +19,7 @@ You can write a complete game without reading this page. It is here for when you
 
 ### Content (Static)
 
-Game content is defined in YAML and `.dlg` files. At startup, it is loaded into a `ContentRegistry`: the read-only collection of locations, characters, dialogues, and other game definitions.
-
-```ts
-interface ContentRegistry {
-    player?: PlayerCharacter;
-    locations: Record<string, Location>;
-    characters: Record<string, Character>;
-    items: Record<string, Item>;
-    maps: Record<string, Map>;
-    dialogues: Record<string, Dialogue>;
-    quests: Record<string, Quest>;
-    journalEntries: Record<string, JournalEntry>;
-    interludes: Record<string, Interlude>;
-    locales: Record<string, LocaleData>;
-}
-```
+Game content is defined in YAML and `.dlg` files. At startup, it is loaded into a `ContentRegistry`: the read-only collection of game definitions. [Content Registry](/technical/content-registry/#structure) documents its complete shape and how each project directory is loaded.
 
 ### State (Dynamic)
 

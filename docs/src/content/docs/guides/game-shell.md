@@ -173,7 +173,7 @@ See [Video & Cutscenes](/guides/video-cutscenes/) for full details on adding vid
 
 ## Save/Load
 
-`GameShell` uses the project’s generated ID to keep its saves separate from other Doodle games:
+`GameShell` uses the project’s generated ID to keep its saves separate from other Doodle Engine games:
 
 ```tsx
 <GameShell

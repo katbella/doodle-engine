@@ -1,9 +1,9 @@
 ---
 title: React Hooks
-description: Reference for Doodle's React hooks and save-slot helpers.
+description: Reference for Doodle Engine's React hooks and save-slot helpers.
 ---
 
-A React hook is a function that gives a component access to shared state or behavior. Doodle's hooks provide game state, player actions, audio, and input handling.
+A React hook is a function that gives a component access to shared state or behavior. Doodle Engine's hooks provide game state, player actions, audio, and input handling.
 
 ## useGame
 

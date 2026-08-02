@@ -1,6 +1,6 @@
 ---
 title: React Components
-description: Reference for Doodle's React renderer components and their props.
+description: Reference for Doodle Engine's React renderer components and their props.
 ---
 
 All components are exported from `@doodle-engine/react`. A prop is a setting passed to a React component.
@@ -26,28 +26,7 @@ import { GameProvider } from '@doodle-engine/react';
 | `children`        | `ReactNode` | required | Child components                                                |
 | `devTools`        | `boolean`   | `false`  | Enable `window.doodle` console API. Pass `import.meta.env.DEV`. |
 
-### Context Value
-
-```typescript
-interface GameContextValue {
-    snapshot: Snapshot;
-    actions: {
-        selectChoice: (choiceId: string) => void;
-        continueDialogue: () => void;
-        talkTo: (characterId: string) => void;
-        travelTo: (locationId: string) => void;
-        writeNote: (title: string, text: string) => void;
-        deleteNote: (noteId: string) => void;
-        setLocale: (locale: string) => void;
-        setPlayerProfile: (profile: PlayerProfileInput) => void;
-        saveGame: () => SaveData;
-        loadGame: (saveData: SaveData) => void;
-        dismissInterlude: () => void;
-    };
-}
-```
-
-Access via `useGame()` hook.
+Child components access the current snapshot and player actions through `useGame()`. See the [`useGame` hook reference](/reference/react-hooks/#usegame) for the complete context value and action list.
 
 ## InputProvider
 

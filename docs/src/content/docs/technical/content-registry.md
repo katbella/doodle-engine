@@ -58,7 +58,7 @@ The dev server (`npm run dev`) builds the registry automatically:
 | `content/journal/*.yaml`    | `registry.journalEntries` | YAML parse, keyed by `id`      |
 | `content/interludes/*.yaml` | `registry.interludes`     | YAML parse, keyed by `id`      |
 | `content/locales/*.yaml`    | `registry.locales`        | YAML parse, keyed by filename  |
-| `content/player.yaml`       | `registry.player`         | YAML parse, optional singleton |
+| `content/player.yaml`       | `registry.player`         | YAML parse, optional file      |
 
 ### Special Cases
 
@@ -66,8 +66,8 @@ The dev server (`npm run dev`) builds the registry automatically:
 
 **Dialogue files** use the filename without its extension as the dialogue ID. For example, `bartender_greeting.dlg` becomes `registry.dialogues.bartender_greeting`.
 
-**player.yaml** is an optional singleton. It defines the player character's
-profile fields and starting stats. It has no `id`,
+Each project can have one optional **player.yaml** file. It defines the player
+character's profile fields and starting stats. It has no `id`,
 location, dialogue, relationship, or party-membership field. The toolkit records
 its source as `player:player` in the file map used by Studio.
 

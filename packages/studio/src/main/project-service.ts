@@ -117,6 +117,7 @@ export class ProjectService {
     }
 
     private async load(projectDir: string): Promise<OpenProject> {
+        const pkg = await this.readProjectPackage(projectDir);
         const { loadProject, validateContent } =
             await import('@doodle-engine/toolkit');
         const { registry, config, fileMap, parseErrors } =
@@ -125,7 +126,6 @@ export class ProjectService {
             ...parseErrors,
             ...validateContent(registry, fileMap, config),
         ];
-        const pkg = await this.readPackageJson(projectDir);
 
         return {
             projectDir,
@@ -138,10 +138,7 @@ export class ProjectService {
             config,
             files: Object.fromEntries(fileMap),
             problems,
-            engine: await readEngineInfo(
-                projectDir,
-                this.currentEngineVersion
-            ),
+            engine: await readEngineInfo(projectDir, this.currentEngineVersion),
         };
     }
 
@@ -153,15 +150,45 @@ export class ProjectService {
         });
     }
 
-    private async readPackageJson(
+    private async readProjectPackage(
         projectDir: string
-    ): Promise<Record<string, unknown> | null> {
+    ): Promise<Record<string, unknown>> {
+        let pkg: unknown;
         try {
-            return JSON.parse(
+            pkg = JSON.parse(
                 await readFile(join(projectDir, 'package.json'), 'utf-8')
             );
         } catch {
-            return null;
+            throw this.notDoodleProjectError(projectDir);
         }
+
+        if (!pkg || typeof pkg !== 'object' || Array.isArray(pkg)) {
+            throw this.notDoodleProjectError(projectDir);
+        }
+
+        const projectPackage = pkg as Record<string, unknown>;
+        const declaresCore = ['dependencies', 'devDependencies'].some(
+            (field) => {
+                const dependencies = projectPackage[field];
+                return (
+                    !!dependencies &&
+                    typeof dependencies === 'object' &&
+                    !Array.isArray(dependencies) &&
+                    typeof (dependencies as Record<string, unknown>)[
+                        '@doodle-engine/core'
+                    ] === 'string'
+                );
+            }
+        );
+        if (!declaresCore) throw this.notDoodleProjectError(projectDir);
+
+        return projectPackage;
+    }
+
+    private notDoodleProjectError(projectDir: string): Error {
+        return new Error(
+            `"${basename(projectDir)}" is not a Doodle Engine project. ` +
+                'Choose a project folder whose package.json declares @doodle-engine/core.'
+        );
     }
 }

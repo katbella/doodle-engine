@@ -22,7 +22,7 @@ This produces a `dist/` directory containing:
 - `asset-manifest.json`: human-readable copy of that media list
 - `sw.js`: service worker, a browser file that caches the game for offline play
 
-Game assets from your project root `assets/` folder are copied into `dist/assets/` during `npm run build`. When you upload to a static host, upload the full `dist/` folder.
+Game assets from your project root `assets/` folder are copied into `dist/assets/` during `npm run build`.
 
 The build uses relative URLs throughout, so the same `dist/` works at a
 domain root (`https://mygame.example/`) or under a folder
@@ -53,25 +53,22 @@ Configure the wrapper to serve `dist/` through a small local HTTP server. Openin
 
 **[Electron](https://www.electronjs.org/)**: runs your game in a desktop window powered by Chromium, the browser engine used by Chrome:
 
-1. Build with `npm run build`
-2. Create an Electron main process that serves `dist/` from a local HTTP server and opens a window pointed at it (Electron's `protocol.handle` or a small `http` server both work)
-3. Package with `electron-builder` or `electron-forge`
+1. Create an Electron main process that serves the existing `dist/` output from a local HTTP server and opens a window pointed at it (Electron's `protocol.handle` or a small `http` server both work).
+2. Package with `electron-builder` or `electron-forge`.
 
 **[Tauri](https://tauri.app/)**: runs your game in the operating system's built-in webview, the component used to display web content inside an application:
 
-1. Build with `npm run build`
-2. Point Tauri's `devPath` at your `dist/` directory
-3. Build with `tauri build`
+1. Point Tauri's web asset configuration at the existing `dist/` directory.
+2. Build with `tauri build`.
 
 ## Mobile Packaging
 
-The build output is a standard web application, so it can also be wrapped for mobile distribution using web-to-native tools. The general approach is the same: build with `npm run build`, then configure the wrapper to load your `dist/` directory as its web content.
+The production `dist/` output is a standard web application, so it can also be wrapped for mobile distribution using web-to-native tools.
 
 Most tools in this space (such as Capacitor or Cordova-based solutions) follow a similar pattern:
 
-1. Build your game with `npm run build`
-2. Configure the mobile wrapper to use `dist/` as its web root
-3. Build and sign for iOS or Android through the wrapper's toolchain
+1. Configure the mobile wrapper to use `dist/` as its web root.
+2. Build and sign for iOS or Android through the wrapper's toolchain.
 
 Check the documentation for whichever tool you choose, as setup steps and platform requirements vary.
 

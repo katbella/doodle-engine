@@ -3,7 +3,7 @@ title: Project Structure
 description: How the project files shared by Doodle Studio and the CLI are organized.
 ---
 
-Each Doodle game lives in a folder containing its content, media, and application. Studio works with these files through visual tools, and the CLI runs commands against the folder. You can also open the files directly in a code editor.
+Each Doodle Engine game lives in a folder containing its content, media, and application. Doodle Studio opens content files in Visual mode or Source mode. The CLI runs commands against the project folder, and a separate code editor opens the files directly.
 
 Knowing where things are is helpful when adding files by hand, using version control, automating validation and builds, or customizing the game's renderer.
 
@@ -71,29 +71,18 @@ All game content lives in `content/`. The engine loads each type from its corres
 YAML entities are identified by the `id` field inside the file, so `tavern.yaml` could be renamed without changing the game. Dialogues and locales are the exception: a dialogue's ID is its filename without `.dlg`, and a locale's code is its filename without `.yaml`. Renaming those files changes their IDs.
 :::
 
-`player.yaml` is a single optional file rather than a directory of entities. It
-defines the player's profile fields and starting stats. `game.yaml` decides
+The optional `player.yaml` file defines the player's profile fields and starting
+stats. `game.yaml` decides
 whether the built-in renderer uses those profile fields directly or asks the
 player to enter replacement profile text. See [Characters &
 Party](/guides/characters-and-party/#player-profile-and-party-sheets).
 
 ### game.yaml
 
-`game.yaml` must provide the starting location, time, flags, variables, and
-inventory. Set the optional `playerCreatesProfile` field to `true` when the
-built-in renderer should ask for the player's name, title, and biography:
-
-```yaml
-playerCreatesProfile: true # Ask for the player's name, title, and biography
-startLocation: tavern # Where the player begins
-startTime:
-    day: 1
-    hour: 8
-startFlags: {} # Initial boolean flags
-startVariables: # Initial numeric/string variables
-    gold: 100
-startInventory: [] # Item IDs the player starts with
-```
+`game.yaml` holds the settings Doodle Engine reads when a new game begins,
+including its initial game state. [Your First Game](/getting-started/your-first-game/#start-with-the-game-configuration)
+walks through the starter configuration. [YAML Schemas](/reference/yaml-schemas/#gameconfig)
+lists every field the file supports.
 
 ### Locale Files
 
@@ -143,7 +132,6 @@ For custom renderers, replace `GameRenderer` with your own components. The `useG
 
 ## Where to continue
 
-- [The Studio Workspace](/studio/workspace/) explains how Studio presents project content
-- [Assets in Studio](/studio/assets/) shows how to import media into these folders
-- [CLI Commands](/reference/cli-commands/) covers development, validation, and production builds
-- [Architecture](/technical/architecture/) explains how the packages and application fit together
+If you are working in Doodle Studio, continue with the [Doodle Studio overview](/studio/). It opens the starter project from the first-game tutorial and introduces the editor before moving into its individual tools.
+
+If you are working in a text editor, continue with [Writing Dialogues](/guides/writing-dialogues/). The [CLI Commands](/reference/cli-commands/) page is available when you need the complete command reference.

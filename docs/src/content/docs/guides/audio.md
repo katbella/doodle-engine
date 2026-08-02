@@ -80,23 +80,7 @@ function MyGame() {
 
 `GameShell` calls `useAudioManager` for you.
 
-### Options
-
-| Option              | Type     | Default | Description                |
-| ------------------- | -------- | ------- | -------------------------- |
-| `masterVolume`      | `number` | `1.0`   | Master volume (0-1)        |
-| `musicVolume`       | `number` | `0.7`   | Music channel volume (0-1) |
-| `soundVolume`       | `number` | `0.8`   | Sound effects volume (0-1) |
-| `voiceVolume`       | `number` | `1.0`   | Voice channel volume (0-1) |
-| `crossfadeDuration` | `number` | `1000`  | Crossfade time in ms       |
-
-### Returns
-
-```typescript
-interface AudioManagerControls {
-    stopAll: () => void;
-}
-```
+For the option defaults, return value, and channel behavior, see the [`useAudioManager` reference](/reference/react-hooks/#useaudiomanager).
 
 ## How It Works
 
@@ -126,7 +110,7 @@ assets/
       bartender_greeting.ogg
 ```
 
-Write only the filename in game content. Doodle knows that a location’s `music` field refers to `assets/audio/music/`, while `ambient` refers to `assets/audio/sfx/`. See [Assets & Media](/guides/assets-and-media/) for every media field and folder.
+Write only the filename in game content. Doodle Engine knows that a location’s `music` field refers to `assets/audio/music/`, while `ambient` refers to `assets/audio/sfx/`. See [Assets & Media](/guides/assets-and-media/) for every media field and folder.
 
 ## UI Sounds
 

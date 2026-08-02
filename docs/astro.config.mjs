@@ -56,7 +56,6 @@ export default defineConfig({
                         { label: 'Studio Overview', slug: 'studio' },
                         { label: 'Projects', slug: 'studio/projects' },
                         { label: 'The Workspace', slug: 'studio/workspace' },
-                        { label: 'Themes', slug: 'studio/themes' },
                         { label: 'Dialogue Editing', slug: 'studio/dialogues' },
                         {
                             label: 'Flags & Variables',
@@ -69,6 +68,7 @@ export default defineConfig({
                             label: 'Validate, Preview, and Build',
                             slug: 'studio/validation-builds',
                         },
+                        { label: 'Themes', slug: 'studio/themes' },
                         {
                             label: 'Updating Studio',
                             slug: 'studio/updates',
