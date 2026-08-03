@@ -986,4 +986,116 @@ describe('parseEffect / parseCondition - quotes and arity', () => {
             parseCondition('variableEquals name Sir Reginald')
         ).toThrow(/single value/);
     });
+
+    it.each([
+        'hasFlag metBartender extra',
+        'notFlag doorLocked extra',
+        'hasItem rusty_key extra',
+        'variableGreaterThan gold 10 extra',
+        'variableLessThan gold 10 extra',
+        'atLocation tavern extra',
+        'questAtStage main_quest started extra',
+        'characterAt merchant market extra',
+        'characterInParty elisa extra',
+        'characterStatGreaterThan player strength 10 extra',
+        'characterStatLessThan player strength 10 extra',
+        'relationshipAbove bartender 5 extra',
+        'relationshipBelow bartender 5 extra',
+        'timeIs 20 6 extra',
+        'itemAt sword armory extra',
+        'roll 1 20 15 extra',
+    ])('rejects extra words in fixed-format condition: %s', (condition) => {
+        expect(() => parseCondition(condition)).toThrow(/unexpected arguments/);
+    });
+
+    it.each([
+        'ROLL result 1 20 extra',
+        'SET flag metBartender extra',
+        'SET questStage main_quest started extra',
+        'SET characterLocation merchant market extra',
+        'SET relationship bartender 5 extra',
+        'SET mapEnabled true extra',
+        'CLEAR flag doorLocked extra',
+        'ADD variable gold 5 extra',
+        'ADD item rusty_key extra',
+        'ADD journalEntry tavern_discovery extra',
+        'ADD toParty elisa extra',
+        'ADD relationship bartender 1 extra',
+        'ADD characterStat player strength 1 extra',
+        'REMOVE item rusty_key extra',
+        'REMOVE fromParty elisa extra',
+        'MOVE item sword armory extra',
+        'GOTO location market extra',
+        'ADVANCE time 2 extra',
+        'START dialogue merchant_intro extra',
+        'END dialogue extra',
+    ])('rejects extra words in fixed-format effect: %s', (effect) => {
+        expect(() => parseEffect(effect)).toThrow(/unexpected arguments/);
+    });
+
+    it('accepts only true or false for SET mapEnabled', () => {
+        expect(() => parseEffect('SET mapEnabled')).toThrow(
+            /only true or false/
+        );
+        expect(() => parseEffect('SET mapEnabled banana')).toThrow(
+            /only true or false/
+        );
+        expect(parseEffect('SET mapEnabled true')).toEqual({
+            type: 'setMapEnabled',
+            enabled: true,
+        });
+        expect(parseEffect('SET mapEnabled false')).toEqual({
+            type: 'setMapEnabled',
+            enabled: false,
+        });
+    });
+});
+
+describe('parseDialogue - conflicting dialogue routes', () => {
+    it.each([
+        `NODE start
+  CHOICE Leave
+    END dialogue
+    GOTO next
+  END
+NODE next
+  NARRATOR: Next.`,
+        `NODE start
+  CHOICE Leave
+    GOTO next
+    END dialogue
+  END
+NODE next
+  NARRATOR: Next.`,
+        `NODE start
+  IF hasFlag leave
+    END dialogue
+    GOTO next
+  END
+NODE next
+  NARRATOR: Next.`,
+        `NODE start
+  IF hasFlag leave
+    GOTO next
+    END dialogue
+  END
+NODE next
+  NARRATOR: Next.`,
+        `NODE start
+  NARRATOR: Leaving.
+  END dialogue
+  GOTO next
+NODE next
+  NARRATOR: Next.`,
+        `NODE start
+  NARRATOR: Leaving.
+  GOTO next
+  END dialogue
+NODE next
+  NARRATOR: Next.`,
+    ])('rejects END dialogue combined with a node GOTO', (dsl) => {
+        expect(() => parseDialogue(dsl, 'test')).toThrow(
+            /cannot contain both END dialogue and GOTO next/
+        );
+    });
 });

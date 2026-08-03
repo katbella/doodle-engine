@@ -15,7 +15,7 @@ NODE dramatic_reveal
   NARRATOR: The harbor looks different when the light returns.
 ```
 
-`GameShell` shows the video as a fullscreen overlay before the player interacts with the dialogue underneath.
+`GameShell` resolves the filename through the standard video asset path and shows the video as a fullscreen overlay before the player interacts with the dialogue underneath.
 
 ## How It Works
 
@@ -24,10 +24,6 @@ NODE dramatic_reveal
 3. The renderer reads `pendingVideo` and opens the `VideoPlayer` component.
 
 `pendingVideo` is transient, which means it appears for one engine update. `GameShell` keeps the filename until playback finishes.
-
-## Using with GameShell
-
-`GameShell` plays the video automatically. The engine resolves its filename to the video asset path.
 
 ## Using with a Custom Renderer
 

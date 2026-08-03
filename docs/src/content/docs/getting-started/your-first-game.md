@@ -1,31 +1,78 @@
 ---
 title: Your First Game
-description: Explore the starter game created by Doodle Engine.
+description: Create the starter game and learn how a Doodle Engine project works.
 ---
 
-This page walks through the starter game file by file, so you can see how a working Doodle Engine project fits together before writing your own content.
+This tutorial creates a small playable game, then follows one conversation through the project so you can see how its parts fit together. The explanations apply whether you use Doodle Studio or work with the CLI and a separate text editor. Where the actions differ, both sets of instructions are provided.
 
-Before starting, you need a project created with **Playable example story** selected, and its dependencies installed. [Installation](/getting-started/installation/) covers both.
+Complete [Installation](/getting-started/installation/) before you begin. You only need to install the tools for the way you want to work today.
 
-If you are working in Doodle Studio, begin with the [Studio walkthrough](/studio/) instead. It explores and changes this same content in the visual editor.
+## Create the starter project
 
-The walkthrough below uses the command line and a code editor. Start the game with `npm run dev`, open `http://localhost:3000`, and keep the game open while you change its files. Whenever you save a content file, the terminal reports the change, the browser reloads, and any mistake appears as a validation error you can fix on the spot.
+### In Doodle Studio
 
-## A Few Terms
+1. Launch Doodle Studio and select **New project…**.
+2. Enter a project name and game title, then choose where to create the project.
+3. Keep **Playable example story** selected and choose **English text with a locale starter file**.
+4. Keep the default React renderer and starter styles selected, then select **Create**.
+5. When the dependency banner appears, select **Install dependencies** and wait for it to finish.
 
-You will see these names throughout the guides:
+### From the command line
+
+Open a terminal and create the project:
+
+```bash
+npx doodle-engine create my-game
+```
+
+Choose **Playable example story** and **English text with a locale starter file** when the command asks. Keep the default React renderer and starter styles, then install the project dependencies:
+
+```bash
+cd my-game
+npm install
+```
+
+The command-line workflow pairs terminal commands with a separate text editor. Source mode remains part of Doodle Studio.
+
+## A few terms
+
+You will see these names throughout the documentation:
 
 - The **content registry** is the collection of characters, locations, dialogues, quests, and other game definitions loaded from `content/`.
 - **Game state** records what has changed during play, including the player's location, flags, variables, inventory, relationships, and quest progress.
 - A **snapshot** is the current game state prepared for display. The renderer receives a new snapshot after each player action.
 - The **renderer** is the game's interface: the screens, controls, layout, and styles the player sees.
-- The **asset manifest** is the list of images, audio, and video the game needs to load.
+- The **asset manifest** lists the images, audio, and video the game needs to load.
 
-The [Glossary](/reference/glossary/) collects these and the rest of Doodle Engine's vocabulary in one place.
+The [Glossary](/reference/glossary/) collects these and the rest of the Doodle Engine vocabulary in one place.
 
-## game.yaml
+## How the project fits together
 
-Open `content/game.yaml`. This is the game configuration: it sets the starting location, the starting time of day, and the initial values for flags, variables, and inventory. The file begins with a commented-out `shell:` section for customizing the game's splash, loading, and title screens. Below that are the starting values:
+The starter story begins in a tavern called The Salty Dog. The tavern has an ID, and the bartender's file uses that ID to place him there. His file points to a dialogue, and that dialogue can start a quest or change facts that later conversations will remember. These links let the story grow across several files without putting everything in one script.
+
+When the game starts, Doodle Engine loads the files under `content/` into the content registry. Each definition has an ID so that other parts of the project can refer to it. In Doodle Studio, Visual mode presents fields for these files and Source mode opens their text. The command-line workflow uses a separate editor for the same files.
+
+During the conversation, conditions read game state and effects update it. After each action, the renderer receives a new snapshot and updates the interface on screen.
+
+## Run the starter game
+
+In Doodle Studio, select **Preview** in the top bar. Doodle Studio starts the project's local server and opens the game in your browser.
+
+From the command line, run:
+
+```bash
+npm run dev
+```
+
+Then open `http://localhost:3000` in your browser. Leave the server running while you explore and edit the project.
+
+Start a new game and speak to Marcus in The Salty Dog. You will return to this conversation after looking at the content behind it.
+
+## Start with the game configuration
+
+In Doodle Studio, select **Game Config** in the project rail. In a text editor, open `content/game.yaml`.
+
+This file sets the state at the beginning of a new game. The starter project begins in the tavern on the first morning, with 100 gold and no inventory:
 
 ```yaml
 playerCreatesProfile: true
@@ -41,13 +88,13 @@ startVariables:
 startInventory: []
 ```
 
-`playerCreatesProfile: true` makes the game ask the player for a name before the story begins.
+`playerCreatesProfile: true` tells the built-in renderer to ask for the player's name before the story begins. The other values become the first game state. Effects in dialogue can change them later.
 
-See [YAML Schemas](/reference/yaml-schemas/) for every field this file supports.
+## Follow the tavern to its character
 
-## Locations
+In Doodle Studio, open `tavern` under **Locations**. In a text editor, open `content/locations/tavern.yaml`.
 
-Open `content/locations/tavern.yaml`. Each location has an `id`, a name, a description, and optional fields for a banner image, music, and ambient sound. Text appears directly in the file when you choose the English starter. The localization example uses `@key` references instead.
+The location has a stable `id` used by the rest of the project. Its name and description are the words shown to the player:
 
 ```yaml
 id: tavern
@@ -58,11 +105,7 @@ music: ""
 ambient: ""
 ```
 
-See [Adding Locations](/guides/adding-locations/) for the complete location fields and map setup. When you are ready to translate your game, [Localization](/guides/localization/) explains how to replace text with locale keys.
-
-## Characters
-
-Open `content/characters/bartender.yaml`. Characters have a name, portrait, an assigned starting location, and a `dialogue` field pointing to the conversation that begins when the player talks to them.
+Now open `bartender` under **Characters**, or open `content/characters/bartender.yaml` in a text editor:
 
 ```yaml
 id: bartender
@@ -75,11 +118,13 @@ dialogue: bartender_greeting
 stats: {}
 ```
 
-See [Characters & Party](/guides/characters-and-party/) for party members, stats, and relationships.
+The `location` field places Marcus in the tavern by referring to its ID. The `dialogue` field names the conversation that begins when the player talks to him. Display names can change without breaking either connection because the project uses IDs for these references.
 
-## Dialogues
+## See how dialogue changes the game
 
-Open `content/dialogues/bartender_greeting.dlg`. For syntax highlighting in VS Code, install the bundled extension (see [VS Code Extension](/guides/vscode-extension/) for instructions). Dialogues use Doodle's DSL (domain-specific language), a small scripting format made for conversations. Nodes are conversation points, choices branch the conversation, and effects like `SET flag` or `ADD variable` change game state. This shortened example follows the same structure as the starter dialogue:
+In Doodle Studio, open `bartender_greeting` under **Dialogues**. Visual mode shows one node at a time, and Source mode shows the `.dlg` file. In a text editor, open `content/dialogues/bartender_greeting.dlg`.
+
+Dialogue files use a small scripting format called the Doodle Engine DSL. A node holds a point in the conversation. Choices lead to another node, and effects record what happened. This shortened example follows the same structure as the starter dialogue:
 
 ```text
 NODE start
@@ -107,11 +152,11 @@ NODE rumors
   END
 ```
 
-The bartender dialogue also demonstrates conditions, dice rolls, and quest triggers. See [Writing Dialogues](/guides/writing-dialogues/) for a detailed guide to the dialogue language.
+Choosing the first response sets the `metBartender` flag and raises Marcus's relationship value before moving to the `rumors` node. Those changes become part of game state. A later condition can read them and reveal a choice or take a different branch.
 
-## Quests
+## Follow the quest connection
 
-Open `content/quests/odd_jobs.yaml`. Quests have a list of stages. Dialogues advance the stage with `SET questStage`. The `questAtStage` condition can make choices available, select an `IF` branch, or control whether a triggered dialogue begins.
+The full bartender dialogue can start the Odd Jobs quest. Open `odd_jobs` under **Quests** in Doodle Studio, or open `content/quests/odd_jobs.yaml` in a text editor:
 
 ```yaml
 id: odd_jobs
@@ -126,16 +171,24 @@ stages:
       description: "Job well done. Elena paid 50 gold for the trouble."
 ```
 
-See [Creating Quests](/guides/creating-quests/) for journal entries and multi-stage quest design.
+The quest has its own ID, and each stage has an ID within that quest. Dialogue effects move the quest from one stage to another. Conditions can then check the current stage before showing a response or starting another conversation.
 
-## The App Component
+## Make a change
 
-Open `src/App.tsx`. It fetches two resources from the development server: the content registry (the loaded game definitions) and the asset manifest (the media files used by the game). It passes both to `GameShell`, which handles loading, the title and credits screens, gameplay, the pause menu, and settings.
+Return to the `start` node in `bartender_greeting` and change Marcus's opening line.
 
-See [Game Shell](/guides/game-shell/) for configuration options, or [Custom Renderer](/technical/custom-renderer/) to build your own UI.
+In Doodle Studio, make the change in Visual mode and wait for the save indicator to clear. Select **Playtest**, choose **Start at node…**, and select the `start` node in `bartender_greeting`. The playtester begins at the edited line and lets you follow the choices without restarting the full game.
 
-## Try a change
+In a text editor, save the `.dlg` file while the development server is running. The terminal reports `Content changed` and the browser reloads. Speak to Marcus again to see the new line.
 
-Make one edit now to see the loop in action. Open `content/dialogues/bartender_greeting.dlg`, change the bartender's opening line in the `start` node, and save. The dev server prints `Content changed`, the browser reloads, and talking to Marcus shows your words.
+This editing loop stays the same as the project grows. Change the content, test the part of the story affected by it, and check the result in the game.
 
-From here, experiment freely: change a line, a condition, an effect, or a starting value, then return to the game to see the result. When you are ready to build something of your own, continue with [Writing Dialogues](/guides/writing-dialogues/), [Adding Locations](/guides/adding-locations/), and [Creating Quests](/guides/creating-quests/).
+## What displays the game
+
+The files under `src/` make up the application that runs in the browser. `src/App.tsx` loads the content registry and the asset manifest, which tells the application where to find the project's media. It passes both to `GameShell`, the built-in renderer used by the starter project.
+
+You can write the story without changing these application files. They become relevant when you want to restyle the interface, change how a screen behaves, or build a renderer of your own.
+
+## Continue from here
+
+[Project Structure](/getting-started/project-structure/) explains the remaining folders and files now that you have seen the main connections in a working game. After that, [Doodle Studio](/studio/) continues with the desktop editor, while [Writing Dialogues](/guides/writing-dialogues/) continues with the dialogue language in a text editor.

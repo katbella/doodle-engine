@@ -1,6 +1,6 @@
 ---
 title: Assets in Studio
-description: Add portraits, banners, music, sound, voice, and video to your game.
+description: Import game media through Doodle Studio.
 ---
 
 Studio can import media from anywhere on your computer and place a game-owned copy in the correct project folder.
@@ -9,7 +9,7 @@ Importing through Studio is a convenience, not a requirement. You can also copy 
 
 ## Add an asset
 
-Open the character, location, item, map, interlude, dialogue node, or game setting that should use the asset. Select **Choose file…** beside the relevant field, then choose the file from your computer.
+Open the character, location, or other content that should use the asset. Select **Choose file…** beside the relevant field, then choose the file from your computer.
 
 Studio copies the file into your game and fills in the field. Your original file remains where it was.
 

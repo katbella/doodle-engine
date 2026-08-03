@@ -62,6 +62,30 @@ function isEffectLine(line: string): boolean {
     return EFFECT_KEYWORDS.has(line.split(/\s+/)[0]);
 }
 
+function rejectExtraArguments(
+    parts: string[],
+    allowedParts: number,
+    syntax: string
+): void {
+    if (parts.length > allowedParts) {
+        throw new Error(
+            `${syntax} has unexpected arguments: ${parts.slice(allowedParts).join(' ')}`
+        );
+    }
+}
+
+function rejectEndDialogueGoto(
+    hasEndDialogue: boolean,
+    next: string | undefined,
+    context: string
+): void {
+    if (hasEndDialogue && next) {
+        throw new Error(
+            `${context} cannot contain both END dialogue and GOTO ${next}. Remove one.`
+        );
+    }
+}
+
 /**
  * Tokenize input string into processable tokens
  * - Removes comments (anything after #)
@@ -184,10 +208,13 @@ export function parseCondition(conditionStr: string): Condition {
 
     switch (type) {
         case 'hasFlag':
+            rejectExtraArguments(parts, 2, 'Condition "hasFlag"');
             return { type: 'hasFlag', flag: parts[1] };
         case 'notFlag':
+            rejectExtraArguments(parts, 2, 'Condition "notFlag"');
             return { type: 'notFlag', flag: parts[1] };
         case 'hasItem':
+            rejectExtraArguments(parts, 2, 'Condition "hasItem"');
             return { type: 'hasItem', itemId: parts[1] };
         case 'variableEquals':
             if (parts.length > 3) {
@@ -201,32 +228,38 @@ export function parseCondition(conditionStr: string): Condition {
                 value: isNaN(Number(parts[2])) ? parts[2] : Number(parts[2]),
             };
         case 'variableGreaterThan':
+            rejectExtraArguments(parts, 3, 'Condition "variableGreaterThan"');
             return {
                 type: 'variableGreaterThan',
                 variable: parts[1],
                 value: Number(parts[2]),
             };
         case 'variableLessThan':
+            rejectExtraArguments(parts, 3, 'Condition "variableLessThan"');
             return {
                 type: 'variableLessThan',
                 variable: parts[1],
                 value: Number(parts[2]),
             };
         case 'atLocation':
+            rejectExtraArguments(parts, 2, 'Condition "atLocation"');
             return { type: 'atLocation', locationId: parts[1] };
         case 'questAtStage':
+            rejectExtraArguments(parts, 3, 'Condition "questAtStage"');
             return {
                 type: 'questAtStage',
                 questId: parts[1],
                 stageId: parts[2],
             };
         case 'characterAt':
+            rejectExtraArguments(parts, 3, 'Condition "characterAt"');
             return {
                 type: 'characterAt',
                 characterId: parts[1],
                 locationId: parts[2],
             };
         case 'characterInParty':
+            rejectExtraArguments(parts, 2, 'Condition "characterInParty"');
             return { type: 'characterInParty', characterId: parts[1] };
         case 'characterStatEquals':
             if (parts.length > 4) {
@@ -241,6 +274,11 @@ export function parseCondition(conditionStr: string): Condition {
                 value: isNaN(Number(parts[3])) ? parts[3] : Number(parts[3]),
             };
         case 'characterStatGreaterThan':
+            rejectExtraArguments(
+                parts,
+                4,
+                'Condition "characterStatGreaterThan"'
+            );
             return {
                 type: 'characterStatGreaterThan',
                 characterId: parts[1],
@@ -248,6 +286,7 @@ export function parseCondition(conditionStr: string): Condition {
                 value: Number(parts[3]),
             };
         case 'characterStatLessThan':
+            rejectExtraArguments(parts, 4, 'Condition "characterStatLessThan"');
             return {
                 type: 'characterStatLessThan',
                 characterId: parts[1],
@@ -255,26 +294,31 @@ export function parseCondition(conditionStr: string): Condition {
                 value: Number(parts[3]),
             };
         case 'relationshipAbove':
+            rejectExtraArguments(parts, 3, 'Condition "relationshipAbove"');
             return {
                 type: 'relationshipAbove',
                 characterId: parts[1],
                 value: Number(parts[2]),
             };
         case 'relationshipBelow':
+            rejectExtraArguments(parts, 3, 'Condition "relationshipBelow"');
             return {
                 type: 'relationshipBelow',
                 characterId: parts[1],
                 value: Number(parts[2]),
             };
         case 'timeIs':
+            rejectExtraArguments(parts, 3, 'Condition "timeIs"');
             return {
                 type: 'timeIs',
                 startHour: Number(parts[1]),
                 endHour: Number(parts[2]),
             };
         case 'itemAt':
+            rejectExtraArguments(parts, 3, 'Condition "itemAt"');
             return { type: 'itemAt', itemId: parts[1], locationId: parts[2] };
         case 'roll':
+            rejectExtraArguments(parts, 4, 'Condition "roll"');
             return {
                 type: 'roll',
                 min: Number(parts[1]),
@@ -329,6 +373,7 @@ export function parseEffect(effectStr: string): Effect {
     }
     if (trimmed.startsWith('ROLL ')) {
         const parts = trimmed.split(/\s+/);
+        rejectExtraArguments(parts, 4, 'Effect "ROLL"');
         return {
             type: 'roll',
             variable: parts[1],
@@ -343,6 +388,7 @@ export function parseEffect(effectStr: string): Effect {
     switch (keyword) {
         case 'SET':
             if (parts[1] === 'flag') {
+                rejectExtraArguments(parts, 3, 'Effect "SET flag"');
                 return { type: 'setFlag', flag: parts[2] };
             }
             if (parts[1] === 'variable') {
@@ -360,6 +406,7 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'questStage') {
+                rejectExtraArguments(parts, 4, 'Effect "SET questStage"');
                 return {
                     type: 'setQuestStage',
                     questId: parts[2],
@@ -367,6 +414,11 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'characterLocation') {
+                rejectExtraArguments(
+                    parts,
+                    4,
+                    'Effect "SET characterLocation"'
+                );
                 return {
                     type: 'setCharacterLocation',
                     characterId: parts[2],
@@ -374,6 +426,7 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'relationship') {
+                rejectExtraArguments(parts, 4, 'Effect "SET relationship"');
                 return {
                     type: 'setRelationship',
                     characterId: parts[2],
@@ -396,18 +449,26 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'mapEnabled') {
+                rejectExtraArguments(parts, 3, 'Effect "SET mapEnabled"');
+                if (parts[2] !== 'true' && parts[2] !== 'false') {
+                    throw new Error(
+                        'Effect "SET mapEnabled" accepts only true or false.'
+                    );
+                }
                 return { type: 'setMapEnabled', enabled: parts[2] === 'true' };
             }
             throw new Error(`Unknown SET effect: ${parts[1]}`);
 
         case 'CLEAR':
             if (parts[1] === 'flag') {
+                rejectExtraArguments(parts, 3, 'Effect "CLEAR flag"');
                 return { type: 'clearFlag', flag: parts[2] };
             }
             throw new Error(`Unknown CLEAR effect: ${parts[1]}`);
 
         case 'ADD':
             if (parts[1] === 'variable') {
+                rejectExtraArguments(parts, 4, 'Effect "ADD variable"');
                 return {
                     type: 'addVariable',
                     variable: parts[2],
@@ -415,15 +476,19 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'item') {
+                rejectExtraArguments(parts, 3, 'Effect "ADD item"');
                 return { type: 'addItem', itemId: parts[2] };
             }
             if (parts[1] === 'journalEntry') {
+                rejectExtraArguments(parts, 3, 'Effect "ADD journalEntry"');
                 return { type: 'addJournalEntry', entryId: parts[2] };
             }
             if (parts[1] === 'toParty') {
+                rejectExtraArguments(parts, 3, 'Effect "ADD toParty"');
                 return { type: 'addToParty', characterId: parts[2] };
             }
             if (parts[1] === 'relationship') {
+                rejectExtraArguments(parts, 4, 'Effect "ADD relationship"');
                 return {
                     type: 'addRelationship',
                     characterId: parts[2],
@@ -431,6 +496,7 @@ export function parseEffect(effectStr: string): Effect {
                 };
             }
             if (parts[1] === 'characterStat') {
+                rejectExtraArguments(parts, 5, 'Effect "ADD characterStat"');
                 return {
                     type: 'addCharacterStat',
                     characterId: parts[2],
@@ -442,15 +508,18 @@ export function parseEffect(effectStr: string): Effect {
 
         case 'REMOVE':
             if (parts[1] === 'item') {
+                rejectExtraArguments(parts, 3, 'Effect "REMOVE item"');
                 return { type: 'removeItem', itemId: parts[2] };
             }
             if (parts[1] === 'fromParty') {
+                rejectExtraArguments(parts, 3, 'Effect "REMOVE fromParty"');
                 return { type: 'removeFromParty', characterId: parts[2] };
             }
             throw new Error(`Unknown REMOVE effect: ${parts[1]}`);
 
         case 'MOVE':
             if (parts[1] === 'item') {
+                rejectExtraArguments(parts, 4, 'Effect "MOVE item"');
                 return {
                     type: 'moveItem',
                     itemId: parts[2],
@@ -461,24 +530,28 @@ export function parseEffect(effectStr: string): Effect {
 
         case 'GOTO':
             if (parts[1] === 'location') {
+                rejectExtraArguments(parts, 3, 'Effect "GOTO location"');
                 return { type: 'goToLocation', locationId: parts[2] };
             }
             throw new Error('GOTO should not be parsed as an effect');
 
         case 'ADVANCE':
             if (parts[1] === 'time') {
+                rejectExtraArguments(parts, 3, 'Effect "ADVANCE time"');
                 return { type: 'advanceTime', hours: Number(parts[2]) };
             }
             throw new Error(`Unknown ADVANCE effect: ${parts[1]}`);
 
         case 'START':
             if (parts[1] === 'dialogue') {
+                rejectExtraArguments(parts, 3, 'Effect "START dialogue"');
                 return { type: 'startDialogue', dialogueId: parts[2] };
             }
             throw new Error(`Unknown START effect: ${parts[1]}`);
 
         case 'END':
             if (parts[1] === 'dialogue') {
+                rejectExtraArguments(parts, 2, 'Effect "END dialogue"');
                 return { type: 'endDialogue' };
             }
             throw new Error('END should not be parsed as an effect');
@@ -515,6 +588,7 @@ function parseChoice(
     const conditions: Condition[] = [];
     const effects: Effect[] = [];
     let next = '';
+    let hasEndDialogue = false;
 
     let i = startIndex + 1;
     const baseIndent = token.indent;
@@ -557,7 +631,9 @@ function parseChoice(
         } else if (isEffectLine(current.line)) {
             // Effect keyword takes precedence over the ':' speaker heuristic, so a
             // NOTIFY (or other effect) whose text contains ':' still parses.
-            effects.push(parseEffect(current.line));
+            const effect = parseEffect(current.line);
+            effects.push(effect);
+            if (effect.type === 'endDialogue') hasEndDialogue = true;
             i++;
         } else if (current.line.includes(':')) {
             // A choice holds button text, conditions, effects, and a route only.
@@ -567,10 +643,18 @@ function parseChoice(
             );
         } else {
             // Must be an effect
-            effects.push(parseEffect(current.line));
+            const effect = parseEffect(current.line);
+            effects.push(effect);
+            if (effect.type === 'endDialogue') hasEndDialogue = true;
             i++;
         }
     }
+
+    rejectEndDialogueGoto(
+        hasEndDialogue,
+        next,
+        `Choice in node "${nodeId}" (line ${token.lineNumber})`
+    );
 
     // Generate a choice ID that is unique within the node. The index guarantees
     // uniqueness even when two choices sanitize to the same text; the sanitized
@@ -618,6 +702,7 @@ function parseIfBlock(tokens: Token[], startIndex: number): IfBlockParseResult {
 
     let next: string | undefined;
     const effects: Effect[] = [];
+    let hasEndDialogue = false;
     let i = startIndex + 1;
     const baseIndent = token.indent;
 
@@ -641,10 +726,18 @@ function parseIfBlock(tokens: Token[], startIndex: number): IfBlockParseResult {
             }
             i++;
         } else {
-            effects.push(parseEffect(current.line));
+            const effect = parseEffect(current.line);
+            effects.push(effect);
+            if (effect.type === 'endDialogue') hasEndDialogue = true;
             i++;
         }
     }
+
+    rejectEndDialogueGoto(
+        hasEndDialogue,
+        next,
+        `IF block at line ${token.lineNumber}`
+    );
 
     return { condition, next, effects, nextIndex: i };
 }
@@ -677,6 +770,7 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
     const choices: Choice[] = [];
     const effects: Effect[] = [];
     let next: string | undefined;
+    let hasEndDialogue = false;
     const conditionalBranches: ConditionalBranch[] = [];
 
     let i = startIndex + 1;
@@ -724,7 +818,9 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
             i++;
         } else if (isEffectLine(current.line)) {
             // Effect keyword (incl. NOTIFY) takes precedence over the ':' rule.
-            effects.push(parseEffect(current.line));
+            const effect = parseEffect(current.line);
+            effects.push(effect);
+            if (effect.type === 'endDialogue') hasEndDialogue = true;
             i++;
         } else if (current.line.includes(':')) {
             // Speaker line. A node supports exactly one speaker; a second speaker
@@ -750,10 +846,18 @@ function parseNode(tokens: Token[], startIndex: number): NodeParseResult {
             i++;
         } else {
             // Must be an effect
-            effects.push(parseEffect(current.line));
+            const effect = parseEffect(current.line);
+            effects.push(effect);
+            if (effect.type === 'endDialogue') hasEndDialogue = true;
             i++;
         }
     }
+
+    rejectEndDialogueGoto(
+        hasEndDialogue,
+        next,
+        `Node "${nodeId}" (line ${token.lineNumber})`
+    );
 
     const node: DialogueNode = {
         id: nodeId,

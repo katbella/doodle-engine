@@ -143,6 +143,9 @@ test.beforeEach(async () => {
     profileDir = await mkdtemp(profilePrefix);
     createdProjectDir = await mkdtemp(createdProjectPrefix);
     await mkdir(join(fixtureDir, 'node_modules'), { recursive: true });
+    const corePackage = JSON.parse(
+        await readFile(join(workspaceDir, 'packages/core/package.json'), 'utf8')
+    ) as { version: string };
     await writeFixture(
         'package.json',
         JSON.stringify({
@@ -150,6 +153,10 @@ test.beforeEach(async () => {
             version: '1.0.0',
             dependencies: { '@doodle-engine/core': 'workspace:*' },
         })
+    );
+    await writeFixture(
+        'node_modules/@doodle-engine/core/package.json',
+        JSON.stringify({ version: corePackage.version })
     );
     await writeFixture(
         'index.html',
@@ -163,9 +170,12 @@ startLocation: tavern
 startTime:
   day: 1
   hour: 8
-startFlags: {}
-startVariables: {}
-startInventory: []
+startFlags:
+  metHarbormaster: true
+startVariables:
+  gold: 12
+startInventory:
+  - brass_compass
 `
     );
     await writeFixture(
@@ -197,6 +207,17 @@ biography: "@character.bartender.bio"
 portrait: ""
 location: tavern
 dialogue: audit
+stats: {}
+`
+    );
+    await writeFixture(
+        'content/items/brass_compass.yaml',
+        `id: brass_compass
+name: Brass Compass
+description: A weathered compass carried in from the harbor.
+icon: ""
+image: ""
+location: inventory
 stats: {}
 `
     );
@@ -399,6 +420,11 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     path: join(tourDir, '02-project-overview-dark.png'),
                     animations: 'disabled',
                 });
+            if (publishDocsScreenshots) {
+                await page.locator('.overview__path').evaluate((element) => {
+                    element.textContent = 'my-game';
+                });
+            }
             await publishThemePair(app, page, page, 'workspace');
             await publishThemePair(
                 app,
@@ -607,10 +633,7 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
 
         await test.step('capture the localization editor', async () => {
             if (!publishDocsScreenshots) return;
-            if (captureVisualTour)
-                await page
-                    .getByRole('button', { name: 'en', exact: true })
-                    .click();
+            await page.getByRole('button', { name: 'en', exact: true }).click();
             await expect(page.locator('.locale-editor')).toBeVisible();
             await publishThemePair(
                 app,
@@ -1139,7 +1162,9 @@ test('opens, edits, and saves through Electron, preload, IPC, and the filesystem
                     .filter({ hasText: 'REQUIRE hasFlag ready' });
                 await requirementLine.click();
                 await page.keyboard.press('End');
-                await page.keyboard.press('Control+ArrowLeft');
+                for (let index = 0; index < 'ready'.length; index += 1) {
+                    await page.keyboard.press('ArrowLeft');
+                }
                 await page.keyboard.press('Control+Space');
                 const suggestions = page.locator(
                     '.editor__source-body .suggest-widget.visible'

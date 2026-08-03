@@ -1,9 +1,9 @@
 ---
 title: Custom Renderer
-description: Build a game interface with Doodle's React APIs or another UI framework.
+description: Build a game interface with Doodle Engine's React APIs or another UI framework.
 ---
 
-The built-in `GameRenderer` assembles Doodle's standard interface. A custom renderer can arrange the React components differently or present engine state through an interface of its own.
+The built-in `GameRenderer` assembles Doodle Engine's standard interface. A custom renderer can arrange the React components differently or present engine state through an interface of its own.
 
 Before starting here, make sure CSS is not enough: [Game Shell styling](/guides/game-shell/#styling) retheming covers most visual changes without any code. This page assumes React and TypeScript experience, a working project, and familiarity with the snapshot idea from [Architecture](/technical/architecture/).
 
@@ -155,21 +155,7 @@ register at priority `300`, a modal panel around `150`, shell pause/settings
 around `50`, and dialogue controls at `0`. A handler returns `true` when it
 consumes the command, preventing lower-priority UI from seeing it.
 
-## Available Actions
-
-```typescript
-actions.selectChoice(choiceId: string)   // Pick a dialogue choice
-actions.continueDialogue()               // Advance past a text-only node
-actions.talkTo(characterId: string)      // Start conversation
-actions.travelTo(locationId: string)     // Travel via map
-actions.writeNote(title, text)           // Add a player note
-actions.deleteNote(noteId: string)       // Remove a player note
-actions.setLocale(locale: string)        // Change language
-actions.setPlayerProfile(profile)        // Complete a player-entered profile
-actions.saveGame()                       // Returns SaveData
-actions.loadGame(saveData: SaveData)     // Restore from save
-actions.dismissInterlude()               // Clear a pending interlude
-```
+The examples above use the actions needed for dialogue and keyboard input. The [`useGame` reference](/reference/react-hooks/#usegame) lists every available action and its behavior.
 
 ## Mixing Individual Components
 
@@ -243,57 +229,13 @@ function MyLayout() {
 }
 ```
 
-## Snapshot Structure
+## Work with the Snapshot
 
-The snapshot provides the current game screen data:
+The examples above use resolved location, dialogue, character, map, and progress data from the current snapshot. [The snapshot section in Architecture](/technical/architecture/#snapshot-derived) shows the complete structure and explains which fields are derived or transient. Use the `Snapshot` type exported by `@doodle-engine/core` when implementing the renderer.
 
-```typescript
-snapshot.player; // Player profile and stats
-snapshot.location; // Current location (name, description, banner)
-snapshot.dialogue; // Current dialogue node or null
-snapshot.choices; // Available choices (empty if no dialogue or auto-advance)
-snapshot.charactersHere; // NPCs at current location
-snapshot.itemsHere; // Items at current location, not in inventory
-snapshot.party; // Characters in the player's party
-snapshot.inventory; // Player's items
-snapshot.quests; // Active quests with current stage
-snapshot.journal; // Unlocked journal entries
-snapshot.playerNotes; // Notes written by the player
-snapshot.variables; // Game variables (gold, reputation, etc.)
-snapshot.time; // Current in-game time { day, hour }
-snapshot.map; // Map data or null if disabled
-snapshot.music; // Current music track
-snapshot.ambient; // Current ambient sound
-snapshot.notifications; // Transient notifications from the last action
-snapshot.pendingSounds; // Sound effects to play from the last action
-snapshot.pendingVideo; // Video to play fullscreen from the last action
-snapshot.pendingInterlude; // Interlude to show from the last action
-snapshot.currentLocale; // Current language code (e.g. "en")
-snapshot.ui; // Resolved UI strings (e.g. snapshot.ui['ui.continue'])
-```
+## Debug a Custom Renderer
 
-## Dev Tools Console API
-
-When `devTools={import.meta.env.DEV}` is set on `GameProvider` or `GameShell`, a `window.doodle` object is available in your browser's DevTools console while developing. Type `doodle.inspect()` to see all available commands:
-
-```text
-doodle.setFlag("flagName")              // Set a flag
-doodle.clearFlag("flagName")            // Clear a flag
-doodle.setVariable("gold", 100)         // Set a variable
-doodle.getVariable("gold")              // Read a variable
-doodle.teleport("locationId")           // Jump to a location
-doodle.triggerDialogue("dialogueId")    // Start a dialogue
-doodle.setQuestStage("questId", "stage")
-doodle.addItem("itemId")
-doodle.removeItem("itemId")
-doodle.inspect()                        // Print current state summary
-doodle.inspectState()                   // View current progress and game state
-doodle.inspectRegistry()                // View all loaded game content
-```
-
-The inspection commands return copies, so exploring their results does not change the running game.
-
-`window.doodle` is only available after a game has started (after clicking New Game or Continue), because `GameProvider` must be mounted first.
+The provider example enables `window.doodle` only in development through `devTools={import.meta.env.DEV}`. [Debugging with Dev Tools](/technical/debugging-with-devtools/) explains when the console API becomes available and lists its inspection and state-control commands.
 
 ## Building Without React
 

@@ -9,16 +9,18 @@ The workspace keeps project navigation on the left, editing in the center, conte
 
 ## Project rail
 
-The project rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an item or reach it with the keyboard to show its **Rename** and **Delete** buttons. Renaming also updates known references to that ID; deleting asks for confirmation.
+Select **Overview** at the top of the project rail to review the project version, engine and dependency status, validation result, content counts, and starting state. The search field below it finds content by name.
+
+The rest of the rail organizes your game into Dialogues, Characters, Locations, Items, Quests, Maps, Interludes, Journal entries, Locales, and Game Config. Select an item to work on it, or use the **+** beside a section to create one. Hover over an item or reach it with the keyboard to show its **Rename** and **Delete** buttons. Renaming also updates known references to that ID, and deleting asks for confirmation.
 
 <ThemeScreenshot
     src="/images/studio/project-rail.webp"
     alt="The project rail with the starter content"
 />
 
-## Visual editor
+## Visual mode
 
-The visual editor provides the fields and controls for the selected type of game content.
+Visual mode provides fields and controls suited to the selected type of game content.
 
 Enter the words the player should see directly into text fields.
 
@@ -27,13 +29,13 @@ Enter the words the player should see directly into text fields.
     alt="A location open in the visual editor"
 />
 
-Studio autosaves visual edits after you stop typing. A dot in the tab means the latest edit has not been saved yet. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately.
+Studio autosaves edits made in Visual mode after you stop typing. A dot in the tab means the latest edit has not been saved yet. Press `Ctrl+S` on Windows or `Cmd+S` on macOS to save immediately.
 
 Dialogue tabs also include **Graph**, a read-only map of how the conversation moves from one node to another. Use it to follow branches and open a node in Visual, then use Visual or Source to make changes. The [dialogue editing guide](/studio/dialogues/#follow-the-conversation-in-graph) explains each part of the graph.
 
-## Source editor
+## Source mode
 
-Select **Source** to edit the active game file directly. Source uses the same file as Visual, so you can move between the two views instead of maintaining a separate copy. Doodle dialogue files and YAML each have syntax highlighting suited to their structure.
+Select **Source** to edit the active game file directly. Source uses the same file as Visual, so you can move between the two views instead of maintaining a separate copy. Doodle Engine dialogue files and YAML each have syntax highlighting suited to their structure.
 
 <ThemeScreenshot
     src="/images/studio/source-editor.webp"
@@ -64,7 +66,7 @@ The **Problems** tab in the bottom dock lists issues across the project. Selecti
 
 ## Flags and variables
 
-Select **Flags & vars** in the top bar to open the project-wide page for these names. Search and group names, review where they are set and checked, add notes, find likely mistakes, and rename known uses. See [Flags & Variables](/studio/flags-and-variables/) for the complete workflow.
+Select **Flags & vars** in the top bar to open the project-wide page for these names. Use it to find where a name is set or checked, keep a note about its purpose, and rename known uses. See [Flags & Variables](/studio/flags-and-variables/) for the complete workflow.
 
 ## Command palette
 

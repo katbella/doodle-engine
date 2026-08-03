@@ -31,7 +31,7 @@ Set a variable to a specific value.
 
 ```text
 SET variable gold 100
-SET variable playerName "Aria"
+SET variable playerName Aria
 ```
 
 ### ADD variable

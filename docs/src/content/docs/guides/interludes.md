@@ -8,8 +8,8 @@ other story transitions. They show scrolling text with optional background art
 and audio. Players can read at their own pace or skip when ready.
 
 This guide covers the interlude file and the two ways to show one: from a
-dialogue effect, or automatically when the player enters a location. In Doodle
-Studio, interludes are edited under **Interludes** in the project rail.
+dialogue effect, or automatically when the player enters a location. In Doodle Studio,
+interludes are edited under **Interludes** in the project rail.
 
 ## Creating an Interlude
 

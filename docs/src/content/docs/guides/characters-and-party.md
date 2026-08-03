@@ -182,9 +182,9 @@ Missing placeholders remain unchanged.
 
 ## Player Profile and Party Sheets
 
-The player has a separate singleton file, `content/player.yaml`. To let the
-player enter their own profile in the built-in renderer, enable the behavior in
-`content/game.yaml`:
+The player's profile and starting stats live in `content/player.yaml`. To let
+the player enter their own profile in the built-in renderer, enable the behavior
+in `content/game.yaml`:
 
 ```yaml
 # content/game.yaml

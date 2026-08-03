@@ -17,7 +17,7 @@ The game shell keeps three kinds of save:
 
 The Save/Load panel lists the quick save and autosave first, followed by manual saves with the newest at the top. **Load** restores the selected save. The title screen’s **Continue** button restores the most recent save of any kind.
 
-All three kinds are stored in the player’s browser. Studio and the CLI's `create` command give every project its own random ID, so one Doodle game cannot list or load another game’s saves by accident.
+All three kinds are stored in the player’s browser. Studio and the CLI's `create` command give every project its own random ID, so one Doodle Engine game cannot list or load another game’s saves by accident.
 
 The generated ID lives in `src/project.ts`.
 

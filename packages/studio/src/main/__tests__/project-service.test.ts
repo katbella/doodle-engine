@@ -35,11 +35,13 @@ describe('ProjectService', () => {
             canceled: false,
             filePaths: ['C:/games/story'],
         });
-        readFile
-            .mockReset()
-            .mockResolvedValue(
-                JSON.stringify({ name: 'story-game', version: '1.2.3' })
-            );
+        readFile.mockReset().mockResolvedValue(
+            JSON.stringify({
+                name: 'story-game',
+                version: '1.2.3',
+                dependencies: { '@doodle-engine/core': '^0.2.0' },
+            })
+        );
         readdir
             .mockReset()
             .mockRejectedValue(
@@ -113,18 +115,65 @@ describe('ProjectService', () => {
                 name: 'story-game',
             })
         );
-        expect(readEngineInfo).toHaveBeenCalledWith(
-            'C:/games/story',
-            '0.2.1'
-        );
+        expect(readEngineInfo).toHaveBeenCalledWith('C:/games/story', '0.2.1');
     });
 
-    it('falls back to the folder name when package metadata is unavailable', async () => {
-        readFile.mockRejectedValueOnce(new Error('missing package'));
+    it('falls back to the folder name when package metadata has no name', async () => {
+        readFile.mockResolvedValueOnce(
+            JSON.stringify({
+                dependencies: { '@doodle-engine/core': '^0.2.0' },
+            })
+        );
         const project = await service.reload('C:/games/fallback-name');
         expect(project.name).toBe('fallback-name');
         expect(project.version).toBeNull();
         expect(addRecentProject).not.toHaveBeenCalled();
+    });
+
+    it('rejects folders without a Doodle Engine package declaration', async () => {
+        readFile.mockResolvedValueOnce(
+            JSON.stringify({
+                name: 'some-other-project',
+                dependencies: { react: '^19.0.0' },
+            })
+        );
+
+        await expect(service.openPath('C:/games/not-doodle')).rejects.toThrow(
+            'not a Doodle Engine project'
+        );
+        expect(loadProject).not.toHaveBeenCalled();
+        expect(addRecentProject).not.toHaveBeenCalled();
+    });
+
+    it('rejects folders with a missing or malformed package.json', async () => {
+        readFile.mockRejectedValueOnce(new Error('missing package'));
+        await expect(service.openPath('C:/games/missing')).rejects.toThrow(
+            'package.json declares @doodle-engine/core'
+        );
+
+        readFile.mockResolvedValueOnce('{ not json');
+        await expect(service.openPath('C:/games/malformed')).rejects.toThrow(
+            'package.json declares @doodle-engine/core'
+        );
+
+        expect(loadProject).not.toHaveBeenCalled();
+        expect(addRecentProject).not.toHaveBeenCalled();
+    });
+
+    it('accepts an uninstalled project that declares core as a dev dependency', async () => {
+        readFile.mockResolvedValueOnce(
+            JSON.stringify({
+                name: 'uninstalled-story',
+                devDependencies: { '@doodle-engine/core': '^0.2.0' },
+            })
+        );
+
+        await expect(
+            service.openPath('C:/games/uninstalled-story')
+        ).resolves.toEqual(
+            expect.objectContaining({ name: 'uninstalled-story' })
+        );
+        expect(loadProject).toHaveBeenCalledWith('C:/games/uninstalled-story');
     });
 
     it('creates through Toolkit and opens the resulting project', async () => {
