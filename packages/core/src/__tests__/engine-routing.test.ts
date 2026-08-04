@@ -6,7 +6,7 @@
  * the cap and the refusal to travel on a map with an unusable scale.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Engine } from '../engine';
 import type { ContentRegistry } from '../types/registry';
 import type { GameConfig, DialogueNode } from '../types/entities';
@@ -329,6 +329,57 @@ describe('dialogue continuation labels', () => {
         const snapshot = engine.talkTo('bob');
         expect(snapshot.dialogue?.continueEndsDialogue).toBe(false);
         expect(engine.continueDialogue().dialogue?.text).toBe('Hello.');
+    });
+
+    it('does not roll while predicting the continuation label', () => {
+        const engine = new Engine(
+            registryWith({
+                conversation: {
+                    id: 'conversation',
+                    startNode: 'check',
+                    nodes: [
+                        {
+                            id: 'check',
+                            speaker: 'bob',
+                            text: 'Try your luck.',
+                            choices: [],
+                            conditionalBranches: [
+                                {
+                                    condition: {
+                                        type: 'roll',
+                                        min: 1,
+                                        max: 2,
+                                        threshold: 2,
+                                    },
+                                    effects: [{ type: 'endDialogue' }],
+                                },
+                            ],
+                            next: 'safe',
+                        },
+                        {
+                            id: 'safe',
+                            speaker: 'bob',
+                            text: 'You continue safely.',
+                            choices: [],
+                        },
+                    ],
+                },
+            })
+        );
+        engine.newGame(config);
+
+        const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+        try {
+            const shown = engine.talkTo('bob');
+            expect(shown.dialogue?.continueEndsDialogue).toBe(false);
+            expect(random).not.toHaveBeenCalled();
+
+            const afterClick = engine.continueDialogue();
+            expect(random).toHaveBeenCalledTimes(1);
+            expect(afterClick.dialogue).toBeNull();
+        } finally {
+            random.mockRestore();
+        }
     });
 });
 

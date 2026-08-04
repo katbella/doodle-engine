@@ -242,7 +242,7 @@ REQUIRE itemAt sword armory
 
 ## roll
 
-Roll a random integer between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. This condition returns only true or false. The `ROLL` effect stores the result in a variable.
+Roll a random whole number between `min` and `max` (inclusive) and return true if the result is greater than or equal to `threshold`. This condition returns only true or false. The `ROLL` effect stores the result in a variable.
 
 ```text
 IF roll 1 20 15
@@ -255,6 +255,8 @@ END
 | `min`       | `number` | Minimum roll value (inclusive) |
 | `max`       | `number` | Maximum roll value (inclusive) |
 | `threshold` | `number` | Minimum result needed to pass  |
+
+`min` and `max` must be whole numbers, and `min` cannot be greater than `max`.
 
 **Use `ROLL` effect first when you need to:**
 

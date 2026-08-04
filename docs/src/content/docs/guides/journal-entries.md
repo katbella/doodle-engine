@@ -3,7 +3,7 @@ title: Journal Entries
 description: Lore, people, and places the player collects as the story reveals them.
 ---
 
-A journal entry is a piece of writing the player unlocks: a rumour they heard, a person they met, a place they found. Entries appear in the Journal panel below the active quests, and once unlocked they stay.
+A journal entry is a piece of writing the player unlocks: a rumor they heard, a person they met, a place they found. Entries appear in the Journal panel below the active quests, and once unlocked they stay.
 
 Entries are independent of quests. A quest moves through stages, while an entry is either unlocked or it is not. A quest can unlock entries as it goes, and so can any other conversation.
 

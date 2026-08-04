@@ -523,9 +523,19 @@ function willContinueEndDialogue(
         return false;
     }
 
-    const branch = node.conditionalBranches?.find((candidate) =>
-        evaluateConditions([candidate.condition], state)
-    );
+    let branch:
+        | NonNullable<DialogueNode['conditionalBranches']>[number]
+        | undefined;
+    for (const candidate of node.conditionalBranches ?? []) {
+        // A roll condition is labeled "Continue"; the roll happens on click.
+        if (candidate.condition.type === 'roll') {
+            return false;
+        }
+        if (evaluateConditions([candidate.condition], state)) {
+            branch = candidate;
+            break;
+        }
+    }
     const effects = branch?.effects ?? [];
     let dialogueEffect: 'start' | 'end' | null = null;
     for (const effect of effects) {

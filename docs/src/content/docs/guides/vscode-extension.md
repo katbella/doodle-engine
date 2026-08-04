@@ -19,7 +19,7 @@ This page is for the CLI and text editor workflow. Doodle Studio has its own bui
 | Condition types (`hasFlag`, `questAtStage`, `variableGreaterThan`, etc.) | `REQUIRE hasFlag metBartender` |
 | Effect targets (`flag`, `variable`, `questStage`, `item`, etc.) | `SET flag seenIntro` |
 | Localization keys | `@bartender.greeting` |
-| Quoted strings | `"Hello, traveller!"` |
+| Quoted strings | `"Hello, traveler!"` |
 | Numbers | `-5`, `20` |
 | Comments | `# This is a comment` |
 

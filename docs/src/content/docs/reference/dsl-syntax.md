@@ -372,7 +372,7 @@ Dialogue text can be written in three forms:
 **Plain text**: Just write the words. Works for most lines, including text that contains colons.
 
 ```text
-BARTENDER: Hello there, traveller!
+BARTENDER: Hello there, traveler!
 CHOICE What's the news?
 NARRATOR: The sign reads: closed until dawn.
 ```

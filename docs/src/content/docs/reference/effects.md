@@ -287,7 +287,7 @@ The interlude ID must match an ID in `content/interludes/`. The interlude appear
 
 ### ROLL
 
-Roll a random integer between `min` and `max` (inclusive) and store the result in a variable.
+Roll a random whole number between `min` and `max` (inclusive) and store the result in a variable.
 
 ```text
 ROLL bluffRoll 1 20
@@ -298,6 +298,8 @@ ROLL bluffRoll 1 20
 | `variable` | `string` | Variable name to store the result in |
 | `min`      | `number` | Minimum value (inclusive)            |
 | `max`      | `number` | Maximum value (inclusive)            |
+
+`min` and `max` must be whole numbers, and `min` cannot be greater than `max`.
 
 The stored variable can then be displayed in dialogue using `{varName}` interpolation, or tested with `variableGreaterThan` / `variableLessThan` conditions.
 
