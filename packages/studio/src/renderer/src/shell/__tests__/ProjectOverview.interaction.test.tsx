@@ -42,6 +42,10 @@ const project = {
         depsInstalled: true,
         packageManager: 'yarn',
     },
+    rendererTheme: {
+        renderer: 'default',
+        template: 'starter-rpg',
+    },
 } as unknown as OpenProject;
 
 describe('ProjectOverview', () => {
@@ -157,8 +161,43 @@ describe('ProjectOverview', () => {
             />
         );
         expect(screen.getByText(/The update failed/)).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
+    });
+
+    it('switches the renderer template from project setup', async () => {
+        const onSwitchRendererTheme = vi.fn();
+        const user = userEvent.setup();
+        const { rerender } = render(
+            <ProjectOverview
+                project={project}
+                onSwitchRendererTheme={onSwitchRendererTheme}
+            />
+        );
+
+        await user.selectOptions(
+            screen.getByRole('combobox', { name: 'Renderer template' }),
+            'fable'
+        );
+        expect(onSwitchRendererTheme).toHaveBeenCalledWith('fable');
+
+        rerender(
+            <ProjectOverview
+                project={project}
+                switchingRendererTheme
+                rendererThemeError="Could not install fonts."
+                onSwitchRendererTheme={onSwitchRendererTheme}
+            />
+        );
+        expect(screen.getByText('Switching theme…')).toBeTruthy();
+        expect(screen.getByRole('alert').textContent).toContain(
+            'Could not install fonts.'
+        );
         expect(
-            screen.getByRole('button', { name: 'Try again' })
-        ).toBeTruthy();
+            (
+                screen.getByRole('combobox', {
+                    name: 'Renderer template',
+                }) as HTMLSelectElement
+            ).disabled
+        ).toBe(true);
     });
 });

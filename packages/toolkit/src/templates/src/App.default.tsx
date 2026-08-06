@@ -33,6 +33,7 @@ export function App() {
     if (!content || !manifest) {
         return (
             <div className="app-bootstrap">
+                <div className="app-bootstrap-mark">Doodle Engine</div>
                 <div className="spinner" />
             </div>
         );

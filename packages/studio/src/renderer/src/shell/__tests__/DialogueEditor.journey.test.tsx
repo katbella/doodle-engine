@@ -58,6 +58,10 @@ const project: OpenProject = {
         depsInstalled: true,
         packageManager: 'yarn',
     },
+    rendererTheme: {
+        renderer: 'default',
+        template: 'starter-rpg',
+    },
 };
 
 const source = `# Author comment must survive

@@ -162,10 +162,7 @@ describe('React components', () => {
             />
         );
         const videoHtml = renderToStaticMarkup(
-            <VideoPlayer
-                src="/assets/video/intro.mp4"
-                onComplete={() => {}}
-            />
+            <VideoPlayer src="/assets/video/intro.mp4" onComplete={() => {}} />
         );
         const interludeHtml = renderToStaticMarkup(
             <Interlude
@@ -209,6 +206,7 @@ describe('React components', () => {
                         statNames: {},
                     },
                 ]}
+                activeCharacterId="sage"
                 onTalkTo={() => {}}
             />
         );
@@ -243,19 +241,15 @@ describe('React components', () => {
         expect(videoHtml).toContain('/assets/video/intro.mp4');
         expect(interludeHtml).toContain('/assets/images/opening.jpg');
         expect(interludeHtml).toContain('/assets/images/banner.png');
-        expect(dialogueHtml).toContain(
-            '/assets/images/portraits/narrator.png'
-        );
-        expect(characterHtml).toContain(
-            '/assets/images/portraits/sage.png'
-        );
-        expect(inventoryHtml).toContain(
-            '/assets/images/items/coin_icon.png'
-        );
+        expect(dialogueHtml).toContain('/assets/images/portraits/narrator.png');
+        expect(characterHtml).toContain('/assets/images/portraits/sage.png');
+        expect(characterHtml).toContain('M4 5.5h16v9H12l-4.5 4v-4H4z');
+        expect(inventoryHtml).toContain('/assets/images/items/coin_icon.png');
         expect(mapHtml).toContain('/assets/images/maps/town.png');
+        expect(mapHtml).toContain('doodle-parchment-surface');
     });
 
-    it('renders GameRenderer through GameProvider with dialogue and interlude', () => {
+    it('hides the game view while an interlude is active', () => {
         const engine = new Engine(makeRegistry(), makeState());
         const snapshot = makeSnapshot({
             dialogue: {
@@ -282,8 +276,26 @@ describe('React components', () => {
 
         expect(html).toContain('game-renderer');
         expect(html).toContain('interlude-overlay');
-        expect(html).toContain('You arrive in town.');
-        expect(html).toContain('continue-button');
-        expect(html).toContain('End Dialogue');
+        expect(html).not.toContain('game-layout');
+        expect(html).not.toContain('You arrive in town.');
+    });
+
+    it('hides the game view while the player profile is being created', () => {
+        const engine = new Engine(makeRegistry(), makeState());
+        const snapshot = makeSnapshot({
+            player: {
+                ...makeSnapshot().player,
+                profileComplete: false,
+            },
+        });
+
+        const html = renderToStaticMarkup(
+            <GameProvider engine={engine} initialSnapshot={snapshot}>
+                <GameRenderer projectId="00000000-0000-4000-8000-000000000002" />
+            </GameProvider>
+        );
+
+        expect(html).toContain('player-setup-overlay');
+        expect(html).not.toContain('game-layout');
     });
 });

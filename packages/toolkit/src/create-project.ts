@@ -1,7 +1,7 @@
 /**
  * Scaffold a new Doodle Engine game project.
  *
- * This is the file-writing half of `doodle create`, moved out of the command so
+ * This is the file-writing half of `doodle-engine create`, moved out of the command so
  * both the CLI and Doodle Studio create projects from the same official
  * templates. It takes plain options instead of asking questions, and writes
  * files without printing — the caller handles any prompts and messages.
@@ -12,6 +12,14 @@ import { join, dirname } from 'path';
 import { randomUUID } from 'crypto';
 import { parse as parseYaml } from 'yaml';
 import { DOODLE_VERSION } from './version';
+import {
+    rendererFontDependencies,
+    rendererProjectMetadata,
+    rendererThemeCss,
+    type RendererTemplate,
+} from './renderer-theme';
+
+export type { RendererTemplate } from './renderer-theme';
 
 // Vite inlines all template files as strings at build time.
 // Keys are relative paths like './templates/content/game.yaml'.
@@ -23,7 +31,6 @@ const TEMPLATES = import.meta.glob('./templates/**/*', {
 
 export type ScaffoldLocalizationMode = 'literal' | 'localized';
 export type ScaffoldContentMode = 'starter' | 'minimal';
-
 export interface CreateProjectOptions {
     /** Directory to create the new project folder inside (usually the cwd). */
     targetDir: string;
@@ -33,8 +40,8 @@ export interface CreateProjectOptions {
     subtitle?: string;
     /** Use the batteries-included GameShell renderer instead of a custom one. */
     useDefaultRenderer: boolean;
-    /** Include the styled starter CSS (only meaningful with the default renderer). */
-    useStarterStyles: boolean;
+    /** Presentation preset for the built-in renderer. */
+    rendererTemplate?: RendererTemplate;
     /** Begin with the connected example story or one valid starting location. */
     contentMode?: ScaffoldContentMode;
     /** Use literal English text or demonstrate localization with English and Swedish. */
@@ -59,7 +66,15 @@ function resolveOutputPath(key: string): string | null {
         return null;
 
     // CSS variant files are picked separately; skip in main loop
-    if (rel === 'src/index.minimal.css' || rel === 'src/index.starter.css')
+    if (
+        rel === 'src/index.minimal.css.txt' ||
+        rel === 'src/index.starter-rpg.css.txt' ||
+        rel === 'src/index.prose.css.txt' ||
+        rel === 'src/index.fable.css.txt' ||
+        rel === 'src/index.renderer-compat.css.txt' ||
+        rel === 'src/index.entry.css.txt' ||
+        rel === 'src/renderer-overrides.css.txt'
+    )
         return null;
 
     // _root/ files go to the project root
@@ -82,7 +97,8 @@ export async function createProject(
     projectName: string,
     options: CreateProjectOptions
 ): Promise<CreateProjectResult> {
-    const { targetDir, useDefaultRenderer, useStarterStyles } = options;
+    const { targetDir, useDefaultRenderer } = options;
+    const rendererTemplate = resolveRendererTemplate(options);
     const title = options.title?.trim() || projectName;
     const subtitle = options.subtitle?.trim() ?? '';
     const projectId = randomUUID();
@@ -142,12 +158,14 @@ export async function createProject(
             dev: 'doodle-engine dev',
             build: 'doodle-engine build',
             validate: 'doodle-engine validate',
+            theme: 'doodle-engine theme',
             preview: 'vite preview',
             typecheck: 'tsc --noEmit',
         },
         dependencies: {
             '@doodle-engine/core': DOODLE_VERSION,
             '@doodle-engine/react': DOODLE_VERSION,
+            ...rendererFontDependencies(rendererTemplate),
             react: '^19.0.0',
             'react-dom': '^19.0.0',
         },
@@ -159,6 +177,10 @@ export async function createProject(
             typescript: '^5.7.0',
             vite: '^6.0.0',
         },
+        doodleEngine: rendererProjectMetadata(
+            useDefaultRenderer ? 'default' : 'custom',
+            rendererTemplate
+        ),
     };
 
     await writeFile(
@@ -209,6 +231,10 @@ export async function createProject(
             '__PROJECT_ID_JSON__',
             JSON.stringify(projectId)
         );
+        output = output.replace(
+            '__RENDERER_SCALING_ENABLED__',
+            String(useDefaultRenderer && rendererTemplate !== 'minimal')
+        );
         output = output
             .replace('__GAME_TITLE_JSON__', JSON.stringify(title))
             .replace('__GAME_SUBTITLE_JSON__', JSON.stringify(subtitle));
@@ -231,14 +257,30 @@ export async function createProject(
     const app = TEMPLATES[appKey];
     await writeFile(join(projectPath, 'src/App.tsx'), app);
 
-    // --- src/index.css (pick variant based on styles choice) ---
-    const cssKey =
-        useDefaultRenderer && useStarterStyles
-            ? './templates/src/index.starter.css'
-            : './templates/src/index.minimal.css';
-    await writeFile(join(projectPath, 'src/index.css'), TEMPLATES[cssKey]);
+    // --- Managed renderer theme; index.css and renderer-overrides.css are
+    // written from templates and remain stable when this file is switched. ---
+    await writeFile(
+        join(projectPath, 'src/index.css'),
+        TEMPLATES['./templates/src/index.entry.css.txt']
+    );
+    await writeFile(
+        join(projectPath, 'src/renderer-overrides.css'),
+        TEMPLATES['./templates/src/renderer-overrides.css.txt']
+    );
+    await writeFile(
+        join(projectPath, 'src/renderer-theme.css'),
+        rendererThemeCss(useDefaultRenderer ? rendererTemplate : 'minimal')
+    );
 
     return { projectPath };
+}
+
+function resolveRendererTemplate(
+    options: CreateProjectOptions
+): RendererTemplate {
+    if (!options.useDefaultRenderer) return 'minimal';
+    if (options.rendererTemplate) return options.rendererTemplate;
+    return 'starter-rpg';
 }
 
 async function writeMinimalContent(

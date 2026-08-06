@@ -6,7 +6,6 @@
     "license": "MIT",
     "description": "CLI tools for Doodle Engine game development",
     "bin": {
-        "doodle": "./dist/cli.js",
         "doodle-engine": "./dist/cli.js"
     },
     "exports": {

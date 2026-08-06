@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { OpenProject } from '../../../shared/project';
 import type { FlagVarNotes } from '../../../shared/project';
 import type { Reference } from '@doodle-engine/core';
+import type { RendererTemplate } from '@doodle-engine/toolkit';
 import { ChevronDown, TriangleAlert, X } from '../lib/icons';
 import type { Tab } from '../types';
 import { filePathFor } from '../lib/paths';
@@ -44,7 +45,10 @@ interface EditorAreaProps {
     reveal: { key: string; message: string; seq: number } | null;
     updatingEngine?: boolean;
     engineUpdateError?: string | null;
+    switchingRendererTheme?: boolean;
+    rendererThemeError?: string | null;
     onUpdateEngine?: () => void;
+    onSwitchRendererTheme?: (template: RendererTemplate) => void;
     onSelect: (key: string) => void;
     onClose: (key: string) => void;
     onSetViewMode: (key: string, mode: ViewMode) => void;
@@ -92,7 +96,10 @@ function EditorAreaContent({
     reveal,
     updatingEngine = false,
     engineUpdateError = null,
+    switchingRendererTheme = false,
+    rendererThemeError = null,
     onUpdateEngine,
+    onSwitchRendererTheme,
     onSelect,
     onClose,
     onSetViewMode,
@@ -431,7 +438,10 @@ function EditorAreaContent({
                             project={project}
                             updatingEngine={updatingEngine}
                             engineUpdateError={engineUpdateError}
+                            switchingRendererTheme={switchingRendererTheme}
+                            rendererThemeError={rendererThemeError}
                             onUpdateEngine={onUpdateEngine}
+                            onSwitchRendererTheme={onSwitchRendererTheme}
                         />
                     </div>
                 ) : active.section === 'dialogues' && activePath ? (

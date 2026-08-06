@@ -87,6 +87,44 @@ describe('Interlude interactions', () => {
         expect(screen.getByText('The room falls silent.')).toBeTruthy();
     });
 
+    it('uses the opening section as the chapter heading and preserves blank-line paragraphs', () => {
+        const { container } = renderInterlude(vi.fn(), {
+            id: 'chapter_one',
+            text: 'Chapter One: A New Beginning\n\nThe road is empty.\nThe night is cold.\n\nThe lights are ahead.',
+            scroll: false,
+            scrollSpeed: 30,
+        });
+
+        expect(screen.getByText('Chapter One')).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { name: 'A New Beginning' })
+        ).toBeTruthy();
+        const paragraphs = container.querySelectorAll('.interlude-text > p');
+        expect(paragraphs).toHaveLength(2);
+        expect(paragraphs[0].textContent).toBe(
+            'The road is empty. The night is cold.'
+        );
+        expect(paragraphs[1].textContent).toBe('The lights are ahead.');
+        expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy();
+    });
+
+    it('delays every prose section and reveals Continue after the final one', () => {
+        renderInterlude(vi.fn(), {
+            id: 'chapter_one',
+            text: 'Chapter One: A New Beginning\n\nFirst.\n\nSecond.\n\nThird.\n\nLast.',
+            scroll: false,
+            scrollSpeed: 30,
+        });
+
+        expect(screen.getByText('First.').style.animationDelay).toBe('0.6s');
+        expect(screen.getByText('Third.').style.animationDelay).toBe('1.8s');
+        expect(screen.getByText('Last.').style.animationDelay).toBe('2.4s');
+        expect(
+            screen.getByRole('button', { name: 'Continue' }).parentElement
+                ?.style.animationDelay
+        ).toBe('3s');
+    });
+
     it('plays and cleans up all configured audio channels', () => {
         const { unmount } = renderInterlude();
 
@@ -135,6 +173,10 @@ describe('Interlude interactions', () => {
         const scroll = container.querySelector(
             '.interlude-scroll-container'
         ) as HTMLDivElement;
+        Object.defineProperties(scroll, {
+            clientHeight: { configurable: true, value: 100 },
+            scrollHeight: { configurable: true, value: 300 },
+        });
 
         fireEvent.wheel(scroll, { deltaY: 80 });
         expect(scroll.scrollTop).toBe(80);
@@ -143,5 +185,36 @@ describe('Interlude interactions', () => {
         fireEvent.keyDown(document.body, { key: 'ArrowUp' });
         expect(scroll.scrollTop).toBe(80);
         expect(onDismiss).not.toHaveBeenCalled();
+    });
+
+    it('auto-scrolls the scroll container at the configured speed', () => {
+        const frames: FrameRequestCallback[] = [];
+        vi.stubGlobal(
+            'requestAnimationFrame',
+            vi.fn((callback: FrameRequestCallback) => {
+                frames.push(callback);
+                return frames.length;
+            })
+        );
+        vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
+        const { container } = renderInterlude();
+        const scroll = container.querySelector(
+            '.interlude-scroll-container'
+        ) as HTMLDivElement;
+        const content = container.querySelector(
+            '.interlude-scroll-content'
+        ) as HTMLDivElement;
+        Object.defineProperties(scroll, {
+            clientHeight: { configurable: true, value: 100 },
+        });
+        Object.defineProperties(content, {
+            scrollHeight: { configurable: true, value: 300 },
+        });
+
+        frames.shift()?.(1_000);
+        frames.shift()?.(2_000);
+
+        expect(scroll.scrollTop).toBe(30);
     });
 });

@@ -102,22 +102,18 @@ export function MapView({
     }
 
     return (
-        <div className={`map-view ${className}`}>
-            <h2>{map.name}</h2>
+        <div className={`map-view doodle-parchment-surface ${className}`}>
+            <h2 className="map-title">{map.name}</h2>
 
             <div className="map-container" style={{ position: 'relative' }}>
                 {map.image && (
-                    <img
-                        src={map.image}
-                        alt={map.name}
-                        className="map-image"
-                    />
+                    <img src={map.image} alt={map.name} className="map-image" />
                 )}
 
                 {map.locations.map((location) => (
                     <button
                         key={location.id}
-                        className={`map-marker ${location.isCurrent ? 'current' : ''}`}
+                        className={`map-marker map-location-button ${location.isCurrent ? 'current is-current' : ''}`}
                         style={{
                             position: 'absolute',
                             left: `${location.x}px`,
@@ -136,7 +132,10 @@ export function MapView({
                         disabled={location.isCurrent}
                         title={location.name}
                     >
-                        {location.name}
+                        <span className="map-location-dot" aria-hidden="true" />
+                        <span className="map-location-name">
+                            {location.name}
+                        </span>
                     </button>
                 ))}
             </div>

@@ -16,7 +16,7 @@ describe('validate command with authored dialogue', () => {
                 targetDir: base,
                 title: 'Story',
                 useDefaultRenderer: true,
-                useStarterStyles: false,
+                rendererTemplate: 'minimal',
                 localizationMode: 'literal',
             });
             await writeFile(

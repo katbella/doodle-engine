@@ -5,6 +5,7 @@ release
 coverage
 *.log
 .build-test-*
+.build-visual-*
 .DS_Store
 design-docs/
 docs/.astro/

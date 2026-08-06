@@ -10,6 +10,7 @@ Doodle Engine's command-line tools come from the `@doodle-engine/cli` package, w
 - `npm run validate` checks the game content
 - `npm run preview` serves a finished build locally
 - `npm run typecheck` checks the game's TypeScript
+- `npm run theme -- <template>` changes the default renderer's theme
 
 ## npx doodle-engine create
 
@@ -26,7 +27,7 @@ This is the one command that runs outside a project. `doodle-engine` is a small 
 
 You will also choose how the project stores text: **English text with a locale starter file** writes English directly in the content, and **English and Swedish localization example** demonstrates translation keys. Either localization choice works with either starting-content choice.
 
-The **default React renderer** provides a ready-to-use React interface that can be customized later. If you select it, you can also include the starter styles.
+The **default React renderer** provides a ready-to-use React interface. Choose **Starter RPG**, **Minimal**, **Prose**, or **Fable** for its initial theme.
 
 When it finishes, follow the printed next steps:
 
@@ -35,6 +36,16 @@ cd my-game
 npm install
 npm run dev
 ```
+
+## npm run theme
+
+Change the theme of a project that uses the default React renderer:
+
+```bash
+npm run theme -- prose
+```
+
+The available names are `starter-rpg`, `minimal`, `prose`, and `fable`. The command replaces `src/renderer-theme.css` and updates the theme's local font packages. It never replaces `src/renderer-overrides.css`, which is where project-specific colors, spacing, and other CSS overrides belong. Run `npm install` afterward when the command reports that font dependencies changed.
 
 ## npm run dev
 

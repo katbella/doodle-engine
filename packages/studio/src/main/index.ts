@@ -30,7 +30,7 @@ import { readEngineInfo } from './engine-info';
 import { pinDoodlePackages } from './engine-update';
 import { detectPackageManager } from './package-manager';
 import { resolveDependencyInstallRuntime } from './package-manager-runtime';
-import type { YamlEdit } from '@doodle-engine/toolkit';
+import type { RendererTemplate, YamlEdit } from '@doodle-engine/toolkit';
 import type {
     InstallResult,
     FlagVarNoteKind,
@@ -622,6 +622,17 @@ app.whenReady().then(() => {
         return recent;
     });
     handle('project:revalidate', (_event, dir: string) => projects.reload(dir));
+    handle(
+        'project:switchRendererTheme',
+        (_event, dir: string, template: RendererTemplate) => {
+            stopPreview();
+            buildProc?.kill();
+            for (const relPath of ['package.json', 'src/renderer-theme.css']) {
+                markSelfWrite(join(dir, relPath));
+            }
+            return projects.switchRendererTheme(dir, template);
+        }
+    );
     handle(
         'project:build',
         async (_event, dir: string): Promise<StudioBuildResult> => {

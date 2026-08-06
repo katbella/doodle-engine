@@ -156,7 +156,18 @@ export function GameProvider({
 
     const setPlayerProfile = useCallback(
         (profile: PlayerProfileInput) => {
-            setSnapshot(engine.setPlayerProfile(profile));
+            const nextSnapshot = engine.setPlayerProfile(profile);
+
+            // A location-triggered interlude may already be present in the
+            // first new-game snapshot. The engine clears transient fields
+            // after publishing that snapshot, so keep the queued interlude
+            // while the player finishes profile creation and reveal it next.
+            setSnapshot((currentSnapshot) => ({
+                ...nextSnapshot,
+                pendingInterlude:
+                    currentSnapshot.pendingInterlude ??
+                    nextSnapshot.pendingInterlude,
+            }));
         },
         [engine]
     );

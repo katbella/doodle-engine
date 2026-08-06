@@ -130,7 +130,7 @@ describe('DialogOverlay', () => {
 });
 
 describe('Inventory keyboard access', () => {
-    it('opens item details from the keyboard and restores focus on close', async () => {
+    it('keeps item details embedded in the inventory panel', async () => {
         const user = userEvent.setup();
         render(
             <Inventory
@@ -152,13 +152,7 @@ describe('Inventory keyboard access', () => {
         expect(item).toBe(document.activeElement);
         await user.keyboard('{Enter}');
 
-        expect(screen.getByRole('dialog', { name: 'Brass Key' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Close' })).toBe(
-            document.activeElement
-        );
-
-        await user.keyboard('{Escape}');
+        expect(screen.getByText('Warm from the lock.')).toBeTruthy();
         expect(screen.queryByRole('dialog', { name: 'Brass Key' })).toBeNull();
-        expect(item).toBe(document.activeElement);
     });
 });

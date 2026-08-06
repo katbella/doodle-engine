@@ -27,10 +27,28 @@ import { GameTime } from './components/GameTime';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CharacterSheet } from './components/CharacterSheet';
 import { PlayerSetup } from './components/PlayerSetup';
-import { DialogOverlay } from './components/DialogOverlay';
 import { InputProviderBoundary, useInputAction } from './input/InputRouter';
 import { saveStorageKeyForProject } from './saves';
 import { uiText } from './uiText';
+
+const GAME_MENU_ICON_PATHS: Record<string, string> = {
+    back: 'M10 6l-6 6 6 6M4 12h10a6 6 0 016 6',
+    party: 'M9 10.6a3 3 0 100-6 3 3 0 000 6zM3.4 19.5v-1.4c0-2.2 2.5-3.6 5.6-3.6s5.6 1.4 5.6 3.6v1.4M16 5.2a3 3 0 010 5.7M17.4 14.7c1.9.5 3.2 1.6 3.2 3.1v1.7',
+    inventory: 'M7 8h10l1 11H6zM9.5 8V6a2.5 2.5 0 015 0v2',
+    journal: 'M4 5h7v14H4zM13 5h7v14h-7zM11 5v14',
+    notes: 'M6 3h9l3 3v15H6zM15 3v3h3M9 12h7M9 15.5h5',
+    map: 'M12 3l1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6z',
+    save: 'M5 4h14v16H5zM9 4v6h6V4M9 16h6',
+    settings:
+        'M12 9.2a2.8 2.8 0 100 5.6 2.8 2.8 0 000-5.6zM12 3v2.4M12 18.6V21M4.6 7.2l2 1.2M17.4 15.6l2 1.2M4.6 16.8l2-1.2M17.4 8.4l2-1.2',
+    menu: 'M5 21V9.5L12 4l7 5.5V21M9.5 21v-6.5a2.5 2.5 0 015 0V21M3.5 21h17',
+};
+
+function resourceLabel(key: string): string {
+    return key
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, (character) => character.toUpperCase());
+}
 
 export interface GameRendererProps {
     className?: string;
@@ -38,6 +56,8 @@ export interface GameRendererProps {
     projectId: string;
     /** Called once when an enabled button in the game interface is clicked. */
     onButtonClick?: () => void;
+    /** Opens the shell menu from the anchored game-menu control. */
+    onOpenMenu?: () => void;
 }
 
 type ActivePanel =
@@ -50,47 +70,84 @@ type ActivePanel =
     | 'settings'
     | null;
 
+const PANEL_UI_KEYS: Record<Exclude<ActivePanel, null>, string> = {
+    party: 'ui.party',
+    inventory: 'ui.inventory',
+    journal: 'ui.journal',
+    notes: 'ui.notes',
+    map: 'ui.map',
+    saveload: 'ui.save_load',
+    settings: 'ui.settings',
+};
+
 function GameMenuButton({
     label,
     icon,
     onClick,
     active,
+    className = '',
 }: {
     label: string;
     icon: string;
     onClick: () => void;
     active: boolean;
+    className?: string;
 }) {
     return (
         <button
-            className={`game-menu-button ${active ? 'active' : ''}`}
+            className={`game-menu-button ${className} ${active ? 'active is-active' : ''}`}
             onClick={onClick}
             title={label}
+            aria-pressed={active}
         >
-            <span className="game-menu-icon" data-icon={icon} />
+            <span
+                className="game-menu-icon"
+                data-icon={icon}
+                aria-hidden="true"
+            >
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d={GAME_MENU_ICON_PATHS[icon]} />
+                </svg>
+            </span>
             <span className="game-menu-label">{label}</span>
         </button>
     );
 }
 
-function PanelDialog({
+function PanelWorkspace({
     label,
+    closeLabel,
     onDismiss,
     children,
 }: {
     label: string;
+    closeLabel: string;
     onDismiss: () => void;
     children: ReactNode;
 }) {
     return (
-        <DialogOverlay
-            overlayClassName="panel-overlay"
-            className="panel"
-            ariaLabel={label}
-            onDismiss={onDismiss}
-        >
-            {children}
-        </DialogOverlay>
+        <div className="panel-workspace">
+            <section className="panel" aria-label={label}>
+                <header className="panel-header">
+                    <div className="panel-header-title-group">
+                        <span
+                            className="panel-header-rule"
+                            aria-hidden="true"
+                        />
+                        <h1 className="panel-title">{label}</h1>
+                    </div>
+                    <button
+                        className="panel-close"
+                        type="button"
+                        onClick={onDismiss}
+                        aria-label={closeLabel}
+                    >
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </header>
+                <div className="panel-body">{children}</div>
+            </section>
+        </div>
     );
 }
 
@@ -106,6 +163,7 @@ function GameRendererInner({
     className = '',
     projectId,
     onButtonClick,
+    onOpenMenu,
 }: GameRendererProps) {
     saveStorageKeyForProject(projectId);
     const { snapshot, actions } = useGame();
@@ -116,6 +174,11 @@ function GameRendererInner({
     const partyProfiles = [snapshot.player, ...snapshot.party];
     const selectedPartyProfile =
         partyProfiles[partyIndex % partyProfiles.length];
+    const activePanelLabel = activePanel
+        ? uiText(snapshot.ui, PANEL_UI_KEYS[activePanel])
+        : '';
+    const hasBlockingFlow =
+        !snapshot.player.profileComplete || Boolean(snapshot.pendingInterlude);
 
     useInputAction(
         ({ command }) => {
@@ -145,10 +208,11 @@ function GameRendererInner({
                 onButtonClick?.();
             }}
         >
-            {snapshot.pendingInterlude && (
+            {snapshot.pendingInterlude && snapshot.player.profileComplete && (
                 <Interlude
                     interlude={snapshot.pendingInterlude}
                     onDismiss={actions.dismissInterlude}
+                    ui={snapshot.ui}
                 />
             )}
 
@@ -159,306 +223,324 @@ function GameRendererInner({
                 />
             )}
 
-            <NotificationArea notifications={snapshot.notifications} />
+            {!hasBlockingFlow && (
+                <>
+                    <NotificationArea notifications={snapshot.notifications} />
 
-            <div className="game-layout">
-                <main className="game-content">
-                    <LocationView
-                        ui={snapshot.ui}
-                        location={snapshot.location}
-                    />
-
-                    {snapshot.dialogue ? (
-                        <div className="dialogue-container">
-                            <DialogueBox dialogue={snapshot.dialogue} />
-                            <ChoiceList
-                                choices={snapshot.choices}
-                                onSelectChoice={actions.selectChoice}
-                                onContinue={actions.continueDialogue}
-                                continueLabel={
-                                    snapshot.dialogue.continueEndsDialogue
-                                        ? uiText(snapshot.ui, 'ui.end_dialogue')
-                                        : uiText(snapshot.ui, 'ui.continue')
-                                }
+                    <div className="game-layout">
+                        <nav
+                            className="game-menu"
+                            aria-label={uiText(snapshot.ui, 'ui.menu')}
+                        >
+                            {activePanel && (
+                                <GameMenuButton
+                                    label={uiText(
+                                        snapshot.ui,
+                                        'ui.return_to_game'
+                                    )}
+                                    icon="back"
+                                    onClick={() => setActivePanel(null)}
+                                    active={false}
+                                    className="game-menu-back-button"
+                                />
+                            )}
+                            <GameMenuButton
+                                label={uiText(snapshot.ui, 'ui.party')}
+                                icon="party"
+                                onClick={() => setActivePanel('party')}
+                                active={activePanel === 'party'}
                             />
-                        </div>
-                    ) : (
-                        <CharacterList
-                            ui={snapshot.ui}
-                            characters={snapshot.charactersHere}
-                            onTalkTo={actions.talkTo}
-                        />
-                    )}
-                </main>
+                            <GameMenuButton
+                                label={uiText(snapshot.ui, 'ui.inventory')}
+                                icon="inventory"
+                                onClick={() => setActivePanel('inventory')}
+                                active={activePanel === 'inventory'}
+                            />
+                            <GameMenuButton
+                                label={uiText(snapshot.ui, 'ui.journal')}
+                                icon="journal"
+                                onClick={() => setActivePanel('journal')}
+                                active={activePanel === 'journal'}
+                            />
+                            <GameMenuButton
+                                label={uiText(snapshot.ui, 'ui.notes')}
+                                icon="notes"
+                                onClick={() => setActivePanel('notes')}
+                                active={activePanel === 'notes'}
+                            />
+                            {snapshot.map && (
+                                <GameMenuButton
+                                    label={uiText(snapshot.ui, 'ui.map')}
+                                    icon="map"
+                                    onClick={() => setActivePanel('map')}
+                                    active={activePanel === 'map'}
+                                />
+                            )}
+                            <GameMenuButton
+                                label={uiText(snapshot.ui, 'ui.save_load')}
+                                icon="save"
+                                onClick={() => setActivePanel('saveload')}
+                                active={activePanel === 'saveload'}
+                            />
+                            {audioSettings && (
+                                <GameMenuButton
+                                    label={uiText(snapshot.ui, 'ui.settings')}
+                                    icon="settings"
+                                    onClick={() => setActivePanel('settings')}
+                                    active={activePanel === 'settings'}
+                                />
+                            )}
+                            {onOpenMenu && (
+                                <GameMenuButton
+                                    label={uiText(snapshot.ui, 'ui.menu')}
+                                    icon="menu"
+                                    onClick={onOpenMenu}
+                                    active={false}
+                                    className="game-shell-menu-button"
+                                />
+                            )}
+                        </nav>
 
-                <aside className="game-status">
-                    <GameTime
-                        ui={snapshot.ui}
-                        time={snapshot.time}
-                        format="narrative"
-                    />
+                        <main className="game-content">
+                            <LocationView
+                                ui={snapshot.ui}
+                                location={snapshot.location}
+                            />
 
-                    <div className="party-panel">
-                        <h2>{uiText(snapshot.ui, 'ui.party')}</h2>
-                        {snapshot.party.length === 0 ? (
-                            <p className="party-empty">
-                                {uiText(snapshot.ui, 'ui.no_companions')}
-                            </p>
-                        ) : (
-                            <div className="party-portraits">
-                                {snapshot.party.map((member) => (
-                                    <div
-                                        key={member.id}
-                                        className="party-member"
-                                    >
-                                        {member.portrait ? (
-                                            <img
-                                                src={member.portrait}
-                                                alt={member.name}
-                                                className="party-portrait"
-                                            />
-                                        ) : (
-                                            <div className="party-portrait-placeholder" />
-                                        )}
-                                        <span className="party-name">
-                                            {member.name}
-                                        </span>
+                            {snapshot.dialogue ? (
+                                <DialogueBox dialogue={snapshot.dialogue}>
+                                    <ChoiceList
+                                        choices={snapshot.choices}
+                                        onSelectChoice={actions.selectChoice}
+                                        onContinue={actions.continueDialogue}
+                                        continueLabel={
+                                            snapshot.dialogue
+                                                .continueEndsDialogue
+                                                ? uiText(
+                                                      snapshot.ui,
+                                                      'ui.end_dialogue'
+                                                  )
+                                                : uiText(
+                                                      snapshot.ui,
+                                                      'ui.continue'
+                                                  )
+                                        }
+                                    />
+                                </DialogueBox>
+                            ) : (
+                                <div
+                                    className="dialogue-stage is-idle"
+                                    aria-hidden="true"
+                                >
+                                    <div className="dialogue-container">
+                                        <div className="dialogue-idle" />
                                     </div>
-                                ))}
+                                </div>
+                            )}
+
+                            <CharacterList
+                                ui={snapshot.ui}
+                                characters={snapshot.charactersHere}
+                                activeCharacterId={snapshot.dialogue?.speaker}
+                                onTalkTo={actions.talkTo}
+                            />
+                        </main>
+
+                        <aside className="game-status">
+                            <GameTime
+                                ui={snapshot.ui}
+                                time={snapshot.time}
+                                format="narrative"
+                            />
+
+                            <div className="party-panel">
+                                {snapshot.party.length === 0 ? (
+                                    <p className="party-empty">
+                                        {uiText(
+                                            snapshot.ui,
+                                            'ui.no_companions'
+                                        )}
+                                    </p>
+                                ) : (
+                                    <div className="party-portraits">
+                                        {snapshot.party.map((member) => {
+                                            const isSpeaking =
+                                                member.id ===
+                                                snapshot.dialogue?.speaker;
+                                            return (
+                                                <button
+                                                    key={member.id}
+                                                    type="button"
+                                                    className={`party-member ${isSpeaking ? 'is-speaking' : ''}`}
+                                                    onClick={() =>
+                                                        actions.talkTo(
+                                                            member.id
+                                                        )
+                                                    }
+                                                    aria-pressed={isSpeaking}
+                                                >
+                                                    {member.portrait ? (
+                                                        <img
+                                                            src={
+                                                                member.portrait
+                                                            }
+                                                            alt={member.name}
+                                                            className="party-portrait"
+                                                        />
+                                                    ) : (
+                                                        <div className="party-portrait party-portrait-placeholder" />
+                                                    )}
+                                                    <span className="party-member-body">
+                                                        <span className="party-name">
+                                                            {member.name}
+                                                        </span>
+                                                        {member.title && (
+                                                            <span className="party-role">
+                                                                {member.title}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    {isSpeaking && (
+                                                        <span
+                                                            className="character-speaking-mark"
+                                                            aria-hidden="true"
+                                                        >
+                                                            <svg viewBox="0 0 24 24">
+                                                                <path d="M4 5.5h16v9H12l-4.5 4v-4H4z" />
+                                                            </svg>
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                        )}
+
+                            {visibleVariables.length > 0 && (
+                                <div className="resources-panel">
+                                    <ul className="resources-list">
+                                        {visibleVariables.map(
+                                            ([key, value]) => (
+                                                <li
+                                                    key={key}
+                                                    className={`resource-entry resource-${key
+                                                        .toLowerCase()
+                                                        .replace(
+                                                            /[^a-z0-9-]+/g,
+                                                            '-'
+                                                        )}`}
+                                                >
+                                                    <span className="resource-name">
+                                                        {resourceLabel(key)}
+                                                    </span>
+                                                    <span className="resource-value">
+                                                        {value}
+                                                    </span>
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+                        </aside>
                     </div>
 
-                    {visibleVariables.length > 0 && (
-                        <div className="resources-panel">
-                            <h2>{uiText(snapshot.ui, 'ui.resources')}</h2>
-                            <ul className="resources-list">
-                                {visibleVariables.map(([key, value]) => (
-                                    <li key={key} className="resource-entry">
-                                        <span className="resource-name">
-                                            {key}
-                                        </span>
-                                        <span className="resource-value">
-                                            {value}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                    {activePanel && (
+                        <PanelWorkspace
+                            label={activePanelLabel}
+                            closeLabel={uiText(snapshot.ui, 'ui.close')}
+                            onDismiss={() => setActivePanel(null)}
+                        >
+                            {activePanel === 'party' && (
+                                <CharacterSheet
+                                    ui={snapshot.ui}
+                                    character={selectedPartyProfile}
+                                    characters={partyProfiles}
+                                    position={partyIndex % partyProfiles.length}
+                                    count={partyProfiles.length}
+                                    onSelect={setPartyIndex}
+                                    onPrevious={() =>
+                                        setPartyIndex(
+                                            (current) =>
+                                                (current -
+                                                    1 +
+                                                    partyProfiles.length) %
+                                                partyProfiles.length
+                                        )
+                                    }
+                                    onNext={() =>
+                                        setPartyIndex(
+                                            (current) =>
+                                                (current + 1) %
+                                                partyProfiles.length
+                                        )
+                                    }
+                                />
+                            )}
+                            {activePanel === 'inventory' && (
+                                <Inventory
+                                    ui={snapshot.ui}
+                                    items={snapshot.inventory}
+                                />
+                            )}
+                            {activePanel === 'journal' && (
+                                <div className="panel-parchment-body">
+                                    <div className="panel-parchment-sheet doodle-parchment-surface">
+                                        <Journal
+                                            ui={snapshot.ui}
+                                            quests={snapshot.quests}
+                                            entries={snapshot.journal}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {activePanel === 'notes' && (
+                                <div className="panel-parchment-body">
+                                    <div className="panel-parchment-sheet doodle-parchment-surface">
+                                        <PlayerNotes
+                                            ui={snapshot.ui}
+                                            notes={snapshot.playerNotes}
+                                            onWrite={actions.writeNote}
+                                            onDelete={actions.deleteNote}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {activePanel === 'map' && snapshot.map && (
+                                <div className="panel-parchment-body">
+                                    <MapView
+                                        ui={snapshot.ui}
+                                        map={snapshot.map}
+                                        currentLocation={snapshot.location.id}
+                                        currentTime={snapshot.time}
+                                        onTravelTo={(id) => {
+                                            actions.travelTo(id);
+                                            setActivePanel(null);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {activePanel === 'saveload' && (
+                                <SaveLoadPanel
+                                    ui={snapshot.ui}
+                                    onSave={actions.saveGame}
+                                    onLoad={actions.loadGame}
+                                    projectId={projectId}
+                                />
+                            )}
+                            {activePanel === 'settings' && audioSettings && (
+                                <SettingsPanel
+                                    ui={snapshot.ui}
+                                    audio={audioSettings}
+                                    onLocaleChange={actions.setLocale}
+                                    currentLocale={snapshot.currentLocale}
+                                    onBack={() => setActivePanel(null)}
+                                />
+                            )}
+                        </PanelWorkspace>
                     )}
-                </aside>
-            </div>
-
-            <nav className="game-menu">
-                <GameMenuButton
-                    label={uiText(snapshot.ui, 'ui.party')}
-                    icon="party"
-                    onClick={() =>
-                        setActivePanel(activePanel === 'party' ? null : 'party')
-                    }
-                    active={activePanel === 'party'}
-                />
-                <GameMenuButton
-                    label={uiText(snapshot.ui, 'ui.inventory')}
-                    icon="inventory"
-                    onClick={() =>
-                        setActivePanel(
-                            activePanel === 'inventory' ? null : 'inventory'
-                        )
-                    }
-                    active={activePanel === 'inventory'}
-                />
-                <GameMenuButton
-                    label={uiText(snapshot.ui, 'ui.journal')}
-                    icon="journal"
-                    onClick={() =>
-                        setActivePanel(
-                            activePanel === 'journal' ? null : 'journal'
-                        )
-                    }
-                    active={activePanel === 'journal'}
-                />
-                <GameMenuButton
-                    label={uiText(snapshot.ui, 'ui.notes')}
-                    icon="notes"
-                    onClick={() =>
-                        setActivePanel(activePanel === 'notes' ? null : 'notes')
-                    }
-                    active={activePanel === 'notes'}
-                />
-                {snapshot.map && (
-                    <GameMenuButton
-                        label={uiText(snapshot.ui, 'ui.map')}
-                        icon="map"
-                        onClick={() =>
-                            setActivePanel(activePanel === 'map' ? null : 'map')
-                        }
-                        active={activePanel === 'map'}
-                    />
-                )}
-                <GameMenuButton
-                    label={uiText(snapshot.ui, 'ui.save_load')}
-                    icon="save"
-                    onClick={() =>
-                        setActivePanel(
-                            activePanel === 'saveload' ? null : 'saveload'
-                        )
-                    }
-                    active={activePanel === 'saveload'}
-                />
-                {audioSettings && (
-                    <GameMenuButton
-                        label={uiText(snapshot.ui, 'ui.settings')}
-                        icon="settings"
-                        onClick={() =>
-                            setActivePanel(
-                                activePanel === 'settings' ? null : 'settings'
-                            )
-                        }
-                        active={activePanel === 'settings'}
-                    />
-                )}
-            </nav>
-
-            {activePanel === 'party' && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.party')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <CharacterSheet
-                        ui={snapshot.ui}
-                        character={selectedPartyProfile}
-                        position={partyIndex % partyProfiles.length}
-                        count={partyProfiles.length}
-                        onPrevious={() =>
-                            setPartyIndex(
-                                (current) =>
-                                    (current - 1 + partyProfiles.length) %
-                                    partyProfiles.length
-                            )
-                        }
-                        onNext={() =>
-                            setPartyIndex(
-                                (current) =>
-                                    (current + 1) % partyProfiles.length
-                            )
-                        }
-                    />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-
-            {activePanel === 'inventory' && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.inventory')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <Inventory ui={snapshot.ui} items={snapshot.inventory} />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-            {activePanel === 'journal' && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.journal')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <Journal
-                        ui={snapshot.ui}
-                        quests={snapshot.quests}
-                        entries={snapshot.journal}
-                    />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-            {activePanel === 'notes' && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.notes')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <PlayerNotes
-                        ui={snapshot.ui}
-                        notes={snapshot.playerNotes}
-                        onWrite={actions.writeNote}
-                        onDelete={actions.deleteNote}
-                    />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-            {activePanel === 'map' && snapshot.map && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.map')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <MapView
-                        ui={snapshot.ui}
-                        map={snapshot.map}
-                        currentLocation={snapshot.location.id}
-                        currentTime={snapshot.time}
-                        onTravelTo={(id) => {
-                            actions.travelTo(id);
-                            setActivePanel(null);
-                        }}
-                    />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-            {activePanel === 'saveload' && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.save_load')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <SaveLoadPanel
-                        ui={snapshot.ui}
-                        onSave={actions.saveGame}
-                        onLoad={actions.loadGame}
-                        projectId={projectId}
-                    />
-                    <button
-                        className="panel-close"
-                        onClick={() => setActivePanel(null)}
-                    >
-                        {uiText(snapshot.ui, 'ui.close')}
-                    </button>
-                </PanelDialog>
-            )}
-            {activePanel === 'settings' && audioSettings && (
-                <PanelDialog
-                    label={uiText(snapshot.ui, 'ui.settings')}
-                    onDismiss={() => setActivePanel(null)}
-                >
-                    <SettingsPanel
-                        ui={snapshot.ui}
-                        audio={audioSettings}
-                        onLocaleChange={actions.setLocale}
-                        currentLocale={snapshot.currentLocale}
-                        onBack={() => setActivePanel(null)}
-                    />
-                </PanelDialog>
+                </>
             )}
         </div>
     );

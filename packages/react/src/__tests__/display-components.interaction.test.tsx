@@ -92,13 +92,31 @@ describe('display component behavior', () => {
         for (const className of [
             '.loading-screen',
             '.splash-screen',
-            '.title-screen',
+            '.title-backdrop',
         ]) {
             expect(
                 container.querySelector<HTMLElement>(className)?.style
                     .backgroundImage
             ).toBe(`url("${path}")`);
         }
+    });
+
+    it('renders title menu labels without number prefixes', () => {
+        const { container } = render(
+            <TitleScreen
+                ui={{
+                    'ui.new_game': 'New Game',
+                    'ui.settings': 'Settings',
+                }}
+                hasSaveData={false}
+                onNewGame={() => {}}
+                onContinue={() => {}}
+                onSettings={() => {}}
+            />
+        );
+
+        expect(container.querySelector('.title-button-key')).toBeNull();
+        expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
     });
 
     it('formats numeric, short, localized, and every narrative time period', () => {

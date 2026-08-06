@@ -58,6 +58,9 @@ export function LoadingScreen({
     return (
         <div className={`loading-screen ${className}`} style={bgStyle}>
             <div className="loading-screen-content">
+                <div className="loading-screen-mark" aria-hidden="true">
+                    Doodle Engine
+                </div>
                 {state.phase !== 'complete' && (
                     <div className="loading-screen-spinner" />
                 )}
@@ -97,7 +100,7 @@ export function LoadingScreen({
                 </div>
 
                 {state.error && (
-                    <p className="loading-screen-message loading-screen-message--error">
+                    <p className="loading-screen-message is-error">
                         {state.error}
                     </p>
                 )}

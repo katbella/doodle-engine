@@ -2,7 +2,15 @@
  * Tests for build helpers.
  */
 
-import { mkdtemp, mkdir, readFile, rm, writeFile, access } from 'fs/promises';
+import {
+    mkdtemp,
+    mkdir,
+    readFile,
+    readdir,
+    rm,
+    writeFile,
+    access,
+} from 'fs/promises';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -49,7 +57,7 @@ async function writeProject(files: Record<string, string>): Promise<string> {
 describe('buildProject validation gate', () => {
     it('stops before building when content has validation errors and writes no output', async () => {
         // startLocation points at a location that does not exist: a validation
-        // error the same as `doodle build` would report.
+        // error the same as `doodle-engine build` would report.
         const projectDir = await writeProject({
             'content/game.yaml':
                 'startLocation: nowhere\n' +
@@ -90,7 +98,7 @@ describe('buildProject success', () => {
             title: 'Test "Quoted" & Game',
             subtitle: 'A "Quoted" Subtitle',
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
             localizationMode: 'literal',
         });
 
@@ -98,10 +106,7 @@ describe('buildProject success', () => {
             await readFile(join(projectPath, 'index.html'), 'utf-8')
         ).toContain('<title>Test &quot;Quoted&quot; &amp; Game</title>');
         const gameConfig = parseYaml(
-            await readFile(
-                join(projectPath, 'content', 'game.yaml'),
-                'utf-8'
-            )
+            await readFile(join(projectPath, 'content', 'game.yaml'), 'utf-8')
         );
         expect(gameConfig.title).toBe('Test "Quoted" & Game');
         expect(gameConfig.subtitle).toBe('A "Quoted" Subtitle');
@@ -138,6 +143,19 @@ describe('buildProject success', () => {
             access(join(result.outDir, 'index.html'))
         ).resolves.toBeUndefined();
 
+        // Theme fonts are emitted locally and included in the offline shell.
+        const fontFiles = (await readdir(join(result.outDir, 'assets'))).filter(
+            (file) => file.endsWith('.woff2')
+        );
+        expect(fontFiles.length).toBeGreaterThan(0);
+        const serviceWorker = await readFile(
+            join(result.outDir, 'sw.js'),
+            'utf-8'
+        );
+        for (const fontFile of fontFiles) {
+            expect(serviceWorker).toContain(`assets/${fontFile}`);
+        }
+
         // api/content is well-formed and carries the loaded registry + config.
         const apiContent = JSON.parse(
             await readFile(join(result.outDir, 'api', 'content'), 'utf-8')
@@ -168,7 +186,7 @@ describe('buildProject success', () => {
             targetDir,
             title: 'Custom Game',
             useDefaultRenderer: false,
-            useStarterStyles: false,
+            rendererTemplate: 'minimal',
             localizationMode: 'literal',
         });
 

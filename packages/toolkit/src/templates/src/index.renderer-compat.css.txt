@@ -1,0 +1,701 @@
+/* Renderer hooks shared by Starter RPG, Prose, and Fable. */
+
+/* ── Shared control states ───────────────────────────────────────── */
+
+/* The supplied exports use divs for most text. Reset equivalent semantic
+   elements so React headings, paragraphs, and lists keep the same geometry. */
+.game-shell h1,
+.game-shell h2,
+.game-shell h3,
+.game-shell h4,
+.game-shell p,
+.game-shell dl,
+.game-shell dd,
+.game-shell ul,
+.game-shell ol {
+    margin: 0;
+}
+
+.game-shell ul,
+.game-shell ol {
+    padding: 0;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    opacity: var(--doodle-disabled-opacity);
+}
+
+.game-menu-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.game-menu-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.panel-close:focus-visible,
+.settings-back-button:focus-visible,
+.load-button:focus-visible,
+.delete-button:focus-visible,
+.item-modal-close:focus-visible,
+.player-notes-add-button:focus-visible,
+.player-note-delete:focus-visible,
+.travel-confirm-cancel:focus-visible,
+.travel-confirm-go:focus-visible,
+.pause-button:focus-visible {
+    outline: var(--doodle-focus-ring);
+    outline-offset: 2px;
+}
+
+/* ── Location art ────────────────────────────────────────────────── */
+
+.has-banner .location-banner::after {
+    display: none;
+}
+
+.has-banner-placeholder .location-banner::after {
+    content: none;
+}
+
+.location-banner-image,
+.dialogue-portrait-image,
+.character-portrait,
+.party-portrait,
+.character-sheet-portrait-image,
+.item-icon,
+.item-modal-image,
+.map-image {
+    object-fit: cover;
+}
+
+.location-banner-image {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.location-banner-placeholder {
+    position: absolute;
+    inset: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--doodle-border-bright);
+    color: var(--doodle-text-faint);
+    font-family: var(--doodle-font-ui);
+}
+
+/* ── Full-stage flows ────────────────────────────────────────────── */
+
+.interlude-overlay,
+.player-setup-overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.interlude-overlay {
+    z-index: 80;
+}
+
+.interlude-background {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.interlude-scroll-container {
+    max-height: calc(100% - (var(--doodle-spacing-xl) * 4));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.interlude-scroll-content {
+    min-height: min-content;
+    padding-block: var(--doodle-spacing-xl);
+}
+
+.player-setup-overlay {
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: calc(var(--doodle-spacing-xl) * 2);
+    background: var(--doodle-bg-primary);
+}
+
+.player-setup {
+    width: min(640px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    border: 1px solid var(--doodle-border-color);
+    background: var(--doodle-bg-secondary);
+    color: var(--doodle-text-primary);
+    box-shadow: var(--doodle-shadow-panel);
+}
+
+.player-setup-form {
+    display: grid;
+    gap: var(--doodle-spacing-lg);
+    padding: calc(var(--doodle-spacing-xl) * 2);
+}
+
+.player-setup-header {
+    padding-bottom: var(--doodle-spacing-lg);
+    border-bottom: 1px solid var(--doodle-border-color);
+}
+
+.player-setup-heading {
+    margin: 0;
+    color: var(--doodle-text-primary);
+    font: 600 36px/1.15 var(--doodle-font-display);
+}
+
+.player-setup-field {
+    display: grid;
+    gap: var(--doodle-spacing-sm);
+}
+
+.player-setup-label {
+    color: var(--doodle-text-muted);
+    font: 500 15px/1.3 var(--doodle-font-ui);
+}
+
+.player-setup-input,
+.player-setup-textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid var(--doodle-border-color);
+    background: var(--doodle-bg-tertiary);
+    color: var(--doodle-text-primary);
+    font: 400 18px/1.5 var(--doodle-font-ui);
+    outline: none;
+}
+
+.player-setup-input::placeholder,
+.player-setup-textarea::placeholder {
+    color: var(--doodle-text-faint);
+}
+
+.player-setup-input:focus,
+.player-setup-textarea:focus {
+    border-color: var(--doodle-accent);
+    box-shadow: 0 0 0 2px var(--doodle-accent-wash);
+}
+
+.player-setup-textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.player-setup-submit {
+    min-height: var(--doodle-control-min-size);
+    padding: 13px 20px;
+    border: 1px solid var(--doodle-accent);
+    background: var(--doodle-accent);
+    color: var(--doodle-on-accent);
+    font: 500 17px/1.2 var(--doodle-font-ui);
+    cursor: pointer;
+}
+
+.player-setup-submit:hover:not(:disabled) {
+    border-color: var(--doodle-accent-bright);
+    background: var(--doodle-accent-bright);
+}
+
+.player-setup-submit:focus-visible {
+    outline: var(--doodle-focus-ring);
+    outline-offset: 2px;
+}
+
+.title-logo {
+    max-width: min(520px, 100%);
+    max-height: 220px;
+    margin: 0;
+    object-fit: contain;
+}
+
+.credits-screen {
+    position: absolute;
+    inset: var(--doodle-stage-inset);
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    padding: calc(var(--doodle-spacing-xl) * 2);
+    background: var(--doodle-bg-secondary);
+    color: var(--doodle-text-primary);
+    font-family: var(--doodle-font-ui);
+}
+
+.credits-panel {
+    width: min(680px, 100%);
+    min-height: 0;
+    gap: var(--doodle-spacing-xl);
+}
+
+.credits-heading {
+    color: var(--doodle-text-primary);
+    font: 600 48px/1.15 var(--doodle-font-display);
+}
+
+.credits-content {
+    color: var(--doodle-text-secondary);
+    font: 400 19px/1.65 var(--doodle-font-prose);
+}
+
+/* shell.css provides a centered fallback. Theme title screens use the
+   authored horizontal stage composition instead. */
+.title-screen {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+}
+
+.title-content {
+    align-items: stretch;
+    gap: 0;
+}
+
+/* ── Dialogue ────────────────────────────────────────────────────── */
+
+.dialogue-portrait-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.dialogue-content {
+    min-width: 0;
+}
+
+.dialogue-speaker {
+    margin-bottom: var(--doodle-spacing-sm);
+}
+
+.choice-button-number {
+    min-width: 1.5em;
+}
+
+.character-speaking-mark svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ── Character strips and status ─────────────────────────────────── */
+
+.character-list-heading,
+.party-panel > h2,
+.resources-panel > h2 {
+    margin: 0;
+    color: var(--doodle-text-muted);
+    font: 500 14px/1.2 var(--doodle-font-ui);
+}
+
+.character-list-heading {
+    display: flex;
+    align-items: center;
+    flex: none;
+    padding: 0 var(--doodle-spacing-lg);
+    border-right: 1px solid var(--doodle-border-color);
+}
+
+.party-panel > h2,
+.resources-panel > h2 {
+    padding: var(--doodle-spacing-sm) 18px;
+}
+
+.party-empty,
+.inventory-empty,
+.journal-empty,
+.player-notes-empty,
+.save-load-empty {
+    color: var(--doodle-text-muted);
+    font: 400 18px/1.6 var(--doodle-font-ui);
+}
+
+.party-empty {
+    display: grid;
+    min-height: 136px;
+    padding: var(--doodle-spacing-lg);
+    place-items: center;
+    border-bottom: 1px solid var(--doodle-border-color);
+    text-align: center;
+}
+
+.inventory-empty {
+    flex: 1;
+    padding: var(--doodle-spacing-xl);
+}
+
+/* ── Panels ──────────────────────────────────────────────────────── */
+
+.panel-body {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.panel-body > * {
+    min-width: 0;
+}
+
+.panel-parchment-body {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: var(--doodle-spacing-xl);
+}
+
+.panel-parchment-sheet {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.shell-panel-overlay {
+    position: absolute;
+    inset: var(--doodle-stage-inset);
+    z-index: 85;
+}
+
+.panel.shell-panel {
+    inset: 0;
+}
+
+.panel .settings-title,
+.panel .settings-back-button {
+    display: none;
+}
+
+.character-sheet-stat dt,
+.character-sheet-stat dd {
+    margin: 0;
+}
+
+.character-sheet-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--doodle-spacing-md);
+}
+
+.character-sheet-navigation button {
+    min-height: var(--doodle-control-min-size);
+    padding: var(--doodle-spacing-sm) var(--doodle-spacing-md);
+    border: 1px solid var(--doodle-border-color);
+    background: var(--doodle-bg-tertiary);
+    color: var(--doodle-text-primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+/* ── Inventory ───────────────────────────────────────────────────── */
+
+.inventory > h2,
+.journal-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.item-icon-placeholder::after {
+    content: 'item';
+}
+
+.item-modal-image-asset {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ── Journal and notes ───────────────────────────────────────────── */
+
+.journal {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.journal > .journal-quests,
+.journal > .journal-entries {
+    display: block;
+    overflow: hidden auto;
+}
+
+.journal-empty {
+    display: grid;
+    flex: 1;
+    min-height: 0;
+    padding: var(--doodle-spacing-xl);
+    place-items: center;
+    color: var(--doodle-parchment-muted);
+    text-align: center;
+}
+
+.player-notes-list-column .player-notes-empty {
+    color: var(--doodle-parchment-muted);
+}
+
+.player-notes-view {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.player-notes-list {
+    list-style: none;
+}
+
+/* ── Map ─────────────────────────────────────────────────────────── */
+
+.map-view {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.map-view > h2 {
+    position: absolute;
+    left: 40px;
+    top: 36px;
+    z-index: 3;
+    margin: 0;
+    color: var(--doodle-parchment-ink);
+    font: 600 30px/1.2 var(--doodle-font-display);
+}
+
+.map-view > .map-container {
+    height: 100%;
+}
+
+.map-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.map-location-button:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+/* ── Save, settings, and notifications ───────────────────────────── */
+
+.save-load-panel,
+.settings-panel {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.save-load-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.save-slot-list {
+    list-style: none;
+}
+
+.save-slot-new {
+    list-style: none;
+}
+
+.save-load-empty {
+    padding: var(--doodle-spacing-xl) 2px;
+    border-top: 1px solid var(--doodle-border-soft);
+    text-align: center;
+}
+
+.save-load-message {
+    color: var(--doodle-accent);
+    font: 500 16px/1.4 var(--doodle-font-ui);
+}
+
+.settings-title {
+    margin-top: 0;
+    color: var(--doodle-text-primary);
+    font-family: var(--doodle-font-display);
+}
+
+.settings-back-button,
+.delete-button,
+.item-modal-close {
+    border: 1px solid var(--doodle-border-color);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: var(--doodle-spacing-sm) var(--doodle-spacing-md);
+}
+
+.notification-area {
+    position: absolute;
+    top: var(--doodle-spacing-xl);
+    left: 50%;
+    z-index: 70;
+    display: flex;
+    width: min(520px, calc(100% - var(--doodle-spacing-xl) * 2));
+    transform: translateX(-50%);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--doodle-spacing-sm);
+    pointer-events: none;
+}
+
+.notification {
+    padding: var(--doodle-spacing-md) var(--doodle-spacing-lg);
+    border: 1px solid var(--doodle-border-color);
+    background: var(--doodle-bg-secondary);
+    color: var(--doodle-text-primary);
+    font: 400 16px/1.45 var(--doodle-font-ui);
+    text-align: center;
+    box-shadow: var(--doodle-shadow);
+}
+
+/* ── Loading and splash ─────────────────────────────────────────── */
+
+.app-bootstrap {
+    flex-direction: column;
+    gap: var(--doodle-spacing-xl);
+    background: var(--doodle-bg-primary);
+    color: var(--doodle-text-primary);
+    font-family: var(--doodle-font-ui);
+}
+
+.app-bootstrap::before {
+    position: absolute;
+    inset: var(--doodle-stage-inset);
+    border: 1px solid var(--doodle-border-color);
+    content: '';
+}
+
+.app-bootstrap-mark {
+    color: var(--doodle-text-muted);
+    font: 500 14px/1.2 var(--doodle-font-ui);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.app-bootstrap .spinner {
+    width: 36px;
+    height: 36px;
+    border-color: var(--doodle-border-color);
+    border-top-color: var(--doodle-accent);
+}
+
+.loading-screen,
+.splash-screen {
+    background-color: var(--doodle-bg-primary);
+    color: var(--doodle-text-primary);
+    font-family: var(--doodle-font-ui);
+}
+
+.loading-screen::before,
+.splash-screen::before {
+    position: absolute;
+    inset: var(--doodle-stage-inset);
+    border: 1px solid var(--doodle-border-color);
+    content: '';
+    pointer-events: none;
+}
+
+.loading-screen-content {
+    position: relative;
+    width: min(520px, calc(100vw - var(--doodle-spacing-xl) * 2));
+    padding: calc(var(--doodle-spacing-xl) * 1.25);
+    border: 1px solid var(--doodle-border-color);
+    background: color-mix(in srgb, var(--doodle-bg-secondary) 94%, transparent);
+    box-shadow: var(--doodle-shadow-panel);
+}
+
+.loading-screen-mark,
+.splash-mark-label {
+    color: var(--doodle-text-muted);
+    font: 500 14px/1.2 var(--doodle-font-ui);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.loading-screen-bar-track {
+    height: 6px;
+    border: 1px solid var(--doodle-border-color);
+    border-radius: 0;
+    background: var(--doodle-bg-sunken);
+}
+
+.loading-screen-bar-fill {
+    border-radius: 0;
+    background: var(--doodle-accent);
+}
+
+.loading-screen-start {
+    justify-content: center;
+    min-height: var(--doodle-control-min-size);
+}
+
+.splash-mark {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: min(460px, 70vw);
+    align-items: center;
+    gap: var(--doodle-spacing-lg);
+}
+
+.splash-mark-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--doodle-border-bright);
+}
+
+/* ── Motion preferences ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

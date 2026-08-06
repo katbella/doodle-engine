@@ -20,6 +20,7 @@ npm run validate   # check content for errors
 npm run build      # create release files in dist/
 npm run preview    # serve the finished build locally
 npm run typecheck  # check the game's TypeScript
+npm run theme -- prose  # change the default renderer theme
 ```
 
 ## Where things live
@@ -27,6 +28,7 @@ npm run typecheck  # check the game's TypeScript
 - `content/` holds the story: locations, characters, dialogues (`.dlg` files), quests, and the game configuration.
 - `assets/` holds images, audio, and video.
 - `src/` is the game's interface code.
+- `src/renderer-overrides.css` holds theme customizations that remain in place when you change themes.
 
 The [Doodle Engine documentation](https://doodleengine.dev) covers everything from writing dialogue to publishing. This project also opens in [Doodle Studio](https://doodleengine.dev/studio/), the visual editor; Studio and direct file editing work on the same files.
 

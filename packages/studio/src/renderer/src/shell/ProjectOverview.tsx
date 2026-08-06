@@ -1,16 +1,26 @@
-import type { OpenProject } from '../../../shared/project';
+import {
+    RENDERER_TEMPLATE_OPTIONS,
+    type OpenProject,
+} from '../../../shared/project';
+import type { RendererTemplate } from '@doodle-engine/toolkit';
 import { ExternalLink } from '../lib/icons';
 
 export function ProjectOverview({
     project,
     updatingEngine = false,
     engineUpdateError = null,
+    switchingRendererTheme = false,
+    rendererThemeError = null,
     onUpdateEngine,
+    onSwitchRendererTheme,
 }: {
     project: OpenProject;
     updatingEngine?: boolean;
     engineUpdateError?: string | null;
+    switchingRendererTheme?: boolean;
+    rendererThemeError?: string | null;
     onUpdateEngine?: () => void;
+    onSwitchRendererTheme?: (template: RendererTemplate) => void;
 }) {
     const r = project.registry;
     const contentGroups: Array<{
@@ -240,6 +250,57 @@ export function ProjectOverview({
                     </div>
                 </div>
                 <dl className="overview__rows overview__rows--compact">
+                    <div className="overview__row">
+                        <dt>
+                            <label htmlFor="overview-renderer-theme">
+                                Renderer template
+                            </label>
+                        </dt>
+                        <dd className="overview__renderer-theme">
+                            {project.rendererTheme.renderer === 'default' &&
+                            project.rendererTheme.template ? (
+                                <select
+                                    id="overview-renderer-theme"
+                                    className="field__input overview__renderer-select"
+                                    value={project.rendererTheme.template}
+                                    disabled={
+                                        switchingRendererTheme ||
+                                        !onSwitchRendererTheme
+                                    }
+                                    onChange={(event) =>
+                                        onSwitchRendererTheme?.(
+                                            event.target
+                                                .value as RendererTemplate
+                                        )
+                                    }
+                                >
+                                    {RENDERER_TEMPLATE_OPTIONS.map(
+                                        (template) => (
+                                            <option
+                                                key={template.id}
+                                                value={template.id}
+                                            >
+                                                {template.label}
+                                            </option>
+                                        )
+                                    )}
+                                </select>
+                            ) : (
+                                <span>Custom renderer</span>
+                            )}
+                            {switchingRendererTheme && (
+                                <span role="status">Switching theme…</span>
+                            )}
+                            {rendererThemeError && (
+                                <span
+                                    className="overview__renderer-error"
+                                    role="alert"
+                                >
+                                    {rendererThemeError}
+                                </span>
+                            )}
+                        </dd>
+                    </div>
                     <div className="overview__row">
                         <dt>Package manager</dt>
                         <dd>{project.engine.packageManager}</dd>

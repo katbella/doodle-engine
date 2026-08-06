@@ -11,9 +11,42 @@ import type {
     ContentRegistry,
     GameConfig,
 } from '@doodle-engine/core';
-import type { ValidationError, YamlEdit } from '@doodle-engine/toolkit';
+import type {
+    RendererTemplate,
+    RendererThemeInfo,
+    SwitchRendererThemeResult,
+    ValidationError,
+    YamlEdit,
+} from '@doodle-engine/toolkit';
 
 export type { YamlEdit };
+
+export const RENDERER_TEMPLATE_OPTIONS = [
+    {
+        id: 'starter-rpg',
+        label: 'Starter RPG',
+        description: 'Neutral interface for a classic RPG story',
+    },
+    {
+        id: 'minimal',
+        label: 'Minimal',
+        description: 'Absolutely no frills, just the text and choices',
+    },
+    {
+        id: 'prose',
+        label: 'Prose',
+        description: 'Reading-first narrative layout',
+    },
+    {
+        id: 'fable',
+        label: 'Fable',
+        description: 'Dark folktale and parchment',
+    },
+] as const satisfies ReadonlyArray<{
+    id: RendererTemplate;
+    label: string;
+    description: string;
+}>;
 
 export type StudioAssetKind =
     | AssetCategory
@@ -104,6 +137,12 @@ export interface OpenProject {
     problems: ValidationError[];
     /** Engine version the project targets and whether its deps are installed. */
     engine: EngineInfo;
+    /** Current built-in renderer theme, or custom renderer status. */
+    rendererTheme: RendererThemeInfo;
+}
+
+export interface StudioThemeSwitchResult extends SwitchRendererThemeResult {
+    project: OpenProject;
 }
 
 /** An entry in the recent-projects list. */
@@ -128,8 +167,8 @@ export interface NewProjectOptions {
     targetDir: string;
     /** Use the batteries-included renderer. */
     useDefaultRenderer: boolean;
-    /** Include the styled starter CSS. */
-    useStarterStyles: boolean;
+    /** Presentation preset for the built-in renderer. */
+    rendererTemplate: RendererTemplate;
     /** Begin with the example story or one valid starting location. */
     contentMode: ScaffoldContentMode;
     /** How starter content stores player-facing text. */
@@ -270,6 +309,11 @@ export interface StudioApi {
     removeRecentProject: (projectDir: string) => Promise<RecentProject[]>;
     /** Reload and re-validate the project from disk (the Validate button). */
     revalidate: (projectDir: string) => Promise<OpenProject>;
+    /** Replace the managed renderer theme while preserving project overrides. */
+    switchRendererTheme: (
+        projectDir: string,
+        template: RendererTemplate
+    ) => Promise<StudioThemeSwitchResult>;
     /** Read optional flag and variable notes from project metadata. */
     readFlagVarNotes: (projectDir: string) => Promise<FlagVarNotesReadResult>;
     /** Re-read notes, change one entry, and return the authoritative result. */

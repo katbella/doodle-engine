@@ -1,7 +1,7 @@
 /**
  * Preview worker (Electron utility process).
  *
- * Runs the project's real dev server — the same one `doodle dev` runs — in its
+ * Runs the project's real dev server — the same one `doodle-engine dev` runs — in its
  * own Node process. Like the build, a dev server loads the project's Vite config
  * and source, so it stays out of the main process. The worker reports the URL
  * the server is listening on; Studio opens that URL in the user's default

@@ -6,6 +6,8 @@ const readdir = vi.hoisted(() => vi.fn());
 const loadProject = vi.hoisted(() => vi.fn());
 const validateContent = vi.hoisted(() => vi.fn());
 const createProject = vi.hoisted(() => vi.fn());
+const readRendererTheme = vi.hoisted(() => vi.fn());
+const switchRendererTheme = vi.hoisted(() => vi.fn());
 const addRecentProject = vi.hoisted(() => vi.fn(async () => {}));
 const pruneRecentProjects = vi.hoisted(() => vi.fn());
 const removeRecentProject = vi.hoisted(() => vi.fn());
@@ -17,6 +19,8 @@ vi.mock('@doodle-engine/toolkit', () => ({
     loadProject,
     validateContent,
     createProject,
+    readRendererTheme,
+    switchRendererTheme,
 }));
 vi.mock('../recent-projects', () => ({
     addRecentProject,
@@ -58,6 +62,15 @@ describe('ProjectService', () => {
             .mockReturnValue([{ file: 'game.yaml', message: 'invalid start' }]);
         createProject.mockReset().mockResolvedValue({
             projectPath: 'C:/games/new-story',
+        });
+        readRendererTheme.mockReset().mockResolvedValue({
+            renderer: 'default',
+            template: 'starter-rpg',
+        });
+        switchRendererTheme.mockReset().mockResolvedValue({
+            previousTemplate: 'starter-rpg',
+            template: 'prose',
+            dependenciesChanged: true,
         });
         addRecentProject.mockClear();
         pruneRecentProjects.mockReset().mockResolvedValue([
@@ -116,6 +129,30 @@ describe('ProjectService', () => {
             })
         );
         expect(readEngineInfo).toHaveBeenCalledWith('C:/games/story', '0.2.1');
+        expect(project?.rendererTheme).toEqual({
+            renderer: 'default',
+            template: 'starter-rpg',
+        });
+    });
+
+    it('switches renderer themes through the toolkit and reloads the project', async () => {
+        const result = await service.switchRendererTheme(
+            'C:/games/story',
+            'prose'
+        );
+
+        expect(switchRendererTheme).toHaveBeenCalledWith(
+            'C:/games/story',
+            'prose'
+        );
+        expect(result).toEqual(
+            expect.objectContaining({
+                previousTemplate: 'starter-rpg',
+                template: 'prose',
+                dependenciesChanged: true,
+                project: expect.objectContaining({ name: 'story-game' }),
+            })
+        );
     });
 
     it('falls back to the folder name when package metadata has no name', async () => {
@@ -183,7 +220,7 @@ describe('ProjectService', () => {
             subtitle: 'A New Story',
             targetDir: 'C:/games',
             useDefaultRenderer: true,
-            useStarterStyles: false,
+            rendererTemplate: 'minimal',
             contentMode: 'minimal',
             localizationMode: 'localized',
         });
@@ -193,7 +230,7 @@ describe('ProjectService', () => {
             title: 'New Story',
             subtitle: 'A New Story',
             useDefaultRenderer: true,
-            useStarterStyles: false,
+            rendererTemplate: 'minimal',
             contentMode: 'minimal',
             localizationMode: 'localized',
         });

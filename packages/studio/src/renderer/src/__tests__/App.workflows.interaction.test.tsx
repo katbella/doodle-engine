@@ -46,7 +46,7 @@ vi.mock('../shell/NewProjectModal', async () => {
                             subtitle: 'Created Subtitle',
                             targetDir: 'C:/games',
                             useDefaultRenderer: true,
-                            useStarterStyles: true,
+                            rendererTemplate: 'starter-rpg',
                             contentMode: 'starter',
                             localizationMode: 'literal',
                         })
@@ -362,6 +362,10 @@ function makeProject(depsInstalled = true): OpenProject {
             depsInstalled,
             packageManager: 'yarn',
         },
+        rendererTheme: {
+            renderer: 'default',
+            template: 'starter-rpg',
+        },
     };
 }
 
@@ -387,6 +391,18 @@ function installBridge(
         checkProjectDestination: vi.fn(async () => ({ available: true })),
         chooseDirectory: vi.fn(async () => 'C:/games'),
         revalidate: vi.fn(async () => initialProject),
+        switchRendererTheme: vi.fn(async () => ({
+            previousTemplate: 'starter-rpg',
+            template: 'fable',
+            dependenciesChanged: false,
+            project: {
+                ...initialProject,
+                rendererTheme: {
+                    renderer: 'default' as const,
+                    template: 'fable' as const,
+                },
+            },
+        })),
         build: vi.fn(async () => ({
             ok: true,
             cancelled: false,

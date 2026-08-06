@@ -1,7 +1,7 @@
 /**
  * Production build for a Doodle Engine project.
  *
- * This is the same build the CLI's `doodle build` runs, moved out of the command
+ * This is the same build the CLI's `doodle-engine build` runs, moved out of the command
  * so Doodle Studio's Build button runs the exact same code and produces the same
  * output. It takes explicit paths instead of reading process.cwd(), reports
  * progress through a callback instead of printing, and returns a result instead

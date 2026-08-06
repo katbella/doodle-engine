@@ -55,6 +55,7 @@ Doodle Studio and the project files work together. You can create and edit story
 - Create a production build when the game is ready to publish
 
 ## Doodle Studio Features
+
 - Work in the visual editor or switch to the source mode and take advantage of IntelliSense and highlighting.
 - Designed to be user-friendly and accessible for all developers, whether they are a writer, designer, or programmer.
 - Choose from several themes to customize the appearance of Doodle Studio, including light, dark, and high-contrast options.
@@ -91,7 +92,7 @@ npm run dev
 | `@doodle-engine/core`    | Engine state, parsing, conditions, and effects                   |
 | `@doodle-engine/react`   | React components and hooks                                       |
 | `@doodle-engine/toolkit` | Project loading, validation, dev server, builds, and scaffolding |
-| `@doodle-engine/cli`     | The `doodle` command line over the toolkit                       |
+| `@doodle-engine/cli`     | The `doodle-engine` command line over the toolkit                |
 | `@doodle-engine/studio`  | Doodle Studio, distributed through GitHub Releases               |
 
 ---

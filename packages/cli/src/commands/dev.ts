@@ -3,7 +3,7 @@
  *
  * Thin wrapper over the toolkit's startDevServer: this file only handles the
  * console presentation. The server, content loading, watching, and validation
- * all run in @doodle-engine/toolkit so `doodle dev` and Doodle Studio's preview
+ * all run in @doodle-engine/toolkit so `doodle-engine dev` and Doodle Studio's preview
  * run the same code.
  */
 

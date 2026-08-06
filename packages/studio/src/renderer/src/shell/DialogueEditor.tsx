@@ -354,7 +354,7 @@ function DialogueEditorInner({
     const selected = dialogue.nodes.find((n) => n.id === selectedId) ?? null;
     const displayedText = (source: string) => {
         if (!source.startsWith('@')) return source;
-        const locale = localeWriter?.authoringLocale;
+        const locale = localeWriter?.primaryLocale;
         const value = locale
             ? localeWriter?.files[locale]?.values[source.slice(1)]
             : undefined;

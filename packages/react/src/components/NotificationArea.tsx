@@ -19,7 +19,12 @@ export function NotificationArea({
     }
 
     return (
-        <div className={`notification-area ${className}`}>
+        <div
+            className={`notification-area ${className}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="false"
+        >
             {notifications.map((text, index) => (
                 <div key={index} className="notification">
                     {text}

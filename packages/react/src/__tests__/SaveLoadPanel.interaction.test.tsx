@@ -69,8 +69,9 @@ describe('SaveLoadPanel real interaction', () => {
         expect(screen.queryByText('No saves yet')).toBeNull();
         expect(screen.getByText('Day 3')).toBeTruthy();
         expect(document.querySelector('.save-slot-info')?.textContent).toMatch(
-            /^Day 3 · /
+            /^Day 3/
         );
+        expect(document.querySelector('.save-slot-time')).toBeTruthy();
 
         const stored = JSON.parse(localStorage.getItem(SAVE_KEY)!);
         expect(stored).toHaveLength(1);
@@ -184,7 +185,8 @@ describe('SaveLoadPanel real interaction', () => {
             />
         );
 
-        expect(screen.getByText('Guardar')).toBeTruthy();
+        expect(screen.getAllByText('Guardar')).toHaveLength(3);
+        expect(screen.getByText('Day 2')).toBeTruthy();
         expect(screen.getByText('Before the finale')).toBeTruthy();
     });
 });

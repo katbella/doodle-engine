@@ -50,7 +50,9 @@ export function SettingsPanel({
             <h2 className="settings-title">{uiText(ui, 'ui.settings')}</h2>
 
             <div className="settings-section">
-                <h3>{uiText(ui, 'ui.audio')}</h3>
+                <h3 className="settings-section-title">
+                    {uiText(ui, 'ui.audio')}
+                </h3>
                 <VolumeSlider
                     label={uiText(ui, 'ui.volume_master')}
                     value={audio.masterVolume}
@@ -84,7 +86,9 @@ export function SettingsPanel({
                 availableLocales.length > 1 &&
                 onLocaleChange && (
                     <div className="settings-section">
-                        <h3>{uiText(ui, 'ui.language')}</h3>
+                        <h3 className="settings-section-title">
+                            {uiText(ui, 'ui.language')}
+                        </h3>
                         <select
                             className="settings-locale-select"
                             value={currentLocale}

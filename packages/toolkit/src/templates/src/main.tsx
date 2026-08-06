@@ -1,8 +1,15 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@doodle-engine/react/style.css';
 import { App } from './App';
 import './index.css';
+import { RENDERER_SCALING } from './project';
+import { enableRendererScaling } from './renderer-scale';
+
+const stopRendererScaling = enableRendererScaling(RENDERER_SCALING);
+
+if (import.meta.hot) {
+    import.meta.hot.dispose(stopRendererScaling);
+}
 
 // Register the service worker in production so the game keeps working
 // offline after the first visit. The relative path means the same build

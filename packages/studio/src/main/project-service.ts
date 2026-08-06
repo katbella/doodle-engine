@@ -11,7 +11,9 @@ import type {
     NewProjectOptions,
     OpenProject,
     RecentProject,
+    StudioThemeSwitchResult,
 } from '../shared/project';
+import type { RendererTemplate } from '@doodle-engine/toolkit';
 
 /**
  * Owns everything the main process does with a project: opening, creating,
@@ -57,7 +59,7 @@ export class ProjectService {
             title: options.title,
             subtitle: options.subtitle,
             useDefaultRenderer: options.useDefaultRenderer,
-            useStarterStyles: options.useStarterStyles,
+            rendererTemplate: options.rendererTemplate,
             contentMode: options.contentMode,
             localizationMode: options.localizationMode,
         });
@@ -108,6 +110,18 @@ export class ProjectService {
         return this.load(projectDir);
     }
 
+    async switchRendererTheme(
+        projectDir: string,
+        template: RendererTemplate
+    ): Promise<StudioThemeSwitchResult> {
+        const { switchRendererTheme } = await import('@doodle-engine/toolkit');
+        const result = await switchRendererTheme(projectDir, template);
+        return {
+            ...result,
+            project: await this.load(projectDir),
+        };
+    }
+
     listRecent(): Promise<RecentProject[]> {
         return pruneRecentProjects(this.recentFile);
     }
@@ -118,7 +132,7 @@ export class ProjectService {
 
     private async load(projectDir: string): Promise<OpenProject> {
         const pkg = await this.readProjectPackage(projectDir);
-        const { loadProject, validateContent } =
+        const { loadProject, readRendererTheme, validateContent } =
             await import('@doodle-engine/toolkit');
         const { registry, config, fileMap, parseErrors } =
             await loadProject(projectDir);
@@ -139,6 +153,7 @@ export class ProjectService {
             files: Object.fromEntries(fileMap),
             problems,
             engine: await readEngineInfo(projectDir, this.currentEngineVersion),
+            rendererTheme: await readRendererTheme(projectDir),
         };
     }
 

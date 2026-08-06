@@ -93,7 +93,12 @@ export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.skip': 'Skip',
     'ui.skip_splash': 'Skip splash screen',
     'ui.menu': 'Menu',
+    'ui.return_to_game': 'Return to game',
     'ui.add_note': 'Add Note',
+    'ui.new_note': 'New Note',
+    'ui.your_notes': 'Your Notes',
+    'ui.notes_hint':
+        'Everything you write here may be useful later. Keep what matters close.',
     'ui.note_title': 'Title',
     'ui.note_text': 'Write a note...',
     'ui.no_notes': 'No notes yet',

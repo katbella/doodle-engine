@@ -5,7 +5,6 @@
 import { useRef, useState, type SubmitEvent } from 'react';
 import type { PlayerProfileInput } from '@doodle-engine/core';
 import { DialogOverlay } from './DialogOverlay';
-import { PlayerEmblem } from './PlayerEmblem';
 import { uiText } from '../uiText';
 
 export interface PlayerSetupProps {
@@ -36,12 +35,18 @@ export function PlayerSetup({ ui, onSubmit }: PlayerSetupProps) {
             initialFocusRef={nameRef}
         >
             <form className="player-setup-form" onSubmit={submit}>
-                <PlayerEmblem className="player-setup-emblem" />
-                <h2>{uiText(ui, 'ui.create_player')}</h2>
+                <header className="player-setup-header">
+                    <h2 className="player-setup-heading">
+                        {uiText(ui, 'ui.create_player')}
+                    </h2>
+                </header>
 
-                <label>
-                    <span>{uiText(ui, 'ui.player_name')}</span>
+                <label className="player-setup-field">
+                    <span className="player-setup-label">
+                        {uiText(ui, 'ui.player_name')}
+                    </span>
                     <input
+                        className="player-setup-input doodle-field"
                         ref={nameRef}
                         value={name}
                         placeholder={uiText(ui, 'ui.player_name')}
@@ -50,26 +55,36 @@ export function PlayerSetup({ ui, onSubmit }: PlayerSetupProps) {
                     />
                 </label>
 
-                <label>
-                    <span>{uiText(ui, 'ui.player_title')}</span>
+                <label className="player-setup-field">
+                    <span className="player-setup-label">
+                        {uiText(ui, 'ui.player_title')}
+                    </span>
                     <input
+                        className="player-setup-input doodle-field"
                         value={title}
                         placeholder={uiText(ui, 'ui.player_title')}
                         onChange={(event) => setTitle(event.target.value)}
                     />
                 </label>
 
-                <label>
-                    <span>{uiText(ui, 'ui.player_biography')}</span>
+                <label className="player-setup-field">
+                    <span className="player-setup-label">
+                        {uiText(ui, 'ui.player_biography')}
+                    </span>
                     <textarea
+                        className="player-setup-textarea doodle-field"
                         value={biography}
                         placeholder={uiText(ui, 'ui.player_biography')}
                         onChange={(event) => setBiography(event.target.value)}
                     />
                 </label>
 
-                <button type="submit" disabled={!name.trim()}>
-                    {uiText(ui, 'ui.begin_adventure')}
+                <button
+                    className="player-setup-submit"
+                    type="submit"
+                    disabled={!name.trim()}
+                >
+                    <span>{uiText(ui, 'ui.begin_adventure')}</span>
                 </button>
             </form>
         </DialogOverlay>

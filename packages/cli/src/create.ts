@@ -1,5 +1,5 @@
 /**
- * doodle create
+ * doodle-engine create
  *
  * Thin wrapper over the toolkit's createProject: this file handles the
  * interactive prompts and console output. The files are written by
@@ -10,6 +10,7 @@
 import prompts from 'prompts';
 import { crayon } from 'crayon.js';
 import { createProject } from '@doodle-engine/toolkit';
+import type { RendererTemplate } from '@doodle-engine/toolkit';
 
 const paw = '🐾';
 const dog = '🐕';
@@ -124,34 +125,50 @@ export async function create(projectName: string) {
         process.exit(0);
     }
 
-    // If using the default renderer, ask about starter styles
-    let useStarterStyles = false;
+    // If using the default renderer, choose its presentation preset.
+    let rendererTemplate: RendererTemplate = 'minimal';
     if (useDefaultRenderer) {
-        const { starterStyles } = await prompts({
+        const answer = await prompts({
             type: 'select',
-            name: 'starterStyles',
-            message: 'Include starter styles?',
+            name: 'rendererTemplate',
+            message: 'Choose a renderer template',
             choices: [
                 {
-                    title: 'Yes: styled UI with dark theme and gold accents',
-                    value: true,
+                    title: 'Starter RPG',
+                    description:
+                        'Complete neutral RPG interface, ready to customize',
+                    value: 'starter-rpg',
                 },
                 {
-                    title: 'No: minimal CSS, build your own',
-                    value: false,
+                    title: 'Minimal',
+                    description:
+                        'Browser-native clean slate with modal positioning only',
+                    value: 'minimal',
+                },
+                {
+                    title: 'Prose',
+                    description:
+                        'Reading-first layout for narrative and choice games',
+                    value: 'prose',
+                },
+                {
+                    title: 'Fable',
+                    description:
+                        'Dark folktale styling with forest and parchment surfaces',
+                    value: 'fable',
                 },
             ],
             initial: 0,
         });
 
-        if (starterStyles === undefined) {
+        if (answer.rendererTemplate === undefined) {
             console.log(
                 crayon.yellow(`\n  ${bone} No worries, maybe next time! Woof!`)
             );
             process.exit(0);
         }
 
-        useStarterStyles = starterStyles;
+        rendererTemplate = answer.rendererTemplate as RendererTemplate;
     }
 
     console.log('');
@@ -164,7 +181,7 @@ export async function create(projectName: string) {
             title: title.trim(),
             subtitle: subtitle.trim(),
             useDefaultRenderer,
-            useStarterStyles,
+            rendererTemplate,
             contentMode,
             localizationMode,
         }));

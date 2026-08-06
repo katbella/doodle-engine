@@ -484,6 +484,11 @@ __metadata:
   resolution: "@doodle-engine/toolkit@workspace:packages/toolkit"
   dependencies:
     "@doodle-engine/core": "workspace:*"
+    "@fontsource-variable/cormorant-garamond": "npm:5.3.0"
+    "@fontsource-variable/eb-garamond": "npm:5.3.0"
+    "@fontsource-variable/public-sans": "npm:5.3.0"
+    "@fontsource-variable/source-serif-4": "npm:5.3.0"
+    "@fontsource/spectral": "npm:5.3.0"
     "@types/node": "npm:^24.0.0"
     "@vitejs/plugin-react": "npm:^5.2.0"
     "@vitest/coverage-v8": "npm:4.1.6"
@@ -1031,6 +1036,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/cormorant-garamond@npm:5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/cormorant-garamond@npm:5.3.0"
+  checksum: 10c0/75569c61e067777a6a8fbb557cfd5dd1d7c1719b2a9be3ddeb4c19b3df4811137423e37431cce9506dead35caf0d00a51a47f7a8e46b7178f206212c9d327af3
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/eb-garamond@npm:5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/eb-garamond@npm:5.3.0"
+  checksum: 10c0/9b309eae7d0f1def439558deebe5c9e6ddc4d30ec9db1a50e501f5f8ea3d90e77f432fcba874a9cbaf83c1a2482178eb4711bbe9936941de73bf178f5edc0f29
+  languageName: node
+  linkType: hard
+
 "@fontsource-variable/ibm-plex-sans@npm:^5.3.0":
   version: 5.3.0
   resolution: "@fontsource-variable/ibm-plex-sans@npm:5.3.0"
@@ -1038,10 +1057,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/public-sans@npm:5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/public-sans@npm:5.3.0"
+  checksum: 10c0/51c95e6f31d9ca2a11931d2c3ef5300ef303f107cef18c6cac0a0f364d9adfe81e2e4aa6e26f81206953bfe914cc06f27e839c420c965c97be4d062e0f2f01e6
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/source-serif-4@npm:5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/source-serif-4@npm:5.3.0"
+  checksum: 10c0/1cdc56fc7ba96b701c4f74d814825b346eafb9064c565d09fbdd8f319e68c64e80a3b66a324684bdef2d343429e1fd38a075382f38d946b187381b34205b427b
+  languageName: node
+  linkType: hard
+
 "@fontsource/monaspace-neon@npm:^5.3.0":
   version: 5.3.0
   resolution: "@fontsource/monaspace-neon@npm:5.3.0"
   checksum: 10c0/cf234af7771ab9047ec939cf931de29eeaf75e1e7dc451714c14cf8d041eaa97c0f548f969d68b29de80c10c42917430c128b5d5fa5b588484bc1d61b3e0b016
+  languageName: node
+  linkType: hard
+
+"@fontsource/spectral@npm:5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/spectral@npm:5.3.0"
+  checksum: 10c0/bf596cf381ff4b37a3a26fd5cbd15dafda3868bde96dd42141f4332f5b7e70cfb5b8ddb8bb5439aed56543a6cf12f7f891745048a92e916431b681c81b8bb6f0
   languageName: node
   linkType: hard
 

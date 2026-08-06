@@ -1,5 +1,5 @@
 /**
- * Asset manifest generation for doodle build.
+ * Asset manifest generation for doodle-engine build.
  *
  * Scans the content directory and game config to produce an AssetManifest
  * describing all assets, their types, tiers, and byte sizes.
@@ -14,7 +14,7 @@ import type { GameConfig } from '@doodle-engine/core';
 
 /**
  * Generate asset manifest from content registry and game config.
- * Called during `doodle build`.
+ * Called during `doodle-engine build`.
  *
  * @param assetsDir - Absolute path to the public assets directory (e.g. /project/assets)
  * @param publicDir - Absolute path to the public root (assets are served relative to this)

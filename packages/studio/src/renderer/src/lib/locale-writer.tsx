@@ -23,7 +23,7 @@ export interface LocaleFileState {
 }
 
 interface LocaleWriterValue {
-    authoringLocale: string | null;
+    primaryLocale: string | null;
     files: Record<string, LocaleFileState>;
     setValue: (locale: string, key: string, value: string) => void;
     deleteValue: (locale: string, key: string) => void;
@@ -125,7 +125,7 @@ function mergeUnsaved(
     return merged;
 }
 
-export function authoringLocaleFor(
+export function primaryLocaleFor(
     locales: Record<string, LocaleData>
 ): string | null {
     if (locales.en) return 'en';
@@ -430,7 +430,7 @@ export function LocaleWriterProvider({
 
     const value = useMemo<LocaleWriterValue>(
         () => ({
-            authoringLocale: authoringLocaleFor(project.registry.locales),
+            primaryLocale: primaryLocaleFor(project.registry.locales),
             files,
             setValue,
             deleteValue,

@@ -79,6 +79,10 @@ const project: OpenProject = {
         depsInstalled: true,
         packageManager: 'yarn',
     },
+    rendererTheme: {
+        renderer: 'default',
+        template: 'starter-rpg',
+    },
 };
 
 function installBridge({

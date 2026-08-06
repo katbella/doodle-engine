@@ -114,7 +114,9 @@ describe('built-in labels come from ui strings', () => {
                 onDelete={() => {}}
             />
         );
-        expect(html).toContain('XXui.notesXX');
+        expect(html).toContain('XXui.new_noteXX');
+        expect(html).toContain('XXui.your_notesXX');
+        expect(html).toContain('XXui.notes_hintXX');
         expect(html).toContain('XXui.note_titleXX');
         expect(html).toContain('XXui.note_textXX');
         expect(html).toContain('XXui.add_noteXX');

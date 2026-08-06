@@ -48,9 +48,7 @@ describe('CharacterSheet', () => {
         expect(screen.queryByText('Story score')).toBeNull();
         expect(screen.queryByText('4')).toBeNull();
 
-        await user.click(
-            screen.getByRole('button', { name: 'Next' })
-        );
+        await user.click(screen.getByRole('button', { name: 'Next' }));
         expect(onNext).toHaveBeenCalledOnce();
     });
 });
@@ -133,7 +131,7 @@ describe('GameRenderer party panel', () => {
         expect(screen.getByRole('heading', { name: 'Avery' })).toBeTruthy();
 
         await user.click(
-            screen.getByRole('button', { name: 'Next' })
+            screen.getByRole('button', { name: 'Elisa, Scout' })
         );
         expect(screen.getByRole('heading', { name: 'Elisa' })).toBeTruthy();
         expect(actions.talkTo).not.toHaveBeenCalled();
