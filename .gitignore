@@ -9,6 +9,7 @@ coverage
 design-docs/
 docs/.astro/
 docs/.yarn/
+.vscode
 .yarn/*
 !.yarn/patches
 !.yarn/plugins

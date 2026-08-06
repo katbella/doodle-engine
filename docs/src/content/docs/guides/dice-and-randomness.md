@@ -3,13 +3,13 @@ title: Dice & Randomness
 description: Add skill checks, random outcomes, and variable interpolation to your dialogues.
 ---
 
-Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random integer between `min` and `max` (inclusive). Which one you want depends on a single question: does anyone need to see the number? `ROLL` stores the result in a variable you can display and reuse. The `roll` condition just passes or fails.
+Doodle Engine has two ways to roll dice: the `ROLL` effect and the `roll` condition. Both roll a random whole number between `min` and `max` (inclusive). `min` and `max` must be whole numbers, and `min` cannot be greater than `max`. Which one you want depends on a single question: does anyone need to see the number? `ROLL` stores the result in a variable you can display and reuse. The `roll` condition just passes or fails.
 
 The examples are dialogue script; [Writing Dialogues](/guides/writing-dialogues/) covers the basics, and silent processing nodes from that guide do the heavy lifting here.
 
 ## ROLL effect
 
-`ROLL <variable> <min> <max>`: rolls a random integer and stores it in a variable. Use this when you need to:
+`ROLL <variable> <min> <max>`: rolls a random whole number and stores it in a variable. Use this when you need to:
 
 - Display the result to the player
 - Branch on the result in multiple places
@@ -24,7 +24,7 @@ When the dialogue appears, the `{bluffRoll}` placeholder is replaced with the va
 
 ## roll condition
 
-`roll <min> <max> <threshold>` rolls a random integer and returns true when the result is greater than or equal to the threshold. It returns only true or false, making it useful for hidden checks in `IF` blocks or triggered content.
+`roll <min> <max> <threshold>` rolls a random whole number and returns true when the result is greater than or equal to the threshold. It returns only true or false, making it useful for hidden checks in `IF` blocks or triggered content.
 
 ```text
 IF roll 1 20 15

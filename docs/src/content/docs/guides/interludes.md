@@ -37,7 +37,7 @@ interlude.chapter_one.text: |
     The road behind you stretches long and empty.
     Ahead, the lights of town flicker through the evening mist.
 
-    You have heard the rumours. Strange things happening.
+    You have heard the rumors. Strange things happening.
     People going missing. Shadows that move wrong.
 
     Someone has to look into it.

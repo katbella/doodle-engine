@@ -503,6 +503,35 @@ describe('validateContent', () => {
         );
     });
 
+    it('requires roll bounds to be ordered whole numbers', () => {
+        const dialogue = makeDialogue([
+            {
+                type: 'roll',
+                variable: 'result',
+                min: 20,
+                max: 1,
+            },
+        ]);
+        dialogue.nodes[0].conditions = [
+            {
+                type: 'roll',
+                min: 1.5,
+                max: 20,
+                threshold: 10,
+            },
+        ];
+        const registry = makeRegistry({
+            dialogues: { test_dialogue: dialogue },
+        });
+
+        expect(messages(registry)).toContain(
+            'Node "start" condition "roll" argument "min" must be a whole number'
+        );
+        expect(messages(registry)).toContain(
+            'Node "start" effect "roll" minimum must be less than or equal to its maximum'
+        );
+    });
+
     it('validates stat names used in conditions and effects', () => {
         const dialogue = makeDialogue([
             {

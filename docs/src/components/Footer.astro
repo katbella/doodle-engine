@@ -1,18 +1,13 @@
 ---
 import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
 
-const creatorUrl = 'https://katbella.com';
 const reportingUrl = '/reference/reporting-issues/';
 const starlightUrl = 'https://starlight.astro.build';
 ---
 
 <DefaultFooter />
 <div class="project-footer">
-    <a href={creatorUrl} target="_blank" rel="noopener noreferrer">
-        Created by Kat Bella
-    </a>
-    <span aria-hidden="true">&bull;</span>
-    <a href={reportingUrl}>Having issues? Get help or report a problem</a>
+    <a href={reportingUrl}>Get help, give feedback, or report a problem.</a>
     <span aria-hidden="true">&bull;</span>
     <a href={starlightUrl} target="_blank" rel="noopener noreferrer">
         Docs built with Starlight

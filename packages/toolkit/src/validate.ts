@@ -1109,6 +1109,52 @@ function validateNumberArgs(
     }
 }
 
+/**
+ * The roll formula requires ordered whole-number bounds.
+ * Without this check, fractional bounds can produce a value above max and a
+ * reversed range produces results unrelated to the authored range.
+ */
+function validateRollBounds(
+    entity: any,
+    site: string,
+    label: string,
+    file: string,
+    errors: ValidationError[]
+): void {
+    if (entity.type !== 'roll') return;
+
+    const { min, max } = entity;
+    if (
+        typeof min !== 'number' ||
+        !Number.isFinite(min) ||
+        typeof max !== 'number' ||
+        !Number.isFinite(max)
+    ) {
+        return;
+    }
+
+    for (const [field, value] of [
+        ['min', min],
+        ['max', max],
+    ] as const) {
+        if (!Number.isInteger(value)) {
+            errors.push({
+                file,
+                message: `${site} ${label} "roll" argument "${field}" must be a whole number`,
+                suggestion: `Give "${field}" a whole number, like 1 or 20`,
+            });
+        }
+    }
+
+    if (min > max) {
+        errors.push({
+            file,
+            message: `${site} ${label} "roll" minimum must be less than or equal to its maximum`,
+            suggestion: 'Put the lower roll bound before the upper bound',
+        });
+    }
+}
+
 const IDENTIFIER_ARGUMENT_KINDS = new Set([
     'flag',
     'variable',
@@ -1228,6 +1274,7 @@ function validateCondition(
         file,
         errors
     );
+    validateRollBounds(condition, site, 'condition', file, errors);
     validateIdentifierArgs(
         condition,
         conditionDescriptor(condition.type).args,
@@ -1286,6 +1333,7 @@ function validateEffect(
         file,
         errors
     );
+    validateRollBounds(effect, site, 'effect', file, errors);
     validateIdentifierArgs(
         effect,
         effectDescriptor(effect.type).args,
