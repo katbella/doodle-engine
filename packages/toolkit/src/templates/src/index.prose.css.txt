@@ -239,9 +239,7 @@ button { font-family: inherit; }
     border: none;
     border-bottom: 1px solid var(--doodle-border-color);
 }
-.location-view.is-overlay,
-.location-view.is-band,
-.location-view.is-split { display: block; }
+.location-view.is-overlay { display: block; }
 
 .location-banner,
 .location-banner-image,
@@ -256,15 +254,12 @@ button { font-family: inherit; }
     gap: 14px;
     padding: 56px 72px 44px;
 }
-.is-band > .location-content { flex-direction: row; align-items: baseline; gap: 40px; padding: 44px 72px 40px; }
-.is-split > .location-content { max-width: 900px; }
 
 .location-name {
     font: 300 52px/1.2 var(--doodle-font-display);
     letter-spacing: -0.02em;
     color: var(--doodle-text-primary);
 }
-.is-band .location-name { flex: none; font-size: 40px; }
 
 .location-description {
     max-width: var(--doodle-measure);
@@ -272,7 +267,6 @@ button { font-family: inherit; }
     color: var(--doodle-text-muted);
     text-wrap: pretty;
 }
-.is-band .location-description { flex: 1; }
 
 /* ── Dialogue ─────────────────────────────────────────────────────── */
 

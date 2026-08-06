@@ -302,9 +302,7 @@ button { font-family: inherit; }
 }
 /* The banner is an empty art slot: drop a background-image on it (or unhide
    .location-banner-image) and every layout works unchanged. */
-.location-view.is-overlay,
-.location-view.is-band { display: flex; flex-direction: column; height: 396px; }
-.location-view.is-split { display: flex; height: 340px; }
+.location-view.is-overlay { display: flex; flex-direction: column; height: 396px; }
 
 .location-banner {
     position: relative;
@@ -312,9 +310,7 @@ button { font-family: inherit; }
     background: var(--doodle-bg-sunken);
     border-bottom: 1px solid var(--doodle-border-color);
 }
-.is-overlay > .location-banner,
-.is-band > .location-banner { flex: 1; min-height: 0; }
-.is-split > .location-banner { flex: 1; border-bottom: none; border-left: 1px solid var(--doodle-border-color); }
+.is-overlay > .location-banner { flex: 1; min-height: 0; }
 
 .location-banner::after {
     content: 'location art';
@@ -342,15 +338,10 @@ button { font-family: inherit; }
     padding: 22px 32px 24px;
     background: var(--doodle-bg-secondary);
 }
-.is-band > .location-content { flex-direction: row; align-items: baseline; gap: 28px; }
-.is-split > .location-content { width: 400px; padding: 30px 32px; }
 
 .location-name { font: 600 34px/1.15 var(--doodle-font-display); letter-spacing: -0.02em; color: var(--doodle-text-primary); }
-.is-band .location-name { flex: none; }
-.is-split .location-name { font-size: 38px; }
 
 .location-description { max-width: 900px; font: 400 18px/1.6 var(--doodle-font-prose); color: var(--doodle-text-secondary); text-wrap: pretty; }
-.is-band .location-description { flex: 1; }
 
 /* ── Dialogue ─────────────────────────────────────────────────────── */
 

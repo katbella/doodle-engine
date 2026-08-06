@@ -156,32 +156,29 @@ export function MapView({
                             pendingTravel.locationName
                         )}
                     </h3>
-                    <p className="travel-confirm-time">
-                        {pendingTravel.hours === 1
-                            ? t('ui.travel_time_one')
-                            : t('ui.travel_time').replace(
-                                  '{hours}',
-                                  String(pendingTravel.hours)
-                              )}
+                    <div className="travel-confirm-meta">
+                        <p className="travel-confirm-time">
+                            {pendingTravel.hours === 1
+                                ? t('ui.travel_time_one')
+                                : t('ui.travel_time').replace(
+                                      '{hours}',
+                                      String(pendingTravel.hours)
+                                  )}
+                        </p>
                         {pendingTravel.arrival && (
-                            <>
-                                <br />
-                                <span className="travel-confirm-arrival">
-                                    {t('ui.arrive')
-                                        .replace(
-                                            '{day}',
-                                            String(pendingTravel.arrival.day)
-                                        )
-                                        .replace(
-                                            '{time}',
-                                            formatHour(
-                                                pendingTravel.arrival.hour
-                                            )
-                                        )}
-                                </span>
-                            </>
+                            <p className="travel-confirm-arrival">
+                                {t('ui.arrive')
+                                    .replace(
+                                        '{day}',
+                                        String(pendingTravel.arrival.day)
+                                    )
+                                    .replace(
+                                        '{time}',
+                                        formatHour(pendingTravel.arrival.hour)
+                                    )}
+                            </p>
                         )}
-                    </p>
+                    </div>
                     <div className="travel-confirm-buttons">
                         <button
                             className="travel-confirm-cancel"

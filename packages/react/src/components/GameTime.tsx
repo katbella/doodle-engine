@@ -53,7 +53,10 @@ export function GameTime({
 
     return (
         <div className={`game-time ${className}`}>
-            <span className="game-time-display">{display}</span>
+            <div className="game-time-display">{display}</div>
+            {format === 'narrative' && (
+                <div className="game-time-clock">{formatHour(time.hour)}</div>
+            )}
         </div>
     );
 }

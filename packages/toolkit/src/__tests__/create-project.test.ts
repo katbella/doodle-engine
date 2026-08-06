@@ -26,7 +26,7 @@ afterEach(async () => {
 
 describe('createProject language setup', () => {
     it.each([
-        ['minimal', 'Browser-native presentation', false, []],
+        ['minimal', '/* Minimal', false, []],
         [
             'starter-rpg',
             '/* Starter RPG',

@@ -39,7 +39,6 @@
 
 /* ── Dialog positioning ─────────────────────────────────────────── */
 
-.item-modal-overlay,
 .travel-confirm-overlay,
 .player-setup-overlay,
 .pause-menu-overlay {
@@ -128,6 +127,7 @@
 .save-slot-thumbnail-empty,
 .save-slot-kind-empty,
 .save-slot-empty-action,
+.character-list-icon,
 .character-speaking-mark {
     display: none;
 }

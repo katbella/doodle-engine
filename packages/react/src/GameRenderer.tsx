@@ -95,9 +95,10 @@ function GameMenuButton({
 }) {
     return (
         <button
-            className={`game-menu-button ${className} ${active ? 'active is-active' : ''}`}
+            className={`game-menu-button doodle-tooltip ${className} ${active ? 'active is-active' : ''}`}
             onClick={onClick}
-            title={label}
+            data-tip={label}
+            aria-label={label}
             aria-pressed={active}
         >
             <span
@@ -229,7 +230,7 @@ function GameRendererInner({
 
                     <div className="game-layout">
                         <nav
-                            className="game-menu"
+                            className="game-menu doodle-leather"
                             aria-label={uiText(snapshot.ui, 'ui.menu')}
                         >
                             {activePanel && (
@@ -346,7 +347,7 @@ function GameRendererInner({
                             />
                         </main>
 
-                        <aside className="game-status">
+                        <aside className="game-status doodle-leather">
                             <GameTime
                                 ui={snapshot.ui}
                                 time={snapshot.time}

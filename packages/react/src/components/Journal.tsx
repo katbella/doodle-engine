@@ -19,7 +19,7 @@ export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
             <h2 className="journal-title">{uiText(ui, 'ui.journal')}</h2>
 
             {quests.length > 0 && (
-                <div className="journal-quests">
+                <div className="journal-quests doodle-scroll doodle-scroll-parchment">
                     <h3 className="doodle-section-label">
                         {uiText(ui, 'ui.active_quests')}
                     </h3>
@@ -38,7 +38,7 @@ export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
             )}
 
             {entries.length > 0 && (
-                <div className="journal-entries">
+                <div className="journal-entries doodle-scroll doodle-scroll-parchment">
                     <h3 className="doodle-section-label">
                         {uiText(ui, 'ui.entries')}
                     </h3>

@@ -31,11 +31,14 @@ export function CharacterList({
                 {uiText(ui, 'ui.characters')}
             </h2>
             <span
-                className="character-list-icon"
+                className="character-list-icon doodle-tooltip"
+                data-tip={uiText(ui, 'ui.characters')}
                 title={uiText(ui, 'ui.characters')}
                 aria-hidden="true"
             >
-                ◱
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M4 5.5h16v9H12l-4.5 4v-4H4z" />
+                </svg>
             </span>
             <div className="character-grid">
                 {characters.map((character) => {

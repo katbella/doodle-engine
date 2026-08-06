@@ -2,22 +2,14 @@
 
 /* ── Shared control states ───────────────────────────────────────── */
 
-/* The supplied exports use divs for most text. Reset equivalent semantic
-   elements so React headings, paragraphs, and lists keep the same geometry. */
-.game-shell h1,
-.game-shell h2,
-.game-shell h3,
-.game-shell h4,
-.game-shell p,
-.game-shell dl,
-.game-shell dd,
-.game-shell ul,
-.game-shell ol {
+/* Browsers add their own margins to headings, paragraphs and lists. Clear them
+   so each theme sets its own spacing. :where() keeps this at zero specificity,
+   so a theme rule like .title-subtitle { margin-top: 24px } still wins. */
+:where(.game-shell) :where(h1, h2, h3, h4, h5, h6, p, dl, dd, ul, ol, figure) {
     margin: 0;
 }
 
-.game-shell ul,
-.game-shell ol {
+:where(.game-shell) :where(ul, ol) {
     padding: 0;
 }
 
@@ -45,11 +37,21 @@ textarea:disabled {
     stroke-linejoin: round;
 }
 
+.character-list-icon svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .panel-close:focus-visible,
 .settings-back-button:focus-visible,
 .load-button:focus-visible,
 .delete-button:focus-visible,
-.item-modal-close:focus-visible,
 .player-notes-add-button:focus-visible,
 .player-note-delete:focus-visible,
 .travel-confirm-cancel:focus-visible,
@@ -289,6 +291,12 @@ textarea:disabled {
 
 .choice-button-number {
     min-width: 1.5em;
+}
+
+.choice-list:not(:has(.choice-button)) {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
 }
 
 .character-speaking-mark svg {
@@ -557,8 +565,7 @@ textarea:disabled {
 }
 
 .settings-back-button,
-.delete-button,
-.item-modal-close {
+.delete-button {
     border: 1px solid var(--doodle-border-color);
     background: transparent;
     color: inherit;

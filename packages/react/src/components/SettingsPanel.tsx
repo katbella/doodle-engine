@@ -46,7 +46,7 @@ export function SettingsPanel({
     className = '',
 }: SettingsPanelProps) {
     return (
-        <div className={`settings-panel ${className}`}>
+        <div className={`settings-panel doodle-scroll ${className}`}>
             <h2 className="settings-title">{uiText(ui, 'ui.settings')}</h2>
 
             <div className="settings-section">
@@ -131,6 +131,7 @@ function VolumeSlider({
                 onChange={(e) => onChange(parseFloat(e.target.value))}
                 className="volume-input"
             />
+            <span className="volume-value">{Math.round(value * 100)}</span>
         </div>
     );
 }

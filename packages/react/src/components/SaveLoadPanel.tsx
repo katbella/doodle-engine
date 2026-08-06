@@ -89,7 +89,7 @@ export function SaveLoadPanel({
 
     return (
         <div className={`save-load-panel ${className}`}>
-            <ul className="save-slot-list">
+            <ul className="save-slot-list doodle-scroll">
                 {slots.length === 0 && (
                     <li className="save-load-empty">
                         {uiText(ui, 'ui.no_saves')}

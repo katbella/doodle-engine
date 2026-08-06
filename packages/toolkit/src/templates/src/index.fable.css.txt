@@ -312,16 +312,12 @@ button { font-family: inherit; }
     border: 1px solid var(--doodle-border-color);
 }
 .location-view.is-overlay { position: relative; height: 420px; overflow: hidden; }
-.location-view.is-band { display: flex; flex-direction: column; height: 408px; }
-.location-view.is-split { display: flex; height: 362px; }
 
 .location-banner {
     overflow: hidden;
     background: radial-gradient(120% 130% at 58% 4%, #26302a 0%, #171e19 76%);
 }
 .is-overlay > .location-banner { position: absolute; inset: 0; }
-.is-band > .location-banner { position: relative; flex: 1; min-height: 0; }
-.is-split > .location-banner { position: relative; flex: 1; border-left: 1px solid var(--doodle-border-color); }
 
 .location-banner-image {
     position: absolute;
@@ -338,7 +334,6 @@ button { font-family: inherit; }
     z-index: 2;
     pointer-events: none;
 }
-.is-split .location-banner-vignette { box-shadow: inset 0 0 70px 20px rgba(15, 19, 16, 0.62); }
 .location-banner-scrim {
     position: absolute;
     left: 0;
@@ -371,25 +366,9 @@ button { font-family: inherit; }
     align-items: flex-start;
     gap: 9px;
 }
-.is-band > .location-content {
-    flex: none;
-    align-items: baseline;
-    gap: 24px;
-    padding: 22px 36px 24px;
-    border-top: 1px solid var(--doodle-border-color);
-    background: rgba(255, 255, 255, 0.022);
-}
-.is-split > .location-content {
-    width: 380px;
-    flex: none;
-    padding: 32px 30px 28px;
-    flex-direction: column;
-}
 
 .location-name { font: 500 66px/1.12 var(--doodle-font-display); color: var(--doodle-text-primary); }
 .is-overlay .location-name { text-shadow: 0 2px 26px rgba(0, 0, 0, 0.85); }
-.is-band .location-name { flex: none; font-size: 44px; }
-.is-split .location-name { font-size: 52px; }
 
 .location-description {
     font: 400 21px/1.55 var(--doodle-font-prose);
@@ -401,8 +380,6 @@ button { font-family: inherit; }
     color: #d8d1c0;
     text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
 }
-.is-band .location-description { flex: 1; }
-.is-split .location-description { margin-top: 13px; }
 
 /* ── Dialogue ─────────────────────────────────────────────────────── */
 
