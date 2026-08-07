@@ -87,7 +87,7 @@ function ShellPanel({
                     onClick={onDismiss}
                     aria-label={closeLabel}
                 >
-                    <span aria-hidden="true">×</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
             </header>
             <div className="panel-body">{children}</div>

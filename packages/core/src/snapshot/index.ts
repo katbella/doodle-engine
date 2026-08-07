@@ -92,6 +92,7 @@ export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.delete': 'Delete',
     'ui.skip': 'Skip',
     'ui.skip_splash': 'Skip splash screen',
+    'ui.idle_hint': 'What do you do next?',
     'ui.menu': 'Menu',
     'ui.return_to_game': 'Return to game',
     'ui.add_note': 'Add Note',

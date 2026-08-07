@@ -2,8 +2,11 @@
  * CharacterList - Displays characters at current location
  */
 
+import { useState, useEffect } from 'react';
 import type { SnapshotCharacter } from '@doodle-engine/core';
 import { uiText } from '../uiText';
+
+const PAGE_SIZE = 3;
 
 export interface CharacterListProps {
     characters: SnapshotCharacter[];
@@ -22,6 +25,17 @@ export function CharacterList({
     activeCharacterId,
     className = '',
 }: CharacterListProps) {
+    const [page, setPage] = useState(0);
+    const pageCount = Math.max(1, Math.ceil(characters.length / PAGE_SIZE));
+
+    useEffect(() => {
+        setPage(0);
+    }, [characters.length]);
+
+    const hasPrev = page > 0;
+    const hasNext = page < pageCount - 1;
+    const visible = characters.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
     return (
         <section
             className={`character-list ${className}`}
@@ -41,7 +55,7 @@ export function CharacterList({
                 </svg>
             </span>
             <div className="character-grid">
-                {characters.map((character) => {
+                {visible.map((character) => {
                     const isSpeaking = character.id === activeCharacterId;
                     return (
                         <button
@@ -83,6 +97,34 @@ export function CharacterList({
                     );
                 })}
             </div>
+            {pageCount > 1 && (
+                <div className="character-list-pager">
+                    {hasPrev && (
+                        <button
+                            className="character-list-pager-button"
+                            onClick={() => setPage(page - 1)}
+                            title={uiText(ui, 'ui.previous_character')}
+                            aria-label={uiText(ui, 'ui.previous_character')}
+                        >
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </button>
+                    )}
+                    {hasNext && (
+                        <button
+                            className="character-list-pager-button"
+                            onClick={() => setPage(page + 1)}
+                            title={uiText(ui, 'ui.next_character')}
+                            aria-label={uiText(ui, 'ui.next_character')}
+                        >
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+            )}
         </section>
     );
 }

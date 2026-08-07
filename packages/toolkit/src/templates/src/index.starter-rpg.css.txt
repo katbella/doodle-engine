@@ -380,13 +380,6 @@ button { font-family: inherit; }
 
 .dialogue-text { font: 400 20px/1.65 var(--doodle-font-prose); color: var(--doodle-text-primary); text-wrap: pretty; }
 .dialogue-speaker { font-weight: 500; color: var(--doodle-accent); }
-.dialogue-paragraph {
-    margin-top: 18px;
-    font: 400 20px/1.65 var(--doodle-font-prose);
-    color: var(--doodle-text-primary);
-    text-wrap: pretty;
-}
-
 .dialogue-idle {
     flex: 1;
     display: flex;
@@ -396,9 +389,6 @@ button { font-family: inherit; }
     gap: 8px;
     padding: 30px;
 }
-.dialogue-idle-line { font: 400 20px/1.6 var(--doodle-font-prose); color: var(--doodle-text-muted); text-align: center; }
-.dialogue-idle-hint { font: 400 16px var(--doodle-font-ui); color: var(--doodle-text-faint); }
-
 /* ── Choices ──────────────────────────────────────────────────────── */
 
 .choice-list {
@@ -716,7 +706,6 @@ button { font-family: inherit; }
 .resources-list { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
 
 .resource-entry { display: flex; align-items: center; gap: 10px; }
-.resource-icon { display: none; }
 .resource-name { flex: 1; font: 400 17px var(--doodle-font-ui); color: var(--doodle-text-secondary); }
 .resource-value { font: 400 18px var(--doodle-font-ui); color: var(--doodle-text-primary); }
 
@@ -800,16 +789,20 @@ button { font-family: inherit; }
 }
 .panel-close {
     flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 40px;
     height: 40px;
+    padding: 0;
     background: transparent;
     border: 1px solid var(--doodle-border-color);
     border-radius: var(--doodle-radius-sm);
     color: var(--doodle-text-muted);
     cursor: pointer;
-    font-size: 16px;
     transition: color 0.16s, border-color 0.16s, background 0.16s;
 }
+.panel-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
 .panel-close:hover { color: var(--doodle-text-primary); background: var(--doodle-bg-tertiary); }
 
 .panel-parchment-body { flex: 1; min-height: 0; padding: 20px; }
@@ -892,8 +885,6 @@ button { font-family: inherit; }
     color: var(--doodle-accent);
     text-wrap: pretty;
 }
-.journal-aside { margin-top: 28px; font: 400 17px/1.6 var(--doodle-font-ui); color: var(--doodle-parchment-quiet); text-wrap: pretty; }
-
 .journal-entries { flex: 1; min-width: 0; padding: 40px 42px; overflow: hidden auto; }
 .journal-entry-list { margin-top: 10px; display: flex; flex-direction: column; gap: 0; }
 .journal-entry { border-top: 1px solid var(--doodle-parchment-rule); padding: 22px 0; }
@@ -959,9 +950,7 @@ button { font-family: inherit; }
 /* ── Map ──────────────────────────────────────────────────────────── */
 
 .map-container { position: relative; height: 100%; overflow: hidden; background: var(--doodle-bg-tertiary); }
-.map-legend { position: absolute; left: 40px; top: 36px; z-index: 3; }
 .map-view > .map-title { left: 40px; top: 36px; margin: 0; font: 600 30px/1.2 var(--doodle-font-display); letter-spacing: -0.025em; color: var(--doodle-parchment-ink); }
-.map-note { position: absolute; right: 42px; bottom: 36px; z-index: 3; text-align: right; font: 400 16px/1.55 var(--doodle-font-ui); color: var(--doodle-text-muted); }
 
 .map-location-button {
     position: absolute;
@@ -1193,15 +1182,6 @@ button { font-family: inherit; }
 .title-button.is-primary:hover .title-button-label { color: #fff; }
 
 .title-build { position: absolute; left: 84px; bottom: 32px; z-index: 3; display: block; font: 400 13px var(--doodle-font-mono); color: var(--doodle-text-faint); }
-.title-epigraph {
-    position: absolute;
-    right: 0;
-    bottom: 32px;
-    z-index: 3;
-    display: none;
-}
-.title-epigraph-source { display: none; }
-
 /* ── Interlude ────────────────────────────────────────────────────── */
 
 .interlude-overlay {

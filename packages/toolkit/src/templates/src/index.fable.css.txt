@@ -438,14 +438,6 @@ button { font-family: inherit; }
     position: relative;
 }
 .dialogue-speaker { color: var(--doodle-accent); }
-.dialogue-paragraph {
-    max-width: 1136px;
-    margin-top: 18px;
-    font: 400 21px/1.6 var(--doodle-font-prose);
-    color: var(--doodle-text-primary);
-    text-wrap: pretty;
-}
-
 .dialogue-idle {
     flex: 1;
     display: flex;
@@ -455,13 +447,6 @@ button { font-family: inherit; }
     gap: 9px;
     padding: 30px;
 }
-.dialogue-idle-line {
-    font: italic 400 21px/1.6 var(--doodle-font-prose);
-    color: var(--doodle-text-muted);
-    text-align: center;
-}
-.dialogue-idle-hint { font: 400 18px var(--doodle-font-ui); color: #5e5849; }
-
 /* ── Choices ──────────────────────────────────────────────────────── */
 
 .choice-list {
@@ -828,17 +813,6 @@ button { font-family: inherit; }
     padding-bottom: 12px;
     border-bottom: 1px solid rgba(59, 71, 62, 0.7);
 }
-.resource-icon {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 33px;
-    height: 33px;
-    border: 1px solid var(--doodle-gold-dim);
-    background: rgba(201, 168, 76, 0.09);
-    color: var(--doodle-gold);
-}
 .resource-name { flex: 1; font: 400 20px var(--doodle-font-ui); color: var(--doodle-text-heading); }
 .resource-value {
     font: 400 19px var(--doodle-font-ui);
@@ -930,15 +904,19 @@ button { font-family: inherit; }
 }
 .panel-close {
     flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 44px;
     height: 44px;
+    padding: 0;
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--doodle-border-color);
     color: var(--doodle-text-muted);
     cursor: pointer;
-    font-size: 18px;
     transition: color 0.16s, border-color 0.16s;
 }
+.panel-close svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; fill: none; }
 .panel-close:hover { color: var(--doodle-accent-bright); border-color: var(--doodle-accent-dim); }
 
 .panel-parchment-body { flex: 1; min-height: 0; padding: 22px; }
@@ -1055,13 +1033,6 @@ button { font-family: inherit; }
     color: var(--doodle-parchment-accent);
     text-wrap: pretty;
 }
-.journal-aside {
-    margin-top: 30px;
-    font: italic 400 19px/1.6 var(--doodle-font-ui);
-    color: var(--doodle-parchment-quiet);
-    text-wrap: pretty;
-}
-
 .journal-entries { flex: 1; min-width: 0; padding: 44px 46px; overflow: hidden auto; }
 .journal-entry-list { margin-top: 10px; display: flex; flex-direction: column; gap: 0; }
 .journal-entry { border-top: 1px solid var(--doodle-parchment-rule); padding: 24px 0; }
@@ -1166,17 +1137,7 @@ button { font-family: inherit; }
 /* ── Map ──────────────────────────────────────────────────────────── */
 
 .map-container { position: relative; height: 100%; overflow: hidden; }
-.map-legend { position: absolute; left: 46px; top: 40px; z-index: 3; }
 .map-view > .map-title { left: 46px; top: 40px; margin: 0; font: 500 44px/1.16 var(--doodle-font-display); color: var(--doodle-parchment-ink); }
-.map-note {
-    position: absolute;
-    right: 48px;
-    bottom: 40px;
-    z-index: 3;
-    text-align: right;
-    font: italic 400 19px/1.55 var(--doodle-font-ui);
-    color: var(--doodle-parchment-quiet);
-}
 
 .map-location-button {
     position: absolute;
@@ -1527,23 +1488,6 @@ button { font-family: inherit; }
     letter-spacing: 0.09em;
     color: var(--doodle-text-faint);
 }
-.title-epigraph {
-    position: absolute;
-    right: 44px;
-    bottom: 36px;
-    z-index: 3;
-    max-width: 440px;
-    text-align: right;
-    font: italic 400 19px/1.55 var(--doodle-font-ui);
-    color: #74705e;
-}
-.title-epigraph-source {
-    font-style: normal;
-    font-size: 16px;
-    letter-spacing: 0.08em;
-    color: #55503f;
-}
-
 /* ── Interlude ────────────────────────────────────────────────────── */
 
 .interlude-overlay {
@@ -1683,8 +1627,7 @@ button { font-family: inherit; }
 
 /* ── Compact menu labels ─────────────────────────────────────────── */
 
-.game-menu-label,
-.game-shell-menu-label {
+.game-menu-label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1696,7 +1639,3 @@ button { font-family: inherit; }
     border: 0;
 }
 
-.game-shell > .game-shell-menu-button {
-    justify-content: center;
-    padding-inline: 0;
-}
