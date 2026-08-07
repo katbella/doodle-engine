@@ -28,6 +28,8 @@ export interface TitleScreenProps {
     title?: string;
     /** Subtitle text */
     subtitle?: string;
+    /** Studio or author name shown above the title when no logo is set */
+    author?: string;
     /** CSS class */
     className?: string;
 }
@@ -42,10 +44,12 @@ export function TitleScreen({
     onCredits,
     title = 'Doodle Engine',
     subtitle,
+    author,
     className = '',
 }: TitleScreenProps) {
     const displayLogo = shell?.logo;
     const background = shell?.background;
+    const showEngineTag = shell?.showEngineTag !== false;
     const bgStyle = screenBackgroundStyle(background ?? '');
     const menuItems = [
         {
@@ -95,11 +99,11 @@ export function TitleScreen({
                 {displayLogo && (
                     <img src={displayLogo} alt={title} className="title-logo" />
                 )}
-                {!displayLogo && (
+                {!displayLogo && author && (
                     <div className="title-eyebrow" aria-hidden="true">
                         <span className="title-eyebrow-rule" />
                         <span className="title-eyebrow-text">
-                            Doodle Engine
+                            {author}
                         </span>
                     </div>
                 )}
@@ -120,7 +124,11 @@ export function TitleScreen({
                 </div>
             </div>
 
-            <div className="title-build">Doodle Engine</div>
+            {showEngineTag && (
+                <div className="title-build">
+                    {uiText(ui, 'ui.made_with_doodle_engine')}
+                </div>
+            )}
         </div>
     );
 }

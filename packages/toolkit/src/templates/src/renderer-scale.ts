@@ -55,6 +55,7 @@ export function enableRendererScaling({
         childList: true,
         subtree: true,
     });
+
     window.addEventListener('resize', schedule);
     schedule();
 

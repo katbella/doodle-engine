@@ -474,6 +474,7 @@ function GameShellInner({
                         shell={shell?.title}
                         title={title}
                         subtitle={subtitle}
+                        author={config.author}
                         hasSaveData={hasSaveData}
                         onNewGame={handleNewGame}
                         onContinue={handleContinue}
@@ -645,6 +646,7 @@ function GameShellPlaying({
                 projectId={projectId}
                 onButtonClick={uiSoundControls?.playClick}
                 onOpenMenu={onPause}
+                onCancelSetup={onQuitToTitle}
             />
 
             {showPauseMenu && (

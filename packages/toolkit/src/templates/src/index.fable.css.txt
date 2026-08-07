@@ -1087,13 +1087,6 @@ button { font-family: inherit; }
     border-color: var(--doodle-parchment-accent);
     color: #6e3418;
 }
-.player-notes-aside {
-    margin-top: auto;
-    font: italic 400 19px/1.6 var(--doodle-font-ui);
-    color: var(--doodle-parchment-quiet);
-    text-wrap: pretty;
-}
-
 .player-notes-list-column { flex: 1; min-width: 0; padding: 44px 46px; overflow: hidden auto; }
 .player-notes-empty {
     text-align: center;
@@ -1249,7 +1242,7 @@ button { font-family: inherit; }
     align-items: center;
     gap: 28px;
     border-top: 1px solid rgba(59, 71, 62, 0.7);
-    padding: 24px 3px;
+    padding: 24px 18px;
 }
 .save-slot-thumbnail {
     width: 182px;
@@ -1388,6 +1381,9 @@ button { font-family: inherit; }
     position: absolute;
     inset: 0;
     background: radial-gradient(125% 120% at 62% 12%, #232b25 0%, #181f1a 58%, #131813 100%);
+    background-size: var(--doodle-title-bg-size, cover);
+    background-repeat: no-repeat;
+    background-position: var(--doodle-title-bg-position, right center);
 }
 .title-art-placeholder {
     position: absolute;

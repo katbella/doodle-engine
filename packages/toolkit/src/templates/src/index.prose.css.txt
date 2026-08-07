@@ -825,7 +825,6 @@ button { font-family: inherit; }
     transition: color 0.16s, border-color 0.16s;
 }
 .player-notes-add-button:hover { color: var(--doodle-accent-bright); border-bottom-color: var(--doodle-accent); }
-.player-notes-aside { margin-top: auto; font: italic 300 19px/1.7 var(--doodle-font-prose); color: var(--doodle-text-faint); text-wrap: pretty; }
 
 .player-notes-list-column { flex: 1; min-width: 0; padding: 56px 64px; overflow: hidden auto; }
 .player-notes-empty { padding: 80px 0; color: var(--doodle-text-faint); font: italic 300 21px var(--doodle-font-prose); }
@@ -922,7 +921,7 @@ button { font-family: inherit; }
 /* ── Save / Load ──────────────────────────────────────────────────── */
 
 .save-slot-list { flex: 1; min-height: 0; padding: 28px 72px 56px; overflow: hidden auto; display: flex; flex-direction: column; gap: 0; }
-.save-slot { display: flex; align-items: baseline; gap: 32px; border-bottom: 1px solid var(--doodle-border-soft); padding: 28px 2px; }
+.save-slot { display: flex; align-items: baseline; gap: 32px; border-bottom: 1px solid var(--doodle-border-soft); padding: 28px 18px; }
 .save-slot-thumbnail,
 .save-slot-thumbnail-empty { display: none; }
 .save-slot-kind {
@@ -1026,7 +1025,14 @@ button { font-family: inherit; }
     display: flex;
     animation: doodle-fade 0.6s;
 }
-.title-backdrop { position: absolute; inset: 0; background: var(--doodle-bg-secondary); }
+.title-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--doodle-bg-secondary);
+    background-size: var(--doodle-title-bg-size, cover);
+    background-repeat: no-repeat;
+    background-position: var(--doodle-title-bg-position, center);
+}
 .title-art-placeholder { display: none; }
 .title-vignette { display: none; }
 .title-scrim { display: none; }

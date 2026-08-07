@@ -58,6 +58,8 @@ export interface GameRendererProps {
     onButtonClick?: () => void;
     /** Opens the shell menu from the anchored game-menu control. */
     onOpenMenu?: () => void;
+    /** Called when the player cancels profile creation to return to the title. */
+    onCancelSetup?: () => void;
 }
 
 type ActivePanel =
@@ -165,6 +167,7 @@ function GameRendererInner({
     projectId,
     onButtonClick,
     onOpenMenu,
+    onCancelSetup,
 }: GameRendererProps) {
     saveStorageKeyForProject(projectId);
     const { snapshot, actions } = useGame();
@@ -221,6 +224,7 @@ function GameRendererInner({
                 <PlayerSetup
                     ui={snapshot.ui}
                     onSubmit={actions.setPlayerProfile}
+                    onCancel={onCancelSetup}
                 />
             )}
 

@@ -10,9 +10,10 @@ import { uiText } from '../uiText';
 export interface PlayerSetupProps {
     ui?: Record<string, string>;
     onSubmit: (profile: PlayerProfileInput) => void;
+    onCancel?: () => void;
 }
 
-export function PlayerSetup({ ui, onSubmit }: PlayerSetupProps) {
+export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
     const [name, setName] = useState('');
     const [title, setTitle] = useState('');
     const [biography, setBiography] = useState('');
@@ -79,13 +80,24 @@ export function PlayerSetup({ ui, onSubmit }: PlayerSetupProps) {
                     />
                 </label>
 
-                <button
-                    className="player-setup-submit"
-                    type="submit"
-                    disabled={!name.trim()}
-                >
-                    <span>{uiText(ui, 'ui.begin_adventure')}</span>
-                </button>
+                <div className="player-setup-actions">
+                    {onCancel && (
+                        <button
+                            className="player-setup-back"
+                            type="button"
+                            onClick={onCancel}
+                        >
+                            <span>{uiText(ui, 'ui.back')}</span>
+                        </button>
+                    )}
+                    <button
+                        className="player-setup-submit"
+                        type="submit"
+                        disabled={!name.trim()}
+                    >
+                        <span>{uiText(ui, 'ui.begin_adventure')}</span>
+                    </button>
+                </div>
             </form>
         </DialogOverlay>
     );

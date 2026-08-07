@@ -59,10 +59,6 @@ export function PlayerNotes({
                         {uiText(ui, 'ui.add_note')}
                     </button>
                 </form>
-
-                <p className="player-notes-aside">
-                    {uiText(ui, 'ui.notes_hint')}
-                </p>
             </section>
 
             <section className="player-notes-list-column doodle-scroll doodle-scroll-parchment">

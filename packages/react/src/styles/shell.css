@@ -204,8 +204,6 @@
         var(--doodle-bg-secondary) 0%,
         var(--doodle-bg-primary) 100%
     );
-    background-size: cover;
-    background-position: center;
     color: var(--doodle-text-primary);
     font-family: var(--doodle-font-family);
     gap: var(--doodle-spacing-md);
@@ -220,8 +218,9 @@
         var(--doodle-bg-secondary) 0%,
         var(--doodle-bg-primary) 100%
     );
-    background-position: center;
-    background-size: cover;
+    background-size: var(--doodle-title-bg-size, cover);
+    background-repeat: no-repeat;
+    background-position: var(--doodle-title-bg-position, center);
 }
 
 .title-content {
