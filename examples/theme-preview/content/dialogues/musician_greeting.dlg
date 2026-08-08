@@ -1,0 +1,17 @@
+NODE start
+  MUSICIAN: Got a request? I probably won't play it, but I'll hear it.
+
+  CHOICE Play something cheerful.
+    GOTO cheerful
+  END
+
+  CHOICE No request. Just listening.
+    END dialogue
+  END
+
+NODE cheerful
+  MUSICIAN: Cheerful it is. Or close enough.
+
+  CHOICE Thanks.
+    END dialogue
+  END

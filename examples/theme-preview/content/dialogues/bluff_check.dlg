@@ -1,0 +1,77 @@
+# Standalone skill-check demo. Demonstrates dice syntax in isolation.
+#
+# ROLL <variable> <min> <max>  : rolls a random integer and stores it in a variable.
+# {varName}                    : in dialogue text, replaced with the variable's value.
+# roll <min> <max> <threshold> : condition. Rolls and returns true if result >= threshold.
+#
+# The actual bluff check in this scaffold is inlined into bartender_greeting.dlg
+# so it can flow back into the bartender conversation (GOTO after_drink, GOTO start).
+#
+# Use START dialogue to launch a self-contained dialogue that doesn't need to
+# return to the caller. For example, from a CHOICE in another dialogue:
+#   START dialogue bluff_check
+
+NODE start
+  # Roll a d20 and store it as "bluffRoll" before the player sees the result
+  ROLL bluffRoll 1 20
+  NARRATOR: Marcus eyes you across the bar. You consider spinning him a tale to get a discount on that drink...
+
+  CHOICE Try to bluff him.
+    GOTO resolve
+  END
+
+  # A choice only routes; its narration lives in a node it points to.
+  CHOICE Actually, never mind.
+    GOTO backed_down
+  END
+
+NODE backed_down
+  NARRATOR: Some fights aren't worth picking.
+  END dialogue
+
+NODE resolve
+  # Show the roll result using {bluffRoll} interpolation in the locale string
+  NARRATOR: You spin the tale with {bluffRoll} on your roll, and Marcus listens carefully.
+
+  # Branch on whether the stored variable passes a threshold (15+)
+  IF variableGreaterThan bluffRoll 14
+    SET flag bluffedMarcus
+    ADD relationship bartender 2
+    GOTO success
+  END
+
+  GOTO failure
+
+# Each node has a single speaker. To let the narrator and the bartender both
+# speak, use two nodes: a narration node (text + Continue) that routes to the
+# bartender's node.
+NODE success
+  NARRATOR: The story lands perfectly. Marcus laughs and slides a free drink across the bar.
+  GOTO success_bartender
+
+NODE success_bartender
+  BARTENDER: Sure, this one's on the house.
+
+  CHOICE Cheers!
+    END dialogue
+  END
+
+NODE failure
+  NARRATOR: Marcus raises an eyebrow, entirely unconvinced.
+  GOTO failure_bartender
+
+NODE failure_bartender
+  BARTENDER: Nope. That'll be five gold.
+
+  # Still have to pay, or just walk away
+  CHOICE Fine. Here's five gold.
+    REQUIRE variableGreaterThan gold 4
+    ADD variable gold -5
+    SET flag hadDrink
+    NOTIFY Bought a drink (-5 gold)
+    END dialogue
+  END
+
+  CHOICE Never mind then.
+    END dialogue
+  END

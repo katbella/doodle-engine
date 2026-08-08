@@ -1,0 +1,8 @@
+id: bartender
+name: "Marcus the Bartender"
+title: ""
+biography: "A gruff man with kind eyes who's heard every story twice. He keeps the peace at The Salty Dog with a firm hand and a generous pour."
+portrait: ""
+location: tavern
+dialogue: bartender_greeting
+stats: {}

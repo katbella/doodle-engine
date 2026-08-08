@@ -1,0 +1,10 @@
+id: odd_jobs
+name: "Odd Jobs"
+description: "The bartender mentioned someone at the market who could use a hand."
+stages:
+  - id: started
+    description: "Marcus mentioned work at the market. I should talk to the merchant there."
+  - id: talked_to_merchant
+    description: "Elena needs a delivery watched. Time to head to the docks."
+  - id: complete
+    description: "Job well done. Elena paid 50 gold for the trouble."

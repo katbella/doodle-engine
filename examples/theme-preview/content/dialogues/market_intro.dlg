@@ -1,0 +1,15 @@
+# One-time narrator intro for the market. Same pattern as tavern_intro.dlg.
+
+TRIGGER market
+REQUIRE notFlag seenMarketIntro
+
+NODE start
+  NARRATOR: The market square opens up before you, a riot of color and noise. Stalls line every side, draped in bright awnings. Merchants call out their prices, children dart between carts, and somewhere a street musician plays an out-of-tune fiddle.
+  SET flag seenMarketIntro
+
+  # ADD journalEntry unlocks a journal entry for the player.
+  ADD journalEntry market_square
+
+  CHOICE Look around.
+    END dialogue
+  END

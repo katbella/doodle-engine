@@ -40,6 +40,15 @@ export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
                     <h2 className="player-setup-heading">
                         {uiText(ui, 'ui.create_player')}
                     </h2>
+                    {onCancel && (
+                        <button
+                            className="player-setup-back"
+                            type="button"
+                            onClick={onCancel}
+                        >
+                            <span>{uiText(ui, 'ui.back')}</span>
+                        </button>
+                    )}
                 </header>
 
                 <label className="player-setup-field">
@@ -81,15 +90,6 @@ export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
                 </label>
 
                 <div className="player-setup-actions">
-                    {onCancel && (
-                        <button
-                            className="player-setup-back"
-                            type="button"
-                            onClick={onCancel}
-                        >
-                            <span>{uiText(ui, 'ui.back')}</span>
-                        </button>
-                    )}
                     <button
                         className="player-setup-submit"
                         type="submit"

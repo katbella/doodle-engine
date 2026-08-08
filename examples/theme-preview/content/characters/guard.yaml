@@ -1,0 +1,8 @@
+id: guard
+name: "Denna"
+title: ""
+biography: "Off-duty from the gate watch. Keeps an eye on the door out of habit."
+portrait: ""
+location: tavern
+dialogue: guard_greeting
+stats: {}

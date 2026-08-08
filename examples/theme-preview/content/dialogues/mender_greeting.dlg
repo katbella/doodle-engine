@@ -1,0 +1,6 @@
+NODE start
+  MENDER: That cloak's seen better days. Want it mended?
+
+  CHOICE Maybe later.
+    END dialogue
+  END

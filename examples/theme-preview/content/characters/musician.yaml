@@ -1,0 +1,8 @@
+id: musician
+name: "Rowe"
+title: ""
+biography: "Plays a battered fiddle by the fire. Takes requests, mostly ignores them."
+portrait: ""
+location: tavern
+dialogue: musician_greeting
+stats: {}

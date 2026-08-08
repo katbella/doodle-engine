@@ -1,0 +1,17 @@
+NODE start
+  STORYTELLER: Ah, a new face! Sit, sit. Have I told you the one about the miller and the missing goat?
+
+  CHOICE Go on, then.
+    GOTO story
+  END
+
+  CHOICE Maybe another time.
+    END dialogue
+  END
+
+NODE story
+  STORYTELLER: There isn't much to it, really. The goat came back on its own. Still, good story, wasn't it?
+
+  CHOICE Sure was.
+    END dialogue
+  END

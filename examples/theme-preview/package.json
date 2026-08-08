@@ -1,0 +1,35 @@
+{
+  "name": "theme-preview",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "build": "node build.mjs",
+    "validate": "node validate.mjs",
+    "theme": "node theme.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@doodle-engine/core": "workspace:*",
+    "@doodle-engine/react": "workspace:*",
+    "@fontsource-variable/public-sans": "5.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@doodle-engine/toolkit": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "doodleEngine": {
+    "renderer": "default",
+    "rendererTemplate": "starter-rpg",
+    "managedFontDependencies": [
+      "@fontsource-variable/public-sans"
+    ]
+  }
+}

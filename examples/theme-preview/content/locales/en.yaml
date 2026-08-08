@@ -1,0 +1,19 @@
+# ===================
+# English Locale Starter
+# ===================
+#
+# This project uses literal English text, so it does not need locale keys yet.
+# To localize a string later:
+# 1. Replace the text in a content file with a key such as @location.tavern.name
+# 2. Add that key and its English text below
+# 3. Copy this file to another language code, such as sv.yaml, and translate it
+# Locale filenames become language codes automatically; no React changes are needed.
+#
+# ===================
+# Example
+# ===================
+# location.tavern.name: "The Salty Dog"
+#
+# Built-in interface labels can also be overridden, for example:
+# ui.continue: "Continue"
+# ui.end_dialogue: "End Dialogue"

@@ -1,9 +1,4 @@
 /* Project-owned renderer customization.
  * Theme switching never replaces this file. Override theme variables or add
  * project-specific rules here.
- *
- * .title-screen {
- *     --doodle-title-bg-position: left top;
- *     --doodle-title-bg-size: contain;
- * }
  */

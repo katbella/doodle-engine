@@ -1,0 +1,17 @@
+NODE start
+  SCRIBE: Need a letter written? Steady hand, fair price.
+
+  CHOICE What do you charge?
+    GOTO price
+  END
+
+  CHOICE Not today.
+    END dialogue
+  END
+
+NODE price
+  SCRIBE: Depends on the length. A short letter's cheap enough.
+
+  CHOICE Good to know.
+    END dialogue
+  END
