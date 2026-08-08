@@ -59,7 +59,7 @@ export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
                         className="player-setup-input doodle-field"
                         ref={nameRef}
                         value={name}
-                        placeholder={uiText(ui, 'ui.player_name')}
+                        placeholder={uiText(ui, 'ui.player_name_placeholder')}
                         required
                         onChange={(event) => setName(event.target.value)}
                     />
@@ -72,7 +72,7 @@ export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
                     <input
                         className="player-setup-input doodle-field"
                         value={title}
-                        placeholder={uiText(ui, 'ui.player_title')}
+                        placeholder={uiText(ui, 'ui.player_title_placeholder')}
                         onChange={(event) => setTitle(event.target.value)}
                     />
                 </label>
@@ -84,7 +84,10 @@ export function PlayerSetup({ ui, onSubmit, onCancel }: PlayerSetupProps) {
                     <textarea
                         className="player-setup-textarea doodle-field"
                         value={biography}
-                        placeholder={uiText(ui, 'ui.player_biography')}
+                        placeholder={uiText(
+                            ui,
+                            'ui.player_biography_placeholder'
+                        )}
                         onChange={(event) => setBiography(event.target.value)}
                     />
                 </label>

@@ -111,7 +111,7 @@ export function LoadingScreen({
                         type="button"
                         onClick={onStart}
                     >
-                        {startLabel}
+                        <span className="title-button-label">{startLabel}</span>
                     </button>
                 )}
             </div>

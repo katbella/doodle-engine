@@ -98,6 +98,8 @@ describe('createProject language setup', () => {
                 )
             ).toEqual(fontDependencies);
             expect(packageJson.scripts.theme).toBe('doodle-engine theme');
+            expect(packageJson.scripts.dev).toBe('doodle-engine dev');
+            expect(packageJson.scripts.build).toBe('doodle-engine build');
             expect(packageJson.doodleEngine).toEqual({
                 renderer: 'default',
                 rendererTemplate,

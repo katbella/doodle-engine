@@ -803,6 +803,15 @@ describe('Snapshot Builder', () => {
             expect(snapshot.ui['ui.load']).toBe('Load');
             expect(snapshot.ui['ui.new_game']).toBe('New Game');
             expect(snapshot.ui['ui.start_game']).toBe('Start game');
+            expect(snapshot.ui['ui.player_name_placeholder']).toBe(
+                "Enter your character's name"
+            );
+            expect(snapshot.ui['ui.player_title_placeholder']).toBe(
+                'Optional: e.g. Warden of the North Road'
+            );
+            expect(snapshot.ui['ui.player_biography_placeholder']).toBe(
+                'Optional: background, personality, and goals'
+            );
             expect(snapshot.ui['ui.resume']).toBe('Resume');
             expect(snapshot.ui['ui.no_companions']).toBe('No companions');
             expect(snapshot.ui['ui.narrator']).toBe('Narrator');

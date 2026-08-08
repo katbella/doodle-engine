@@ -65,6 +65,10 @@ export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.player_name': 'Name',
     'ui.player_title': 'Title',
     'ui.player_biography': 'Biography',
+    'ui.player_name_placeholder': "Enter your character's name",
+    'ui.player_title_placeholder': 'Optional: e.g. Warden of the North Road',
+    'ui.player_biography_placeholder':
+        'Optional: background, personality, and goals',
     'ui.begin_adventure': 'Begin adventure',
     'ui.resources': 'Resources',
     'ui.no_items': 'No items',

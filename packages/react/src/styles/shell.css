@@ -15,7 +15,6 @@
     --doodle-text-primary: #ffffff;
     --doodle-text-secondary: #a0a0a0;
     --doodle-accent: #ffffff;
-    --doodle-accent-hover: #cccccc;
     --doodle-error: #f87171;
 
     /* Typography */
@@ -23,7 +22,6 @@
     --doodle-font-size-sm: 0.875rem;
     --doodle-font-size-base: 1rem;
     --doodle-font-size-lg: 1.25rem;
-    --doodle-font-size-xl: 2rem;
     --doodle-font-size-2xl: 3rem;
 
     /* Spacing */
@@ -34,7 +32,6 @@
 
     /* Transitions */
     --doodle-transition-fast: 150ms ease;
-    --doodle-transition-normal: 300ms ease;
     --doodle-transition-slow: 500ms ease;
 }
 

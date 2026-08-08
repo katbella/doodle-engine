@@ -26,7 +26,6 @@
     --doodle-accent-dim: #7a4630;
     --doodle-accent-bright: #ce8461;
     --doodle-accent-wash: rgba(182, 106, 72, 0.09);
-    --doodle-accent-wash-strong: rgba(182, 106, 72, 0.14);
 
     /* Secondary accent — moss green, used for labels and roles */
     --doodle-moss: #7c9068;
@@ -35,7 +34,6 @@
 
     /* Gold — currency only */
     --doodle-gold: #c9a84c;
-    --doodle-gold-dim: #8e7430;
 
     /* Text */
     --doodle-text-primary: #e7e0cf;
@@ -48,23 +46,15 @@
     --doodle-border-color: #3b473e;
     --doodle-border-bright: #4a5a4c;
     --doodle-border-soft: rgba(59, 71, 62, 0.6);
-    --doodle-border-accent: var(--doodle-accent-dim);
 
     /* Spacing */
-    --doodle-spacing-xs: 4px;
     --doodle-spacing-sm: 8px;
     --doodle-spacing-md: 16px;
     --doodle-spacing-lg: 24px;
     --doodle-spacing-xl: 32px;
 
-    /* Border radius — this theme is square throughout */
-    --doodle-radius-sm: 0;
-    --doodle-radius-md: 0;
-    --doodle-radius-lg: 0;
-
     /* Shadows */
     --doodle-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    --doodle-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
     --doodle-shadow-panel: 0 22px 60px rgba(0, 0, 0, 0.55);
 
     /* Layout dimensions */
@@ -77,7 +67,6 @@
     /* Interaction */
     --doodle-control-min-size: 44px;
     --doodle-disabled-opacity: 0.48;
-    --doodle-motion-fast: 160ms ease;
     --doodle-focus-ring: 1px solid var(--doodle-accent);
 
     /* Typography */
@@ -96,7 +85,6 @@
     --doodle-parchment-ink: #33382c;
     --doodle-parchment-ink-soft: #4a4a38;
     --doodle-parchment-muted: #8b7e5f;
-    --doodle-parchment-quiet: #7a6e52;
     --doodle-parchment-accent: #a85a34;
     --doodle-parchment-border: #9c8a62;
     --doodle-parchment-rule: rgba(120, 102, 72, 0.32);
@@ -185,7 +173,6 @@ button { font-family: inherit; }
 
 /* Artwork placeholders — replace the background or reveal the matching image
    when real game art is available. */
-.doodle-art-slot,
 .dialogue-portrait,
 .character-portrait-placeholder,
 .party-portrait-placeholder,
@@ -327,6 +314,15 @@ button { font-family: inherit; }
     object-fit: cover;
     z-index: 1;
 }
+.location-banner-placeholder {
+    position: absolute;
+    inset: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--doodle-border-bright);
+    color: var(--doodle-text-faint);
+    font-family: var(--doodle-font-ui);
+}
 .location-banner-vignette {
     position: absolute;
     inset: 0;
@@ -343,17 +339,6 @@ button { font-family: inherit; }
     z-index: 4;
     background: linear-gradient(rgba(15, 19, 16, 0), rgba(15, 19, 16, 0.68) 48%, rgba(15, 19, 16, 0.94));
 }
-.location-banner-hem {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 44px;
-    z-index: 2;
-    pointer-events: none;
-    background: linear-gradient(rgba(12, 16, 13, 0), rgba(12, 16, 13, 0.72));
-}
-
 .location-content { display: flex; }
 .is-overlay > .location-content {
     position: absolute;
@@ -409,6 +394,7 @@ button { font-family: inherit; }
     align-items: center;
     justify-content: center;
 }
+.dialogue-portrait-image { display: block; width: 100%; height: 100%; object-fit: cover; }
 .dialogue-portrait-placeholder { font: italic 400 14px var(--doodle-font-ui); color: var(--doodle-text-faint); }
 
 .dialogue-container { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -437,7 +423,7 @@ button { font-family: inherit; }
     text-wrap: pretty;
     position: relative;
 }
-.dialogue-speaker { color: var(--doodle-accent); }
+.dialogue-speaker { margin-bottom: var(--doodle-spacing-sm); color: var(--doodle-accent); }
 .dialogue-idle {
     flex: 1;
     display: flex;
@@ -513,6 +499,16 @@ button { font-family: inherit; }
     color: var(--doodle-moss);
     cursor: default;
 }
+.character-list-icon svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .character-grid { display: flex; flex: 1; min-width: 0; justify-content: flex-start; }
 
 .character-card {
@@ -540,7 +536,7 @@ button { font-family: inherit; }
     border-top-color: var(--doodle-accent);
 }
 
-.character-portrait { width: 42px; height: 56px; flex: none; border: 1px solid var(--doodle-border-color); }
+.character-portrait { width: 42px; height: 56px; flex: none; border: 1px solid var(--doodle-border-color); object-fit: cover; }
 .character-portrait-placeholder { background: var(--doodle-bg-sunken); }
 .character-card.is-speaking .character-portrait { border-color: var(--doodle-accent); }
 
@@ -563,6 +559,16 @@ button { font-family: inherit; }
 .character-card.is-speaking .character-role { color: var(--doodle-moss-bright); }
 
 .character-speaking-mark { flex: none; display: flex; align-items: center; color: var(--doodle-accent-bright); }
+.character-speaking-mark svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 .character-list-pager { display: flex; align-items: center; flex: none; padding-right: 6px; }
 .character-list-pager-button {
@@ -622,7 +628,7 @@ button { font-family: inherit; }
     border-left-color: var(--doodle-accent);
 }
 
-.party-portrait { width: 52px; height: 68px; flex: none; border: 1px solid var(--doodle-border-color); }
+.party-portrait { width: 52px; height: 68px; flex: none; border: 1px solid var(--doodle-border-color); object-fit: cover; }
 .party-portrait-placeholder { background: linear-gradient(#161c17, #131813); }
 .party-member.is-speaking .party-portrait { border-color: var(--doodle-accent); }
 
@@ -853,7 +859,17 @@ button { font-family: inherit; }
     border-bottom: none;
     border-top: 1px solid var(--doodle-border-color);
 }
-.game-menu-icon { opacity: 0.95; display: flex; }
+.game-menu-icon { width: 24px; height: 24px; opacity: 0.95; display: flex; }
+.game-menu-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .game-menu-button:hover .game-menu-icon { opacity: 1; }
 
 /* ── Game panels ─────────────────────────────────────────────────── */
@@ -920,7 +936,7 @@ button { font-family: inherit; }
 .panel-close:hover { color: var(--doodle-accent-bright); border-color: var(--doodle-accent-dim); }
 
 .panel-parchment-body { flex: 1; min-height: 0; padding: 22px; }
-.panel-parchment-sheet { height: 100%; display: flex; }
+.panel-parchment-sheet { height: 100%; }
 
 /* ── Inventory ────────────────────────────────────────────────────── */
 
@@ -957,6 +973,7 @@ button { font-family: inherit; }
 .item-icon {
     width: 100%;
     height: 150px;
+    object-fit: cover;
     background: rgba(13, 17, 14, 0.5);
     border: 1px solid var(--doodle-border-soft);
     display: flex;
@@ -964,6 +981,7 @@ button { font-family: inherit; }
     justify-content: center;
 }
 .item-icon-placeholder { font: italic 400 14px var(--doodle-font-ui); color: var(--doodle-text-faint); }
+.item-icon-placeholder::after { content: 'item'; }
 .item-name {
     font: 400 19px/1.3 var(--doodle-font-ui);
     color: var(--doodle-text-heading);
@@ -989,6 +1007,7 @@ button { font-family: inherit; }
     align-items: center;
     justify-content: center;
 }
+.item-modal-image-asset { display: block; width: 100%; height: 100%; object-fit: cover; }
 .item-modal-image-placeholder { font: italic 400 15px var(--doodle-font-ui); color: var(--doodle-text-faint); }
 .item-modal-name {
     margin-top: 32px;
@@ -1326,8 +1345,6 @@ button { font-family: inherit; }
 /* ── Settings ─────────────────────────────────────────────────────── */
 
 .settings-panel {
-    flex: 1;
-    min-height: 0;
     padding: 44px 54px;
     overflow: hidden auto;
     display: grid;
@@ -1343,10 +1360,7 @@ button { font-family: inherit; }
     padding-bottom: 10px;
     border-bottom: 1px solid rgba(59, 71, 62, 0.7);
 }
-.settings-row { display: flex; align-items: center; gap: 24px; }
-.settings-row-label { width: 190px; flex: none; font: 400 21px var(--doodle-font-ui); color: var(--doodle-text-secondary); }
-.settings-locale-select,
-.settings-textsize-select {
+.settings-locale-select {
     flex: 1;
     background: #2a332c;
     border: 1px solid var(--doodle-border-color);
@@ -1634,4 +1648,3 @@ button { font-family: inherit; }
     white-space: nowrap;
     border: 0;
 }
-

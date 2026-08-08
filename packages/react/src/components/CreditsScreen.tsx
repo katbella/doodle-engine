@@ -28,7 +28,10 @@ export function CreditsScreen({
                         </>
                     )}
                 </div>
-                <button className="title-button" onClick={onBack}>
+                <button
+                    className="title-button credits-back-button"
+                    onClick={onBack}
+                >
                     <span className="title-button-label">
                         {uiText(ui, 'ui.back')}
                     </span>

@@ -4,16 +4,13 @@ A narrative game built with [Doodle Engine](https://doodleengine.dev).
 
 ## Working on the game
 
-This project is linked to the local `@doodle-engine/*` packages in this repo, not the published npm versions, so it installs through Yarn from the repo root, not `npm install` here.
+This project uses the `@doodle-engine/*` packages in this repository, not their published versions. Run its commands from the repository root so the local packages are built first.
 
-Install once from the repo root, then start the development server from this folder:
+Install once, then start the development server:
 
 ```bash
-# from the repo root
 yarn install
-
-# from examples/theme-preview
-npm run dev
+yarn example
 ```
 
 The game opens at http://localhost:3000 and reloads whenever a content file changes. Content errors appear in the terminal as you save.
@@ -21,11 +18,11 @@ The game opens at http://localhost:3000 and reloads whenever a content file chan
 Other commands:
 
 ```bash
-npm run validate   # check content for errors
-npm run build      # create release files in dist/
-npm run preview    # serve the finished build locally
-npm run typecheck  # check the game's TypeScript
-npm run theme -- prose  # change the default renderer theme
+yarn workspace theme-preview run validate   # check content for errors
+yarn build                                  # build the repository and example
+yarn workspace theme-preview run preview    # serve the finished build locally
+yarn workspace theme-preview run typecheck  # check the game's TypeScript
+yarn example:theme prose                    # change the renderer theme
 ```
 
 ## Where things live

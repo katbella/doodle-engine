@@ -27,15 +27,6 @@
     --doodle-accent-wash: rgba(61, 85, 53, 0.05);
     --doodle-accent-wash-strong: rgba(61, 85, 53, 0.1);
 
-    /* Secondary accent */
-    --doodle-moss: #66705f;
-    --doodle-moss-dim: #838b7d;
-    --doodle-moss-bright: #45503f;
-
-    /* Currency */
-    --doodle-gold: #7f7434;
-    --doodle-gold-dim: #c8c4a2;
-
     /* Text */
     --doodle-text-primary: #14160f;
     --doodle-text-heading: #262920;
@@ -47,23 +38,15 @@
     --doodle-border-color: #d9dad0;
     --doodle-border-bright: #c3c5b8;
     --doodle-border-soft: #e7e8e0;
-    --doodle-border-accent: var(--doodle-accent);
 
     /* Spacing */
-    --doodle-spacing-xs: 4px;
     --doodle-spacing-sm: 8px;
     --doodle-spacing-md: 16px;
     --doodle-spacing-lg: 24px;
     --doodle-spacing-xl: 32px;
 
-    /* Border radius — none in this theme */
-    --doodle-radius-sm: 0;
-    --doodle-radius-md: 0;
-    --doodle-radius-lg: 0;
-
     /* Shadows — none in this theme */
     --doodle-shadow: none;
-    --doodle-shadow-lg: none;
     --doodle-shadow-panel: none;
 
     /* Layout dimensions */
@@ -76,27 +59,19 @@
     /* Interaction */
     --doodle-control-min-size: 44px;
     --doodle-disabled-opacity: 0.48;
-    --doodle-motion-fast: 160ms ease;
     --doodle-focus-ring: 1px solid var(--doodle-accent);
 
     /* Typography — one family, optical sizes */
     --doodle-font-display: 'Spectral', Georgia, serif;
     --doodle-font-ui: 'Spectral', Georgia, serif;
     --doodle-font-prose: 'Spectral', Georgia, serif;
-    --doodle-font-mono: 'Spectral', Georgia, serif;
 
     /* Reading measure */
     --doodle-measure: 66ch;
 
     /* Sheet surface — journal, notes, map */
     --doodle-parchment-bg: transparent;
-    --doodle-parchment-ink: var(--doodle-text-primary);
-    --doodle-parchment-ink-soft: var(--doodle-text-secondary);
     --doodle-parchment-muted: var(--doodle-text-muted);
-    --doodle-parchment-quiet: var(--doodle-text-faint);
-    --doodle-parchment-accent: var(--doodle-accent);
-    --doodle-parchment-border: transparent;
-    --doodle-parchment-rule: var(--doodle-border-soft);
 }
 
 /* ── Reset ────────────────────────────────────────────────────────── */
@@ -122,7 +97,6 @@ a:hover { color: var(--doodle-accent-bright); }
 button { font-family: inherit; }
 
 @keyframes doodle-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes doodle-pop-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes doodle-fade-up {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: none; }
@@ -141,10 +115,6 @@ button { font-family: inherit; }
     white-space: nowrap;
     border: 0;
 }
-
-/* Labels are visible in this theme, so tooltips are suppressed. */
-.doodle-tooltip { position: relative; }
-.doodle-tooltip::after { display: none; }
 
 @supports not selector(::-webkit-scrollbar) {
     .doodle-scroll { scrollbar-width: thin; scrollbar-color: var(--doodle-border-bright) transparent; }
@@ -177,6 +147,8 @@ button { font-family: inherit; }
 .doodle-field:hover { border-bottom-color: var(--doodle-border-bright); }
 .doodle-field:focus { border-bottom-color: var(--doodle-accent); }
 .doodle-field::placeholder { color: var(--doodle-text-faint); font-style: italic; }
+.player-setup-input,
+.player-setup-textarea { padding-inline: 0; }
 
 .doodle-field-parchment {
     background: transparent;
@@ -244,8 +216,7 @@ button { font-family: inherit; }
 .location-banner,
 .location-banner-image,
 .location-banner-vignette,
-.location-banner-scrim,
-.location-banner-hem { display: none; }
+.location-banner-scrim { display: none; }
 
 .location-content {
     display: flex;
@@ -368,6 +339,7 @@ button { font-family: inherit; }
     display: flex;
     align-items: stretch;
     flex: none;
+    height: 98px;
     background: transparent;
     border: none;
     border-top: 1px solid var(--doodle-border-color);
@@ -715,7 +687,7 @@ button { font-family: inherit; }
 .panel-close:hover { color: var(--doodle-accent); }
 
 .panel-parchment-body { flex: 1; min-height: 0; padding: 0; }
-.panel-parchment-sheet { height: 100%; display: flex; }
+.panel-parchment-sheet { height: 100%; }
 
 /* ── Inventory ────────────────────────────────────────────────────── */
 
@@ -827,7 +799,7 @@ button { font-family: inherit; }
 .player-notes-add-button:hover { color: var(--doodle-accent-bright); border-bottom-color: var(--doodle-accent); }
 
 .player-notes-list-column { flex: 1; min-width: 0; padding: 56px 64px; overflow: hidden auto; }
-.player-notes-empty { padding: 80px 0; color: var(--doodle-text-faint); font: italic 300 21px var(--doodle-font-prose); }
+.player-notes-empty { padding: 80px 0; color: var(--doodle-parchment-muted); font: italic 300 21px var(--doodle-font-prose); }
 .player-notes-list { margin-top: 18px; display: flex; flex-direction: column; gap: 0; }
 .player-note { position: relative; border-top: 1px solid var(--doodle-border-soft); padding: 32px 0; }
 .player-note-title { font: 400 25px var(--doodle-font-display); color: var(--doodle-text-primary); padding-right: 60px; text-wrap: pretty; }
@@ -979,8 +951,6 @@ button { font-family: inherit; }
 /* ── Settings ─────────────────────────────────────────────────────── */
 
 .settings-panel {
-    flex: 1;
-    min-height: 0;
     padding: 56px 72px;
     overflow: hidden auto;
     display: grid;
@@ -996,10 +966,7 @@ button { font-family: inherit; }
     padding-bottom: 14px;
     border-bottom: 1px solid var(--doodle-border-color);
 }
-.settings-row { display: flex; align-items: baseline; gap: 24px; }
-.settings-row-label { width: 170px; flex: none; font: 300 19px var(--doodle-font-ui); color: var(--doodle-text-muted); }
-.settings-locale-select,
-.settings-textsize-select {
+.settings-locale-select {
     flex: 1;
     background: transparent;
     border: none;
@@ -1077,6 +1044,7 @@ button { font-family: inherit; }
 .title-button-label { flex: 1; padding: 18px 0; font: 300 24px var(--doodle-font-display); color: var(--doodle-text-secondary); transition: color 0.16s; }
 .title-button:hover .title-button-label { color: var(--doodle-text-primary); }
 .title-menu .title-button-label { padding-left: 16px; }
+.credits-back-button .title-button-label { padding-inline: 24px; }
 .title-button.is-primary .title-button-label { color: var(--doodle-accent); }
 .title-button.is-primary:hover .title-button-label { color: var(--doodle-accent-bright); }
 

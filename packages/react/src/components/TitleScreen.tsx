@@ -102,9 +102,7 @@ export function TitleScreen({
                 {!displayLogo && author && (
                     <div className="title-eyebrow" aria-hidden="true">
                         <span className="title-eyebrow-rule" />
-                        <span className="title-eyebrow-text">
-                            {author}
-                        </span>
+                        <span className="title-eyebrow-text">{author}</span>
                     </div>
                 )}
                 <h1 className="title-heading">{title}</h1>

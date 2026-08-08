@@ -37,6 +37,11 @@
     display: none;
 }
 
+.party-member-body {
+    display: flex;
+    flex-direction: column;
+}
+
 /* ── Dialog positioning ─────────────────────────────────────────── */
 
 .travel-confirm-overlay,

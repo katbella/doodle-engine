@@ -24,15 +24,6 @@
     --doodle-accent-wash: rgba(47, 111, 235, 0.07);
     --doodle-accent-wash-strong: rgba(47, 111, 235, 0.13);
 
-    /* Secondary accent */
-    --doodle-moss: #5c6b7a;
-    --doodle-moss-dim: #7c8894;
-    --doodle-moss-bright: #3d4a57;
-
-    /* Currency */
-    --doodle-gold: #8a6d1f;
-    --doodle-gold-dim: #d8cba4;
-
     /* Text */
     --doodle-text-primary: #16191d;
     --doodle-text-heading: #2a2f36;
@@ -44,10 +35,8 @@
     --doodle-border-color: #d3d8dd;
     --doodle-border-bright: #bcc3ca;
     --doodle-border-soft: #e2e6ea;
-    --doodle-border-accent: var(--doodle-accent);
 
     /* Spacing */
-    --doodle-spacing-xs: 4px;
     --doodle-spacing-sm: 8px;
     --doodle-spacing-md: 16px;
     --doodle-spacing-lg: 24px;
@@ -56,7 +45,6 @@
     /* Border radius — square in this theme */
     --doodle-radius-sm: 0;
     --doodle-radius-md: 0;
-    --doodle-radius-lg: 0;
 
     /* Shadows */
     --doodle-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
@@ -73,7 +61,6 @@
     /* Interaction */
     --doodle-control-min-size: 44px;
     --doodle-disabled-opacity: 0.48;
-    --doodle-motion-fast: 160ms ease;
     --doodle-focus-ring: 2px solid var(--doodle-accent);
 
     /* Typography */
@@ -85,15 +72,12 @@
     /* Surfaces — flat in this theme; override to add texture */
     --doodle-surface-chrome: #f1f3f5;
     --doodle-surface-panel: #ffffff;
-    --doodle-surface-sheet: #ffffff;
 
     /* Sheet surface — journal, notes, map */
     --doodle-parchment-bg: #ffffff;
     --doodle-parchment-ink: #16191d;
     --doodle-parchment-ink-soft: #4a525b;
     --doodle-parchment-muted: #77808a;
-    --doodle-parchment-quiet: #8d959e;
-    --doodle-parchment-accent: var(--doodle-accent);
     --doodle-parchment-border: var(--doodle-border-color);
     --doodle-parchment-rule: #e6e9ec;
 }
@@ -143,28 +127,6 @@ button { font-family: inherit; }
     border: 0;
 }
 
-.doodle-tooltip { position: relative; }
-.doodle-tooltip::after {
-    content: attr(data-tip);
-    position: absolute;
-    z-index: 70;
-    left: calc(100% + 10px);
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--doodle-text-primary);
-    border: 1px solid var(--doodle-text-primary);
-    border-radius: var(--doodle-radius-sm);
-    color: #fff;
-    font: 400 15px var(--doodle-font-ui);
-    white-space: nowrap;
-    padding: 7px 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.14s;
-}
-/* Menu labels are visible in this theme, so tooltips stay suppressed. */
-.doodle-tooltip::after { display: none; }
-
 @supports not selector(::-webkit-scrollbar) {
     .doodle-scroll { scrollbar-width: thin; scrollbar-color: var(--doodle-border-bright) transparent; }
 }
@@ -181,7 +143,6 @@ button { font-family: inherit; }
 /* Every art slot renders as a labelled dashed box until real art is dropped
    in. Give the element a background-image (or unhide its <img>) and remove
    its ::after rule; nothing else needs to change. */
-.doodle-art-slot,
 .dialogue-portrait,
 .character-portrait-placeholder,
 .party-portrait-placeholder,
@@ -323,11 +284,20 @@ button { font-family: inherit; }
     font: 400 14px var(--doodle-font-mono);
     color: var(--doodle-text-faint);
 }
+.has-banner-placeholder .location-banner::after { content: none; }
+.location-banner-placeholder {
+    position: absolute;
+    inset: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--doodle-border-bright);
+    color: var(--doodle-text-faint);
+    font-family: var(--doodle-font-ui);
+}
 /* Unhide this and drop the ::after rule once real art exists. */
 .location-banner-image { display: none; }
 .location-banner-vignette,
-.location-banner-scrim,
-.location-banner-hem { display: none; }
+.location-banner-scrim { display: none; }
 
 .location-content {
     flex: none;
@@ -363,6 +333,7 @@ button { font-family: inherit; }
     flex-direction: column;
 }
 .dialogue-portrait { flex: none; width: 194px; height: 258px; }
+.dialogue-portrait-image { display: block; width: 100%; height: 100%; object-fit: cover; }
 .dialogue-portrait-placeholder { font: 400 12px var(--doodle-font-mono); color: var(--doodle-text-faint); }
 
 .dialogue-container { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -379,7 +350,7 @@ button { font-family: inherit; }
 }
 
 .dialogue-text { font: 400 20px/1.65 var(--doodle-font-prose); color: var(--doodle-text-primary); text-wrap: pretty; }
-.dialogue-speaker { font-weight: 500; color: var(--doodle-accent); }
+.dialogue-speaker { margin-bottom: var(--doodle-spacing-sm); font-weight: 500; color: var(--doodle-accent); }
 .dialogue-idle {
     flex: 1;
     display: flex;
@@ -450,6 +421,16 @@ button { font-family: inherit; }
     overflow: hidden;
 }
 .character-list-icon { display: flex; align-items: center; padding: 0 18px; color: var(--doodle-text-faint); cursor: default; }
+.character-list-icon svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .character-grid { display: flex; flex: 1; min-width: 0; justify-content: flex-start; }
 
 .character-card {
@@ -472,7 +453,7 @@ button { font-family: inherit; }
 .character-card:focus-visible { outline: 2px solid var(--doodle-accent); outline-offset: -2px; }
 .character-card.is-speaking { background: var(--doodle-bg-secondary); border-bottom-color: var(--doodle-accent); }
 
-.character-portrait { width: 42px; height: 56px; flex: none; }
+.character-portrait { width: 42px; height: 56px; flex: none; object-fit: cover; }
 .character-portrait-placeholder::after { content: 'art'; }
 .character-card.is-speaking .character-portrait { border-style: solid; border-color: var(--doodle-accent-dim); }
 
@@ -494,6 +475,16 @@ button { font-family: inherit; }
 .character-card.is-speaking .character-name { color: var(--doodle-text-primary); }
 
 .character-speaking-mark { flex: none; display: flex; align-items: center; color: var(--doodle-accent); }
+.character-speaking-mark svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
 .character-list-pager { display: flex; align-items: center; flex: none; padding-right: 6px; }
 .character-list-pager-button {
@@ -548,7 +539,7 @@ button { font-family: inherit; }
 .party-member:focus-visible { outline: 2px solid var(--doodle-accent); outline-offset: -2px; }
 .party-member.is-speaking { background: var(--doodle-accent-wash); border-left-color: var(--doodle-accent); }
 
-.party-portrait { width: 48px; height: 62px; flex: none; }
+.party-portrait { width: 48px; height: 62px; flex: none; object-fit: cover; }
 .party-portrait-placeholder::after { content: 'art'; }
 .party-member.is-speaking .party-portrait { border-style: solid; border-color: var(--doodle-accent-dim); }
 
@@ -732,7 +723,24 @@ button { font-family: inherit; }
 .game-menu-button.is-active { background: var(--doodle-bg-secondary); border-left-color: var(--doodle-accent); color: var(--doodle-accent); }
 .game-menu-back-button { background: var(--doodle-bg-secondary); color: var(--doodle-text-primary); }
 .game-shell-menu-button { margin-top: auto; border-bottom: none; border-top: 1px solid var(--doodle-border-color); }
-.game-menu-icon { display: flex; flex: none; margin-right: 12px; color: var(--doodle-text-faint); }
+.game-menu-icon {
+    display: flex;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    color: var(--doodle-text-faint);
+}
+.game-menu-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .game-menu-button:hover .game-menu-icon { color: var(--doodle-text-secondary); }
 .game-menu-button.is-active .game-menu-icon { color: var(--doodle-accent); }
 
@@ -806,7 +814,7 @@ button { font-family: inherit; }
 .panel-close:hover { color: var(--doodle-text-primary); background: var(--doodle-bg-tertiary); }
 
 .panel-parchment-body { flex: 1; min-height: 0; padding: 20px; }
-.panel-parchment-sheet { height: 100%; display: flex; }
+.panel-parchment-sheet { height: 100%; }
 
 /* ── Inventory ────────────────────────────────────────────────────── */
 
@@ -840,8 +848,9 @@ button { font-family: inherit; }
 .inventory-item:focus-visible { outline: 2px solid var(--doodle-accent); outline-offset: 1px; }
 .inventory-item.is-selected { border-color: var(--doodle-accent); background: var(--doodle-accent-wash); }
 
-.item-icon { width: 100%; height: 138px; }
+.item-icon { width: 100%; height: 138px; object-fit: cover; }
 .item-icon-placeholder { font: 400 12px var(--doodle-font-mono); color: var(--doodle-text-faint); }
+.item-icon-placeholder::after { content: 'item'; }
 .item-name { font: 500 17px/1.35 var(--doodle-font-ui); color: var(--doodle-text-heading); text-align: center; text-wrap: pretty; }
 
 .item-modal {
@@ -854,6 +863,7 @@ button { font-family: inherit; }
     background: var(--doodle-bg-tertiary);
 }
 .item-modal-image { flex: none; height: 376px; }
+.item-modal-image-asset { display: block; width: 100%; height: 100%; object-fit: cover; }
 .item-modal-image-placeholder { font: 400 12px var(--doodle-font-mono); color: var(--doodle-text-faint); }
 .item-modal-name {
     margin-top: 28px;
@@ -925,7 +935,7 @@ button { font-family: inherit; }
 .player-notes-add-button:hover { background: var(--doodle-accent-bright); }
 
 .player-notes-list-column { flex: 1; min-width: 0; padding: 40px 42px; overflow: hidden auto; }
-.player-notes-empty { text-align: center; padding: 72px 26px; color: var(--doodle-text-muted); font: 400 18px var(--doodle-font-ui); }
+.player-notes-empty { text-align: center; padding: 72px 26px; color: var(--doodle-parchment-muted); font: 400 18px var(--doodle-font-ui); }
 .player-notes-list { margin-top: 10px; display: flex; flex-direction: column; gap: 0; }
 .player-note { position: relative; border-top: 1px solid var(--doodle-parchment-rule); padding: 22px 0; }
 .player-note-title { font: 500 22px var(--doodle-font-display); color: var(--doodle-parchment-ink); padding-right: 32px; text-wrap: pretty; }
@@ -1076,8 +1086,6 @@ button { font-family: inherit; }
 /* ── Settings ─────────────────────────────────────────────────────── */
 
 .settings-panel {
-    flex: 1;
-    min-height: 0;
     padding: 40px 48px;
     overflow: hidden auto;
     display: grid;
@@ -1093,10 +1101,7 @@ button { font-family: inherit; }
     padding-bottom: 10px;
     border-bottom: 1px solid var(--doodle-border-color);
 }
-.settings-row { display: flex; align-items: center; gap: 20px; }
-.settings-row-label { width: 180px; flex: none; font: 400 17px var(--doodle-font-ui); color: var(--doodle-text-secondary); }
-.settings-locale-select,
-.settings-textsize-select {
+.settings-locale-select {
     flex: 1;
     background: var(--doodle-bg-secondary);
     border: 1px solid var(--doodle-border-color);

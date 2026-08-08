@@ -48,6 +48,7 @@ interface DoodleEnginePackageMetadata {
     renderer: 'default' | 'custom';
     rendererTemplate: RendererTemplate;
     managedFontDependencies: string[];
+    manageFontDependencies?: boolean;
 }
 
 interface ProjectPackage {
@@ -72,9 +73,12 @@ export function isRendererTemplate(value: string): value is RendererTemplate {
 }
 
 export function rendererThemeCss(template: RendererTemplate): string {
-    const compatibility =
-        template === 'minimal' ? '' : `\n\n${rendererCompatibilityCss}`;
-    return THEME_CSS[template] + compatibility;
+    const themeCss = THEME_CSS[template];
+    if (template === 'minimal') return themeCss;
+
+    const imports = themeCss.match(/^(?:@import[^\r\n]+;\r?\n)+/)?.[0] ?? '';
+    const themeRules = themeCss.slice(imports.length).trimStart();
+    return `${imports}\n${rendererCompatibilityCss.trim()}\n\n${themeRules}`;
 }
 
 export function rendererFontDependencies(
@@ -135,6 +139,10 @@ export async function switchRendererTheme(
     projectDir: string,
     template: RendererTemplate
 ): Promise<SwitchRendererThemeResult> {
+    const packagePath = join(projectDir, 'package.json');
+    const packageSource = await readFile(packagePath, 'utf-8');
+    const packageIndent = packageSource.match(/\n([\t ]+)"/)?.[1] ?? '  ';
+    const packageNewline = packageSource.includes('\r\n') ? '\r\n' : '\n';
     const pkg = await readProjectPackage(projectDir);
     const info = await readRendererTheme(projectDir);
     if (info.renderer !== 'default') {
@@ -150,25 +158,29 @@ export async function switchRendererTheme(
 
     const dependencies = { ...(pkg.dependencies ?? {}) };
     const originalDependencies = { ...dependencies };
-    const previousManaged =
-        pkg.doodleEngine?.managedFontDependencies ??
-        Object.keys(FONT_DEPENDENCIES[info.template]);
-    for (const dependency of previousManaged) {
-        const managedVersions = Object.values(FONT_DEPENDENCIES)
-            .map((fonts) => fonts[dependency])
-            .filter(Boolean);
-        if (
-            dependencies[dependency] &&
-            managedVersions.includes(dependencies[dependency])
-        ) {
-            delete dependencies[dependency];
+    const manageFontDependencies =
+        pkg.doodleEngine?.manageFontDependencies !== false;
+    if (manageFontDependencies) {
+        const previousManaged =
+            pkg.doodleEngine?.managedFontDependencies ??
+            Object.keys(FONT_DEPENDENCIES[info.template]);
+        for (const dependency of previousManaged) {
+            const managedVersions = Object.values(FONT_DEPENDENCIES)
+                .map((fonts) => fonts[dependency])
+                .filter(Boolean);
+            if (
+                dependencies[dependency] &&
+                managedVersions.includes(dependencies[dependency])
+            ) {
+                delete dependencies[dependency];
+            }
         }
-    }
-    for (const [dependency, version] of Object.entries(
-        FONT_DEPENDENCIES[template]
-    )) {
-        if (dependencies[dependency] !== version) {
-            dependencies[dependency] = version;
+        for (const [dependency, version] of Object.entries(
+            FONT_DEPENDENCIES[template]
+        )) {
+            if (dependencies[dependency] !== version) {
+                dependencies[dependency] = version;
+            }
         }
     }
     const dependenciesChanged = !recordsEqual(
@@ -176,20 +188,41 @@ export async function switchRendererTheme(
         dependencies
     );
 
+    const metadata = rendererProjectMetadata('default', template);
+    if (!manageFontDependencies) {
+        metadata.managedFontDependencies = [];
+        metadata.manageFontDependencies = false;
+    }
     const nextPackage: ProjectPackage = {
         ...pkg,
         dependencies,
-        doodleEngine: rendererProjectMetadata('default', template),
+        doodleEngine: metadata,
     };
+
+    const projectPath = join(projectDir, 'src', 'project.ts');
+    const projectSource = await readOptional(projectPath);
+    const nextProjectSource = projectSource?.replace(
+        /(export const RENDERER_SCALING\s*=\s*\{[\s\S]*?\benabled:\s*)(?:true|false)/,
+        `$1${String(template !== 'minimal')}`
+    );
 
     await writeFile(
         join(projectDir, 'src', 'renderer-theme.css'),
         rendererThemeCss(template)
     );
     await writeFile(
-        join(projectDir, 'package.json'),
-        JSON.stringify(nextPackage, null, 2) + '\n'
+        packagePath,
+        JSON.stringify(nextPackage, null, packageIndent).replace(
+            /\n/g,
+            packageNewline
+        ) + packageNewline
     );
+    if (
+        nextProjectSource !== undefined &&
+        nextProjectSource !== projectSource
+    ) {
+        await writeFile(projectPath, nextProjectSource);
+    }
 
     return {
         previousTemplate: info.template,
