@@ -1,0 +1,36 @@
+NODE start
+  STORYTELLER: Ah, a new face! Sit, sit. Have I told you the one about the miller and the missing goat?
+
+  CHOICE Go on, then.
+    GOTO story
+  END
+
+  CHOICE Maybe another time.
+    END dialogue
+  END
+
+NODE story
+  STORYTELLER: "Right, so. This was before your time, before half the town's time, back when the mill still had both its wheels. Old Miller Corwin kept a goat, a mean, one-horned thing named Bucket, for reasons nobody ever explained to me and I stopped asking.
+
+  Bucket went missing on a Tuesday. Corwin searched the whole mill, the riverbank, the Widow Halloway's garden twice, since Bucket had a taste for her cabbages and a grudge against her fence. Nothing. Three days go by. Corwin's convinced something's eaten his goat, or worse, someone has.
+
+  Then on the fourth morning, there's a racket at the mill door. Corwin opens it, and there's Bucket, calm as you like, standing next to a stranger in traveling clothes. Turns out the goat had wandered into the man's camp two nights running, eaten his bread, headbutted his dog, and generally made itself so unbearable that the man walked three miles out of his way just to give it back.
+
+  Corwin thanked him, gave him a loaf for his trouble, and the man left without another word. Never got his name. Never saw him again, far as I know.
+
+  So that's it, really. The goat came back on its own, more or less. Somebody just carried it the last three miles."
+
+  CHOICE That's the whole story?
+    GOTO anticlimax
+  END
+
+  CHOICE Sure was.
+    END dialogue
+  END
+
+NODE anticlimax
+  STORYTELLER: That's the whole story. Told you it wasn't much. You wanted a happy ending, you should've asked about Bucket's second disappearance. That one's got a wolf in it.
+
+  CHOICE Maybe another time.
+    END dialogue
+  END

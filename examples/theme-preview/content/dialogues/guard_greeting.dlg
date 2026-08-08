@@ -1,0 +1,33 @@
+NODE start
+  GUARD: Quiet night so far. Let's keep it that way.
+
+  CHOICE Anything I should know about?
+    GOTO warning
+  END
+
+  # Only offered once (demonstrates: ADD toParty)
+  CHOICE Could use someone who can handle themselves. Interested?
+    REQUIRE notFlag guardJoinedParty
+    GOTO invite_to_party
+  END
+
+  CHOICE Just passing through.
+    END dialogue
+  END
+
+NODE warning
+  GUARD: Nothing worth worrying about. Mind yourself after dark, same as anyone.
+
+  CHOICE Will do.
+    END dialogue
+  END
+
+NODE invite_to_party
+  GUARD: Off duty tonight anyway. Sure, I'll watch your back for a while.
+  SET flag guardJoinedParty
+  ADD toParty guard
+  NOTIFY Denna joined your party
+
+  CHOICE Glad to have you along.
+    END dialogue
+  END

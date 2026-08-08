@@ -3,7 +3,7 @@
  *
  * Thin wrapper over the toolkit's buildProject: this file only handles the
  * console presentation (colors, headers, exit codes). The actual build runs in
- * @doodle-engine/toolkit so `doodle build` and Doodle Studio's Build button run
+ * @doodle-engine/toolkit so `doodle-engine build` and Doodle Studio's Build button run
  * the same code and produce the same output.
  */
 

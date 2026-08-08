@@ -182,9 +182,7 @@ describe('GameShell player journeys', () => {
         });
         await continueFromLoading(user);
 
-        expect(
-            screen.getByRole('heading', { name: 'Test Game' })
-        ).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Test Game' })).toBeTruthy();
         expect(screen.getByText('Test subtitle')).toBeTruthy();
         expect(document.title).toBe('Test Game');
     });
@@ -262,7 +260,7 @@ describe('GameShell player journeys', () => {
         expect(screen.getByText('Sin notas')).toBeTruthy();
     });
 
-    it('opens, dismisses, and restores focus for every game-menu panel', async () => {
+    it('opens every game-menu panel as a persistent workspace', async () => {
         const user = await startGame();
         const panels = [
             'Inventory',
@@ -276,28 +274,34 @@ describe('GameShell player journeys', () => {
         for (const name of panels) {
             const trigger = screen.getByRole('button', { name });
             await user.click(trigger);
-            expect(screen.getByRole('dialog', { name })).toBeTruthy();
+            expect(screen.getByRole('region', { name })).toBeTruthy();
 
             await user.keyboard('{Escape}');
-            expect(screen.queryByRole('dialog', { name })).toBeNull();
+            expect(screen.queryByRole('region', { name })).toBeNull();
             expect(trigger).toBe(document.activeElement);
         }
+    });
+
+    it('changes menu content without remounting the panel workspace', async () => {
+        const user = await startGame();
+
+        await user.click(screen.getByRole('button', { name: 'Inventory' }));
+        const workspace = document.querySelector('.panel-workspace');
+
+        await user.click(screen.getByRole('button', { name: 'Journal' }));
+
+        expect(document.querySelector('.panel-workspace')).toBe(workspace);
+        expect(screen.getByRole('region', { name: 'Journal' })).toBeTruthy();
+        expect(screen.queryByRole('region', { name: 'Inventory' })).toBeNull();
     });
 
     it('supports the inventory, notes, and map-travel journey through the composed UI', async () => {
         const user = await startGame();
 
         await user.click(screen.getByRole('button', { name: 'Inventory' }));
-        await user.click(screen.getByText('Old Coin'));
         expect(
             screen.getByText('Stamped with a forgotten crest.')
         ).toBeTruthy();
-        const itemModal = screen
-            .getByText('Stamped with a forgotten crest.')
-            .closest<HTMLElement>('.item-modal')!;
-        await user.click(
-            within(itemModal).getByRole('button', { name: 'Close' })
-        );
         await user.click(screen.getByRole('button', { name: 'Close' }));
 
         await user.click(screen.getByRole('button', { name: 'Notes' }));
@@ -577,12 +581,14 @@ describe('GameShell player journeys', () => {
             await screen.findByRole('button', { name: 'New Game' })
         );
 
-        expect(screen.getByText('gold')).toBeTruthy();
+        expect(screen.getByText('Gold')).toBeTruthy();
         expect(screen.getByText('5')).toBeTruthy();
         expect(screen.queryByText('_internal')).toBeNull();
         await user.click(screen.getByRole('button', { name: 'Settings' }));
-        expect(screen.getByRole('heading', { name: 'Settings' })).toBeTruthy();
+        expect(
+            screen.getByRole('region', { name: 'Settings' })
+        ).toBeTruthy();
         await user.click(screen.getByRole('button', { name: 'Back' }));
-        expect(screen.queryByRole('heading', { name: 'Settings' })).toBeNull();
+        expect(screen.queryByRole('region', { name: 'Settings' })).toBeNull();
     });
 });

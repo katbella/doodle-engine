@@ -111,9 +111,14 @@ describe('NewProjectModal', () => {
             'localized'
         );
 
-        const checks = screen.getAllByRole('checkbox');
-        await user.click(checks[0]);
-        expect((checks[1] as HTMLInputElement).disabled).toBe(true);
+        const rendererTemplate = screen.getByRole('combobox', {
+            name: 'Renderer template',
+        });
+        await user.selectOptions(rendererTemplate, 'prose');
+
+        const rendererToggle = screen.getByRole('checkbox');
+        await user.click(rendererToggle);
+        expect((rendererTemplate as HTMLSelectElement).disabled).toBe(true);
         await user.click(screen.getByRole('button', { name: 'Create' }));
         expect(onCreate).toHaveBeenCalledWith({
             name: 'Story Game',
@@ -121,7 +126,7 @@ describe('NewProjectModal', () => {
             subtitle: 'A Subtitle',
             targetDir: 'C:/games',
             useDefaultRenderer: false,
-            useStarterStyles: true,
+            rendererTemplate: 'prose',
             contentMode: 'minimal',
             localizationMode: 'localized',
         });

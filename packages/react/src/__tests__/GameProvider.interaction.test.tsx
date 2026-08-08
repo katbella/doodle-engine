@@ -50,7 +50,15 @@ const config: GameConfig = {
 
 function GameHarness() {
     const { snapshot } = useGame();
-    return <div data-testid="location">{snapshot.location.name}</div>;
+    return (
+        <>
+            <div data-testid="location">{snapshot.location.name}</div>
+            <div data-testid="interlude">{snapshot.pendingInterlude?.id}</div>
+            <div data-testid="profile-complete">
+                {String(snapshot.player.profileComplete)}
+            </div>
+        </>
+    );
 }
 
 describe('GameProvider real player actions', () => {
@@ -83,5 +91,43 @@ describe('GameProvider real player actions', () => {
         });
 
         expect(screen.getByTestId('location').textContent).toBe('The Market');
+    });
+
+    it('keeps a new-game interlude queued while the player creates a profile', () => {
+        const content = registry();
+        content.interludes.opening = {
+            id: 'opening',
+            text: 'Chapter One: The Road',
+            triggerLocation: 'tavern',
+        };
+        const engine = new Engine(content, createInitialState());
+        const snapshot = engine.newGame({
+            ...config,
+            playerCreatesProfile: true,
+        });
+        let capturedActions: ReturnType<typeof useGame>['actions'] | null =
+            null;
+
+        function Capture() {
+            const { actions } = useGame();
+            capturedActions = actions;
+            return null;
+        }
+
+        render(
+            <GameProvider engine={engine} initialSnapshot={snapshot}>
+                <GameHarness />
+                <Capture />
+            </GameProvider>
+        );
+
+        expect(screen.getByTestId('interlude').textContent).toBe('opening');
+
+        act(() => {
+            capturedActions!.setPlayerProfile({ name: 'Wren' });
+        });
+
+        expect(screen.getByTestId('profile-complete').textContent).toBe('true');
+        expect(screen.getByTestId('interlude').textContent).toBe('opening');
     });
 });

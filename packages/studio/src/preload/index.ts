@@ -20,6 +20,8 @@ const api: StudioApi = {
     removeRecentProject: (dir) =>
         ipcRenderer.invoke('project:removeRecent', dir),
     revalidate: (dir) => ipcRenderer.invoke('project:revalidate', dir),
+    switchRendererTheme: (dir, template) =>
+        ipcRenderer.invoke('project:switchRendererTheme', dir, template),
     readFlagVarNotes: (dir) =>
         ipcRenderer.invoke('metadata:readFlagVarNotes', dir),
     updateFlagVarNote: (dir, kind, id, note) =>

@@ -1,0 +1,7 @@
+id: old_coin
+name: "Old Coin"
+description: "A tarnished coin with strange markings. It doesn't match any currency you've seen before."
+icon: ""
+image: ""
+location: tavern
+stats: {}

@@ -75,6 +75,10 @@ const project: OpenProject = {
         depsInstalled: true,
         packageManager: 'yarn',
     },
+    rendererTheme: {
+        renderer: 'default',
+        template: 'starter-rpg',
+    },
 };
 
 const source = `# This comment and shell block must survive form saves

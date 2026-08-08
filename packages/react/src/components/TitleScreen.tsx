@@ -28,6 +28,8 @@ export interface TitleScreenProps {
     title?: string;
     /** Subtitle text */
     subtitle?: string;
+    /** Studio or author name shown above the title when no logo is set */
+    author?: string;
     /** CSS class */
     className?: string;
 }
@@ -42,38 +44,89 @@ export function TitleScreen({
     onCredits,
     title = 'Doodle Engine',
     subtitle,
+    author,
     className = '',
 }: TitleScreenProps) {
     const displayLogo = shell?.logo;
     const background = shell?.background;
-
+    const showEngineTag = shell?.showEngineTag !== false;
     const bgStyle = screenBackgroundStyle(background ?? '');
+    const menuItems = [
+        {
+            label: uiText(ui, 'ui.new_game'),
+            onClick: onNewGame,
+            primary: true,
+        },
+        ...(hasSaveData
+            ? [
+                  {
+                      label: uiText(ui, 'ui.resume'),
+                      onClick: onContinue,
+                      primary: false,
+                  },
+              ]
+            : []),
+        {
+            label: uiText(ui, 'ui.settings'),
+            onClick: onSettings,
+            primary: false,
+        },
+        ...(onCredits
+            ? [
+                  {
+                      label: uiText(ui, 'ui.credits'),
+                      onClick: onCredits,
+                      primary: false,
+                  },
+              ]
+            : []),
+    ];
 
     return (
-        <div className={`title-screen ${className}`} style={bgStyle}>
-            {displayLogo && (
-                <img src={displayLogo} alt={title} className="title-logo" />
+        <div
+            className={`title-screen ${background ? 'has-background' : ''} ${className}`}
+        >
+            <div className="title-backdrop" style={bgStyle} />
+            {!background && (
+                <div className="title-art-placeholder" aria-hidden="true">
+                    <span>Title artwork</span>
+                </div>
             )}
-            <h1 className="title-heading">{title}</h1>
-            {subtitle && <p className="title-subtitle">{subtitle}</p>}
-            <div className="title-menu">
-                <button className="title-button" onClick={onNewGame}>
-                    {uiText(ui, 'ui.new_game')}
-                </button>
-                {hasSaveData && (
-                    <button className="title-button" onClick={onContinue}>
-                        {uiText(ui, 'ui.resume')}
-                    </button>
+            <div className="title-vignette" aria-hidden="true" />
+            <div className="title-scrim" aria-hidden="true" />
+
+            <div className="title-content">
+                {displayLogo && (
+                    <img src={displayLogo} alt={title} className="title-logo" />
                 )}
-                <button className="title-button" onClick={onSettings}>
-                    {uiText(ui, 'ui.settings')}
-                </button>
-                {onCredits && (
-                    <button className="title-button" onClick={onCredits}>
-                        {uiText(ui, 'ui.credits')}
-                    </button>
+                {!displayLogo && author && (
+                    <div className="title-eyebrow" aria-hidden="true">
+                        <span className="title-eyebrow-rule" />
+                        <span className="title-eyebrow-text">{author}</span>
+                    </div>
                 )}
+                <h1 className="title-heading">{title}</h1>
+                {subtitle && <p className="title-subtitle">{subtitle}</p>}
+                <div className="title-menu">
+                    {menuItems.map((item) => (
+                        <button
+                            className={`title-button ${item.primary ? 'is-primary' : ''}`}
+                            key={item.label}
+                            onClick={item.onClick}
+                        >
+                            <span className="title-button-label">
+                                {item.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
             </div>
+
+            {showEngineTag && (
+                <div className="title-build">
+                    {uiText(ui, 'ui.made_with_doodle_engine')}
+                </div>
+            )}
         </div>
     );
 }

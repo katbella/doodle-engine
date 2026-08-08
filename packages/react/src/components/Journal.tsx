@@ -16,11 +16,13 @@ export interface JournalProps {
 export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
     return (
         <div className={`journal ${className}`}>
-            <h2>{uiText(ui, 'ui.journal')}</h2>
+            <h2 className="journal-title">{uiText(ui, 'ui.journal')}</h2>
 
             {quests.length > 0 && (
-                <div className="journal-quests">
-                    <h3>{uiText(ui, 'ui.active_quests')}</h3>
+                <div className="journal-quests doodle-scroll doodle-scroll-parchment">
+                    <h3 className="doodle-section-label">
+                        {uiText(ui, 'ui.active_quests')}
+                    </h3>
                     {quests.map((quest) => (
                         <div key={quest.id} className="quest-entry">
                             <div className="quest-name">{quest.name}</div>
@@ -36,17 +38,21 @@ export function Journal({ quests, entries, ui, className = '' }: JournalProps) {
             )}
 
             {entries.length > 0 && (
-                <div className="journal-entries">
-                    <h3>{uiText(ui, 'ui.entries')}</h3>
-                    {entries.map((entry) => (
-                        <div
-                            key={entry.id}
-                            className={`journal-entry journal-category-${entry.category}`}
-                        >
-                            <div className="entry-title">{entry.title}</div>
-                            <div className="entry-text">{entry.text}</div>
-                        </div>
-                    ))}
+                <div className="journal-entries doodle-scroll doodle-scroll-parchment">
+                    <h3 className="doodle-section-label">
+                        {uiText(ui, 'ui.entries')}
+                    </h3>
+                    <div className="journal-entry-list">
+                        {entries.map((entry) => (
+                            <article
+                                key={entry.id}
+                                className={`journal-entry journal-category-${entry.category}`}
+                            >
+                                <h4 className="entry-title">{entry.title}</h4>
+                                <p className="entry-text">{entry.text}</p>
+                            </article>
+                        ))}
+                    </div>
                 </div>
             )}
 

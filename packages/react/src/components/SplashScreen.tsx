@@ -78,6 +78,13 @@ export function SplashScreen({
             {displayLogo && (
                 <img src={displayLogo} alt="" className="splash-logo" />
             )}
+            {!displayLogo && (
+                <div className="splash-mark" aria-hidden="true">
+                    <span className="splash-mark-rule" />
+                    <span className="splash-mark-label">Doodle Engine</span>
+                    <span className="splash-mark-rule" />
+                </div>
+            )}
         </div>
     );
 }

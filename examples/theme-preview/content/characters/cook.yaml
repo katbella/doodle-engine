@@ -1,0 +1,8 @@
+id: cook
+name: "Old Pim"
+title: "Cook, The Salty Dog"
+biography: "Runs the tavern kitchen. Says little, cooks well."
+portrait: ""
+location: tavern
+dialogue: cook_greeting
+stats: {}

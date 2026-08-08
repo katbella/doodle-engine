@@ -64,7 +64,7 @@ export function LocalizedTextField({
     const isKey = source.startsWith('@');
     const keyName = isKey ? source.slice(1) : '';
     const locale =
-        writer?.authoringLocale ??
+        writer?.primaryLocale ??
         authoredTextPreview(source, registry)?.locale ??
         null;
     const localeValues = locale

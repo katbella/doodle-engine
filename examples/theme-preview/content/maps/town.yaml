@@ -1,0 +1,11 @@
+id: town
+name: "Town"
+image: ""
+scale: 100
+locations:
+  - id: tavern
+    x: 100
+    y: 200
+  - id: market
+    x: 300
+    y: 150

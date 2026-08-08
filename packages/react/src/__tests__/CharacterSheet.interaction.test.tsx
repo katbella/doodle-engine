@@ -48,9 +48,7 @@ describe('CharacterSheet', () => {
         expect(screen.queryByText('Story score')).toBeNull();
         expect(screen.queryByText('4')).toBeNull();
 
-        await user.click(
-            screen.getByRole('button', { name: 'Next' })
-        );
+        await user.click(screen.getByRole('button', { name: 'Next' }));
         expect(onNext).toHaveBeenCalledOnce();
     });
 });
@@ -132,9 +130,7 @@ describe('GameRenderer party panel', () => {
         await user.click(screen.getByRole('button', { name: 'Party' }));
         expect(screen.getByRole('heading', { name: 'Avery' })).toBeTruthy();
 
-        await user.click(
-            screen.getByRole('button', { name: 'Next' })
-        );
+        await user.click(screen.getByRole('button', { name: 'Elisa, Scout' }));
         expect(screen.getByRole('heading', { name: 'Elisa' })).toBeTruthy();
         expect(actions.talkTo).not.toHaveBeenCalled();
     });
@@ -150,6 +146,9 @@ describe('PlayerSetup', () => {
                     'ui.player_name': 'Your name',
                     'ui.player_title': 'Optional title',
                     'ui.player_biography': 'A short history',
+                    'ui.player_name_placeholder': 'Name your traveler',
+                    'ui.player_title_placeholder': 'Choose a calling',
+                    'ui.player_biography_placeholder': 'Tell their story',
                 }}
                 onSubmit={onSubmit}
             />
@@ -160,9 +159,9 @@ describe('PlayerSetup', () => {
         });
         expect((submit as HTMLButtonElement).disabled).toBe(true);
         expect(screen.queryByLabelText(/portrait/i)).toBeNull();
-        expect(screen.getByPlaceholderText('Your name')).toBeTruthy();
-        expect(screen.getByPlaceholderText('Optional title')).toBeTruthy();
-        expect(screen.getByPlaceholderText('A short history')).toBeTruthy();
+        expect(screen.getByPlaceholderText('Name your traveler')).toBeTruthy();
+        expect(screen.getByPlaceholderText('Choose a calling')).toBeTruthy();
+        expect(screen.getByPlaceholderText('Tell their story')).toBeTruthy();
 
         await user.type(screen.getByLabelText('Your name'), 'Avery');
         await user.type(screen.getByLabelText('Optional title'), 'Warden');

@@ -1,0 +1,185 @@
+# This dialogue is triggered by clicking the bartender character.
+# SPEAKER: lines set who's talking, matched to character ID (case-insensitive).
+# Nodes can have multiple CHOICE blocks; REQUIRE hides a choice if the condition fails.
+
+NODE start
+  # The displayed text uses *bold* around the tavern name.
+  BARTENDER: Welcome to the *Salty Dog*, stranger. What can I get you?
+
+  # Always available: ask for rumors (demonstrates: flag, relationship, journalEntry)
+  CHOICE What's the news around here?
+    SET flag metBartender
+    ADD relationship bartender 1
+    GOTO rumors
+  END
+
+  # Always available: buy a drink (demonstrates: variable change, flag)
+  CHOICE I'll have a drink.
+    GOTO order_drink
+  END
+
+  # Only before accepting the quest (demonstrates: notFlag condition)
+  CHOICE I'm looking for work.
+    REQUIRE notFlag acceptedOddJobs
+    GOTO work_intro
+  END
+
+  # Only while quest is active at "started" stage (demonstrates: questAtStage condition)
+  CHOICE About that job you mentioned...
+    REQUIRE questAtStage odd_jobs started
+    GOTO work_followup
+  END
+
+  # Only after quest is complete (demonstrates: questAtStage condition)
+  CHOICE Thanks for putting me onto that work.
+    REQUIRE questAtStage odd_jobs complete
+    GOTO work_done
+  END
+
+  CHOICE Never mind, just passing through.
+    GOTO farewell
+  END
+
+NODE rumors
+  # The displayed text nests *bold* inside cRRGGBB[color] for the old coin.
+  BARTENDER: Word is there's been strange folk poking around the docks at night. And the merchant in the market square has been looking for hired help. Oh, I found this cD6A84B[*old coin*] on the floor the other day. Strange markings. You can have it.
+  ADD journalEntry tavern_discovery
+  ADD item old_coin
+  NOTIFY Journal Updated
+
+  CHOICE Tell me more about that.
+    GOTO rumors_detail
+  END
+
+  CHOICE So, what else?
+    GOTO start
+  END
+
+NODE rumors_detail
+  BARTENDER: Some say they've seen lights out on the old pier after midnight. Probably smugglers, but who knows these days. Keep your wits about you.
+
+  CHOICE Interesting. I'll keep that in mind.
+    GOTO start
+  END
+
+NODE order_drink
+  BARTENDER: Five gold for the house special, strongest thing this side of the river. What do you say?
+
+  # Only if player can afford it (demonstrates: variableGreaterThan condition)
+  CHOICE Sure, here's five gold.
+    REQUIRE variableGreaterThan gold 4
+    ADD variable gold -5
+    ADD variable _drinksBought 1
+    ADD variable reputation 1
+    SET flag hadDrink
+    ADD relationship bartender 1
+    NOTIFY Bought a drink (-5 gold)
+    GOTO after_drink
+  END
+
+  # Try to bluff a free drink. Rolls dice inline (demonstrates: ROLL + GOTO within one dialogue)
+  CHOICE Try to talk your way to a free drink.
+    GOTO bluff_attempt
+  END
+
+  # Always available as an out
+  CHOICE On second thought, I'll pass.
+    GOTO start
+  END
+
+NODE bluff_attempt
+  # Roll happens immediately on entering this silent node. If the IF passes,
+  # everything inside that IF block runs before routing to bluff_success.
+  ROLL bluffRoll 1 20
+  IF variableGreaterThan bluffRoll 14
+    SET flag bluffedMarcus
+    ADD relationship bartender 2
+    GOTO bluff_success
+  END
+  GOTO bluff_failure
+
+NODE bluff_success
+  BARTENDER: Sure, this one's on the house.
+
+  CHOICE Cheers!
+    GOTO start
+  END
+
+NODE bluff_failure
+  BARTENDER: Nope. That'll be five gold.
+
+  CHOICE Fine. Here's five gold.
+    REQUIRE variableGreaterThan gold 4
+    ADD variable gold -5
+    ADD variable _drinksBought 1
+    ADD variable reputation 1
+    SET flag hadDrink
+    ADD relationship bartender 1
+    NOTIFY Bought a drink (-5 gold)
+    GOTO start
+  END
+
+  CHOICE Never mind then.
+    GOTO start
+  END
+
+NODE after_drink
+  BARTENDER: Glad you like it! Brewed it myself. Now then, anything else?
+
+  CHOICE So, what else?
+    GOTO start
+  END
+
+NODE work_intro
+  BARTENDER: Well now, you look capable enough. There's a merchant over in the market square. Elena has been asking around for someone reliable. Tell her Marcus sent you.
+
+  CHOICE Sure, I could use the coin.
+    SET flag acceptedOddJobs
+    SET questStage odd_jobs started
+    ADD journalEntry odd_jobs_accepted
+    ADD relationship bartender 2
+    ADD variable reputation 5
+    NOTIFY New Quest: Odd Jobs
+    GOTO work_accepted
+  END
+
+  CHOICE Not right now, thanks.
+    GOTO start
+  END
+
+NODE work_accepted
+  BARTENDER: Good on you. Elena's fair with pay. Head to the market square when you're ready.
+
+  CHOICE I'll head there now.
+    GOTO farewell
+  END
+
+  CHOICE What exactly do they need?
+    GOTO work_details
+  END
+
+NODE work_details
+  BARTENDER: Something about a shipment that needs escorting. Nothing too dangerous, she says, but then, that's what they always say.
+
+  CHOICE Got it. I'll take care of it.
+    GOTO farewell
+  END
+
+NODE work_followup
+  BARTENDER: Still working on that job for Elena? She's over at the market square if you haven't found her yet. Don't keep her waiting too long.
+
+  CHOICE I'll head there now.
+    GOTO farewell
+  END
+
+NODE work_done
+  BARTENDER: I heard Elena's singing your praises. Good work out there. I knew you had it in you.
+  ADD relationship bartender 3
+
+  CHOICE Anytime.
+    GOTO start
+  END
+
+NODE farewell
+  BARTENDER: Take care out there. The streets aren't as safe as they used to be.
+  END dialogue

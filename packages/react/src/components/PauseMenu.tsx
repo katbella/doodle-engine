@@ -44,7 +44,7 @@ export function PauseMenu({
         >
             <h2 className="pause-title">{title}</h2>
             <div className="pause-buttons">
-                <button className="pause-button" onClick={onResume}>
+                <button className="pause-button is-primary" onClick={onResume}>
                     {uiText(ui, 'ui.resume')}
                 </button>
                 <button className="pause-button" onClick={onSave}>

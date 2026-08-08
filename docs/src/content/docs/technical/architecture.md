@@ -118,7 +118,7 @@ Effects produce a new state: setting flags, adding items, changing quest stages,
 @doodle-engine/core      Engine, types, conditions, effects, parser, snapshot builder
 @doodle-engine/react     React components, hooks, context provider
 @doodle-engine/toolkit   Project loading, validation, dev server, builds, project creation
-@doodle-engine/cli       The doodle command line, a thin wrapper over the toolkit
+@doodle-engine/cli       The doodle-engine command line, a thin wrapper over the toolkit
 @doodle-engine/studio    Doodle Studio desktop editor
 ```
 

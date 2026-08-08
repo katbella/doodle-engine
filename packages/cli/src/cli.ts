@@ -10,6 +10,7 @@ import { pathToFileURL } from 'node:url';
 import { dev } from './commands/dev.js';
 import { build } from './commands/build.js';
 import { validate } from './commands/validate.js';
+import { theme } from './commands/theme.js';
 import { create } from './create.js';
 
 // Filled in from package.json at build time (see vite.config.ts), so the
@@ -57,6 +58,13 @@ export function createCli(): Command {
         .description('Validate game content')
         .action(async () => {
             await validate();
+        });
+
+    program
+        .command('theme <template>')
+        .description('Change the current project renderer theme')
+        .action(async (template: string) => {
+            await theme(template);
         });
 
     return program;

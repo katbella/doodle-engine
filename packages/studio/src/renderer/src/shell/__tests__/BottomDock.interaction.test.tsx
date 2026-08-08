@@ -46,6 +46,10 @@ function project(problems: OpenProject['problems'] = []): OpenProject {
             depsInstalled: true,
             packageManager: 'yarn',
         },
+        rendererTheme: {
+            renderer: 'default',
+            template: 'starter-rpg',
+        },
     };
 }
 

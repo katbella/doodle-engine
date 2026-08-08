@@ -28,8 +28,13 @@ export function CreditsScreen({
                         </>
                     )}
                 </div>
-                <button className="title-button" onClick={onBack}>
-                    {uiText(ui, 'ui.back')}
+                <button
+                    className="title-button credits-back-button"
+                    onClick={onBack}
+                >
+                    <span className="title-button-label">
+                        {uiText(ui, 'ui.back')}
+                    </span>
                 </button>
             </div>
         </div>

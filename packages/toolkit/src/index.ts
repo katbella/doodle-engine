@@ -37,7 +37,20 @@ export type {
     CreateProjectResult,
     ScaffoldContentMode,
     ScaffoldLocalizationMode,
+    RendererTemplate,
 } from './create-project';
+
+// Renderer theme inspection and switching
+export {
+    RENDERER_TEMPLATES,
+    isRendererTemplate,
+    readRendererTheme,
+    switchRendererTheme,
+} from './renderer-theme';
+export type {
+    RendererThemeInfo,
+    SwitchRendererThemeResult,
+} from './renderer-theme';
 
 // Comment-preserving YAML edits (for Studio's visual entity forms)
 export { applyYamlEdits } from './yaml-edit';

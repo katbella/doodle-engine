@@ -1,0 +1,8 @@
+id: scribe
+name: "Toma"
+title: "Traveling Scribe"
+biography: "A traveling scribe who stops here between jobs. Writes letters for anyone who asks."
+portrait: ""
+location: tavern
+dialogue: scribe_greeting
+stats: {}

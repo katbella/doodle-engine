@@ -34,54 +34,66 @@ export function PlayerNotes({
     };
 
     return (
-        <div className={`player-notes ${className}`}>
-            <h2>{uiText(ui, 'ui.notes')}</h2>
+        <div className={`player-notes-view ${className}`}>
+            <section className="player-notes">
+                <h2 className="doodle-section-label">
+                    {uiText(ui, 'ui.new_note')}
+                </h2>
 
-            <form className="player-notes-form" onSubmit={handleSubmit}>
-                <input
-                    className="player-notes-title-input"
-                    type="text"
-                    placeholder={uiText(ui, 'ui.note_title')}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-                <textarea
-                    className="player-notes-text-input"
-                    placeholder={uiText(ui, 'ui.note_text')}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    rows={3}
-                />
-                <button className="player-notes-add-button" type="submit">
-                    {uiText(ui, 'ui.add_note')}
-                </button>
-            </form>
+                <form className="player-notes-form" onSubmit={handleSubmit}>
+                    <input
+                        className="player-notes-title-input doodle-field-parchment"
+                        type="text"
+                        placeholder={uiText(ui, 'ui.note_title')}
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                    <textarea
+                        className="player-notes-text-input doodle-field-parchment"
+                        placeholder={uiText(ui, 'ui.note_text')}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        rows={7}
+                    />
+                    <button className="player-notes-add-button" type="submit">
+                        {uiText(ui, 'ui.add_note')}
+                    </button>
+                </form>
+            </section>
 
-            {notes.length === 0 ? (
-                <p className="player-notes-empty">
-                    {uiText(ui, 'ui.no_notes')}
-                </p>
-            ) : (
-                <ul className="player-notes-list">
-                    {notes.map((note) => (
-                        <li key={note.id} className="player-note">
-                            {note.title && (
-                                <div className="player-note-title">
-                                    {note.title}
+            <section className="player-notes-list-column doodle-scroll doodle-scroll-parchment">
+                <h2 className="doodle-section-label">
+                    {uiText(ui, 'ui.your_notes')}
+                </h2>
+                {notes.length === 0 ? (
+                    <p className="player-notes-empty">
+                        {uiText(ui, 'ui.no_notes')}
+                    </p>
+                ) : (
+                    <ul className="player-notes-list">
+                        {notes.map((note) => (
+                            <li key={note.id} className="player-note">
+                                {note.title && (
+                                    <div className="player-note-title">
+                                        {note.title}
+                                    </div>
+                                )}
+                                <div className="player-note-text">
+                                    {note.text}
                                 </div>
-                            )}
-                            <div className="player-note-text">{note.text}</div>
-                            <button
-                                className="player-note-delete"
-                                onClick={() => onDelete(note.id)}
-                                aria-label={uiText(ui, 'ui.delete')}
-                            >
-                                {uiText(ui, 'ui.delete')}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+                                <button
+                                    className="player-note-delete"
+                                    type="button"
+                                    onClick={() => onDelete(note.id)}
+                                    aria-label={uiText(ui, 'ui.delete')}
+                                >
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
         </div>
     );
 }

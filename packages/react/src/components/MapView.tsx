@@ -102,22 +102,18 @@ export function MapView({
     }
 
     return (
-        <div className={`map-view ${className}`}>
-            <h2>{map.name}</h2>
+        <div className={`map-view doodle-parchment-surface ${className}`}>
+            <h2 className="map-title">{map.name}</h2>
 
             <div className="map-container" style={{ position: 'relative' }}>
                 {map.image && (
-                    <img
-                        src={map.image}
-                        alt={map.name}
-                        className="map-image"
-                    />
+                    <img src={map.image} alt={map.name} className="map-image" />
                 )}
 
                 {map.locations.map((location) => (
                     <button
                         key={location.id}
-                        className={`map-marker ${location.isCurrent ? 'current' : ''}`}
+                        className={`map-marker map-location-button ${location.isCurrent ? 'current is-current' : ''}`}
                         style={{
                             position: 'absolute',
                             left: `${location.x}px`,
@@ -136,7 +132,10 @@ export function MapView({
                         disabled={location.isCurrent}
                         title={location.name}
                     >
-                        {location.name}
+                        <span className="map-location-dot" aria-hidden="true" />
+                        <span className="map-location-name">
+                            {location.name}
+                        </span>
                     </button>
                 ))}
             </div>
@@ -157,32 +156,29 @@ export function MapView({
                             pendingTravel.locationName
                         )}
                     </h3>
-                    <p className="travel-confirm-time">
-                        {pendingTravel.hours === 1
-                            ? t('ui.travel_time_one')
-                            : t('ui.travel_time').replace(
-                                  '{hours}',
-                                  String(pendingTravel.hours)
-                              )}
+                    <div className="travel-confirm-meta">
+                        <p className="travel-confirm-time">
+                            {pendingTravel.hours === 1
+                                ? t('ui.travel_time_one')
+                                : t('ui.travel_time').replace(
+                                      '{hours}',
+                                      String(pendingTravel.hours)
+                                  )}
+                        </p>
                         {pendingTravel.arrival && (
-                            <>
-                                <br />
-                                <span className="travel-confirm-arrival">
-                                    {t('ui.arrive')
-                                        .replace(
-                                            '{day}',
-                                            String(pendingTravel.arrival.day)
-                                        )
-                                        .replace(
-                                            '{time}',
-                                            formatHour(
-                                                pendingTravel.arrival.hour
-                                            )
-                                        )}
-                                </span>
-                            </>
+                            <p className="travel-confirm-arrival">
+                                {t('ui.arrive')
+                                    .replace(
+                                        '{day}',
+                                        String(pendingTravel.arrival.day)
+                                    )
+                                    .replace(
+                                        '{time}',
+                                        formatHour(pendingTravel.arrival.hour)
+                                    )}
+                            </p>
                         )}
-                    </p>
+                    </div>
                     <div className="travel-confirm-buttons">
                         <button
                             className="travel-confirm-cancel"

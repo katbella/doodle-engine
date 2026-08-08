@@ -208,6 +208,96 @@ describe('Monaco setup', () => {
         ).toEqual(['keyword', 'effectTarget', 'reference', 'literal']);
     });
 
+    it('tokenizes quoted text, plain values, comments, and structural commands', () => {
+        const plain = '"quoted \\"text\\"" @copy.key -2.5 true loose # note';
+        expect(
+            tokenizeDlgLine(plain)
+                .filter((token) => plain[token.startIndex] !== ' ')
+                .map((token) => token.scopes)
+        ).toEqual([
+            'string',
+            'type',
+            'number',
+            'literal',
+            'identifier',
+            'comment',
+        ]);
+        expect(tokenizeDlgLine(':')).toEqual([
+            { startIndex: 0, scopes: 'delimiter' },
+        ]);
+
+        for (const [line, scopes] of [
+            ['TRIGGER docks', ['keyword', 'reference']],
+            ['NODE opening', ['keyword', 'reference']],
+            ['CHOICE @choice.leave', ['keyword', 'type']],
+            ['VOICE greeting.ogg', ['keyword', 'string']],
+            ['PORTRAIT stern.png', ['keyword', 'string']],
+            ['END', ['keyword']],
+        ] as const) {
+            expect(
+                tokenizeDlgLine(line)
+                    .filter((token) => line[token.startIndex] !== ' ')
+                    .map((token) => token.scopes)
+            ).toEqual(scopes);
+        }
+    });
+
+    it('treats the remainder of text effects as one argument', () => {
+        const line = 'NOTIFY @notice.found old coin';
+        expect(getDlgCursorContext(line, line.length + 1)).toMatchObject({
+            keyword: 'NOTIFY',
+            argumentIndex: 0,
+            argumentKind: 'text',
+        });
+        expect(
+            tokenizeDlgLine(line)
+                .filter((token) => line[token.startIndex] !== ' ')
+                .map((token) => token.scopes)
+        ).toEqual(['keyword', 'type', 'string', 'string']);
+        expect(dlgHover(line, 3)?.documentation).toContain(
+            '`NOTIFY <message>`'
+        );
+        expect(dlgHover('ELENA: Hello', 2)).toBeNull();
+    });
+
+    it('completes variables, booleans, and character references', () => {
+        const context = {
+            nameCatalog: {
+                flags: [],
+                variables: [{ id: 'gold' }],
+                stats: [{ id: 'courage' }],
+            },
+            registry: {
+                locations: {},
+                characters: { elena: { id: 'elena' } },
+                items: {},
+                maps: {},
+                dialogues: {},
+                quests: {},
+                journalEntries: {},
+                interludes: {},
+                locales: {},
+            },
+        } as unknown as DlgCompletionContext;
+
+        expect(
+            dlgCompletions('SET variable ', 14, context).map(
+                (item) => item.label
+            )
+        ).toEqual(['gold']);
+        expect(
+            dlgCompletions('SET mapEnabled ', 16, context).map(
+                (item) => item.label
+            )
+        ).toEqual(['false', 'true']);
+        expect(
+            dlgCompletions('SET characterStat ', 19, context).map(
+                (item) => item.label
+            )
+        ).toEqual(['elena', 'player']);
+        expect(dlgCompletions('TRIGGER ', 9)).toEqual([]);
+    });
+
     it('offers descriptor keywords and project values in valid contexts', () => {
         const context = {
             nameCatalog: {

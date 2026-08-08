@@ -1,0 +1,8 @@
+id: storyteller
+name: "Nan Odell"
+title: "Tavern Storyteller"
+biography: "Tells the same three tavern stories every night. Somehow they still land."
+portrait: ""
+location: tavern
+dialogue: storyteller_greeting
+stats: {}

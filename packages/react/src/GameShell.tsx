@@ -6,14 +6,19 @@
  * Wraps AssetProvider + GameProvider + GameRenderer with full shell chrome.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    type ReactNode,
+} from 'react';
 import {
     Engine,
     buildUIStrings,
     createInitialState,
     resolveAssetPath,
 } from '@doodle-engine/core';
-import { uiText } from './uiText';
 import type {
     ContentRegistry,
     GameConfig,
@@ -40,6 +45,8 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PauseMenu } from './components/PauseMenu';
 import { SettingsPanel } from './components/SettingsPanel';
 import { VideoPlayer } from './components/VideoPlayer';
+import { DialogOverlay } from './components/DialogOverlay';
+import { uiText } from './uiText';
 import { InputProvider, useInputAction } from './input/InputRouter';
 import {
     hasSaves,
@@ -50,6 +57,43 @@ import {
 } from './saves';
 
 type Screen = 'splash' | 'title' | 'credits' | 'playing';
+
+function ShellPanel({
+    label,
+    closeLabel,
+    onDismiss,
+    children,
+}: {
+    label: string;
+    closeLabel: string;
+    onDismiss: () => void;
+    children: ReactNode;
+}) {
+    return (
+        <DialogOverlay
+            overlayClassName="shell-panel-overlay"
+            className="panel shell-panel"
+            ariaLabel={label}
+            onDismiss={onDismiss}
+        >
+            <header className="panel-header">
+                <div className="panel-header-title-group">
+                    <span className="panel-header-rule" aria-hidden="true" />
+                    <div className="panel-title">{label}</div>
+                </div>
+                <button
+                    className="panel-close"
+                    type="button"
+                    onClick={onDismiss}
+                    aria-label={closeLabel}
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+            </header>
+            <div className="panel-body">{children}</div>
+        </DialogOverlay>
+    );
+}
 
 export interface GameShellProps {
     /** Content registry (from api/content) */
@@ -405,25 +449,32 @@ function GameShellInner({
                 onPointerOver={handleUIHover}
             >
                 {showSettings ? (
-                    <SettingsPanel
-                        ui={titleUi}
-                        audio={audioSettings}
-                        uiSoundControls={
-                            uiSoundsConfig !== false
-                                ? uiSoundControls
-                                : undefined
-                        }
-                        availableLocales={availableLocales}
-                        currentLocale={selectedLocale}
-                        onLocaleChange={setSelectedLocale}
-                        onBack={closeSettings}
-                    />
+                    <ShellPanel
+                        label={uiText(titleUi, 'ui.settings')}
+                        closeLabel={uiText(titleUi, 'ui.close')}
+                        onDismiss={closeSettings}
+                    >
+                        <SettingsPanel
+                            ui={titleUi}
+                            audio={audioSettings}
+                            uiSoundControls={
+                                uiSoundsConfig !== false
+                                    ? uiSoundControls
+                                    : undefined
+                            }
+                            availableLocales={availableLocales}
+                            currentLocale={selectedLocale}
+                            onLocaleChange={setSelectedLocale}
+                            onBack={closeSettings}
+                        />
+                    </ShellPanel>
                 ) : (
                     <TitleScreen
                         ui={titleUi}
                         shell={shell?.title}
                         title={title}
                         subtitle={subtitle}
+                        author={config.author}
                         hasSaveData={hasSaveData}
                         onNewGame={handleNewGame}
                         onContinue={handleContinue}
@@ -594,17 +645,9 @@ function GameShellPlaying({
             <GameRenderer
                 projectId={projectId}
                 onButtonClick={uiSoundControls?.playClick}
+                onOpenMenu={onPause}
+                onCancelSetup={onQuitToTitle}
             />
-
-            {!showPauseMenu && !showSettings && !pendingVideo && (
-                <button
-                    className="game-shell-menu-button"
-                    onClick={onPause}
-                    aria-label={uiText(snapshot.ui, 'ui.menu')}
-                >
-                    {uiText(snapshot.ui, 'ui.menu')}
-                </button>
-            )}
 
             {showPauseMenu && (
                 <PauseMenu
@@ -619,15 +662,21 @@ function GameShellPlaying({
             )}
 
             {showSettings && (
-                <SettingsPanel
-                    ui={snapshot.ui}
-                    audio={audioSettings}
-                    uiSoundControls={uiSoundControls}
-                    availableLocales={availableLocales}
-                    currentLocale={snapshot.currentLocale}
-                    onLocaleChange={actions.setLocale}
-                    onBack={onCloseSettings}
-                />
+                <ShellPanel
+                    label={uiText(snapshot.ui, 'ui.settings')}
+                    closeLabel={uiText(snapshot.ui, 'ui.close')}
+                    onDismiss={onCloseSettings}
+                >
+                    <SettingsPanel
+                        ui={snapshot.ui}
+                        audio={audioSettings}
+                        uiSoundControls={uiSoundControls}
+                        availableLocales={availableLocales}
+                        currentLocale={snapshot.currentLocale}
+                        onLocaleChange={actions.setLocale}
+                        onBack={onCloseSettings}
+                    />
+                </ShellPanel>
             )}
         </>
     );

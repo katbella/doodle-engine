@@ -12,6 +12,7 @@ import { CharacterList } from '../components/CharacterList';
 import { Inventory } from '../components/Inventory';
 import { Journal } from '../components/Journal';
 import { PlayerNotes } from '../components/PlayerNotes';
+import { PlayerSetup } from '../components/PlayerSetup';
 import { PauseMenu } from '../components/PauseMenu';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { GameTime } from '../components/GameTime';
@@ -114,7 +115,8 @@ describe('built-in labels come from ui strings', () => {
                 onDelete={() => {}}
             />
         );
-        expect(html).toContain('XXui.notesXX');
+        expect(html).toContain('XXui.new_noteXX');
+        expect(html).toContain('XXui.your_notesXX');
         expect(html).toContain('XXui.note_titleXX');
         expect(html).toContain('XXui.note_textXX');
         expect(html).toContain('XXui.add_noteXX');
@@ -130,6 +132,21 @@ describe('built-in labels come from ui strings', () => {
         );
         expect(empty).toContain('XXui.no_notesXX');
         expect(empty).not.toContain('No notes yet');
+    });
+
+    it('PlayerSetup labels and guidance placeholders', () => {
+        const html = renderToStaticMarkup(
+            <PlayerSetup ui={ui} onSubmit={() => {}} />
+        );
+
+        expect(html).toContain('XXui.create_playerXX');
+        expect(html).toContain('XXui.player_nameXX');
+        expect(html).toContain('XXui.player_titleXX');
+        expect(html).toContain('XXui.player_biographyXX');
+        expect(html).toContain('XXui.player_name_placeholderXX');
+        expect(html).toContain('XXui.player_title_placeholderXX');
+        expect(html).toContain('XXui.player_biography_placeholderXX');
+        expect(html).toContain('XXui.begin_adventureXX');
     });
 
     it('PauseMenu title and quit button', () => {

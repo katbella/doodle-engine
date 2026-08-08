@@ -25,17 +25,118 @@ afterEach(async () => {
 });
 
 describe('createProject language setup', () => {
+    it.each([
+        ['minimal', '/* Minimal', false, []],
+        [
+            'starter-rpg',
+            '/* Starter RPG',
+            true,
+            ['@fontsource-variable/public-sans'],
+        ],
+        ['prose', '/* Prose', true, ['@fontsource/spectral']],
+        [
+            'fable',
+            '/* Fable',
+            true,
+            [
+                '@fontsource-variable/cormorant-garamond',
+                '@fontsource-variable/eb-garamond',
+                '@fontsource-variable/source-serif-4',
+            ],
+        ],
+    ] as const)(
+        'creates the %s renderer template and its scaling configuration',
+        async (rendererTemplate, marker, scalingEnabled, fontDependencies) => {
+            const targetDir = await makeTempDir();
+            const { projectPath } = await createProject(
+                `${rendererTemplate}-game`,
+                {
+                    targetDir,
+                    useDefaultRenderer: true,
+                    rendererTemplate,
+                }
+            );
+
+            const css = await readFile(
+                join(projectPath, 'src', 'renderer-theme.css'),
+                'utf-8'
+            );
+            const indexCss = await readFile(
+                join(projectPath, 'src', 'index.css'),
+                'utf-8'
+            );
+            const overridesCss = await readFile(
+                join(projectPath, 'src', 'renderer-overrides.css'),
+                'utf-8'
+            );
+            const projectSource = await readFile(
+                join(projectPath, 'src', 'project.ts'),
+                'utf-8'
+            );
+            const scaleSource = await readFile(
+                join(projectPath, 'src', 'renderer-scale.ts'),
+                'utf-8'
+            );
+            const packageJson = JSON.parse(
+                await readFile(join(projectPath, 'package.json'), 'utf-8')
+            );
+
+            expect(css).toContain(marker);
+            expect(indexCss).toContain("@import './renderer-theme.css'");
+            expect(indexCss).toContain("@import './renderer-overrides.css'");
+            expect(overridesCss).toContain(
+                'Theme switching never replaces this file.'
+            );
+            expect(projectSource).toContain(
+                `enabled: ${String(scalingEnabled)}`
+            );
+            expect(projectSource).not.toContain('__RENDERER_SCALING_ENABLED__');
+            expect(scaleSource).toContain('--doodle-stage-width');
+            expect(
+                Object.keys(packageJson.dependencies).filter((name) =>
+                    name.startsWith('@fontsource')
+                )
+            ).toEqual(fontDependencies);
+            expect(packageJson.scripts.theme).toBe('doodle-engine theme');
+            expect(packageJson.scripts.dev).toBe('doodle-engine dev');
+            expect(packageJson.scripts.build).toBe('doodle-engine build');
+            expect(packageJson.doodleEngine).toEqual({
+                renderer: 'default',
+                rendererTemplate,
+                managedFontDependencies: fontDependencies,
+            });
+            expect(css).not.toContain('fonts.googleapis.com');
+
+            if (rendererTemplate === 'minimal') {
+                expect(css).not.toContain('--doodle-bg-primary');
+                expect(css).not.toContain('@doodle-engine/react/style.css');
+                expect(css).toMatch(/\.game-menu-icon\s*\{\s*display:\s*none;/);
+            } else {
+                expect(css).toContain('--doodle-bg-primary');
+                expect(css).toContain('--doodle-spacing-md');
+                expect(css).toContain(
+                    "@import '@doodle-engine/react/style.css'"
+                );
+                expect(css).toContain('Renderer hooks shared');
+                expect(css).toMatch(
+                    /\.interlude-text\s*>\s*p\s*\{[^}]*animation:/s
+                );
+                expect(css).not.toContain('.interlude-text > p:nth-of-type(3)');
+            }
+        }
+    );
+
     it('gives each generated game its own stable project identity', async () => {
         const targetDir = await makeTempDir();
         const first = await createProject('first-game', {
             targetDir,
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
         });
         const second = await createProject('second-game', {
             targetDir,
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
         });
 
         const firstProject = await readFile(
@@ -90,7 +191,7 @@ describe('createProject language setup', () => {
         const { projectPath } = await createProject('literal-game', {
             targetDir,
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
         });
 
         const localeSource = await readFile(
@@ -156,7 +257,7 @@ describe('createProject language setup', () => {
         const { projectPath } = await createProject('localized-game', {
             targetDir,
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
             localizationMode: 'localized',
         });
 
@@ -230,7 +331,7 @@ describe('createProject language setup', () => {
             title: 'Minimal Story',
             subtitle: 'A small beginning',
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
             contentMode: 'minimal',
             localizationMode: 'literal',
         });
@@ -270,7 +371,7 @@ describe('createProject language setup', () => {
         const { projectPath } = await createProject('minimal-localized-game', {
             targetDir,
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
             contentMode: 'minimal',
             localizationMode: 'localized',
         });

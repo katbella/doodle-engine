@@ -10,7 +10,7 @@ import type {
     ThemeMode,
     FlagVarNotes,
 } from '../../shared/project';
-import type { ValidationError } from '@doodle-engine/toolkit';
+import type { RendererTemplate, ValidationError } from '@doodle-engine/toolkit';
 import {
     ReferenceIndex,
     type Reference,
@@ -146,6 +146,10 @@ export function App() {
     const [buildLog, setBuildLog] = useState<string[]>([]);
     const [installing, setInstalling] = useState(false);
     const [engineUpdateError, setEngineUpdateError] = useState<string | null>(
+        null
+    );
+    const [switchingRendererTheme, setSwitchingRendererTheme] = useState(false);
+    const [rendererThemeError, setRendererThemeError] = useState<string | null>(
         null
     );
     const [installLog, setInstallLog] = useState<string[]>([]);
@@ -695,6 +699,52 @@ export function App() {
             setInstalling(false);
         }
     }, [project, installing, reloadProject]);
+
+    const switchRendererTheme = useCallback(
+        async (template: RendererTemplate) => {
+            if (!project || switchingRendererTheme || installing) return;
+            const dir = project.projectDir;
+            setSwitchingRendererTheme(true);
+            setRendererThemeError(null);
+            try {
+                const switched = await window.studio.switchRendererTheme(
+                    dir,
+                    template
+                );
+                if (currentDirRef.current !== dir) return;
+
+                setProject(switched.project);
+                setReferenceProject(switched.project);
+                setPreview(null);
+
+                if (switched.dependenciesChanged) {
+                    setInstalling(true);
+                    setInstallLog([]);
+                    setDockTab('build');
+                    const installed =
+                        await window.studio.installDependencies(dir);
+                    if (currentDirRef.current !== dir) return;
+                    if (!installed.ok) {
+                        setRendererThemeError(
+                            'The theme changed, but its font dependencies could not be installed. Check Build output and install dependencies before previewing.'
+                        );
+                        return;
+                    }
+                    const fresh = await reloadProject(dir);
+                    setProject(fresh);
+                    setReferenceProject(fresh);
+                }
+            } catch (error) {
+                if (currentDirRef.current === dir) {
+                    setRendererThemeError(displayError(error));
+                }
+            } finally {
+                setInstalling(false);
+                setSwitchingRendererTheme(false);
+            }
+        },
+        [project, switchingRendererTheme, installing, reloadProject]
+    );
 
     const startPreview = useCallback(async () => {
         if (!project || previewBusy) return;
@@ -1318,7 +1368,12 @@ export function App() {
                     reveal={reveal}
                     updatingEngine={installing}
                     engineUpdateError={engineUpdateError}
+                    switchingRendererTheme={switchingRendererTheme}
+                    rendererThemeError={rendererThemeError}
                     onUpdateEngine={updateEngine}
+                    onSwitchRendererTheme={(template) =>
+                        void switchRendererTheme(template)
+                    }
                     onSelect={setActiveKey}
                     onClose={closeTab}
                     onSetViewMode={setViewMode}

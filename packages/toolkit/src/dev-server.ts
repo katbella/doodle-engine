@@ -1,7 +1,7 @@
 /**
  * Development server for a Doodle Engine project.
  *
- * This is the same server the CLI's `doodle dev` runs, moved out of the command
+ * This is the same server the CLI's `doodle-engine dev` runs, moved out of the command
  * so Doodle Studio can start the exact same server for its live preview. It
  * serves the project's content and asset manifest over HTTP, watches the content
  * folder, and reloads the browser on change. Progress and validation are

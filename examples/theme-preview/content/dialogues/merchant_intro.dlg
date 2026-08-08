@@ -1,0 +1,104 @@
+# Merchant dialogue. Same speaker-line and CHOICE syntax as bartender_greeting.dlg.
+# The quest choices here demonstrate multi-stage quest gating with questAtStage.
+
+NODE start
+  MERCHANT: Welcome, welcome! Elena's Emporium has everything you need, and plenty you didn't know you wanted.
+
+  CHOICE Let me see what you've got.
+    GOTO browse
+  END
+
+  # Only appears when quest is at "started" (bartender sent you)
+  CHOICE Marcus sent me about some work.
+    REQUIRE questAtStage odd_jobs started
+    GOTO odd_jobs_talk
+  END
+
+  # Only appears after talking to merchant about the job
+  CHOICE The delivery is done.
+    REQUIRE questAtStage odd_jobs talked_to_merchant
+    GOTO quest_complete
+  END
+
+  CHOICE Tell me about the market.
+    GOTO about_market
+  END
+
+  CHOICE Just browsing. Goodbye.
+    GOTO farewell
+  END
+
+NODE browse
+  MERCHANT: Take a look! I've got a fine map of the area if you're new around here. Only twenty gold, a bargain for not getting lost.
+
+  # Conditional purchase: need enough gold (demonstrates: variableGreaterThan)
+  # This choice uses *bold* around the item name.
+  CHOICE I'll take the *map*. (20 gold)
+    REQUIRE variableGreaterThan gold 19
+    ADD variable gold -20
+    SET flag boughtMap
+    NOTIFY Bought a map (-20 gold)
+    GOTO sold_map
+  END
+
+  CHOICE A bit rich for my blood.
+    GOTO too_pricey
+  END
+
+NODE sold_map
+  MERCHANT: Excellent choice! This'll keep you from wandering into the wrong part of town.
+
+  CHOICE Thanks for the info.
+    GOTO start
+  END
+
+NODE too_pricey
+  MERCHANT: Ha! You'd pay twice that if you got lost in the docks at night. But no rush. I'll be here.
+
+  CHOICE I'll keep looking around.
+    GOTO start
+  END
+
+NODE odd_jobs_talk
+  MERCHANT: Ah, Marcus sent you? Good man. I've got a shipment coming in and could use someone to keep an eye on things. Interested?
+
+  CHOICE I'm in. What do you need?
+    SET questStage odd_jobs talked_to_merchant
+    ADD relationship merchant 1
+    NOTIFY Quest Updated: Odd Jobs
+    GOTO task_details
+  END
+
+  CHOICE Let me think about it.
+    GOTO farewell
+  END
+
+NODE task_details
+  MERCHANT: Head down to the docks at sundown. You'll meet my contact there, a woman named Ria. Make sure the cargo gets here in one piece.
+
+  CHOICE Consider it done.
+    GOTO farewell
+  END
+
+NODE quest_complete
+  MERCHANT: Everything arrived in perfect condition! You've earned this: fifty gold, as promised. If I need help again, you'll be the first I call.
+  SET questStage odd_jobs complete
+  ADD variable gold 50
+  ADD variable reputation 10
+  ADD relationship merchant 3
+  NOTIFY Quest Complete: Odd Jobs (+50 gold, +10 reputation)
+
+  CHOICE Glad I could help.
+    GOTO farewell
+  END
+
+NODE about_market
+  MERCHANT: Market Square is the heart of this little town. You can find just about anything here if you know where to look. I've been trading here for fifteen years.
+
+  CHOICE Thanks for the info.
+    GOTO start
+  END
+
+NODE farewell
+  MERCHANT: Safe travels! Come back anytime.
+  END dialogue

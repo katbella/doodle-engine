@@ -58,7 +58,9 @@ describe('PlayerNotes real interaction', () => {
                 onDelete={onDelete}
             />
         );
-        const deleteButtons = screen.getAllByText('Delete');
+        const deleteButtons = screen.getAllByRole('button', {
+            name: 'Delete',
+        });
         fireEvent.click(deleteButtons[1]);
         expect(onDelete).toHaveBeenCalledExactlyOnceWith('n2');
     });
@@ -70,14 +72,16 @@ describe('PlayerNotes real interaction', () => {
                 onWrite={() => {}}
                 onDelete={() => {}}
                 ui={{
-                    'ui.notes': 'Notas',
+                    'ui.new_note': 'Nueva nota',
+                    'ui.your_notes': 'Tus notas',
                     'ui.note_title': 'Titulo',
                     'ui.note_text': 'Escribe una nota...',
                     'ui.add_note': 'Anadir nota',
                 }}
             />
         );
-        expect(screen.getByText('Notas')).toBeTruthy();
+        expect(screen.getByText('Nueva nota')).toBeTruthy();
+        expect(screen.getByText('Tus notas')).toBeTruthy();
         expect(screen.getByPlaceholderText('Titulo')).toBeTruthy();
         expect(screen.getByPlaceholderText('Escribe una nota...')).toBeTruthy();
         expect(screen.getByText('Anadir nota')).toBeTruthy();

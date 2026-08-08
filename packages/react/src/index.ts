@@ -81,8 +81,6 @@ export type { CharacterSheetProps } from './components/CharacterSheet';
 export { PlayerSetup } from './components/PlayerSetup';
 export type { PlayerSetupProps } from './components/PlayerSetup';
 
-export { PlayerEmblem } from './components/PlayerEmblem';
-export type { PlayerEmblemProps } from './components/PlayerEmblem';
 
 export { Inventory } from './components/Inventory';
 export type { InventoryProps } from './components/Inventory';

@@ -286,6 +286,8 @@ export interface ShellConfig {
         background?: string;
         /** Music to play on the title screen */
         music?: string;
+        /** Show the "Made in Doodle Engine" tag (default: true) */
+        showEngineTag?: boolean;
     };
     uiSounds?: {
         click?: string;
@@ -303,6 +305,8 @@ export interface GameConfig {
     title: string;
     /** Optional line shown beneath the game title */
     subtitle?: string;
+    /** Studio or author name shown on the title screen when no logo is set */
+    author?: string;
     /** Shell screen configuration */
     shell?: ShellConfig;
     /** Whether the renderer asks the player to enter profile text */

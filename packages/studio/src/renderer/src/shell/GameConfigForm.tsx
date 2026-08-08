@@ -68,6 +68,7 @@ export function GameConfigForm({
     const OWNED = [
         'title',
         'subtitle',
+        'author',
         'playerCreatesProfile',
         'startLocation',
         'startTime',
@@ -250,6 +251,21 @@ export function GameConfigForm({
                             }
                             onChange={(event) =>
                                 set('subtitle', event.target.value)
+                            }
+                        />
+                    </label>
+                    <label className="field">
+                        <span className="field__label">Author</span>
+                        <input
+                            className="dlg__input"
+                            value={
+                                typeof config.author === 'string'
+                                    ? config.author
+                                    : ''
+                            }
+                            placeholder="Studio or author name"
+                            onChange={(event) =>
+                                set('author', event.target.value)
                             }
                         />
                     </label>
@@ -571,6 +587,22 @@ export function GameConfigForm({
                             }
                         />
                     </div>
+                    <label className="field field--inline">
+                        <input
+                            type="checkbox"
+                            checked={shellSection('title').showEngineTag !== false}
+                            onChange={(event) =>
+                                setShellField(
+                                    'title',
+                                    'showEngineTag',
+                                    event.target.checked ? undefined : false
+                                )
+                            }
+                        />
+                        <span className="field__label">
+                            Show "Made in Doodle Engine" on the title screen
+                        </span>
+                    </label>
                 </div>
             </section>
 
@@ -677,6 +709,7 @@ const SHELL_FIELDS = [
     ['title', 'logo'],
     ['title', 'background'],
     ['title', 'music'],
+    ['title', 'showEngineTag'],
     ['uiSounds', 'click'],
     ['uiSounds', 'hover'],
     ['uiSounds', 'menuOpen'],

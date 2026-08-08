@@ -46,11 +46,13 @@ export function SettingsPanel({
     className = '',
 }: SettingsPanelProps) {
     return (
-        <div className={`settings-panel ${className}`}>
+        <div className={`settings-panel doodle-scroll ${className}`}>
             <h2 className="settings-title">{uiText(ui, 'ui.settings')}</h2>
 
             <div className="settings-section">
-                <h3>{uiText(ui, 'ui.audio')}</h3>
+                <h3 className="settings-section-title">
+                    {uiText(ui, 'ui.audio')}
+                </h3>
                 <VolumeSlider
                     label={uiText(ui, 'ui.volume_master')}
                     value={audio.masterVolume}
@@ -84,7 +86,9 @@ export function SettingsPanel({
                 availableLocales.length > 1 &&
                 onLocaleChange && (
                     <div className="settings-section">
-                        <h3>{uiText(ui, 'ui.language')}</h3>
+                        <h3 className="settings-section-title">
+                            {uiText(ui, 'ui.language')}
+                        </h3>
                         <select
                             className="settings-locale-select"
                             value={currentLocale}
@@ -127,6 +131,7 @@ function VolumeSlider({
                 onChange={(e) => onChange(parseFloat(e.target.value))}
                 className="volume-input"
             />
+            <span className="volume-value">{Math.round(value * 100)}</span>
         </div>
     );
 }

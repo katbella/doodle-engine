@@ -5,11 +5,13 @@ const create = vi.hoisted(() => vi.fn(async () => {}));
 const dev = vi.hoisted(() => vi.fn(async () => {}));
 const build = vi.hoisted(() => vi.fn(async () => {}));
 const validate = vi.hoisted(() => vi.fn(async () => {}));
+const theme = vi.hoisted(() => vi.fn(async () => {}));
 
 vi.mock('../create', () => ({ create }));
 vi.mock('../commands/dev', () => ({ dev }));
 vi.mock('../commands/build', () => ({ build }));
 vi.mock('../commands/validate', () => ({ validate }));
+vi.mock('../commands/theme', () => ({ theme }));
 
 import { createCli, runCli } from '../cli';
 
@@ -27,18 +29,21 @@ describe('CLI program', () => {
             'dev',
             'build',
             'validate',
+            'theme',
         ]);
     });
 
     it('routes every command to its implementation', async () => {
-        await runCli(['node', 'doodle', 'create', 'story']);
-        await runCli(['node', 'doodle', 'dev']);
-        await runCli(['node', 'doodle', 'build']);
-        await runCli(['node', 'doodle', 'validate']);
+        await runCli(['node', 'doodle-engine', 'create', 'story']);
+        await runCli(['node', 'doodle-engine', 'dev']);
+        await runCli(['node', 'doodle-engine', 'build']);
+        await runCli(['node', 'doodle-engine', 'validate']);
+        await runCli(['node', 'doodle-engine', 'theme', 'prose']);
 
         expect(create).toHaveBeenCalledWith('story');
         expect(dev).toHaveBeenCalledOnce();
         expect(build).toHaveBeenCalledOnce();
         expect(validate).toHaveBeenCalledOnce();
+        expect(theme).toHaveBeenCalledWith('prose');
     });
 });

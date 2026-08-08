@@ -5,18 +5,27 @@ const startDevServer = vi.hoisted(() => vi.fn());
 const loadContent = vi.hoisted(() => vi.fn());
 const validateContent = vi.hoisted(() => vi.fn());
 const printValidationErrors = vi.hoisted(() => vi.fn());
+const switchRendererTheme = vi.hoisted(() => vi.fn());
+const isRendererTemplate = vi.hoisted(
+    () => (value: string) =>
+        ['minimal', 'starter-rpg', 'prose', 'fable'].includes(value)
+);
 
 vi.mock('@doodle-engine/toolkit', () => ({
     buildProject,
     startDevServer,
     loadContent,
     validateContent,
+    switchRendererTheme,
+    isRendererTemplate,
+    RENDERER_TEMPLATES: ['minimal', 'starter-rpg', 'prose', 'fable'],
 }));
 vi.mock('../print-validation', () => ({ printValidationErrors }));
 
 import { build } from '../commands/build';
 import { dev } from '../commands/dev';
 import { validate } from '../commands/validate';
+import { theme } from '../commands/theme';
 
 const exitError = new Error('process exited');
 
@@ -33,6 +42,7 @@ describe('CLI command adapters', () => {
         loadContent.mockReset();
         validateContent.mockReset();
         printValidationErrors.mockReset();
+        switchRendererTheme.mockReset();
     });
 
     afterEach(() => vi.restoreAllMocks());
@@ -135,6 +145,36 @@ describe('CLI command adapters', () => {
         expect(console.error).toHaveBeenCalledWith(
             expect.stringContaining('Error loading content:'),
             expect.any(Error)
+        );
+    });
+
+    it('switches the current project renderer theme', async () => {
+        switchRendererTheme.mockResolvedValue({
+            previousTemplate: 'starter-rpg',
+            template: 'prose',
+            dependenciesChanged: true,
+        });
+
+        await theme('prose');
+
+        expect(switchRendererTheme).toHaveBeenCalledWith(
+            'C:/games/story',
+            'prose'
+        );
+        expect(console.log).toHaveBeenCalledWith(
+            expect.stringContaining('Font dependencies changed')
+        );
+    });
+
+    it('rejects unknown themes and reports switch failures', async () => {
+        await expect(theme('unknown')).rejects.toBe(exitError);
+        expect(switchRendererTheme).not.toHaveBeenCalled();
+
+        switchRendererTheme.mockRejectedValueOnce(new Error('custom CSS'));
+        await expect(theme('fable')).rejects.toBe(exitError);
+        expect(console.error).toHaveBeenLastCalledWith(
+            expect.stringContaining('Theme switch failed:'),
+            'custom CSS'
         );
     });
 });

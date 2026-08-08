@@ -36,18 +36,14 @@ function formatTimestamp(timestamp: string): string {
 }
 
 function displaySlotLabel(slot: SaveSlot, ui: Record<string, string>): string {
-    if (slot.kind === 'quick' && slot.label === 'Quick Save') {
-        return uiText(ui, 'ui.quick_save');
-    }
-    if (slot.kind === 'auto' && slot.label === 'Autosave') {
-        return uiText(ui, 'ui.autosave');
-    }
     const day = slot.save.state?.currentTime?.day;
-    if (slot.kind === 'manual' && slot.label === `Day ${day}`) {
+    const usesGeneratedLabel =
+        (slot.kind === 'quick' && slot.label === 'Quick Save') ||
+        (slot.kind === 'auto' && slot.label === 'Autosave') ||
+        (slot.kind === 'manual' &&
+            (slot.label === 'Save' || slot.label === `Day ${day}`));
+    if (day !== undefined && usesGeneratedLabel) {
         return uiText(ui, 'ui.day').replace('{day}', String(day));
-    }
-    if (slot.kind === 'manual' && slot.label === 'Save') {
-        return uiText(ui, 'ui.save');
     }
     return slot.label;
 }
@@ -93,53 +89,82 @@ export function SaveLoadPanel({
 
     return (
         <div className={`save-load-panel ${className}`}>
-            <button className="save-button" onClick={handleNewSave}>
-                {uiText(ui, 'ui.new_save')}
-            </button>
-
-            {slots.length === 0 ? (
-                <p className="save-load-empty">{uiText(ui, 'ui.no_saves')}</p>
-            ) : (
-                <ul className="save-slot-list">
-                    {slots.map((slot) => (
-                        <li
-                            key={slot.id}
-                            className={`save-slot save-slot-${slot.kind}`}
-                        >
-                            <div className="save-slot-info">
-                                <span className="save-slot-label">
-                                    {displaySlotLabel(slot, ui)}
-                                </span>
-                                {slot.timestamp && (
-                                    <time
-                                        className="save-slot-time"
-                                        dateTime={slot.timestamp}
-                                    >
-                                        {' · '}
-                                        {formatTimestamp(slot.timestamp)}
-                                    </time>
-                                )}
-                            </div>
-                            <div className="save-slot-actions">
-                                <button
-                                    className="load-button"
-                                    onClick={() => handleLoad(slot.id)}
+            <ul className="save-slot-list doodle-scroll">
+                {slots.length === 0 && (
+                    <li className="save-load-empty">
+                        {uiText(ui, 'ui.no_saves')}
+                    </li>
+                )}
+                {slots.map((slot) => (
+                    <li
+                        key={slot.id}
+                        className={`save-slot save-slot-${slot.kind}`}
+                    >
+                        <div className="save-slot-thumbnail" aria-hidden="true">
+                            <span className="doodle-placeholder-text">
+                                thumbnail
+                            </span>
+                        </div>
+                        <div className="save-slot-kind">
+                            {slot.kind === 'quick'
+                                ? uiText(ui, 'ui.quick_save')
+                                : slot.kind === 'auto'
+                                  ? uiText(ui, 'ui.autosave')
+                                  : uiText(ui, 'ui.save')}
+                        </div>
+                        <div className="save-slot-info">
+                            <span className="save-slot-label">
+                                {displaySlotLabel(slot, ui)}
+                            </span>
+                            {slot.timestamp && (
+                                <time
+                                    className="save-slot-time"
+                                    dateTime={slot.timestamp}
                                 >
-                                    {uiText(ui, 'ui.load')}
+                                    {formatTimestamp(slot.timestamp)}
+                                </time>
+                            )}
+                        </div>
+                        <div className="save-slot-actions">
+                            <button
+                                className="load-button"
+                                onClick={() => handleLoad(slot.id)}
+                            >
+                                {uiText(ui, 'ui.load')}
+                            </button>
+                            {slot.kind === 'manual' && (
+                                <button
+                                    className="delete-button"
+                                    onClick={() => handleDelete(slot.id)}
+                                >
+                                    {uiText(ui, 'ui.delete')}
                                 </button>
-                                {slot.kind === 'manual' && (
-                                    <button
-                                        className="delete-button"
-                                        onClick={() => handleDelete(slot.id)}
-                                    >
-                                        {uiText(ui, 'ui.delete')}
-                                    </button>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            )}
+                            )}
+                        </div>
+                    </li>
+                ))}
+                <li className="save-slot-new">
+                    <button
+                        className="save-slot is-empty"
+                        onClick={handleNewSave}
+                    >
+                        <span
+                            className="save-slot-thumbnail-empty"
+                            aria-hidden="true"
+                        />
+                        <span
+                            className="save-slot-kind-empty"
+                            aria-hidden="true"
+                        />
+                        <span className="save-slot-empty-label">
+                            {uiText(ui, 'ui.new_save')}
+                        </span>
+                        <span className="save-slot-empty-action">
+                            {uiText(ui, 'ui.save')}
+                        </span>
+                    </button>
+                </li>
+            </ul>
 
             {message && <span className="save-load-message">{message}</span>}
         </div>

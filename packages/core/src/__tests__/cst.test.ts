@@ -180,7 +180,7 @@ describe('parseDialogueCst — structure and spans', () => {
 });
 
 describe('real starter dialogue fixtures', () => {
-    // The real .dlg files that `doodle create` gives every new project. Testing
+    // The real .dlg files that `doodle-engine create` gives every new project. Testing
     // against these (not just hand-written samples) proves the parser works on
     // the exact content authors actually start from.
     const dialoguesDir = join(

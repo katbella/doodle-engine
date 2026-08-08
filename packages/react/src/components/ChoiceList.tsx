@@ -82,22 +82,29 @@ export function ChoiceList({
     if (showContinue) {
         return (
             <div className={`choice-list ${className}`}>
-                <button className="continue-button" onClick={onContinue}>
-                    {continueLabel}
-                </button>
+                <div className="continue-button-row">
+                    <button className="continue-button" onClick={onContinue}>
+                        {continueLabel}
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
         <div className={`choice-list ${className}`}>
-            {choices.map((choice) => (
+            {choices.map((choice, index) => (
                 <button
                     key={choice.id}
                     className="choice-button"
                     onClick={() => onSelectChoice(choice.id)}
                 >
-                    <FormattedText text={choice.text} />
+                    <span className="choice-button-number" aria-hidden="true">
+                        {index + 1}.
+                    </span>
+                    <span className="choice-button-label">
+                        <FormattedText text={choice.text} />
+                    </span>
                 </button>
             ))}
         </div>

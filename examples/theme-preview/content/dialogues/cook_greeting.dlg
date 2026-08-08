@@ -1,0 +1,6 @@
+NODE start
+  COOK: Kitchen's open if you're hungry. Otherwise, mind the pans.
+
+  CHOICE Just looking around.
+    END dialogue
+  END

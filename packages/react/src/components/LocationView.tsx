@@ -18,15 +18,23 @@ export function LocationView({
     className = '',
 }: LocationViewProps) {
     return (
-        <div className={`location-view ${className}`}>
+        <div
+            className={`location-view is-overlay ${location.banner ? 'has-banner' : 'has-banner-placeholder'} ${className}`}
+        >
             <div className="location-banner">
                 {location.banner ? (
-                    <img src={location.banner} alt={location.name} />
+                    <img
+                        className="location-banner-image"
+                        src={location.banner}
+                        alt={location.name}
+                    />
                 ) : (
                     <div className="location-banner-placeholder">
                         {uiText(ui, 'ui.location_banner')}
                     </div>
                 )}
+                <div className="location-banner-vignette" aria-hidden="true" />
+                <div className="location-banner-scrim" aria-hidden="true" />
             </div>
 
             <div className="location-content">

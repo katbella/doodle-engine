@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import type { NewProjectOptions } from '../../../shared/project';
+import {
+    RENDERER_TEMPLATE_OPTIONS,
+    type NewProjectOptions,
+} from '../../../shared/project';
 import { ModalShell } from './ModalShell';
 
 export function NewProjectModal({
@@ -18,7 +21,8 @@ export function NewProjectModal({
     const [subtitle, setSubtitle] = useState('');
     const [targetDir, setTargetDir] = useState('');
     const [useDefaultRenderer, setUseDefaultRenderer] = useState(true);
-    const [useStarterStyles, setUseStarterStyles] = useState(true);
+    const [rendererTemplate, setRendererTemplate] =
+        useState<NewProjectOptions['rendererTemplate']>('starter-rpg');
     const [contentMode, setContentMode] =
         useState<NewProjectOptions['contentMode']>('starter');
     const [localizationMode, setLocalizationMode] =
@@ -68,7 +72,7 @@ export function NewProjectModal({
                 subtitle: subtitle.trim(),
                 targetDir,
                 useDefaultRenderer,
-                useStarterStyles,
+                rendererTemplate,
                 contentMode,
                 localizationMode,
             });
@@ -192,14 +196,25 @@ export function NewProjectModal({
                 </span>
             </label>
 
-            <label className="field field--check">
-                <input
-                    type="checkbox"
-                    checked={useStarterStyles}
+            <label className="field">
+                <span className="field__label">Renderer template</span>
+                <select
+                    className="field__input"
+                    value={rendererTemplate}
                     disabled={!useDefaultRenderer}
-                    onChange={(e) => setUseStarterStyles(e.target.checked)}
-                />
-                <span>Include starter styles</span>
+                    onChange={(event) =>
+                        setRendererTemplate(
+                            event.target
+                                .value as NewProjectOptions['rendererTemplate']
+                        )
+                    }
+                >
+                    {RENDERER_TEMPLATE_OPTIONS.map((template) => (
+                        <option key={template.id} value={template.id}>
+                            {template.label}: {template.description}
+                        </option>
+                    ))}
+                </select>
             </label>
 
             <div className="modal__actions">

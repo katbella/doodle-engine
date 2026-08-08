@@ -317,7 +317,7 @@ describe('createProject destination safety', () => {
                 createProject('existing', {
                     targetDir: target,
                     useDefaultRenderer: true,
-                    useStarterStyles: true,
+                    rendererTemplate: 'starter-rpg',
                 })
             ).rejects.toThrow('not empty');
             const kept = await import('node:fs/promises').then((fs) =>

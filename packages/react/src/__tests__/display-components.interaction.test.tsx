@@ -13,6 +13,7 @@ import { GameTime } from '../components/GameTime';
 import { NotificationArea } from '../components/NotificationArea';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { LoadingScreen } from '../components/LoadingScreen';
+import { CreditsScreen } from '../components/CreditsScreen';
 import { SplashScreen } from '../components/SplashScreen';
 import { TitleScreen } from '../components/TitleScreen';
 import { VideoPlayer } from '../components/VideoPlayer';
@@ -51,8 +52,32 @@ describe('display component behavior', () => {
                 onStart={onStart}
             />
         );
-        await user.click(screen.getByRole('button', { name: 'Start game' }));
+        const startButton = screen.getByRole('button', {
+            name: 'Start game',
+        });
+        expect(
+            startButton.querySelector('.title-button-label')?.textContent
+        ).toBe('Start game');
+        await user.click(startButton);
         expect(onStart).toHaveBeenCalledOnce();
+    });
+
+    it('marks the credits back button for full-width label padding', () => {
+        render(
+            <CreditsScreen
+                ui={{
+                    'ui.credits': 'Credits',
+                    'ui.back': 'Back',
+                    'ui.made_with_doodle_engine': 'Made with Doodle Engine',
+                }}
+                title="Example Game"
+                onBack={() => {}}
+            />
+        );
+
+        expect(
+            screen.getByRole('button', { name: 'Back' }).classList
+        ).toContain('credits-back-button');
     });
 
     it('supports spaces in shell background asset paths', () => {
@@ -92,13 +117,31 @@ describe('display component behavior', () => {
         for (const className of [
             '.loading-screen',
             '.splash-screen',
-            '.title-screen',
+            '.title-backdrop',
         ]) {
             expect(
                 container.querySelector<HTMLElement>(className)?.style
                     .backgroundImage
             ).toBe(`url("${path}")`);
         }
+    });
+
+    it('renders title menu labels without number prefixes', () => {
+        const { container } = render(
+            <TitleScreen
+                ui={{
+                    'ui.new_game': 'New Game',
+                    'ui.settings': 'Settings',
+                }}
+                hasSaveData={false}
+                onNewGame={() => {}}
+                onContinue={() => {}}
+                onSettings={() => {}}
+            />
+        );
+
+        expect(container.querySelector('.title-button-key')).toBeNull();
+        expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
     });
 
     it('formats numeric, short, localized, and every narrative time period', () => {

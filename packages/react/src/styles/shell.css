@@ -5,7 +5,7 @@
  * Override these variables or individual classes to customize the look.
  *
  * Import in your app:
- *   import '@doodle-engine/react/styles/shell.css'
+ *   import '@doodle-engine/react/style.css'
  */
 
 :root {
@@ -15,7 +15,6 @@
     --doodle-text-primary: #ffffff;
     --doodle-text-secondary: #a0a0a0;
     --doodle-accent: #ffffff;
-    --doodle-accent-hover: #cccccc;
     --doodle-error: #f87171;
 
     /* Typography */
@@ -23,7 +22,6 @@
     --doodle-font-size-sm: 0.875rem;
     --doodle-font-size-base: 1rem;
     --doodle-font-size-lg: 1.25rem;
-    --doodle-font-size-xl: 2rem;
     --doodle-font-size-2xl: 3rem;
 
     /* Spacing */
@@ -34,7 +32,6 @@
 
     /* Transitions */
     --doodle-transition-fast: 150ms ease;
-    --doodle-transition-normal: 300ms ease;
     --doodle-transition-slow: 500ms ease;
 }
 
@@ -109,7 +106,7 @@
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+    border-radius: 0;
     overflow: hidden;
 }
 
@@ -117,7 +114,7 @@
     width: 100%;
     height: 100%;
     background: var(--doodle-accent);
-    border-radius: 2px;
+    border-radius: 0;
     transform-origin: left center;
     transition: transform var(--doodle-transition-fast);
 }
@@ -156,7 +153,7 @@
     text-align: center;
 }
 
-.loading-screen-message--error {
+.loading-screen-message.is-error {
     color: var(--doodle-error);
 }
 
@@ -204,12 +201,39 @@
         var(--doodle-bg-secondary) 0%,
         var(--doodle-bg-primary) 100%
     );
-    background-size: cover;
-    background-position: center;
     color: var(--doodle-text-primary);
     font-family: var(--doodle-font-family);
     gap: var(--doodle-spacing-md);
     z-index: 9997;
+}
+
+.title-backdrop {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        160deg,
+        var(--doodle-bg-secondary) 0%,
+        var(--doodle-bg-primary) 100%
+    );
+    background-size: var(--doodle-title-bg-size, cover);
+    background-repeat: no-repeat;
+    background-position: var(--doodle-title-bg-position, center);
+}
+
+.title-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--doodle-spacing-md);
+}
+
+.title-art-placeholder,
+.title-vignette,
+.title-scrim,
+.title-build {
+    display: none;
 }
 
 .title-logo {
@@ -246,7 +270,7 @@
     background: transparent;
     color: var(--doodle-text-primary);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+    border-radius: 0;
     font-family: var(--doodle-font-family);
     font-size: var(--doodle-font-size-base);
     cursor: pointer;
@@ -265,6 +289,11 @@
 
 .title-button:active {
     background: color-mix(in srgb, var(--doodle-accent) 35%, transparent);
+}
+
+.title-button-label {
+    display: block;
+    width: 100%;
 }
 
 .credits-screen {

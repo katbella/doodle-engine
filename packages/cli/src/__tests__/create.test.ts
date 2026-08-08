@@ -32,7 +32,7 @@ describe('create command', () => {
             .mockResolvedValueOnce({ contentMode: 'starter' })
             .mockResolvedValueOnce({ localizationMode: 'literal' })
             .mockResolvedValueOnce({ useDefaultRenderer: true })
-            .mockResolvedValueOnce({ starterStyles: true });
+            .mockResolvedValueOnce({ rendererTemplate: 'starter-rpg' });
 
         await create('story');
 
@@ -41,7 +41,7 @@ describe('create command', () => {
             title: 'Story Title',
             subtitle: 'A Story Subtitle',
             useDefaultRenderer: true,
-            useStarterStyles: true,
+            rendererTemplate: 'starter-rpg',
             contentMode: 'starter',
             localizationMode: 'literal',
         });
@@ -52,6 +52,14 @@ describe('create command', () => {
         const titlePrompt = prompts.mock.calls[0][0];
         expect(titlePrompt.validate('')).toBe('Enter a game title');
         expect(titlePrompt.validate('A title')).toBe(true);
+        expect(prompts.mock.calls[5][0].choices).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ title: 'Starter RPG' }),
+                expect.objectContaining({ title: 'Minimal' }),
+                expect.objectContaining({ title: 'Prose' }),
+                expect.objectContaining({ title: 'Fable' }),
+            ])
+        );
     });
 
     it('creates a custom-renderer project without asking about styles', async () => {
@@ -70,7 +78,7 @@ describe('create command', () => {
             title: 'Custom Story',
             subtitle: '',
             useDefaultRenderer: false,
-            useStarterStyles: false,
+            rendererTemplate: 'minimal',
             contentMode: 'minimal',
             localizationMode: 'localized',
         });
@@ -114,7 +122,7 @@ describe('create command', () => {
                 { contentMode: 'starter' },
                 { localizationMode: 'literal' },
                 { useDefaultRenderer: true },
-                { starterStyles: undefined },
+                { rendererTemplate: undefined },
             ],
         ],
     ])('stops when the %s prompt is cancelled', async (_name, responses) => {
