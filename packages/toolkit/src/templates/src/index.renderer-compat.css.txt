@@ -37,6 +37,10 @@ textarea:disabled {
     stroke-linejoin: round;
 }
 
+.character-list-pager-button svg {
+    fill: currentColor;
+}
+
 .character-list-icon svg {
     display: block;
     width: 26px;
@@ -700,6 +704,7 @@ textarea:disabled {
 }
 
 .loading-screen-start {
+    align-items: center;
     justify-content: center;
     min-height: var(--doodle-control-min-size);
 }

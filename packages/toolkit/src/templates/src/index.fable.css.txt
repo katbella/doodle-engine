@@ -570,7 +570,7 @@ button { font-family: inherit; }
     align-self: stretch;
     background: transparent;
     border: none;
-    color: #9a9482;
+    color: var(--doodle-text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;

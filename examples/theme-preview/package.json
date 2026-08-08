@@ -13,9 +13,9 @@
   "dependencies": {
     "@doodle-engine/core": "workspace:*",
     "@doodle-engine/react": "workspace:*",
-    "@fontsource-variable/public-sans": "5.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@fontsource/spectral": "5.3.0"
   },
   "devDependencies": {
     "@doodle-engine/toolkit": "workspace:*",
@@ -27,9 +27,9 @@
   },
   "doodleEngine": {
     "renderer": "default",
-    "rendererTemplate": "starter-rpg",
+    "rendererTemplate": "prose",
     "managedFontDependencies": [
-      "@fontsource-variable/public-sans"
+      "@fontsource/spectral"
     ]
   }
 }
