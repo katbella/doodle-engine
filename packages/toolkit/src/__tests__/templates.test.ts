@@ -70,6 +70,39 @@ describe('scaffold templates', () => {
         ]);
     });
 
+    it('localizes every quest journal and tracking label in starter locales', () => {
+        for (const locale of ['en', 'sv']) {
+            const source =
+                templateFiles[`../templates/content/locales/${locale}.yaml`];
+            expect(source).toContain('ui.completed_quests:');
+            expect(source).toContain('ui.no_active_quests:');
+            expect(source).toContain('ui.track_quest:');
+            expect(source).toContain('ui.stop_tracking_quest:');
+        }
+    });
+
+    it('generates a completable quest with working tracking dialogue', () => {
+        const quest =
+            templateFiles['../templates/content/quests/odd_jobs.yaml'];
+        const bartender =
+            templateFiles[
+                '../templates/content/dialogues/bartender_greeting.dlg'
+            ];
+        const merchant =
+            templateFiles[
+                '../templates/content/dialogues/merchant_intro.dlg'
+            ];
+
+        expect(quest).toMatch(
+            /- id: complete\s+completesQuest: true\s+description:/
+        );
+        expect(bartender).toContain('REQUIRE questStatus odd_jobs complete');
+        expect(bartender).toContain('SET trackedQuest odd_jobs');
+        expect(merchant).toContain(
+            'REQUIRE questAtStage odd_jobs talked_to_merchant'
+        );
+    });
+
     it('app TSX templates parse', () => {
         expectTsxTemplateToParse(defaultApp, 'App.default.tsx');
         expectTsxTemplateToParse(customApp, 'App.custom.tsx');

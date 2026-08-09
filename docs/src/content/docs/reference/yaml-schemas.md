@@ -198,6 +198,7 @@ stages:
     - id: talked_to_merchant
       description: '@quest.odd_jobs.stage.talked_to_merchant'
     - id: complete
+      completesQuest: true
       description: '@quest.odd_jobs.stage.complete'
 ```
 
@@ -210,10 +211,11 @@ stages:
 
 ### QuestStage
 
-| Field         | Type     | Description                                   |
-| ------------- | -------- | --------------------------------------------- |
-| `id`          | `string` | Stage identifier (used with `SET questStage`) |
-| `description` | `string` | Text shown in journal for this stage          |
+| Field            | Type      | Description                                   |
+| ---------------- | --------- | --------------------------------------------- |
+| `id`             | `string`  | Stage identifier (used with `SET questStage`) |
+| `description`    | `string`  | Text shown in journal for this stage          |
+| `completesQuest` | `boolean` | Optional; marks this as a finishing stage     |
 
 ## JournalEntry
 

@@ -498,6 +498,19 @@ function GameRendererInner({
                                             ui={snapshot.ui}
                                             quests={snapshot.quests}
                                             entries={snapshot.journal}
+                                            onTrackQuest={(questId) => {
+                                                const quest =
+                                                    snapshot.quests.find(
+                                                        (candidate) =>
+                                                            candidate.id ===
+                                                            questId
+                                                    );
+                                                if (quest?.tracked) {
+                                                    actions.clearTrackedQuest();
+                                                } else {
+                                                    actions.trackQuest(questId);
+                                                }
+                                            }}
                                         />
                                     </div>
                                 </div>

@@ -49,7 +49,8 @@ function tokenKind(kind: ArgKind): DlgToken['kind'] {
         kind === 'number' ||
         kind === 'hours' ||
         kind === 'boolean' ||
-        kind === 'value'
+        kind === 'value' ||
+        kind === 'questStatus'
     ) {
         return 'value';
     }
@@ -91,6 +92,13 @@ export function conditionTokens(condition: Condition): DlgToken[] {
 
 /** Split an effect's canonical `.dlg` form into semantic tokens. */
 export function effectTokens(effect: Effect): DlgToken[] {
+    if (effect.type === 'setTrackedQuest' && effect.questId === null) {
+        return [
+            { kind: 'keyword', text: 'SET' },
+            { kind: 'keyword', text: 'trackedQuest' },
+            { kind: 'id', text: 'none' },
+        ];
+    }
     return descriptorTokens(effect, effectDescriptor(effect.type));
 }
 

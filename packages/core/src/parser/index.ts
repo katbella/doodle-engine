@@ -251,6 +251,20 @@ export function parseCondition(conditionStr: string): Condition {
                 questId: parts[1],
                 stageId: parts[2],
             };
+        case 'questStatus': {
+            rejectExtraArguments(parts, 3, 'Condition "questStatus"');
+            const status = parts[2];
+            if (
+                status !== 'not_started' &&
+                status !== 'active' &&
+                status !== 'complete'
+            ) {
+                throw new Error(
+                    'Condition "questStatus" status must be not_started, active, or complete'
+                );
+            }
+            return { type: 'questStatus', questId: parts[1], status };
+        }
         case 'characterAt':
             rejectExtraArguments(parts, 3, 'Condition "characterAt"');
             return {
@@ -411,6 +425,13 @@ export function parseEffect(effectStr: string): Effect {
                     type: 'setQuestStage',
                     questId: parts[2],
                     stageId: parts[3],
+                };
+            }
+            if (parts[1] === 'trackedQuest') {
+                rejectExtraArguments(parts, 3, 'Effect "SET trackedQuest"');
+                return {
+                    type: 'setTrackedQuest',
+                    questId: parts[2] === 'none' ? null : parts[2],
                 };
             }
             if (parts[1] === 'characterLocation') {

@@ -108,6 +108,17 @@ SET questStage odd_jobs started
 SET questStage odd_jobs complete
 ```
 
+### SET trackedQuest
+
+Follow an active quest, or clear tracking with `none`.
+
+```text
+SET trackedQuest odd_jobs
+SET trackedQuest none
+```
+
+Tracking is also cleared automatically when the followed quest is no longer active.
+
 ## Journal
 
 ### ADD journalEntry

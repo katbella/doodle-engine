@@ -7,4 +7,5 @@ stages:
   - id: talked_to_merchant
     description: "@quest.odd_jobs.stage.talked_to_merchant"
   - id: complete
+    completesQuest: true
     description: "@quest.odd_jobs.stage.complete"

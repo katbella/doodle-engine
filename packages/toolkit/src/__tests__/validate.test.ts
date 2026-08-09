@@ -93,6 +93,55 @@ function makeConfig(overrides: Partial<GameConfig> = {}): GameConfig {
 }
 
 describe('validateContent', () => {
+    it('reports quests that have no completing stage', () => {
+        expect(
+            messages(
+                makeRegistry({
+                    quests: {
+                        endless: {
+                            id: 'endless',
+                            name: 'Endless',
+                            description: '',
+                            stages: [{ id: 'started', description: '' }],
+                        },
+                    },
+                })
+            )
+        ).toContain('Quest "endless" has no completing stage');
+    });
+
+    it('reports missing quests in questStatus and setTrackedQuest', () => {
+        const conditionDialogue = makeDialogueWithCondition({
+            type: 'questStatus',
+            questId: 'missing',
+            status: 'active',
+        });
+        const effectDialogue = makeDialogue([
+            { type: 'setTrackedQuest', questId: 'missing' },
+        ]);
+        const result = messages(
+            makeRegistry({
+                dialogues: {
+                    condition_dialogue: {
+                        ...conditionDialogue,
+                        id: 'condition_dialogue',
+                    },
+                    effect_dialogue: {
+                        ...effectDialogue,
+                        id: 'effect_dialogue',
+                    },
+                },
+            })
+        );
+
+        expect(result).toContain(
+            'Node "start" condition "questStatus" references non-existent quest "missing"'
+        );
+        expect(result).toContain(
+            'Node "start" effect "setTrackedQuest" references non-existent quest "missing"'
+        );
+    });
+
     it('accepts valid player profiles and character stat conditions', () => {
         const registry = makeRegistry({
             player: {

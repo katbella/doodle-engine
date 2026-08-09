@@ -30,6 +30,7 @@ export type ArgKind =
     | 'locationId'
     | 'questId'
     | 'stageId' // depends on the questId chosen just before it
+    | 'questStatus'
     | 'journalId'
     | 'dialogueId'
     | 'interludeId'
@@ -179,6 +180,16 @@ export const CONDITION_DESCRIPTORS: ConditionDescriptor[] = [
         args: [
             { name: 'questId', label: 'Quest', kind: 'questId' },
             { name: 'stageId', label: 'Stage', kind: 'stageId' },
+        ],
+    },
+    {
+        type: 'questStatus',
+        label: 'Quest has status',
+        group: 'Quests',
+        keyword: 'questStatus',
+        args: [
+            { name: 'questId', label: 'Quest', kind: 'questId' },
+            { name: 'status', label: 'Status', kind: 'questStatus' },
         ],
     },
     {
@@ -384,6 +395,13 @@ export const EFFECT_DESCRIPTORS: EffectDescriptor[] = [
             { name: 'questId', label: 'Quest', kind: 'questId' },
             { name: 'stageId', label: 'Stage', kind: 'stageId' },
         ],
+    },
+    {
+        type: 'setTrackedQuest',
+        label: 'Set tracked quest',
+        group: 'Quests',
+        keyword: 'SET trackedQuest',
+        args: [{ name: 'questId', label: 'Quest', kind: 'questId' }],
     },
     {
         type: 'addJournalEntry',

@@ -7,4 +7,5 @@ stages:
   - id: talked_to_merchant
     description: "Elena needs a delivery watched. Time to head to the docks."
   - id: complete
+    completesQuest: true
     description: "Job well done. Elena paid 50 gold for the trouble."

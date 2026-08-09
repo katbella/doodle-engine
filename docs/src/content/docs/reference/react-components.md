@@ -324,7 +324,7 @@ import { Inventory } from '@doodle-engine/react';
 
 ## Journal
 
-Displays active quests and unlocked journal entries.
+Displays active quests, completed quests, and unlocked journal entries.
 
 ```tsx
 import { Journal } from '@doodle-engine/react';
@@ -334,16 +334,17 @@ import { Journal } from '@doodle-engine/react';
 
 ### Props
 
-| Prop        | Type                     | Default  | Description              |
-| ----------- | ------------------------ | -------- | ------------------------ |
-| `quests`    | `SnapshotQuest[]`        | required | Active quests            |
-| `entries`   | `SnapshotJournalEntry[]` | required | Unlocked journal entries |
-| `ui`        | `Record<string, string>` | —        | Resolved UI strings      |
-| `className` | `string`                 | `''`     | CSS class                |
+| Prop           | Type                        | Default  | Description                               |
+| -------------- | --------------------------- | -------- | ----------------------------------------- |
+| `quests`       | `SnapshotQuest[]`           | required | Started quests                            |
+| `entries`      | `SnapshotJournalEntry[]`    | required | Unlocked journal entries                  |
+| `ui`           | `Record<string, string>`    | —        | Resolved UI strings                       |
+| `className`    | `string`                    | `''`     | CSS class                                 |
+| `onTrackQuest` | `(questId: string) => void` | —        | Shows controls for tracking active quests |
 
 ### Layout
 
-- Quests shown first with name, description, and current stage
+- Active and completed quests appear in separate sections; tracked and completed entries receive state classes
 - Journal entries shown below, with category used as CSS class (`journal-category-{category}`)
 
 ## PlayerNotes

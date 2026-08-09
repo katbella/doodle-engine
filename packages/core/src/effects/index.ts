@@ -59,6 +59,9 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
         case 'setQuestStage':
             return applySetQuestStage(effect.questId, effect.stageId, state);
 
+        case 'setTrackedQuest':
+            return { ...state, trackedQuest: effect.questId };
+
         case 'addJournalEntry':
             return applyAddJournalEntry(effect.entryId, state);
 

@@ -46,6 +46,10 @@ Placeholders in curly braces are replaced while the game runs. Keep the same pla
 | `ui.paused` | Paused |
 | `ui.quit_to_title` | Quit to Title |
 | `ui.active_quests` | Active Quests |
+| `ui.completed_quests` | Completed Quests |
+| `ui.no_active_quests` | No active quests |
+| `ui.track_quest` | Track quest |
+| `ui.stop_tracking_quest` | Stop tracking |
 | `ui.entries` | Entries |
 | `ui.no_entries` | No entries yet |
 | `ui.audio` | Audio |

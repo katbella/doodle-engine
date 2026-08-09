@@ -88,7 +88,14 @@ function valuesFromEntity(
     const values: Record<string, string> = {};
     for (const arg of descriptor.args) {
         const raw = entity[arg.name];
-        values[arg.name] = raw === undefined || raw === null ? '' : String(raw);
+        values[arg.name] =
+            descriptor.type === 'setTrackedQuest' &&
+            arg.name === 'questId' &&
+            raw === null
+                ? 'none'
+                : raw === undefined || raw === null
+                  ? ''
+                  : String(raw);
     }
     return values;
 }
@@ -106,6 +113,7 @@ export function emptyDraft(
 
 function defaultFor(arg: ArgDescriptor): string {
     if (arg.kind === 'boolean') return 'true';
+    if (arg.kind === 'questStatus') return 'active';
     if (arg.kind === 'number' || arg.kind === 'hours') return '0';
     return '';
 }

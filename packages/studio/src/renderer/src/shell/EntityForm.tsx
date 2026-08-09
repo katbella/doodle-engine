@@ -647,6 +647,7 @@ function StatsBag({
 interface Stage {
     id: string;
     description?: string;
+    completesQuest?: boolean;
 }
 
 /** Editable list of quest stages. Order matters (a quest progresses through
@@ -718,6 +719,20 @@ function StageListEditor({
                                         set(i, { description })
                                     }
                                 />
+                                <label className="field__check">
+                                    <input
+                                        type="checkbox"
+                                        checked={stage.completesQuest === true}
+                                        onChange={(e) =>
+                                            set(i, {
+                                                completesQuest:
+                                                    e.target.checked ||
+                                                    undefined,
+                                            })
+                                        }
+                                    />
+                                    Completes quest
+                                </label>
                             </div>
                             <button
                                 className="rowedit__btn"

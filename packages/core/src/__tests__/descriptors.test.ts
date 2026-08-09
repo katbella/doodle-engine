@@ -33,6 +33,7 @@ const sampleArg: Record<string, string> = {
     locationId: 'tavern',
     questId: 'odd_jobs',
     stageId: 'started',
+    questStatus: 'active',
     journalId: 'tavern_note',
     dialogueId: 'merchant_intro',
     interludeId: 'chapter_one',
@@ -64,6 +65,7 @@ const ALL_CONDITION_TYPES: Condition['type'][] = [
     'variableLessThan',
     'atLocation',
     'questAtStage',
+    'questStatus',
     'characterAt',
     'characterInParty',
     'characterStatEquals',
@@ -87,6 +89,7 @@ const ALL_EFFECT_TYPES: Effect['type'][] = [
     'goToLocation',
     'advanceTime',
     'setQuestStage',
+    'setTrackedQuest',
     'addJournalEntry',
     'startDialogue',
     'endDialogue',
@@ -107,8 +110,8 @@ const ALL_EFFECT_TYPES: Effect['type'][] = [
 ];
 
 describe('condition descriptors', () => {
-    it('covers all 18 condition types, one each', () => {
-        expect(CONDITION_DESCRIPTORS).toHaveLength(18);
+    it('covers all 19 condition types, one each', () => {
+        expect(CONDITION_DESCRIPTORS).toHaveLength(19);
         const types = CONDITION_DESCRIPTORS.map((d) => d.type).sort();
         expect(types).toEqual([...ALL_CONDITION_TYPES].sort());
         expect(new Set(types).size).toBe(types.length);
@@ -148,8 +151,8 @@ describe('condition descriptors', () => {
 });
 
 describe('effect descriptors', () => {
-    it('covers all 27 effect types, one each', () => {
-        expect(EFFECT_DESCRIPTORS).toHaveLength(27);
+    it('covers all 28 effect types, one each', () => {
+        expect(EFFECT_DESCRIPTORS).toHaveLength(28);
         const types = EFFECT_DESCRIPTORS.map((d) => d.type).sort();
         expect(types).toEqual([...ALL_EFFECT_TYPES].sort());
         expect(new Set(types).size).toBe(types.length);

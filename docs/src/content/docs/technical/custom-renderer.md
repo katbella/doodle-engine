@@ -242,6 +242,8 @@ function MyLayout() {
 
 The examples above use resolved location, dialogue, character, map, and progress data from the current snapshot. [The snapshot section in Architecture](/technical/architecture/#snapshot-derived) shows the complete structure and explains which fields are derived or transient. Use the `Snapshot` type exported by `@doodle-engine/core` when implementing the renderer.
 
+Each `SnapshotQuest` includes `status` (`not_started`, `active`, or `complete`) and `tracked`. Use `status` to choose the quest section and `tracked` to mark the quest the player is following. `currentStage` identifies the quest's current authored step.
+
 ## Debug a Custom Renderer
 
 The provider example enables `window.doodle` only in development through `devTools={import.meta.env.DEV}`. [Debugging with Dev Tools](/technical/debugging-with-devtools/) explains when the console API becomes available and lists its inspection and state-control commands.

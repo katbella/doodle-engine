@@ -31,6 +31,7 @@ import { resolveText, type TextCharacterMap } from '../localization';
 import { evaluateConditions } from '../conditions';
 import { resolveAssetPath } from '../assets/paths';
 import { statNameSources } from '../stats';
+import { getQuestStatus } from '../quests';
 
 // =============================================================================
 // UI String Defaults
@@ -77,6 +78,10 @@ export const UI_DEFAULTS: Readonly<Record<string, string>> = {
     'ui.paused': 'Paused',
     'ui.quit_to_title': 'Quit to Title',
     'ui.active_quests': 'Active Quests',
+    'ui.completed_quests': 'Completed Quests',
+    'ui.no_active_quests': 'No active quests',
+    'ui.track_quest': 'Track quest',
+    'ui.stop_tracking_quest': 'Stop tracking',
     'ui.entries': 'Entries',
     'ui.no_entries': 'No entries yet',
     'ui.audio': 'Audio',
@@ -495,7 +500,12 @@ function buildDialogueSnapshot(
             'portrait'
         ),
         voice: resolveAssetPath(node.voice, 'voice'),
-        continueEndsDialogue: willContinueEndDialogue(node, dialogue, state),
+        continueEndsDialogue: willContinueEndDialogue(
+            node,
+            dialogue,
+            state,
+            registry
+        ),
     };
 
     // Build choices - only include those whose conditions pass
@@ -506,7 +516,7 @@ function buildDialogueSnapshot(
                 return true;
             }
             // Check if all conditions pass
-            return evaluateConditions(choice.conditions, state);
+            return evaluateConditions(choice.conditions, state, registry);
         })
         .map((choice) => ({
             id: choice.id,
@@ -519,13 +529,14 @@ function buildDialogueSnapshot(
 function willContinueEndDialogue(
     node: DialogueNode,
     dialogue: Dialogue,
-    state: GameState
+    state: GameState,
+    registry: ContentRegistry
 ): boolean {
     if (
         node.choices.some(
             (choice) =>
                 !choice.conditions?.length ||
-                evaluateConditions(choice.conditions, state)
+                evaluateConditions(choice.conditions, state, registry)
         )
     ) {
         return false;
@@ -539,7 +550,7 @@ function willContinueEndDialogue(
         if (candidate.condition.type === 'roll') {
             return false;
         }
-        if (evaluateConditions([candidate.condition], state)) {
+        if (evaluateConditions([candidate.condition], state, registry)) {
             branch = candidate;
             break;
         }
@@ -621,7 +632,7 @@ function buildInventorySnapshot(
 }
 
 /**
- * Build snapshots for all active quests.
+ * Build snapshots for all started quests.
  */
 function buildQuestsSnapshot(
     state: GameState,
@@ -637,8 +648,13 @@ function buildQuestsSnapshot(
         const stage = quest.stages.find((s) => s.id === stageId);
         if (!stage) continue;
 
+        const status = getQuestStatus(questId, state, registry);
+        const tracked = status === 'active' && state.trackedQuest === questId;
+
         quests.push({
             id: quest.id,
+            status,
+            tracked,
             name: resolve(quest.name),
             description: resolve(quest.description),
             currentStage: stage.id,
@@ -646,7 +662,11 @@ function buildQuestsSnapshot(
         });
     }
 
-    return quests;
+    return quests.sort((a, b) => {
+        const rank = (quest: SnapshotQuest): number =>
+            quest.tracked ? 0 : quest.status === 'active' ? 1 : 2;
+        return rank(a) - rank(b);
+    });
 }
 
 /**

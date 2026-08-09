@@ -748,19 +748,39 @@ button { font-family: inherit; }
     width: 40%;
     min-width: 400px;
     flex: none;
+    min-height: 0;
     padding: 56px 56px;
     overflow: hidden auto;
     border-right: 1px solid var(--doodle-border-color);
 }
-.quest-entry { margin-top: 18px; border-left: none; padding: 0; }
+.journal-quests-completed { margin-top: 56px; }
+.journal-quests-empty { margin-top: 32px; font: italic 300 19px var(--doodle-font-prose); color: var(--doodle-text-faint); }
+.quest-entry { margin-top: 22px; }
+.quest-entry-tracked { border-left: 3px solid var(--doodle-accent); padding-left: 14px; }
+.quest-entry-tracked .quest-stage { color: var(--doodle-accent); }
+.quest-entry-complete .quest-name { color: var(--doodle-text-secondary); }
+.quest-entry-complete .quest-stage { color: var(--doodle-text-secondary); }
+.quest-track-button {
+    margin-top: 22px;
+    padding: 0 0 7px;
+    border: 0;
+    border-bottom: 1px solid var(--doodle-accent-dim);
+    background: transparent;
+    color: var(--doodle-accent);
+    font: 400 16px var(--doodle-font-ui);
+    cursor: pointer;
+    transition: color 0.16s, border-color 0.16s;
+}
+.quest-track-button:hover { color: var(--doodle-accent-bright); border-bottom-color: var(--doodle-accent); }
+.quest-track-button[aria-pressed='true'] { color: var(--doodle-text-secondary); border-bottom-color: var(--doodle-border-bright); }
 .quest-name { font: 300 38px/1.22 var(--doodle-font-display); letter-spacing: -0.02em; color: var(--doodle-text-primary); text-wrap: pretty; }
-.quest-description { margin-top: 18px; font: 300 21px/1.72 var(--doodle-font-prose); color: var(--doodle-text-secondary); text-wrap: pretty; }
+.quest-description { margin-top: 18px; font: 600 21px/1.72 var(--doodle-font-prose); color: var(--doodle-text-secondary); text-wrap: pretty; }
 .quest-stage {
     margin-top: 26px;
     padding-top: 20px;
     border-top: 1px solid var(--doodle-border-color);
     font: 300 20px/1.6 var(--doodle-font-prose);
-    color: var(--doodle-accent);
+    color: var(--doodle-text-secondary);
     text-wrap: pretty;
 }
 .journal-entries { flex: 1; min-width: 0; padding: 56px 64px; overflow: hidden auto; }

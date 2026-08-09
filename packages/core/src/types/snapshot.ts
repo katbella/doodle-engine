@@ -118,6 +118,10 @@ export interface SnapshotDialogue {
 export interface SnapshotQuest {
     /** Quest ID */
     id: string;
+    /** Derived quest status */
+    status: import('./conditions').QuestStatus;
+    /** Whether the player is following this quest */
+    tracked: boolean;
     /** Localized quest name */
     name: string;
     /** Localized quest description */

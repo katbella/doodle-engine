@@ -330,6 +330,15 @@ function validateEntityShapes(
                 suggestion:
                     'Add a stages list with at least one { id, description } entry',
             });
+        } else if (
+            !quest.stages.some((stage) => stage.completesQuest === true)
+        ) {
+            errors.push({
+                file,
+                message: `Quest "${quest.id}" has no completing stage`,
+                suggestion:
+                    'Set completesQuest: true on at least one finishing stage',
+            });
         }
     }
 
@@ -688,6 +697,15 @@ function validateConditionReferences(
                 `Add stage "${condition.stageId}" to quest "${condition.questId}" or update the condition`
             );
         }
+    } else if (
+        condition.type === 'questStatus' &&
+        hasValue(condition.questId) &&
+        !registry.quests[condition.questId]
+    ) {
+        missing(
+            `condition "questStatus" references non-existent quest "${condition.questId}"`,
+            `Create quest "${condition.questId}" or update the condition`
+        );
     }
 }
 
@@ -761,6 +779,15 @@ function validateEffectReferences(
                 `Add stage "${effect.stageId}" to quest "${effect.questId}" or update the effect`
             );
         }
+    } else if (
+        effect.type === 'setTrackedQuest' &&
+        hasValue(effect.questId) &&
+        !registry.quests[effect.questId]
+    ) {
+        missing(
+            `effect "setTrackedQuest" references non-existent quest "${effect.questId}"`,
+            `Create quest "${effect.questId}" or update the effect`
+        );
     } else if (
         effect.type === 'addJournalEntry' &&
         hasValue(effect.entryId) &&
@@ -992,6 +1019,7 @@ const CONDITION_FIELDS: Record<string, string[]> = {
     variableGreaterThan: ['variable', 'value'],
     variableLessThan: ['variable', 'value'],
     questAtStage: ['questId', 'stageId'],
+    questStatus: ['questId', 'status'],
     atLocation: ['locationId'],
     characterAt: ['characterId', 'locationId'],
     characterInParty: ['characterId'],
@@ -1016,6 +1044,7 @@ const EFFECT_FIELDS: Record<string, string[]> = {
     goToLocation: ['locationId'],
     advanceTime: ['hours'],
     setQuestStage: ['questId', 'stageId'],
+    setTrackedQuest: [],
     addJournalEntry: ['entryId'],
     startDialogue: ['dialogueId'],
     endDialogue: [],

@@ -101,6 +101,9 @@ export interface GameState {
     /** Current stage for each started quest (questId -> stageId) */
     questProgress: Record<string, string>;
 
+    /** Quest ID the player is currently tracking, or null */
+    trackedQuest: string | null;
+
     /** Journal entry IDs that have been unlocked */
     unlockedJournalEntries: string[];
 

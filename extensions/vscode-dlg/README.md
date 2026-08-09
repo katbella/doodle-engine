@@ -24,7 +24,8 @@ Then reload VS Code. The extension activates automatically for `.dlg` files.
 - Effect keywords: `SET`, `ADD`, `REMOVE`, `MOVE`, `CLEAR`, `ADVANCE`, `START`, `ROLL`
 - Media keywords: `MUSIC`, `SOUND`, `VOICE`, `VIDEO`, `NOTIFY`, `INTERLUDE`
 - Speaker names, upper or mixed case (`BARTENDER:`, `Bartender:`)
-- Condition types (`hasFlag`, `questAtStage`, `variableGreaterThan`, etc.)
+- Condition types (`hasFlag`, `questAtStage`, `questStatus`, `variableGreaterThan`, etc.)
+- Quest tracking effects (`SET trackedQuest odd_jobs` and `SET trackedQuest none`)
 - Effect targets (`flag`, `variable`, `questStage`, `item`, etc.)
 - Localization keys (`@bartender.greeting`)
 - Variable interpolation in text (`{gold}`)

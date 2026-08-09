@@ -181,6 +181,22 @@ Change the active language. The next snapshot will have all `@key` references re
 const snapshot = engine.setLocale('es');
 ```
 
+### trackQuest
+
+```typescript
+trackQuest(questId: string): Snapshot
+```
+
+Follow an active quest. An unknown, unstarted, or completed quest is ignored.
+
+### clearTrackedQuest
+
+```typescript
+clearTrackedQuest(): Snapshot
+```
+
+Stop following the current quest.
+
 ### getSnapshot
 
 ```typescript
@@ -317,11 +333,11 @@ resolveText(
 ): string
 ```
 
-| Parameter    | Type                               | Description                                                           |
+| Parameter    | Type                               | Description                                                                  |
 | ------------ | ---------------------------------- | --------------------------------------------------------------------- |
-| `text`       | `string`                           | A `@key` or plain text                                                |
-| `localeData` | `LocaleData`                       | Locale dictionary for the current language                            |
-| `variables`  | `Record<string, number \| string>` | Values for `{variable}` placeholders                                  |
+| `text`       | `string`                           | A `@key` or plain text                                                       |
+| `localeData` | `LocaleData`                       | Locale dictionary for the current language                                   |
+| `variables`  | `Record<string, number \| string>` | Values for `{variable}` placeholders                                         |
 | `characters` | Character values by ID             | Values for `{id.name}`, `{id.title}`, `{id.biography}`, and `{id.stats.key}` |
 
 Text starting with `@` is looked up in `localeData`, and a missing key returns the `@key` itself. Text without `@` is returned as written. Placeholders are filled in afterwards from `variables` and `characters`, and any placeholder without a matching value is left as written.

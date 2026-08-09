@@ -183,7 +183,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.dlg",
-                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|characterAt|characterInParty|characterStatEquals|characterStatGreaterThan|characterStatLessThan|relationshipAbove|relationshipBelow|timeIs|itemAt|roll)\\b"
+                    "match": "\\b(hasFlag|notFlag|hasItem|variableEquals|variableGreaterThan|variableLessThan|atLocation|questAtStage|questStatus|characterAt|characterInParty|characterStatEquals|characterStatGreaterThan|characterStatLessThan|relationshipAbove|relationshipBelow|timeIs|itemAt|roll)\\b"
                 }
             ]
         },
@@ -191,7 +191,7 @@
             "patterns": [
                 {
                     "name": "variable.parameter.dlg",
-                    "match": "\\b(flag|variable|questStage|characterLocation|relationship|characterStat|mapEnabled|item|journalEntry|toParty|fromParty|location|dialogue|time)\\b"
+                    "match": "\\b(flag|variable|questStage|trackedQuest|characterLocation|relationship|characterStat|mapEnabled|item|journalEntry|toParty|fromParty|location|dialogue|time)\\b"
                 }
             ]
         },

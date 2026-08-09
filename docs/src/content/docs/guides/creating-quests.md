@@ -21,10 +21,11 @@ stages:
     - id: talked_to_merchant
       description: "Elena needs a delivery watched. Time to head to the docks."
     - id: complete
+      completesQuest: true
       description: "Job well done. Elena paid 50 gold for the trouble."
 ```
 
-Each stage has an `id` and a `description` shown in the player's journal.
+Each stage has an `id` and a `description` shown in the player's journal. Set `completesQuest: true` on every stage that ends the quest; quests may have multiple endings.
 
 ## Starting a Quest
 
@@ -33,6 +34,7 @@ Use `SET questStage` in a dialogue to start or advance a quest:
 ```text
 CHOICE Accept the job.
   SET questStage odd_jobs started
+  SET trackedQuest odd_jobs
   ADD journalEntry odd_jobs_accepted
   NOTIFY New quest: Odd Jobs
   GOTO quest_details
@@ -86,19 +88,25 @@ Or hide content after quest completion:
 
 ```text
 CHOICE Ask whether Elena needs help.
-  REQUIRE notFlag questComplete
+  REQUIRE questStatus odd_jobs not_started
   GOTO offer_quest
 END
 ```
 
+`questStatus` checks whether a quest has `not_started`, is `active`, or is `complete`. Use `questAtStage` when a specific step matters.
+
+## Tracking a Quest
+
+`SET trackedQuest odd_jobs` follows an active quest, while `SET trackedQuest none` clears it. Players can also track or stop tracking active quests in the built-in Journal. Tracking clears automatically when the quest completes.
+
 ## Quest Display
 
-Active quests appear in the Journal component. Each quest shows:
+The Journal separates active and completed quests. Each quest shows:
 
 - Quest name and description
 - Current stage description
 
-The Journal shows any quest that has a stage in `questProgress`. Use a stage ID such as `complete` for the final stage. A custom renderer can use that ID to separate or hide completed quests.
+A quest is `not_started` until it has a current stage, `active` while its current stage is non-completing, and `complete` when its current stage has `completesQuest: true`.
 
 Below the quests, the same panel lists unlocked journal entries. See [Journal Entries](/guides/journal-entries/) for writing them and the `ADD journalEntry` effect used above.
 

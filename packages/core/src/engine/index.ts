@@ -33,6 +33,7 @@ import type {
     ConditionContext,
 } from '../types/trace';
 import { buildSnapshot } from '../snapshot';
+import { getQuestStatus } from '../quests';
 import { applyEffects } from '../effects';
 import {
     evaluateConditions,
@@ -85,7 +86,7 @@ export class Engine {
         state: GameState = createInitialState()
     ) {
         this.registry = registry;
-        this.state = state;
+        this.state = { ...state, trackedQuest: state.trackedQuest ?? null };
     }
 
     // ===========================================================================
@@ -135,6 +136,7 @@ export class Engine {
             variables: { ...config.startVariables },
             inventory: [...config.startInventory],
             questProgress: {},
+            trackedQuest: null,
             unlockedJournalEntries: [],
             playerNotes: [],
             dialogueState: null,
@@ -172,6 +174,7 @@ export class Engine {
             false;
         this.state = {
             ...saveData.state,
+            trackedQuest: saveData.state.trackedQuest ?? null,
             player: saveData.state.player
                 ? {
                       ...saveData.state.player,
@@ -257,7 +260,7 @@ export class Engine {
         }
         if (
             choice.conditions &&
-            !evaluateConditions(choice.conditions, this.state)
+            !evaluateConditions(choice.conditions, this.state, this.registry)
         ) {
             return this.buildSnapshotAndClearTransients();
         }
@@ -487,6 +490,23 @@ export class Engine {
             currentLocale: locale,
         };
 
+        return this.buildSnapshotAndClearTransients();
+    }
+
+    /** Follow an active quest. */
+    trackQuest(questId: string): Snapshot {
+        if (
+            this.registry.quests[questId] &&
+            getQuestStatus(questId, this.state, this.registry) === 'active'
+        ) {
+            this.state = { ...this.state, trackedQuest: questId };
+        }
+        return this.buildSnapshotAndClearTransients();
+    }
+
+    /** Stop following the current quest. */
+    clearTrackedQuest(): Snapshot {
+        this.state = { ...this.state, trackedQuest: null };
         return this.buildSnapshotAndClearTransients();
     }
 
@@ -769,14 +789,15 @@ export class Engine {
 
             // First failing condition is the reason it's hidden (AND logic).
             for (const condition of choice.conditions) {
-                if (!evaluateCondition(condition, this.state)) {
+                if (!evaluateCondition(condition, this.state, this.registry)) {
                     return {
                         choiceId: choice.id,
                         visible: false,
                         failedCondition: condition,
                         resolvedValues: describeConditionValues(
                             condition,
-                            this.state
+                            this.state,
+                            this.registry
                         ),
                     };
                 }
@@ -914,6 +935,18 @@ export class Engine {
             this.emitChoiceFilters();
         }
 
+        if (
+            this.state.trackedQuest !== null &&
+            (!this.registry.quests[this.state.trackedQuest] ||
+                getQuestStatus(
+                    this.state.trackedQuest,
+                    this.state,
+                    this.registry
+                ) !== 'active')
+        ) {
+            this.state = { ...this.state, trackedQuest: null };
+        }
+
         const snapshot = buildSnapshot(this.state, this.registry);
 
         // Clear transient fields after building snapshot
@@ -955,7 +988,11 @@ export class Engine {
             if (!choice.conditions || choice.conditions.length === 0) {
                 return true;
             }
-            return evaluateConditions(choice.conditions, this.state);
+            return evaluateConditions(
+                choice.conditions,
+                this.state,
+                this.registry
+            );
         });
     }
 
@@ -1156,13 +1193,17 @@ export class Engine {
         condition: Condition,
         context: ConditionContext
     ): boolean {
-        const result = evaluateCondition(condition, this.state);
+        const result = evaluateCondition(condition, this.state, this.registry);
         if (this.trace) {
             this.emit({
                 kind: 'condition',
                 seq: this.traceSeq++,
                 condition,
-                resolvedValues: describeConditionValues(condition, this.state),
+                resolvedValues: describeConditionValues(
+                    condition,
+                    this.state,
+                    this.registry
+                ),
                 result,
                 context,
             });
@@ -1188,7 +1229,11 @@ export class Engine {
             // Check if conditions pass
             if (
                 dialogue.conditions &&
-                !evaluateConditions(dialogue.conditions, this.state)
+                !evaluateConditions(
+                    dialogue.conditions,
+                    this.state,
+                    this.registry
+                )
             ) {
                 continue;
             }
@@ -1218,7 +1263,11 @@ export class Engine {
 
             if (
                 interlude.triggerConditions &&
-                !evaluateConditions(interlude.triggerConditions, this.state)
+                !evaluateConditions(
+                    interlude.triggerConditions,
+                    this.state,
+                    this.registry
+                )
             ) {
                 continue;
             }
@@ -1283,6 +1332,7 @@ export function createInitialState(currentLocale = 'en'): GameState {
         variables: {},
         inventory: [],
         questProgress: {},
+        trackedQuest: null,
         unlockedJournalEntries: [],
         playerNotes: [],
         dialogueState: null,
