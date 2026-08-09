@@ -237,23 +237,10 @@ import { PlayerSetup } from '@doodle-engine/react';
 | `ui`       | `Record<string, string>`                | `{}`     | Resolved UI strings       |
 | `onSubmit` | `(profile: PlayerProfileInput) => void` | required | Completed-profile handler |
 
-The component uses the localized `ui.player_name`, `ui.player_title`, and
-`ui.player_biography` strings for its persistent labels and input hints.
-
-## PlayerEmblem
-
-Renders the built-in generic SVG emblem used when the player has no fixed
-portrait.
-
-```tsx
-import { PlayerEmblem } from '@doodle-engine/react';
-
-<PlayerEmblem className="my-player-emblem" />;
-```
-
-| Prop        | Type     | Default           | Description |
-| ----------- | -------- | ----------------- | ----------- |
-| `className` | `string` | `'player-emblem'` | CSS class   |
+The component uses `ui.player_name`, `ui.player_title`, and
+`ui.player_biography` for its field labels. The text shown inside each empty
+field comes from `ui.player_name_placeholder`, `ui.player_title_placeholder`,
+and `ui.player_biography_placeholder`.
 
 ## GameTime
 
@@ -337,7 +324,7 @@ import { Inventory } from '@doodle-engine/react';
 
 ## Journal
 
-Displays active quests and unlocked journal entries.
+Displays active quests, completed quests, and unlocked journal entries.
 
 ```tsx
 import { Journal } from '@doodle-engine/react';
@@ -347,16 +334,17 @@ import { Journal } from '@doodle-engine/react';
 
 ### Props
 
-| Prop        | Type                     | Default  | Description              |
-| ----------- | ------------------------ | -------- | ------------------------ |
-| `quests`    | `SnapshotQuest[]`        | required | Active quests            |
-| `entries`   | `SnapshotJournalEntry[]` | required | Unlocked journal entries |
-| `ui`        | `Record<string, string>` | —        | Resolved UI strings      |
-| `className` | `string`                 | `''`     | CSS class                |
+| Prop           | Type                        | Default  | Description                               |
+| -------------- | --------------------------- | -------- | ----------------------------------------- |
+| `quests`       | `SnapshotQuest[]`           | required | Started quests                            |
+| `entries`      | `SnapshotJournalEntry[]`    | required | Unlocked journal entries                  |
+| `ui`           | `Record<string, string>`    | —        | Resolved UI strings                       |
+| `className`    | `string`                    | `''`     | CSS class                                 |
+| `onTrackQuest` | `(questId: string) => void` | —        | Shows controls for tracking active quests |
 
 ### Layout
 
-- Quests shown first with name, description, and current stage
+- Active and completed quests appear in separate sections; tracked and completed entries receive state classes
 - Journal entries shown below, with category used as CSS class (`journal-category-{category}`)
 
 ## PlayerNotes
@@ -592,6 +580,7 @@ import { TitleScreen } from '@doodle-engine/react';
     ui={snapshot.ui}
     title="My Game"
     subtitle="A text-based adventure"
+    author="North Road Studio"
     hasSaveData={true}
     onNewGame={handleNewGame}
     onContinue={handleContinue}
@@ -601,18 +590,19 @@ import { TitleScreen } from '@doodle-engine/react';
 
 ### Props
 
-| Prop          | Type                     | Default           | Description                          |
-| ------------- | ------------------------ | ----------------- | ------------------------------------ |
-| `ui`          | `Record<string, string>` | required          | Resolved UI strings                  |
-| `shell`       | `ShellConfig['title']`   | —                 | Title config from `game.yaml`        |
-| `title`       | `string`                 | `'Doodle Engine'` | Game title text (shown when no logo) |
-| `subtitle`    | `string`                 | —                 | Subtitle text                        |
-| `hasSaveData` | `boolean`                | required          | Whether Continue button is shown     |
-| `onNewGame`   | `() => void`             | required          | New Game handler                     |
-| `onContinue`  | `() => void`             | required          | Continue handler                     |
-| `onSettings`  | `() => void`             | required          | Settings handler                     |
-| `onCredits`   | `() => void`             | —                 | Credits handler                      |
-| `className`   | `string`                 | `''`              | CSS class                            |
+| Prop          | Type                     | Default           | Description                                     |
+| ------------- | ------------------------ | ----------------- | ----------------------------------------------- |
+| `ui`          | `Record<string, string>` | required          | Resolved UI strings                             |
+| `shell`       | `ShellConfig['title']`   | —                 | Title config from `game.yaml`                   |
+| `title`       | `string`                 | `'Doodle Engine'` | Game title text (shown when no logo)            |
+| `subtitle`    | `string`                 | —                 | Subtitle text                                   |
+| `author`      | `string`                 | —                 | Author or studio shown above the title without a logo |
+| `hasSaveData` | `boolean`                | required          | Whether Continue button is shown                |
+| `onNewGame`   | `() => void`             | required          | New Game handler                                |
+| `onContinue`  | `() => void`             | required          | Continue handler                                |
+| `onSettings`  | `() => void`             | required          | Settings handler                                |
+| `onCredits`   | `() => void`             | —                 | Credits handler                                 |
+| `className`   | `string`                 | `''`              | CSS class                                       |
 
 ## CreditsScreen
 

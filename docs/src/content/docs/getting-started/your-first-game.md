@@ -75,6 +75,7 @@ In Doodle Studio, select **Game Config** in the project rail. In a text editor, 
 This file sets the state at the beginning of a new game. The starter project begins in the tavern on the first morning, with 100 gold and no inventory:
 
 ```yaml
+author: ""
 playerCreatesProfile: true
 startLocation: tavern
 startTime:
@@ -88,7 +89,10 @@ startVariables:
 startInventory: []
 ```
 
-`playerCreatesProfile: true` tells the built-in renderer to ask for the player's name before the story begins. The other values become the first game state. Effects in dialogue can change them later.
+Fill in `author` to show an author or studio name above the title when the title
+screen has no logo. `playerCreatesProfile: true` tells the built-in renderer to
+ask for the player's name before the story begins. The other values become the
+first game state. Effects in dialogue can change them later.
 
 ## Follow the tavern to its character
 
@@ -168,10 +172,11 @@ stages:
     - id: talked_to_merchant
       description: "Elena needs a delivery watched. Time to head to the docks."
     - id: complete
+      completesQuest: true
       description: "Job well done. Elena paid 50 gold for the trouble."
 ```
 
-The quest has its own ID, and each stage has an ID within that quest. Dialogue effects move the quest from one stage to another. Conditions can then check the current stage before showing a response or starting another conversation.
+The quest has its own ID, and each stage has an ID within that quest. Dialogue effects move the quest from one stage to another. Conditions can then check the current stage before showing a response or starting another conversation. The `completesQuest` field tells the engine that reaching the final stage finishes the quest.
 
 ## Make a change
 

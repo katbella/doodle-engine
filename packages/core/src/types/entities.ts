@@ -211,6 +211,8 @@ export interface Quest {
 export interface QuestStage {
     /** Unique identifier for this stage */
     id: string;
+    /** Whether reaching this stage completes the quest */
+    completesQuest?: boolean;
     /** Text shown in journal for this stage */
     description: string;
 }

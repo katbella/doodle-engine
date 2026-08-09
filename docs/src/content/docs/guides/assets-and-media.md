@@ -136,9 +136,9 @@ dialogue: bartender_greeting
 ```
 
 A fixed `portrait` in `content/player.yaml` uses the same portraits directory.
-When it is omitted, the built-in renderer shows its generic player emblem.
-Player-created profiles do not offer a portrait upload. A custom renderer can
-provide its own portrait policy and storage.
+When it is omitted, the party list shows the player's initial and the character
+sheet shows a simple placeholder. Player-created profiles do not offer a
+portrait upload. A custom renderer can display a different fallback.
 
 ### Item Images
 

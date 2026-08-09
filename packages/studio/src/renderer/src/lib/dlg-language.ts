@@ -370,7 +370,12 @@ export function getDlgCursorContext(
 }
 
 function scopeForArgument(kind: ArgKind): string {
-    if (kind === 'stageId' || kind === 'boolean' || kind === 'value') {
+    if (
+        kind === 'stageId' ||
+        kind === 'boolean' ||
+        kind === 'value' ||
+        kind === 'questStatus'
+    ) {
         return 'literal';
     }
     if (kind === 'flag' || kind === 'variable' || kind === 'stat') {
@@ -639,6 +644,9 @@ function idsForArgument(
         return context.nameCatalog?.stats.map((item) => item.id) ?? [];
     }
     if (kind === 'boolean') return ['true', 'false'];
+    if (kind === 'questStatus') {
+        return ['not_started', 'active', 'complete'];
+    }
     if (kind === 'stageId') {
         const questId = argumentValues[argumentIndex - 1];
         return (
@@ -652,6 +660,9 @@ function idsForArgument(
     const collection = context.registry[target as keyof ContentRegistry];
     if (!collection || Array.isArray(collection)) return [];
     const ids = Object.keys(collection);
+    if (kind === 'questId' && keyword === 'SET trackedQuest') {
+        ids.unshift('none');
+    }
     if (
         kind === 'characterId' &&
         [

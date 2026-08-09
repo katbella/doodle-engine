@@ -64,6 +64,7 @@ The CLI scans these sources to build the manifest:
 **Game assets (tier 2)**: collected from the content registry, which is the loaded set of game content:
 
 - `location.banner`, `location.music`, `location.ambient`
+- `player.portrait`
 - `character.portrait`
 - `item.icon`, `item.image`
 - `map.image`

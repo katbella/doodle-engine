@@ -118,9 +118,9 @@ stats:
 The profile mode is selected by `playerCreatesProfile` in `content/game.yaml`.
 When it is `true`, the built-in renderer asks for a name, title, and biography;
 only the name is required. Those entered values replace the corresponding
-profile text. The modal uses its generic player emblem and does not provide
-portrait uploads. When the flag is false, the profile fields from `player.yaml`
-are used directly. Stats always come from `player.yaml`.
+profile text. The modal does not provide portrait uploads. When the flag is
+false, the profile fields from `player.yaml` are used directly. Stats always
+come from `player.yaml`.
 
 ## Item
 
@@ -198,6 +198,7 @@ stages:
     - id: talked_to_merchant
       description: '@quest.odd_jobs.stage.talked_to_merchant'
     - id: complete
+      completesQuest: true
       description: '@quest.odd_jobs.stage.complete'
 ```
 
@@ -210,10 +211,11 @@ stages:
 
 ### QuestStage
 
-| Field         | Type     | Description                                   |
-| ------------- | -------- | --------------------------------------------- |
-| `id`          | `string` | Stage identifier (used with `SET questStage`) |
-| `description` | `string` | Text shown in journal for this stage          |
+| Field            | Type      | Description                                   |
+| ---------------- | --------- | --------------------------------------------- |
+| `id`             | `string`  | Stage identifier (used with `SET questStage`) |
+| `description`    | `string`  | Text shown in journal for this stage          |
+| `completesQuest` | `boolean` | Optional; marks this as a finishing stage     |
 
 ## JournalEntry
 
@@ -271,6 +273,7 @@ Triggered via the `INTERLUDE <id>` DSL effect, or automatically when traveling t
 ```yaml
 title: My Game
 subtitle: A text-based adventure
+author: North Road Studio
 playerCreatesProfile: true
 startLocation: tavern
 startTime:
@@ -284,17 +287,18 @@ startVariables:
 startInventory: []
 ```
 
-| Field                  | Type                               | Description                                                |
-| ---------------------- | ---------------------------------- | ---------------------------------------------------------- |
-| `title`                | `string`                           | Player-facing game title                                   |
-| `subtitle?`            | `string`                           | Optional line beneath the title                            |
-| `playerCreatesProfile` | `boolean`                          | Ask the player for profile text in the built-in renderer   |
-| `shell?`               | `ShellConfig`                      | Shell screen configuration                                 |
-| `startLocation`        | `string`                           | Starting location ID                                       |
-| `startTime`            | `{ day: number, hour: number }`    | Starting time                                              |
-| `startFlags`           | `Record<string, boolean>`          | Initial flags                                              |
-| `startVariables`       | `Record<string, number \| string>` | Initial variables                                          |
-| `startInventory`       | `string[]`                         | Item IDs the player starts with                            |
+| Field                  | Type                               | Description                                                      |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| `title`                | `string`                           | Player-facing game title                                         |
+| `subtitle?`            | `string`                           | Optional line beneath the title                                  |
+| `author?`              | `string`                           | Author or studio shown above the title when no title logo is set |
+| `playerCreatesProfile` | `boolean`                          | Ask the player for profile text in the built-in renderer         |
+| `shell?`               | `ShellConfig`                      | Shell screen configuration                                       |
+| `startLocation`        | `string`                           | Starting location ID                                             |
+| `startTime`            | `{ day: number, hour: number }`    | Starting time                                                    |
+| `startFlags`           | `Record<string, boolean>`          | Initial flags                                                    |
+| `startVariables`       | `Record<string, number \| string>` | Initial variables                                                |
+| `startInventory`       | `string[]`                         | Item IDs the player starts with                                  |
 
 `playerCreatesProfile` defaults to `false`. It controls how the player profile
 is initialized. The profile content and starting stats remain in

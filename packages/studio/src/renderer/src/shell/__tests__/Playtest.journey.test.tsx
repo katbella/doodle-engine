@@ -85,7 +85,11 @@ const project: OpenProject = {
                 description: '',
                 stages: [
                     { id: 'started', description: '' },
-                    { id: 'complete', description: '' },
+                    {
+                        id: 'complete',
+                        description: '',
+                        completesQuest: true,
+                    },
                 ],
             },
         },
@@ -214,6 +218,26 @@ describe('Playtest author journeys', () => {
             screen.getByLabelText('Stage of entry'),
             'started'
         );
+        expect(screen.getByLabelText('Status of entry').textContent).toBe(
+            'active'
+        );
+        await user.selectOptions(
+            screen.getByLabelText('Tracked quest'),
+            'entry'
+        );
+        expect(
+            (screen.getByLabelText('Tracked quest') as HTMLSelectElement).value
+        ).toBe('entry');
+        await user.selectOptions(
+            screen.getByLabelText('Stage of entry'),
+            'complete'
+        );
+        expect(screen.getByLabelText('Status of entry').textContent).toBe(
+            'complete'
+        );
+        expect(
+            (screen.getByLabelText('Tracked quest') as HTMLSelectElement).value
+        ).toBe('');
 
         const relationship = screen.getByLabelText('Relationship with guide');
         await user.clear(relationship);

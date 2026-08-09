@@ -328,6 +328,9 @@ describe('Monaco setup', () => {
             dlgCompletions('REQUIRE ', 9, context).map((item) => item.label)
         ).toContain('questAtStage');
         expect(
+            dlgCompletions('REQUIRE ', 9, context).map((item) => item.label)
+        ).toContain('questStatus');
+        expect(
             dlgCompletions('REQUIRE hasFlag ', 17, context).map(
                 (item) => item.label
             )
@@ -337,6 +340,22 @@ describe('Monaco setup', () => {
                 (item) => item.label
             )
         ).toEqual(['complete', 'started']);
+        const questStatusLine = 'REQUIRE questStatus odd_jobs ';
+        expect(
+            dlgCompletions(
+                questStatusLine,
+                questStatusLine.length + 1,
+                context
+            ).map((item) => item.label)
+        ).toEqual(['active', 'complete', 'not_started']);
+        const trackedQuestLine = 'SET trackedQuest ';
+        expect(
+            dlgCompletions(
+                trackedQuestLine,
+                trackedQuestLine.length + 1,
+                context
+            ).map((item) => item.label)
+        ).toEqual(['none', 'odd_jobs']);
         expect(
             dlgCompletions('  GOTO ', 8, context).map((item) => item.label)
         ).toEqual(['farewell', 'location', 'opening']);

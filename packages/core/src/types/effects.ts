@@ -112,6 +112,12 @@ export interface SetQuestStageEffect {
     stageId: string;
 }
 
+/** Set or clear the quest followed by the player. */
+export interface SetTrackedQuestEffect {
+    type: 'setTrackedQuest';
+    questId: string | null;
+}
+
 /**
  * Unlock a journal entry for the player.
  * Example: ADD journalEntry tavern_discovery
@@ -313,6 +319,7 @@ export type Effect =
     | GoToLocationEffect
     | AdvanceTimeEffect
     | SetQuestStageEffect
+    | SetTrackedQuestEffect
     | AddJournalEntryEffect
     | StartDialogueEffect
     | EndDialogueEffect

@@ -19,6 +19,7 @@ import {
 import { Play, X } from '../lib/icons';
 import {
     parseRichText,
+    getQuestStatus,
     type ContentRegistry,
     type GameConfig,
     type RichTextSegment,
@@ -392,6 +393,10 @@ function StateInspector({
 }) {
     const state = session.getState();
     const questIds = Object.keys(project.registry.quests);
+    const activeQuestIds = questIds.filter(
+        (questId) =>
+            getQuestStatus(questId, state, project.registry) === 'active'
+    );
     const characterIds = Object.keys(project.registry.characters);
 
     return (
@@ -482,7 +487,19 @@ function StateInspector({
                 <Group label="Quest stages">
                     {questIds.map((questId) => (
                         <div key={questId} className="irow irow--field">
-                            <span className="irow__key mono">{questId}</span>
+                            <span className="irow__key mono">
+                                {questId}{' '}
+                                <span
+                                    className="inspector__value"
+                                    aria-label={`Status of ${questId}`}
+                                >
+                                    {getQuestStatus(
+                                        questId,
+                                        state,
+                                        project.registry
+                                    )}
+                                </span>
+                            </span>
                             <select
                                 className="ivalue mono"
                                 value={state.questProgress[questId] ?? ''}
@@ -508,6 +525,29 @@ function StateInspector({
                             </select>
                         </div>
                     ))}
+                    <div className="irow irow--field">
+                        <span className="irow__key mono">tracked</span>
+                        <select
+                            className="ivalue mono"
+                            value={state.trackedQuest ?? ''}
+                            aria-label="Tracked quest"
+                            onChange={(e) =>
+                                onAct(() =>
+                                    session.applyEffect({
+                                        type: 'setTrackedQuest',
+                                        questId: e.target.value || null,
+                                    })
+                                )
+                            }
+                        >
+                            <option value="">none</option>
+                            {activeQuestIds.map((questId) => (
+                                <option key={questId} value={questId}>
+                                    {questId}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </Group>
             )}
 

@@ -32,6 +32,7 @@ const sample: Record<string, string> = {
     locationId: 'tavern',
     questId: 'odd_jobs',
     stageId: 'started',
+    questStatus: 'active',
     journalId: 'tavern_note',
     dialogueId: 'merchant_intro',
     interludeId: 'chapter_one',
@@ -125,6 +126,14 @@ describe('effect builder', () => {
         const effect = parseEffect('ADD variable gold -5');
         const draft = effectToDraft(effect);
         expect(draft.values).toEqual({ variable: 'gold', value: '-5' });
+        expect(buildEffect(draft).value).toEqual(effect);
+    });
+
+    it('round-trips an effect that clears quest tracking', () => {
+        const effect = parseEffect('SET trackedQuest none');
+        const draft = effectToDraft(effect);
+
+        expect(draft.values).toEqual({ questId: 'none' });
         expect(buildEffect(draft).value).toEqual(effect);
     });
 });

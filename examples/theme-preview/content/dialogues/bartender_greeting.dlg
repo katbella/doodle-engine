@@ -30,9 +30,9 @@ NODE start
     GOTO work_followup
   END
 
-  # Only after quest is complete (demonstrates: questAtStage condition)
+  # Only after quest is complete (demonstrates: questStatus condition)
   CHOICE Thanks for putting me onto that work.
-    REQUIRE questAtStage odd_jobs complete
+    REQUIRE questStatus odd_jobs complete
     GOTO work_done
   END
 
@@ -136,6 +136,7 @@ NODE work_intro
   CHOICE Sure, I could use the coin.
     SET flag acceptedOddJobs
     SET questStage odd_jobs started
+    SET trackedQuest odd_jobs
     ADD journalEntry odd_jobs_accepted
     ADD relationship bartender 2
     ADD variable reputation 5

@@ -2,13 +2,19 @@
 interface Props {
     src: string;
     alt: string;
+    compact?: boolean;
 }
 
-const { src, alt } = Astro.props;
+const { src, alt, compact = false } = Astro.props;
 const lightSrc = src.replace(/(\.[^./]+)$/, '-light$1');
 ---
 
-<p class="theme-screenshot">
+<p
+    class:list={[
+        'theme-screenshot',
+        { 'theme-screenshot--compact': compact },
+    ]}
+>
     <a href={src} class="light:sl-hidden">
         <img src={src} alt={alt} loading="lazy" decoding="async" />
     </a>
@@ -20,5 +26,13 @@ const lightSrc = src.replace(/(\.[^./]+)$/, '-light$1');
 <style>
     .theme-screenshot img {
         margin: 0;
+    }
+
+    .theme-screenshot--compact {
+        width: min(100%, 18rem);
+    }
+
+    .theme-screenshot--compact img {
+        width: 100%;
     }
 </style>

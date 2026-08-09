@@ -26,6 +26,8 @@ export interface GameContextValue {
         writeNote: (title: string, text: string) => void;
         deleteNote: (noteId: string) => void;
         setLocale: (locale: string) => void;
+        trackQuest: (questId: string) => void;
+        clearTrackedQuest: () => void;
         saveGame: () => SaveData;
         loadGame: (saveData: SaveData) => void;
         dismissInterlude: () => void;
@@ -135,6 +137,16 @@ export function GameProvider({
         [engine]
     );
 
+    const trackQuest = useCallback(
+        (questId: string) => setSnapshot(engine.trackQuest(questId)),
+        [engine]
+    );
+
+    const clearTrackedQuest = useCallback(
+        () => setSnapshot(engine.clearTrackedQuest()),
+        [engine]
+    );
+
     // Action: Save game
     const saveGame = useCallback(() => {
         return engine.saveGame();
@@ -182,6 +194,8 @@ export function GameProvider({
             writeNote,
             deleteNote,
             setLocale,
+            trackQuest,
+            clearTrackedQuest,
             saveGame,
             loadGame,
             dismissInterlude,

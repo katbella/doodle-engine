@@ -92,6 +92,15 @@ export interface QuestAtStageCondition {
     stageId: string;
 }
 
+export type QuestStatus = 'not_started' | 'active' | 'complete';
+
+/** Check the derived status of a quest. */
+export interface QuestStatusCondition {
+    type: 'questStatus';
+    questId: string;
+    status: QuestStatus;
+}
+
 /**
  * Check if a character is at a specific location.
  * Example: characterAt merchant market
@@ -221,6 +230,7 @@ export type Condition =
     | VariableLessThanCondition
     | AtLocationCondition
     | QuestAtStageCondition
+    | QuestStatusCondition
     | CharacterAtCondition
     | CharacterInPartyCondition
     | CharacterStatEqualsCondition

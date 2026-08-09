@@ -101,6 +101,8 @@ CHOICE @buy_drink
 END
 ```
 
+Condition names include `hasFlag`, `notFlag`, `hasItem`, variable comparisons, `atLocation`, `questAtStage`, `questStatus`, character and relationship checks, `timeIs`, `itemAt`, and `roll`.
+
 ## Dialogue Keywords
 
 ### Speaker Line
@@ -345,6 +347,7 @@ ADD item old_coin
 REMOVE item rusty_key
 MOVE item sword armory
 SET questStage odd_jobs started
+SET trackedQuest odd_jobs
 ADD journalEntry tavern_discovery
 SET characterLocation merchant tavern
 ADD toParty elisa

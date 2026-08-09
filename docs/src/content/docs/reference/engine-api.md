@@ -135,7 +135,7 @@ const snapshot = engine.talkTo('bartender');
 travelTo(locationId: string): Snapshot
 ```
 
-Travel to a location on the current map. The current map is the map that contains the player's current location. Travel advances time, moves party members to the destination, ends any active dialogue, and checks for triggered dialogues and interludes at the destination.
+Travel to a location on the current map. The current map is the map that contains the player's current location. A successful travel advances time, moves party members to the destination, ends any active dialogue, clears a dialogue music override so the destination's music can resume, and checks for triggered dialogues and interludes at the destination.
 
 Travel time is `round(distance / scale)` in hours, using the straight-line distance between the two markers, with a minimum of 1 hour.
 
@@ -151,7 +151,7 @@ const snapshot = engine.travelTo('market');
 writeNote(title: string, text: string): Snapshot
 ```
 
-Add a player note to the journal. Notes have auto-generated IDs based on timestamp.
+Add a player note to the journal. The engine gives each note a unique ID.
 
 ```typescript
 const snapshot = engine.writeNote('Clue', 'The bartender mentioned a coin...');
@@ -166,7 +166,7 @@ deleteNote(noteId: string): Snapshot
 Remove a player note from the journal.
 
 ```typescript
-const snapshot = engine.deleteNote('note_1234567890');
+const snapshot = engine.deleteNote(note.id);
 ```
 
 ### setLocale
@@ -180,6 +180,22 @@ Change the active language. The next snapshot will have all `@key` references re
 ```typescript
 const snapshot = engine.setLocale('es');
 ```
+
+### trackQuest
+
+```typescript
+trackQuest(questId: string): Snapshot
+```
+
+Follow an active quest. An unknown, unstarted, or completed quest is ignored.
+
+### clearTrackedQuest
+
+```typescript
+clearTrackedQuest(): Snapshot
+```
+
+Stop following the current quest.
 
 ### getSnapshot
 
@@ -305,16 +321,24 @@ resolveText(
     text: string,
     localeData: LocaleData,
     variables?: Record<string, number | string>,
-    characters?: TextCharacterMap
+    characters?: Record<
+        string,
+        {
+            name: string;
+            title: string;
+            biography: string;
+            stats: Record<string, number | string>;
+        }
+    >
 ): string
 ```
 
-| Parameter    | Type                               | Description                                        |
-| ------------ | ---------------------------------- | -------------------------------------------------- |
-| `text`       | `string`                           | A `@key` or plain text                             |
-| `localeData` | `LocaleData`                       | Locale dictionary for the current language         |
-| `variables`  | `Record<string, number \| string>` | Values for `{variable}` placeholders               |
-| `characters` | `TextCharacterMap`                 | Values for `{id.name}` and `{id.stats.key}`        |
+| Parameter    | Type                               | Description                                                                  |
+| ------------ | ---------------------------------- | --------------------------------------------------------------------- |
+| `text`       | `string`                           | A `@key` or plain text                                                       |
+| `localeData` | `LocaleData`                       | Locale dictionary for the current language                                   |
+| `variables`  | `Record<string, number \| string>` | Values for `{variable}` placeholders                                         |
+| `characters` | Character values by ID             | Values for `{id.name}`, `{id.title}`, `{id.biography}`, and `{id.stats.key}` |
 
 Text starting with `@` is looked up in `localeData`, and a missing key returns the `@key` itself. Text without `@` is returned as written. Placeholders are filled in afterwards from `variables` and `characters`, and any placeholder without a matching value is left as written.
 

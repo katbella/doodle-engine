@@ -133,6 +133,14 @@ The generated identifier in `src/project.ts` that keeps a game's browser saves s
 
 A tracked objective with ordered stages, defined in `content/quests/`. A quest advances when a dialogue runs `SET questStage`, and its current stage's description appears in the player's journal. The `questAtStage` condition connects dialogue to quest progress. See [Creating Quests](/guides/creating-quests/).
 
+## Quest Status
+
+`not_started` means the quest has no current stage. `active` means it has started. `complete` means its current stage has `completesQuest: true`.
+
+## Tracked Quest
+
+The single active quest the player has chosen to follow. Tracking clears when that quest completes.
+
 ## Relationship
 
 A per-character number, starting at 0, that records how a character regards the player. Effects raise or lower it, and the `relationshipAbove` and `relationshipBelow` conditions branch on it. See [Characters & Party](/guides/characters-and-party/#relationships).

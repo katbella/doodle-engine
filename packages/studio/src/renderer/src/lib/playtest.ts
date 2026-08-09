@@ -268,6 +268,8 @@ function describeReason(
             return values.questStage === undefined
                 ? 'quest is not started'
                 : `quest is ${fmt(values.questStage)}`;
+        case 'questStatus':
+            return `quest is ${fmt(values.questStatus)}`;
         case 'characterAt':
             return `${condition.characterId} is at ${fmt(values.characterLocation)}`;
         case 'characterInParty':

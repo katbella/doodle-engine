@@ -49,7 +49,7 @@ Override the current music track from within dialogue:
 MUSIC tension_theme.ogg
 ```
 
-The override clears when the player travels to a new location and the destination's location music resumes. To reset immediately to the current location's music, pass an empty string:
+The override clears when the player travels to a new location and the destination's location music resumes. To reset immediately to the current location's music, use the `MUSIC` keyword with no track argument:
 
 ```text
 MUSIC

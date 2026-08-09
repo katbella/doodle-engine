@@ -81,6 +81,53 @@ describe('renderer theme switching', () => {
         }
     );
 
+    it.each(['starter-rpg', 'prose', 'fable'] as const)(
+        'styles tracked and completed quests in the %s theme',
+        (template) => {
+            const css = rendererThemeCss(template);
+
+            expect(css).toContain('.journal-quests-completed');
+            expect(css).toMatch(
+                /\.journal-quests-completed\s*\{[^}]*margin-top:/s
+            );
+            expect(css).not.toMatch(
+                /\.journal-quests-completed\s*\{[^}]*(?:flex|overflow):/s
+            );
+            expect(css).toMatch(
+                /\.journal-quests\s*\{[^}]*overflow:\s*hidden auto;/s
+            );
+            expect(css).toMatch(
+                /\.quest-description\s*\{[^}]*font:\s*600\b/s
+            );
+            expect(css).toContain('.quest-entry-tracked');
+            expect(css).toContain('.quest-entry-complete');
+            expect(css).toMatch(
+                /\.quest-entry-tracked\s*\{[^}]*border-left:/s
+            );
+            expect(css).not.toMatch(/\.quest-entry\s*\{[^}]*border-left:/s);
+            expect(css).toContain('.quest-entry-tracked .quest-stage');
+            expect(css).not.toContain('.quest-entry-tracked .quest-name');
+            expect(css).toMatch(
+                /\.quest-track-button\s*\{[^}]*border:[^}]*background:[^}]*font:/s
+            );
+            expect(css).not.toContain('.quest-track-button svg');
+            expect(css).not.toContain(
+                '.quest-entry-complete .quest-stage::before'
+            );
+        }
+    );
+
+    it('leaves quest presentation out of minimal and shared compatibility CSS', () => {
+        expect(rendererThemeCss('minimal')).not.toContain(
+            '.quest-track-button'
+        );
+        expect(rendererCompatibilityCss).not.toContain('.quest-track-button');
+        expect(rendererCompatibilityCss).not.toContain('.quest-entry-tracked');
+        expect(rendererCompatibilityCss).not.toContain(
+            '.journal > .journal-quests-completed'
+        );
+    });
+
     it('stacks party titles below names in the minimal theme', () => {
         expect(rendererThemeCss('minimal')).toMatch(
             /\.party-member-body\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s

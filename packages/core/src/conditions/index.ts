@@ -12,12 +12,15 @@
 
 import type { Condition } from '../types/conditions';
 import type { GameState } from '../types/state';
+import type { ContentRegistry } from '../types/registry';
+import { getQuestStatus } from '../quests';
 
 /**
  * Evaluate a single condition against the current game state.
  *
  * @param condition - The condition to evaluate
  * @param state - Current game state
+ * @param registry - Required when evaluating questStatus
  * @returns true if the condition passes, false otherwise
  *
  * @example
@@ -28,7 +31,8 @@ import type { GameState } from '../types/state';
  */
 export function evaluateCondition(
     condition: Condition,
-    state: GameState
+    state: GameState,
+    registry?: ContentRegistry
 ): boolean {
     switch (condition.type) {
         case 'hasFlag':
@@ -69,6 +73,17 @@ export function evaluateCondition(
                 condition.questId,
                 condition.stageId,
                 state
+            );
+
+        case 'questStatus':
+            if (!registry) {
+                throw new Error(
+                    'A content registry is required to evaluate questStatus'
+                );
+            }
+            return (
+                getQuestStatus(condition.questId, state, registry) ===
+                condition.status
             );
 
         case 'characterAt':
@@ -152,9 +167,12 @@ export function evaluateCondition(
  */
 export function evaluateConditions(
     conditions: Condition[],
-    state: GameState
+    state: GameState,
+    registry?: ContentRegistry
 ): boolean {
-    return conditions.every((condition) => evaluateCondition(condition, state));
+    return conditions.every((condition) =>
+        evaluateCondition(condition, state, registry)
+    );
 }
 
 // =============================================================================
@@ -385,11 +403,13 @@ function evaluateRoll(min: number, max: number, threshold: number): boolean {
  *
  * @param condition - The condition to describe
  * @param state - Current game state
+ * @param registry - Required when describing questStatus
  * @returns A record of the state values relevant to this condition
  */
 export function describeConditionValues(
     condition: Condition,
-    state: GameState
+    state: GameState,
+    registry?: ContentRegistry
 ): Record<string, unknown> {
     switch (condition.type) {
         case 'hasFlag':
@@ -409,6 +429,20 @@ export function describeConditionValues(
 
         case 'questAtStage':
             return { questStage: state.questProgress[condition.questId] };
+
+        case 'questStatus':
+            if (!registry) {
+                throw new Error(
+                    'A content registry is required to describe questStatus'
+                );
+            }
+            return {
+                questStatus: getQuestStatus(
+                    condition.questId,
+                    state,
+                    registry
+                ),
+            };
 
         case 'characterAt':
             return {

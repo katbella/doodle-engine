@@ -24,6 +24,7 @@ function makeSave(day: number): SaveData {
             variables: {},
             inventory: [],
             questProgress: {},
+            trackedQuest: null,
             unlockedJournalEntries: [],
             playerNotes: [],
             dialogueState: null,

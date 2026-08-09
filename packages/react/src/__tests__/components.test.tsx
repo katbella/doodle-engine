@@ -99,6 +99,7 @@ function makeState(): GameState {
         variables: {},
         inventory: [],
         questProgress: {},
+        trackedQuest: null,
         unlockedJournalEntries: [],
         playerNotes: [],
         dialogueState: null,

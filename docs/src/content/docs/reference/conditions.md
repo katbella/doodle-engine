@@ -161,6 +161,21 @@ REQUIRE questAtStage odd_jobs started
 
 A quest that hasn't been started has no stage, so `questAtStage` will return false.
 
+Use `questAtStage` for a specific progression step. Use `questStatus` for whether a quest has started, is underway, or has finished.
+
+## questStatus
+
+Check whether a quest has not started, is active, or is complete.
+
+```text
+REQUIRE questStatus odd_jobs active
+```
+
+| Parameter | Type                                | Description     |
+| --------- | ----------------------------------- | --------------- |
+| `questId` | `string`                            | Quest ID        |
+| `status`  | `not_started \| active \| complete` | Status to check |
+
 ## characterAt
 
 Check if a character is at a specific location.

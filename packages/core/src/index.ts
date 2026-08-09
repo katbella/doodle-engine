@@ -66,6 +66,8 @@ export type {
     VariableLessThanCondition,
     AtLocationCondition,
     QuestAtStageCondition,
+    QuestStatusCondition,
+    QuestStatus,
     CharacterAtCondition,
     CharacterInPartyCondition,
     CharacterStatEqualsCondition,
@@ -91,6 +93,7 @@ export type {
     GoToLocationEffect,
     AdvanceTimeEffect,
     SetQuestStageEffect,
+    SetTrackedQuestEffect,
     AddJournalEntryEffect,
     StartDialogueEffect,
     EndDialogueEffect,
@@ -109,6 +112,8 @@ export type {
     ShowInterludeEffect,
     RollEffect,
 } from './types/effects';
+
+export { getQuestStatus } from './quests';
 
 // Game State
 export type {

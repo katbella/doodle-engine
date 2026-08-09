@@ -171,6 +171,10 @@ export function ConditionEffectBuilder({
                             value={draft.values[arg.name] ?? ''}
                             registry={registry}
                             allowsPlayer={arg.allowsPlayer === true}
+                            allowNone={
+                                draft.type === 'setTrackedQuest' &&
+                                arg.name === 'questId'
+                            }
                             questId={draft.values.questId}
                             projectDir={projectDir}
                             nameCatalog={nameCatalog}
@@ -238,6 +242,7 @@ function ArgField({
     value,
     registry,
     allowsPlayer,
+    allowNone,
     questId,
     projectDir,
     assetKind,
@@ -249,6 +254,7 @@ function ArgField({
     value: string;
     registry: ContentRegistry;
     allowsPlayer: boolean;
+    allowNone: boolean;
     /** The quest chosen in this same builder, so stage lists the right stages. */
     questId?: string;
     projectDir?: string;
@@ -335,6 +341,7 @@ function ArgField({
             ] ?? {}
         );
         if (allowsPlayer) ids.unshift('player');
+        if (allowNone) ids.unshift('none');
         return (
             <label className="builder__arg">
                 {label}
@@ -367,6 +374,24 @@ function ArgField({
                 >
                     <option value="true">true</option>
                     <option value="false">false</option>
+                </select>
+            </label>
+        );
+    }
+
+    if (arg.kind === 'questStatus') {
+        return (
+            <label className="builder__arg">
+                {label}
+                <select
+                    className="dlg__select"
+                    value={value || 'active'}
+                    onChange={(e) => onChange(e.target.value)}
+                    onBlur={onBlur}
+                >
+                    <option value="not_started">not_started</option>
+                    <option value="active">active</option>
+                    <option value="complete">complete</option>
                 </select>
             </label>
         );

@@ -1,0 +1,105 @@
+---
+const themes = [
+    {
+        name: 'Starter RPG',
+        slug: 'starter-rpg',
+    },
+    {
+        name: 'Minimal',
+        slug: 'minimal',
+    },
+    {
+        name: 'Prose',
+        slug: 'prose',
+    },
+    {
+        name: 'Fable',
+        slug: 'fable',
+    },
+];
+---
+
+<div class="renderer-theme-gallery">
+    {
+        themes.map((theme) => (
+            <section class="renderer-theme" aria-labelledby={`${theme.slug}-theme-title`}>
+                <h3 id={`${theme.slug}-theme-title`}>{theme.name}</h3>
+                <div class="renderer-theme__screenshots">
+                    <figure>
+                        <a href={`/images/renderer-themes/${theme.slug}-title.webp`}>
+                            <img
+                                src={`/images/renderer-themes/${theme.slug}-title.webp`}
+                                alt={`${theme.name} renderer theme title screen`}
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        </a>
+                        <figcaption>Title screen</figcaption>
+                    </figure>
+                    <figure>
+                        <a href={`/images/renderer-themes/${theme.slug}-dialogue.webp`}>
+                            <img
+                                src={`/images/renderer-themes/${theme.slug}-dialogue.webp`}
+                                alt={`${theme.name} renderer theme showing dialogue in the game`}
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        </a>
+                        <figcaption>Dialogue</figcaption>
+                    </figure>
+                </div>
+            </section>
+        ))
+    }
+</div>
+
+<style>
+    .renderer-theme-gallery {
+        display: grid;
+        gap: 1.75rem;
+        margin-block: 1.5rem;
+    }
+
+    .renderer-theme h3 {
+        margin-block: 0 0.65rem;
+    }
+
+    .renderer-theme__screenshots {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    figure {
+        margin: 0;
+        overflow: hidden;
+        border: 1px solid var(--sl-color-gray-5);
+        border-radius: 0.5rem;
+        background: var(--sl-color-bg-nav);
+    }
+
+    a,
+    img {
+        display: block;
+    }
+
+    img {
+        width: 100%;
+        margin: 0;
+        aspect-ratio: 8 / 5;
+        object-fit: cover;
+    }
+
+    figcaption {
+        padding: 0.55rem 0.7rem;
+        color: var(--sl-color-text);
+        font-size: var(--sl-text-sm);
+        font-weight: 600;
+    }
+
+    @media (max-width: 40rem) {
+        .renderer-theme__screenshots {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -7,6 +7,15 @@ The built-in `GameRenderer` assembles Doodle Engine's standard interface. A cust
 
 Before starting here, make sure CSS is not enough: [Game Shell styling](/guides/game-shell/#styling) retheming covers most visual changes without any code. This page assumes React and TypeScript experience, a working project, and familiarity with the snapshot idea from [Architecture](/technical/architecture/).
 
+The React package exposes its base component stylesheet as
+`@doodle-engine/react/style.css`. All themes except for **Minimal** import it
+for you. If your custom renderer does not load a theme, import the base
+stylesheet from your CSS before adding project rules:
+
+```css
+@import '@doodle-engine/react/style.css';
+```
+
 ## Using useGame
 
 The `useGame` hook provides the current snapshot, which contains the data for the current game screen, and the methods for player actions:
@@ -232,6 +241,8 @@ function MyLayout() {
 ## Work with the Snapshot
 
 The examples above use resolved location, dialogue, character, map, and progress data from the current snapshot. [The snapshot section in Architecture](/technical/architecture/#snapshot-derived) shows the complete structure and explains which fields are derived or transient. Use the `Snapshot` type exported by `@doodle-engine/core` when implementing the renderer.
+
+Each `SnapshotQuest` includes `status` (`not_started`, `active`, or `complete`) and `tracked`. Use `status` to choose the quest section and `tracked` to mark the quest the player is following. `currentStage` identifies the quest's current authored step.
 
 ## Debug a Custom Renderer
 

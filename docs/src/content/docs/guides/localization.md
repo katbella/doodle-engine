@@ -74,6 +74,10 @@ The engine does this while building each snapshot. See [resolveText](/reference/
 
 ## Changing Language at Runtime
 
+A new game starts in the `en` locale. To begin in another language, call
+`setLocale` from the renderer before or after starting the game. Loaded save
+data restores the locale stored in that save.
+
 Use the `setLocale` action:
 
 ```tsx

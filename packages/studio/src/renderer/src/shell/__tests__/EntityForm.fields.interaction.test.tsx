@@ -314,6 +314,9 @@ stages:
         await user.clear(newStage);
         await user.type(newStage, 'epilogue');
         await user.click(
+            screen.getAllByRole('checkbox', { name: 'Completes quest' })[2]
+        );
+        await user.click(
             screen.getAllByRole('button', { name: 'Remove stage' })[0]
         );
         await user.click(screen.getByRole('button', { name: 'Delete stage' }));
@@ -328,7 +331,11 @@ stages:
                     path: ['stages'],
                     value: [
                         { id: 'start', description: 'Begin' },
-                        { id: 'epilogue', description: '' },
+                        {
+                            id: 'epilogue',
+                            description: '',
+                            completesQuest: true,
+                        },
                     ],
                 },
             ],

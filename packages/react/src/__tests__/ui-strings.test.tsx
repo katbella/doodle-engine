@@ -79,25 +79,42 @@ describe('built-in labels come from ui strings', () => {
         expect(html).not.toContain('>No items<');
     });
 
-    it('Journal headings', () => {
+    it('Journal headings, states, and tracking controls', () => {
         const html = renderToStaticMarkup(
             <Journal
                 ui={ui}
                 quests={[
                     {
                         id: 'q',
+                        status: 'active',
+                        tracked: true,
                         name: 'Q',
                         description: 'd',
                         currentStage: 's',
                         currentStageDescription: 'sd',
                     },
+                    {
+                        id: 'q2',
+                        status: 'active',
+                        tracked: false,
+                        name: 'Q2',
+                        description: 'd2',
+                        currentStage: 's2',
+                        currentStageDescription: 'sd2',
+                    },
                 ]}
                 entries={[{ id: 'e', title: 't', text: 'x', category: 'lore' }]}
+                onTrackQuest={() => {}}
             />
         );
         expect(html).toContain('XXui.journalXX');
         expect(html).toContain('XXui.active_questsXX');
         expect(html).toContain('XXui.entriesXX');
+        expect(html).toContain('XXui.track_questXX');
+        expect(html).toContain('XXui.stop_tracking_questXX');
+        expect(html).not.toContain('>Track quest<');
+        expect(html).not.toContain('>Stop tracking<');
+        expect(html).not.toContain('<svg');
 
         const empty = renderToStaticMarkup(
             <Journal ui={ui} quests={[]} entries={[]} />

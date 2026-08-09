@@ -3,6 +3,8 @@ title: Game Shell
 description: Using GameShell for splash screens, title menus, pause, settings, and video.
 ---
 
+import RendererThemeGallery from '../../../components/RendererThemeGallery.astro';
+
 `GameShell` provides the screens and menus around the game, including loading, title, pause, settings, credits, and video playback. New projects created with the default renderer already render it from `src/App.tsx`, so most of this page is about configuring what you have rather than adding something new. Configuration lives in two places: props passed to the component in `src/App.tsx`, and the `shell:` section of `content/game.yaml` for media the shell should load.
 
 ## Basic Usage
@@ -210,14 +212,35 @@ These are the default values. Volume settings are saved to browser storage under
 
 ## Styling
 
-When you create a project in Studio, you can include starter styles or begin with minimal CSS:
+When you create a project in Studio or from the command line, choose one of four
+styles:
 
-- **Starter styles**: a dark fantasy theme with warm gold accents, sized layout panels, bottom bar, and panels for inventory, journal, map, and save/load. Everything is defined with CSS custom properties so you can retheme by editing `:root` values in `src/index.css`.
-- **Minimal CSS**: a body reset that leaves the visual design to your project.
+- **Starter RPG** (`starter-rpg`): a complete theme with the main layout, bottom bar, and game panels
+- **Minimal** (`minimal`): only the layout needed for menus and panels, leaving the visual design to your project
+- **Prose** (`prose`): a reading-focused theme for narrative and choice games
+- **Fable** (`fable`): a dark folktale design
 
-You can switch at any time by replacing `src/index.css`. The components use class names that describe each part of the interface, such as `.game-renderer`, `.game-layout`, `.game-content`, `.game-status`, `.game-menu`, `.dialogue-box`, and `.choice-button`.
+Each example below shows the same title screen and dialogue scene so you can
+compare the themes.
 
-To retheme the starter styles, override the custom properties:
+<RendererThemeGallery />
+
+You can switch at any time with:
+
+```bash
+npm run theme -- prose
+```
+
+The command replaces `src/renderer-theme.css`, so put your colors, spacing, and
+other changes in `src/renderer-overrides.css`. Your changes stay in place when
+you switch themes. `src/index.css` loads both files.
+
+The components use class names that describe each part of the interface, such
+as `.game-renderer`, `.game-layout`, `.game-content`, `.game-status`,
+`.game-menu`, `.dialogue-box`, and `.choice-button`.
+
+To change the theme colors, add custom properties to
+`src/renderer-overrides.css`:
 
 ```css
 :root {

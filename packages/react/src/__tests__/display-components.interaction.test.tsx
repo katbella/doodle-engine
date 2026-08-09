@@ -17,6 +17,7 @@ import { CreditsScreen } from '../components/CreditsScreen';
 import { SplashScreen } from '../components/SplashScreen';
 import { TitleScreen } from '../components/TitleScreen';
 import { VideoPlayer } from '../components/VideoPlayer';
+import { Journal } from '../components/Journal';
 
 afterEach(() => {
     cleanup();
@@ -24,6 +25,83 @@ afterEach(() => {
 });
 
 describe('display component behavior', () => {
+    const quests = [
+        {
+            id: 'active',
+            status: 'active' as const,
+            tracked: false,
+            name: 'Active quest',
+            description: 'In progress',
+            currentStage: 'started',
+            currentStageDescription: 'Get started',
+        },
+        {
+            id: 'done',
+            status: 'complete' as const,
+            tracked: false,
+            name: 'Finished quest',
+            description: 'Finished',
+            currentStage: 'complete',
+            currentStageDescription: 'All done',
+        },
+    ];
+
+    it('renders active and completed quest sections', () => {
+        const { container } = render(<Journal quests={quests} entries={[]} />);
+        expect(screen.getByText('Active Quests')).toBeTruthy();
+        expect(screen.getByText('Completed Quests')).toBeTruthy();
+        expect(screen.getByText('Active quest')).toBeTruthy();
+        expect(screen.getByText('Finished quest')).toBeTruthy();
+
+        const questColumn = container.querySelector('.journal-quests');
+        const completedSection = container.querySelector(
+            '.journal-quests-completed'
+        );
+        expect(questColumn?.contains(completedSection)).toBe(true);
+        expect(
+            within(questColumn as HTMLElement)
+                .getAllByRole('heading', { level: 3 })
+                .map((heading) => heading.textContent)
+        ).toEqual(['Active Quests', 'Completed Quests']);
+    });
+
+    it('calls back with the quest id and omits controls without a callback', async () => {
+        const onTrackQuest = vi.fn();
+        const user = userEvent.setup();
+        const view = render(
+            <Journal quests={quests} entries={[]} onTrackQuest={onTrackQuest} />
+        );
+        await user.click(screen.getByRole('button', { name: 'Track quest' }));
+        expect(onTrackQuest).toHaveBeenCalledWith('active');
+
+        view.rerender(<Journal quests={quests} entries={[]} />);
+        expect(screen.queryAllByRole('button')).toHaveLength(0);
+    });
+
+    it('localizes both tracking actions', () => {
+        render(
+            <Journal
+                ui={{
+                    'ui.track_quest': 'Följ uppdrag',
+                    'ui.stop_tracking_quest': 'Sluta följa',
+                }}
+                quests={[
+                    { ...quests[0], tracked: true },
+                    { ...quests[0], id: 'other', name: 'Other quest' },
+                ]}
+                entries={[]}
+                onTrackQuest={() => {}}
+            />
+        );
+
+        expect(
+            screen.getByRole('button', { name: 'Följ uppdrag' })
+        ).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: 'Sluta följa' })
+        ).toBeTruthy();
+    });
+
     it('offers the start action only after loading completes', async () => {
         const onStart = vi.fn();
         const user = userEvent.setup();

@@ -139,11 +139,11 @@ NARRATOR: "{player.name}, your strength is {player.stats.strength}."
 ELISA: "Ah, you're a {player.stats.class}!"
 ```
 
-Profile fields use `{player.name}` and `{player.title}`. Character stats use
-`{characterId.stats.statKey}`, including `{player.stats.statKey}` for player
-stats. Numeric and string values are supported, and localized string stat
-values are resolved before display. Hidden underscore-prefixed stats can also
-be interpolated.
+Profile fields use `{player.name}`, `{player.title}`, and
+`{player.biography}`. Character stats use `{characterId.stats.statKey}`,
+including `{player.stats.statKey}` for player stats. Numeric and string values
+are supported, and localized string stat values are resolved before display.
+Hidden underscore-prefixed stats can also be interpolated.
 
 Placeholders work in dialogue lines, choices, and notifications. If a variable,
 character, field, or stat does not exist, the placeholder is left as written.
