@@ -35,6 +35,9 @@ Placeholders in curly braces are replaced while the game runs. Keep the same pla
 | `ui.player_name` | Name |
 | `ui.player_title` | Title |
 | `ui.player_biography` | Biography |
+| `ui.player_name_placeholder` | Enter your character's name |
+| `ui.player_title_placeholder` | Optional: e.g. Warden of the North Road |
+| `ui.player_biography_placeholder` | Optional: background, personality, and goals |
 | `ui.begin_adventure` | Begin adventure |
 | `ui.resources` | Resources |
 | `ui.no_items` | No items |
@@ -62,8 +65,12 @@ Placeholders in curly braces are replaced while the game runs. Keep the same pla
 | `ui.delete` | Delete |
 | `ui.skip` | Skip |
 | `ui.skip_splash` | Skip splash screen |
+| `ui.idle_hint` | What do you do next? |
 | `ui.menu` | Menu |
+| `ui.return_to_game` | Return to game |
 | `ui.add_note` | Add Note |
+| `ui.new_note` | New Note |
+| `ui.your_notes` | Your Notes |
 | `ui.note_title` | Title |
 | `ui.note_text` | Write a note... |
 | `ui.no_notes` | No notes yet |

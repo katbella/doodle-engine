@@ -206,8 +206,8 @@ stats:
 ```
 
 The start modal asks for a required name plus an optional title and biography.
-The modal uses the localized UI strings for its labels and input hints, along
-with a generic emblem, and it has no portrait upload.
+Its field labels and the text shown inside each empty field can be translated.
+The modal does not include a portrait upload.
 
 To provide a fixed protagonist instead, omit `playerCreatesProfile` or set it
 to `false` in `game.yaml`. The `name`, `title`, `biography`, and `portrait`

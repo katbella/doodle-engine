@@ -52,6 +52,7 @@ shell:
         logo: assets/images/game-logo.png
         background: assets/images/title-bg.jpg
         music: assets/audio/music/title-theme.ogg
+        showEngineTag: false # Hide "Made with Doodle Engine"
 
     uiSounds:
         click: assets/audio/ui/click.ogg
@@ -60,7 +61,9 @@ shell:
         menuClose: assets/audio/ui/menu_close.ogg
 ```
 
-All fields are optional. Screens use their built-in presentation when an image or sound is omitted. Use project-relative paths beginning with `assets/`. The build checks that each referenced local file exists.
+All fields are optional. Screens use their built-in presentation when an image
+or sound is omitted. Use project-relative asset paths beginning with `assets/`.
+The build checks that each referenced local file exists.
 
 ## Customizing the Loading Screen
 

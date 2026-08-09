@@ -27,7 +27,7 @@ Select **New project…** on the Welcome screen, or open the **File** menu and s
 | Starting content       | Begin with the playable example story or one starting location.                                            |
 | Localization           | Start with English written directly in the editor, or include an English and Swedish localization example. |
 | Default React renderer | Includes a ready-to-use React interface that can be customized later.                                      |
-| Starter styles         | Includes the styled interface for the default React renderer.                                              |
+| Renderer template      | Chooses the initial theme for the game shown in Preview.                                                   |
 
 ## Choose the starting content
 
@@ -45,11 +45,27 @@ The English locale starter remains available for later. When your game needs ano
 
 Choose **English and Swedish localization example** when you specifically want to study an already-localized project.
 
+## Choose the game theme
+
+In the New Project window, use **Renderer template** to choose Starter RPG, Minimal, Prose, or Fable. This changes the game shown in Preview. It does not change the colors used by Doodle Studio itself.
+
+See [Game Shell styling](/guides/game-shell/#styling) for title and dialogue screenshots of all four renderer themes. To change Studio's own colors, see [Studio themes](/studio/themes/).
+
 ## Open a project
 
 Select **Open project…**, then choose the project root: the folder containing `package.json`, `content/`, and `src/`.
 
 The project opens in the Studio workspace.
+
+## Change the game theme
+
+You can change the renderer theme after creating a project:
+
+1. Select **Overview** in the left sidebar.
+2. Find **Project setup**.
+3. Choose a theme from **Renderer template**.
+
+Studio updates the theme and installs any fonts it needs. Your changes in `src/renderer-overrides.css` remain in place. Projects with a custom renderer show **Custom renderer** instead of the theme menu.
 
 ## Install project dependencies
 

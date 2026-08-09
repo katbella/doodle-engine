@@ -11,7 +11,7 @@ This page is an overview of those customization layers, ordered from least to mo
 
 Start at the first layer that can express the change you want:
 
-1. **Restyle the built-in renderer.** Change the CSS custom properties and component classes in `src/index.css`. [Game Shell styling](/guides/game-shell/#styling) documents the starter and minimal styles.
+1. **Restyle the built-in renderer.** Change CSS custom properties and component classes in `src/renderer-overrides.css`. [Game Shell styling](/guides/game-shell/#styling) documents the four generated themes and the theme-switching command.
 2. **Compose Doodle Engine's React components.** Keep the engine and providers, but arrange components such as `DialogueBox`, `ChoiceList`, `MapView`, and `Inventory` in your own layout. The [Custom Renderer guide](/technical/custom-renderer/#mixing-individual-components) shows the complete provider setup, and [React Components](/reference/react-components/) lists every prop.
 3. **Build a renderer around the core engine.** `@doodle-engine/core` has no UI dependency, so another React interface, another framework, or plain JavaScript can display its snapshots. [Custom Renderer](/technical/custom-renderer/#building-without-react) owns that implementation path.
 4. **Replace the game shell.** Compose your own loading, title, pause, settings, and gameplay flow when the built-in `GameShell` is no longer the right frame. Read [Game Shell](/guides/game-shell/) first so you know which loading, audio, input, save, and video responsibilities the replacement must cover.

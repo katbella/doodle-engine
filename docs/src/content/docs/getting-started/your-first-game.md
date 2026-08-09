@@ -75,6 +75,7 @@ In Doodle Studio, select **Game Config** in the project rail. In a text editor, 
 This file sets the state at the beginning of a new game. The starter project begins in the tavern on the first morning, with 100 gold and no inventory:
 
 ```yaml
+author: ""
 playerCreatesProfile: true
 startLocation: tavern
 startTime:
@@ -88,7 +89,10 @@ startVariables:
 startInventory: []
 ```
 
-`playerCreatesProfile: true` tells the built-in renderer to ask for the player's name before the story begins. The other values become the first game state. Effects in dialogue can change them later.
+Fill in `author` to show an author or studio name above the title when the title
+screen has no logo. `playerCreatesProfile: true` tells the built-in renderer to
+ask for the player's name before the story begins. The other values become the
+first game state. Effects in dialogue can change them later.
 
 ## Follow the tavern to its character
 

@@ -43,7 +43,10 @@ my-game/
     App.tsx           # Root component
     project.ts        # Stable identity used to keep saves separate
     locale-options.ts # Builds the language list from the loaded locales
-    index.css         # Styles
+    renderer-scale.ts # Fits fixed-size themes to the browser window
+    index.css         # Loads the theme and your custom styles
+    renderer-theme.css     # Current theme styles
+    renderer-overrides.css # Your custom styles
   index.html          # HTML shell
   README.md           # Commands and pointers for this project
   package.json
@@ -126,7 +129,10 @@ The `src/` directory contains the game application. Studio uses this application
 - **App.tsx**: fetches the content registry (loaded game definitions) and asset manifest (media list), then renders `GameShell` or your custom renderer providers
 - **project.ts**: contains the project’s generated identity. **Keep it unchanged for every release of the same game. If a copied project becomes a different game, give the copy a new ID before releasing it.**
 - **locale-options.ts**: turns the loaded locale codes into the language list shown in Settings
-- **index.css**: styles for the game interface
+- **renderer-scale.ts**: fits the built-in renderer to the browser window when the current theme uses a fixed-size layout
+- **index.css**: imports `renderer-theme.css` first and `renderer-overrides.css` second
+- **renderer-theme.css**: contains the current theme and is replaced by `npm run theme -- <name>`
+- **renderer-overrides.css**: contains your CSS changes and is kept when you switch themes
 
 For custom renderers, replace `GameRenderer` with your own components. The `useGame` React hook gives those components the current game screen and player actions. See [Custom Renderer](/technical/custom-renderer/).
 
